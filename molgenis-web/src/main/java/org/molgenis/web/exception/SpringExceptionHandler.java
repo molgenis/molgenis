@@ -24,6 +24,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
@@ -41,29 +42,29 @@ public class SpringExceptionHandler
 			HttpMessageNotReadableException.class, HttpMessageNotWritableException.class,
 			MethodArgumentNotValidException.class, MissingServletRequestPartException.class, BindException.class,
 			NoHandlerFoundException.class, AsyncRequestTimeoutException.class })
-	public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod,
+	public final Object handleSpringException(Exception ex, @Nullable HandlerMethod handlerMethod,
 			HttpServletRequest httpServletRequest)
 	{
 		HttpStatus status;
 		if (ex instanceof NoSuchRequestHandlingMethodException || ex instanceof NoHandlerFoundException)
 		{
 			status = HttpStatus.NOT_FOUND;
-			return handleException(ex, httpServletRequest, status);
+			return handleException(ex, httpServletRequest, status, null);
 		}
 		else if (ex instanceof HttpRequestMethodNotSupportedException)
 		{
 			status = HttpStatus.METHOD_NOT_ALLOWED;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof HttpMediaTypeNotSupportedException)
 		{
 			status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof HttpMediaTypeNotAcceptableException)
 		{
 			status = HttpStatus.NOT_ACCEPTABLE;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof MissingServletRequestParameterException || ex instanceof ServletRequestBindingException
 				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException
@@ -71,18 +72,18 @@ public class SpringExceptionHandler
 				|| ex instanceof BindException)
 		{
 			status = HttpStatus.BAD_REQUEST;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException
 				|| ex instanceof HttpMessageNotWritableException)
 		{
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof AsyncRequestTimeoutException)
 		{
 			status = HttpStatus.SERVICE_UNAVAILABLE;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 		else
 		{
@@ -92,7 +93,7 @@ public class SpringExceptionHandler
 			}
 
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
-			return handleException(ex, handlerMethod, status);
+			return handleException(ex, handlerMethod, status, null);
 		}
 	}
 }
