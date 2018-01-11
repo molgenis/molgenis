@@ -32,30 +32,33 @@ class ExceptionHandlerUtils
 	{
 	}
 
-	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String environment)
+	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String errorCode,
+			String environment)
 	{
-		return handleException(e, isHtmlRequest(handlerMethod), httpStatus, environment);
+		return handleException(e, isHtmlRequest(handlerMethod), httpStatus, errorCode, environment);
 	}
 
-	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus)
+	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String errorCode)
 	{
-		return handleException(e, isHtmlRequest(handlerMethod), httpStatus, PRODUCTION);
+		return handleException(e, isHtmlRequest(handlerMethod), httpStatus, errorCode, PRODUCTION);
 	}
 
 	static Object handleException(Exception e, HttpServletRequest httpServletRequest, HttpStatus httpStatus,
+			String errorCode, String environment)
+	{
+		return handleException(e, isHtmlRequest(httpServletRequest), httpStatus, errorCode, environment);
+	}
+
+	static Object handleException(Exception e, HttpServletRequest httpServletRequest, HttpStatus httpStatus,
+			String errorCode)
+	{
+		return handleException(e, isHtmlRequest(httpServletRequest), httpStatus, errorCode, PRODUCTION);
+	}
+
+	private static Object handleException(Exception e, boolean isHtmlRequest, HttpStatus httpStatus, String errorCode,
 			String environment)
 	{
-		return handleException(e, isHtmlRequest(httpServletRequest), httpStatus, environment);
-	}
-
-	static Object handleException(Exception e, HttpServletRequest httpServletRequest, HttpStatus httpStatus)
-	{
-		return handleException(e, isHtmlRequest(httpServletRequest), httpStatus, PRODUCTION);
-	}
-
-	private static Object handleException(Exception e, boolean isHtmlRequest, HttpStatus httpStatus, String environment)
-	{
-		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
+		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage(), errorCode);
 		if (isHtmlRequest)
 		{
 			Map<String, Object> model = new HashMap<>();

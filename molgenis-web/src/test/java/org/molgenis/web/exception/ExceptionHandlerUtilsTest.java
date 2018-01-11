@@ -14,9 +14,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.web.exception.ExceptionHandlerUtils.DEVELOPMENT;
-import static org.molgenis.web.exception.ExceptionHandlerUtils.PRODUCTION;
-import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -35,8 +33,7 @@ public class ExceptionHandlerUtilsTest
 		expectedModel.put("errorMessageResponse", ErrorMessageResponse.create("message"));
 		expectedModel.put("httpStatusCode", 500);
 		ModelAndView expectedModelAndView = new ModelAndView("view-exception", expectedModel, httpStatus);
-		Object modelAndView = handleException(new Exception("message"), handlerMethod, httpStatus, null,
-				PRODUCTION);
+		Object modelAndView = handleException(new Exception("message"), handlerMethod, httpStatus, null, PRODUCTION);
 		assertTrue(EqualsBuilder.reflectionEquals(modelAndView, expectedModelAndView));
 	}
 
