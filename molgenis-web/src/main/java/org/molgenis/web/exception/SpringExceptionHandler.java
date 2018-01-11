@@ -35,6 +35,7 @@ public class SpringExceptionHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
 
+	@SuppressWarnings("deprecation")
 	@ExceptionHandler({ NoSuchRequestHandlingMethodException.class, HttpRequestMethodNotSupportedException.class,
 			HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class,
 			MissingPathVariableException.class, MissingServletRequestParameterException.class,
@@ -42,8 +43,7 @@ public class SpringExceptionHandler
 			HttpMessageNotReadableException.class, HttpMessageNotWritableException.class,
 			MethodArgumentNotValidException.class, MissingServletRequestPartException.class, BindException.class,
 			NoHandlerFoundException.class, AsyncRequestTimeoutException.class })
-	public final Object handleSpringException(Exception ex, @Nullable HandlerMethod handlerMethod,
-			HttpServletRequest httpServletRequest)
+	public final Object handleSpringException(Exception ex, @Nullable HandlerMethod handlerMethod, HttpServletRequest httpServletRequest)
 	{
 		HttpStatus status;
 		if (ex instanceof NoSuchRequestHandlingMethodException || ex instanceof NoHandlerFoundException)
@@ -67,15 +67,13 @@ public class SpringExceptionHandler
 			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof MissingServletRequestParameterException || ex instanceof ServletRequestBindingException
-				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException
-				|| ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
+				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException || ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
 				|| ex instanceof BindException)
 		{
 			status = HttpStatus.BAD_REQUEST;
 			return handleException(ex, handlerMethod, status, null);
 		}
-		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException
-				|| ex instanceof HttpMessageNotWritableException)
+		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException || ex instanceof HttpMessageNotWritableException)
 		{
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 			return handleException(ex, handlerMethod, status, null);
