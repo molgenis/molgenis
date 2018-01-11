@@ -25,14 +25,9 @@ class ExceptionHandlerUtils
 	{
 	}
 
-	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus)
+	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String errorCode, String environment)
 	{
-		return handleException(e, handlerMethod, httpStatus, PRODUCTION);
-	}
-
-	static Object handleException(Exception e, HandlerMethod handlerMethod, HttpStatus httpStatus, String environment)
-	{
-		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
+		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage(), errorCode);
 		if (isHtmlRequest(handlerMethod))
 		{
 			Map<String, Object> model = new HashMap<>();

@@ -49,7 +49,7 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Get a repository by entity type id
 	 *
-	 * @throws UnknownEntityException if no repository exists for the given entity name
+	 * @throws UnknownEntityTypeException if no repository exists for the given entity name
 	 */
 	Repository<Entity> getRepository(String id);
 

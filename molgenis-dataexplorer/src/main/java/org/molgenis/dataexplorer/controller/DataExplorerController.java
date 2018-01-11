@@ -514,15 +514,4 @@ public class DataExplorerController extends PluginController
 			return false;
 		}
 	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
-	}
-
 }
