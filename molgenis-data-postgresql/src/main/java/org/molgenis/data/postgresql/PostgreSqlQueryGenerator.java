@@ -11,6 +11,8 @@ import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.UnexpectedEnumException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.time.Instant;
@@ -41,6 +43,8 @@ import static org.molgenis.data.support.EntityTypeUtils.*;
  */
 class PostgreSqlQueryGenerator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlQueryGenerator.class);
+
 	private static final String UNSPECIFIED_ATTRIBUTE_MSG = "Can't use %s without specifying an attribute";
 
 	static final String ERR_CODE_READONLY_VIOLATION = "23506";
@@ -566,6 +570,15 @@ class PostgreSqlQueryGenerator
 		}
 		// order by
 		result.append(' ').append(getSqlSort(entityType, q));
+
+		// https://www.postgresql.org/docs/9.6/static/queries-limit.html
+		if (q.getPageSize() > 0 && q.getOffset() > 0 && q.getSort() == null)
+		{
+			throw new MolgenisQueryException(
+					String.format("Query with offset '%d' and page size '%d' is missing required sort", q.getOffset(),
+							q.getPageSize()));
+		}
+
 		// limit
 		if (q.getPageSize() > 0)
 		{
@@ -1080,30 +1093,40 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	private static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
+	/**
+	 * Package-private for testability
+	 */
+	static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
 	{
 		StringBuilder sortSql = new StringBuilder();
-		if (q.getSort() != null)
+		Sort sort = q.getSort();
+		if (sort == null)
 		{
-			for (Sort.Order o : q.getSort())
-			{
-				Attribute attr = entityType.getAttribute(o.getAttr());
-				sortSql.append(", ").append(getColumnName(attr));
-				if (o.getDirection().equals(Sort.Direction.DESC))
-				{
-					sortSql.append(" DESC");
-				}
-				else
-				{
-					sortSql.append(" ASC");
-				}
-			}
+			// Using different LIMIT/OFFSET values to select different subsets of a query result will give inconsistent results unless you enforce a predictable result ordering with ORDER BY.
+			// https://www.postgresql.org/docs/9.6/static/queries-limit.html
+			LOG.debug("Query with offset/page size without sort detected: {}", q);
+			sort = new Sort(entityType.getIdAttribute().getName());
+		}
 
-			if (sortSql.length() > 0)
+		for (Sort.Order o : sort)
+		{
+			Attribute attr = entityType.getAttribute(o.getAttr());
+			sortSql.append(", ").append(getColumnName(attr));
+			if (o.getDirection().equals(Sort.Direction.DESC))
 			{
-				sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+				sortSql.append(" DESC");
+			}
+			else
+			{
+				sortSql.append(" ASC");
 			}
 		}
+
+		if (sortSql.length() > 0)
+		{
+			sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+		}
+
 		return sortSql.toString();
 	}
 
