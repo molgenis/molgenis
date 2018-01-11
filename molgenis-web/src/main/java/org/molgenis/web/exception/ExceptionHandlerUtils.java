@@ -56,7 +56,7 @@ class ExceptionHandlerUtils
 	private static Object handleException(Exception e, boolean isHtmlRequest, HttpStatus httpStatus, String environment)
 	{
 		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage());
-		if ((isHtmlRequest))
+		if (isHtmlRequest)
 		{
 			Map<String, Object> model = new HashMap<>();
 			model.put(KEY_ERROR_MESSAGE_RESPONSE, errorMessageResponse);
