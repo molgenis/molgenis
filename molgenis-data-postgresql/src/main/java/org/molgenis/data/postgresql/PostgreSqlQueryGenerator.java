@@ -571,14 +571,6 @@ class PostgreSqlQueryGenerator
 		// order by
 		result.append(' ').append(getSqlSort(entityType, q));
 
-		// https://www.postgresql.org/docs/9.6/static/queries-limit.html
-		if (q.getPageSize() > 0 && q.getOffset() > 0 && q.getSort() == null)
-		{
-			throw new MolgenisQueryException(
-					String.format("Query with offset '%d' and page size '%d' is missing required sort", q.getOffset(),
-							q.getPageSize()));
-		}
-
 		// limit
 		if (q.getPageSize() > 0)
 		{
