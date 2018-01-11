@@ -80,7 +80,7 @@ public class MappingConfig
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory, defaultPackage);
+				permissionSystemService, attrMetaFactory, defaultPackage, entityManager);
 	}
 
 	@Bean

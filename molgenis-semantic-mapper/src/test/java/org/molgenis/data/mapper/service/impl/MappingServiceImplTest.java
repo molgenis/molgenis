@@ -78,6 +78,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private AttributeFactory attrMetaFactory;
 
 	@Autowired
+	private EntityManager entityManager;
+
+	@Autowired
 	private MappingServiceImpl mappingService;
 
 	@Autowired
@@ -177,6 +180,18 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.getRepository(geneMetaData.getId())).thenReturn(geneRepo);
 		when(dataService.getEntityType(SOURCE_EXON_ENTITY)).thenReturn(exonMetaData);
 		when(dataService.getRepository(SOURCE_EXON_ENTITY)).thenReturn(exonRepo);
+	}
+
+	@Test
+	public void testApplyMappingToEntity() {
+		EntityMapping entityMapping = mock(EntityMapping.class);
+		Entity sourceEntity = mock(Entity.class);
+		EntityType targetMetaData = mock(EntityType.class);
+
+		Entity mappedEntity = mock(Entity.class);
+		when(entityManager.create(targetMetaData, EntityManager.CreationMode.POPULATE)).thenReturn(mappedEntity);
+
+		assertEquals(mappingService.applyMappingToEntity(entityMapping, sourceEntity, targetMetaData), mappedEntity);
 	}
 
 	@Test
@@ -332,6 +347,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
 
+		Entity mappedEntity = mock(Entity.class);
+		when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE)).thenReturn(mappedEntity);
+
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, true, "packageId", "label", progress), 4);
 
@@ -391,6 +409,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
+
+		when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE)).thenAnswer(invocation -> new DynamicEntity(targetMeta));
 
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, false, "packageId", "label", progress), 4);
@@ -723,6 +743,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Import(UserTestConfig.class)
 	static class Config
 	{
+		@Bean
+		EntityManager entityManager()
+		{
+			return mock(EntityManager.class);
+		}
 
 		@Bean
 		public AlgorithmService algorithmService()
