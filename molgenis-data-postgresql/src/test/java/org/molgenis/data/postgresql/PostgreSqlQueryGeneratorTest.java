@@ -576,7 +576,7 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
-	public void getSqlSortOffsetPageSizeNoSort()
+	public void getSqlSortNoSort()
 	{
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");

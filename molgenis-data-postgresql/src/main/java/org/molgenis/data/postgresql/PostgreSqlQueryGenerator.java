@@ -1092,34 +1092,33 @@ class PostgreSqlQueryGenerator
 	{
 		StringBuilder sortSql = new StringBuilder();
 		Sort sort = q.getSort();
-		if (q.getOffset() > 0 && q.getPageSize() > 0 && sort == null)
+		if (sort == null)
 		{
 			// Using different LIMIT/OFFSET values to select different subsets of a query result will give inconsistent results unless you enforce a predictable result ordering with ORDER BY.
 			// https://www.postgresql.org/docs/9.6/static/queries-limit.html
 			LOG.debug("Query with offset/page size without sort detected: {}", q);
 			sort = new Sort(entityType.getIdAttribute().getName());
 		}
-		if (sort != null)
-		{
-			for (Sort.Order o : sort)
-			{
-				Attribute attr = entityType.getAttribute(o.getAttr());
-				sortSql.append(", ").append(getColumnName(attr));
-				if (o.getDirection().equals(Sort.Direction.DESC))
-				{
-					sortSql.append(" DESC");
-				}
-				else
-				{
-					sortSql.append(" ASC");
-				}
-			}
 
-			if (sortSql.length() > 0)
+		for (Sort.Order o : sort)
+		{
+			Attribute attr = entityType.getAttribute(o.getAttr());
+			sortSql.append(", ").append(getColumnName(attr));
+			if (o.getDirection().equals(Sort.Direction.DESC))
 			{
-				sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+				sortSql.append(" DESC");
+			}
+			else
+			{
+				sortSql.append(" ASC");
 			}
 		}
+
+		if (sortSql.length() > 0)
+		{
+			sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+		}
+
 		return sortSql.toString();
 	}
 
