@@ -52,7 +52,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
 		when(httpServletRequest.getMethod()).thenReturn("OPTIONS");
-		assertEquals(handler.handleSpringException(exception, null, httpServletRequest), expected);
+		assertEquals(handler.handleSpringException(exception, httpServletRequest), expected);
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		AsyncRequestTimeoutException exception = mock(AsyncRequestTimeoutException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		BindException exception = mock(BindException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		MissingServletRequestPartException exception = mock(MissingServletRequestPartException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		HttpMessageNotWritableException exception = mock(HttpMessageNotWritableException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -142,7 +142,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -157,7 +157,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		TypeMismatchException exception = mock(TypeMismatchException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		ConversionNotSupportedException exception = mock(ConversionNotSupportedException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -187,7 +187,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		ServletRequestBindingException exception = mock(ServletRequestBindingException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -202,7 +202,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		MissingServletRequestParameterException exception = mock(MissingServletRequestParameterException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -217,7 +217,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		MissingPathVariableException exception = mock(MissingPathVariableException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -232,7 +232,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		HttpMediaTypeNotAcceptableException exception = mock(HttpMediaTypeNotAcceptableException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 
 	@Test
@@ -247,6 +247,6 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 		HttpMediaTypeNotSupportedException exception = mock(HttpMediaTypeNotSupportedException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
-		assertEquals(handler.handleSpringException(exception, handlerMethod, null), expected);
+		assertEquals(handler.handleSpringException(exception, handlerMethod), expected);
 	}
 }
