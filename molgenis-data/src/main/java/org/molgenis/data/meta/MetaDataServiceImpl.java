@@ -64,7 +64,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		EntityType entityType = getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityTypeId));
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		return !entityType.isAbstract() ? getRepository(entityType) : null;
 	}
@@ -224,7 +224,7 @@ public class MetaDataServiceImpl implements MetaDataService
 												   .findOne();
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getId()));
+			throw new UnknownEntityTypeException(entityType.getId());
 		}
 
 		updateEntityType(entityType, existingEntityType);
