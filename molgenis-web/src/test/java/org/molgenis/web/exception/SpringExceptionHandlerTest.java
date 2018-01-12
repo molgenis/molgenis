@@ -168,7 +168,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 
 		ResponseEntity expected = new ResponseEntity(
 				new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
-				HttpStatus.BAD_REQUEST);
+				HttpStatus.INTERNAL_SERVER_ERROR);
 		ConversionNotSupportedException exception = mock(ConversionNotSupportedException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
@@ -213,7 +213,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest
 
 		ResponseEntity expected = new ResponseEntity(
 				new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
-				HttpStatus.BAD_REQUEST);
+				HttpStatus.INTERNAL_SERVER_ERROR);
 		MissingPathVariableException exception = mock(MissingPathVariableException.class);
 		when(exception.getLocalizedMessage()).thenReturn("localized message");
 
