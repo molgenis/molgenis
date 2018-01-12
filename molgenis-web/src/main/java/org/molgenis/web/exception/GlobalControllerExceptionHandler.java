@@ -9,13 +9,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler
+public class GlobalControllerExceptionHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
 

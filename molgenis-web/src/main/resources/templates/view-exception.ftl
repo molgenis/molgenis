@@ -1,4 +1,3 @@
-<#include "resource-macros.ftl">
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
+    <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
 </head>
 <body>
 <h1>${httpStatusCode}</h1><br/>
