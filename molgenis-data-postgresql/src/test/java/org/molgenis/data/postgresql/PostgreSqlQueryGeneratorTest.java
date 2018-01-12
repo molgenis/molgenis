@@ -430,17 +430,20 @@ public class PostgreSqlQueryGeneratorTest
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.isUnique()).thenReturn(true);
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
 
 		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this");
+				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"idAttr\" ASC");
 		assertEquals(parameters, emptyList());
 	}
 
@@ -460,17 +463,20 @@ public class PostgreSqlQueryGeneratorTest
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.isUnique()).thenReturn(true);
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
 
 		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
 		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
-				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this");
+				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"idAttr\" ASC");
 		assertEquals(parameters, emptyList());
 	}
 
@@ -479,15 +485,15 @@ public class PostgreSqlQueryGeneratorTest
 	{
 		List<Object[]> dataList = new ArrayList<>();
 		dataList.add(new Object[] { new QueryImpl<>(),
-				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this",
+				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"idAttr\" ASC",
 				emptyList() });
 		dataList.add(new Object[] { new QueryImpl<>().in("attr", asList("ref0", "ref1")),
-				"SELECT DISTINCT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"attr_filter1\" ON (this.\"idAttr\" = \"attr_filter1\".\"refAttr\") WHERE \"attr_filter1\".\"refIdAttr\" IN (?,?)",
+				"SELECT DISTINCT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"attr_filter1\" ON (this.\"idAttr\" = \"attr_filter1\".\"refAttr\") WHERE \"attr_filter1\".\"refIdAttr\" IN (?,?) ORDER BY \"idAttr\" ASC",
 				asList("ref0", "ref1") });
 		Query<Entity> sortQuery = new QueryImpl<>();
 		sortQuery.sort(new Sort("attr"));
 		dataList.add(new Object[] { sortQuery,
-				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"attr\" ASC",
+				"SELECT this.\"idAttr\", (SELECT array_agg(\"refIdAttr\" ORDER BY \"refIdAttr\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"idAttr\" = \"refEntityId#07f902bf\".\"refAttr\") AS \"attr\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"attr\" ASC, \"idAttr\" ASC",
 				emptyList() });
 		return dataList.iterator();
 	}
@@ -498,6 +504,8 @@ public class PostgreSqlQueryGeneratorTest
 		Attribute refIdAttr = when(mock(Attribute.class).getName()).thenReturn("refIdAttr").getMock();
 		when(refIdAttr.getIdentifier()).thenReturn("refIdAttrId");
 		when(refIdAttr.getDataType()).thenReturn(STRING);
+		when(refIdAttr.isUnique()).thenReturn(true);
+
 		EntityType refEntityType = when(mock(EntityType.class).getId()).thenReturn("refEntity").getMock();
 		when(refEntityType.getId()).thenReturn("refEntityId");
 		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
@@ -516,10 +524,12 @@ public class PostgreSqlQueryGeneratorTest
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("idAttrId");
 		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.isUnique()).thenReturn(true);
 
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getAttribute("attr")).thenReturn(attr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 
@@ -572,7 +582,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true);
 		assertEquals(sqlSelect,
-				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityTypeId#c34894ba_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\", (SELECT array_agg(DISTINCT ARRAY[\"mref2\".\"order\"::TEXT,\"mref2\".\"mref2\"::TEXT]) FROM \"entityTypeId#c34894ba_mref2\" AS \"mref2\" WHERE this.\"masterId\" = \"mref2\".\"masterId\") AS \"mref2\" FROM \"entityTypeId#c34894ba\" AS this");
+				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityTypeId#c34894ba_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\", (SELECT array_agg(DISTINCT ARRAY[\"mref2\".\"order\"::TEXT,\"mref2\".\"mref2\"::TEXT]) FROM \"entityTypeId#c34894ba_mref2\" AS \"mref2\" WHERE this.\"masterId\" = \"mref2\".\"masterId\") AS \"mref2\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"masterId\" ASC");
 	}
 
 	@Test
@@ -593,6 +603,59 @@ public class PostgreSqlQueryGeneratorTest
 		when(q.getOffset()).thenReturn(10);
 		when(q.getPageSize()).thenReturn(5);
 		assertEquals(PostgreSqlQueryGenerator.getSqlSort(entityType, q), "ORDER BY \"idAttr\" ASC");
+	}
+
+	@Test
+	public void getSqlSortSortWithUniqueAttribute()
+	{
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.isUnique()).thenReturn(true);
+
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(attr.getIdentifier()).thenReturn("attrId");
+		when(attr.getDataType()).thenReturn(STRING);
+		when(attr.isUnique()).thenReturn(true);
+
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getId()).thenReturn("entityTypeId");
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		Sort sort = new Sort().on("attr");
+		when(q.getSort()).thenReturn(sort);
+		assertEquals(PostgreSqlQueryGenerator.getSqlSort(entityType, q), "ORDER BY \"attr\" ASC");
+	}
+
+	@Test
+	public void getSqlSortSortWithoutUniqueAttribute()
+	{
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getIdentifier()).thenReturn("idAttrId");
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.isUnique()).thenReturn(true);
+
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
+		when(attr.getIdentifier()).thenReturn("attrId");
+		when(attr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+		when(entityType.getId()).thenReturn("entityTypeId");
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("idAttr")).thenReturn(idAttr);
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		Sort sort = new Sort().on("attr");
+		when(q.getSort()).thenReturn(sort);
+		assertEquals(PostgreSqlQueryGenerator.getSqlSort(entityType, q), "ORDER BY \"attr\" ASC, \"idAttr\" ASC");
 	}
 
 	@Test
@@ -638,7 +701,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true);
 		assertEquals(sqlSelect,
-				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityTypeId#c34894ba_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"mref1\" ASC");
+				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) FROM \"entityTypeId#c34894ba_mref1\" AS \"mref1\" WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" FROM \"entityTypeId#c34894ba\" AS this ORDER BY \"mref1\" ASC, \"masterId\" ASC");
 	}
 
 	@DataProvider(name = "getSqlAddColumnProvider")
@@ -888,7 +951,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(collectionsEntity, q, parameters, true);
 		assertEquals(sqlSelect,
-				"SELECT this.\"collectionsId\", (SELECT array_agg(DISTINCT ARRAY[\"type\".\"order\"::TEXT,\"type\".\"type\"::TEXT]) FROM \"eu_bbmri_eric_collecti#4dc023e6_type\" AS \"type\" WHERE this.\"collectionsId\" = \"type\".\"collectionsId\") AS \"type\", (SELECT array_agg(DISTINCT ARRAY[\"category\".\"order\"::TEXT,\"category\".\"category\"::TEXT]) FROM \"eu_bbmri_eric_collecti#4dc023e6_category\" AS \"category\" WHERE this.\"collectionsId\" = \"category\".\"collectionsId\") AS \"category\" FROM \"eu_bbmri_eric_collections#4dc023e6\" AS this");
+				"SELECT this.\"collectionsId\", (SELECT array_agg(DISTINCT ARRAY[\"type\".\"order\"::TEXT,\"type\".\"type\"::TEXT]) FROM \"eu_bbmri_eric_collecti#4dc023e6_type\" AS \"type\" WHERE this.\"collectionsId\" = \"type\".\"collectionsId\") AS \"type\", (SELECT array_agg(DISTINCT ARRAY[\"category\".\"order\"::TEXT,\"category\".\"category\"::TEXT]) FROM \"eu_bbmri_eric_collecti#4dc023e6_category\" AS \"category\" WHERE this.\"collectionsId\" = \"category\".\"collectionsId\") AS \"category\" FROM \"eu_bbmri_eric_collections#4dc023e6\" AS this ORDER BY \"collectionsId\" ASC");
 	}
 
 	@Test

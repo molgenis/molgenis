@@ -1091,13 +1091,26 @@ class PostgreSqlQueryGenerator
 	static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
 	{
 		StringBuilder sortSql = new StringBuilder();
-		Sort sort = q.getSort();
-		if (sort == null)
+
+		// https://www.postgresql.org/docs/9.6/static/queries-limit.html
+		// When using LIMIT, it is important to use an ORDER BY clause that constrains the result rows into a unique order.
+		// Otherwise you will get an unpredictable subset of the query's rows. You might be asking for the tenth through twentieth rows,
+		// but tenth through twentieth in what ordering? The ordering is unknown, unless you specified ORDER BY.
+		Sort sort;
+		if (q.getSort() != null && !hasUniqueSortAttribute(entityType, q.getSort()))
 		{
-			// Using different LIMIT/OFFSET values to select different subsets of a query result will give inconsistent results unless you enforce a predictable result ordering with ORDER BY.
-			// https://www.postgresql.org/docs/9.6/static/queries-limit.html
-			LOG.debug("Query with offset/page size without sort detected: {}", q);
+			LOG.debug("Query with sort without unique attribute detected: {}", q);
+			sort = new Sort(q.getSort());
+			sort.on(entityType.getIdAttribute().getName());
+		}
+		else if (q.getSort() == null)
+		{
+			LOG.debug("Query without sort detected: {}", q);
 			sort = new Sort(entityType.getIdAttribute().getName());
+		}
+		else
+		{
+			sort = q.getSort();
 		}
 
 		for (Sort.Order o : sort)
@@ -1120,6 +1133,20 @@ class PostgreSqlQueryGenerator
 		}
 
 		return sortSql.toString();
+	}
+
+	private static boolean hasUniqueSortAttribute(EntityType entityType, Sort sort)
+	{
+		for (Sort.Order order : sort)
+		{
+			String attributeName = order.getAttr();
+			Attribute attribute = entityType.getAttribute(attributeName);
+			if (attribute.isUnique())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
