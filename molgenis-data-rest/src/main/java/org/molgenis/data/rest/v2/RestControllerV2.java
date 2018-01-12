@@ -285,7 +285,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -347,7 +347,10 @@ public class RestControllerV2
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		// No repo
-		if (!dataService.hasRepository(entityTypeId)) throw createUnknownEntityException(entityTypeId);
+		if (!dataService.hasRepository(entityTypeId))
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityTypeId);
 
@@ -402,7 +405,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -440,7 +443,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -475,7 +478,7 @@ public class RestControllerV2
 				Entity originalEntity = dataService.findOneById(entityTypeId, id);
 				if (originalEntity == null)
 				{
-					throw createUnknownEntityExceptionNotValidId(id);
+					throw new UnknownEntityTypeException(id.toString());
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
@@ -575,25 +578,6 @@ public class RestControllerV2
 		return id;
 	}
 
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
-	{
-		LOG.debug("Invalid request body.", exception);
-		return new ErrorMessageResponse(new ErrorMessage("Invalid request body."));
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
-	{
-		LOG.info("Invalid method arguments.", exception);
-		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
-				error -> new ErrorMessage(error.getDefaultMessage())));
-	}
-
 	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
@@ -612,30 +596,12 @@ public class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("Runtime exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(ConversionFailedException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
-	{
-		LOG.info("ConversionFailedException occurred", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)
 	{
 		EntityType entity = dataService.getEntityType(entityTypeId);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Attribute attribute = entity.getAttribute(attributeName);
@@ -651,6 +617,10 @@ public class RestControllerV2
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
