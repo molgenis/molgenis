@@ -284,7 +284,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void testLogoutNoToken() throws Exception
 	{
 		mockMvc.perform(MockMvcRequestBuilders.post(RestController.BASE_URI + "/logout").content(""))
-			   .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+			   .andExpect(MockMvcResultMatchers.status().isBadRequest());
 		Mockito.verifyZeroInteractions(tokenService);
 	}
 
