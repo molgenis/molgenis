@@ -12,6 +12,7 @@ import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
@@ -68,7 +69,7 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 								 .setLocaleResolver(localeResolver)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
-										 new FallbackExceptionHandler())
+										 new FallbackExceptionHandler(), new SpringExceptionHandler())
 								 .build();
 	}
 

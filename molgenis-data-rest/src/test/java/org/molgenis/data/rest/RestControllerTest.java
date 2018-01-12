@@ -38,6 +38,7 @@ import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -229,7 +230,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
 								 .setCustomArgumentResolvers(new TokenExtractor())
 								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
-										 new FallbackExceptionHandler())
+										 new FallbackExceptionHandler(), new SpringExceptionHandler())
 								 .setLocaleResolver(localeResolver)
 								 .build();
 
