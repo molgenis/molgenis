@@ -1,13 +1,13 @@
 package org.molgenis.integrationtest.jobs;
 
-import org.molgenis.data.jobs.JobExecutionConfig;
-import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
-import org.molgenis.data.jobs.JobFactoryRegistrar;
-import org.molgenis.data.jobs.model.JobPackage;
-import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
-import org.molgenis.data.jobs.model.ScheduledJobTypeMetadata;
-import org.molgenis.data.jobs.schedule.JobScheduler;
-import org.molgenis.scheduler.SchedulerConfig;
+import org.molgenis.jobs.JobExecutionConfig;
+import org.molgenis.jobs.JobExecutionUpdaterImpl;
+import org.molgenis.jobs.JobFactoryRegistrar;
+import org.molgenis.jobs.model.JobPackage;
+import org.molgenis.jobs.model.ScheduledJobTypeFactory;
+import org.molgenis.jobs.model.ScheduledJobTypeMetadata;
+import org.molgenis.jobs.schedule.JobScheduler;
+import org.molgenis.jobs.scheduler.SchedulerConfig;
 import org.molgenis.settings.mail.JavaMailPropertyType;
 import org.molgenis.settings.mail.MailPackage;
 import org.molgenis.settings.mail.MailSettingsImpl;

@@ -2,8 +2,8 @@ package org.molgenis.amazon.bucket.meta;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.model.JobExecution;
 
 import javax.annotation.Nullable;
 

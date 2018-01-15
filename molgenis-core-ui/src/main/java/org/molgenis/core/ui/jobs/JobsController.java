@@ -4,10 +4,10 @@ import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.jobs.schedule.JobScheduler;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.MediaType;
@@ -24,8 +24,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.data.support.Href.concatEntityHref;
 import static org.molgenis.core.ui.jobs.JobsController.URI;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
+import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Controller

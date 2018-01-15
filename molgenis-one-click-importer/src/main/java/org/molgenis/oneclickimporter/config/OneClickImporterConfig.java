@@ -2,10 +2,10 @@ package org.molgenis.oneclickimporter.config;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.i18n.PropertiesMessageSource;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.Job;
+import org.molgenis.jobs.JobFactory;
+import org.molgenis.jobs.Progress;
 import org.molgenis.oneclickimporter.job.OneClickImportJob;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.springframework.context.annotation.Bean;

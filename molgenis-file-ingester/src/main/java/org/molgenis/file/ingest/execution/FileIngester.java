@@ -9,9 +9,9 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

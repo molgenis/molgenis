@@ -1,14 +1,14 @@
 package org.molgenis.data.annotation.web.meta;
 
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 @Component
 public class AnnotationJobExecutionMetaData extends SystemEntityType
