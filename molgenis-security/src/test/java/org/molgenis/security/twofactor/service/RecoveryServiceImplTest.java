@@ -3,10 +3,11 @@ package org.molgenis.security.twofactor.service;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.security.twofactor.model.*;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,7 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 	@Autowired
 	private RecoveryCodeFactory recoveryCodeFactory;
-	private org.molgenis.auth.User molgenisUser = mock(org.molgenis.auth.User.class);
+	private User molgenisUser = mock(User.class);
 	private RecoveryCode recoveryCode = mock(RecoveryCode.class);
 
 	@BeforeMethod

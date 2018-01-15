@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.jobs;
 
-import org.molgenis.auth.User;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -8,6 +7,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.schedule.JobScheduler;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.MediaType;

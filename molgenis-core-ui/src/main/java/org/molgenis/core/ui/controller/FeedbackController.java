@@ -2,13 +2,13 @@ package org.molgenis.core.ui.controller;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
-import org.molgenis.auth.User;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.UserService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

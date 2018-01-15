@@ -2,7 +2,6 @@ package org.molgenis.file.ingest;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
-import org.molgenis.data.config.UserTestConfig;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
@@ -11,6 +10,7 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.file.ingest.config.FileIngestTestConfig;
 import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;

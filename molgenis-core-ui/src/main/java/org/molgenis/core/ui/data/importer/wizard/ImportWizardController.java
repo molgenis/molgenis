@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import org.molgenis.auth.*;
 import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.core.ui.wizard.AbstractWizardController;
 import org.molgenis.core.ui.wizard.Wizard;
@@ -11,6 +10,7 @@ import org.molgenis.data.file.util.FileExtensionUtils;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
@@ -48,10 +48,10 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.security.core.Permission.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 

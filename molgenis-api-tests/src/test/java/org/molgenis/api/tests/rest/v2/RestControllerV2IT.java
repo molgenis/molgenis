@@ -23,7 +23,7 @@ import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.security.owned.OwnedEntityType.OWNED;
+import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 
 public class RestControllerV2IT
 {

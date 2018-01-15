@@ -2,10 +2,10 @@ package org.molgenis.core.ui.admin.user;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.auth.Group;
-import org.molgenis.auth.User;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;

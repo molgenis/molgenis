@@ -1,9 +1,9 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import org.molgenis.auth.Group;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.security.auth.Group;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.io.File;
@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 
 public class ImportWizard extends Wizard
 {

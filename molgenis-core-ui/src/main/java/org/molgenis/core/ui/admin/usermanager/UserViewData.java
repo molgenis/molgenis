@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import org.molgenis.auth.Group;
-import org.molgenis.auth.User;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.User;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,11 @@
 package org.molgenis.security.token;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.Token;
-import org.molgenis.auth.TokenFactory;
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.auth.Token;
+import org.molgenis.data.security.auth.TokenFactory;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +15,10 @@ import org.testng.annotations.Test;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.TokenMetaData.TOKEN;
-import static org.molgenis.auth.TokenMetaData.TOKEN_ATTR;
-import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.TokenMetaData.TOKEN;
+import static org.molgenis.data.security.auth.TokenMetaData.TOKEN_ATTR;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.testng.Assert.assertEquals;
 
 public class DataServiceTokenServiceTest

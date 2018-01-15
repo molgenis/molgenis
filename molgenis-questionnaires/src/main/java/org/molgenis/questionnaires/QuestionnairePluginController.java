@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +18,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.security.owned.OwnedEntityType.OWNER_USERNAME;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
@@ -27,7 +27,6 @@ import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
 import static org.molgenis.questionnaires.QuestionnaireUtils.findQuestionnairesMetaData;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
-import static org.molgenis.security.owned.OwnedEntityType.OWNER_USERNAME;
 
 @Controller
 @RequestMapping(QuestionnairePluginController.URI)

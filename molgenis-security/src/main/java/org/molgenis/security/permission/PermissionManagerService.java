@@ -1,10 +1,10 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.auth.Group;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupAuthority;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserAuthority;
 
 import java.util.List;
 

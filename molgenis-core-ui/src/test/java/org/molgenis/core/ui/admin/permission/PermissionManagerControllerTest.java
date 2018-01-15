@@ -1,13 +1,13 @@
 package org.molgenis.core.ui.admin.permission;
 
-import org.molgenis.auth.Group;
-import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupAuthorityFactory;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserAuthorityFactory;
 import org.molgenis.security.permission.PermissionManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;

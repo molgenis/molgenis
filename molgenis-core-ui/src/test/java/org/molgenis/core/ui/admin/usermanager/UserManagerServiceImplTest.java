@@ -1,9 +1,9 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import org.molgenis.auth.*;
 import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsService;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })

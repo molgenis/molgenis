@@ -1,9 +1,9 @@
 package org.molgenis.data.jobs.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.StaticEntity;
 
 import javax.annotation.Nullable;

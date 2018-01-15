@@ -2,8 +2,6 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -13,6 +11,8 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -45,8 +45,8 @@ import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 

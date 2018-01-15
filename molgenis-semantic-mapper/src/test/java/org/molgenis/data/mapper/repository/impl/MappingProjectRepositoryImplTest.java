@@ -1,8 +1,6 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.mapper.config.MapperTestConfig;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -14,6 +12,8 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

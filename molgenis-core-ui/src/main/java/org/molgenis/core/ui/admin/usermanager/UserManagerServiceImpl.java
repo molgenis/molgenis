@@ -3,9 +3,9 @@ package org.molgenis.core.ui.admin.usermanager;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,9 +17,9 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 
 /**
  * Manage user in groups

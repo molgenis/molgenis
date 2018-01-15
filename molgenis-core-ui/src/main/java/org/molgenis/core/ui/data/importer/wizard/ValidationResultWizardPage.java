@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import com.google.common.collect.Lists;
-import org.molgenis.auth.Group;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataService;
@@ -9,10 +8,11 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage

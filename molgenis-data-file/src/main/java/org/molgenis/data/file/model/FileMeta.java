@@ -2,7 +2,7 @@ package org.molgenis.data.file.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.owned.OwnedEntity;
+import org.molgenis.data.security.owned.OwnedEntity;
 
 import javax.annotation.Nullable;
 

@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.meta;
 
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
