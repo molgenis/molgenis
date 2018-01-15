@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.validation.meta;
 
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.MolgenisDataException;

@@ -1,7 +1,9 @@
-package org.molgenis.data.meta.model;
+package org.molgenis.data.validation.meta.model;
 
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.validation.meta.TagRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.Test;

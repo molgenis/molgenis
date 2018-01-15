@@ -60,7 +60,7 @@ import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
-import static org.molgenis.data.meta.NameValidator.validateEntityName;
+import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.MediaType.*;
