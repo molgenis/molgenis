@@ -74,14 +74,16 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
  FIXME Ideally, we'd like to scan all of org.molgenis.data or even org.molgenis, but there's some unwanted dependencies
  in org.molgenis.data and subpackages from included modules
   */
-@ComponentScan({ "org.molgenis.data.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
-		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.data.platform",
+@ComponentScan({ "org.molgenis.data.security.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
+		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.data.security.auth",
+		"org.molgenis.data.platform",
 		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
 		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.i18n", "org.molgenis.data.postgresql",
-		"org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation",
+		"org.molgenis.data.file.model", "org.molgenis.data.security.owned", "org.molgenis.data.security.user",
+		"org.molgenis.data.validation",
 		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
-		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings" })
+		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings",
+		"org.molgenis.data.util" })
 @Import({ TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class,
 		ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
