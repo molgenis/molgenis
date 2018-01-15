@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static java.io.File.separatorChar;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
+import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 
 public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 {

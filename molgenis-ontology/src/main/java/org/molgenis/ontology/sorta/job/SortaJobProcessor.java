@@ -1,6 +1,7 @@
 package org.molgenis.ontology.sorta.job;
 
 import com.google.common.collect.Iterables;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.Progress;
@@ -12,7 +13,6 @@ import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.ui.menu.MenuReaderService;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

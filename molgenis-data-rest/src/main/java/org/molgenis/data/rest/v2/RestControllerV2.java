@@ -1,5 +1,6 @@
 package org.molgenis.data.rest.v2;
 
+import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -12,7 +13,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.i18n.LanguageService;

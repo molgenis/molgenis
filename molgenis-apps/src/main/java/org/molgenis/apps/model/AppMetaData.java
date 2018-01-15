@@ -1,7 +1,7 @@
 package org.molgenis.apps.model;
 
+import org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.system.core.FreemarkerTemplateMetaData;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.stereotype.Component;
 

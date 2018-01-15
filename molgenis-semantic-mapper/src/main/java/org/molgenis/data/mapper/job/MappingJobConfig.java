@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.job;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.JobFactory;
 import org.molgenis.data.jobs.model.ScheduledJobType;
@@ -9,7 +10,6 @@ import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

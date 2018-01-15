@@ -1,5 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
+import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
@@ -7,7 +8,6 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.model.FileMeta;
