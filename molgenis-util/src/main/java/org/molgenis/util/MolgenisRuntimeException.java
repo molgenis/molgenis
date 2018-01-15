@@ -1,4 +1,4 @@
-package org.molgenis.data;
+package org.molgenis.util;
 
 @Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisRuntimeException extends RuntimeException
