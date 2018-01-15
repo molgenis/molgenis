@@ -1,4 +1,4 @@
-package org.molgenis.ontology.ic;
+package org.molgenis.ontology.core.ic;
 
 public class PubMedTFEntity
 {

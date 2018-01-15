@@ -1,4 +1,4 @@
-package org.molgenis.ontology.importer.repository;
+package org.molgenis.ontology.core.importer.repository;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -13,8 +13,8 @@ import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.core.meta.*;
-import org.molgenis.ontology.utils.OWLClassContainer;
-import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.ontology.core.utils.OWLClassContainer;
+import org.molgenis.ontology.core.utils.OntologyLoader;
 import org.molgenis.util.file.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

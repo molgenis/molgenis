@@ -1,4 +1,4 @@
-package org.molgenis.ontology.importer;
+package org.molgenis.ontology.core.importer;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
@@ -8,8 +8,8 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.importer.repository.OntologyFileExtensions;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.importer.repository.OntologyFileExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

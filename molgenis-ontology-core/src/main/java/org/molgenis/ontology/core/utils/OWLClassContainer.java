@@ -1,4 +1,4 @@
-package org.molgenis.ontology.utils;
+package org.molgenis.ontology.core.utils;
 
 import org.semanticweb.owlapi.model.OWLClass;
 

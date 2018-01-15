@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
+import org.molgenis.ontology.core.importer.repository.OntologyRepositoryCollection;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;

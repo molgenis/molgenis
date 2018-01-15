@@ -1,4 +1,4 @@
-package org.molgenis.ontology.importer.repository;
+package org.molgenis.ontology.core.importer.repository;
 
 import com.google.common.collect.ImmutableSet;
 

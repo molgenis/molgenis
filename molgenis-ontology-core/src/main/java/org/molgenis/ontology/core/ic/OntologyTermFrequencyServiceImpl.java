@@ -1,4 +1,4 @@
-package org.molgenis.ontology.ic;
+package org.molgenis.ontology.core.ic;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -11,8 +11,8 @@ import org.springframework.scheduling.annotation.Async;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.*;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.molgenis.ontology.ic.TermFrequencyMetaData.*;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class OntologyTermFrequencyServiceImpl implements TermFrequencyService

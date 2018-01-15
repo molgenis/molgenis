@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository.model;
+package org.molgenis.ontology.core.repository.model;
 
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.testng.Assert;

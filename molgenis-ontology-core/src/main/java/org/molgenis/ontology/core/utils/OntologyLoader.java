@@ -1,4 +1,4 @@
-package org.molgenis.ontology.utils;
+package org.molgenis.ontology.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;

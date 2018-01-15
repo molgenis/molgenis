@@ -14,9 +14,9 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.ic.TermFrequencyService;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ontology.ic.TermFrequencyService;
 
 import java.util.*;
 import java.util.stream.Collectors;
