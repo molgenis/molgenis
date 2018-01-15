@@ -1,8 +1,7 @@
-package org.molgenis.data;
+package org.molgenis.data.annotation.web;
 
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.web.AnnotationService;
-import org.molgenis.data.annotation.web.AnnotationServiceImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
