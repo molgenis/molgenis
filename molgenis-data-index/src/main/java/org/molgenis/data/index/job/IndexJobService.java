@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
-import static org.molgenis.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 /**
  * Executes the {@link IndexAction}s stored in an {@link IndexActionGroup}.

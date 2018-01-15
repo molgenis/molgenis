@@ -7,7 +7,7 @@ import org.molgenis.data.config.MetadataTestConfig;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.util.GenericDependencyResolver;
+import org.molgenis.data.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

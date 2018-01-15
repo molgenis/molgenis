@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.util.EntityUtils.asStream;
 
 @Service
 public class OntologyImportService implements ImportService

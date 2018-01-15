@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.*;
 
 /**
  * Converts RSQL value symbols to the relevant data type.

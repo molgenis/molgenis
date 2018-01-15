@@ -28,8 +28,8 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.QueryRule.Operator.*;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })

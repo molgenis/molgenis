@@ -4,9 +4,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.util.EntityUtils;
 
 import java.util.Iterator;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.util;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;

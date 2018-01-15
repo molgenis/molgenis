@@ -39,9 +39,9 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.util.MolgenisDateFormat.*;
 import static org.molgenis.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.util.MolgenisDateFormat.*;
 
 @Service
 public class RestService

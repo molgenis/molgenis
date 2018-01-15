@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 @Component
 public class IndexBootstrapper

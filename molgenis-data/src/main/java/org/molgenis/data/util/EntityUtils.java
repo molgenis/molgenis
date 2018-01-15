@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.util;
 
 import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
@@ -11,6 +11,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.util.ListEscapeUtils;
+import org.molgenis.util.Pair;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.format.DateTimeParseException;
 import java.util.Iterator;
@@ -25,7 +28,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.*;
 
 public class EntityUtils
 {

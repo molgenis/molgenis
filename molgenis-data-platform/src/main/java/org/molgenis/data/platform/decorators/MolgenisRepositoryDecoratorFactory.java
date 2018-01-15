@@ -17,9 +17,9 @@ import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.*;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 

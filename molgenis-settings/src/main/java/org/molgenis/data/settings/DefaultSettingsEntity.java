@@ -6,8 +6,8 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;

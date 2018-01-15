@@ -13,7 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.util.EntityUtils;
 
 import java.util.*;
 import java.util.stream.Stream;

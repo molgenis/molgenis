@@ -38,10 +38,10 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
-import static org.molgenis.util.EntityUtils.getTypedValue;
 
 public class VcfToEntity
 {

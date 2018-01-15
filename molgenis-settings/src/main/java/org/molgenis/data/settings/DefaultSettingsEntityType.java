@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
-import static org.molgenis.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 public abstract class DefaultSettingsEntityType extends SystemEntityType
 {

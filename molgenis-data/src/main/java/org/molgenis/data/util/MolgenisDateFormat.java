@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.util;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;

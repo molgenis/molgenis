@@ -46,11 +46,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.util.EntityUtils.getTypedValue;
 
 /**
  * Controller class for the data explorer.

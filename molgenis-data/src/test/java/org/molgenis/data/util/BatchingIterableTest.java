@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.util;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;

@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.data.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;

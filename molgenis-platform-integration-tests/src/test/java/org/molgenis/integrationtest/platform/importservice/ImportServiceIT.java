@@ -47,7 +47,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.util.EntityUtils.asStream;
+import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })

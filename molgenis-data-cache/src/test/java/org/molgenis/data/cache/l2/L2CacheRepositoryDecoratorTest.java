@@ -9,7 +9,7 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionInformation;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
