@@ -1,4 +1,4 @@
-package org.molgenis.data.settings;
+package org.molgenis.settings;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -9,8 +9,8 @@ import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
+import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 public abstract class DefaultSettingsEntityType extends SystemEntityType
 {

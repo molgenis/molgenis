@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.menu;
 
 import com.google.gson.GsonBuilder;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.settings.AppSettings;
 
 import static java.util.Objects.requireNonNull;
 

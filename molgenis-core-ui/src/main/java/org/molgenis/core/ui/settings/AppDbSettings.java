@@ -2,9 +2,9 @@ package org.molgenis.core.ui.settings;
 
 import org.molgenis.core.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.molgenis.settings.AppSettings;
+import org.molgenis.settings.DefaultSettingsEntity;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;

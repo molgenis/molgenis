@@ -7,7 +7,7 @@ import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.util.FileUploadUtils;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;

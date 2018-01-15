@@ -1,8 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.script.core.ScriptTypePopulator;
+import org.molgenis.settings.SettingsPopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

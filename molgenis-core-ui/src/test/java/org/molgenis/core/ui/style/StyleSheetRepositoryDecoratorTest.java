@@ -2,7 +2,7 @@ package org.molgenis.core.ui.style;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -2,8 +2,8 @@ package org.molgenis.core.ui;
 
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;

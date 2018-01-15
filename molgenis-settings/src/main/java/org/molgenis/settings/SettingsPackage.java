@@ -1,4 +1,4 @@
-package org.molgenis.data.settings;
+package org.molgenis.settings;
 
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.PackageMetadata;

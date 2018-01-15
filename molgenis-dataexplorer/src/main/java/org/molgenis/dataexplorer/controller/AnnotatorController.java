@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
+import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 @Controller
 @RequestMapping(URI)

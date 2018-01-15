@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.menu;
 
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

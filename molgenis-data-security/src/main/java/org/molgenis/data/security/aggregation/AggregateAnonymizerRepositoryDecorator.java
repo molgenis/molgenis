@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 
 import static java.util.Objects.requireNonNull;
 

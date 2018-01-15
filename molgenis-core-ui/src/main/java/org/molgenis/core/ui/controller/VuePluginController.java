@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.controller;
 
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;

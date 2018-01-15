@@ -1,4 +1,4 @@
-package org.molgenis.data.settings;
+package org.molgenis.settings;
 
 import javax.annotation.Nullable;
 

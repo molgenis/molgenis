@@ -1,9 +1,9 @@
 package org.molgenis.security.twofactor.service;
 
 import org.jboss.aerogear.security.otp.Totp;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.settings.AppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

@@ -16,11 +16,11 @@ import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.*;
+import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 

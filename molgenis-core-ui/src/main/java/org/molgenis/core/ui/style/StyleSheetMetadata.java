@@ -2,7 +2,7 @@ package org.molgenis.core.ui.style;
 
 import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.settings.SettingsPackage;
+import org.molgenis.settings.SettingsPackage;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;

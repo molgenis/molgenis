@@ -1,4 +1,4 @@
-package org.molgenis.data.settings;
+package org.molgenis.settings;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
  * Base class for application and plugin settings entities. Settings are read/written from/to data source.
