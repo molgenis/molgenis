@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import com.google.common.collect.Maps;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class ScriptRunnerFactory
 		return scriptRunners.values();
 	}
 
-	ScriptRunner getScriptRunner(String type)
+	public ScriptRunner getScriptRunner(String type)
 	{
 		ScriptRunner scriptRunner = scriptRunners.get(type);
 		if (scriptRunner == null)

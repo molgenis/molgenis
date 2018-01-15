@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
+import static org.molgenis.script.core.ScriptPackage.PACKAGE_SCRIPT;
 
 @Component
 public class ScriptMetaData extends SystemEntityType

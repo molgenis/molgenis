@@ -5,8 +5,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
-import org.molgenis.script.Script;
-import org.molgenis.script.ScriptParameter;
+import org.molgenis.script.core.Script;
+import org.molgenis.script.core.ScriptParameter;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.core.ScriptMetaData.TYPE;
 
 @Service
 public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService

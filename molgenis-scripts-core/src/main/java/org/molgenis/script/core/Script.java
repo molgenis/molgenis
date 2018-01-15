@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-import static org.molgenis.script.ScriptMetaData.*;
+import static org.molgenis.script.core.ScriptMetaData.*;
 
 public class Script extends StaticEntity
 {

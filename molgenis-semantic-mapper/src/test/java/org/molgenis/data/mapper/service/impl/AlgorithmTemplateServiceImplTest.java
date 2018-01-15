@@ -13,8 +13,8 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
-import org.molgenis.script.*;
-import org.molgenis.script.config.ScriptTestConfig;
+import org.molgenis.script.core.*;
+import org.molgenis.script.core.config.ScriptTestConfig;
 import org.molgenis.security.core.token.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.core.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptParameterMetaData.SCRIPT_PARAMETER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = AlgorithmTemplateServiceImplTest.Config.class)

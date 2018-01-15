@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.testng.annotations.Test;
 

@@ -1,7 +1,7 @@
-package org.molgenis.script.config;
+package org.molgenis.script.core.config;
 
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.script.*;
+import org.molgenis.script.core.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 

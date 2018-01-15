@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import org.molgenis.script.Script;
+import org.molgenis.script.core.Script;
 
 import java.util.Map;
 

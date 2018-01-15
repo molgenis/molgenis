@@ -21,8 +21,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.script.Script;
-import org.molgenis.script.ScriptParameter;
+import org.molgenis.script.core.Script;
+import org.molgenis.script.core.ScriptParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +40,8 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.core.ScriptMetaData.TYPE;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = AlgorithmGeneratorServiceImplTest.Config.class)

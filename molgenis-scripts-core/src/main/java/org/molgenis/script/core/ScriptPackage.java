@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.PackageMetadata;

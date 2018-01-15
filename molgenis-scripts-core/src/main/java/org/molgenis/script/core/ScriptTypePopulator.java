@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.molgenis.data.DataService;
 import org.springframework.stereotype.Component;
@@ -8,7 +8,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
+import static org.molgenis.script.core.ScriptTypeMetaData.SCRIPT_TYPE;
 
 /**
  * Populates {@link ScriptType} repository with script type entities based on existing {@link ScriptRunner script runners.}

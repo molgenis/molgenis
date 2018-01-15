@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
@@ -12,7 +12,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
+import static org.molgenis.script.core.ScriptTypeMetaData.SCRIPT_TYPE;
 import static org.testng.Assert.assertEquals;
 
 public class ScriptTypePopulatorTest

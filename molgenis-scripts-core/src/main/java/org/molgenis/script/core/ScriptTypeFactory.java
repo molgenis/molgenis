@@ -1,4 +1,4 @@
-package org.molgenis.script;
+package org.molgenis.script.core;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;
