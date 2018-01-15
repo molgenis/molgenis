@@ -1,4 +1,4 @@
-package org.molgenis.file;
+package org.molgenis.data.file;
 
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;

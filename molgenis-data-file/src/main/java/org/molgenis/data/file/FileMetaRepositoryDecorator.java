@@ -1,9 +1,9 @@
-package org.molgenis.file;
+package org.molgenis.data.file;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
 package org.molgenis.core.ui.style;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.file.model.FileMeta;
 
 public class StyleSheet extends StaticEntity
 {

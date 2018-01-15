@@ -1,4 +1,4 @@
-package org.molgenis.data.processor;
+package org.molgenis.data.file.processor;
 
 import java.util.List;
 

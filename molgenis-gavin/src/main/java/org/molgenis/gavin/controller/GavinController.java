@@ -2,8 +2,8 @@ package org.molgenis.gavin.controller;
 
 import org.molgenis.core.ui.controller.AbstractStaticContentController;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;

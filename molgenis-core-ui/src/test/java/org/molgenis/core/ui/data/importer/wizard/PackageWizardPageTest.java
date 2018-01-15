@@ -2,7 +2,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.MetaDataService;

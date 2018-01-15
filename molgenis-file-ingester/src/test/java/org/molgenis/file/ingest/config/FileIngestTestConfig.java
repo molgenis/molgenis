@@ -1,8 +1,8 @@
 package org.molgenis.file.ingest.config;
 
 import org.molgenis.data.config.EntityBaseTestConfig;
+import org.molgenis.data.file.config.FileTestConfig;
 import org.molgenis.data.jobs.config.JobTestConfig;
-import org.molgenis.file.config.FileTestConfig;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.springframework.context.annotation.Configuration;

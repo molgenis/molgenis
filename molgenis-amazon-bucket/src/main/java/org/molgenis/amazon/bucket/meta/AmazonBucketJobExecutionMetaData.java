@@ -1,9 +1,9 @@
 package org.molgenis.amazon.bucket.meta;
 
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;

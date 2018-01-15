@@ -5,7 +5,7 @@ import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

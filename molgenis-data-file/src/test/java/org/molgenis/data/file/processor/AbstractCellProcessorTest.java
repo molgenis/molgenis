@@ -1,4 +1,4 @@
-package org.molgenis.data.processor;
+package org.molgenis.data.file.processor;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

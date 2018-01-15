@@ -1,4 +1,4 @@
-package org.molgenis.file.model;
+package org.molgenis.data.file.model;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityType;

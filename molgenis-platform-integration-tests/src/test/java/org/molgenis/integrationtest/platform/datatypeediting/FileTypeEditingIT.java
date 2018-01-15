@@ -15,10 +15,10 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)

@@ -6,13 +6,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,10 +38,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILENAME;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.util.MolgenisDateFormat.*;
-import static org.molgenis.file.model.FileMetaMetaData.FILENAME;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 @Service
 public class RestService

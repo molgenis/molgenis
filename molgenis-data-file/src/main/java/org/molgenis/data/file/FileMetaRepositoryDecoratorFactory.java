@@ -1,9 +1,9 @@
-package org.molgenis.file;
+package org.molgenis.data.file;
 
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;

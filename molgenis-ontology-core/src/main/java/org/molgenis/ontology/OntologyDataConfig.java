@@ -1,6 +1,6 @@
 package org.molgenis.ontology;
 
-import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.ontology.importer.repository.OntologyFileExtensions;
 import org.molgenis.ontology.importer.repository.OntologyRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;

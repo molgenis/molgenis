@@ -1,7 +1,8 @@
-package org.molgenis.data.support;
+package org.molgenis.data.file.support;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.file.processor.CellProcessor;
+import org.molgenis.data.support.AbstractRepositoryCollection;
 
 import java.io.IOException;
 import java.util.Arrays;

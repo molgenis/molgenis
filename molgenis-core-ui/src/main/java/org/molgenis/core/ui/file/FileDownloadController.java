@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.file;
 
 import org.molgenis.data.DataService;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMeta;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMeta;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.molgenis.core.ui.file.FileDownloadController.URI;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 
 @Controller
 @RequestMapping(URI)

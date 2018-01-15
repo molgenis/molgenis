@@ -1,4 +1,4 @@
-package org.molgenis.file;
+package org.molgenis.data.file;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -6,8 +6,8 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.file.model.FileMeta;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

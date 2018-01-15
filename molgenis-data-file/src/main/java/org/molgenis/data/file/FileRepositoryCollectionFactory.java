@@ -1,8 +1,9 @@
-package org.molgenis.data;
+package org.molgenis.data.file;
 
 import com.google.common.collect.Maps;
-import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.util.FileExtensionUtils;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.file.support.FileRepositoryCollection;
+import org.molgenis.data.file.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package org.molgenis.script;
 
-import org.molgenis.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMeta;
 
 public class ScriptResult
 {

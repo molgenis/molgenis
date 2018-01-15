@@ -1,4 +1,4 @@
-package org.molgenis.file.model;
+package org.molgenis.data.file.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -6,7 +6,7 @@ import org.molgenis.security.owned.OwnedEntity;
 
 import javax.annotation.Nullable;
 
-import static org.molgenis.file.model.FileMetaMetaData.*;
+import static org.molgenis.data.file.model.FileMetaMetaData.*;
 
 public class FileMeta extends OwnedEntity
 {

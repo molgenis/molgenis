@@ -1,6 +1,6 @@
 package org.molgenis.core.ui;
 
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,7 +1,7 @@
 package org.molgenis.amazon.bucket.client;
 
 import com.amazonaws.services.s3.AmazonS3;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 
 import java.io.File;
 import java.io.IOException;
