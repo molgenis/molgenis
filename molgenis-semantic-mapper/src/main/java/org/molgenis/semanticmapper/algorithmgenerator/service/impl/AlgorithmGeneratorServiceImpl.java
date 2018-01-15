@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.generator.AlgorithmGenerator;
 import org.molgenis.semanticmapper.algorithmgenerator.generator.NumericAlgorithmGenerator;
@@ -17,6 +16,7 @@ import org.molgenis.semanticmapper.service.impl.AlgorithmTemplate;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.semanticmapper.utils.AlgorithmGeneratorHelper;
 import org.molgenis.semanticmapper.utils.MagmaUnitConverter;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;

@@ -1,10 +1,10 @@
 package org.molgenis.semanticmapper.algorithmgenerator.categorymapper;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.Category;
 import org.molgenis.semanticmapper.algorithmgenerator.rules.CategoryMatchQuality;
 import org.molgenis.semanticmapper.algorithmgenerator.rules.CategoryRule;
+import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 
 import java.util.List;
 import java.util.Objects;

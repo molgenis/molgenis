@@ -5,12 +5,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticmapper.service.UnitResolver;
 import org.molgenis.semanticmapper.utils.UnitHelper;
+import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

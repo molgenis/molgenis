@@ -1,7 +1,7 @@
 package org.molgenis.semanticmapper.service.impl;
 
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 
 import java.util.Map;
 import java.util.stream.Stream;

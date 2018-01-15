@@ -2,11 +2,11 @@ package org.molgenis.semanticmapper.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptParameter;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
