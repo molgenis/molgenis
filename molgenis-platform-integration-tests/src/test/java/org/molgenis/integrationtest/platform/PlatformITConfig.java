@@ -16,6 +16,7 @@ import org.molgenis.data.jobs.JobExecutionConfig;
 import org.molgenis.data.jobs.JobFactoryRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
+import org.molgenis.data.platform.RepositoryCollectionDecoratorFactoryImpl;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.populate.IdGeneratorImpl;
@@ -85,8 +86,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
 		PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
-		org.molgenis.data.RepositoryCollectionRegistry.class,
-		org.molgenis.data.RepositoryCollectionDecoratorFactoryImpl.class,
+		org.molgenis.data.RepositoryCollectionRegistry.class, RepositoryCollectionDecoratorFactoryImpl.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, DataPersisterImpl.class,
 		org.molgenis.data.importer.ImportServiceFactory.class, FileRepositoryCollectionFactory.class,

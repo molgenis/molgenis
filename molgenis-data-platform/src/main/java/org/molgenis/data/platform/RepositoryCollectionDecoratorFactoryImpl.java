@@ -1,5 +1,9 @@
-package org.molgenis.data;
+package org.molgenis.data.platform;
 
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCollectionDecorator;
+import org.molgenis.data.RepositoryCollectionDecoratorFactory;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryCollectionDecorator;
 import org.springframework.stereotype.Component;
