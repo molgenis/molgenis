@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

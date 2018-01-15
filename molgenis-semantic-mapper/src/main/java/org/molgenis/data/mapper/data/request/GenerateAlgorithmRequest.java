@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.data.request;
 
 import com.google.auto.value.AutoValue;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;

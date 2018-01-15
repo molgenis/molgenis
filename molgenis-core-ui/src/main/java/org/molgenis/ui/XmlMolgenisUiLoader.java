@@ -1,7 +1,7 @@
 package org.molgenis.ui;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.util.SchemaLoader;
+import org.molgenis.core.util.SchemaLoader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

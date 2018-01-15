@@ -1,10 +1,10 @@
 package org.molgenis.ui;
 
 import com.google.gson.Gson;
+import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.web.PluginAttributes;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.ModelAndView;

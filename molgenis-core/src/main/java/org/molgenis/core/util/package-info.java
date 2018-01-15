@@ -1,4 +1,4 @@
 /**
  * MOLGENIS supporting utilities
  */
-package org.molgenis.util;
+package org.molgenis.core.util;

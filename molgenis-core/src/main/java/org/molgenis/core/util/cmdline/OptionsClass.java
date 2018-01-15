@@ -1,4 +1,4 @@
-package org.molgenis.util.cmdline;
+package org.molgenis.core.util.cmdline;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

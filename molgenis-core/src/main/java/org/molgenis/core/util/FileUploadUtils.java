@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.util.FileCopyUtils;

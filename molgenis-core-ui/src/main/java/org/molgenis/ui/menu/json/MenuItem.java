@@ -1,7 +1,7 @@
 package org.molgenis.ui.menu.json;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;

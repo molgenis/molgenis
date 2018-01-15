@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;

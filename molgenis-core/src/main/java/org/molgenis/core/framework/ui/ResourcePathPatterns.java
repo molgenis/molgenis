@@ -1,4 +1,4 @@
-package org.molgenis.framework.ui;
+package org.molgenis.core.framework.ui;
 
 public class ResourcePathPatterns
 {

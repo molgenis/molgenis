@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import com.google.gson.Gson;
 import org.springframework.http.MediaType;

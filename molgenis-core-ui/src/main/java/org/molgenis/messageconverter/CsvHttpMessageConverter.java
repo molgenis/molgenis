@@ -1,9 +1,9 @@
 package org.molgenis.messageconverter;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.core.util.BaseHttpMessageConverter;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.util.BaseHttpMessageConverter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;

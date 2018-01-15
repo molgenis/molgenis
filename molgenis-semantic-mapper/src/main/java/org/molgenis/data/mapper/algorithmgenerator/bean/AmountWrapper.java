@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.bean;
 
 import com.google.auto.value.AutoValue;
 import org.jscience.physics.amount.Amount;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 import javax.annotation.Nullable;
 

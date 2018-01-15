@@ -2,9 +2,9 @@ package org.molgenis.data.semanticsearch.explain.bean;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.Sets;
+import org.molgenis.core.gson.AutoGson;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.gson.AutoGson;
 
 import java.util.Collections;
 import java.util.HashMap;

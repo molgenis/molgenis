@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;

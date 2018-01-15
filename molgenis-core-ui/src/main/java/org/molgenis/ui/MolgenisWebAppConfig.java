@@ -3,6 +3,8 @@ package org.molgenis.ui;
 import com.google.common.collect.Maps;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
@@ -27,8 +29,6 @@ import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.ui.style.StyleService;
 import org.molgenis.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
@@ -66,7 +66,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static freemarker.template.Configuration.VERSION_2_3_23;
-import static org.molgenis.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.*;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 

@@ -1,7 +1,7 @@
 package org.molgenis.data.config;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

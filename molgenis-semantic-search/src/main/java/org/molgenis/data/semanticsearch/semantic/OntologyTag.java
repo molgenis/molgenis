@@ -1,8 +1,8 @@
 package org.molgenis.data.semanticsearch.semantic;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.core.gson.AutoGson;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.gson.AutoGson;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
 @AutoValue

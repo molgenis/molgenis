@@ -2,6 +2,7 @@ package org.molgenis.security.account;
 
 import org.molgenis.auth.User;
 import org.molgenis.auth.UserFactory;
+import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.captcha.CaptchaException;
@@ -9,7 +10,6 @@ import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.util.CountryCodes;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;

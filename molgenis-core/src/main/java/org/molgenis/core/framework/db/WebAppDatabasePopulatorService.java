@@ -1,4 +1,4 @@
-package org.molgenis.framework.db;
+package org.molgenis.core.framework.db;
 
 public interface WebAppDatabasePopulatorService
 {

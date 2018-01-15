@@ -1,8 +1,9 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
+import org.molgenis.util.ResourceUtils;
 
 import java.io.IOException;
 import java.util.Map;

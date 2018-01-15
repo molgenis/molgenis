@@ -1,9 +1,9 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.core.gson.AutoGson;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.Quality;
-import org.molgenis.gson.AutoGson;
 
 import javax.annotation.Nullable;
 

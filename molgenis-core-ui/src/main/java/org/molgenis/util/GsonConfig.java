@@ -1,7 +1,9 @@
 package org.molgenis.util;
 
+import org.molgenis.core.gson.AutoValueTypeAdapterFactory;
+import org.molgenis.core.util.GsonFactoryBean;
+import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.gson.AutoValueTypeAdapterFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

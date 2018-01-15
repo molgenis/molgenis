@@ -68,7 +68,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import javax.servlet.Filter;
 import java.util.List;
 
-import static org.molgenis.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.*;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 

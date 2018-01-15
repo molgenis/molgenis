@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.core.util;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
