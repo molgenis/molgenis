@@ -31,7 +31,6 @@ public class MolgenisWebAppInitializer
 
 	/**
 	 * A Molgenis common web application initializer
-	 *
 	 */
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, int maxFileSize)
 	{
@@ -43,22 +42,23 @@ public class MolgenisWebAppInitializer
 		servletContext.addListener(new ContextLoaderListener(rootContext));
 
 		// Register and map the dispatcher servlet
-		ServletRegistration.Dynamic dispatcherServlet = servletContext.addServlet("dispatcher",
-				new DispatcherServlet(rootContext));
-		if (dispatcherServlet == null)
+		DispatcherServlet dispatcherServlet = new DispatcherServlet(rootContext);
+		dispatcherServlet.setDispatchOptionsRequest(true);
+		// instead of throwing a 404 when a handler is not found allow for custom handling
+		dispatcherServlet.setThrowExceptionIfNoHandlerFound(true);
+
+		ServletRegistration.Dynamic dispatcherServletRegistration = servletContext.addServlet("dispatcher",
+				dispatcherServlet);
+		if (dispatcherServletRegistration == null)
 		{
 			LOG.warn("ServletContext already contains a complete ServletRegistration for servlet 'dispatcher'");
 		}
 		else
 		{
 			final long maxSize = (long) maxFileSize * MB;
-			dispatcherServlet.addMapping("/");
-			dispatcherServlet.setMultipartConfig(
+			dispatcherServletRegistration.addMapping("/");
+			dispatcherServletRegistration.setMultipartConfig(
 					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
-			dispatcherServlet.setInitParameter("dispatchOptionsRequest", "true");
-			// instead of throwing a 404 when a handler is not found allow for custom handling
-			dispatcherServlet.setInitParameter("throwExceptionIfNoHandlerFound", "true");
-
 		}
 
 		// add filters

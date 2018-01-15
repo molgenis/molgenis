@@ -16,6 +16,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.ui.converter.RdfConverter;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.freemarker.MolgenisFreemarkerObjectWrapper;
@@ -46,6 +47,7 @@ import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -150,6 +152,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new ResourceHttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 		converters.add(rdfConverter);
+	}
+
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers)
+	{
+		argumentResolvers.add(new TokenExtractor());
 	}
 
 	@Override

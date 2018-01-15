@@ -25,7 +25,7 @@ import org.molgenis.security.account.UnknownUsernamePasswordException;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenParam;
 import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,6 +141,10 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, permissionService, dataService);
 	}
 
@@ -159,6 +163,10 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, permissionService, dataService);
 	}
 
@@ -753,14 +761,8 @@ public class RestController
 
 	@PostMapping("/logout")
 	@ResponseStatus(OK)
-	public void logout(HttpServletRequest request)
+	public void logout(@TokenParam(required = true) String token, HttpServletRequest request)
 	{
-		String token = TokenExtractor.getToken(request);
-		if (token == null)
-		{
-			throw new MissingValueException("token", "header");
-		}
-
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
 
@@ -842,6 +844,10 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
 		// Check if the entity has an attribute with name refAttributeName
@@ -914,6 +920,10 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 
 		// convert sort

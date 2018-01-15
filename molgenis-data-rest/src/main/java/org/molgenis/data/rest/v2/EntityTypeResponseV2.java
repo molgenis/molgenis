@@ -9,7 +9,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.Href;
-import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 
@@ -18,6 +17,7 @@ import java.util.List;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 class EntityTypeResponseV2
 {
@@ -53,8 +53,8 @@ class EntityTypeResponseV2
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
-		this.description = meta.getDescription(LanguageService.getCurrentUserLanguageCode());
-		this.label = meta.getLabel(LanguageService.getCurrentUserLanguageCode());
+		this.description = meta.getDescription(getCurrentUserLanguageCode());
+		this.label = meta.getLabel(getCurrentUserLanguageCode());
 
 		// filter attribute parts
 		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
@@ -84,7 +84,7 @@ class EntityTypeResponseV2
 			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService);
 		}));
 
-		languageCode = LanguageService.getCurrentUserLanguageCode();
+		languageCode = getCurrentUserLanguageCode();
 
 		Attribute labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;

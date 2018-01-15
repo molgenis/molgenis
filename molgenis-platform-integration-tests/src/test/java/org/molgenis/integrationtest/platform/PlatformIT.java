@@ -1087,19 +1087,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 								.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
-	@Test(singleThreaded = true)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityTypeException.class)
 	public void testQuery()
 	{
 		assertNotNull(dataService.query(entityTypeDynamic.getId()));
-		try
-		{
-			dataService.query("bogus");
-			fail("Should have thrown UnknownEntityException");
-		}
-		catch (UnknownEntityTypeException e)
-		{
-			// Expected
-		}
+		dataService.query("bogus");
 	}
 
 	@Test(singleThreaded = true)

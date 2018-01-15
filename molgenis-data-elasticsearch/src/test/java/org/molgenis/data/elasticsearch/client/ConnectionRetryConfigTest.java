@@ -42,7 +42,7 @@ public class ConnectionRetryConfigTest extends AbstractTestNGSpringContextTests
 		{
 			RetryCallback<Client, RuntimeException> fail = c ->
 			{
-				throw new IndexInternalException("");
+				throw new IndexInternalException("Fail for test.");
 			};
 			return retryTemplate.execute(fail);
 		});

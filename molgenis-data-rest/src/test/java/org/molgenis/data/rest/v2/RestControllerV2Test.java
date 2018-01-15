@@ -28,6 +28,8 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -37,7 +39,9 @@ import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.MolgenisDateFormat;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -101,7 +105,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String HREF_ENTITY_COLLECTION = RestControllerV2.BASE_URI + '/' + ENTITY_NAME;
 	private static final String HREF_COPY_ENTITY = RestControllerV2.BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
-	public static final String SOMETHING_WENT_WRONG = "Something went wrong.";
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -153,6 +156,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public RestControllerV2Test()
 	{
 		super(Strictness.WARN);
+		AllPropertiesMessageSource messageSource = new AllPropertiesMessageSource();
+		messageSource.addBasenames("ValidationMessages");
+		messageSource.addMolgenisNamespaces("data");
+		MessageSourceHolder.setMessageSource(messageSource);
 	}
 
 	@BeforeMethod
@@ -384,7 +391,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setLocaleResolver(localeResolver)
 								 .setMessageConverters(gsonHttpMessageConverter)
-								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(), new SpringExceptionHandler(),
 										 new FallbackExceptionHandler())
 								 .setConversionService(conversionService)
 								 .build();
@@ -943,8 +950,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResultActions resultActions = mockMvc.perform(
 				post(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions,
-				"Something went wrong."); //TODO: restore once spring exceptions get handled
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
@@ -952,8 +958,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResultActions resultActions = mockMvc.perform(
 				put(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions,
-				SOMETHING_WENT_WRONG); //TODO: restore once spring exceptions get handled
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityTypeId, String attributeName,
@@ -964,8 +969,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 																						 .contentType(
 																								 APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions,
-				SOMETHING_WENT_WRONG); //TODO: restore once spring exceptions get handled
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
