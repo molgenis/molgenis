@@ -11,6 +11,8 @@ import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.UnexpectedEnumException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.time.Instant;
@@ -41,6 +43,8 @@ import static org.molgenis.data.support.EntityTypeUtils.*;
  */
 class PostgreSqlQueryGenerator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlQueryGenerator.class);
+
 	private static final String UNSPECIFIED_ATTRIBUTE_MSG = "Can't use %s without specifying an attribute";
 
 	static final String ERR_CODE_READONLY_VIOLATION = "23506";
@@ -566,6 +570,7 @@ class PostgreSqlQueryGenerator
 		}
 		// order by
 		result.append(' ').append(getSqlSort(entityType, q));
+
 		// limit
 		if (q.getPageSize() > 0)
 		{
@@ -1080,31 +1085,68 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	private static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
+	/**
+	 * Package-private for testability
+	 */
+	static <E extends Entity> String getSqlSort(EntityType entityType, Query<E> q)
 	{
 		StringBuilder sortSql = new StringBuilder();
-		if (q.getSort() != null)
-		{
-			for (Sort.Order o : q.getSort())
-			{
-				Attribute attr = entityType.getAttribute(o.getAttr());
-				sortSql.append(", ").append(getColumnName(attr));
-				if (o.getDirection().equals(Sort.Direction.DESC))
-				{
-					sortSql.append(" DESC");
-				}
-				else
-				{
-					sortSql.append(" ASC");
-				}
-			}
 
-			if (sortSql.length() > 0)
+		// https://www.postgresql.org/docs/9.6/static/queries-limit.html
+		// When using LIMIT, it is important to use an ORDER BY clause that constrains the result rows into a unique order.
+		// Otherwise you will get an unpredictable subset of the query's rows. You might be asking for the tenth through twentieth rows,
+		// but tenth through twentieth in what ordering? The ordering is unknown, unless you specified ORDER BY.
+		Sort sort;
+		if (q.getSort() != null && !hasUniqueSortAttribute(entityType, q.getSort()))
+		{
+			LOG.debug("Query with sort without unique attribute detected: {}", q);
+			sort = new Sort(q.getSort());
+			sort.on(entityType.getIdAttribute().getName());
+		}
+		else if (q.getSort() == null)
+		{
+			LOG.debug("Query without sort detected: {}", q);
+			sort = new Sort(entityType.getIdAttribute().getName());
+		}
+		else
+		{
+			sort = q.getSort();
+		}
+
+		for (Sort.Order o : sort)
+		{
+			Attribute attr = entityType.getAttribute(o.getAttr());
+			sortSql.append(", ").append(getColumnName(attr));
+			if (o.getDirection().equals(Sort.Direction.DESC))
 			{
-				sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+				sortSql.append(" DESC");
+			}
+			else
+			{
+				sortSql.append(" ASC");
 			}
 		}
+
+		if (sortSql.length() > 0)
+		{
+			sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+		}
+
 		return sortSql.toString();
+	}
+
+	private static boolean hasUniqueSortAttribute(EntityType entityType, Sort sort)
+	{
+		for (Sort.Order order : sort)
+		{
+			String attributeName = order.getAttr();
+			Attribute attribute = entityType.getAttribute(attributeName);
+			if (attribute.isUnique())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static <E extends Entity> String getSqlFrom(EntityType entityType, Query<E> q)
