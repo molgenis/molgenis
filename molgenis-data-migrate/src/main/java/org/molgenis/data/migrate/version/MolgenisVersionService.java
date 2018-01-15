@@ -1,4 +1,4 @@
-package org.molgenis.migrate.version;
+package org.molgenis.data.migrate.version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

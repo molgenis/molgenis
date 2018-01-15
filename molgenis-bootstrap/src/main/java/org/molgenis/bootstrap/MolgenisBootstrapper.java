@@ -5,6 +5,7 @@ import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
+import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;

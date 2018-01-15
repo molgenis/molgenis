@@ -1,4 +1,4 @@
-package org.molgenis.framework;
+package org.molgenis.data.migrate.framework;
 
 /**
  * Base class for Molgenis upgrade steps.

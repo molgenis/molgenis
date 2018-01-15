@@ -1,7 +1,7 @@
-package org.molgenis.bootstrap;
+package org.molgenis.data.migrate.bootstrap;
 
-import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.framework.MolgenisUpgradeService;
+import org.molgenis.data.migrate.framework.MolgenisUpgrade;
+import org.molgenis.data.migrate.framework.MolgenisUpgradeService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +19,7 @@ public class MolgenisUpgradeBootstrapper
 		this.upgradeService = requireNonNull(upgradeService);
 	}
 
-	void bootstrap()
+	public void bootstrap()
 	{
 		// add upgrade steps here
 		// upgradeService.addUpgrade(new Step1Xxx(...));

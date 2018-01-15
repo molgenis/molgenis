@@ -1,4 +1,4 @@
-package org.molgenis.framework;
+package org.molgenis.data.migrate.framework;
 
 public interface MolgenisUpgradeService
 {

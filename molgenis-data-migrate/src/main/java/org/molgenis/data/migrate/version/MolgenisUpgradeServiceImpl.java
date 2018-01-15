@@ -1,7 +1,7 @@
-package org.molgenis.migrate.version;
+package org.molgenis.data.migrate.version;
 
-import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.framework.MolgenisUpgradeService;
+import org.molgenis.data.migrate.framework.MolgenisUpgrade;
+import org.molgenis.data.migrate.framework.MolgenisUpgradeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

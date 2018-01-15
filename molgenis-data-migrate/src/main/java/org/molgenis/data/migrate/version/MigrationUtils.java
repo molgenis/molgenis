@@ -1,4 +1,4 @@
-package org.molgenis.migrate.version;
+package org.molgenis.data.migrate.version;
 
 import java.io.*;
 import java.util.Properties;
