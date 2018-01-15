@@ -1,6 +1,8 @@
-package org.molgenis.data.transaction;
+package org.molgenis.data.postgresql.transaction;
 
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.transaction.MolgenisTransaction;
+import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

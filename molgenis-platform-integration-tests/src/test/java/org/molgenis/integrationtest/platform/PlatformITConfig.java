@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
@@ -20,6 +19,7 @@ import org.molgenis.data.platform.RepositoryCollectionDecoratorFactoryImpl;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.populate.IdGeneratorImpl;
+import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
