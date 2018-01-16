@@ -11,8 +11,6 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -39,11 +37,12 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
@@ -125,9 +124,14 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	void verifyFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
 			Map<String, Object> expectedLastRow)
 	{
-		List<Entity> importedEntities = findAllAsList(entityName);
-		assertEquals(entityToMap(importedEntities.get(0)), expectedFirstRow);
-		assertEquals(entityToMap(getLast(importedEntities)), expectedLastRow);
+		EntityType entityType = dataService.getEntityType(entityName);
+		String idAttributeName = entityType.getIdAttribute().getName();
+
+		Map<Object, Entity> importedEntities = findAllAsList(entityName).stream()
+																		.collect(toMap(Entity::getIdValue,
+																				Function.identity()));
+		assertEquals(entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))), expectedFirstRow);
+		assertEquals(entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))), expectedLastRow);
 	}
 
 	List<Entity> findAllAsList(String entityName)
