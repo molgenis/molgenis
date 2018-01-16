@@ -8,7 +8,7 @@ import org.molgenis.data.WritableFactory;
 import org.molgenis.data.excel.exception.ExcelWriteException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 
 import java.io.*;

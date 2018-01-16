@@ -5,10 +5,10 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static java.io.File.separatorChar;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
+import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 
 public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 {

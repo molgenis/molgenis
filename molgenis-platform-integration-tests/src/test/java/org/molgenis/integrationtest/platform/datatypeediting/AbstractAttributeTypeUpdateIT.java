@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
-import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -9,6 +8,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
+import org.molgenis.data.security.auth.UserAuthorityMetaData;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

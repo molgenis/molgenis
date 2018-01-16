@@ -26,17 +26,17 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.test.MockMvcExceptionalRequestPerformer;
-import org.molgenis.util.GsonConfig;
-import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.MolgenisDateFormat;
+import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
@@ -82,6 +82,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
+
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Test.RestControllerV2Config.class, GsonConfig.class })

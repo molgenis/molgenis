@@ -6,8 +6,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.util.MolgenisDateFormat;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 /**
  * Validates {@link Query queries} based on the {@link EntityType entity type} that will be queried. Converts query

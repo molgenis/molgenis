@@ -14,7 +14,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

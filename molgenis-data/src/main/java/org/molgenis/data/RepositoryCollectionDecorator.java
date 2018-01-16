@@ -12,11 +12,11 @@ import static java.util.Spliterators.spliteratorUnknownSize;
 /**
  * Applies {@link Repository} decorators to all {@link RepositoryCollection} repositories.
  */
-class RepositoryCollectionDecorator extends AbstractRepositoryCollectionDecorator
+public class RepositoryCollectionDecorator extends AbstractRepositoryCollectionDecorator
 {
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
-	RepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection,
+	public RepositoryCollectionDecorator(RepositoryCollection delegateRepositoryCollection,
 			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		super(delegateRepositoryCollection);

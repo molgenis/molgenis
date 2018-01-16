@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorTagIdentifier.class)

@@ -3,14 +3,14 @@ package org.molgenis.integrationtest.platform.importservice;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.security.auth.User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
@@ -191,16 +190,13 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	private void verifyItEmxAutoId()
 	{
-		List<Entity> testAutoIdEntities = findAllAsList("it_emx_autoid_testAutoId");
-		Map<String, Object> firstRow = entityToMap(testAutoIdEntities.get(0));
-		Map<String, Object> lastRow = entityToMap(getLast(testAutoIdEntities));
-		assertNotNull(firstRow.get("id"));
-		assertNotNull(lastRow.get("id"));
-
-		firstRow.remove("id");
-		lastRow.remove("id");
-		assertEquals(firstRow, testAutoIdFirstRow);
-		assertEquals(lastRow, testAutoIdLastRow);
+		List<Entity> entities = findAllAsList("it_emx_autoid_testAutoId");
+		assertTrue(entities.stream()
+						   .anyMatch(entity -> testAutoIdFirstRow.get("firstName").equals(entity.get("firstName"))
+								   && testAutoIdFirstRow.get("lastName").equals(entity.get("lastName"))));
+		assertTrue(entities.stream()
+						   .anyMatch(entity -> testAutoIdLastRow.get("firstName").equals(entity.get("firstName"))
+								   && testAutoIdLastRow.get("lastName").equals(entity.get("lastName"))));
 	}
 
 	private void verifyItEmxOneToMany()

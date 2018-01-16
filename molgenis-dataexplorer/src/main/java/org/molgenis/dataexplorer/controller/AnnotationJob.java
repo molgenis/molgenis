@@ -6,8 +6,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.jobs.TransactionalJob;
+import org.molgenis.jobs.Progress;
+import org.molgenis.jobs.TransactionalJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 

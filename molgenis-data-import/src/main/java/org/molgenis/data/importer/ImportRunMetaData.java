@@ -1,7 +1,7 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityType;
+import org.molgenis.data.security.owned.OwnedEntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;

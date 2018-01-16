@@ -1,14 +1,14 @@
 package org.molgenis.gavin.controller;
 
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.controller.AbstractStaticContentController;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.controller.AbstractStaticContentController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -1,7 +1,7 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
+import org.molgenis.data.security.auth.GroupAuthority;
+import org.molgenis.data.security.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -21,13 +21,13 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.util.SecurityDecoratorUtils.validatePermission;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 /**
  * Decorator for the entity type repository:

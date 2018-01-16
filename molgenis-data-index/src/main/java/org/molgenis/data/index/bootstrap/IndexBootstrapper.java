@@ -7,11 +7,11 @@ import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
+import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
 
 @Component
 public class IndexBootstrapper

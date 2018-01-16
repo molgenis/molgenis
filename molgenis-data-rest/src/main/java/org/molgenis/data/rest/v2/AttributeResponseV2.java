@@ -2,6 +2,7 @@ package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
@@ -9,7 +10,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.support.Href;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.List;

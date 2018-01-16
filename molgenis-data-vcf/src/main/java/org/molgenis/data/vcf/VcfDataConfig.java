@@ -1,6 +1,6 @@
 package org.molgenis.data.vcf;
 
-import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 

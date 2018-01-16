@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -23,7 +23,7 @@ import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 /**
  * Controller class for the data explorer.

@@ -1,15 +1,15 @@
 package org.molgenis.amazon.bucket.meta;
 
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.jobs.model.JobPackage;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 @Component
 public class AmazonBucketJobExecutionMetaData extends SystemEntityType

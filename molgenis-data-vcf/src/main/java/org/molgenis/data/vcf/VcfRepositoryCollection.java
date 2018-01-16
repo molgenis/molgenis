@@ -7,7 +7,7 @@ import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -1,8 +1,8 @@
 package org.molgenis.integrationtest.file;
 
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMetaFactory;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

@@ -1,10 +1,10 @@
 package org.molgenis.apps.model;
 
+import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.data.system.core.FreemarkerTemplate;
-import org.molgenis.file.model.FileMeta;
 
 import javax.annotation.Nullable;
 

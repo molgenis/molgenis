@@ -1,11 +1,11 @@
 package org.molgenis.data.rest;
 
+import org.molgenis.core.ui.data.rsql.MolgenisRSQL;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.QueryImpl;
 
 import java.util.Map;

@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.auth.User;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.security.test.context.support.WithMockUser;

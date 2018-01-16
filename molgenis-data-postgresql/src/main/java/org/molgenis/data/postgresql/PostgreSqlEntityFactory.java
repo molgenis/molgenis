@@ -26,8 +26,8 @@ import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getColumnName;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 @Component
 class PostgreSqlEntityFactory

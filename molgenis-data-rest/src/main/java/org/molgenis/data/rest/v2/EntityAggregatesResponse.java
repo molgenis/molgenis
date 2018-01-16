@@ -1,10 +1,10 @@
 package org.molgenis.data.rest.v2;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.aggregation.AggregateAnonymizer;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.aggregation.AnonymizedAggregateResult;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.aggregation.AggregateAnonymizer;
+import org.molgenis.data.security.aggregation.AnonymizedAggregateResult;
 
 import java.util.HashMap;
 import java.util.List;

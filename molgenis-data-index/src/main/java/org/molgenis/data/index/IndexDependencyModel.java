@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.GenericDependencyResolver;
+import org.molgenis.data.util.GenericDependencyResolver;
 
 import java.util.List;
 import java.util.Map;

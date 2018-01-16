@@ -21,7 +21,7 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityReferenceConstraintViolationException;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

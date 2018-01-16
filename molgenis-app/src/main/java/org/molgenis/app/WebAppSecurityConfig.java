@@ -1,8 +1,8 @@
 package org.molgenis.app;
 
+import org.molgenis.core.ui.security.MolgenisAccessDecisionVoter;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
-import org.molgenis.ui.security.MolgenisAccessDecisionVoter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

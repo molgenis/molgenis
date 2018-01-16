@@ -27,7 +27,7 @@ import org.molgenis.data.validation.InvalidIdentifierAttributeTypeException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.*;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.util.EntityUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,7 +53,7 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.*;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.i18n.I18nUtils.isI18n;
 

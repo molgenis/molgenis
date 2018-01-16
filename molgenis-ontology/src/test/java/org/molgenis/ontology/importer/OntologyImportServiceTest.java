@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

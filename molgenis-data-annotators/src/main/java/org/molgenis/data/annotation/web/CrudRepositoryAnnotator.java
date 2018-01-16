@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.exception.SecondRunNotSupportedExceptio
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.i18n.CodedRuntimeException;
-import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

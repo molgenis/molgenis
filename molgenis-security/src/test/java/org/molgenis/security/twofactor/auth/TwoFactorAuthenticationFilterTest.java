@@ -1,13 +1,13 @@
 package org.molgenis.security.twofactor.auth;
 
+import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserAccountServiceImpl;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
