@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-csv</artifactId>
 
     <name>data-csv</name>
+    <description>Comma-separated data reading/writing.</description>
 
     <dependencies>
         <dependency>

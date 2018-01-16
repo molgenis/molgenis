@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>genomebrowser</name>
+    <description>Genome browser for persisted genetic data.</description>
 
     <dependencies>
         <dependency>

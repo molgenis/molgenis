@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>ontology-core</name>
+    <description>Ontology data model and importer.</description>
 
     <build>
         <plugins>

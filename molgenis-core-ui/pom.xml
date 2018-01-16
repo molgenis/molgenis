@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>core-ui</name>
+    <description>Spaghetti module containing core plugins and legacy UI components.</description>
 
     <build>
         <plugins>

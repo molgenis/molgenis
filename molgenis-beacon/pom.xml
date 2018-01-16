@@ -9,7 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>molgenis-beacon</artifactId>
+
     <name>beacon</name>
+    <description>Web service to share genetic data (https://beacon-network.org/).</description>
 
     <build>
         <plugins>

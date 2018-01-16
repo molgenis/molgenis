@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>dataexplorer</name>
+    <description>Plugin module that allows for data set exploration.</description>
 
     <build>
         <plugins>

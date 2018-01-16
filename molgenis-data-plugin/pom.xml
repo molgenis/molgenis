@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>data-plugin</name>
+    <description>Plugin data model.</description>
 
     <dependencies>
         <dependency>

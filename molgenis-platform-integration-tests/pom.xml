@@ -9,6 +9,8 @@
     <artifactId>molgenis-platform-integration-tests</artifactId>
 
     <name>platform-integration-tests</name>
+    <description>Data layer integration test module.</description>
+
     <properties>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>

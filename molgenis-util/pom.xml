@@ -12,6 +12,7 @@
     <artifactId>molgenis-util</artifactId>
 
     <name>util</name>
+    <description>Utility classes.</description>
 
     <dependencies>
         <!-- third party dependencies -->

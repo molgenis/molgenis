@@ -12,6 +12,7 @@
     <artifactId>molgenis-bootstrap</artifactId>
 
     <name>bootstrap</name>
+    <description>Application bootstrapper.</description>
 
     <dependencies>
         <dependency>

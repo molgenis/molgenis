@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-migrate</artifactId>
 
     <name>data-migrate</name>
+    <description>Handles application migration on version updates.</description>
 
     <packaging>jar</packaging>
     <dependencies>

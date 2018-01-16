@@ -11,6 +11,9 @@
 
     <artifactId>molgenis-one-click-importer</artifactId>
     <name>one-click-importer</name>
+    <description>Plugin module for importing data with automatic metadata determination (not part of the importer
+        framework).
+    </description>
 
     <profiles>
         <profile>

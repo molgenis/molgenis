@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-excel</artifactId>
 
     <name>data-excel</name>
+    <description>XLSX/XSL data reading/writing.</description>
 
     <properties>
         <apache.poi.version>3.15</apache.poi.version>

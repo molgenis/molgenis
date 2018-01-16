@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>file-ingester</name>
+    <description>File ingestion from remote URLs.</description>
 
     <dependencies>
         <dependency>

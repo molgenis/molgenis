@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-validation</artifactId>
 
     <name>data-validation</name>
+    <description>Data layer validation framework and metadata model validation.</description>
 
     <dependencies>
         <dependency>

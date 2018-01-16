@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-index</artifactId>
 
     <name>data-index</name>
+    <description>Data layer indexing framework.</description>
 
     <build>
         <plugins>

@@ -12,6 +12,7 @@
     <artifactId>molgenis-settings</artifactId>
 
     <name>settings</name>
+    <description>Settings framework including application settings and mail settings implementations.</description>
 
     <dependencies>
         <dependency>

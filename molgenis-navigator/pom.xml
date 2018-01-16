@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>molgenis-navigator</artifactId>
     <name>navigator</name>
+    <description>Plugin module for navigating metadata.</description>
 
     <profiles>
         <profile>

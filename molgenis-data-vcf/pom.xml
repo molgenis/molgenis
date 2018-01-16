@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-vcf</artifactId>
 
     <name>data-vcf</name>
+    <description>VCF data reading/writing and importing.</description>
 
     <build>
         <plugins>
