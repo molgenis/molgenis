@@ -36,7 +36,7 @@ public class ImportPublicDataIT
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 
 		adminToken = login(adminUserName, adminPassword);
 
