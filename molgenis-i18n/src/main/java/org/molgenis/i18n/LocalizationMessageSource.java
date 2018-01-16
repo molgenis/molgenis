@@ -61,7 +61,12 @@ public class LocalizationMessageSource extends AbstractMessageSource
 	@Override
 	public MessageFormat resolveCode(String code, Locale locale)
 	{
-		return createMessageFormat(resolveCodeWithoutArguments(code, locale), locale);
+		String resolved = resolveCodeWithoutArguments(code, locale);
+		if (resolved == null)
+		{
+			return null;
+		}
+		return createMessageFormat(resolved, locale);
 	}
 
 	@Override
