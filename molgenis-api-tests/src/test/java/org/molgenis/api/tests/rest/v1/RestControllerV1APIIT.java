@@ -844,8 +844,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .
-					   body("errors[0].message", Matchers.equalTo("Unknown entity [base_APITest3]"));
+			   .body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	@Test
@@ -879,8 +878,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .
-					   body("errors[0].message", Matchers.equalTo("Unknown entity [base_APITest4]"));
+			   .body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)
