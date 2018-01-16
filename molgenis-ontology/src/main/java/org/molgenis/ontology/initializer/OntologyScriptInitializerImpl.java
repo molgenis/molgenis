@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.script.*;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

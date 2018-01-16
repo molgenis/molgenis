@@ -1,6 +1,6 @@
 package org.molgenis.security.user;
 
-import org.molgenis.data.MolgenisRuntimeException;
+import org.molgenis.util.MolgenisRuntimeException;
 
 @Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisUserException extends MolgenisRuntimeException

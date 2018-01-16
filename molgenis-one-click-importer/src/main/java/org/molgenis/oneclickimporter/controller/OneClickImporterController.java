@@ -1,15 +1,15 @@
 package org.molgenis.oneclickimporter.controller;
 
-import org.molgenis.jobs.JobExecutor;
-import org.molgenis.settings.AppSettings;
-import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.file.FileStore;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.navigator.NavigatorController;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.core.ui.controller.VuePluginController;
-import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

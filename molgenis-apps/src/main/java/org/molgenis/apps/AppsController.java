@@ -2,9 +2,9 @@ package org.molgenis.apps;
 
 import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
+import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.PluginController;

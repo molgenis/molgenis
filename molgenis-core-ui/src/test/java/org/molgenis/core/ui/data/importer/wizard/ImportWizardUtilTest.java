@@ -1,4 +1,4 @@
-package org.molgenis.data.importer.wizard;
+package org.molgenis.core.ui.data.importer.wizard;
 
 import org.mockito.Mock;
 import org.molgenis.data.validation.ValidationException;

@@ -1,5 +1,6 @@
 package org.molgenis.security.account;
 
+import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.captcha.CaptchaException;
@@ -7,7 +8,6 @@ import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.core.util.CountryCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

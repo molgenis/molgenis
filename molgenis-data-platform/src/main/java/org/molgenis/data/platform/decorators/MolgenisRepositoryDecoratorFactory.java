@@ -1,8 +1,6 @@
 package org.molgenis.data.platform.decorators;
 
 import org.molgenis.data.*;
-import org.molgenis.data.security.aggregation.AggregateAnonymizer;
-import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
@@ -14,16 +12,18 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.settings.AppSettings;
+import org.molgenis.data.security.aggregation.AggregateAnonymizer;
+import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
+import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.data.validation.data.DefaultValueReferenceValidator;
 import org.molgenis.data.validation.data.EntityAttributesValidator;
 import org.molgenis.data.validation.query.QueryValidationRepositoryDecorator;
 import org.molgenis.data.validation.query.QueryValidator;
-import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.data.util.EntityUtils;
+import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 

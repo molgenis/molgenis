@@ -1,10 +1,14 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DateParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -15,10 +19,6 @@ import org.molgenis.data.rest.exception.IllegalAttributeTypeException;
 import org.molgenis.data.rest.exception.ValueTypeConversionException;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.meta.AttributeValidationResult;
-import org.molgenis.core.ui.file.FileDownloadController;
-import org.molgenis.data.file.FileStore;
-import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,11 +44,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.validation.meta.AttributeConstraint.MAPPED_BY_TYPE;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.validation.meta.AttributeConstraint.MAPPED_BY_TYPE;
 
 @Service
 public class RestService

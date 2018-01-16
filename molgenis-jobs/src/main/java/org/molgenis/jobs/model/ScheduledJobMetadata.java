@@ -77,7 +77,8 @@ public class ScheduledJobMetadata extends SystemEntityType
 		addAttribute(PARAMETERS).setDataType(TEXT).setLabel("Job parameters").setNillable(false);
 	}
 
-	private String buildValidationExpressionString(String field, String regex) {
-		return  "$('" + field + "').matches(" + regex + ").value()";
+	private String buildValidationExpressionString(String field, String regex)
+	{
+		return "$('" + field + "').matches(" + regex + ").value()";
 	}
 }

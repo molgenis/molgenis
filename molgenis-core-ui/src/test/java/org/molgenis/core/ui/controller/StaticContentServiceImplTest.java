@@ -1,15 +1,15 @@
 package org.molgenis.core.ui.controller;
 
 import org.mockito.Mock;
+import org.molgenis.core.ui.settings.StaticContent;
+import org.molgenis.core.ui.settings.StaticContentFactory;
+import org.molgenis.core.ui.settings.StaticContentMeta;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.PluginPermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
-import org.molgenis.core.ui.settings.StaticContent;
-import org.molgenis.core.ui.settings.StaticContentFactory;
-import org.molgenis.core.ui.settings.StaticContentMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

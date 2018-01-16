@@ -1,20 +1,20 @@
 package org.molgenis.core.ui.controller;
 
+import org.molgenis.core.ui.settings.StaticContent;
+import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.PluginPermissionDeniedException;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.core.ui.settings.StaticContent;
-import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.core.ui.settings.StaticContentMeta.STATIC_CONTENT;
+import static org.molgenis.security.core.Permission.WRITE;
 
 /**
  * Controller that handles static content pages requests.

@@ -1,4 +1,4 @@
-package org.molgenis.data.importer.wizard;
+package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;

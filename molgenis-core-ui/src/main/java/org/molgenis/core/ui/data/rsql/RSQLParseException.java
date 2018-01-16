@@ -1,4 +1,4 @@
-package org.molgenis.data.rsql;
+package org.molgenis.core.ui.data.rsql;
 
 import org.molgenis.i18n.CodedRuntimeException;
 

@@ -61,16 +61,14 @@ public class HrefTest
 	@Test
 	public static void testAttributeUrlEncodeIdWithSpace()
 	{
-		assertEquals(
-				Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird id", "xint"),
+		assertEquals(Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird id", "xint"),
 				"http://molgenis.org/api/v1/org_test_TypeTest/weird%20id/xint");
 	}
 
 	@Test
 	public static void testAttributeUrlEncodeIdWithSlash()
 	{
-		assertEquals(
-				Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird/id", "xint"),
+		assertEquals(Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird/id", "xint"),
 				"http://molgenis.org/api/v1/org_test_TypeTest/weird%2Fid/xint");
 	}
 

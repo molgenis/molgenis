@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 @AutoGson(autoValueClass = AutoValue_MenuItem.class)
 public abstract class MenuItem
 {
-	public static MenuItem create(String id, String label, String href, UiMenuItemType type,
-			List<MenuItem> items)
+	public static MenuItem create(String id, String label, String href, UiMenuItemType type, List<MenuItem> items)
 	{
 		return new AutoValue_MenuItem(id, label, href, type, items);
 	}

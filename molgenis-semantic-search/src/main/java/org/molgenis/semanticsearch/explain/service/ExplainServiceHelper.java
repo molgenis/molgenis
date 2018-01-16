@@ -5,7 +5,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
-import org.molgenis.data.semanticsearch.explain.service.exception.TermNotFoundException;
+import org.molgenis.semanticsearch.explain.service.exception.TermNotFoundException;
 import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 
 import java.util.*;

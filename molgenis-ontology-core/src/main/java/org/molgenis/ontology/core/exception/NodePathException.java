@@ -1,4 +1,4 @@
-package org.molgenis.ontology.exception;
+package org.molgenis.ontology.core.exception;
 
 import org.molgenis.i18n.CodedRuntimeException;
 

@@ -5,20 +5,20 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticmapper.data.request.AddTagRequest;
 import org.molgenis.semanticmapper.data.request.AutoTagRequest;
 import org.molgenis.semanticmapper.data.request.GetOntologyTermRequest;
 import org.molgenis.semanticmapper.data.request.RemoveTagRequest;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.semantic.OntologyTag;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
-import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +35,8 @@ import static com.google.common.collect.ImmutableSortedSet.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.molgenis.semanticmapper.controller.TagWizardController.URI;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.semanticmapper.controller.TagWizardController.URI;
 
 @Controller
 @RequestMapping(URI)

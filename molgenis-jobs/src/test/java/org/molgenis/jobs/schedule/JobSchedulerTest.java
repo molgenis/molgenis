@@ -1,17 +1,17 @@
 package org.molgenis.jobs.schedule;
 
 import org.mockito.Mock;
-import org.molgenis.data.security.auth.SecurityPackage;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.auth.SecurityPackage;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobFactory;
 import org.molgenis.jobs.model.ScheduledJobMetadata;
 import org.molgenis.jobs.model.ScheduledJobType;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

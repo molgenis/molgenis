@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Due to a circular dependency this decorator factory is not stored in molgenis-data.
- *
+ * <p>
  * TODO move to molgenis-data-platform module (https://github.com/molgenis/molgenis/issues/6942)
  */
 @Component

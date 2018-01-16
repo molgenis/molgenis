@@ -1,10 +1,10 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
+import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.validation.ValidationException;
 import org.molgenis.data.validation.ValidationMessage;
 import org.molgenis.i18n.CodedRuntimeException;
-import org.molgenis.core.ui.wizard.Wizard;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -47,8 +47,7 @@ class ImportWizardUtil
 	}
 
 	public static void handleException(CodedRuntimeException e, ImportWizard importWizard, BindingResult result,
-			Logger logger,
-			String entityImportOption)
+			Logger logger, String entityImportOption)
 	{
 		File file = importWizard.getFile();
 

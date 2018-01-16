@@ -2,9 +2,9 @@ package org.molgenis.oneclickimporter.job;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.molgenis.jobs.Progress;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.file.FileStore;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.Progress;
 import org.molgenis.oneclickimporter.exceptions.UnsupportedFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;

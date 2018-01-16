@@ -1,12 +1,12 @@
 package org.molgenis.data.validation.query;
 
 import org.molgenis.data.*;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.file.model.FileMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

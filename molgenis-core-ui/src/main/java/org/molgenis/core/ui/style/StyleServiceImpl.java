@@ -1,17 +1,18 @@
 package org.molgenis.core.ui.style;
 
+import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.settings.AppSettings;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.settings.AppSettings;
+import org.molgenis.ui.style.StyleAlreadyExistsException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;

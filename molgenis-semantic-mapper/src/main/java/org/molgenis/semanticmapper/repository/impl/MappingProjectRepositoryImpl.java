@@ -1,19 +1,19 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.mapper.exception.DuplicateMappingProjectException;
+import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.semanticmapper.exception.DuplicateMappingProjectException;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.repository.MappingProjectRepository;
 import org.molgenis.semanticmapper.repository.MappingTargetRepository;
-import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.support.DynamicEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;

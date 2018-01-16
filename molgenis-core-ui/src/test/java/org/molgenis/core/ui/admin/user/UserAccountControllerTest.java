@@ -183,7 +183,6 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 		accountUpdateRequest.setMiddleNames("Middle Middle");
 		accountUpdateRequest.setLastname("Last");
 
-
 		userAccountController.updateAccount(accountUpdateRequest);
 
 		verify(user).setTitle("Mr.");

@@ -1,18 +1,18 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.core.ui.wizard.AbstractWizardPage;
+import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataService;
-import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.util.FileExtensionUtils;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.CodedRuntimeException;
-import org.molgenis.core.ui.wizard.AbstractWizardPage;
-import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.file.util.FileExtensionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

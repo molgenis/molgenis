@@ -1,22 +1,22 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.data.*;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
-import org.molgenis.data.mapper.exception.DuplicateMappingProjectException;
+import org.molgenis.semanticmapper.exception.DuplicateMappingProjectException;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
 import org.molgenis.semanticmapper.repository.MappingTargetRepository;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,11 +31,10 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest

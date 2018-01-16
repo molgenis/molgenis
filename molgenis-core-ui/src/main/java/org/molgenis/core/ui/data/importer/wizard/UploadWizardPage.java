@@ -1,13 +1,13 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import org.molgenis.data.file.FileRepositoryCollectionFactory;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.core.util.FileUploadUtils;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

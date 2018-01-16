@@ -1,6 +1,8 @@
-package org.molgenis.ui.style;
+package org.molgenis.core.ui.style;
 
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
+import org.molgenis.ui.style.CannotDeleteCurrentThemeException;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,7 +19,7 @@ public class CannotDeleteCurrentThemeExceptionTest extends ExceptionMessageTest
 	@Test
 	public void testGetMessage()
 	{
-		assertEquals(new CannotDeleteCurrentThemeException("theme0").getMessage(), "id:theme0");
+		Assert.assertEquals(new CannotDeleteCurrentThemeException("theme0").getMessage(), "id:theme0");
 	}
 
 	@Test

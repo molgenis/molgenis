@@ -2,16 +2,16 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.csv.CsvDataConfig;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;

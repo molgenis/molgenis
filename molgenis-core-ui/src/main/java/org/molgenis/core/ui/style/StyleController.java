@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

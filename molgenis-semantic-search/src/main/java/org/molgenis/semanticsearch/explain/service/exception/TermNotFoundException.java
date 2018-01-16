@@ -1,4 +1,4 @@
-package org.molgenis.data.semanticsearch.explain.service.exception;
+package org.molgenis.semanticsearch.explain.service.exception;
 
 import org.molgenis.i18n.CodedRuntimeException;
 

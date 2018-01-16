@@ -1,15 +1,15 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
+import org.molgenis.core.ui.wizard.AbstractWizardPage;
+import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.exception.UnknownImportModeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.i18n.CodedRuntimeException;
-import org.molgenis.core.ui.wizard.AbstractWizardPage;
-import org.molgenis.core.ui.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

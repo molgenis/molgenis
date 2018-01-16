@@ -1,16 +1,16 @@
-package org.molgenis.data.mapper.config;
+package org.molgenis.core.ui;
 
 import org.molgenis.i18n.PropertiesMessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SemanticMapperI18nConfig
+public class CoreUi18nConfig
 {
-	public static final String NAMESPACE = "semantic-mapper";
+	public static final String NAMESPACE = "core-ui";
 
 	@Bean
-	public PropertiesMessageSource semanticMapperMessageSource()
+	public PropertiesMessageSource coreUiMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

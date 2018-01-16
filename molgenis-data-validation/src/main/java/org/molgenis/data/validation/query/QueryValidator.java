@@ -1,13 +1,13 @@
 package org.molgenis.data.validation.query;
 
 import org.molgenis.data.*;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
