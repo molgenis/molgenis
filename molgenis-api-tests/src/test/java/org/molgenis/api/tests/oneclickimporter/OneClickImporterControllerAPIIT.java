@@ -134,7 +134,7 @@ public class OneClickImporterControllerAPIIT
 		assertTrue(validJobStats.contains(jobStatus));
 
 		await().pollDelay(500, MILLISECONDS)
-			   .atMost(20, SECONDS)
+			   .atMost(30, SECONDS)
 			   .until(() -> pollJobForStatus(jobUrl), equalTo("SUCCESS"));
 
 		// Extract the id of the entity created by the import
