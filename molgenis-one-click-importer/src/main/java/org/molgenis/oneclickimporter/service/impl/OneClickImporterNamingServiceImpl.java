@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.file.util.FileExtensionUtils.getFileNameWithoutExtension;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
-import static org.molgenis.util.FileExtensionUtils.getFileNameWithoutExtension;
 
 @Component
 public class OneClickImporterNamingServiceImpl implements OneClickImporterNamingService

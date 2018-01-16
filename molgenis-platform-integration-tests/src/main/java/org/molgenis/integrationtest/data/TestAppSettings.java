@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data;
 
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.settings.AppSettings;
 
 public class TestAppSettings implements AppSettings
 {

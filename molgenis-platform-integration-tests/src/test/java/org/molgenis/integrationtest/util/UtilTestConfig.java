@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.util;
 
-import org.molgenis.util.GenericDependencyResolver;
+import org.molgenis.data.util.GenericDependencyResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 

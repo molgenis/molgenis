@@ -2,10 +2,10 @@ package org.molgenis.data.rest.v2;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.file.model.FileMetaMetaData;
 
 import static java.lang.String.format;
 import static org.molgenis.data.meta.AttributeType.FILE;

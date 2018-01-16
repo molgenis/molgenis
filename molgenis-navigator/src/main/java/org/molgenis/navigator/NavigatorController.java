@@ -1,9 +1,9 @@
 package org.molgenis.navigator;
 
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.controller.VuePluginController;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

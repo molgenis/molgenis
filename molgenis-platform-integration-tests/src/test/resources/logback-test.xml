@@ -7,12 +7,12 @@
             <level>ERROR</level>
         </filter>
     </appender>
-    <appender name="jobExecutionLogAppender" class="org.molgenis.data.jobs.model.JobExecutionLogAppender"/>
+    <appender name="jobExecutionLogAppender" class="org.molgenis.jobs.model.JobExecutionLogAppender"/>
     <logger name="org.molgenis" level="INFO"/>
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="org.molgenis.data.jobs.model.JobExecution" level="ALL">
+    <logger name="org.molgenis.jobs.model.JobExecution" level="ALL">
         <appender-ref ref="jobExecutionLogAppender"/>
     </logger>
 </configuration>

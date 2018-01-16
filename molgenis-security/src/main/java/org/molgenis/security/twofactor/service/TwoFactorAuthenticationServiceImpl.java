@@ -1,15 +1,15 @@
 package org.molgenis.security.twofactor.service;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
 import org.molgenis.security.twofactor.model.UserSecretMetaData;
-import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;

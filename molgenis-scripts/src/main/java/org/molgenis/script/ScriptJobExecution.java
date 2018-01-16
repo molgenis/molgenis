@@ -1,8 +1,8 @@
 package org.molgenis.script;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.model.JobExecution;
 
 import static org.molgenis.script.ScriptJobExecutionMetadata.NAME;
 import static org.molgenis.script.ScriptJobExecutionMetadata.PARAMETERS;

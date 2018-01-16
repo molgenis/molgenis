@@ -2,10 +2,10 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.molgenis.auth.User;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;

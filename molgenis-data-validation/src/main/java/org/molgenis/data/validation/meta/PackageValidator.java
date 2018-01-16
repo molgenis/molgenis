@@ -1,7 +1,6 @@
 package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.MetaUtils;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.validation.ConstraintViolation;

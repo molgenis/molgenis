@@ -2,9 +2,11 @@ package org.molgenis.script;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.jobs.JobExecutor;
+import org.molgenis.core.ui.jobs.JobsController;
+import org.molgenis.jobs.JobExecutor;
+import org.molgenis.script.core.ScriptException;
+import org.molgenis.script.core.UnknownScriptException;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.jobs.JobsController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;

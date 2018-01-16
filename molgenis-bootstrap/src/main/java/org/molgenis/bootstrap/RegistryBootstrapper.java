@@ -4,10 +4,11 @@ import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.importer.ImportServiceRegistrar;
-import org.molgenis.data.jobs.JobFactoryRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
-import org.molgenis.script.ScriptRunnerRegistrar;
+import org.molgenis.jobs.JobFactoryRegistrar;
+import org.molgenis.script.core.ScriptRunner;
+import org.molgenis.script.core.ScriptRunnerRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -18,7 +19,7 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 
 /**
  * Bootstraps registries of {@link org.molgenis.data.RepositoryCollection repository collection},
- * {@link org.molgenis.data.importer.ImportService importers} and {@link org.molgenis.script.ScriptRunner script runners}.
+ * {@link org.molgenis.data.importer.ImportService importers} and {@link ScriptRunner script runners}.
  */
 @Component
 public class RegistryBootstrapper

@@ -96,7 +96,7 @@
                         </goals>
                         <configuration>
                             <!--<quiet>true</quiet>-->
-                            <packageName>org.molgenis.ui</packageName>
+                            <packageName>org.molgenis.core.ui</packageName>
                             <schemaDirectory>src/main/resources/schemas</schemaDirectory>
                         </configuration>
                     </execution>
@@ -134,8 +134,8 @@
                             </info>
                             <springmvc>true</springmvc>
                             <locations>
-                                <location>org.molgenis.ui.admin.user</location>
-                                <location>org.molgenis.ui.admin.usermanager</location>
+                                <location>org.molgenis.core.ui.admin.user</location>
+                                <location>org.molgenis.core.ui.admin.usermanager</location>
                             </locations>
                             <swaggerDirectory>${project.build.directory}/generated-resources/swagger</swaggerDirectory>
                             <swaggerFileName>${project.name}-swagger</swaggerFileName>

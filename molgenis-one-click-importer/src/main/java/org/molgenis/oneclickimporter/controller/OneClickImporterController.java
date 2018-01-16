@@ -1,18 +1,18 @@
 package org.molgenis.oneclickimporter.controller;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.jobs.JobExecutor;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.file.FileStore;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.navigator.NavigatorController;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.controller.VuePluginController;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ import java.time.format.DateTimeParseException;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.Href.concatEntityHref;
+import static org.molgenis.core.ui.data.support.Href.concatEntityHref;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;

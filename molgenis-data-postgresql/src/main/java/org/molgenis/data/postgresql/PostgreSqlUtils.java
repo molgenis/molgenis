@@ -2,9 +2,9 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.file.model.FileMeta;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;

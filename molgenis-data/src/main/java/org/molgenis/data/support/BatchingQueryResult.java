@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.util.BatchingIterable;
+import org.molgenis.data.util.BatchingIterable;
 
 import java.util.List;
 

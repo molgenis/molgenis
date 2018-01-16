@@ -12,7 +12,6 @@ import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -20,6 +19,7 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILED;
+import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
 
 @ContextConfiguration(classes = { IndexBootstrapperTest.Config.class })
 public class IndexBootstrapperTest extends AbstractMolgenisSpringTest

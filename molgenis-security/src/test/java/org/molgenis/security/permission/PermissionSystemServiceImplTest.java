@@ -5,12 +5,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.quality.Strictness;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.user.UserService;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserAuthority;
+import org.molgenis.data.security.auth.UserAuthorityFactory;
+import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PermissionSystemServiceImplTest.Config.class })

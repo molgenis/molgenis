@@ -19,12 +19,12 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.util.EntityUtils;
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
@@ -51,7 +52,6 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.support.EntityTypeUtils.isStringType;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using

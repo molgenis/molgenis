@@ -2,9 +2,9 @@ package org.molgenis.data.excel;
 
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;

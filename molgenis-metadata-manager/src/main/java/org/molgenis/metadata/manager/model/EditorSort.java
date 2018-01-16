@@ -2,7 +2,7 @@ package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 import java.util.List;
 

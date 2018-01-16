@@ -2,8 +2,8 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;

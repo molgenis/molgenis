@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
 import org.molgenis.amazon.bucket.client.AmazonBucketClientImpl;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

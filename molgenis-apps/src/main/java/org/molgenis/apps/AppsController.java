@@ -2,9 +2,9 @@ package org.molgenis.apps;
 
 import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
+import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.ErrorMessageResponse;
@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static org.molgenis.apps.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
-import static org.molgenis.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
+import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 
 @Controller

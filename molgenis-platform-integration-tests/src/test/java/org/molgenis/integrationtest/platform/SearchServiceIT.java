@@ -5,9 +5,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.exception.UnknownIndexException;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -28,8 +28,8 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.QueryRule.Operator.*;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })

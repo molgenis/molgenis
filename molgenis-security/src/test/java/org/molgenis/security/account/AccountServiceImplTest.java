@@ -3,17 +3,17 @@ package org.molgenis.security.account;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.auth.Group;
-import org.molgenis.auth.GroupMember;
-import org.molgenis.auth.GroupMemberFactory;
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupMember;
+import org.molgenis.data.security.auth.GroupMemberFactory;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.security.user.UserService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +27,11 @@ import org.testng.annotations.Test;
 import java.net.URISyntaxException;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.GroupMetaData.NAME;
-import static org.molgenis.auth.UserMetaData.*;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 
 @ContextConfiguration

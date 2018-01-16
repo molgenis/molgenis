@@ -3,8 +3,8 @@ package org.molgenis.data.excel;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 

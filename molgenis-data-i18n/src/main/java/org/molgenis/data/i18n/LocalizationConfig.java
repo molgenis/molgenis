@@ -2,10 +2,10 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.model.L10nStringFactory;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.i18n.LocalizationMessageSource;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
