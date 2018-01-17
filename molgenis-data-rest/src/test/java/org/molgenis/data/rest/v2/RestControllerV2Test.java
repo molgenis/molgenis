@@ -720,7 +720,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testCreateEntitiesExceptions3() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+				"id:entity2");
 	}
 
 	/**
@@ -814,8 +814,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpdateEntitiesExceptions3() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}", "id:entity2");
 
 	}
 
@@ -860,7 +859,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+				"id:entity2");
 	}
 
 	/**
@@ -870,7 +869,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownAttributeException("entity", "email2").getMessage());
+				"type:entity attribute:email2");
 	}
 
 	/**
@@ -926,8 +925,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
-		when(dataService.getEntityType("MyEntityType")).thenThrow(
-				new UnknownEntityException("Unknown entity [MyEntityType]"));
+		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
 
 		String expectedContent =
 				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Unknown entity [MyEntityType]\"\n"
@@ -1027,8 +1025,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4").getMessage());
+				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}", "id:4");
 	}
 
 	private void testCreateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception

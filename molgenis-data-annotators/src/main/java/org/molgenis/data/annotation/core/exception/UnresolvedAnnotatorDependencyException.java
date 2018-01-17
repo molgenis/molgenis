@@ -1,5 +1,9 @@
 package org.molgenis.data.annotation.core.exception;
 
+/**
+ * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
+ */
+@Deprecated
 public class UnresolvedAnnotatorDependencyException extends RuntimeException
 {
 	public UnresolvedAnnotatorDependencyException()

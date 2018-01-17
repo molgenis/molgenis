@@ -1,9 +1,9 @@
 package org.molgenis.data.annotation.web;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.util.MolgenisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class AnnotationServiceImpl implements AnnotationService
 				return annotator;
 			}
 		}
-		throw new UnknownEntityException("Unknown annotator [" + annotatorName + "]");
+		throw new MolgenisRuntimeException("Unknown annotator [" + annotatorName + "]");
 	}
 
 	@Override

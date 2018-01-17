@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
@@ -64,7 +63,7 @@ public class FairController
 		Entity subjectEntity = dataService.findOneById("fdp_Catalog", catalogID);
 		if (subjectEntity == null)
 		{
-			throw new UnknownEntityException(format("Catalog with id [%s] does not exist", catalogID));
+			throw new UnknownEntityException(dataService.getEntityType("fdp_Catalog"), catalogID);
 		}
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
