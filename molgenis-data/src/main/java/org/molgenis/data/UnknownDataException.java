@@ -5,6 +5,7 @@ package org.molgenis.data;
  *
  * @see UnknownEntityTypeException
  * @see UnknownRepositoryException
+ * @see UnknownRepositoryCollectionException
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class UnknownDataException extends ErrorCodedDataAccessException
