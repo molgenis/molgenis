@@ -16,6 +16,7 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
+import org.molgenis.data.validation.UnsupportedRepositoryCollectionCapabilityException;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.Permission;
@@ -83,11 +84,6 @@ public class RestControllerV2
 	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityTypeId)
 	{
 		return new MolgenisDataAccessException("No read permission on entity " + entityTypeId);
-	}
-
-	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
-	{
-		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
@@ -352,7 +348,11 @@ public class RestControllerV2
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
-		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
+		if (!writableCapabilities)
+		{
+			throw new UnsupportedRepositoryCollectionCapabilityException(repositoryToCopyFrom.getName(),
+					RepositoryCapability.WRITABLE);
+		}
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
