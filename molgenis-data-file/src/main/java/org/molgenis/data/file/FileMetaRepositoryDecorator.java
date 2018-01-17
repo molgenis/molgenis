@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -82,8 +81,7 @@ public class FileMetaRepositoryDecorator extends AbstractRepositoryDecorator<Fil
 		FileMeta fileMeta = findOneById(id);
 		if (fileMeta == null)
 		{
-			throw new UnknownEntityException(
-					format("Unknown [%s] with id [%s]", getEntityType().getLabel(), id.toString()));
+			throw new UnknownEntityException(getEntityType(), id);
 		}
 		return fileMeta;
 	}
