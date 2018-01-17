@@ -3,7 +3,6 @@ package org.molgenis.data.excel;
 import com.google.common.collect.Lists;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -31,7 +30,7 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 	private ExcelRepositoryCollection excelRepositoryCollection;
 
 	@BeforeMethod
-	public void beforeMethod() throws MolgenisInvalidFormatException, IOException
+	public void beforeMethod() throws IOException
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);

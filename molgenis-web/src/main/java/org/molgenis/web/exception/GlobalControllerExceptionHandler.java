@@ -1,6 +1,6 @@
 package org.molgenis.web.exception;
 
-import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.UnknownDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +21,8 @@ public class GlobalControllerExceptionHandler
 	@Value("${environment:production}")
 	private String environment;
 
-	@ExceptionHandler(UnknownEntityTypeException.class)
-	public Object handleException(UnknownEntityTypeException e, HandlerMethod handlerMethod)
+	@ExceptionHandler(UnknownDataException.class)
+	public Object handleException(UnknownDataException e, HandlerMethod handlerMethod)
 	{
 		LOG.info("", e);
 		return ExceptionHandlerUtils.handleException(e, handlerMethod, NOT_FOUND, e.getErrorCode(), environment);

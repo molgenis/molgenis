@@ -5,7 +5,7 @@ import com.google.common.collect.Iterators;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl.EntityTypeWithoutMappedByAttributes;
@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
@@ -232,7 +231,7 @@ public class DataPersisterImpl implements DataPersister
 		EntityType existingEntityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity type [%s]", entityType.getId()));
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		return updateEntityTypeFirstPass(entityType, existingEntityType);
 

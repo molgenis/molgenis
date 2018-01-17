@@ -3,7 +3,6 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 	private AttributeFactory attrMetaFactory;
 
 	@Test
-	public void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException
+	public void getRepositoriesCsv() throws IOException
 	{
 		InputStream in = getClass().getResourceAsStream("/testdata.csv");
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
@@ -43,7 +42,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void getRepositoriesZip() throws IOException, MolgenisInvalidFormatException
+	public void getRepositoriesZip() throws IOException
 	{
 		File zip = File.createTempFile("file", ".zip");
 		try (FileOutputStream fos = new FileOutputStream(zip))

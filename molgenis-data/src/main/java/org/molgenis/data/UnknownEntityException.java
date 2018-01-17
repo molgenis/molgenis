@@ -1,26 +1,39 @@
 package org.molgenis.data;
 
-public class UnknownEntityException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
+public class UnknownEntityException extends UnknownDataException
 {
-	private static final long serialVersionUID = 5202731000953612564L;
+	private static final String ERROR_CODE = "D02";
 
-	public UnknownEntityException()
+	private final transient EntityType entityType;
+
+	private final transient Object entityId;
+
+	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(String msg)
+	public Object getEntityId()
 	{
-		super(msg);
+		return entityId;
 	}
 
-	public UnknownEntityException(Throwable t)
+	@Override
+	public String getMessage()
 	{
-		super(t);
+		return String.format("type:%s id:%s", entityType.getId(), entityId.toString());
 	}
 
-	public UnknownEntityException(String msg, Throwable t)
+	@Override
+	protected Object[] getLocalizedMessageArguments()
 	{
-		super(msg, t);
+		return new Object[] { entityType, entityId };
 	}
-
 }

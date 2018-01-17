@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.LinkedHashMultimap.create;
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -115,7 +114,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + package_.getId() + "]");
+			throw new UnknownEntityException(dataService.getEntityType(PACKAGE), package_.getId());
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
@@ -264,7 +263,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (attributeEntity == null)
 		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s]", attributeName));
+			throw new UnknownAttributeException(entityTypeEntity, attributeName);
 		}
 
 		return attributeEntity;

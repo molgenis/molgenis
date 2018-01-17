@@ -1,6 +1,9 @@
 package org.molgenis.util;
 
-@Deprecated // FIXME extend from CodedRuntimeException
+/**
+ * @deprecated use class that extends from org.molgenis.i18n.CodedRuntimeException
+ */
+@Deprecated
 public class MolgenisRuntimeException extends RuntimeException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
