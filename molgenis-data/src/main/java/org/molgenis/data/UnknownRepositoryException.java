@@ -1,20 +1,32 @@
 package org.molgenis.data;
 
-import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
- * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
+ * @see Repository
  */
-@Deprecated
-public class UnknownRepositoryException extends MolgenisDataException
+@SuppressWarnings({ "squid:MaximumInheritanceDepth", "squid:S2166" })
+public class UnknownRepositoryException extends UnknownDataException
 {
-	public UnknownRepositoryException(String repoName)
+	private static final String ERROR_CODE = "D05";
+
+	private final String repositoryId;
+
+	public UnknownRepositoryException(String repositoryId)
 	{
-		super(format("Unknown repository [%s]", repoName));
+		super(ERROR_CODE);
+		this.repositoryId = requireNonNull(repositoryId);
 	}
 
-	public UnknownRepositoryException(String repoName, String repoCollectionName)
+	@Override
+	public String getMessage()
 	{
-		super(format("Unknown repository [%s] in repository collection [%s]", repoName, repoCollectionName));
+		return String.format("repository:%s", repositoryId);
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[] { repositoryId };
 	}
 }

@@ -4,10 +4,12 @@ package org.molgenis.data;
  * Thrown when a data or metadata element does not exist.
  *
  * @see UnknownEntityTypeException
+ * @see UnknownRepositoryException
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class UnknownDataException extends ErrorCodedDataAccessException
 {
-	public UnknownDataException(String errorCode)
+	UnknownDataException(String errorCode)
 	{
 		super(errorCode);
 	}
