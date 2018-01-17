@@ -877,6 +877,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
+	{
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
+				"type:entity attribute:email2");
+	}
+
+	/**
+	@Test
 	public void testUpdateEntitiesSpecificAttributeReadOnlyAttribute() throws Exception
 	{
 		ResultActions resultActions = mockMvc.perform(
