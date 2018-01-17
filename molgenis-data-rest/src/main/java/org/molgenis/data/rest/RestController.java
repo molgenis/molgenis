@@ -901,14 +901,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(MolgenisReferencedEntityException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
