@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>questionnaires</name>
+    <description>Plugin module for gathering information from respondents using series of questions.</description>
 
     <build>
         <plugins>

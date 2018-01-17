@@ -11,6 +11,7 @@
 
     <artifactId>molgenis-metadata-manager</artifactId>
     <name>metadata-manager</name>
+    <description>Plugin module for viewing, creating and updating metadata.</description>
 
     <profiles>
         <profile>

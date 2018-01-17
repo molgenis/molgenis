@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-rest</artifactId>
 
     <name>data-rest</name>
+    <description>REST API v1 and v2 for entity CRUD operations.</description>
 
     <dependencies>
         <dependency>

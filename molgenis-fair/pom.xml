@@ -12,6 +12,8 @@
     <artifactId>molgenis-fair</artifactId>
 
     <name>fair</name>
+    <description>FAIR data point that exposes datasets in a Findable, Accessible, Interoperable and Reusable manner.
+    </description>
 
     <dependencies>
         <dependency>

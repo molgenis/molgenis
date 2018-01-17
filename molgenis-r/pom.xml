@@ -9,6 +9,7 @@
     <artifactId>molgenis-r</artifactId>
 
     <name>r</name>
+    <description>R script evaluation.</description>
 
     <dependencies>
         <dependency>

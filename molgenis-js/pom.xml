@@ -9,6 +9,7 @@
     <artifactId>molgenis-js</artifactId>
 
     <name>js</name>
+    <description>JavaScript script evaluation with or without the Magma API on the Nashorn engine.</description>
 
     <build>
         <plugins>

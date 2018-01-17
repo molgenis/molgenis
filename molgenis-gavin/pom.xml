@@ -9,6 +9,7 @@
     <artifactId>molgenis-gavin</artifactId>
 
     <name>gavin</name>
+    <description>Plugin module for Gene-Aware Variant INterpretation for medical sequencing.</description>
 
     <dependencies>
         <dependency>

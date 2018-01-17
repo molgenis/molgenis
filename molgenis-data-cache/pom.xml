@@ -11,6 +11,7 @@
     <artifactId>molgenis-data-cache</artifactId>
 
     <name>data-cache</name>
+    <description>Data layer entity caching.</description>
 
     <dependencies>
         <dependency>

@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>web</name>
+    <description>Web framework without plugins.</description>
 
     <dependencies>
         <dependency>

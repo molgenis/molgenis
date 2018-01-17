@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>data</name>
+    <description>Data layer core containing data service and metadata model.</description>
 
     <build>
         <plugins>

@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-file</artifactId>
 
     <name>data-file</name>
+    <description>File persistence and file metadata model.</description>
 
     <build>
         <plugins>

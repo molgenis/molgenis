@@ -12,6 +12,7 @@
     <artifactId>molgenis-test</artifactId>
 
     <name>test</name>
+    <description>Utility test classes.</description>
 
     <build>
         <plugins>

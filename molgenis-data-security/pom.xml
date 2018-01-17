@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>data-security</name>
+    <description>Security data model and data layer security.</description>
 
     <build>
         <plugins>

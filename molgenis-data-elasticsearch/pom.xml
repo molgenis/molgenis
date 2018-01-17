@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-elasticsearch</artifactId>
 
     <name>data-elasticsearch</name>
+    <description>Data layer indexing implementation based on Elasticsearch.</description>
 
     <dependencies>
         <dependency>

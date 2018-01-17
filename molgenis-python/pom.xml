@@ -9,6 +9,7 @@
     <artifactId>molgenis-python</artifactId>
 
     <name>python</name>
+    <description>Python script evaluation.</description>
 
     <dependencies>
         <dependency>

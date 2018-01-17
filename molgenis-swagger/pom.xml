@@ -12,6 +12,7 @@
     <artifactId>molgenis-swagger</artifactId>
 
     <name>swagger</name>
+    <description>Plugin API containing Swagger (https://swagger.io/) API visualization.</description>
 
     <dependencies>
         <dependency>

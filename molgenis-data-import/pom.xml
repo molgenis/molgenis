@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>data-import</name>
+    <description>Entity importer framework and EMX importer.</description>
 
     <build>
         <plugins>

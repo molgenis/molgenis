@@ -11,6 +11,7 @@
     <artifactId>molgenis-semantic-mapper</artifactId>
 
     <name>semantic-mapper</name>
+    <description>Plugin module for semantic data mapping.</description>
 
     <build>
         <plugins>

@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-i18n</artifactId>
 
     <name>data-i18n</name>
+    <description>Localization service and data model.</description>
 
     <dependencies>
         <dependency>

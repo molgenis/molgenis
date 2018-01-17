@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>amazon-bucket</name>
+    <description>Amazon S3 Bucket client and file ingestion.</description>
 
     <dependencies>
         <dependency>

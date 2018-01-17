@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
 
     <name>security</name>
+    <description>Spaghetti module containing security-related plugins and security configuration.</description>
 
     <repositories>
         <repository>

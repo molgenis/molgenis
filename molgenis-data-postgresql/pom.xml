@@ -9,6 +9,7 @@
     <artifactId>molgenis-data-postgresql</artifactId>
 
     <name>data-postgresql</name>
+    <description>Data layer persistence in PostgreSQL.</description>
 
     <dependencies>
         <dependency>

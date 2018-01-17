@@ -9,6 +9,7 @@
     <artifactId>molgenis-jobs</artifactId>
 
     <name>jobs</name>
+    <description>Jobs framework and data model.</description>
 
     <build>
         <plugins>

@@ -9,6 +9,7 @@
     <artifactId>molgenis-scripts</artifactId>
 
     <name>scripts</name>
+    <description>Plugin module for executing scripts (e.g. JavaScript, R, Python).</description>
 
     <build>
         <plugins>

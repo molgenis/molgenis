@@ -11,6 +11,7 @@
 
     <artifactId>molgenis-searchall</artifactId>
     <name>searchall</name>
+    <description>Plugin module for system-wide data search.</description>
 
     <profiles>
         <profile>

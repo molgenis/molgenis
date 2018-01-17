@@ -9,6 +9,7 @@
     <artifactId>molgenis-scripts-core</artifactId>
 
     <name>scripts-core</name>
+    <description>Script execution framework.</description>
 
     <build>
         <plugins>
