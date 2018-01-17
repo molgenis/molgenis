@@ -1,8 +1,6 @@
 package org.molgenis.semanticmapper.service.impl;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
@@ -33,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,14 +47,15 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
-import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
-import static org.molgenis.data.mapper.service.impl.MappingServiceImpl.SOURCE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
+import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
+import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class,
 		EntityBaseTestConfig.class, DefaultPackage.class })
@@ -128,13 +128,13 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(dataService);
-		Mockito.reset(mappingProjectRepo);
-		Mockito.reset(permissionSystemService);
-		Mockito.reset(hopRepo);
-		Mockito.reset(geneRepo);
-		Mockito.reset(exonRepo);
-		Mockito.reset(progress);
+		reset(dataService);
+		reset(mappingProjectRepo);
+		reset(permissionSystemService);
+		reset(hopRepo);
+		reset(geneRepo);
+		reset(exonRepo);
+		reset(progress);
 
 		user = userFactory.create();
 		user.setUsername(USERNAME);
@@ -295,7 +295,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		assertEquals(targetMetadata.getId(), "target id");
 		assertEquals(targetMetadata.getLabel(), "target id");
 		assertEquals(targetMetadata.getPackage().getId(), "base");
-		Assert.assertNull(targetMetadata.getAttribute(SOURCE));
+		assertNull(targetMetadata.getAttribute(SOURCE));
 	}
 
 	@Test
@@ -347,7 +347,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 			consumer.accept(sourceGeneEntities);
 			return null;
-		}).when(geneRepo).forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+		}).when(geneRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -358,8 +358,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, true, "packageId", "label", progress), 4);
 
-		Mockito.verify(geneRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.any(Integer.class));
+		Mockito.verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		Mockito.verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
@@ -403,7 +402,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
 		when(updateEntityRepo.count()).thenReturn(4L);
-		when(updateEntityRepo.findAll(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+		when(updateEntityRepo.findAll(any(), any())).thenReturn(
 				expectedEntities.stream());
 
 		Mockito.doAnswer(invocationOnMock ->
@@ -412,7 +411,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.<Consumer>getArgument(0);
 			consumer.accept(sourceGeneEntities);
 			return null;
-		}).when(geneRepo).forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+		}).when(geneRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -423,8 +422,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, false, "packageId", "label", progress), 4);
 
-		Mockito.verify(geneRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.any(Integer.class));
+		Mockito.verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		Mockito.verify(updateEntityRepo).upsertBatch(batchCaptor.capture());
 		Assert.assertTrue(EntityUtils.equalsEntities(batchCaptor.getValue(), expectedEntities));
@@ -461,7 +459,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(targetEntityType.getIdAttribute()).thenReturn(targetID);
 		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
 
-		List<Entity> batch = Lists.newArrayList(Mockito.mock(Entity.class));
+		List<Entity> batch = newArrayList(Mockito.mock(Entity.class));
 		Mockito.doAnswer(invocationOnMock ->
 		{
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.<Consumer>getArgument(0);
@@ -471,12 +469,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			consumer.accept(batch);
 			return null;
 		})
-			   .when(sourceRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+			   .when(sourceRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
 
-		Mockito.verify(targetRepo, Mockito.times(3)).add(ArgumentMatchers.any(Stream.class));
+		Mockito.verify(targetRepo, Mockito.times(3)).add(any(Stream.class));
 		Mockito.verify(progress, Mockito.times(3)).increment(1);
 		Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
 		Mockito.verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
@@ -513,12 +510,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			consumer.accept(batch);
 			return null;
 		})
-			   .when(sourceRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+			   .when(sourceRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
 
-		Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(ArgumentMatchers.any(List.class));
+		Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(any(List.class));
 		Mockito.verify(progress, Mockito.times(2)).increment(1);
 		Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
 		Mockito.verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");

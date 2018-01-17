@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import org.molgenis.data.DataService;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;

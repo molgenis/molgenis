@@ -1,7 +1,7 @@
 package org.molgenis.js.magma;
 
 import org.mockito.Mock;
-import org.molgenis.script.Script;
+import org.molgenis.script.core.Script;
 import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;

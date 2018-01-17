@@ -35,6 +35,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
@@ -123,10 +124,10 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		mappingProjectRepositoryImpl.add(mappingProject);
 
 		ArgumentCaptor<DynamicEntity> argumentCaptor = ArgumentCaptor.forClass(DynamicEntity.class);
-		Mockito.verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
+		verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
 		assertEquals(argumentCaptor.getValue().getString(IDENTIFIER), "mappingProjectID");
-		Assert.assertNull(mappingTarget1.getIdentifier());
-		Assert.assertNull(mappingTarget2.getIdentifier());
+		assertNull(mappingTarget1.getIdentifier());
+		assertNull(mappingTarget2.getIdentifier());
 	}
 
 	@Test(expectedExceptions = DuplicateMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
@@ -141,7 +142,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		Mockito.verify(dataService).deleteById(MAPPING_PROJECT, "abc");
+		verify(dataService).deleteById(MAPPING_PROJECT, "abc");
 	}
 
 	@Test

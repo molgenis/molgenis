@@ -2,7 +2,7 @@ package org.molgenis.core.ui.data.support;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisRuntimeException;
+import org.molgenis.util.MolgenisRuntimeException;
 import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;

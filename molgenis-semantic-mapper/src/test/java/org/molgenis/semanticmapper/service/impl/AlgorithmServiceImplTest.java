@@ -116,14 +116,14 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 	{
 		AttributeMapping attributeMapping = mock(AttributeMapping.class);
 		String algorithm = "algorithm";
-		Mockito.when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
-		Attribute targetAttribute = Mockito.when(mock(Attribute.class).getDataType())
+		when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
+		Attribute targetAttribute = when(mock(Attribute.class).getDataType())
 										   .thenReturn(attributeType)
 										   .getMock();
-		Mockito.when(attributeMapping.getTargetAttribute()).thenReturn(targetAttribute);
+		when(attributeMapping.getTargetAttribute()).thenReturn(targetAttribute);
 
 		Entity sourceEntity = mock(Entity.class);
-		Mockito.when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(algorithmResult);
+		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(algorithmResult);
 
 		algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
 	}

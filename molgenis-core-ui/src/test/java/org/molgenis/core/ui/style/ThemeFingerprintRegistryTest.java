@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.FileSystemResource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

@@ -4,6 +4,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.io.IOUtils;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 

@@ -8,8 +8,8 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.ValidationResult;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
@@ -418,8 +418,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private static AttributeValueValidationResult checkText(Entity entity, Attribute attribute,
-			AttributeType fieldType)
+	private static AttributeValueValidationResult checkText(Entity entity, Attribute attribute, AttributeType fieldType)
 	{
 		String text = entity.getString(attribute.getName());
 		if (text == null)

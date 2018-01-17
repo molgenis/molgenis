@@ -7,6 +7,7 @@ import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.script.core.*;
 import org.molgenis.script.core.exception.MissingParameterException;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;

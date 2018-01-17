@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.util.MolgenisRuntimeException;
+
 @Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisInvalidFormatException extends MolgenisRuntimeException
 {

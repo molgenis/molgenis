@@ -12,6 +12,7 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;

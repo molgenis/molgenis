@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.style;
 
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.FileSystemResource;
 
 import java.io.InputStream;

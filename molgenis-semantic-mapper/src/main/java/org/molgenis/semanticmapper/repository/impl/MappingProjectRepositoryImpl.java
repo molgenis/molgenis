@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {

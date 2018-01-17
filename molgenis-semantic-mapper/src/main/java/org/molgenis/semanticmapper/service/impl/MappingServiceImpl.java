@@ -19,6 +19,7 @@ import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
+import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.repository.MappingProjectRepository;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
@@ -37,11 +38,11 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 
 public class MappingServiceImpl implements MappingService
 {

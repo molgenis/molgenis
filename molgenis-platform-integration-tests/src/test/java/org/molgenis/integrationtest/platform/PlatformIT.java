@@ -62,9 +62,9 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })

@@ -8,6 +8,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.util.ListEscapeUtils;
+import org.molgenis.util.Pair;
+import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.Iterator;
 import java.util.List;

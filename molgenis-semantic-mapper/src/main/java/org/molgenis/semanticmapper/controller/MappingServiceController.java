@@ -58,14 +58,14 @@ import static com.google.common.collect.Streams.stream;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
-import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
-import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
-import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
+import static org.molgenis.core.ui.data.support.Href.concatEntityHref;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
-import static org.molgenis.data.support.Href.concatEntityHref;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
+import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
+import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.create;
+import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.createEmpty;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.http.ResponseEntity.created;
 

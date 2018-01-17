@@ -2,6 +2,7 @@ package org.molgenis.data.security;
 
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.util.SecurityDecoratorUtils;
 import org.molgenis.security.core.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;

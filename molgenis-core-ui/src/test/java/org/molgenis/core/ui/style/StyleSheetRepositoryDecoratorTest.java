@@ -2,6 +2,8 @@ package org.molgenis.core.ui.style;
 
 import org.molgenis.data.Repository;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.ui.style.CannotDeleteAllThemesException;
+import org.molgenis.ui.style.CannotDeleteCurrentThemeException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
