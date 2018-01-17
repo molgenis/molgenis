@@ -15,6 +15,7 @@ import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.Permission;
@@ -87,11 +88,6 @@ public class RestControllerV2
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
-	}
-
-	static DuplicateEntityException createDuplicateEntityException(String entityTypeId)
-	{
-		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityTypeId + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
@@ -343,7 +339,10 @@ public class RestControllerV2
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
 				request.getNewEntityName());
-		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+		if (dataService.hasRepository(newFullName))
+		{
+			throw new EntityTypeAlreadyExistsException(newFullName);
+		}
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
