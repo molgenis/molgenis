@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.core.utils;
 
 import net.sf.samtools.util.BlockCompressedOutputStream;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.EffectBasedAnnotator;
 import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
@@ -46,9 +45,8 @@ public class CmdLineAnnotatorUtils
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
 			EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			EffectStructureConverter effectStructureConverter, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude, boolean update) throws IOException, MolgenisInvalidFormatException
+			List<String> attributesToInclude, boolean update) throws IOException
 	{
-
 		try (BufferedWriter outputVCFWriter = createBufferedWriter(outputVCFFile);
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
 						entityTypeFactory, attributeFactory))

@@ -1,14 +1,15 @@
 package org.molgenis.data.i18n;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapabilityException;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.i18n.LanguageService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language>
 {
@@ -20,7 +21,7 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 	@Override
 	public void delete(Language language)
 	{
-		throw new MolgenisDataException("Deleting languages is not allowed");
+		throw new RepositoryCapabilityException(this, WRITABLE);
 	}
 
 	@Override
@@ -33,7 +34,10 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 	public void deleteById(Object id)
 	{
 		Language entity = findOneById(id);
-		if (entity != null) delete(entity);
+		if (entity != null)
+		{
+			delete(entity);
+		}
 	}
 
 	@Override
@@ -54,7 +58,7 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 
 		if (!LanguageService.hasLanguageCode(language.getCode()))
 		{
-			throw new MolgenisDataException("Adding languages is not allowed");
+			throw new RepositoryCapabilityException(this, WRITABLE);
 		}
 		else
 		{

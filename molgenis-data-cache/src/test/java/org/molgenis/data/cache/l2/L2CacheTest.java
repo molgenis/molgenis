@@ -184,8 +184,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UncheckedExecutionException.class)
 	public void testGetStringIdLoaderThrowsException()
 	{
-		when(repository.findOneById("2")).thenThrow(
-				new MolgenisDataException("Table is missing for entity TestEntity"));
+		when(repository.findOneById("2")).thenThrow(new RuntimeException("Table is missing for entity TestEntity"));
 		l2Cache.get(repository, "2");
 	}
 
@@ -194,7 +193,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	public void testGetBatchIdLoaderThrowsException()
 	{
 		when(repository.findAll(any(Stream.class))).thenThrow(
-				new MolgenisDataException("Table is missing for entity TestEntity"));
+				new RuntimeException("Table is missing for entity TestEntity"));
 		l2Cache.getBatch(repository, newArrayList("1", "2"));
 	}
 

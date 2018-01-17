@@ -3,12 +3,12 @@ package org.molgenis.script;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.jobs.JobsController;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.script.core.ScriptException;
-import org.molgenis.script.core.UnknownScriptException;
+import org.molgenis.script.core.exception.MissingParameterException;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +58,8 @@ public class ScriptRunnerController
 	 *
 	 * @param scriptName name of the Script to start
 	 * @param parameters parameter values for the script
-	 * @throws IOException if an input or output exception occurs when redirecting
+	 * @throws IOException              if an input or output exception occurs when redirecting
+	 * @throws ScriptExecutionException if something went wrong while running the script
 	 */
 	@RequestMapping(value = "/scripts/{name}/start")
 	public void startScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
@@ -83,8 +84,10 @@ public class ScriptRunnerController
 	 * @param scriptName name of the Script to run
 	 * @param parameters parameter values for the script
 	 * @param response   {@link HttpServletResponse} to return the result
-	 * @throws IOException     if something goes wrong when redirecting or writing the result
-	 * @throws ScriptException if the script name is unknown or one of the script parameters is missing
+	 * @throws IOException               if something goes wrong when redirecting or writing the result
+	 * @throws UnknownEntityException    if the script name is unknown
+	 * @throws MissingParameterException if one of the script parameters is missing
+	 * @throws ScriptExecutionException  if an error occured while executing the script
 	 */
 	@RequestMapping("/scripts/{name}/run")
 	public void runScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
@@ -104,17 +107,5 @@ public class ScriptRunnerController
 			pw.write(result.getOutput());
 			pw.flush();
 		}
-	}
-
-	@ExceptionHandler(UnknownScriptException.class)
-	public void handleUnknownScriptException(UnknownScriptException e, HttpServletResponse response) throws IOException
-	{
-		response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-	}
-
-	@ExceptionHandler(ScriptException.class)
-	public void handleGenerateScriptException(ScriptException e, HttpServletResponse response) throws IOException
-	{
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 	}
 }

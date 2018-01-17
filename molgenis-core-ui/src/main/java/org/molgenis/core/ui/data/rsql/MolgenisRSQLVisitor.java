@@ -183,7 +183,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 		Attribute attr = entityType.getAttribute(attrTokens[0]);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+			throw new UnknownAttributeException(entityType, attrName);
 		}
 		EntityType entityTypeAtDepth;
 		for (int i = 1; i < attrTokens.length; ++i)
@@ -192,7 +192,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 			attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
 			if (attr == null)
 			{
-				throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
+				throw new UnknownAttributeException(entityTypeAtDepth, attrName);
 			}
 		}
 

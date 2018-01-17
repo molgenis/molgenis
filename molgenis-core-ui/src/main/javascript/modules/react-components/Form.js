@@ -688,10 +688,10 @@ var Form = React.createClass({
      * @private
      */
     _isValueNotSet(fieldType, value) {
-        if(value === undefined) {
+        if (value === undefined) {
             return true
         }
-        else if(fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
+        else if (fieldType === 'CATEGORICAL_MREF' || fieldType === 'MREF') {
             return !value.items || value.items.length === 0
         } else {
             return value === '' || value === null

@@ -21,8 +21,8 @@ public class SearchAllPluginController extends VuePluginController
 	public static final String NAVIGATOR = "navigator";
 	public static final String DATAEXPLORER = "dataexplorer";
 
-	public SearchAllPluginController(AppSettings appSettings, MenuReaderService menuReaderService,
-			UserAccountService userAccountService)
+	public SearchAllPluginController(AppSettings appSettings,
+			MenuReaderService menuReaderService, UserAccountService userAccountService)
 	{
 		super(URI, menuReaderService, appSettings, userAccountService);
 	}

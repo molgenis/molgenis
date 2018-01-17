@@ -1,9 +1,10 @@
 package org.molgenis.core.ui.style;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.ui.style.CannotDeleteAllThemesException;
+import org.molgenis.ui.style.CannotDeleteCurrentThemeException;
 
 import java.util.stream.Stream;
 
@@ -37,8 +38,7 @@ public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<S
 	@Override
 	public void deleteAll()
 	{
-		throw new MolgenisDataException(
-				"Cannot delete all boostrap themes, at least one theme is needed for the application");
+		throw new CannotDeleteAllThemesException();
 	}
 
 	@Override
@@ -57,9 +57,10 @@ public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<S
 
 	private void checkAndUpdateAppSettings(Object id)
 	{
-		if (appSettings.getBootstrapTheme().equals(id))
+		String currentBootstrapThemeId = appSettings.getBootstrapTheme();
+		if (currentBootstrapThemeId.equals(id))
 		{
-			throw new MolgenisDataException("Cannot delete the currently selected bootstrap theme");
+			throw new CannotDeleteCurrentThemeException(currentBootstrapThemeId);
 		}
 	}
 }

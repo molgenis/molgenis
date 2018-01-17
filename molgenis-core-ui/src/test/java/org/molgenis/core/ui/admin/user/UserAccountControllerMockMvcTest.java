@@ -88,7 +88,7 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 															.setLocale(any(), any(), eq(new Locale("nl")));
 		//FIXME: update expected status after specific exceptions are implemented
 		mockMvc.perform(post("/plugin/useraccount/language/update").param("languageCode", "nl"))
-			   .andExpect(status().isForbidden());
+			   .andExpect(status().isInternalServerError());
 	}
 
 	@Test

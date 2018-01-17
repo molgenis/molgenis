@@ -6,7 +6,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.MetaDataService;
@@ -14,6 +13,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionManager;
+import org.molgenis.util.MolgenisRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -119,7 +119,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			{
 				throw (RuntimeException) exception.getCause();
 			}
-			throw new MolgenisDataException(exception);
+			throw new MolgenisRuntimeException(exception);
 		}
 	}
 

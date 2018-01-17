@@ -2,13 +2,14 @@ package org.molgenis.dataexplorer.negotiator;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.exception.MissingConfigException;
+import org.molgenis.dataexplorer.exception.MrefNotSupportedException;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
@@ -16,16 +17,17 @@ import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -115,8 +117,7 @@ public class NegotiatorController extends PluginController
 		}
 		else
 		{
-			throw new MolgenisDataException(
-					messageSource.getMessage("dataexplorer_directory_no_config", new Object[] {}, getLocale()));
+			throw new MissingConfigException("Negotiator");
 		}
 		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels , disabledCollectionLabels);
 	}
@@ -166,8 +167,7 @@ public class NegotiatorController extends PluginController
 
 		if (EntityTypeUtils.isMultipleReferenceType(attribute))
 		{
-			throw new MolgenisDataException(
-					String.format("The %s cannot be an mref or categorical mref", attribute.getName()));
+			throw new MrefNotSupportedException(attribute.getName());
 		}
 
 		//If the configured attr is an xref or categorical we assume the id value should be used
@@ -216,7 +216,15 @@ public class NegotiatorController extends PluginController
 
 	private boolean evaluateExpressionOnEntity(String expression, Entity entity)
 	{
-		return expression == null ? true : Boolean.valueOf(jsMagmaScriptEvaluator.eval(expression, entity).toString());
+		if (expression == null)
+		{
+			return true;
+		}
+		else
+		{
+			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
+			return value != null ? Boolean.valueOf(value.toString()) : false;
+		}
 	}
 
 	private HttpEntity<NegotiatorQuery> getNegotiatorQueryHttpEntity(NegotiatorRequest request, NegotiatorConfig config,
@@ -253,15 +261,5 @@ public class NegotiatorController extends PluginController
 		String userPass = username + ":" + password;
 		String userPassBase64 = Base64.getEncoder().encodeToString(userPass.getBytes(UTF_8));
 		return "Basic " + userPassBase64;
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }

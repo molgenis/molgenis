@@ -3,11 +3,12 @@ package org.molgenis.semanticmapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.semanticmapper.exception.DuplicateMappingProjectException;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
@@ -43,7 +44,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	{
 		if (mappingProject.getIdentifier() != null)
 		{
-			throw new MolgenisDataException("MappingProject already exists");
+			throw new DuplicateMappingProjectException(mappingProject.getIdentifier());
 		}
 		dataService.add(MAPPING_PROJECT, toEntity(mappingProject));
 	}
@@ -55,7 +56,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		MappingProject existing = getMappingProject(mappingProject.getIdentifier());
 		if (existing == null)
 		{
-			throw new MolgenisDataException("MappingProject does not exist");
+			throw new UnknownEntityException(mappingProjectMeta, mappingProject.getIdentifier());
 		}
 		Entity mappingProjectEntity = toEntity(mappingProject);
 		dataService.update(MAPPING_PROJECT, mappingProjectEntity);

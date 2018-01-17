@@ -1,22 +1,21 @@
 package org.molgenis.core.ui.style;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_3;
 import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_4;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 public class StyleController
@@ -30,7 +29,7 @@ public class StyleController
 
 	@GetMapping("/css/bootstrap-{bootstrap-version}/{theme}")
 	public ResponseEntity getThemeCss(@PathVariable("bootstrap-version") String bootstrapVersion,
-			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisStyleException
+			@PathVariable("theme") String theme, HttpServletResponse response) throws MolgenisThemeException
 	{
 		response.setHeader("Content-Type", "text/css");
 		response.setHeader("Cache-Control", "max-age=31536000");
@@ -49,18 +48,10 @@ public class StyleController
 		}
 		catch (IOException e)
 		{
-			throw new MolgenisStyleException("Unable to return theme data", e);
+			throw new MolgenisThemeException(e.getCause());
 		}
 
 		return new ResponseEntity(HttpStatus.OK);
-	}
-
-	@ResponseBody
-	@ResponseStatus(NOT_FOUND)
-	@ExceptionHandler({ MolgenisStyleException.class, IOException.class })
-	public ErrorMessageResponse handleStyleException(Exception e)
-	{
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
 
 }

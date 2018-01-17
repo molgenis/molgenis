@@ -1,5 +1,6 @@
 package org.molgenis.data.populate;
 
+import org.molgenis.data.DateParseException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
@@ -21,7 +22,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.util.EntityUtils.asStream;
-import static org.molgenis.data.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 /**
  * Populate entity values for attributes with default values
@@ -121,8 +123,7 @@ public class DefaultValuePopulator
 		}
 		catch (DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), valueAsString));
+			throw new DateParseException(attr, valueAsString);
 		}
 	}
 
@@ -134,8 +135,7 @@ public class DefaultValuePopulator
 		}
 		catch (DateTimeParseException e)
 		{
-			throw new RuntimeException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), valueAsString));
+			throw new DateParseException(attr, valueAsString);
 		}
 	}
 

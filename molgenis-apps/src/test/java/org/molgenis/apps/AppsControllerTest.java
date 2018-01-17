@@ -13,11 +13,13 @@ import org.molgenis.data.Sort;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -51,6 +53,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+	private MockMvcExceptionalRequestPerformer exceptionalRequestPerformer;
+
 	public AppsControllerTest()
 	{
 		super(Strictness.WARN);
@@ -63,6 +67,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(appsController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
+		exceptionalRequestPerformer = new MockMvcExceptionalRequestPerformer(mockMvc);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -185,24 +190,22 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
-	public void testActivateAppUnknownApp() throws Exception
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
+	public void testActivateAppUnknownApp() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/activate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/activate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
-	@Test
-	public void testActivateAppAlreadyActivated() throws Exception
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already activated")
+	public void testActivateAppAlreadyActivated() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/activate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already activated\"}]}"));
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/activate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
 	@Test
@@ -215,23 +218,22 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		verify(dataService).update(APP, app);
 	}
 
-	@Test
-	public void testDeactivateAppUnknownApp() throws Exception
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "Unknown app 'id'")
+	public void testDeactivateAppUnknownApp() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(true).getMock();
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"Unknown app 'id'\"}]}"));
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/deactivate");
+		exceptionalRequestPerformer.perform(request);
 	}
 
-	@Test
-	public void testDeActivateAppAlreadyDeactivated() throws Exception
+	@Test(expectedExceptions = AppsException.class, expectedExceptionsMessageRegExp = "App 'name' already deactivated")
+	public void testDeActivateAppAlreadyDeactivated() throws Throwable
 	{
 		App app = when(mock(App.class).isActive()).thenReturn(false).getMock();
 		when(app.getName()).thenReturn("name");
 		when(dataService.findOneById(APP, "id", App.class)).thenReturn(app);
-		mockMvc.perform(post(AppsController.URI + "/id/deactivate"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().string("{\"errors\":[{\"message\":\"App 'name' already deactivated\"}]}"));
+		MockHttpServletRequestBuilder request = post(AppsController.URI + "/id/deactivate");
+
+		exceptionalRequestPerformer.perform(request);
 	}
 }

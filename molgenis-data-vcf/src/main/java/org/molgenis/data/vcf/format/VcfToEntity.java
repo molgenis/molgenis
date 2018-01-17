@@ -3,7 +3,6 @@ package org.molgenis.data.vcf.format;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -12,6 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.exception.UnknownSampleAttributeException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.genotype.Allele;
@@ -328,8 +328,7 @@ public class VcfToEntity
 						}
 						else
 						{
-							throw new MolgenisDataException("Sample entity contains an attribute [" + format[i]
-									+ "] which is not specified in vcf headers");
+							throw new UnknownSampleAttributeException(format[i]);
 						}
 					}
 					sampleEntity.set(format[i], value);

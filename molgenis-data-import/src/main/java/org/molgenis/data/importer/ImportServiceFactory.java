@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.util.FileExtensionUtils;
+import org.molgenis.data.importer.exception.NoSuitableImporterFoundException;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,10 @@ public class ImportServiceFactory
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
-		if (importService == null) throw new MolgenisDataException("Can not import file. No suitable importer found");
+		if (importService == null)
+		{
+			throw new NoSuitableImporterFoundException(file.getName());
+		}
 
 		return importService;
 	}
@@ -71,7 +75,10 @@ public class ImportServiceFactory
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
-		if (importService == null) throw new MolgenisDataException("Can not import file. No suitable importer found");
+		if (importService == null)
+		{
+			throw new NoSuitableImporterFoundException(fileName);
+		}
 
 		return importService;
 	}

@@ -1,12 +1,13 @@
 package org.molgenis.script.core;
 
 import com.google.common.collect.Maps;
+import org.molgenis.data.UnknownEntityException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Register script types.
@@ -17,9 +18,11 @@ import static java.lang.String.format;
 public class ScriptRunnerFactory
 {
 	private final Map<String, ScriptRunner> scriptRunners;
+	private final ScriptTypeMetaData scriptTypeMetaData;
 
-	public ScriptRunnerFactory()
+	public ScriptRunnerFactory(ScriptTypeMetaData scriptTypeMetaData)
 	{
+		this.scriptTypeMetaData = requireNonNull(scriptTypeMetaData);
 		scriptRunners = Maps.newHashMap();
 	}
 
@@ -38,7 +41,7 @@ public class ScriptRunnerFactory
 		ScriptRunner scriptRunner = scriptRunners.get(type);
 		if (scriptRunner == null)
 		{
-			throw new ScriptException(format("Unknown script type [%s]", type));
+			throw new UnknownEntityException(scriptTypeMetaData, type);
 		}
 
 		return scriptRunner;

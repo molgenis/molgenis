@@ -1,6 +1,9 @@
 package org.molgenis.data;
 
-public class MolgenisInvalidFormatException extends Exception
+import org.molgenis.util.MolgenisRuntimeException;
+
+@Deprecated // FIXME extend from CodedRuntimeException
+public class MolgenisInvalidFormatException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 1L;
 

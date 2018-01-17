@@ -1,9 +1,7 @@
 package org.molgenis.core.ui.thememanager;
 
-import org.molgenis.core.ui.style.MolgenisStyleException;
 import org.molgenis.core.ui.style.Style;
 import org.molgenis.core.ui.style.StyleService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -15,9 +13,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static java.util.Collections.singletonList;
 import static org.molgenis.core.ui.thememanager.ThemeManagerController.URI;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Controller
 @RequestMapping(URI)
@@ -65,32 +61,18 @@ public class ThemeManagerController extends PluginController
 	public @ResponseBody
 	Style addBootstrapTheme(@RequestParam(value = "bootstrap3-style") MultipartFile bootstrap3Style,
 			@RequestParam(value = "bootstrap4-style", required = false) MultipartFile bootstrap4Style)
-			throws MolgenisStyleException
+			throws IOException
 	{
 		String styleIdentifier = bootstrap3Style.getOriginalFilename();
-		try
-		{
-			String bs4FileName = null;
-			InputStream bs4InputStream = null;
-			if (bootstrap4Style != null)
-			{
-				bs4FileName = bootstrap4Style.getOriginalFilename();
-				bs4InputStream = bootstrap4Style.getInputStream();
-			}
-			return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
-					bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisStyleException("unable to add style: " + styleIdentifier, e);
-		}
-	}
 
-	@ResponseBody
-	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler({ MolgenisStyleException.class })
-	public ErrorMessageResponse handleStyleException(Exception e)
-	{
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+		String bs4FileName = null;
+		InputStream bs4InputStream = null;
+		if (bootstrap4Style != null)
+		{
+			bs4FileName = bootstrap4Style.getOriginalFilename();
+			bs4InputStream = bootstrap4Style.getInputStream();
+		}
+		return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
+				bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
 	}
 }

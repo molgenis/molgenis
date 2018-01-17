@@ -10,6 +10,10 @@ import java.util.Set;
  */
 public class NameValidator
 {
+	private NameValidator()
+	{
+	}
+
 	// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
 	public static final Set<String> KEYWORDS = ImmutableSet.of("login", "logout", "csv", "base", "exist", "meta");
 

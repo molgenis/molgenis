@@ -2,19 +2,15 @@ package org.molgenis.data.postgresql;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.*;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.NotNullConstraintViolationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +28,6 @@ import java.util.stream.Stream;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
@@ -480,9 +475,8 @@ class PostgreSqlRepository extends AbstractRepository
 				// so validate manually.
 				if (!attr.isNillable() && Iterables.isEmpty(refEntities))
 				{
-					throw new MolgenisValidationException(new ConstraintViolation(
-							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getId(), entity.getIdValue().toString())));
+					throw new NotNullConstraintViolationException(attr.getEntity().getId(), attr.getName(),
+							entity.getIdValue().toString());
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -564,9 +558,7 @@ class PostgreSqlRepository extends AbstractRepository
 													  .findFirst()
 													  .orElseThrow(() -> new IllegalStateException(
 															  "Not all entities in batch were updated but all are present in the repository."));
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Cannot update [%s] with id [%s] because it does not exist", entityType.getId(),
-							nonExistingEntityId.toString())));
+			throw new UnknownEntityException(entityType, nonExistingEntityId.toString());
 		}
 	}
 
@@ -576,8 +568,7 @@ class PostgreSqlRepository extends AbstractRepository
 		// so validate it ourselves
 		if (!attr.isNillable() && mrefs.isEmpty())
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(
-					format("Entity [%s] attribute [%s] value cannot be null", entityType.getId(), attr.getName())));
+			throw new NotNullConstraintViolationException(entityType.getId(), attr.getName());
 		}
 
 		final Attribute idAttr = entityType.getIdAttribute();

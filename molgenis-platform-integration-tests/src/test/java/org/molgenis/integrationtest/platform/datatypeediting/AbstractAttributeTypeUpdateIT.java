@@ -33,7 +33,7 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 	private final Logger LOG = getLogger(AbstractAttributeTypeUpdateIT.class);
 
 	private static final List<AttributeType> referencingTypes = newArrayList(MREF, XREF, CATEGORICAL, CATEGORICAL_MREF,
-			FILE);
+			FILE, ONE_TO_MANY);
 	private static final List<String> enumOptions = newArrayList("1", "2b", "abc");
 	private static final String MAIN_ENTITY = "MAINENTITY";
 	private static final String REFERENCE_ENTITY = "REFERENCEENTITY";
@@ -192,6 +192,8 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		Attribute attribute = entityType.getAttribute(mainAttribute);
 		if (referencingTypes.contains(typeToConvertTo)) attribute.setRefEntity(referenceEntityType);
 		else attribute.setRefEntity(null);
+
+		if (ONE_TO_MANY == typeToConvertTo) attribute.setMappedBy(referenceEntityType.getIdAttribute());
 
 		if (typeToConvertTo.equals(AttributeType.ENUM)) attribute.setEnumOptions(enumOptions);
 		else attribute.setEnumOptions(emptyList());

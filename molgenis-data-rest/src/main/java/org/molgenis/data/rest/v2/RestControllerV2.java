@@ -10,27 +10,30 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.rest.exception.AbstractEntityDeletionException;
+import org.molgenis.data.rest.exception.IdentifierAndValueException;
+import org.molgenis.data.rest.exception.MissingIdentifierException;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
+import org.molgenis.data.validation.RepositoryCollectionCapabilityException;
+import org.molgenis.data.validation.ValidationException;
+import org.molgenis.data.validation.data.AttributeValueValidationResult;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.UnexpectedEnumException;
-import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,8 +48,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.transform;
-import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
@@ -56,6 +57,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.validation.data.AttributeValueConstraint.READ_ONLY;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -78,55 +80,6 @@ public class RestControllerV2
 	private final PermissionSystemService permissionSystemService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
-
-	static UnknownEntityException createUnknownEntityException(String entityTypeId)
-	{
-		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
-	}
-
-	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityTypeId)
-	{
-		return new MolgenisDataAccessException("No read permission on entity " + entityTypeId);
-	}
-
-	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
-	{
-		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
-	}
-
-	static DuplicateEntityException createDuplicateEntityException(String entityTypeId)
-	{
-		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityTypeId + "'");
-	}
-
-	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
-	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityTypeId + "'");
-	}
-
-	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
-			String attributeName)
-	{
-		return new MolgenisDataAccessException(
-				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityTypeId + "' is readonly");
-	}
-
-	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
-	{
-		return new MolgenisDataException("Operation failed. Unknown identifier on index " + count);
-	}
-
-	static MolgenisDataException createMolgenisDataExceptionIdentifierAndValue()
-	{
-		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
-	}
-
-	static UnknownEntityException createUnknownEntityExceptionNotValidId(Object id)
-	{
-		return new UnknownEntityException(
-				"The entity you are trying to update [" + id.toString() + "] does not exist.");
-	}
 
 	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
 			LocalizationService localizationService, PermissionSystemService permissionSystemService,
@@ -192,7 +145,7 @@ public class RestControllerV2
 		Entity entity = dataService.findOneById(entityTypeId, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " [" + untypedId + "] not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		return createEntityResponse(entity, fetch, true);
@@ -227,8 +180,7 @@ public class RestControllerV2
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Cannot delete entities because type [%s] is abstract.", entityTypeId));
+			throw new AbstractEntityDeletionException(entityType);
 		}
 		Attribute idAttribute = entityType.getIdAttribute();
 		Stream<Object> typedIds = request.getEntityIds().stream().map(entityId -> getTypedValue(entityId, idAttribute));
@@ -285,7 +237,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -347,7 +299,10 @@ public class RestControllerV2
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		// No repo
-		if (!dataService.hasRepository(entityTypeId)) throw createUnknownEntityException(entityTypeId);
+		if (!dataService.hasRepository(entityTypeId))
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityTypeId);
 
@@ -357,17 +312,26 @@ public class RestControllerV2
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(),
 				request.getNewEntityName());
-		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+		if (dataService.hasRepository(newFullName))
+		{
+			throw new EntityTypeAlreadyExistsException(newFullName);
+		}
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
 				Permission.READ);
-		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
+		if (!readPermission)
+		{
+			throw new EntityTypePermissionDeniedException(repositoryToCopyFrom.getEntityType(), Permission.READ);
+		}
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
 												  .contains(RepositoryCapability.WRITABLE);
-		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
+		if (!writableCapabilities)
+		{
+			throw new RepositoryCollectionCapabilityException(entityTypeId, RepositoryCapability.WRITABLE);
+		}
 
 		// Copy
 		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
@@ -402,7 +366,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -440,7 +404,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -448,12 +412,13 @@ public class RestControllerV2
 			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw createUnknownAttributeException(entityTypeId, attributeName);
+				throw new UnknownAttributeException(meta, attributeName);
 			}
 
 			if (attr.isReadOnly())
 			{
-				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityTypeId, attributeName);
+				throw new ValidationException(
+						new AttributeValueValidationResult(READ_ONLY, AttributeValue.create(attr, "")));
 			}
 
 			final List<Entity> entities = request.getEntities()
@@ -463,7 +428,7 @@ public class RestControllerV2
 												 .collect(toList());
 			if (entities.size() != request.getEntities().size())
 			{
-				throw createMolgenisDataExceptionIdentifierAndValue();
+				throw new IdentifierAndValueException();
 			}
 
 			final List<Entity> updatedEntities = new ArrayList<>();
@@ -475,7 +440,7 @@ public class RestControllerV2
 				Entity originalEntity = dataService.findOneById(entityTypeId, id);
 				if (originalEntity == null)
 				{
-					throw createUnknownEntityExceptionNotValidId(id);
+					throw new UnknownEntityTypeException(id.toString());
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
@@ -563,71 +528,16 @@ public class RestControllerV2
 	}
 
 	/**
-	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 * Get entity id and perform a check, throwing an UnknownIdentifierException when necessary
 	 */
 	private static Object checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw createMolgenisDataExceptionUnknownIdentifier(count);
+			throw new MissingIdentifierException(count);
 		}
 		return id;
-	}
-
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception)
-	{
-		LOG.debug("Invalid request body.", exception);
-		return new ErrorMessageResponse(new ErrorMessage("Invalid request body."));
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody
-	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
-	{
-		LOG.info("Invalid method arguments.", exception);
-		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
-				error -> new ErrorMessage(error.getDefaultMessage())));
-	}
-
-	@ExceptionHandler(MolgenisDataException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
-	{
-		LOG.info("Operation failed.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MolgenisDataAccessException.class)
-	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
-	{
-		LOG.debug("Data access exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("Runtime exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(ConversionFailedException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
-	{
-		LOG.info("ConversionFailedException occurred", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
 	private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName)
@@ -635,7 +545,7 @@ public class RestControllerV2
 		EntityType entity = dataService.getEntityType(entityTypeId);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Attribute attribute = entity.getAttribute(attributeName);
@@ -651,6 +561,10 @@ public class RestControllerV2
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());

@@ -1,10 +1,10 @@
 package org.molgenis.data.security;
 
 import com.google.common.collect.Maps;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.slf4j.Logger;
@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 
@@ -99,9 +98,7 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	{
 		if (!isReadAllowed(systemEntityType))
 		{
-			throw new MolgenisDataAccessException(
-					format("No read permission on entity type '%s' with id '%s'", systemEntityType.getLabel(),
-							systemEntityType.getId()));
+			throw new EntityTypePermissionDeniedException(systemEntityType, Permission.READ);
 		}
 	}
 

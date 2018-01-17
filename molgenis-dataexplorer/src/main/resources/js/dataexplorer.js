@@ -420,19 +420,19 @@ $.when($,
             $('#observationset-search').focus();
         }
 
-        function sendVirtualPageView (ga, location) {
-          /* ga() is the google analytics library operations que function */
-          if(window.hasTrackingId) {
-            // default tracker
-            ga('set', 'page', location);
-            ga('send', 'pageview')
-          }
+        function sendVirtualPageView(ga, location) {
+            /* ga() is the google analytics library operations que function */
+            if (window.hasTrackingId) {
+                // default tracker
+                ga('set', 'page', location);
+                ga('send', 'pageview')
+            }
 
-          if(window.hasMolgenisTrackingId) {
-            // molgenis tracker
-            ga('molgenisTracker.set', 'page', location);
-            ga('molgenisTracker.send', 'pageview')
-          }
+            if (window.hasMolgenisTrackingId) {
+                // molgenis tracker
+                ga('molgenisTracker.set', 'page', location);
+                ga('molgenisTracker.send', 'pageview')
+            }
         }
 
         function pushState() {
@@ -479,7 +479,7 @@ $.when($,
             var entityTypeDropdown = $('#dataset-select');
 
             $(document).off(self.moduleEvents.DATAEXPLORER_URI_CHANGE)
-            if(window.ga && (window.hasTrackingId || window.hasMolgenisTrackingId) ) {
+            if (window.ga && (window.hasTrackingId || window.hasMolgenisTrackingId)) {
                 $(document).on(self.moduleEvents.DATAEXPLORER_URI_CHANGE, function () {
                     sendVirtualPageView(ga, $(location).attr('href'))
                 })

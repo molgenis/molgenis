@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
-import org.springframework.dao.DataAccessException;
+import org.molgenis.util.MolgenisRuntimeException;
 
 @Deprecated // FIXME extend from CodedRuntimeException
-public class MolgenisDataException extends DataAccessException
+public class MolgenisDataException extends MolgenisRuntimeException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
 

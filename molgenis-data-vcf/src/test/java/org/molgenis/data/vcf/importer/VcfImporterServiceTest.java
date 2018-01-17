@@ -10,8 +10,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.context.SecurityContext;
@@ -45,6 +47,8 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	private SecurityContext securityContext;
 	@Mock
 	private RepositoryCollection repositoryCollection;
+	@Mock
+	private PackageMetadata packageMetadata;
 
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
@@ -58,7 +62,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService,
-				defaultPackage);
+				defaultPackage, packageMetadata);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
 		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
@@ -247,7 +251,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		verify(permissionSystemService).giveUserWriteMetaPermissions(sampleEntityType0);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = EntityTypeAlreadyExistsException.class)
 	public void doImportAlreadyExists()
 	{
 		String entityTypeId0 = "entity0";

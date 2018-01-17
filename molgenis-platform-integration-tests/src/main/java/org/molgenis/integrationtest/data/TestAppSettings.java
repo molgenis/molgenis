@@ -1,7 +1,9 @@
 package org.molgenis.integrationtest.data;
 
 import org.molgenis.settings.AppSettings;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TestAppSettings implements AppSettings
 {
 	@Override
@@ -62,7 +64,7 @@ public class TestAppSettings implements AppSettings
 	@Override
 	public String getLanguageCode()
 	{
-		return null;
+		return "en";
 	}
 
 	@Override

@@ -39,8 +39,8 @@ import org.mockito.Mock;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
-import org.molgenis.data.index.exception.IndexException;
-import org.molgenis.data.index.exception.UnknownIndexException;
+import org.molgenis.data.index.exception.IndexInternalException;
+import org.molgenis.data.index.exception.UnknownIndexInternalException;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
@@ -200,7 +200,7 @@ public class ClientFacadeTest
 		clientFacade.createIndex(index, indexSettings, mappings);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error creating index 'indexname'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error creating index 'indexname'\\.")
 	public void testCreateIndexThrowsElasticsearchException()
 	{
 		Index index = Index.create("indexname");
@@ -246,7 +246,7 @@ public class ClientFacadeTest
 		verify(mockAppender).doAppend(matcher(DEBUG, "Created index 'indexname'."));
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error determining index\\(es\\) 'index' existence\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error determining index\\(es\\) 'index' existence\\.")
 	public void testIndexesExistThrowsException()
 	{
 		Index index = Index.create("index");
@@ -257,7 +257,7 @@ public class ClientFacadeTest
 		clientFacade.indexesExist(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
 	public void testDeleteIndexThrowsException()
 	{
 		Index index = Index.create("index");
@@ -268,7 +268,7 @@ public class ClientFacadeTest
 		clientFacade.deleteIndex(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error deleting index\\(es\\) 'index'\\.")
 	public void testDeleteIndexNotAcknowledged()
 	{
 		Index index = Index.create("index");
@@ -280,7 +280,7 @@ public class ClientFacadeTest
 		clientFacade.deleteIndex(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
 	public void testRefreshIndicesThrowsException()
 	{
 		when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
@@ -289,7 +289,7 @@ public class ClientFacadeTest
 		clientFacade.refreshIndexes();
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "One or more indexes '_all' not found\\.")
+	@Test(expectedExceptions = IllegalStateException.class)
 	public void testRefreshIndicesNotFound()
 	{
 		when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
@@ -298,7 +298,7 @@ public class ClientFacadeTest
 		clientFacade.refreshIndexes();
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error refreshing index\\(es\\) '_all'\\.")
 	public void testRefreshIndicesFailedShards()
 	{
 		when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
@@ -309,7 +309,7 @@ public class ClientFacadeTest
 		clientFacade.refreshIndexes();
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
 	public void testGetCountThrowsException()
 	{
 		Index index = Index.create("index");
@@ -320,7 +320,7 @@ public class ClientFacadeTest
 		clientFacade.getCount(index);
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
+	@Test(expectedExceptions = UnknownIndexInternalException.class, expectedExceptionsMessageRegExp = "Unknown indices: \\[index\\]")
 	public void testGetCountThrowsResourceNotFoundException()
 	{
 		Index index = Index.create("index");
@@ -331,7 +331,7 @@ public class ClientFacadeTest
 		clientFacade.getCount(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error counting docs in index\\(es\\) 'index'\\.")
 	public void testGetGetCountFailedShards()
 	{
 		Index index = Index.create("index");
@@ -344,7 +344,7 @@ public class ClientFacadeTest
 		clientFacade.getCount(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Timeout while counting docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Timeout while counting docs in index\\(es\\) 'index'\\.")
 	public void testGetGetCountTimeout()
 	{
 		Index index = Index.create("index");
@@ -357,7 +357,7 @@ public class ClientFacadeTest
 		clientFacade.getCount(index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.")
 	public void testSearchTimedOut()
 	{
 		Index index = Index.create("index");
@@ -371,7 +371,7 @@ public class ClientFacadeTest
 		clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
 	public void testSearchFailedShards()
 	{
 		Index index = Index.create("index");
@@ -385,7 +385,7 @@ public class ClientFacadeTest
 		clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
+	@Test(expectedExceptions = UnknownIndexInternalException.class, expectedExceptionsMessageRegExp = "Unknown indices: \\[index\\]")
 	public void testSearchIndexNotFound()
 	{
 		Index index = Index.create("index");
@@ -397,7 +397,7 @@ public class ClientFacadeTest
 		clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.")
 	public void testSearchThrowsException()
 	{
 		Index index = Index.create("index");
@@ -409,7 +409,7 @@ public class ClientFacadeTest
 		clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index));
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
 	public void testAggregateThrowsException()
 	{
 		Index index = Index.create("index");
@@ -421,7 +421,7 @@ public class ClientFacadeTest
 		clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "One or more indexes 'index' not found\\.")
+	@Test(expectedExceptions = UnknownIndexInternalException.class, expectedExceptionsMessageRegExp = "Unknown indices: \\[index\\]")
 	public void testAggregateThrowsResourceNotFoundException()
 	{
 		Index index = Index.create("index");
@@ -433,7 +433,7 @@ public class ClientFacadeTest
 		clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error aggregating docs in index\\(es\\) 'index'\\.")
 	public void testAggregateResultHasShardFailures()
 	{
 		Index index = Index.create("index");
@@ -447,7 +447,7 @@ public class ClientFacadeTest
 		clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Timeout aggregating docs in index\\(es\\) 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Timeout aggregating docs in index\\(es\\) 'index'\\.")
 	public void testAggregateTimeout()
 	{
 		Index index = Index.create("index");
@@ -461,7 +461,7 @@ public class ClientFacadeTest
 		clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.")
 	public void testExplainThrowsException()
 	{
 		SearchHit searchHit = SearchHit.create("id", "index");
@@ -474,7 +474,7 @@ public class ClientFacadeTest
 		clientFacade.explain(searchHit, queryBuilder);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
 	public void testIndexThrowsException()
 	{
 		Index index = Index.create("index");
@@ -493,7 +493,7 @@ public class ClientFacadeTest
 		clientFacade.index(index, document);
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "Index 'index' not found\\.")
+	@Test(expectedExceptions = UnknownIndexInternalException.class, expectedExceptionsMessageRegExp = "Unknown indices: \\[index\\]")
 	public void testIndexThrowsResourceNotFoundException()
 	{
 		Index index = Index.create("index");
@@ -512,7 +512,7 @@ public class ClientFacadeTest
 		clientFacade.index(index, document);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error indexing doc with id 'id' in index 'index'\\.")
 	public void testIndexShardFailure()
 	{
 		Index index = Index.create("index");
@@ -535,7 +535,7 @@ public class ClientFacadeTest
 		clientFacade.index(index, document);
 	}
 
-	@Test(expectedExceptions = IndexException.class, expectedExceptionsMessageRegExp = "Error deleting doc with id 'id' in index 'index'\\.")
+	@Test(expectedExceptions = IndexInternalException.class, expectedExceptionsMessageRegExp = "Error deleting doc with id 'id' in index 'index'\\.")
 	public void testDeleteThrowsException()
 	{
 		Index index = Index.create("index");
@@ -552,7 +552,7 @@ public class ClientFacadeTest
 		clientFacade.deleteById(index, document);
 	}
 
-	@Test(expectedExceptions = UnknownIndexException.class, expectedExceptionsMessageRegExp = "Index 'index' not found\\.")
+	@Test(expectedExceptions = UnknownIndexInternalException.class, expectedExceptionsMessageRegExp = "Unknown indices: \\[index\\]")
 	public void testDeleteResourceNotFound()
 	{
 		Index index = Index.create("index");

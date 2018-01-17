@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.download;
 
 import com.google.common.collect.Streams;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
@@ -13,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.dataexplorer.controller.DataRequest;
+import org.molgenis.dataexplorer.exception.ExcelMaxSizeExceededException;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.io.IOException;
@@ -66,9 +66,7 @@ public class DataExplorerDownloadHandler
 		long rows = dataService.count(entityTypeId, dataRequest.getQuery());
 		if (rows * cols >= MAX_EXCEL_CELLS)
 		{
-			throw new MolgenisDataException(String.format(
-					"Total number of cells for this download exceeds the maximum of %s for .xlsx downloads, please use .csv instead",
-					MAX_EXCEL_CELLS));
+			throw new ExcelMaxSizeExceededException(MAX_EXCEL_CELLS);
 		}
 	}
 

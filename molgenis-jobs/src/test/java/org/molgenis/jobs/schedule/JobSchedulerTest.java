@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.SecurityPackage;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.jobs.config.JobTestConfig;
@@ -75,6 +76,8 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void runNowUnknownEntity()
 	{
+		EntityType scheduledJobEntityType = mock(EntityType.class);
+		when(dataService.getEntityType(SCHEDULED_JOB)).thenReturn(scheduledJobEntityType);
 		when(dataService.findOneById(SCHEDULED_JOB, id)).thenReturn(null);
 		jobScheduler.runNow(id);
 	}
@@ -177,6 +180,9 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		@Mock
 		private Scheduler quartzScheduler;
 
+		@Mock
+		private ScheduledJobMetadata scheduledJobMetadata;
+
 		public Config()
 		{
 			initMocks(this);
@@ -190,7 +196,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public JobScheduler jobScheduler()
 		{
-			return new JobScheduler(quartzScheduler(), dataService);
+			return new JobScheduler(quartzScheduler(), dataService, scheduledJobMetadata);
 		}
 
 		@Bean

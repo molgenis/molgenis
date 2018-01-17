@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Sets.difference;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.function.Function.identity;
@@ -121,7 +120,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
 			if (repoCollection == null)
 			{
-				throw new MolgenisDataException(format("Unknown backend [%s]", entityType.getBackend()));
+				throw new UnknownRepositoryCollectionException(entityType.getBackend());
 			}
 			repoCollection.createRepository(entityType);
 		}

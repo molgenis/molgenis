@@ -7,15 +7,19 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Component
 public class UploadWizardPage extends AbstractWizardPage
@@ -73,9 +77,17 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 
 		}
-		catch (Exception e)
+		catch (CodedRuntimeException e)
 		{
 			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+		}
+		catch (ServletException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
 		}
 
 		return null;

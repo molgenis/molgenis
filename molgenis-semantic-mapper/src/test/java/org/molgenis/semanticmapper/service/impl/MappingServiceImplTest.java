@@ -1,6 +1,5 @@
 package org.molgenis.semanticmapper.service.impl;
 
-import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
@@ -11,12 +10,15 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.jobs.Progress;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.semanticmapper.config.MapperTestConfig;
+import org.molgenis.semanticmapper.exception.IncompatibleDataTypeException;
+import org.molgenis.semanticmapper.exception.IncompatibleReferenceException;
+import org.molgenis.semanticmapper.exception.MissingTargetAttributeException;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
@@ -45,14 +47,15 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class,
 		EntityBaseTestConfig.class, DefaultPackage.class })
@@ -125,13 +128,13 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Mockito.reset(dataService);
-		Mockito.reset(mappingProjectRepo);
-		Mockito.reset(permissionSystemService);
-		Mockito.reset(hopRepo);
-		Mockito.reset(geneRepo);
-		Mockito.reset(exonRepo);
-		Mockito.reset(progress);
+		reset(dataService);
+		reset(mappingProjectRepo);
+		reset(permissionSystemService);
+		reset(hopRepo);
+		reset(geneRepo);
+		reset(exonRepo);
+		reset(progress);
 
 		user = userFactory.create();
 		user.setUsername(USERNAME);
@@ -292,7 +295,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		assertEquals(targetMetadata.getId(), "target id");
 		assertEquals(targetMetadata.getLabel(), "target id");
 		assertEquals(targetMetadata.getPackage().getId(), "base");
-		Assert.assertNull(targetMetadata.getAttribute(SOURCE));
+		assertNull(targetMetadata.getAttribute(SOURCE));
 	}
 
 	@Test
@@ -344,7 +347,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 			consumer.accept(sourceGeneEntities);
 			return null;
-		}).when(geneRepo).forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+		}).when(geneRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -355,8 +358,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, true, "packageId", "label", progress), 4);
 
-		Mockito.verify(geneRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.any(Integer.class));
+		Mockito.verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
 		Mockito.verify(permissionSystemService).giveUserWriteMetaPermissions(entityTypeCaptor.capture());
@@ -400,7 +402,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
 
 		when(updateEntityRepo.count()).thenReturn(4L);
-		when(updateEntityRepo.findAll(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+		when(updateEntityRepo.findAll(any(), any())).thenReturn(
 				expectedEntities.stream());
 
 		Mockito.doAnswer(invocationOnMock ->
@@ -409,7 +411,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.<Consumer>getArgument(0);
 			consumer.accept(sourceGeneEntities);
 			return null;
-		}).when(geneRepo).forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+		}).when(geneRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
@@ -420,8 +422,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// apply mapping again
 		assertEquals(mappingService.applyMappings("TestRun", entityTypeId, false, "packageId", "label", progress), 4);
 
-		Mockito.verify(geneRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.any(Integer.class));
+		Mockito.verify(geneRepo).forEachBatched(any(Consumer.class), any(Integer.class));
 
 		Mockito.verify(updateEntityRepo).upsertBatch(batchCaptor.capture());
 		Assert.assertTrue(EntityUtils.equalsEntities(batchCaptor.getValue(), expectedEntities));
@@ -458,7 +459,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(targetEntityType.getIdAttribute()).thenReturn(targetID);
 		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
 
-		List<Entity> batch = Lists.newArrayList(Mockito.mock(Entity.class));
+		List<Entity> batch = newArrayList(Mockito.mock(Entity.class));
 		Mockito.doAnswer(invocationOnMock ->
 		{
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.<Consumer>getArgument(0);
@@ -468,12 +469,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			consumer.accept(batch);
 			return null;
 		})
-			   .when(sourceRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+			   .when(sourceRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
 
-		Mockito.verify(targetRepo, Mockito.times(3)).add(ArgumentMatchers.any(Stream.class));
+		Mockito.verify(targetRepo, Mockito.times(3)).add(any(Stream.class));
 		Mockito.verify(progress, Mockito.times(3)).increment(1);
 		Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
 		Mockito.verify(progress).status("Mapped 3 [sourceMappingLabel] entities.");
@@ -510,19 +510,18 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 			consumer.accept(batch);
 			return null;
 		})
-			   .when(sourceRepo)
-			   .forEachBatched(ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+			   .when(sourceRepo).forEachBatched(any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
 
 		mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
 
-		Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(ArgumentMatchers.any(List.class));
+		Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(any(List.class));
 		Mockito.verify(progress, Mockito.times(2)).increment(1);
 		Mockito.verify(progress).status("Mapping source [sourceMappingLabel]...");
 		Mockito.verify(progress).status("Mapped 4 [sourceMappingLabel] entities.");
 		Mockito.verifyNoMoreInteractions(progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
+	@Test(expectedExceptions = MissingTargetAttributeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY_1")
 	public void testIncompatibleMetaDataUnknownAttribute()
 	{
 		String targetRepositoryName = "targetRepository";
@@ -550,9 +549,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
-			"attribute COUNTRY in the mapping target is type INT while attribute "
-					+ "COUNTRY in the target repository is type STRING. Please make sure the types are the same")
+	@Test(expectedExceptions = IncompatibleDataTypeException.class, expectedExceptionsMessageRegExp = "name:COUNTRY type:INT, targetName:COUNTRY targetType:STRING")
 	public void testIncompatibleMetaDataDifferentType()
 	{
 		String targetRepositoryName = "target_repository";
@@ -580,10 +577,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
-			"In the mapping target, attribute COUNTRY of type XREF has "
-					+ "reference entity mapping_target_ref while in the target repository attribute COUNTRY of type XREF has reference entity target_repository_ref. "
-					+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository")
+	@Test(expectedExceptions = IncompatibleReferenceException.class, expectedExceptionsMessageRegExp = "name:COUNTRY type:XREF ref:mapping_target_ref, targetName:COUNTRY, targetType:XREF, targetRef:target_repository_ref")
 	public void testIncompatibleMetaDataDifferentRefEntity()
 	{
 		String targetRepositoryName = "target_repository";
@@ -752,7 +746,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import(UserTestConfig.class)
+	@Import({ MapperTestConfig.class })
 	static class Config
 	{
 		@Bean

@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.core.io.FileSystemResource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,7 +26,7 @@ public class ThemeFingerprintRegistryTest
 	}
 
 	@Test
-	public void getFingerprint() throws IOException, MolgenisStyleException
+	public void getFingerprint() throws IOException, MolgenisThemeException
 	{
 		String theme = "bootstrap-theme-name.min.css";
 		String version = "bootstrap-3";

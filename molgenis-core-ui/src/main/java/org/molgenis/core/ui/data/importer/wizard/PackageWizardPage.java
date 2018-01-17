@@ -3,19 +3,19 @@ package org.molgenis.core.ui.data.importer.wizard;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.exception.UnknownImportModeException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public class PackageWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null)
 				{
-					throw new IOException("unknown database action: " + entityImportOption);
+					throw new UnknownImportModeException(entityImportOption);
 				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
@@ -101,14 +101,12 @@ public class PackageWizardPage extends AbstractWizardPage
 
 					if (!entitiesNotImportable.isEmpty())
 					{
-						throw new MolgenisDataException(
-								"You are trying to upload entities that are not compatible with the already existing entities: "
-										+ entitiesNotImportable.toString());
+						throw new EntityTypeNotImportableException(entitiesNotImportable);
 					}
 				}
 
 			}
-			catch (RuntimeException | IOException e)
+			catch (CodedRuntimeException e)
 			{
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}

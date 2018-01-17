@@ -11,6 +11,7 @@ import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
@@ -246,8 +247,15 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			else
 			{
-				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
+				EntityType entityType = dataService.getEntityType(entityClassId);
+				if (entityType == null)
+				{
+					throw new UnknownEntityTypeException(entityClassId);
+				}
+				if (value != null)
+				{
+					throw new EntityTypePermissionDeniedException(entityType, WRITE);
+				}
 			}
 		});
 	}
@@ -479,10 +487,10 @@ public class ImportWizardController extends AbstractWizardController
 		ImportRun importRun;
 		String fileExtension = getExtension(file.getName());
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
-		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
+		String baseName = getBaseName(file.getName());
+		if (fileExtension.contains("vcf") && dataService.hasRepository(baseName))
 		{
-			throw new MolgenisDataException(
-					"A repository with name " + getBaseName(file.getName()) + " already exists");
+			throw new RepositoryAlreadyExistsException(baseName);
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(

@@ -6,8 +6,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.LocaleUtil;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.oneclickimporter.exceptions.UnsupportedHeaderCellType;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -197,8 +197,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 		}
 		else
 		{
-			throw new MolgenisDataException(
-					String.format("Celltype [%s] is not supported for columnheaders", cell.getCellTypeEnum()));
+			throw new UnsupportedHeaderCellType(cell.getCellTypeEnum());
 		}
 	}
 

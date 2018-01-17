@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.util.CountryCodes;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.login.MolgenisLoginController;
@@ -19,14 +21,10 @@ import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.ErrorMessageResponse;
-import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,10 +37,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -65,10 +65,12 @@ public class UserAccountController extends PluginController
 	private final TwoFactorAuthenticationService twoFactorAuthenticationService;
 	private final AuthenticationSettings authenticationSettings;
 	private final LocaleResolver localeResolver;
+	private final LanguageMetadata languageMetadata;
 
 	public UserAccountController(UserAccountService userAccountService, RecoveryService recoveryService,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
-			AuthenticationSettings authenticationSettings, LocaleResolver localeResolver)
+			AuthenticationSettings authenticationSettings, LocaleResolver localeResolver,
+			LanguageMetadata languageMetadata)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
@@ -76,6 +78,7 @@ public class UserAccountController extends PluginController
 		this.twoFactorAuthenticationService = requireNonNull(twoFactorAuthenticationService);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.localeResolver = requireNonNull(localeResolver);
+		this.languageMetadata = requireNonNull(languageMetadata);
 	}
 
 	@ApiOperation("Show account")
@@ -99,7 +102,6 @@ public class UserAccountController extends PluginController
 
 	@ApiOperation("Updates the selected user language")
 	@ApiResponses({ @ApiResponse(code = 204, message = "Update succeeded"),
-			@ApiResponse(code = 403, message = "Access denied. You need write permission on the UserAccount plugin", response = ErrorMessageResponse.class),
 			@ApiResponse(code = 400, message = "Bad request. You need to provide a valid language code", response = ErrorMessageResponse.class) })
 	@PostMapping(value = "/language/update", produces = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -108,7 +110,7 @@ public class UserAccountController extends PluginController
 	{
 		if (!LanguageService.hasLanguageCode(languageCode))
 		{
-			throw new MolgenisUserException(format("Unknown language code ''{0}''", languageCode));
+			throw new UnknownEntityException(languageMetadata, languageCode);
 		}
 		localeResolver.setLocale(request, response, new Locale(languageCode));
 	}
@@ -261,33 +263,5 @@ public class UserAccountController extends PluginController
 		Map<String, List<String>> recoveryCodes = new HashMap<>();
 		recoveryCodes.put("recoveryCodes", recoveryCodesList);
 		return recoveryCodes;
-	}
-
-	@ExceptionHandler(MolgenisUserException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	@ResponseBody
-	private ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(AccessDeniedException.class)
-	@ResponseStatus(value = HttpStatus.FORBIDDEN)
-	@ResponseBody
-	private ErrorMessageResponse handleAccessDeniedException(AccessDeniedException e)
-	{
-		LOG.warn("Access denied", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	@ResponseBody
-	private ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 }

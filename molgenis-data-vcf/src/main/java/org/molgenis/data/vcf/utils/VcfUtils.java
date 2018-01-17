@@ -3,7 +3,6 @@ package org.molgenis.data.vcf.utils;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -11,6 +10,8 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.data.vcf.exception.MissingPedigreeInformationException;
+import org.molgenis.data.vcf.exception.UnexpectedPedigreeInformationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,8 +178,7 @@ public class VcfUtils
 					}
 					else
 					{
-						throw new MolgenisDataException(
-								"Expected Child, Mother or Father, but found: " + element + " in line " + line);
+						throw new UnexpectedPedigreeInformationException(element, line);
 					}
 				}
 
@@ -189,7 +189,7 @@ public class VcfUtils
 				}
 				else
 				{
-					throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+					throw new MissingPedigreeInformationException(line);
 				}
 			}
 		}

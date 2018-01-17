@@ -121,7 +121,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-		when(decoratedRepository.findAll(fetchLessQuery)).thenThrow(new MolgenisDataException("What table?"));
+		when(decoratedRepository.findAll(fetchLessQuery)).thenThrow(new RuntimeException("What table?"));
 
 		Fetch fetch = mock(Fetch.class);
 		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);

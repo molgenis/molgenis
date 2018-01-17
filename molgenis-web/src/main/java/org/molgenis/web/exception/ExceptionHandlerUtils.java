@@ -1,10 +1,17 @@
 package org.molgenis.web.exception;
 
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.web.ErrorMessageResponse;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.util.matcher.ELRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 class ExceptionHandlerUtils
@@ -58,7 +66,7 @@ class ExceptionHandlerUtils
 	private static Object handleException(Exception e, boolean isHtmlRequest, HttpStatus httpStatus, String errorCode,
 			String environment)
 	{
-		ErrorMessageResponse errorMessageResponse = ErrorMessageResponse.create(e.getLocalizedMessage(), errorCode);
+		ErrorMessageResponse errorMessageResponse = createErrorMessageResponse(e, errorCode);
 		if (isHtmlRequest)
 		{
 			Map<String, Object> model = new HashMap<>();
@@ -74,6 +82,35 @@ class ExceptionHandlerUtils
 		{
 			return new ResponseEntity<>(errorMessageResponse, httpStatus);
 		}
+	}
+
+	private static ErrorMessageResponse createErrorMessageResponse(Exception e, String errorCode)
+	{
+		Locale locale = LocaleContextHolder.getLocale();
+		ErrorMessageResponse result = new ErrorMessageResponse();
+		if (e instanceof MethodArgumentNotValidException)
+		{
+			MethodArgumentNotValidException methodArgumentNotValidException = (MethodArgumentNotValidException) e;
+			BindingResult bindingResult = methodArgumentNotValidException.getBindingResult();
+			MessageSource messageSource = MessageSourceHolder.getMessageSource();
+
+			for (ObjectError objectError : bindingResult.getGlobalErrors())
+			{
+				String message = messageSource.getMessage(objectError, locale);
+				result.addErrorMessage(new ErrorMessageResponse.ErrorMessage(message, objectError.getCode()));
+			}
+			for (FieldError fieldError : bindingResult.getFieldErrors())
+			{
+				String message = messageSource.getMessage(fieldError, locale);
+				result.addErrorMessage(new ErrorMessageResponse.ErrorMessage(message, fieldError.getCode()));
+			}
+
+		}
+		else
+		{
+			result.addErrorMessage(new ErrorMessageResponse.ErrorMessage(e.getLocalizedMessage(), errorCode));
+		}
+		return result;
 	}
 
 	private static boolean isHtmlRequest(HandlerMethod handlerMethod)

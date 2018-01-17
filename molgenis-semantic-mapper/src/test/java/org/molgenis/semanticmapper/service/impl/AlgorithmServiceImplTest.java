@@ -2,22 +2,30 @@ package org.molgenis.semanticmapper.service.impl;
 
 import com.google.common.collect.Lists;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
+import org.molgenis.script.core.exception.ScriptExecutionException;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.semanticmapper.exception.AlgorithmValueConversionException;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Locale;
+
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 
 public class AlgorithmServiceImplTest extends AbstractMockitoTest
@@ -40,6 +48,10 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 	{
 		algorithmServiceImpl = new AlgorithmServiceImpl(ontologyTagService, semanticSearhService,
 				algorithmGeneratorService, entityManager, jsMagmaScriptEvaluator);
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("semantic-mapper");
+		MessageSourceHolder.setMessageSource(messageSource);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -48,37 +60,37 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		new AlgorithmServiceImpl(null, null, null, null, null);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDate' can't be converted to type 'DATE'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDate type:DATE")
 	public void testApplyConvertDateNumberFormatException()
 	{
 		testApplyConvertException("invalidDate", DATE);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDateTime' can't be converted to type 'DATE_TIME'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDateTime type:DATE_TIME")
 	public void testApplyConvertDateTimeNumberFormatException()
 	{
 		testApplyConvertException("invalidDateTime", DATE_TIME);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDouble' can't be converted to type 'DECIMAL'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidDouble type:DECIMAL")
 	public void testApplyConvertDoubleNumberFormatException()
 	{
 		testApplyConvertException("invalidDouble", DECIMAL);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidInt' can't be converted to type 'INT'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidInt type:INT")
 	public void testApplyConvertIntNumberFormatException()
 	{
 		testApplyConvertException("invalidInt", INT);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'9007199254740991' is larger than the maximum allowed value for type 'INT'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:9007199254740991 type:INT")
 	public void testApplyConvertIntArithmeticException()
 	{
 		testApplyConvertException("9007199254740991", INT);
 	}
 
-	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidLong' can't be converted to type 'LONG'")
+	@Test(expectedExceptions = AlgorithmValueConversionException.class, expectedExceptionsMessageRegExp = "value:invalidLong type:LONG")
 	public void testApplyConvertLongNumberFormatException()
 	{
 		testApplyConvertException("invalidLong", LONG);
@@ -91,28 +103,27 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		String algorithm = "algorithm";
 		Entity entity = mock(Entity.class);
 
-		Mockito.when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new ScriptExecutionException("execution error"));
 
 		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
 				Lists.newArrayList(entity));
 		AlgorithmEvaluation eval = result.iterator().next();
 
-		Assert.assertEquals(eval.getErrorMessage(),
-				"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
+		Assert.assertEquals(eval.getErrorMessage(), "errorMessage:execution error");
 	}
 
 	private void testApplyConvertException(String algorithmResult, AttributeType attributeType)
 	{
 		AttributeMapping attributeMapping = mock(AttributeMapping.class);
 		String algorithm = "algorithm";
-		Mockito.when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
-		Attribute targetAttribute = Mockito.when(mock(Attribute.class).getDataType())
+		when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
+		Attribute targetAttribute = when(mock(Attribute.class).getDataType())
 										   .thenReturn(attributeType)
 										   .getMock();
-		Mockito.when(attributeMapping.getTargetAttribute()).thenReturn(targetAttribute);
+		when(attributeMapping.getTargetAttribute()).thenReturn(targetAttribute);
 
 		Entity sourceEntity = mock(Entity.class);
-		Mockito.when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(algorithmResult);
+		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(algorithmResult);
 
 		algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
 	}

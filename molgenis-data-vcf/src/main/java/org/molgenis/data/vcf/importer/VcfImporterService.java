@@ -11,7 +11,9 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.data.validation.EntityTypeAlreadyExistsException;
 import org.molgenis.data.vcf.VcfFileExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
@@ -38,15 +41,17 @@ public class VcfImporterService implements ImportService
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
 	private final DefaultPackage defaultPackage;
+	private final PackageMetadata packageMetadata;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
-			MetaDataService metaDataService, DefaultPackage defaultPackage)
+			MetaDataService metaDataService, DefaultPackage defaultPackage, PackageMetadata packageMetadata)
 
 	{
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.defaultPackage = requireNonNull(defaultPackage);
+		this.packageMetadata = requireNonNull(packageMetadata);
 	}
 
 	@Transactional
@@ -67,8 +72,7 @@ public class VcfImporterService implements ImportService
 			}
 			catch (IOException e)
 			{
-				LOG.error("", e);
-				throw new MolgenisDataException(e);
+				throw new UncheckedIOException(e);
 			}
 		}
 		else
@@ -145,7 +149,7 @@ public class VcfImporterService implements ImportService
 
 		if (runAsSystem(() -> dataService.hasRepository(entityTypeId)))
 		{
-			throw new MolgenisDataException("Can't overwrite existing " + entityTypeId);
+			throw new EntityTypeAlreadyExistsException(entityTypeId);
 		}
 
 		EntityType entityType = inRepository.getEntityType();
@@ -252,7 +256,9 @@ public class VcfImporterService implements ImportService
 		{
 			targetPackage = dataService.getMeta().getPackage(packageId);
 			if (targetPackage == null)
-				throw new MolgenisDataException(String.format("Unknown package [%s]", packageId));
+			{
+				throw new UnknownEntityException(packageMetadata, packageId);
+			}
 			entityType.setPackage(targetPackage);
 		}
 		else

@@ -3,7 +3,11 @@ package org.molgenis.data;
 /**
  * Thrown when a data or metadata element does not exist.
  *
+ * @see UnknownAttributeException
+ * @see UnknownEntityException
  * @see UnknownEntityTypeException
+ * @see UnknownRepositoryException
+ * @see UnknownRepositoryCollectionException
  */
 public abstract class UnknownDataException extends ErrorCodedDataAccessException
 {

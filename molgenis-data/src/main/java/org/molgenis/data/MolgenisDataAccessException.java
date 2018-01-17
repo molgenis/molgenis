@@ -1,11 +1,17 @@
 package org.molgenis.data;
 
-public class MolgenisDataAccessException extends RuntimeException
-{
-	private static final long serialVersionUID = 4738825795930038340L;
+import org.springframework.dao.DataAccessException;
 
+/**
+ * @deprecated see {@link ErrorCodedDataAccessException}
+ */
+@Deprecated
+@SuppressWarnings("squid:MaximumInheritanceDepth")
+public class MolgenisDataAccessException extends DataAccessException
+{
 	public MolgenisDataAccessException()
 	{
+		this("");
 	}
 
 	public MolgenisDataAccessException(String msg)
@@ -15,12 +21,11 @@ public class MolgenisDataAccessException extends RuntimeException
 
 	public MolgenisDataAccessException(Throwable t)
 	{
-		super(t);
+		this("", t);
 	}
 
 	public MolgenisDataAccessException(String msg, Throwable t)
 	{
 		super(msg, t);
 	}
-
 }

@@ -3,6 +3,7 @@ package org.molgenis.data.importer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import org.molgenis.data.importer.exception.EmptyImportException;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.util.*;
@@ -104,7 +105,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	{
 		if (getImportOrder().isEmpty())
 		{
-			throw new IllegalStateException("Must add entity first");
+			throw new EmptyImportException();
 		}
 		String entityTypeId = getImportOrder().get(getImportOrder().size() - 1);
 		valid = valid && state.isValid();

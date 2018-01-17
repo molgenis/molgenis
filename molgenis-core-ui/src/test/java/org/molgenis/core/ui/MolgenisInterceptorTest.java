@@ -62,8 +62,8 @@ public class MolgenisInterceptorTest
 		assertEquals(model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
 
 		Gson gson = new Gson();
-		Map<String, String> environmentAttributes = gson
-				.fromJson(String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
+		Map<String, String> environmentAttributes = gson.fromJson(
+				String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
 
 		assertEquals(model.get(PluginAttributes.KEY_APP_SETTINGS), appSettings);
 		assertEquals(environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);

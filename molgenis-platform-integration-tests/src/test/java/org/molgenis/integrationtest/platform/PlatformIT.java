@@ -20,7 +20,7 @@ import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.EntityReferenceConstraintViolationException;
 import org.molgenis.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -400,10 +400,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			});
 			fail("Should throw exception!");
 		}
-		catch (MolgenisValidationException expected)
+		catch (EntityReferenceConstraintViolationException expected)
 		{
-			assertEquals(expected.getMessage(),
-					"Value '2' for attribute 'ref_id_attr' is referenced by entity 'TypeTestDynamic'.");
+			assertEquals(expected.getMessage(), "type:TypeTestDynamic attribute:ref_id_attr value:2");
 		}
 
 		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);

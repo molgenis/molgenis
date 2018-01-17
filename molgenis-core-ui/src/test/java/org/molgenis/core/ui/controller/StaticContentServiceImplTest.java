@@ -3,8 +3,10 @@ package org.molgenis.core.ui.controller;
 import org.mockito.Mock;
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
+import org.molgenis.core.ui.settings.StaticContentMeta;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.PluginPermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -26,6 +28,8 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	private StaticContent staticContent;
 	@Mock
 	private PermissionService permissionService;
+	@Mock
+	private StaticContentMeta staticContentMeta;
 
 	private StaticContentServiceImpl staticContentService;
 
@@ -66,7 +70,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permissions on home plugin.")
+	@Test(expectedExceptions = PluginPermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:home permission:WRITE")
 	public void checkPermissionsThrowsException()
 	{
 		when(permissionService.hasPermissionOnPlugin("home", Permission.WRITE)).thenReturn(false);
@@ -81,16 +85,18 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 		staticContentService.checkPermissions("home");
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permissions on home plugin.")
+	@Test(expectedExceptions = PluginPermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:home permission:WRITE")
 	public void submitContentNoPluginPermissions()
 	{
 		when(permissionService.hasPermissionOnPlugin("home", Permission.WRITE)).thenReturn(false);
 		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permission on static content entity type.")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "id:sys_StaticContent permission:WRITE")
 	public void submitContentNoStaticContentPermissions()
 	{
+		when(staticContentFactory.getEntityType()).thenReturn(staticContentMeta);
+		when(staticContentMeta.getId()).thenReturn("sys_StaticContent");
 		when(permissionService.hasPermissionOnPlugin("home", Permission.WRITE)).thenReturn(true);
 		when(permissionService.hasPermissionOnEntityType(STATIC_CONTENT, Permission.WRITE)).thenReturn(false);
 		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");

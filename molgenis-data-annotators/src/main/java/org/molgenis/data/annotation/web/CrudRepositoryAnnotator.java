@@ -6,11 +6,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.EffectCreatingAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.exception.AnnotationException;
-import org.molgenis.data.annotation.core.exception.UiAnnotationException;
+import org.molgenis.data.annotation.core.exception.SecondRunNotSupportedException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -64,16 +64,17 @@ public class CrudRepositoryAnnotator
 				if (!dataService.hasRepository(targetMetaData.getId()))
 				{
 					// add new entities to new repo
-					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
-					permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
-					runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
+					try (Repository externalRepository = dataService.getMeta().createRepository(targetMetaData))
+					{
+						permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
+						runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
 
-					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
+						iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
+					}
 				}
 				else
 				{
-					throw new UnsupportedOperationException(
-							"This entity has already been annotated with " + annotator.getSimpleName());
+					throw new SecondRunNotSupportedException(annotator);
 				}
 			}
 			else
@@ -86,35 +87,13 @@ public class CrudRepositoryAnnotator
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
 		}
-		catch (AnnotationException ae)
+		catch (CodedRuntimeException crte)
 		{
-			deleteResultEntity(annotator, targetMetaData);
-			throw new UiAnnotationException(ae);
+			throw crte;
 		}
 		catch (Exception e)
 		{
-			deleteResultEntity(annotator, targetMetaData);
 			throw new RuntimeException(e);
-		}
-	}
-
-	private void deleteResultEntity(RepositoryAnnotator annotator, EntityType targetMetaData)
-	{
-		try
-		{
-			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
-			{
-				runAsSystem(() ->
-				{
-					dataService.deleteAll(targetMetaData.getId());
-					dataService.getMeta().deleteEntityType(targetMetaData.getId());
-				});
-			}
-		}
-		catch (Exception ex)
-		{
-			// log the problem but throw the original exception
-			LOG.error("Failed to remove result entity: %s", targetMetaData.getId());
 		}
 	}
 

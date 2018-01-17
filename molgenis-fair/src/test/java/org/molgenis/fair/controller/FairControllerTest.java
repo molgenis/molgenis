@@ -45,7 +45,7 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter,
-										 new RdfConverter())
+										 new RdfConverter()).setControllerAdvice(new FairExceptionHandler())
 								 .build();
 	}
 

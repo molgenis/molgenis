@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.data.rsql;
 
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.DateParseException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.data.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 /**
  * Converts RSQL value symbols to the relevant data type.
@@ -70,10 +70,9 @@ public class RSQLValueParser
 		{
 			return parseInstant(paramValue);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new MolgenisDataException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE, attr.getName(), paramValue));
+			throw new DateParseException(attr, paramValue);
 		}
 	}
 
@@ -83,10 +82,9 @@ public class RSQLValueParser
 		{
 			return parseLocalDate(paramValue);
 		}
-		catch (DateTimeParseException e)
+		catch (java.time.format.DateTimeParseException e)
 		{
-			throw new MolgenisDataException(
-					format(FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE, attr.getName(), paramValue));
+			throw new DateParseException(attr, paramValue);
 		}
 	}
 

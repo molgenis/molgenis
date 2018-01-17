@@ -92,7 +92,8 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		mockMvc.perform(get("/plugin/metadata-manager"))
 			   .andExpect(status().isOk())
 			   .andExpect(view().name("view-metadata-manager"))
-			   .andExpect(model().attribute("baseUrl", "/test/path")).andExpect(model().attribute("lng", "de"))
+			   .andExpect(model().attribute("baseUrl", "/test/path"))
+			   .andExpect(model().attribute("lng", "de"))
 			   .andExpect(model().attribute("fallbackLng", "nl"));
 	}
 

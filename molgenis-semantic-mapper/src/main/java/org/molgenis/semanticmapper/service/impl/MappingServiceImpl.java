@@ -11,10 +11,15 @@ import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.semanticmapper.exception.IncompatibleDataTypeException;
+import org.molgenis.semanticmapper.exception.IncompatibleReferenceException;
+import org.molgenis.semanticmapper.exception.IncompatibleTargetException;
+import org.molgenis.semanticmapper.exception.MissingTargetAttributeException;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
+import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.repository.MappingProjectRepository;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
@@ -52,10 +57,12 @@ public class MappingServiceImpl implements MappingService
 	private final AttributeFactory attrMetaFactory;
 	private final DefaultPackage defaultPackage;
 	private final EntityManager entityManager;
+	private final MappingProjectMetaData mappingProjectMetaData;
 
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage, EntityManager entityManager)
+			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage, EntityManager entityManager,
+			MappingProjectMetaData mappingProjectMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -64,6 +71,7 @@ public class MappingServiceImpl implements MappingService
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityManager = requireNonNull(entityManager);
+		this.mappingProjectMetaData = requireNonNull(mappingProjectMetaData);
 	}
 
 	@Override
@@ -93,7 +101,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
 		String mappingProjectName = mappingProject.getName();
 
@@ -128,7 +136,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
-			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
 
 		return cloneMappingProject(mappingProject, clonedMappingProjectName);
@@ -264,7 +272,7 @@ public class MappingServiceImpl implements MappingService
 				compareTargetMetadatas(candidate, target);
 				return true;
 			}
-			catch (MolgenisDataException incompatible)
+			catch (IncompatibleTargetException incompatible)
 			{
 				return false;
 			}
@@ -295,18 +303,14 @@ public class MappingServiceImpl implements MappingService
 			Attribute targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
 			if (targetRepositoryAttribute == null)
 			{
-				throw new MolgenisDataException(format("Target repository does not contain the following attribute: %s",
-						mappingTargetAttributeName));
+				throw new MissingTargetAttributeException(mappingTargetAttributeName);
 			}
 
 			AttributeType targetRepositoryAttributeType = targetRepositoryAttribute.getDataType();
 			AttributeType mappingTargetAttributeType = mappingTargetAttribute.getDataType();
 			if (!mappingTargetAttributeType.equals(targetRepositoryAttributeType))
 			{
-				throw new MolgenisDataException(
-						format("attribute %s in the mapping target is type %s while attribute %s in the target repository is type %s. Please make sure the types are the same",
-								mappingTargetAttributeName, mappingTargetAttributeType,
-								targetRepositoryAttribute.getName(), targetRepositoryAttributeType));
+				throw new IncompatibleDataTypeException(mappingTargetAttribute, targetRepositoryAttribute);
 			}
 
 			if (isReferenceType(mappingTargetAttribute))
@@ -315,12 +319,7 @@ public class MappingServiceImpl implements MappingService
 				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getId();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
-					throw new MolgenisDataException(
-							format("In the mapping target, attribute %s of type %s has reference entity %s while in the target repository attribute %s of type %s has reference entity %s. "
-											+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository",
-									mappingTargetAttributeName, mappingTargetAttributeType, mappingTargetRefEntityName,
-									targetRepositoryAttribute.getName(), targetRepositoryAttributeType,
-									targetRepositoryRefEntityName));
+					throw new IncompatibleReferenceException(mappingTargetAttribute, targetRepositoryAttribute);
 				}
 			}
 		}

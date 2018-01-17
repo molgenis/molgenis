@@ -4,6 +4,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
+import org.molgenis.data.i18n.model.LanguageMetadata;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
@@ -27,6 +28,8 @@ public class UserAccountControllerTestConfig
 	private DataService dataService;
 	@Mock
 	private LocaleResolver localeResolver;
+	@Mock
+	private LanguageMetadata languageMetadata;
 
 	public UserAccountControllerTestConfig()
 	{
@@ -36,7 +39,7 @@ public class UserAccountControllerTestConfig
 	public void resetMocks()
 	{
 		Mockito.reset(userAccountService, recoveryService, twoFactorAuthenticationService, authenticationSettings,
-				dataService, localeResolver);
+				dataService, localeResolver, languageMetadata);
 	}
 
 	@Bean
@@ -79,6 +82,6 @@ public class UserAccountControllerTestConfig
 	public UserAccountController userAccountController()
 	{
 		return new UserAccountController(userAccountService(), recoveryService(), twoFactorAuthenticationService(),
-				authenticationSettings(), localeResolver());
+				authenticationSettings(), localeResolver(), languageMetadata);
 	}
 }

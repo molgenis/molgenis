@@ -9,7 +9,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
 
 public class QueryUtils
@@ -131,9 +130,7 @@ public class QueryUtils
 			attr = entityTypeAtCurrentDepth.getAttribute(attrName);
 			if (attr == null)
 			{
-				throw new UnknownAttributeException(
-						format("Query rule field [%s] refers to unknown attribute [%s] in entity type [%s]",
-								queryRuleField, attrName, entityTypeAtCurrentDepth.getId()));
+				throw new UnknownAttributeException(entityTypeAtCurrentDepth, attrName);
 			}
 			if (depth + 1 < queryRuleFieldTokens.length)
 			{

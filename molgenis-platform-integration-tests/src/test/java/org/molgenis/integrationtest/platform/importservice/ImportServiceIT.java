@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvDataConfig;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
@@ -120,7 +119,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 		catch (Exception e)
 		{
 			LOG.error("File name: [{}]", resourceName);
-			throw new MolgenisDataAccessException(e);
+			throw new RuntimeException(e);
 		}
 	}
 

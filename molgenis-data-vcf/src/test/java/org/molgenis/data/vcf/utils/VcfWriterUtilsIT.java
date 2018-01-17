@@ -3,7 +3,6 @@ package org.molgenis.data.vcf.utils;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -233,7 +232,7 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3643
 	@Test
-	public void convertToVcfInfoGtFirst() throws MolgenisDataException, IOException
+	public void convertToVcfInfoGtFirst() throws IOException
 	{
 		String formatDpAttrName = "DP";
 		String formatEcAttrName = "EC";

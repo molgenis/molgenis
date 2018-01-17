@@ -1,10 +1,14 @@
 package org.molgenis.integrationtest.platform.datatypeediting;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.data.validation.ValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.*;
@@ -58,36 +62,19 @@ public class DecimalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		return new Object[][] { { 2L, XREF, MolgenisValidationException.class,
-				"Attribute data type update from [DECIMAL] to [XREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 2.0, CATEGORICAL, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [CATEGORICAL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 4.0, ENUM, MolgenisValidationException.class,
-						"Unknown enum value for attribute 'mainAttribute' of entity 'MAINENTITY'." },
-				{ 1.0, DATE, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [DATE] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, DATE_TIME, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [DATE_TIME] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, MREF, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [MREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, CATEGORICAL_MREF, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [CATEGORICAL_MREF] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, EMAIL, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [EMAIL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, HTML, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [HTML] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, HYPERLINK, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [HYPERLINK] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, COMPOUND, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [COMPOUND] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, FILE, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [FILE] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, BOOL, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [BOOL] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, SCRIPT, MolgenisValidationException.class,
-						"Attribute data type update from [DECIMAL] to [SCRIPT] not allowed, allowed types are [ENUM, INT, LONG, STRING, TEXT]" },
-				{ 1.0, ONE_TO_MANY, MolgenisValidationException.class,
-						"Invalid [xref] value [] for attribute [Referenced entity] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('refEntityType').isNull().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/).not()).or($('refEntityType').isNull().not().and($('type').matches(/^(categorical|categoricalmref|file|mref|onetomany|xref)$/))).value().Invalid [xref] value [] for attribute [Mapped by] of entity [mainAttribute] with type [sys_md_Attribute]. Offended validation expression: $('mappedBy').isNull().and($('type').eq('onetomany').not()).or($('mappedBy').isNull().not().and($('type').eq('onetomany'))).value()" } };
+		return new Object[][] { { 2L, XREF, "V94" },
+				{ 2.0, CATEGORICAL, "V94" }, { 1.0, DATE, "V94" },
+				{ 1.0, DATE_TIME, "V94" },
+				{ 1.0, MREF, "V94" },
+				{ 1.0, CATEGORICAL_MREF, "V94" },
+				{ 1.0, EMAIL, "V94" },
+				{ 1.0, HTML, "V94" },
+				{ 1.0, HYPERLINK, "V94" },
+				{ 1.0, COMPOUND, "V94" },
+				{ 1.0, FILE, "V94" },
+				{ 1.0, BOOL, "V94" },
+				{ 1.0, SCRIPT, "V94" },
+				{ 1.0, ONE_TO_MANY, "V94" } };
 	}
 
 	/**
@@ -96,22 +83,38 @@ public class DecimalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 *
 	 * @param valueToConvert   The value that will be converted
 	 * @param typeToConvertTo  The type to convert to
-	 * @param exceptionClass   The expected class of the exception that will be thrown
-	 * @param exceptionMessage The expected exception message
+	 * @param errorCode       The expected errorCode
 	 */
 	@Test(dataProvider = "invalidConversionTestCases")
-	public void testInvalidConversion(double valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
-			String exceptionMessage)
+	public void testInvalidConversion(double valueToConvert, AttributeType typeToConvertTo, String errorCode)
 	{
 		try
 		{
 			testTypeConversion(valueToConvert, typeToConvertTo);
 			fail("Conversion should have failed");
 		}
-		catch (Exception exception)
+		catch (ValidationException exception)
 		{
-			assertTrue(exception.getClass().isAssignableFrom(exceptionClass));
-			assertEquals(exception.getMessage(), exceptionMessage);
+			//match on error code only since the message has no parameters
+			List<String> messageList = exception.getValidationMessages()
+												.map(message -> message.getErrorCode())
+												.collect(Collectors.toList());
+			assertTrue(messageList.contains(errorCode));
+		}
+	}
+
+	@Test
+	public void testInvalidEnumValue()
+	{
+		try
+		{
+			testTypeConversion("enumOption100", ENUM);
+			fail("Conversion should have failed");
+		}
+		catch (MolgenisDataException exception)
+		{
+			assertEquals(exception.getMessage(),
+					"Value [enumOption100] is of type [String] instead of [Double] for attribute: [mainAttribute]");
 		}
 	}
 }

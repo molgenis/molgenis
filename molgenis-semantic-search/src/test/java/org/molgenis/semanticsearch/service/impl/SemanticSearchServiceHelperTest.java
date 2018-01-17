@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -159,10 +158,11 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	public void testGetAttributeIdentifiers()
 	{
 		EntityType sourceEntityType = entityTypeFactory.create("sourceEntityType");
-		Entity entityTypeEntity = mock(Entity.class);
+		EntityType entityTypeEntity = mock(EntityType.class);
 
 		when(dataService.findOne(ENTITY_TYPE_META_DATA,
-				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()))).thenReturn(entityTypeEntity);
+				new QueryImpl<EntityType>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()),
+				EntityType.class)).thenReturn(entityTypeEntity);
 
 		Attribute attributeEntity1 = attrMetaFactory.create();
 		attributeEntity1.setIdentifier("1");

@@ -19,6 +19,7 @@ import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.SearchService;
+import org.molgenis.data.index.exception.UnknownIndexInternalException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
@@ -96,7 +97,7 @@ public class ElasticsearchService implements SearchService, IndexService
 	}
 
 	@Override
-	public long count(EntityType entityType)
+	public long count(EntityType entityType) throws UnknownIndexInternalException
 	{
 		Index index = contentGenerators.createIndex(entityType);
 		return clientFacade.getCount(index);

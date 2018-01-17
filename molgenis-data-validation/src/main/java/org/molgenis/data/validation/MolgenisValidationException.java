@@ -2,13 +2,17 @@ package org.molgenis.data.validation;
 
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisDataAccessException;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class MolgenisValidationException extends MolgenisDataException
+/**
+ * @deprecated use {@link DataIntegrityViolationException} instead.
+ */
+@Deprecated
+public class MolgenisValidationException extends MolgenisDataAccessException
 {
 	private static final long serialVersionUID = 1L;
 	private final Set<ConstraintViolation> violations;

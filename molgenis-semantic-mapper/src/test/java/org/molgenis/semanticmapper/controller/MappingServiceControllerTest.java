@@ -2,12 +2,10 @@ package org.molgenis.semanticmapper.controller;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
-import org.mockito.stubbing.OngoingStubbing;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -15,25 +13,25 @@ import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.semanticmapper.exception.IllegalTargetPackageException;
 import org.molgenis.semanticmapper.job.MappingJobExecution;
 import org.molgenis.semanticmapper.job.MappingJobExecutionFactory;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.service.AlgorithmService;
+import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticsearch.service.OntologyTagService;
-import org.molgenis.semanticsearch.service.SemanticSearchService;
+import org.molgenis.test.MockMvcExceptionalRequestPerformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -44,6 +42,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.testng.annotations.BeforeMethod;
@@ -53,8 +52,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
@@ -66,7 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = GsonConfig.class)
+@ContextConfiguration(classes = { GsonConfig.class })
 public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -75,11 +73,15 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
-	@InjectMocks
-	private MappingServiceController controller = new MappingServiceController();
+	@SuppressWarnings("unused") // needed for UnknownEntityException
+	@Mock
+	private MappingProjectMetaData mappingProjectMetaData;
 
 	@Mock
-	private UserService userService;
+	private PackageMetadata packageMetadata;
+
+	@InjectMocks
+	private MappingServiceController controller = new MappingServiceController();
 
 	@Mock
 	private MappingJobExecutionFactory mappingJobExecutionFactory;
@@ -88,16 +90,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private MappingService mappingService;
 
 	@Mock
-	private AlgorithmService algorithmService;
-
-	@Mock
 	private DataService dataService;
 
 	@Mock
 	private OntologyTagService ontologyTagService;
-
-	@Mock
-	private SemanticSearchService semanticSearchService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
@@ -107,12 +103,6 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private Model model;
-
-	@Mock
-	private MappingTarget mappingTarget;
-
-	@Mock
-	private EntityType targetEntityType;
 
 	@Mock
 	private EntityType target1;
@@ -143,10 +133,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	private static final String ID = "mappingservice";
 	private Attribute ageAttr;
 	private Attribute dobAttr;
-	private Attribute heightAttr;
 
 	private MockMvc mockMvc;
-	private OngoingStubbing<Multimap<Relation, OntologyTerm>> multimapOngoingStubbing;
+	private MockMvcExceptionalRequestPerformer exceptionalRequestPerformer;
 
 	public MappingServiceControllerTest()
 	{
@@ -183,6 +172,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter())
 								 .build();
+
+		exceptionalRequestPerformer = new MockMvcExceptionalRequestPerformer(mockMvc);
 	}
 
 	@Test
@@ -208,7 +199,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		ageMapping.setAlgorithm("$('length').value()");
 		ageMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -219,7 +210,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
+		Attribute heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
 		hop.addAttribute(heightAttr);
 
 		mockMvc.perform(post(URI + "/saveattributemapping").param("mappingProjectId", "asdf")
@@ -240,7 +231,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		heightMapping.setAlgorithm("$('length').value()");
 		heightMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -263,7 +254,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
 		mappingTarget.addSource(lifeLines);
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -325,7 +316,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(response.getContentAsString(), "true",
 				"When checking for a new entity type, the result should be the String \"true\"");
 		assertEquals(response.getContentType(), "application/json");
-		Mockito.verify(dataService).getEntityType("blah");
+		verify(dataService).getEntityType("blah");
 	}
 
 	@Test
@@ -372,50 +363,46 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(actual3, "");
 	}
 
-	@Test
-	public void testScheduleMappingJobUnknownMappingProjectId() throws Exception
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:null id:mappingProjectId")
+	public void testScheduleMappingJobUnknownMappingProjectId() throws Throwable
 	{
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "package")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("No mapping project found with ID mappingProjectId"));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "package")
+															   .accept("text/plain");
+		exceptionalRequestPerformer.perform(post);
 	}
 
-	@Test
-	public void testScheduleMappingJobUnknownPackage() throws Exception
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_md_Package id:sys")
+	public void testScheduleMappingJobUnknownPackage() throws Throwable
 	{
+		when(packageMetadata.getId()).thenReturn("sys_md_Package");
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "sys")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("No package found with ID sys"));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "sys")
+															   .accept("text/plain");
+		exceptionalRequestPerformer.perform(post);
 	}
 
-	@Test
-	public void testScheduleMappingJobSystemPackage() throws Exception
+	@Test(expectedExceptions = IllegalTargetPackageException.class, expectedExceptionsMessageRegExp = "id:sys")
+	public void testScheduleMappingJobSystemPackage() throws Throwable
 	{
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getId()).thenReturn("sys");
 		when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
 
-		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
-										  .param("targetEntityTypeId", "targetEntityTypeId")
-										  .param("label", "label")
-										  .param("package", "sys")
-										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("Package [sys] is a system package."));
+		MockHttpServletRequestBuilder post = post(URI + "/map").param("mappingProjectId", "mappingProjectId")
+															   .param("targetEntityTypeId", "targetEntityTypeId")
+															   .param("label", "label")
+															   .param("package", "sys")
+															   .accept("text/plain");
+
+		exceptionalRequestPerformer.perform(post);
 	}
 
 	@Test
@@ -443,15 +430,15 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 			   .andExpect(content().contentType("text/plain"))
 			   .andExpect(content().string("/api/v2/MappingJobExecution/abcde"));
 
-		Mockito.verify(jobExecutor).submit(mappingJobExecution);
-		Mockito.verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
-		Mockito.verify(mappingJobExecution).setLabel("label");
-		Mockito.verify(mappingJobExecution).setAddSourceAttribute(null);
-		Mockito.verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
-		Mockito.verify(mappingJobExecution).setPackageId("base");
-		Mockito.verify(mappingJobExecution).setUser(me);
-		Mockito.verify(mappingJobExecution).getEntityType();
-		Mockito.verify(mappingJobExecution).getIdValue();
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(me);
+		verify(mappingJobExecution).getEntityType();
+		verify(mappingJobExecution).getIdValue();
 		Mockito.verifyNoMoreInteractions(mappingJobExecution);
 	}
 
@@ -481,13 +468,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 			   .andExpect(status().isFound())
 			   .andExpect(header().string("Location", "/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000"));
 
-		Mockito.verify(jobExecutor).submit(mappingJobExecution);
-		Mockito.verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
-		Mockito.verify(mappingJobExecution).setLabel("label");
-		Mockito.verify(mappingJobExecution).setAddSourceAttribute(null);
-		Mockito.verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
-		Mockito.verify(mappingJobExecution).setPackageId("base");
-		Mockito.verify(mappingJobExecution).setUser(me);
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(me);
 		Mockito.verifyNoMoreInteractions(mappingJobExecution);
 	}
 
@@ -516,13 +503,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		String view = controller.viewMappingProject("hop hop hop", model);
 
 		assertEquals(view, "view-single-mapping-project");
-		Mockito.verify(model).addAttribute("entityTypes", asList(target1, target2));
-		Mockito.verify(model).addAttribute("packages", singletonList(base));
-		Mockito.verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
-		Mockito.verify(model).addAttribute("selectedTarget", "HOP");
-		Mockito.verify(model).addAttribute("mappingProject", mappingProject);
-		Mockito.verify(model).addAttribute("hasWritePermission", true);
-		Mockito.verify(model)
+		verify(model).addAttribute("entityTypes", asList(target1, target2));
+		verify(model).addAttribute("packages", singletonList(base));
+		verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
+		verify(model).addAttribute("selectedTarget", "HOP");
+		verify(model).addAttribute("mappingProject", mappingProject);
+		verify(model).addAttribute("hasWritePermission", true);
+		verify(model)
 			   .addAttribute("attributeTagMap", ImmutableMap.of("dob", singletonList(ontologyTermDateOfBirth), "age",
 					   singletonList(ontologyTermAge)));
 	}

@@ -3,8 +3,8 @@ package org.molgenis.core.ui.controller;
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
+import org.molgenis.data.security.exception.PluginPermissionDeniedException;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.settings.StaticContentMeta.STATIC_CONTENT;
+import static org.molgenis.security.core.Permission.WRITE;
 
 /**
  * Controller that handles static content pages requests.
@@ -67,8 +68,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE)
-				&& permissionService.hasPermissionOnEntityType(STATIC_CONTENT, Permission.WRITE);
+		return permissionService.hasPermissionOnPlugin(pluginId, WRITE) && permissionService.hasPermissionOnEntityType(
+				STATIC_CONTENT, WRITE);
 	}
 
 	@Override
@@ -79,15 +80,16 @@ public class StaticContentServiceImpl implements StaticContentService
 		return staticContent != null ? staticContent.getContent() : null;
 	}
 
+	@Override
 	public void checkPermissions(String pluginId)
 	{
-		if (!permissionService.hasPermissionOnPlugin(pluginId, Permission.WRITE))
+		if (!permissionService.hasPermissionOnPlugin(pluginId, WRITE))
 		{
-			throw new MolgenisDataAccessException("No write permissions on " + pluginId + " plugin.");
+			throw new PluginPermissionDeniedException(pluginId, WRITE);
 		}
-		if (!permissionService.hasPermissionOnEntityType(STATIC_CONTENT, Permission.WRITE))
+		if (!permissionService.hasPermissionOnEntityType(STATIC_CONTENT, WRITE))
 		{
-			throw new MolgenisDataAccessException("No write permission on static content entity type.");
+			throw new EntityTypePermissionDeniedException(staticContentFactory.getEntityType(), WRITE);
 		}
 	}
 }

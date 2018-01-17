@@ -7,16 +7,13 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
-import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -147,7 +144,6 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/job/{jobIdentifier}", produces = APPLICATION_JSON_VALUE)
 	public @ResponseBody
 	GavinJobExecution getGavinJobExecution(@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws JobNotFoundException
 	{
 		return gavinJobFactory.findGavinJobExecution(jobIdentifier);
 	}
@@ -160,7 +156,7 @@ public class GavinController extends AbstractStaticContentController
 	 */
 	@GetMapping("/result/{jobIdentifier}")
 	public String result(@PathVariable(value = "jobIdentifier") String jobIdentifier, Model model,
-			HttpServletRequest request) throws JobNotFoundException
+			HttpServletRequest request)
 	{
 		model.addAttribute("jobExecution", gavinJobFactory.findGavinJobExecution(jobIdentifier));
 		model.addAttribute("downloadFileExists", getDownloadFileForJob(jobIdentifier).exists());
@@ -194,8 +190,7 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/download/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public FileSystemResource download(HttpServletResponse response,
-			@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws FileNotFoundException, JobNotFoundException
+			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
 		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
 		File file = getDownloadFileForJob(jobIdentifier);
@@ -229,8 +224,7 @@ public class GavinController extends AbstractStaticContentController
 	@GetMapping(value = "/error/{jobIdentifier}", produces = APPLICATION_OCTET_STREAM_VALUE)
 	@ResponseBody
 	public Resource downloadErrorReport(HttpServletResponse response,
-			@PathVariable(value = "jobIdentifier") String jobIdentifier)
-			throws FileNotFoundException, JobNotFoundException
+			@PathVariable(value = "jobIdentifier") String jobIdentifier) throws FileNotFoundException
 	{
 		GavinJobExecution jobExecution = gavinJobFactory.findGavinJobExecution(jobIdentifier);
 		response.setHeader("Content-Disposition",
@@ -242,27 +236,6 @@ public class GavinController extends AbstractStaticContentController
 			throw new FileNotFoundException("No error report found for this job. Results are removed every night.");
 		}
 		return new FileSystemResource(file);
-	}
-
-	@ExceptionHandler(value = FileNotFoundException.class)
-	public void handleFileNotFound(FileNotFoundException ex, HttpServletResponse res) throws IOException
-	{
-		res.sendError(404, ex.getMessage());
-	}
-
-	@ExceptionHandler(value = JobNotFoundException.class)
-	public void handleJobNotFound(JobNotFoundException ex, HttpServletResponse res) throws IOException
-	{
-		res.sendError(404, ex.getMessage());
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.warn(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
 	}
 
 	/**

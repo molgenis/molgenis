@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.Relation;
@@ -20,12 +19,10 @@ import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.semantic.OntologyTag;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
-import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSortedSet.of;
 import static com.google.common.collect.Lists.newArrayList;
@@ -86,16 +82,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			Optional<String> findFirst = entityTypeIds.stream().findFirst();
-			if (findFirst.isPresent())
-			{
-				target = findFirst.get();
-			}
-		}
-
-		if (StringUtils.isEmpty(target))
-		{
-			throw new UnknownEntityException("There are no entities available!");
+			target = selectFirstEntityTypeAsTarget(entityTypeIds);
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
@@ -114,6 +101,13 @@ public class TagWizardController extends PluginController
 		model.addAttribute("relations", Relation.values());
 
 		return VIEW_TAG_WIZARD;
+	}
+
+	private String selectFirstEntityTypeAsTarget(List<String> entityTypeIds)
+	{
+		return entityTypeIds.stream()
+							.findFirst()
+							.orElseThrow(() -> new IllegalStateException("There are no entities available!"));
 	}
 
 	/**
@@ -183,15 +177,5 @@ public class TagWizardController extends PluginController
 	List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
 		return ontologyService.findOntologyTerms(request.getOntologyIds(), of(request.getSearchTerm()), 100);
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }

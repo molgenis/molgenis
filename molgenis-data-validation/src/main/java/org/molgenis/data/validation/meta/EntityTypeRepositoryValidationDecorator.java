@@ -3,6 +3,7 @@ package org.molgenis.data.validation.meta;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ValidationException;
 
 import java.util.stream.Stream;
 
@@ -25,7 +26,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	@Override
 	public void update(EntityType entityType)
 	{
-		entityTypeValidator.validate(entityType);
+		validate(entityType);
 		delegate().update(entityType);
 	}
 
@@ -34,7 +35,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	{
 		delegate().update(entities.filter(entityType ->
 		{
-			entityTypeValidator.validate(entityType);
+			validate(entityType);
 			return true;
 		}));
 	}
@@ -42,7 +43,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	@Override
 	public void add(EntityType entityType)
 	{
-		entityTypeValidator.validate(entityType);
+		validate(entityType);
 		delegate().add(entityType);
 	}
 
@@ -51,8 +52,17 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	{
 		return delegate().add(entities.filter(entityType ->
 		{
-			entityTypeValidator.validate(entityType);
+			validate(entityType);
 			return true;
 		}));
+	}
+
+	private void validate(EntityType entityType)
+	{
+		EntityTypeValidationResult validationResult = entityTypeValidator.validate(entityType);
+		if (validationResult.hasConstraintViolations())
+		{
+			throw new ValidationException(validationResult);
+		}
 	}
 }

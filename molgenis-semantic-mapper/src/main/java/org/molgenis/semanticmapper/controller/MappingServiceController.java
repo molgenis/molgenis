@@ -10,6 +10,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.semantic.Relation;
@@ -23,10 +24,12 @@ import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.semanticmapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.semanticmapper.data.request.MappingServiceRequest;
+import org.molgenis.semanticmapper.exception.IllegalTargetPackageException;
 import org.molgenis.semanticmapper.job.MappingJobExecution;
 import org.molgenis.semanticmapper.job.MappingJobExecutionFactory;
 import org.molgenis.semanticmapper.mapping.model.*;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticmapper.service.impl.AlgorithmEvaluation;
@@ -112,6 +115,12 @@ public class MappingServiceController extends PluginController
 
 	@Autowired
 	private JobsController jobsController;
+
+	@Autowired
+	private MappingProjectMetaData mappingProjectMetaData;
+
+	@Autowired
+	private PackageMetadata packageMetadata;
 
 	public MappingServiceController()
 	{
@@ -249,7 +258,7 @@ public class MappingServiceController extends PluginController
 		Attribute targetAttr = targetEntityType.getAttribute(targetAttributeName);
 		if (targetAttr == null)
 		{
-			throw new UnknownAttributeException("Unknown attribute [" + targetAttributeName + "]");
+			throw new UnknownAttributeException(targetEntityType, targetAttributeName);
 		}
 
 		String algorithm = mappingServiceRequest.getAlgorithm();
@@ -576,29 +585,22 @@ public class MappingServiceController extends PluginController
 		label = trim(label);
 		packageId = trim(packageId);
 
-		try
+		validateEntityName(targetEntityTypeId);
+		if (mappingService.getMappingProject(mappingProjectId) == null)
 		{
-			validateEntityName(targetEntityTypeId);
-			if (mappingService.getMappingProject(mappingProjectId) == null)
-			{
-				throw new MolgenisDataException("No mapping project found with ID " + mappingProjectId);
-			}
-			if (packageId != null)
-			{
-				Package package_ = dataService.getMeta().getPackage(packageId);
-				if (package_ == null)
-				{
-					throw new MolgenisDataException("No package found with ID " + packageId);
-				}
-				if (isSystemPackage(package_))
-				{
-					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
-				}
-			}
+			throw new UnknownEntityException(mappingProjectMetaData, mappingProjectId);
 		}
-		catch (MolgenisDataException mde)
+		if (packageId != null)
 		{
-			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
+			Package pack = dataService.getMeta().getPackage(packageId);
+			if (pack == null)
+			{
+				throw new UnknownEntityException(packageMetadata, packageId);
+			}
+			if (isSystemPackage(pack))
+			{
+				throw new IllegalTargetPackageException(packageId);
+			}
 		}
 
 		MappingJobExecution mappingJobExecution = scheduleMappingJobInternal(mappingProjectId, targetEntityTypeId,
@@ -699,22 +701,15 @@ public class MappingServiceController extends PluginController
 			algorithmTest.setAlgorithm(algorithm);
 		}
 
-		try
+		Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
+		if (!sourceAttributeNames.isEmpty())
 		{
-			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
-			if (!sourceAttributeNames.isEmpty())
-			{
-				List<Attribute> sourceAttributes = sourceAttributeNames.stream()
-																	   .map(attributeName -> entityMapping.getSourceEntityType()
-																										  .getAttribute(
-																												  attributeName))
-																	   .collect(Collectors.toList());
-				model.addAttribute("sourceAttributes", sourceAttributes);
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
+			List<Attribute> sourceAttributes = sourceAttributeNames.stream()
+																   .map(attributeName -> entityMapping.getSourceEntityType()
+																									  .getAttribute(
+																											  attributeName))
+																   .collect(Collectors.toList());
+			model.addAttribute("sourceAttributes", sourceAttributes);
 		}
 
 		model.addAttribute("mappingProjectId", mappingProjectId);

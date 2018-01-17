@@ -55,7 +55,7 @@ public class FileIngester
 	{
 		if (!"CSV".equals(loader))
 		{
-			throw new FileIngestException("Unknown loader '" + loader + "'");
+			throw new UnknownLoaderException(loader);
 		}
 
 		progress.setProgressMax(2);

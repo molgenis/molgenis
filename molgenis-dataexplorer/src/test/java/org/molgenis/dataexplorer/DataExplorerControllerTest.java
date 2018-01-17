@@ -12,12 +12,13 @@ import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
@@ -105,6 +106,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	private MockMvc mockMvc;
+	private MetaDataService metaDataService;
 
 	public DataExplorerControllerTest()
 	{
@@ -139,7 +141,15 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
 		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+		metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
+
+		mockMvc = MockMvcBuilders.standaloneSetup(controller)
+								 .setMessageConverters(gsonHttpMessageConverter)
+								 .setLocaleResolver(localeResolver)
+								 .build();
 	}
 
 	@Test
@@ -152,6 +162,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(metaDataService.getEntityTypes()).thenReturn(Stream.empty());
+		when(metaDataService.getEntityType("test1")).thenReturn(entityType);
 
 		controller.init(selectedEntityname, selectedEntityId, model);
 
@@ -161,9 +172,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void initSortEntitiesByLabel()
 	{
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(metaDataService);
-
 		EntityType entity1 = mock(EntityType.class);
 		when(entity1.getId()).thenReturn("1");
 		when(entity1.getLabel()).thenReturn("zzz");
@@ -223,13 +231,21 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Test
 	public void getAnnotatorModuleSuccess() throws Exception
 	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypeById("yes")).thenReturn(entityType);
+
 		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getEntityTypeById("no")).thenReturn(entityType);
+
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
 	}
 
@@ -266,7 +282,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		verify(model).addAttribute("viewName", "view-standalone-report-specific-id");
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "EntityType with id \\[id\\] does not exist\\. Did you use the correct URL\\?")
+	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:id")
 	public void testViewEntityDetailsByIdEntityTypeNotExists() throws Exception
 	{
 		when(dataService.getEntityType(entityTypeId)).thenReturn(null);

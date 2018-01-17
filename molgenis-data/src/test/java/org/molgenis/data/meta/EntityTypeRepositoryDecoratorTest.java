@@ -6,9 +6,9 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownRepositoryCollectionException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
@@ -92,7 +92,7 @@ public class EntityTypeRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(entityType1);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[backend\\]")
+	@Test(expectedExceptions = UnknownRepositoryCollectionException.class, expectedExceptionsMessageRegExp = "collection:backend")
 	public void addWithUnknownBackend()
 	{
 		when(entityType1.getAttributes()).thenReturn(emptyList());

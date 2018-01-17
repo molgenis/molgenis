@@ -1,19 +1,30 @@
 package org.molgenis.data.index.exception;
 
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.CodedRuntimeException;
 
-public class UnknownIndexException extends IndexException
+import static java.util.Objects.requireNonNull;
+
+public class UnknownIndexException extends CodedRuntimeException
 {
-	private static final long serialVersionUID = 1L;
+	private static final String ERROR_CODE = "IDX02";
+	private final transient EntityType entityType;
 
-	public UnknownIndexException(String indexName)
+	public UnknownIndexException(EntityType entityType, Throwable cause)
 	{
-		super(String.format("Index '%s' not found.", indexName));
+		super(ERROR_CODE, cause);
+		this.entityType = requireNonNull(entityType);
 	}
 
-	public UnknownIndexException(String[] indexNames)
+	@Override
+	public String getMessage()
 	{
-		super(String.format("One or more indexes '%s' not found.", stream(indexNames).collect(joining(", "))));
+		return String.format("entityType:%s", entityType.getId());
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return new Object[] { entityType };
 	}
 }

@@ -1,7 +1,6 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -12,6 +11,7 @@ import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
+import org.molgenis.semanticmapper.exception.DuplicateMappingProjectException;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,12 +30,12 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
@@ -125,32 +124,25 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		mappingProjectRepositoryImpl.add(mappingProject);
 
 		ArgumentCaptor<DynamicEntity> argumentCaptor = ArgumentCaptor.forClass(DynamicEntity.class);
-		Mockito.verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
+		verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
 		assertEquals(argumentCaptor.getValue().getString(IDENTIFIER), "mappingProjectID");
-		Assert.assertNull(mappingTarget1.getIdentifier());
-		Assert.assertNull(mappingTarget2.getIdentifier());
+		assertNull(mappingTarget1.getIdentifier());
+		assertNull(mappingTarget2.getIdentifier());
 	}
 
-	@Test
+	@Test(expectedExceptions = DuplicateMappingProjectException.class, expectedExceptionsMessageRegExp = "id:mappingProjectID")
 	public void testAddWithIdentifier()
 	{
 		MappingProject mappingProject = new MappingProject("My first mapping project", owner);
 		mappingProject.setIdentifier("mappingProjectID");
-		try
-		{
-			mappingProjectRepositoryImpl.add(mappingProject);
-		}
-		catch (MolgenisDataException mde)
-		{
-			assertEquals(mde.getMessage(), "MappingProject already exists");
-		}
+		mappingProjectRepositoryImpl.add(mappingProject);
 	}
 
 	@Test
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		Mockito.verify(dataService).deleteById(MAPPING_PROJECT, "abc");
+		verify(dataService).deleteById(MAPPING_PROJECT, "abc");
 	}
 
 	@Test
@@ -179,20 +171,12 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		assertEquals(result, singletonList(mappingProject));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_map_MappingProject id:mappingProjectID")
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
 		when(dataService.findOneById(TAG, "mappingProjectID")).thenReturn(null);
-		try
-		{
-			mappingProjectRepositoryImpl.update(mappingProject);
-			Assert.fail("Expected exception");
-		}
-		catch (MolgenisDataException expected)
-		{
-			assertEquals(expected.getMessage(), "MappingProject does not exist");
-		}
+		mappingProjectRepositoryImpl.update(mappingProject);
 	}
 
 	@Configuration
@@ -208,13 +192,13 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public MappingTargetRepository mappingTargetRepository()
 		{
-			return Mockito.mock(MappingTargetRepository.class);
+			return mock(MappingTargetRepository.class);
 		}
 
 		@Bean
 		public IdGenerator idGenerator()
 		{
-			return Mockito.mock(IdGenerator.class);
+			return mock(IdGenerator.class);
 		}
 
 		@Bean
