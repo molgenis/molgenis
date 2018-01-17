@@ -6,6 +6,10 @@ import org.molgenis.data.meta.model.Attribute;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
+ */
+@Deprecated
 public class AnnotationException extends RuntimeException
 {
 	private final Integer entityNumber;
@@ -25,8 +29,7 @@ public class AnnotationException extends RuntimeException
 
 	public AnnotationException(AnnotationException ae)
 	{
-		this(ae.getFailedEntity(), ae.getEntityNumber(), ae.getRequiredAttributes(), ae.getAnnotatorName(),
-				ae.getCause());
+		this(ae.getFailedEntity(), ae.getEntityNumber(), ae.getRequiredAttributes(), ae.getAnnotatorName(), ae.getCause());
 	}
 
 	public Integer getEntityNumber()

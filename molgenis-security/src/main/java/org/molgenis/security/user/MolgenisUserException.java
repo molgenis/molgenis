@@ -1,5 +1,9 @@
 package org.molgenis.security.user;
 
+/**
+ * @deprecated use class that extends from org.molgenis.i18n.CodedRuntimeException
+ */
+@Deprecated
 public class MolgenisUserException extends RuntimeException
 {
 

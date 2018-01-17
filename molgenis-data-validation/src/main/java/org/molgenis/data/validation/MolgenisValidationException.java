@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
+ */
+@Deprecated
 public class MolgenisValidationException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,9 @@
 package org.molgenis.jobs.schedule;
 
+/**
+ * @deprecated use class that extends from org.molgenis.i18n.CodedRuntimeException
+ */
+@Deprecated
 public class ScheduledJobException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
