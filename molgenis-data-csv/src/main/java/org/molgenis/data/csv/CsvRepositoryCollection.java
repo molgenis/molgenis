@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.support.FileRepositoryCollection;
@@ -38,7 +37,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	private List<String> entityTypeIds;
 	private List<String> entityTypeIdsLowerCase;
 
-	public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException
+	public CsvRepositoryCollection(File file) throws IOException
 	{
 		this(file, (CellProcessor[]) null);
 	}

@@ -5,11 +5,11 @@ import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.util.MolgenisRuntimeException;
 
 import java.io.*;
 import java.util.*;
@@ -42,7 +42,7 @@ public class VcfWriterUtils
 	 * attributesToInclude is empty
 	 */
 	public static void writeVcfHeader(File inputVcfFile, BufferedWriter outputVCFWriter,
-			List<Attribute> addedAttributes) throws MolgenisInvalidFormatException, IOException
+			List<Attribute> addedAttributes) throws IOException
 	{
 		writeVcfHeader(inputVcfFile, outputVCFWriter, addedAttributes, Collections.emptyList());
 	}
@@ -53,8 +53,7 @@ public class VcfWriterUtils
 	 * @param attributesToInclude , the Attribute to write to the VCF file, if empty writes all attributes
 	 */
 	public static void writeVcfHeader(File inputVcfFile, BufferedWriter outputVCFWriter,
-			List<Attribute> addedAttributes, List<String> attributesToInclude)
-			throws MolgenisInvalidFormatException, IOException
+			List<Attribute> addedAttributes, List<String> attributesToInclude) throws IOException
 	{
 		System.out.println("Detecting VCF column header...");
 
@@ -75,8 +74,7 @@ public class VcfWriterUtils
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new MolgenisInvalidFormatException(
-					"Did not find ## on the first line, are you sure it is a VCF file?");
+			throw new MolgenisRuntimeException("Did not find ## on the first line, are you sure it is a VCF file?");
 		}
 
 		inputVcfFileScanner.close();
@@ -148,14 +146,13 @@ public class VcfWriterUtils
 	}
 
 	private static void checkColumnHeaders(BufferedWriter outputVCFWriter, Scanner inputVcfFileScanner, String line)
-			throws IOException, MolgenisInvalidFormatException
+			throws IOException
 	{
 		if (!line.startsWith(CHROM))
 		{
 			outputVCFWriter.close();
 			inputVcfFileScanner.close();
-			throw new MolgenisInvalidFormatException(
-					"Header does not start with #CHROM, are you sure it is a VCF file?");
+			throw new MolgenisRuntimeException("Header does not start with #CHROM, are you sure it is a VCF file?");
 		}
 	}
 

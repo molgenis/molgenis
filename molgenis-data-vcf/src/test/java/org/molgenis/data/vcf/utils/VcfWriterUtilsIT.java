@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -291,7 +290,7 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
+	public void vcfWriterRoundtripTest() throws IOException
 	{
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
 		try
@@ -321,7 +320,7 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
+	public void vcfWriterAnnotateTest() throws IOException
 	{
 		entity1.set("ANNO", "TEST_test21");
 		entity2.set("ANNO", "TEST_test22");
@@ -356,7 +355,7 @@ public class VcfWriterUtilsIT extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void vcfWriteMrefTest() throws IOException, MolgenisInvalidFormatException
+	public void vcfWriteMrefTest() throws IOException
 	{
 		final File actualOutputFile = File.createTempFile("output", ".vcf");
 
