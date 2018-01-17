@@ -3,6 +3,7 @@ package org.molgenis.data;
 /**
  * Thrown when a data or metadata element does not exist.
  *
+ * @see UnknownAttributeException
  * @see UnknownEntityTypeException
  * @see UnknownRepositoryException
  * @see UnknownRepositoryCollectionException
