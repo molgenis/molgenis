@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.web.settings;
 
 import org.molgenis.data.annotation.core.entity.impl.GoNLAnnotator;
-import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.molgenis.settings.DefaultSettingsEntity;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 @Component

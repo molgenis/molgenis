@@ -1,10 +1,14 @@
 package org.molgenis.integrationtest.ui;
 
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.ui.jobs.JobsController;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.ui.menu.MenuReaderServiceImpl;
-import org.molgenis.ui.style.*;
+import org.molgenis.core.ui.jobs.JobsController;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.menu.MenuReaderServiceImpl;
+import org.molgenis.core.ui.style.StyleService;
+import org.molgenis.core.ui.style.StyleSheetFactory;
+import org.molgenis.core.ui.style.StyleSheetMetadata;
+import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
+import org.molgenis.settings.AppSettings;
+import org.molgenis.ui.style.MolgenisThemeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

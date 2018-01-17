@@ -8,14 +8,14 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.file.processor.CellProcessor;
+import org.molgenis.data.file.processor.TrimProcessor;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;

@@ -1,6 +1,6 @@
 package org.molgenis.app;
 
-import org.molgenis.ui.MolgenisWebAppInitializer;
+import org.molgenis.core.ui.MolgenisWebAppInitializer;
 import org.springframework.web.WebApplicationInitializer;
 
 import javax.servlet.ServletContext;

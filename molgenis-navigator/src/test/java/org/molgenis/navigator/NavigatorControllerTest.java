@@ -1,11 +1,11 @@
 package org.molgenis.navigator;
 
 import org.mockito.Mock;
-import org.molgenis.auth.User;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.core.ui.menu.Menu;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;

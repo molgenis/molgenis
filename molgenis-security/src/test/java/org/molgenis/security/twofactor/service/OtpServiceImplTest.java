@@ -1,7 +1,7 @@
 package org.molgenis.security.twofactor.service;
 
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeException;
+import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
 package org.molgenis.file.ingest.execution;
 
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

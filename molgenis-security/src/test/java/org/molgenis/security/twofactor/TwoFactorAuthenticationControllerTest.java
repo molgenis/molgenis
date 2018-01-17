@@ -1,11 +1,11 @@
 package org.molgenis.security.twofactor;
 
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
 import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProviderImpl;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProviderImpl;
 import org.molgenis.security.twofactor.service.*;
+import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

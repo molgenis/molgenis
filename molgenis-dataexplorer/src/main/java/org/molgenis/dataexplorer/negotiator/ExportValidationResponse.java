@@ -1,7 +1,7 @@
 package org.molgenis.dataexplorer.negotiator;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 import java.util.List;
 

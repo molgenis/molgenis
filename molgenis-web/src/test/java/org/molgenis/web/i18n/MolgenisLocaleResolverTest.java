@@ -2,9 +2,9 @@ package org.molgenis.web.i18n;
 
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.molgenis.auth.User;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.User;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.BeforeMethod;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 import static java.util.Locale.GERMAN;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 
 public class MolgenisLocaleResolverTest extends AbstractMolgenisSpringTest

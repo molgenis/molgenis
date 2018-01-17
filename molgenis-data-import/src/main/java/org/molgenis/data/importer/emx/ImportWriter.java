@@ -14,11 +14,11 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.transaction.annotation.Transactional;
 

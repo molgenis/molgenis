@@ -1,14 +1,15 @@
 package org.molgenis.bootstrap;
 
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
+import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
-import org.molgenis.data.jobs.JobBootstrapper;
+import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
+import org.molgenis.jobs.JobBootstrapper;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.style.BootstrapThemePopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;

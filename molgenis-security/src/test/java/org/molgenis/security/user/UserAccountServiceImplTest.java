@@ -1,6 +1,7 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.User;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.user.UserAccountServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -1,12 +1,13 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserAuthority;
+import org.molgenis.data.security.auth.UserAuthorityFactory;
+import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.UserService;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.WRITEMETA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;

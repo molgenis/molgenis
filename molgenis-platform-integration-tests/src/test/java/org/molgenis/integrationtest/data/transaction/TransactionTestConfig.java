@@ -2,7 +2,7 @@ package org.molgenis.integrationtest.data.transaction;
 
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
-import org.molgenis.data.transaction.PostgreSqlTransactionManager;
+import org.molgenis.data.postgresql.transaction.PostgreSqlTransactionManager;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
 import org.molgenis.data.transaction.TransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;

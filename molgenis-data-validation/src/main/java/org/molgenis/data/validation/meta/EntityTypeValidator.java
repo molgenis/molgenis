@@ -23,8 +23,8 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.molgenis.data.validation.meta.EntityTypeConstraint.*;
-import static org.molgenis.util.EntityUtils.asStream;
 
 /**
  * {@link EntityType} validator.

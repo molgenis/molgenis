@@ -1,6 +1,8 @@
 package org.molgenis.script;
 
 import org.molgenis.data.DataService;
+import org.molgenis.script.core.Script;
+import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 import static org.molgenis.script.ScriptPluginController.URI;
+import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.core.ScriptParameterMetaData.SCRIPT_PARAMETER;
 
 @Controller
 @RequestMapping(URI)

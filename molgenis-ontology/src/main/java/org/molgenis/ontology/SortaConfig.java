@@ -1,9 +1,9 @@
 package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
+import org.molgenis.ontology.core.ic.OntologyTermFrequencyServiceImpl;
+import org.molgenis.ontology.core.ic.TermFrequencyService;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
-import org.molgenis.ontology.ic.OntologyTermFrequencyServiceImpl;
-import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;

@@ -1,6 +1,6 @@
 package org.molgenis.python;
 
-import org.molgenis.data.MolgenisRuntimeException;
+import org.molgenis.util.MolgenisRuntimeException;
 
 @Deprecated // FIXME extend from CodedRuntimeException
 public class MolgenisPythonException extends MolgenisRuntimeException

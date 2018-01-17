@@ -1,8 +1,8 @@
 package org.molgenis.web.i18n;
 
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.i18n.LanguageService;
 import org.springframework.web.servlet.LocaleResolver;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.i18n.LanguageService.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;

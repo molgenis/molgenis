@@ -1,14 +1,14 @@
 package org.molgenis.metadata.manager.controller;
 
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
 import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.controller.VuePluginController;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

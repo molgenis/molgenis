@@ -2,8 +2,7 @@ package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.beacon.config.Beacon;
-
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 import javax.annotation.Nullable;
 

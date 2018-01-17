@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.parseInstant;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })

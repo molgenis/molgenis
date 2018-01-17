@@ -1,8 +1,8 @@
 package org.molgenis.data.index.job;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.model.JobExecution;
 
 /**
  * This entity is used to keep track of the status of the execution of a reindex job.

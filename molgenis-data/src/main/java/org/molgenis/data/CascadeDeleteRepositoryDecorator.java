@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
-import static org.molgenis.util.EntityUtils.asStream;
+import static org.molgenis.data.util.EntityUtils.asStream;
 
 public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {

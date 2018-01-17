@@ -1,7 +1,7 @@
 package org.molgenis.ontology.sorta.job;
 
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.jobs.TransactionalJob;
+import org.molgenis.jobs.Progress;
+import org.molgenis.jobs.TransactionalJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 

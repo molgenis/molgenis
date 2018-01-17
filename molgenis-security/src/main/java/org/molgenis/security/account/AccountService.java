@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import org.molgenis.auth.User;
+import org.molgenis.data.security.auth.User;
 
 public interface AccountService
 {

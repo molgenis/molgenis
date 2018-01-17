@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static java.time.ZoneId.systemDefault;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.MolgenisDateFormat.parseLocalDate;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
