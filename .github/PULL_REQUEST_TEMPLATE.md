@@ -6,3 +6,4 @@
 - [ ] (If you have changed REST API interface) view-swagger.ftl updated
 - [ ] Test plan template updated
 - [ ] Clean commits
+- [ ] Added Feature/Fix to release notes
