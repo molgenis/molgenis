@@ -6,6 +6,10 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
+/**
+ * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
+ */
+@Deprecated
 public class UiAnnotationException extends AnnotationException
 {
 	public UiAnnotationException(AnnotationException ae)
