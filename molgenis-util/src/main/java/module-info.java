@@ -10,4 +10,5 @@ module molgenis.util {
 	
 	exports org.molgenis.util;
 	exports org.molgenis.util.mail;
+	exports org.molgenis.util.stream;
 }

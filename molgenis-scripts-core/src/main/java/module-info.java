@@ -4,4 +4,6 @@ module molgenis.scripts.core {
 	requires guava;
 	requires freemarker;
 	requires jsr305;
+
+	exports org.molgenis.script.core;
 }
