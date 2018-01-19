@@ -6,4 +6,5 @@ module molgenis.security.core {
 	exports org.molgenis.security.core;
 	exports org.molgenis.security.core.runas;
 	exports org.molgenis.security.core.utils;
+	exports org.molgenis.security.core.token to molgenis.security;
 }
