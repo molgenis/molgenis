@@ -329,7 +329,7 @@
                                 </resources>
                             </configuration>
                         </execution>
-                        <!-- add sources created by jaxb -->
+                        <!-- add sources created by Google AutoValue -->
                         <execution>
                             <id>execution-annotations</id>
                             <phase>generate-sources</phase>
