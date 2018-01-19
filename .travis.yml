@@ -1,5 +1,5 @@
 language: java
-jdk: oraclejdk8
+jdk: oraclejdk9
 # Trusty dist needed for postgresql version 9.6
 dist: trusty
 # Caches downloaded libraries between builds
@@ -12,6 +12,9 @@ services:
   - postgresql
 addons:
   postgresql: '9.6'
+  apt:
+    packages:
+      - oracle-java9-installer
 # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
 sudo: true
 before_install:
