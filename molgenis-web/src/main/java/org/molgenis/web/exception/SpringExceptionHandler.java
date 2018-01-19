@@ -22,7 +22,6 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,20 +34,19 @@ public class SpringExceptionHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
 
-	@SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
-	@ExceptionHandler({ NoSuchRequestHandlingMethodException.class, NoHandlerFoundException.class })
+	@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod" })
+	@ExceptionHandler({ NoHandlerFoundException.class })
 	public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest)
 	{
 		return handleException(ex, httpServletRequest, NOT_FOUND, null);
 	}
 
-	@ExceptionHandler({ HttpRequestMethodNotSupportedException.class,
-			HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class,
-			MissingPathVariableException.class, MissingServletRequestParameterException.class,
-			ServletRequestBindingException.class, ConversionNotSupportedException.class, TypeMismatchException.class,
-			HttpMessageNotReadableException.class, HttpMessageNotWritableException.class,
-			MethodArgumentNotValidException.class, MissingServletRequestPartException.class, BindException.class,
-			AsyncRequestTimeoutException.class })
+	@ExceptionHandler({ HttpRequestMethodNotSupportedException.class, HttpMediaTypeNotSupportedException.class,
+			HttpMediaTypeNotAcceptableException.class, MissingPathVariableException.class,
+			MissingServletRequestParameterException.class, ServletRequestBindingException.class,
+			ConversionNotSupportedException.class, TypeMismatchException.class, HttpMessageNotReadableException.class,
+			HttpMessageNotWritableException.class, MethodArgumentNotValidException.class,
+			MissingServletRequestPartException.class, BindException.class, AsyncRequestTimeoutException.class })
 	public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod)
 	{
 		HttpStatus status;
@@ -67,13 +65,15 @@ public class SpringExceptionHandler
 			status = HttpStatus.NOT_ACCEPTABLE;
 			return handleException(ex, handlerMethod, status, null);
 		}
-		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException || ex instanceof HttpMessageNotWritableException)
+		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException
+				|| ex instanceof HttpMessageNotWritableException)
 		{
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 			return handleException(ex, handlerMethod, status, null);
 		}
 		else if (ex instanceof MissingServletRequestParameterException || ex instanceof ServletRequestBindingException
-				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException || ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
+				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException
+				|| ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
 				|| ex instanceof BindException)
 		{
 			status = HttpStatus.BAD_REQUEST;
