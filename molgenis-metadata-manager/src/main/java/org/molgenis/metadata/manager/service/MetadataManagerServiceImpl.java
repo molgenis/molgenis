@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.service;
 
 import com.google.common.collect.ImmutableList;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -49,7 +49,7 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		EntityType entityType = metadataService.getEntityTypeBypassingRegistry(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(String.format("Unknown EntityType [%s]", entityTypeId));
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		return createEntityTypeResponse(entityType, metadataService.getReferringAttributes(entityTypeId)
 																   .filter(EntityTypeUtils::isSingleReferenceType)

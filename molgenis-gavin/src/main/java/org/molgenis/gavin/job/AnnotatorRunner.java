@@ -1,6 +1,5 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.utils.CmdLineAnnotatorUtils;
 import org.molgenis.data.annotation.core.utils.EffectStructureConverter;
@@ -32,7 +31,7 @@ public class AnnotatorRunner
 	}
 
 	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
-			throws IOException, MolgenisInvalidFormatException
+			throws IOException
 	{
 		CmdLineAnnotatorUtils.annotate(annotator, vcfAttributes, entityTypeFactory, attributeFactory,
 				effectStructureConverter, inputFile, outputFile, emptyList(), update);

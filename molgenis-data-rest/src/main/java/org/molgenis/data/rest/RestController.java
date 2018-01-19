@@ -25,6 +25,7 @@ import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenParam;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.util.MolgenisRuntimeException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -231,7 +232,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -254,7 +255,7 @@ public class RestController
 
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -503,7 +504,7 @@ public class RestController
 	{
 		if (entityMap == null)
 		{
-			throw new UnknownEntityException("Missing entity in body");
+			throw new MolgenisRuntimeException("Missing entity in body");
 		}
 
 		createInternal(entityTypeId, entityMap, response);
@@ -564,14 +565,13 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		Attribute attr = entityType.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' does not exist");
+			throw new UnknownAttributeException(entityType, attributeName);
 		}
 
 		if (attr.isReadOnly())
@@ -901,14 +901,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(MolgenisReferencedEntityException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	private void updateInternal(String entityTypeId, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
@@ -921,7 +913,7 @@ public class RestController
 		Entity existing = dataService.findOneById(entityTypeId, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
@@ -989,14 +981,14 @@ public class RestController
 		Attribute attr = meta.getAttribute(refAttributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(entityTypeId + " does not have an attribute named " + refAttributeName);
+			throw new UnknownAttributeException(meta, refAttributeName);
 		}
 
 		// Get the entity
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),

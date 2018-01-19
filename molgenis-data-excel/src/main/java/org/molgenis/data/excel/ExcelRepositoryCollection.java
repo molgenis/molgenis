@@ -6,7 +6,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.file.processor.TrimProcessor;
@@ -16,6 +15,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
+import org.molgenis.util.MolgenisRuntimeException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
@@ -38,19 +38,17 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private EntityTypeFactory entityTypeFactory;
 	private AttributeFactory attributeFactory;
 
-	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
+	public ExcelRepositoryCollection(File file) throws IOException
 	{
 		this(file, new TrimProcessor());
 	}
 
-	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors)
-			throws IOException, MolgenisInvalidFormatException
+	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws IOException
 	{
 		this(file.getName(), new FileInputStream(file), cellProcessors);
 	}
 
-	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
-			throws IOException, MolgenisInvalidFormatException
+	public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors) throws IOException
 	{
 		super(ExcelFileExtensions.getExcel(), cellProcessors);
 		this.name = name;
@@ -60,7 +58,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		}
 		catch (InvalidFormatException e)
 		{
-			throw new MolgenisInvalidFormatException(e.getMessage());
+			throw new MolgenisRuntimeException(e.getMessage());
 		}
 	}
 

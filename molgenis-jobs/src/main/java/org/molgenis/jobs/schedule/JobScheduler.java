@@ -78,7 +78,7 @@ public class JobScheduler
 		ScheduledJob scheduledJob = dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
 		if (scheduledJob == null)
 		{
-			throw new UnknownEntityException(format("Unknown ScheduledJob entity with id ''{0}''", scheduledJobId));
+			throw new UnknownEntityException(dataService.getEntityType(SCHEDULED_JOB), scheduledJobId);
 		}
 		return scheduledJob;
 	}
