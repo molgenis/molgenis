@@ -25,5 +25,10 @@ Disconnected from server
 Added JAVA_ENDORSED_DIRS with empty value, didn't help.
 
 Upgraded to tomcat 8.5.24, tomcat starts!
+Previously we ran into trouble where resources don't get updated if you are live editing them.
+Still not fixed.
+In `conf/context.xml` added `<Resources cachingAllowed="false"/>` to the `<Context>` element.
+Didn't help.
 
-
+## Spring 5
+Spring 4 gives errors with
