@@ -13,7 +13,282 @@
 
     <name>api-tests</name>
 
+    <profiles>
+        <!-- Profile create-it-db (active by default) creates a new postgres database and drops it after running the tests -->
+        <profile>
+            <id>create-it-db</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- override the it db name and create new database for the test run -->
+                <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
+                <it_db_name>molgenis_apitest_${maven.build.timestamp}</it_db_name>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sql-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create postgres integration database</id>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>drop postgres integration database</id>
+                                <phase>post-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- Profile create-it-es (active by default) creates new elasticsearch instance and drops it after the tests -->
+        <profile>
+            <id>create-it-es</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- override the cluster name for the test run -->
+                <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
+                <elasticsearch.cluster.name>apitest${maven.build.timestamp}</elasticsearch.cluster.name>
+                <elasticsearch.transport.addresses>localhost:${elasticsearch.tcp.port}
+                </elasticsearch.transport.addresses>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- Reserve network ports -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>reserve-network-port</id>
+                                <goals>
+                                    <goal>reserve-network-port</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Start and stop elasticsearch instance -->
+                    <plugin>
+                        <groupId>com.github.alexcojocaru</groupId>
+                        <artifactId>elasticsearch-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-elasticsearch</id>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>stop-elasticsearch</id>
+                                <phase>post-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources/</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>home/**</include>
+                    <include>tomcat/**</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources/</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>home/**</exclude>
+                    <exclude>tomcat/**</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+        <plugins>
+            <!-- Reserve greenmail port -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-mail-network-ports</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>greenmail.smtp.port</portName>
+                                <portName>greenmail.pop3.port</portName>
+                            </portNames>
+                            <randomPort>true</randomPort>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>reserve-cargo-network-ports</id>
+                        <goals><goal>reserve-network-port</goal></goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>cargo.rmi.port</portName>
+                                <portName>cargo.servlet.port</portName>
+                                <portName>cargo.tomcat.ajp.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Dependency plugin extracts elasticsearch configuration resources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>${project.groupId}</includeGroupIds>
+                            <includeArtifactIds>molgenis-data-elasticsearch</includeArtifactIds>
+                            <excludeTransitive>true</excludeTransitive>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                            <includes>conf/**</includes>
+                            <type>test-jar</type>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Cargo plugin runs Tomcat -->
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <configuration>
+                    <container>
+                        <containerId>tomcat7x</containerId>
+                        <zipUrlInstaller>
+                            <url>http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip</url>
+                        </zipUrlInstaller>
+                        <systemProperties>
+                            <molgenis.home>${project.build.testOutputDirectory}/home</molgenis.home>
+                        </systemProperties>
+                    </container>
+                    <configuration>
+                        <configfiles>
+                            <configfile>
+                                <file>${project.build.testOutputDirectory}/tomcat/mail.xml</file>
+                                <todir>conf/Catalina/localhost</todir>
+                            </configfile>
+                        </configfiles>
+                        <properties>
+                            <cargo.start.jvmargs>-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled</cargo.start.jvmargs>
+                            <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+                            <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
+                            <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+                        </properties>
+                    </configuration>
+                    <deployables>
+                        <deployable>
+                            <groupId>com.icegreen</groupId>
+                            <artifactId>greenmail-webapp</artifactId>
+                            <type>war</type>
+                            <properties>
+                                <context>mail</context>
+                            </properties>
+                        </deployable>
+                    </deployables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-server</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>deploy-molgenis</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <deployables>
+                                <deployable>
+                                    <groupId>org.molgenis</groupId>
+                                    <artifactId>molgenis-app</artifactId>
+                                    <type>war</type>
+                                    <properties>
+                                        <context>ROOT</context>
+                                    </properties>
+                                    <pingUrlPath>/menu/main/home</pingUrlPath>
+                                    <pingTimeout>120000</pingTimeout>
+                                </deployable>
+                            </deployables>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-server</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Failsafe plugin runs integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.20.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <REST_TEST_HOST>http://localhost:${cargo.servlet.port}</REST_TEST_HOST>
+                    </systemPropertyVariables>
+                    <excludes>
+                        <!-- Only runs if specific data folder and file are specified -->
+                        <exclude>**/ImportPublicDataIT.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-app</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -58,6 +333,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>3.0.2</version>
@@ -78,6 +360,13 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail-webapp</artifactId>
+            <version>1.5.5</version>
+            <type>war</type>
             <scope>test</scope>
         </dependency>
     </dependencies>

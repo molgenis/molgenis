@@ -84,6 +84,18 @@
         <mockito.version>2.7.22</mockito.version>
         <hamcrest-all.version>1.3</hamcrest-all.version>
         <awaitility.version>3.0.0</awaitility.version>
+
+        <!-- Integration test properties -->
+        <cargo-plugin.version>1.6.6</cargo-plugin.version>
+        <tomcat.version>7.0.78</tomcat.version>
+        <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
+        <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
+        <!-- if profiles are inactive, set these props to use local infrastructure -->
+        <it_db_name>molgenis_test</it_db_name>
+        <it_db_user>molgenis</it_db_user>
+        <it_db_password>molgenis</it_db_password>
+        <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
+        <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     </properties>
 
     <distributionManagement>
@@ -98,6 +110,7 @@
     </distributionManagement>
 
     <profiles>
+        <!-- [release] Release to sonatype -->
         <profile>
             <id>release</id>
             <build>
@@ -179,6 +192,7 @@
                 </plugins>
             </build>
         </profile>
+        <!-- [skip-js-compile] Skip javascript compilation to speed up the build -->
         <profile>
             <id>skip-js-compile</id>
             <properties>
@@ -357,12 +371,14 @@
                             <goals>
                                 <goal>reserve-network-port</goal>
                             </goals>
-                            <phase>process-resources</phase>
+                            <!-- disabled by default unless child pom binds it to existing phase -->
+                            <phase>none</phase>
                             <configuration>
-                                <minPortNumber>8080</minPortNumber>
                                 <portNames>
-                                    <portName>jetty.http.port</portName>
+                                    <portName>elasticsearch.tcp.port</portName>
+                                    <portName>elasticsearch.http.port</portName>
                                 </portNames>
+                                <randomPort>true</randomPort>
                             </configuration>
                         </execution>
                         <execution>
@@ -564,6 +580,94 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <!-- SQL plugin -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sql-maven-plugin</artifactId>
+                    <version>${sql-maven-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                            <version>${postgres.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <driver>org.postgresql.Driver</driver>
+                        <url>jdbc:postgresql://localhost/</url>
+                        <username>${it_db_user}</username>
+                        <password>${it_db_password}</password>
+                        <forceMojoExecution>true</forceMojoExecution>
+                        <onError>continue</onError>
+                        <autocommit>true</autocommit>
+                        <skip>${skipTests}</skip>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>create postgres integration database</id>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <!-- skip by default unless child pom binds it to existing phase -->
+                            <phase>none</phase>
+                            <configuration>
+                                <sqlCommand>CREATE DATABASE ${it_db_name};</sqlCommand>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>drop postgres integration database</id>
+                            <goals>
+                                <goal>execute</goal>
+                            </goals>
+                            <!-- skip by default unless child pom binds it to existing phase -->
+                            <phase>none</phase>
+                            <configuration>
+                                <sqlCommand>DROP DATABASE ${it_db_name};</sqlCommand>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Elasticsearch plugin start and stop elasticsearch instance -->
+                <plugin>
+                    <groupId>com.github.alexcojocaru</groupId>
+                    <artifactId>elasticsearch-maven-plugin</artifactId>
+                    <version>${elasticsearch-maven-plugin.version}</version>
+                    <configuration>
+                        <version>${elasticsearch.version}</version>
+                        <clusterName>${elasticsearch.cluster.name}</clusterName>
+                        <pathConf>${project.build.directory}/test-classes/conf/elasticsearch</pathConf>
+                        <transportPort>${elasticsearch.tcp.port}</transportPort>
+                        <httpPort>${elasticsearch.http.port}</httpPort>
+                        <!-- on build server, concurrent launches are slow to start -->
+                        <timeout>120</timeout>
+                        <skip>${skipTests}</skip>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>start-elasticsearch</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>runforked</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>stop-elasticsearch</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Cargo plugin stops and starts Tomcat -->
+                <plugin>
+                    <groupId>org.codehaus.cargo</groupId>
+                    <artifactId>cargo-maven2-plugin</artifactId>
+                    <version>${cargo-plugin.version}</version>
+                    <configuration>
+                        <skip>${skipTests}</skip>
+                    </configuration>
                 </plugin>
                 <!-- minify css/js -->
                 <plugin>

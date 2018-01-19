@@ -65,7 +65,7 @@ public class RestControllerV2APIIT
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
@@ -376,7 +376,7 @@ public class RestControllerV2APIIT
 				put(API_V2 + "base_v2APITest1/label").then().log().all().statusCode(OKE);
 	}
 
-	@Test
+	@Test(enabled = false) //TODO: enable when PropertiesSource bug is fixed
 	public void testGetI18nStrings()
 	{
 		ValidatableResponse response = given().log()
