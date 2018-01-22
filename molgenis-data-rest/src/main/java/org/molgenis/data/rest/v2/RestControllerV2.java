@@ -99,12 +99,6 @@ public class RestControllerV2
 		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityTypeId + "'");
 	}
 
-	static UnknownAttributeException createUnknownAttributeException(String entityTypeId, String attributeName)
-	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityTypeId + "'");
-	}
-
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityTypeId,
 			String attributeName)
 	{
@@ -448,7 +442,7 @@ public class RestControllerV2
 			Attribute attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw createUnknownAttributeException(entityTypeId, attributeName);
+				throw new UnknownAttributeException(meta, attributeName);
 			}
 
 			if (attr.isReadOnly())
@@ -609,15 +603,6 @@ public class RestControllerV2
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 		LOG.debug("Data access exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

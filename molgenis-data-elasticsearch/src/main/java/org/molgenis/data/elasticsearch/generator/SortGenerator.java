@@ -48,7 +48,7 @@ class SortGenerator
 		Attribute sortAttribute = entityType.getAttribute(attributeName);
 		if (sortAttribute == null)
 		{
-			throw new UnknownAttributeException(attributeName);
+			throw new UnknownAttributeException(entityType, attributeName);
 		}
 		String sortField = getSortField(sortAttribute);
 		SortDirection sortDirection = getSortDirection(order.getDirection());
