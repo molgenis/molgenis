@@ -3,12 +3,8 @@
 import Vue from 'vue'
 import App from './App'
 import store from './store'
-import router from './router/index'
-import { sync } from 'vuex-router-sync'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 import { INITIAL_STATE } from './store/state'
-
-sync(store, router)
 
 /* eslint-disable no-new */
 Vue.use(i18n, {
@@ -20,7 +16,6 @@ Vue.use(i18n, {
     new Vue({
       el: '#app',
       store,
-      router,
       template: '<App />',
       components: {App}
     })
