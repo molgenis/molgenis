@@ -18,16 +18,11 @@
     <#if googleSignIn><meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}"></#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
-
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
-
-        <#list css as css_file_name>
-            <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
-        </#list>
 
         <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
 
@@ -91,6 +86,11 @@
         <#-- Make footer sticky -->
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/footer.css"/>" type="text/css">
     </#if>
+
+    <#-- Load css specified by plugins -->
+    <#list css as css_file_name>
+        <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
+    </#list>
 
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
