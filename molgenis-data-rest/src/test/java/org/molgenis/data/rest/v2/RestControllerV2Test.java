@@ -864,16 +864,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	/**
-	 * createUnknownAttributeException
-	 */
-	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
-	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
-				"type:entity attribute:email2");
-	}
-
-	/**
 	 * createMolgenisDataAccessExceptionReadOnlyAttribute
 	 */
 	@Test
