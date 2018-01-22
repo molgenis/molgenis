@@ -7,9 +7,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 public class UnknownEntityExceptionTest extends ExceptionMessageTest
 {
 	@Mock
@@ -19,11 +16,6 @@ public class UnknownEntityExceptionTest extends ExceptionMessageTest
 	public void setUp()
 	{
 		messageSource.addMolgenisNamespaces("data");
-		when(entityType.getLabel(any())).then((invocation ->
-		{
-			String language = invocation.getArgument(0);
-			return language.equals("en") ? "MyEntityType" : "MijnEntiteitSoort";
-		}));
 	}
 
 	@Test(dataProvider = "languageMessageProvider")
@@ -37,8 +29,8 @@ public class UnknownEntityExceptionTest extends ExceptionMessageTest
 	@Override
 	public Object[][] languageMessageProvider()
 	{
-		Object[] enParams = { "en", "Unknown repository 'MyRepository'." };
-		Object[] nlParams = { "nl", "Onbekende opslagplaats 'MyRepository'." };
+		Object[] enParams = { "en", "Unknown entity 'entityType' of entity type 'MyEntity'." };
+		Object[] nlParams = { "nl", "Onbekende entiteit 'entityType' van entiteitsoort 'MyEntity'." };
 		return new Object[][] { enParams, nlParams };
 	}
 }
