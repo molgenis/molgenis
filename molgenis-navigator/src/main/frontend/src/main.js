@@ -1,4 +1,3 @@
-import 'es6-promise/auto'
 import Vue from 'vue'
 import App from './App'
 import { sync } from 'vuex-router-sync'
