@@ -1,7 +1,7 @@
 package org.molgenis.oneclickimporter.config;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.i18n.PropertiesMessageSource;
+import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
@@ -55,9 +55,7 @@ public class OneClickImporterConfig
 					String packageId = entityTypes.get(0).getPackage().getId();
 					oneClickImportJobExecution.setPackage(packageId);
 
-					String labels = entityTypes.stream()
-											   .map(EntityType::getLabel)
-											   .collect(Collectors.joining(","));
+					String labels = entityTypes.stream().map(EntityType::getLabel).collect(Collectors.joining(","));
 
 					progress.status(format("Created table(s): %s", labels));
 					return entityTypes;

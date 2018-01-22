@@ -570,8 +570,7 @@ public class RestController
 		Attribute attr = entityType.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' does not exist");
+			throw new UnknownAttributeException(entityType, attributeName);
 		}
 
 		if (attr.isReadOnly())
@@ -824,14 +823,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(UnknownAttributeException.class)
-	@ResponseStatus(NOT_FOUND)
-	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
 	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
@@ -989,7 +980,7 @@ public class RestController
 		Attribute attr = meta.getAttribute(refAttributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(entityTypeId + " does not have an attribute named " + refAttributeName);
+			throw new UnknownAttributeException(meta, refAttributeName);
 		}
 
 		// Get the entity

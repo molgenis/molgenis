@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.util.matcher.ELRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -94,9 +95,9 @@ class ExceptionHandlerUtils
 
 	private static ErrorMessageResponse createErrorMessageResponse(Exception e, String errorCode)
 	{
-		if (e instanceof BindingResult)
+		if (e instanceof Errors)
 		{
-			return getErrorMessageResponse((BindingResult) e);
+			return getErrorMessageResponse((Errors) e);
 		}
 		else if (e instanceof MethodArgumentNotValidException)
 		{
@@ -108,18 +109,18 @@ class ExceptionHandlerUtils
 		}
 	}
 
-	private static ErrorMessageResponse getErrorMessageResponse(BindingResult bindingResult)
+	private static ErrorMessageResponse getErrorMessageResponse(Errors errors)
 	{
 		List<ErrorMessageResponse.ErrorMessage> errorMessages = newArrayList();
 		Locale locale = LocaleContextHolder.getLocale();
 		MessageSource messageSource = MessageSourceHolder.getMessageSource();
-		for (ObjectError objectError : bindingResult.getGlobalErrors())
+		for (ObjectError objectError : errors.getGlobalErrors())
 		{
 			String message = messageSource.getMessage("org.molgenis.web.exception.ObjectError",
 					new Object[] { objectError.getObjectName(), objectError }, locale);
 			errorMessages.add(new ErrorMessageResponse.ErrorMessage(message, objectError.getCode()));
 		}
-		for (FieldError fieldError : bindingResult.getFieldErrors())
+		for (FieldError fieldError : errors.getFieldErrors())
 		{
 			String message = messageSource.getMessage("org.molgenis.web.exception.FieldError",
 					new Object[] { fieldError.getField(), fieldError.getObjectName(), fieldError }, locale);
