@@ -823,14 +823,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(UnknownAttributeException.class)
-	@ResponseStatus(NOT_FOUND)
-	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
 	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
