@@ -54,9 +54,9 @@
         <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
-        <spring.version>4.3.10.RELEASE</spring.version>
-        <spring.security.version>4.2.3.RELEASE</spring.security.version>
-        <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
+        <spring.version>5.0.2.RELEASE</spring.version>
+        <spring.security.version>5.0.0.RELEASE</spring.security.version>
+        <hibernate.validator.version>6.0.7.Final</hibernate.validator.version>
         <httpclient.version>4.5.3</httpclient.version>
         <google.auto-value.version>1.4.1</google.auto-value.version>
         <caffeine.version>2.3.5</caffeine.version>
@@ -70,10 +70,10 @@
         <postgres.version>9.4.1211</postgres.version>
         <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
         <snakeyaml.version>1.15</snakeyaml.version>
-        <jackson-annotations.version>2.8.8</jackson-annotations.version>
-        <jackson-core.version>2.8.8</jackson-core.version>
-        <jackson-databind.version>2.8.8.1</jackson-databind.version>
-        <javax-servlet-api.version>3.0.1</javax-servlet-api.version>
+        <jackson-annotations.version>2.9.3</jackson-annotations.version>
+        <jackson-core.version>2.9.3</jackson-core.version>
+        <jackson-databind.version>2.9.3</jackson-databind.version>
+        <javax-servlet-api.version>3.1.0</javax-servlet-api.version>
         <freemarker.version>2.3.23</freemarker.version>
         <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
@@ -872,15 +872,6 @@
                 <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
@@ -888,15 +879,6 @@
                 <version>${spring.security.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -924,7 +906,7 @@
                 <version>${apache.commons.lang.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
@@ -961,11 +943,6 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
