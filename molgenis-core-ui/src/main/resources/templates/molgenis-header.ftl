@@ -81,10 +81,10 @@
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
         <#-- Add spacing to body to show content below fixed-top navigation bar -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/menu/menu.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/menu/fixed-top-menu.css"/>" type="text/css">
 
         <#-- Make footer sticky -->
-        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/footer.css"/>" type="text/css">
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
     </#if>
 
     <#-- Load css specified by plugins -->
