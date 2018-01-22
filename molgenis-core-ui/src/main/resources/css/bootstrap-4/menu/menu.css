@@ -1,4 +1,8 @@
 body > .container-fluid {
-    padding-top: 60px;
-    margin-bottom: 6rem; /* #footer-container.height + 1rem for spacing */
+    padding-top: 80px;
 }
+
+nav {
+    font-size: 14px;
+}
+

@@ -87,6 +87,9 @@
 
         <#-- Add spacing to body to show content below fixed-top navigation bar -->
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/menu/menu.css"/>" type="text/css">
+
+        <#-- Make footer sticky -->
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/footer.css"/>" type="text/css">
     </#if>
 
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
