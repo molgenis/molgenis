@@ -11,7 +11,7 @@ describe('Settings.vue', () => {
   it('should display settings name', () => {
     expect(Settings.name).to.equal('Settings')
   })
-  it('should contains created-method content', () => {
+  it('should contain created-method content', () => {
     const mockDispatch = td.function('dispatch')
     Settings.$store =
       {
@@ -20,7 +20,7 @@ describe('Settings.vue', () => {
     Settings.created()
     td.verify(mockDispatch(GET_SETTINGS))
   })
-  it('should contains computed-method content', () => {
+  it('should contain computed-method content', () => {
     const actions = {
       '__GET_SETTINGS__': function () {}
     }
