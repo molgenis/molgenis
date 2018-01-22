@@ -21,4 +21,5 @@
     <script type=text/javascript src="<@resource_href "/js/metadata-manager/manifest.js"/>"></script>
     <script type=text/javascript src="<@resource_href "/js/metadata-manager/vendor.js"/>"></script>
     <script type=text/javascript src="<@resource_href "/js/metadata-manager/app.js"/>"></script>
-<@footer/>
+
+<@footer version/>
