@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.transaction.UnknownRepositoryCollectionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
