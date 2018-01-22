@@ -70,10 +70,6 @@
   .navigator-path .breadcrumb {
     background-color: transparent;
   }
-
-  .navigator-search {
-    margin-top: 2rem;
-  }
 </style>
 
 <script>
