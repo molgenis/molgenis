@@ -1,15 +1,13 @@
 <template>
-      <div id="app" class="col app-container">
-        <router-view></router-view>
-      </div>
+  <div id="app" class="metadata-manager-container">
+    <router-view></router-view>
+  </div>
 </template>
 
 <style>
-
-  .app-container {
+  .metadata-manager-container {
     padding-top: 40px
   }
-
 </style>
 
 <script>
