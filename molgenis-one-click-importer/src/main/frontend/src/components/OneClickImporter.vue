@@ -1,9 +1,8 @@
 <template>
   <div>
-
     <div class="row">
       <div class="col-md-12">
-        <form id="upload-form" v-on:submit.prevent class="form">
+        <form id="upload-form" @submit.prevent class="form">
           <div class="form-group">
             <label for="file-input">{{ 'import-input-label' | i18n }}</label>
             <input
