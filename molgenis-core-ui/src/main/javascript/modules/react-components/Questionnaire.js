@@ -128,14 +128,21 @@ var Questionnaire = React.createClass({
             var attrName = arr[i].name;
             var attr = this.state.entity.allAttributes[attrName];
 
-            //Set value of attribute with visibleExpression that is not visible to null
-            if (attr.visibleExpression && evalScript(attr.visibleExpression, values) === false) {
-                arr[i].value = null;
-            }
-
             //Set status to SUBMITTED
             if (attrName === 'status') {
                 arr[i].value = 'SUBMITTED';
+            }
+
+            if (attrName === 'submitDate') {
+              // Generate submit timestamp
+              var currentTime = moment().toISOString();
+              arr[i].value = currentTime
+            }
+
+            // Set value of attribute with visibleExpression that is not visible to null
+            // Ignore the submitDate attribute. This should never be set to null
+            if (attr.visibleExpression && evalScript(attr.visibleExpression, values) === false && attrName !== 'submitDate') {
+                arr[i].value = null;
             }
         }
     },
