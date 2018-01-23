@@ -3,20 +3,19 @@ package org.molgenis.oneclickimporter.controller;
 import com.google.common.io.Resources;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.JobExecutor;
+import org.molgenis.core.ui.menu.Menu;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
 import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.GsonConfig;
-import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -25,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,7 +35,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
@@ -56,7 +58,7 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	private MenuReaderService menuReaderService;
 
 	@Mock
-	private LanguageService languageService;
+	private LocaleResolver localeResolver;
 
 	@Mock
 	private AppSettings appSettings;
@@ -82,13 +84,12 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 	public void before()
 	{
 		OneClickImporterController oneClickImporterController = new OneClickImporterController(menuReaderService,
-				languageService, appSettings, userAccountService, fileStore, oneClickImportJobExecutionFactory,
-				jobExecutor);
+				appSettings, userAccountService, fileStore, oneClickImportJobExecutionFactory, jobExecutor);
 
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER)).thenReturn("/test-path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(languageService.getCurrentUserLanguageCode()).thenReturn("nl");
+		when(localeResolver.resolveLocale(any())).thenReturn(new Locale("nl"));
 		when(appSettings.getLanguageCode()).thenReturn("en");
 		User user = mock(User.class);
 		when(user.isSuperuser()).thenReturn(false);
@@ -106,7 +107,9 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
 		stringConverter.setWriteAcceptCharset(false);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(oneClickImporterController)
-				.setMessageConverters(gsonHttpMessageConverter, stringConverter).build();
+								 .setLocaleResolver(localeResolver)
+								 .setMessageConverters(gsonHttpMessageConverter, stringConverter)
+								 .build();
 	}
 
 	/**

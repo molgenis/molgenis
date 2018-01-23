@@ -4,12 +4,13 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-questionnaires</artifactId>
     <packaging>jar</packaging>
 
     <name>questionnaires</name>
+    <description>Plugin module for gathering information from respondents using series of questions.</description>
 
     <build>
         <plugins>

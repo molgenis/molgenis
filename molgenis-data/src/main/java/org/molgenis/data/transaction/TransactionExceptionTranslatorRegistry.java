@@ -20,7 +20,7 @@ public class TransactionExceptionTranslatorRegistry
 		transactionExceptionTranslators = Sets.newLinkedHashSetWithExpectedSize(1);
 	}
 
-	Collection<TransactionExceptionTranslator> getTransactionExceptionTranslators()
+	public Collection<TransactionExceptionTranslator> getTransactionExceptionTranslators()
 	{
 		return Collections.unmodifiableSet(transactionExceptionTranslators);
 	}

@@ -1,13 +1,13 @@
 package org.molgenis.security.permission;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
@@ -27,12 +27,12 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })

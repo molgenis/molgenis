@@ -2,14 +2,13 @@ package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.support.Href;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 
@@ -18,6 +17,7 @@ import java.util.List;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 class EntityTypeResponseV2
 {
@@ -37,25 +37,24 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService)
 	{
-		this(meta, null, permissionService, dataService, languageService);
+		this(meta, null, permissionService, dataService);
 	}
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, PermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+			DataService dataService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
-		this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
-		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
+		this.description = meta.getDescription(getCurrentUserLanguageCode());
+		this.label = meta.getLabel(getCurrentUserLanguageCode());
 
 		// filter attribute parts
 		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
@@ -82,11 +81,10 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = null;
 			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService,
-					languageService);
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService);
 		}));
 
-		languageCode = languageService.getCurrentUserLanguageCode();
+		languageCode = getCurrentUserLanguageCode();
 
 		Attribute labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;

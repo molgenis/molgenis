@@ -2,9 +2,9 @@ package org.molgenis.oneclickimporter.job;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.file.FileStore;
+import org.molgenis.jobs.Progress;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -19,7 +19,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.util.FileExtensionUtils.findExtensionFromPossibilities;
+import static org.molgenis.data.file.util.FileExtensionUtils.findExtensionFromPossibilities;
 import static org.molgenis.util.file.ZipFileUtil.unzip;
 
 @Component

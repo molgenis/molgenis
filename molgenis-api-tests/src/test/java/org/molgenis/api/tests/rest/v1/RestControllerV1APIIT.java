@@ -62,7 +62,7 @@ public class RestControllerV1APIIT
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
@@ -844,8 +844,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .
-					   body("errors[0].message", Matchers.equalTo("Unknown entity [base_APITest3]"));
+			   .body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	@Test
@@ -879,8 +878,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .
-					   body("errors[0].message", Matchers.equalTo("Unknown entity [base_APITest4]"));
+			   .body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)

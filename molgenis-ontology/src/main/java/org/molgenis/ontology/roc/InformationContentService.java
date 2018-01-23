@@ -10,11 +10,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
-import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
+import org.molgenis.semanticsearch.string.Stemmer;
 
 import java.math.BigDecimal;
 import java.util.Arrays;

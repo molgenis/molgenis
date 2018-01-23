@@ -1,11 +1,11 @@
 package org.molgenis.fair.controller;
 
 import org.mockito.Mockito;
+import org.molgenis.core.ui.converter.RdfConverter;
+import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.ui.converter.RdfConverter;
-import org.molgenis.util.GsonConfig;
-import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;

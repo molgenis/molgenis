@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.util.FileExtensionUtils;
+import org.molgenis.data.file.util.FileExtensionUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 

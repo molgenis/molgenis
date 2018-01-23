@@ -77,8 +77,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 		EntityType entityType = findOneById(id);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(
-					format("Unknown entity meta data [%s] with id [%s]", getName(), id.toString()));
+			throw new UnknownEntityTypeException(id.toString());
 		}
 		deleteEntityType(entityType);
 	}

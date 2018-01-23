@@ -1,14 +1,14 @@
 package org.molgenis.security.twofactor.service;
 
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretMetaData;
-import org.molgenis.security.user.UserService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

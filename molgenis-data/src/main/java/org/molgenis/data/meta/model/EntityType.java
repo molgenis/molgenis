@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.i18n.Labeled;
 import org.molgenis.util.UnexpectedEnumException;
 
 import javax.annotation.Nullable;
@@ -34,7 +35,7 @@ import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
  * EntityType defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
  */
-public class EntityType extends StaticEntity
+public class EntityType extends StaticEntity implements Labeled
 {
 	private transient Map<String, Attribute> cachedOwnAttrs;
 	private transient Boolean cachedHasAttrWithExpression;

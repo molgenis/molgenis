@@ -1,16 +1,16 @@
 package org.molgenis.data.index.job;
 
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.jobs.model.JobPackage;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 /**
  * This entity is used to track the progress of the execution of a IndexActionJob.

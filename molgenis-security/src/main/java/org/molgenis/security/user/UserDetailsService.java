@@ -2,8 +2,8 @@ package org.molgenis.security.user;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -20,10 +20,10 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {

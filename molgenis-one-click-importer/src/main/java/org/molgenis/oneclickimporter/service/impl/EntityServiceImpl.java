@@ -7,13 +7,13 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

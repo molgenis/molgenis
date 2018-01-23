@@ -6,17 +6,16 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
+import org.molgenis.core.ui.data.rsql.MolgenisRSQL;
+import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
-import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.data.support.DefaultEntityCollection;
-import org.molgenis.data.support.Href;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -24,10 +23,10 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenParam;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.web.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
@@ -40,7 +39,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -60,14 +58,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
-import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -82,7 +80,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author erwin
  */
-@Controller
+@org.springframework.web.bind.annotation.RestController
 @RequestMapping(BASE_URI)
 public class RestController
 {
@@ -99,12 +97,10 @@ public class RestController
 	private final UserAccountService userAccountService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
-	private final LanguageService languageService;
 
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
 			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
-			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService,
-			LanguageService languageService)
+			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService)
 	{
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.dataService = requireNonNull(dataService);
@@ -114,14 +110,12 @@ public class RestController
 		this.permissionService = requireNonNull(permissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
-		this.languageService = requireNonNull(languageService);
 	}
 
 	/**
 	 * Checks if an entity exists.
 	 */
 	@GetMapping(value = "/{entityTypeId}/exist", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public boolean entityExists(@PathVariable("entityTypeId") String entityTypeId)
 	{
 		try
@@ -129,7 +123,7 @@ public class RestController
 			dataService.getRepository(entityTypeId);
 			return true;
 		}
-		catch (UnknownEntityException e)
+		catch (UnknownEntityTypeException e)
 		{
 			return false;
 		}
@@ -143,7 +137,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@GetMapping(value = "/{entityTypeId}/meta", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityTypeResponse retrieveEntityType(@PathVariable("entityTypeId") String entityTypeId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -152,8 +145,11 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
-		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, permissionService, dataService,
-				languageService);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
+		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, permissionService, dataService);
 	}
 
 	/**
@@ -164,7 +160,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@PostMapping(value = "/{entityTypeId}/meta", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityTypeResponse retrieveEntityTypePost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityTypeRequest request)
 	{
@@ -172,8 +167,11 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityType meta = dataService.getEntityType(entityTypeId);
-		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, permissionService, dataService,
-				languageService);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
+		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, permissionService, dataService);
 	}
 
 	/**
@@ -182,7 +180,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@GetMapping(value = "/{entityTypeId}/meta/{attributeName}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMeta(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -200,7 +197,6 @@ public class RestController
 	 * @return EntityType
 	 */
 	@PostMapping(value = "/{entityTypeId}/meta/{attributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public AttributeResponse retrieveEntityAttributeMetaPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityTypeRequest request)
 	{
@@ -218,7 +214,6 @@ public class RestController
 	 * /api/v1/person/99 Retrieves a person with id 99
 	 */
 	@GetMapping(value = "/{entityTypeId}/{id:.+}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -230,7 +225,7 @@ public class RestController
 		EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 		Entity entity = dataService.findOneById(entityTypeId, id);
@@ -273,7 +268,6 @@ public class RestController
 	 * /api/v1/person/99/address
 	 */
 	@GetMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Object retrieveEntityAttribute(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid EntityCollectionRequest request,
@@ -295,7 +289,6 @@ public class RestController
 	 * /api/v1/person/99/address
 	 */
 	@PostMapping(value = "/{entityTypeId}/{id}/{refAttributeName}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public Object retrieveEntityAttributePost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid @RequestBody EntityCollectionRequest request)
@@ -313,7 +306,6 @@ public class RestController
 	 * Returns json
 	 */
 	@GetMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
@@ -333,7 +325,6 @@ public class RestController
 	 * Returns json
 	 */
 	@PostMapping(value = "/{entityTypeId}", params = "_method=GET", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
@@ -565,7 +556,7 @@ public class RestController
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
@@ -579,8 +570,7 @@ public class RestController
 		Attribute attr = entityType.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					"Attribute '" + attributeName + "' of entity '" + entityTypeId + "' does not exist");
+			throw new UnknownAttributeException(entityType, attributeName);
 		}
 
 		if (attr.isReadOnly())
@@ -798,14 +788,8 @@ public class RestController
 
 	@PostMapping("/logout")
 	@ResponseStatus(OK)
-	public void logout(HttpServletRequest request)
+	public void logout(@TokenParam(required = true) String token, HttpServletRequest request)
 	{
-		String token = TokenExtractor.getToken(request);
-		if (token == null)
-		{
-			throw new HttpMessageNotReadableException("Missing token in header");
-		}
-
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
 
@@ -817,7 +801,6 @@ public class RestController
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
 	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
 	{
 		LOG.error("", e);
@@ -826,7 +809,6 @@ public class RestController
 
 	@ExceptionHandler(UnknownTokenException.class)
 	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
 	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
 	{
 		LOG.debug("", e);
@@ -835,17 +817,7 @@ public class RestController
 
 	@ExceptionHandler(UnknownEntityException.class)
 	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
 	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(UnknownAttributeException.class)
-	@ResponseStatus(NOT_FOUND)
-	@ResponseBody
-	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
 	{
 		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
@@ -853,7 +825,6 @@ public class RestController
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
 	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
 	{
 		LOG.debug("", e);
@@ -869,7 +840,6 @@ public class RestController
 
 	@ExceptionHandler(MolgenisValidationException.class)
 	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
 	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
 	{
 		LOG.info("", e);
@@ -885,7 +855,6 @@ public class RestController
 
 	@ExceptionHandler(ConversionException.class)
 	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
 	public ErrorMessageResponse handleConversionException(ConversionException e)
 	{
 		LOG.info("", e);
@@ -894,7 +863,6 @@ public class RestController
 
 	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
 		LOG.error("", e);
@@ -903,7 +871,6 @@ public class RestController
 
 	@ExceptionHandler(AuthenticationException.class)
 	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
 		LOG.info("", e);
@@ -919,25 +886,14 @@ public class RestController
 
 	@ExceptionHandler(MolgenisDataAccessException.class)
 	@ResponseStatus(UNAUTHORIZED)
-	@ResponseBody
 	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
 		LOG.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MolgenisReferencedEntityException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ResponseBody
 	public ErrorMessageResponse handleMolgenisReferencingEntityException(MolgenisReferencedEntityException e)
 	{
 		LOG.error("", e);
@@ -1002,11 +958,11 @@ public class RestController
 		if (attribute != null)
 		{
 			return new AttributeResponse(entityTypeId, meta, attribute, attributeSet, attributeExpandSet,
-					permissionService, dataService, languageService);
+					permissionService, dataService);
 		}
 		else
 		{
-			throw new UnknownAttributeException(attributeName);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 	}
 
@@ -1014,13 +970,17 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
 		// Check if the entity has an attribute with name refAttributeName
 		Attribute attr = meta.getAttribute(refAttributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(entityTypeId + " does not have an attribute named " + refAttributeName);
+			throw new UnknownAttributeException(meta, refAttributeName);
 		}
 
 		// Get the entity
@@ -1065,7 +1025,7 @@ public class RestController
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, permissionService,
-						dataService, languageService);
+						dataService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1086,6 +1046,10 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
+		if (meta == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 		Repository<Entity> repository = dataService.getRepository(entityTypeId);
 
 		// convert sort
@@ -1119,7 +1083,7 @@ public class RestController
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityTypeId, meta, permissionService,
-				dataService, languageService);
+				dataService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1148,7 +1112,7 @@ public class RestController
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 					entityMap.put(attrName,
 							new AttributeResponse(meta.getId(), meta, attr, subAttributesSet, null, permissionService,
-									dataService, languageService));
+									dataService));
 				}
 				else
 				{
@@ -1203,7 +1167,7 @@ public class RestController
 
 				EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 						Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(), attrName),
-						null, permissionService, dataService, languageService);
+						null, permissionService, dataService);
 
 				entityMap.put(attrName, ecr);
 			}

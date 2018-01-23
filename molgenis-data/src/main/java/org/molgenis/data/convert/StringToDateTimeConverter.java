@@ -1,6 +1,6 @@
 package org.molgenis.data.convert;
 
-import org.molgenis.util.MolgenisDateFormat;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.springframework.core.convert.converter.Converter;
 
 import java.time.Instant;

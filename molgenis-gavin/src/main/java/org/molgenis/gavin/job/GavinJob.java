@@ -1,14 +1,14 @@
 package org.molgenis.gavin.job;
 
 import com.google.common.collect.Multiset;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.jobs.TransactionalJob;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.gavin.job.input.model.LineType;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.jobs.Progress;
+import org.molgenis.jobs.TransactionalJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 

@@ -2,12 +2,11 @@ package org.molgenis.ontology.sorta.controller;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.User;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -16,9 +15,11 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.file.FileStore;
+import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
@@ -36,9 +37,7 @@ import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +97,6 @@ public class SortaController extends PluginController
 	private final ExecutorService taskExecutor;
 	private final FileStore fileStore;
 	private final PermissionService permissionService;
-	private final LanguageService languageService;
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
 	private final PermissionSystemService permissionSystemService;
@@ -112,7 +110,7 @@ public class SortaController extends PluginController
 	public SortaController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, PermissionService permissionService, DataService dataService,
-			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
+			MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
 			SortaJobExecutionFactory sortaJobExecutionFactory, EntityTypeFactory entityTypeFactory,
@@ -127,7 +125,6 @@ public class SortaController extends PluginController
 		this.fileStore = requireNonNull(fileStore);
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);
-		this.languageService = requireNonNull(languageService);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
@@ -336,7 +333,7 @@ public class SortaController extends PluginController
 
 		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", ontologyTermMetaData,
-				permissionService, dataService, languageService);
+				permissionService, dataService);
 	}
 
 	@PostMapping("/match")

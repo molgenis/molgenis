@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.Identifiable;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
  * ‘tuple’, ‘record’, ‘row’, ‘hashmap’. Optionally Entity can provide a unique ‘id’ for updates. Optionally Entity can
  * provide a human readable label for lookups
  */
-public interface Entity
+public interface Entity extends Identifiable
 {
 	/**
 	 * Returns entity meta data

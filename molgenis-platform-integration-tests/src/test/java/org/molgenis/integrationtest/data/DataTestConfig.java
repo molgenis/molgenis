@@ -9,11 +9,12 @@ import org.molgenis.integrationtest.data.meta.MetaTestConfig;
 import org.molgenis.integrationtest.data.transaction.TransactionTestConfig;
 import org.molgenis.integrationtest.data.validation.ValidationTestConfig;
 import org.molgenis.integrationtest.jobs.JobsTestConfig;
+import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * <p>This guy uses the {@link org.molgenis.data.settings.AppSettings}. This bean has to be declared on test-level.
+ * <p>This guy uses the {@link AppSettings}. This bean has to be declared on test-level.
  * See integration test examples (SortaControllerIT.java)</p>
  */
 @Configuration

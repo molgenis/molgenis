@@ -1,7 +1,7 @@
 package org.molgenis.data.populate;
 
 import com.google.common.io.BaseEncoding;
-import org.molgenis.util.UniqueId;
+import org.molgenis.data.util.UniqueId;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;

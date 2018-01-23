@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
@@ -23,7 +23,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Returns the repository for the given entity name.
 	 *
 	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
-	 * @throws UnknownEntityException if no entity with the given name exists
+	 * @throws UnknownEntityTypeException if no entity with the given name exists
 	 */
 	Repository<Entity> getRepository(String entityTypeId);
 
@@ -33,7 +33,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
-	 * @throws UnknownEntityException if no entity with the given name exists
+	 * @throws UnknownEntityTypeException if no entity with the given name exists
 	 */
 	<E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
 
@@ -204,7 +204,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Updates a single existing entity type and entity type attributes.
 	 *
 	 * @param entityType entity type
-	 * @throws UnknownEntityException if entity type does not exist
+	 * @throws UnknownEntityTypeException if entity type does not exist
 	 */
 	void updateEntityType(EntityType entityType);
 

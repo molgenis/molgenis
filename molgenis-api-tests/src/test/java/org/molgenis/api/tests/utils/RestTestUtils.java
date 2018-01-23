@@ -5,8 +5,8 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.auth.GroupMemberMetaData;
-import org.molgenis.auth.GroupMetaData;
+import org.molgenis.data.security.auth.GroupMemberMetaData;
+import org.molgenis.data.security.auth.GroupMetaData;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -29,9 +29,9 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMemberMetaData.USER;
-import static org.molgenis.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
+import static org.molgenis.data.security.auth.GroupMetaData.NAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 

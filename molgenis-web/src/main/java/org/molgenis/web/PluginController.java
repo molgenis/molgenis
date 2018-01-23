@@ -2,8 +2,8 @@ package org.molgenis.web;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

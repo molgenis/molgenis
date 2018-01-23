@@ -16,8 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.core.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.molgenis.fair.controller.FairController.BASE_URI;
-import static org.molgenis.ui.converter.RDFMediaType.TEXT_TURTLE_VALUE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
