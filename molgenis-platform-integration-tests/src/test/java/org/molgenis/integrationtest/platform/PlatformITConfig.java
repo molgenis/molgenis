@@ -205,7 +205,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Registered entity factories");
 
 					LOG.trace("Registering entity factories ...");
-					systemRepositoryDecoratorFactoryRegistrar.register(event);
+					systemRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
 					LOG.trace("Registered entity factories");
 					LOG.debug("Bootstrapped registries");
 

@@ -842,9 +842,7 @@ public class RestControllerV1APIIT
 			   .get(API_V1 + "base_APITest3")
 			   .then()
 			   .log()
-			   .all()
-			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].code", Matchers.equalTo("D01"));
+			   .all().statusCode(RestTestUtils.NOT_FOUND).body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	@Test
@@ -876,9 +874,7 @@ public class RestControllerV1APIIT
 			   .get(API_V1 + "base_APITest4")
 			   .then()
 			   .log()
-			   .all()
-			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].code", Matchers.equalTo("D01"));
+			   .all().statusCode(RestTestUtils.NOT_FOUND).body("errors[0].code", Matchers.equalTo("D01"));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)

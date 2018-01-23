@@ -88,7 +88,7 @@ public class BootstrapTestUtils
 			LOG.trace("Registered entity factories");
 
 			LOG.trace("Registering entity factories ...");
-			systemRepositoryDecoratorFactoryRegistrar.register(event);
+			systemRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
 			LOG.trace("Registered entity factories");
 			LOG.debug("Bootstrapped registries");
 

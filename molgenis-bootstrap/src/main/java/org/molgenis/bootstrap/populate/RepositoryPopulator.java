@@ -1,6 +1,7 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
 import org.molgenis.script.core.ScriptTypePopulator;
 import org.molgenis.settings.SettingsPopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;

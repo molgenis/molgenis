@@ -233,7 +233,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		Package pack = packageFactory.create();
 		pack.setTags(singletonList(chromosomeNameTagEntity));
-				when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
+		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(
 				CHROMOSOME_NAME_ONTOLOGY_TERM);
 
