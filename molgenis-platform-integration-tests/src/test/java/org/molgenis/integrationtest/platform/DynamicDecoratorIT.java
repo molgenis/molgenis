@@ -148,9 +148,9 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		{
 			dataService.deleteAll(entityTypeDynamic.getId());
 			dataService.deleteAll(refEntityTypeDynamic.getId());
+			dataService.deleteAll(DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION);
 			metaDataService.deleteEntityType(entityTypeDynamic.getId());
 			metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
-			//TODO: cleanup config
 		});
 		waitForWorkToBeFinished(indexService, LOG);
 	}
