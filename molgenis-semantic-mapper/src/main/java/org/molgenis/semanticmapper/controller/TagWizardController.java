@@ -95,7 +95,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			throw new MolgenisRuntimeException("There are no entities available!");
+			throw new IllegalStateException("There are no entities available!");
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
