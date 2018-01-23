@@ -85,23 +85,23 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repository;
 
-		// 15. Query the L2 cache before querying the database
+		// 15. Dynamic decorators
+		decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
+
+		// 14. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 14. Query the L1 cache before querying the database
+		// 13. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 13. Route specific queries to the index
+		// 12. Route specific queries to the index
 		decoratedRepository = indexedRepositoryDecoratorFactory.create(decoratedRepository);
 
-		// 12. Query the L3 cache before querying the index
+		// 11. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-		// 11. Register the cud action needed to index indexed repositories
+		// 10. Register the cud action needed to index indexed repositories
 		decoratedRepository = new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
-
-		// 10. Dynamic decorators
-		decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
 
 		// 9. Custom decorators for system entity types
 		decoratedRepository = systemRepositoryDecoratorRegistry.decorate(decoratedRepository);
