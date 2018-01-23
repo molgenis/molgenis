@@ -27,9 +27,9 @@ public class DynamicDecorator extends StaticEntity
 		setId(id);
 	}
 
-	public void setId(String name)
+	public void setId(String id)
 	{
-		set(ID, name);
+		set(ID, id);
 	}
 
 	public String getId()
