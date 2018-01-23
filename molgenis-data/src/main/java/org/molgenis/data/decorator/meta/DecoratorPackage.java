@@ -25,7 +25,7 @@ public class DecoratorPackage extends SystemPackage
 	@Override
 	protected void init()
 	{
-		setLabel("System");
+		setLabel("Decorator");
 		setDescription("Package containing entities concerning dynamic decorators");
 		setParent(rootSystemPackage);
 	}

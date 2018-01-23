@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpyingRepositoryDecoratorFactory implements DynamicRepositoryDecoratorFactory
 {
-	private static final String NAME = "spy";
+	private static final String ID = "spy";
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -17,8 +17,8 @@ public class SpyingRepositoryDecoratorFactory implements DynamicRepositoryDecora
 	}
 
 	@Override
-	public String getName()
+	public String getId()
 	{
-		return NAME;
+		return ID;
 	}
 }

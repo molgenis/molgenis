@@ -12,7 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
  */
 public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends EntityType>
 {
-	String getName();
+	String getId();
 
 	/**
 	 * Creates a decorated repository based on the given {@link Repository}

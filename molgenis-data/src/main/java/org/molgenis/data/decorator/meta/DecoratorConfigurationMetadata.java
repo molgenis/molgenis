@@ -34,6 +34,8 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 	{
 		setLabel("Decorator Configuration");
 		setPackage(decoratorPackage);
+		setDescription(
+				"Configuration entity to configurate which dynamic decorators should be applied to an entity types.");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
 		addAttribute(ENTITY_TYPE_ID).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");

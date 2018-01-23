@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimestampRepositoryDecoratorFactory implements DynamicRepositoryDecoratorFactory
 {
-	private static final String NAME = "timestamp";
+	private static final String ID = "timestamp";
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -17,8 +17,8 @@ public class TimestampRepositoryDecoratorFactory implements DynamicRepositoryDec
 	}
 
 	@Override
-	public String getName()
+	public String getId()
 	{
-		return NAME;
+		return ID;
 	}
 }

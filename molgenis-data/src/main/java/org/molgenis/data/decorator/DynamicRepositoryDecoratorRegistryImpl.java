@@ -38,7 +38,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	@Override
 	public synchronized void addFactory(DynamicRepositoryDecoratorFactory factory)
 	{
-		String factoryId = factory.getName();
+		String factoryId = factory.getId();
 		factories.put(factoryId, factory);
 	}
 
