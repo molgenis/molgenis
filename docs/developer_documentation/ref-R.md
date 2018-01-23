@@ -13,7 +13,7 @@ at the top of your script and you can connect to a MOLGENIS server. Typically th
 eval(expr = parse(text = getURL("https://molgenis.mydomain.example/molgenis.R?molgenis-token=${molgenisToken}")))
 ```  
 
-**NOTE:** We support R-versions earlier or equal to 3.2.x
+**NOTE:** The MOLGENIS R-api client supports up to R-version 3.2.x
 
 # Overview example
 
