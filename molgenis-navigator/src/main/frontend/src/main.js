@@ -1,11 +1,10 @@
-import 'es6-promise/auto'
 import Vue from 'vue'
 import App from './App'
 import { sync } from 'vuex-router-sync'
 import store from './store'
 import router from './router'
-// You can use both the components found @https://bootstrap-vue.github.io/
-import BootstrapVue from 'bootstrap-vue/dist/bootstrap-vue.esm'
+
+import BootstrapVue from 'bootstrap-vue'
 
 import 'font-awesome/css/font-awesome.min.css'
 

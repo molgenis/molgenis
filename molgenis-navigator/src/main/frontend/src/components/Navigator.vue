@@ -9,17 +9,18 @@
 
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
-      <div class="col-lg-6 input-group">
-        <input v-model="query" type="text" class="form-control"
-               :placeholder="$t('search-input-placeholder')">
-        <span class="input-group-btn">
-          <button @click="submitQuery()" class="btn btn-secondary" :disabled="!query"
-                  type="button">{{ 'search-button' | i18n }}</button>
-        </span>
-        <span class="input-group-btn">
-          <button @click="reset()" class="btn btn-secondary" :disabled="!query"
-                  type="button">{{ 'clear-button' | i18n }}</button>
-        </span>
+      <div class="input-group col-lg-6">
+        <input v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
+        <div class="input-group-append">
+
+          <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query"
+                  type="button">{{ 'search-button' | i18n }}
+          </button>
+
+          <button @click="reset()" class="btn btn-outline-secondary" :disabled="!query"
+                  type="button">{{ 'clear-button' | i18n }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -66,12 +67,8 @@
     margin-top: 2rem;
   }
 
-  .navigator-path .breadcrumb{
+  .navigator-path .breadcrumb {
     background-color: transparent;
-  }
-
-  .navigator-search {
-    margin-top: 2rem;
   }
 </style>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class='card'>
+  <div class="card">
     <div class="card-header">
       <h4 v-html="highlight(entityType.label)"></h4>
       <a v-if="navigator" :href="navigator + '/' + entityType.packageId" class="card-link"><i
