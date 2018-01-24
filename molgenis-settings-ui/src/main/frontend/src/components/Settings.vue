@@ -44,7 +44,9 @@
     },
     created: function () {
       this.$store.dispatch(GET_SETTINGS).then(() => {
-        this.$store.dispatch(GET_SETTINGS_BY_ID, 'sys_set_app')
+        this.$store.dispatch(GET_SETTINGS_BY_ID, 'sys_set_app').then(() => {
+          this.createForm = true
+        })
       })
     },
     data () {
@@ -65,7 +67,7 @@
         message: null,
         error: null,
         selectedEntity: null,
-        createForm: true
+        createForm: false
       }
     },
     watch: {
