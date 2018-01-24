@@ -16,8 +16,10 @@
                                  :entities="initSettingsOptions"></entity-select-component>
       </div>
       <div class="card-block">
-        <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
-                        :hooks="hooks"></form-component>
+        <div v-if="createForm">
+          <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
+                          :hooks="hooks"></form-component>
+        </div>
       </div>
     </div>
     <div class="card-footer">
@@ -62,12 +64,16 @@
         },
         message: null,
         error: null,
-        selectedEntity: null
+        selectedEntity: null,
+        createForm: true
       }
     },
     watch: {
       selectedEntity (updatedValue) {
-        this.$store.dispatch(GET_SETTINGS_BY_ID, updatedValue)
+        this.createForm = false
+        this.$store.dispatch(GET_SETTINGS_BY_ID, updatedValue).then(() => {
+          this.createForm = true
+        })
       }
     },
     computed: {
