@@ -1,14 +1,6 @@
 <template>
-  <div id="app" class="one-click-importer-container">
-    <one-click-importer></one-click-importer>
-  </div>
+  <one-click-importer></one-click-importer>
 </template>
-
-<style>
-  .one-click-importer-container {
-    padding-top: 40px
-  }
-</style>
 
 <script>
   import OneClickImporter from './components/OneClickImporter'
