@@ -27,6 +27,10 @@ questionnaires.
 The cool feature in the questionnaire module is that you can show certain questions based on the answer given on other questions.
 You do this by using the __Javascript Magma syntax__ to create an expression inside the visible column (See driverslicence in the simple questionnaire example).
 
+## Questionnaire timestamp on submit
+MOLGENIS will automatically add a submit date for you when you submit a questionnaire. So keep in mind that you do not have to manually
+add a question relating to submit dates.
+
 # Using Questionnaire data
 You can access the questionnaire results through the data explorer.
 Go to the data explorer and look for the (in our case) Simple Questionnaire table.
