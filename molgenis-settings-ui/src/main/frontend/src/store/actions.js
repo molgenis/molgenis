@@ -20,7 +20,7 @@ export default {
   [GET_SETTINGS_BY_ID] ({commit}: { commit: Function }, selectedEntity: String) {
     if (selectedEntity) {
       const uri = '/api/v2/' + selectedEntity
-      api.get(uri).then(response => {
+      return api.get(uri).then(response => {
         const formFields = EntityToStateMapper.generateFormFields(response.meta)
         commit(SET_FORM_FIELDS, formFields)
         commit(SET_FORM_DATA, EntityToStateMapper.generateFormData(formFields, response.items[0]))
