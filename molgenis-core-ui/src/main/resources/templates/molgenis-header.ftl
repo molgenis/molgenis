@@ -77,7 +77,7 @@
             <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
         </#list>
     <#else>
-        <#-- Include bootstrap 4 CSS for Vue plugins -->
+        <#-- Include bootstrap 4 theme CSS for Vue plugins -->
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
         <#-- Add spacing to body to show content below fixed-top navigation bar -->
@@ -85,6 +85,12 @@
 
         <#-- Make footer sticky -->
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
+
+        <#-- Include jQuery v3.3.1 to support bootstrap.js -->
+        <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/jquery-3.3.1.min.js"/>"></script>
+
+        <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
+        <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
     </#if>
 
     <#-- Load css specified by plugins -->
@@ -127,12 +133,6 @@
                 , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
             }
         </script>
-
-        <#-- Include jQuery v2.1.1 for bootstrap CSS -->
-        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/jquery-2.1.1.min.js"/>"></script>
-
-        <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
-        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
         <#-- Include the Vue version of the molgenis menu  -->
         <script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>
