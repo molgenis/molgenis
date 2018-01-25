@@ -4,16 +4,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.Href;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.*;
+
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 public class EntityTypeResponse
 {
@@ -34,10 +35,9 @@ public class EntityTypeResponse
 	 */
 	private final Boolean writable;
 
-	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService)
 	{
-		this(meta, null, null, permissionService, dataService, languageService);
+		this(meta, null, null, permissionService, dataService);
 	}
 
 	/**
@@ -45,12 +45,12 @@ public class EntityTypeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService, LanguageService languageService)
+			PermissionService permissionService, DataService dataService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
-		this.languageCode = languageService.getCurrentUserLanguageCode();
+		this.languageCode = getCurrentUserLanguageCode();
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -60,13 +60,13 @@ public class EntityTypeResponse
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
+			this.description = meta.getDescription(getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			label = meta.getLabel(languageService.getCurrentUserLanguageCode());
+			label = meta.getLabel(getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 
@@ -84,7 +84,7 @@ public class EntityTypeResponse
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeResponse(name, meta, attr, subAttributesSet,
 								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService, dataService, languageService));
+								permissionService, dataService));
 					}
 					else
 					{

@@ -1,14 +1,13 @@
 <template>
-  <div class="container pt-3">
-
+  <div>
     <div v-if=false class="alert alert-danger" role="alert">
       <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}
     </div>
 
-    <div class="row  mt-1">
+    <div class="row mt-1">
       <div class="col-lg-6">
-        <search-input/>
+        <search-input></search-input>
       </div>
     </div>
 
@@ -16,7 +15,7 @@
 
       <div class="row  mt-1" v-if="this.$store.state.result.packages.length > 0">
         <packages-result :packages="this.$store.state.result.packages" :navigator="navigatorBaseUrl"
-                         :highlight="highlight"/>
+                         :highlight="highlight"></packages-result>
       </div>
 
       <div v-else-if="this.$store.state.submitted">{{'no-matching-packages-label' | i18n }}</div>
@@ -28,7 +27,7 @@
             <div v-for="entityType in this.$store.state.result.entityTypes"
                  class="col-lg-12 padding-card-bottom">
               <entity-result :entityType="entityType" :dataexplorer="dataExplorerBaseUrl"
-                             :navigator="navigatorBaseUrl" :highlight="highlight"/>
+                             :navigator="navigatorBaseUrl" :highlight="highlight"></entity-result>
             </div>
           </div>
         </div>

@@ -236,7 +236,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		if (entityType.getAttribute(attr.getName()) == null)
 		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
+			throw new UnknownAttributeException(entityType, attr.getName());
 		}
 		if (!isPersisted(attr))
 		{

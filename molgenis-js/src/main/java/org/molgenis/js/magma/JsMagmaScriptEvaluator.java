@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.js.nashorn.NashornScriptEngine;
-import org.molgenis.script.ScriptException;
+import org.molgenis.script.core.ScriptException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

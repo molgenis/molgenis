@@ -40,7 +40,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	/**
 	 * Get a CrudRepository by entity name
 	 *
-	 * @throws UnknownEntityException when the repository can not be found
+	 * @throws UnknownEntityTypeException when the repository can not be found
 	 * @throws MolgenisDataException  if the repository doesn't implement CrudRepository
 	 */
 	Repository<Entity> getRepository(String entityTypeId);

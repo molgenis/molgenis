@@ -2,24 +2,25 @@ package org.molgenis.integrationtest.platform.importservice;
 
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvDataConfig;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.vcf.VcfDataConfig;
 import org.molgenis.data.vcf.importer.VcfImporterService;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
-import org.molgenis.ontology.OntologyDataConfig;
+import org.molgenis.ontology.core.OntologyDataConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
-import org.molgenis.ontology.importer.OntologyImportService;
+import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -39,15 +40,16 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.getLast;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.util.EntityUtils.asStream;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, ImportServiceIT.Config.class })
@@ -125,9 +127,14 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	void verifyFirstAndLastRows(String entityName, Map<String, Object> expectedFirstRow,
 			Map<String, Object> expectedLastRow)
 	{
-		List<Entity> importedEntities = findAllAsList(entityName);
-		assertEquals(entityToMap(importedEntities.get(0)), expectedFirstRow);
-		assertEquals(entityToMap(getLast(importedEntities)), expectedLastRow);
+		EntityType entityType = dataService.getEntityType(entityName);
+		String idAttributeName = entityType.getIdAttribute().getName();
+
+		Map<Object, Entity> importedEntities = findAllAsList(entityName).stream()
+																		.collect(toMap(Entity::getIdValue,
+																				Function.identity()));
+		assertEquals(entityToMap(importedEntities.get(expectedFirstRow.get(idAttributeName))), expectedFirstRow);
+		assertEquals(entityToMap(importedEntities.get(expectedLastRow.get(idAttributeName))), expectedLastRow);
 	}
 
 	List<Entity> findAllAsList(String entityName)

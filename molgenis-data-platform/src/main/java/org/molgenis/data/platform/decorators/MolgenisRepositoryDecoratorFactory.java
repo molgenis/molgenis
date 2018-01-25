@@ -1,8 +1,6 @@
 package org.molgenis.data.platform.decorators;
 
 import org.molgenis.data.*;
-import org.molgenis.data.aggregation.AggregateAnonymizer;
-import org.molgenis.data.aggregation.AggregateAnonymizerRepositoryDecorator;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
@@ -14,17 +12,20 @@ import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.index.IndexedRepositoryDecoratorFactory;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.security.RepositorySecurityDecorator;
+import org.molgenis.data.security.aggregation.AggregateAnonymizer;
+import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
+import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.owned.OwnedEntityType.OWNED;
+import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory

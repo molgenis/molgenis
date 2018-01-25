@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import javax.annotation.Nullable;
+import java.util.Locale;
 
 import static org.molgenis.data.i18n.model.L10nStringMetaData.*;
 
@@ -72,5 +73,10 @@ public class L10nString extends StaticEntity
 	{
 		set(DESCRIPTION, description);
 		return this;
+	}
+
+	public String getString(Locale locale)
+	{
+		return getString(locale.getLanguage());
 	}
 }

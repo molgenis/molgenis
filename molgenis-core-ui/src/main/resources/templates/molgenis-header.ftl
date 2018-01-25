@@ -14,89 +14,96 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <#if googleSignIn>
-        <meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}">
-    </#if>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <#if googleSignIn><meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}"></#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
-    <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>"
-              type="text/css"
-              id="bootstrap-theme">
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+        <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+        <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
+
+        <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
+
+        <#-- Include browser polyfills before any script tags are inserted -->
+        <@polyfill/>
+
+        <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
+        <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
+        <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
+        <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+        <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis.js"/>"></script>
+        <script src="<@resource_href "/js/script-evaluator.js"/>"></script>
+
+        <#-- Load custome javascript -->
+        <#if app_settings.customJavascript?has_content>
+            <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
+                <#if js_file_name?ends_with(".js")>
+                    <script src="<@resource_href "${js_file_name?html}"/>"></script>
+                </#if>
+            </#list>
+        </#if>
+
+        <#if googleSignIn>
+            <#if authenticated?? && authenticated>
+            <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
+                <script>
+                    function onLoad() {
+                        gapi.load('auth2', function () {
+                            gapi.auth2.init();
+                        });
+                    }
+                </script>
+            </#if>
+
+            <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
+        </#if>
+
+        <script>
+            top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
+                <#if context_url??>
+                top.molgenis.setContextUrl('${context_url?js_string}');
+                </#if>
+                <#if plugin_id??>
+                top.molgenis.setPluginId('${plugin_id?js_string}');
+                </#if>
+        </script>
+
+        <#-- Load javascript specified by plugins -->
+        <#list js as js_file_name>
+            <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
+        </#list>
     <#else>
-        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>"
-              type="text/css"
-              id="bootstrap-theme">
+        <#-- Include bootstrap 4 theme CSS for Vue plugins -->
+        <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+
+        <#-- Add spacing to body to show content below fixed-top navigation bar -->
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/menu/fixed-top-menu.css"/>" type="text/css">
+
+        <#-- Make footer sticky -->
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap-4/footer/sticky-footer.css"/>" type="text/css">
+
+        <#-- Include jQuery v3.3.1 to support bootstrap.js -->
+        <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/jquery-3.3.1.min.js"/>"></script>
+
+        <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
+        <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
     </#if>
 
-    <#if app_settings.logoTopHref?has_content>
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
-    </#if>
-
+    <#-- Load css specified by plugins -->
     <#list css as css_file_name>
         <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
     </#list>
 
-    <#if app_settings.cssHref?has_content>
-        <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
-    </#if>
-    <#if !version?? || version == 1>
-    <#-- Include browser polyfills before any script tags are inserted -->
-    <@polyfill/>
-    </#if>
-    <#if app_settings.customJavascript?has_content>
-        <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
-            <#if js_file_name?ends_with(".js")>
-                <script src="<@resource_href "${js_file_name?html}"/>"></script>
-            </#if>
-        </#list>
-    </#if>
-<#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-    <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
-    <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
-    <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
-    <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
-    <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
-    <script src="<@resource_href "/js/molgenis.js"/>"></script>
-    <script src="<@resource_href "/js/script-evaluator.js"/>"></script>
-    <#if googleSignIn>
-        <#if authenticated?? && authenticated>
-        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
-            <script>
-                function onLoad() {
-                    gapi.load('auth2', function () {
-                        gapi.auth2.init();
-                    });
-                }
-            </script>
-        </#if>
-        <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>"
-                async defer></script>
-    </#if>
-    <script>
-        top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
-            <#if context_url??>
-            top.molgenis.setContextUrl('${context_url?js_string}');
-            </#if>
-            <#if plugin_id??>
-            top.molgenis.setPluginId('${plugin_id?js_string}');
-            </#if>
-    </script>
-    <#list js as js_file_name>
-        <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
-    </#list>
     <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 </head>
-    <#if version?? || version == 1>
-    <body>
-    <#else>
-    <body>
-    </#if>
+
+<body>
     <#if !(version??) || version == 1>
-    <#-- Navbar menu -->
+        <#-- Navbar menu -->
         <#if menu_id??>
             <#if !(plugin_id??)>
                 <#assign plugin_id="NULL">
@@ -106,29 +113,31 @@
         </#if>
     <#else>
         <#assign menu=molgenis_ui.getMenuJson()>
-    <#-- VUE -->
-    <div id="molgenis-menu"></div>
-    <script type="text/javascript">
-        window.molgenisMenu = {
-            menu: ${menu}
-            <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
-            <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
-            <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
-            , authenticated: ${authenticated?c}
-            , loginHref: '/login'
-            <#if googleSignIn>, logoutFunction: function () {
-                var auth2 = gapi.auth2.getAuthInstance()
-                auth2.signOut()
-            }</#if>
-            , googleSignIn: ${googleSignIn?c}
-            , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
-        }
-    </script>
 
-    <script type=text/javascript src="<@resource_href "/js/menu/manifest.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/menu/vendor.js"/>"></script>
-    <script type=text/javascript src="<@resource_href "/js/menu/app.js"/>"></script>
+        <#-- VUE -->
+        <div id="molgenis-menu"></div>
+
+        <script type="text/javascript">
+            window.molgenisMenu = {
+                menu: ${menu}
+                <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
+                <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
+                <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
+                , authenticated: ${authenticated?c}
+                , loginHref: '/login'
+                <#if googleSignIn>, logoutFunction: function () {
+                    var auth2 = gapi.auth2.getAuthInstance()
+                    auth2.signOut()
+                }</#if>
+                , googleSignIn: ${googleSignIn?c}
+                , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
+            }
+        </script>
+
+        <#-- Include the Vue version of the molgenis menu  -->
+        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>
     </#if>
+
 <#-- Start application content -->
 <div class="container-fluid">
     <div class="row">

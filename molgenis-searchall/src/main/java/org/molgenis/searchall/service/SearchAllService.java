@@ -1,16 +1,15 @@
 package org.molgenis.searchall.service;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.searchall.model.AttributeResult;
 import org.molgenis.searchall.model.EntityTypeResult;
 import org.molgenis.searchall.model.PackageResult;
 import org.molgenis.searchall.model.Result;
-import org.molgenis.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,22 +21,21 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
 @Component
 public class SearchAllService
 {
 	private final DataService dataService;
-	private final LanguageService languageService;
 
-	public SearchAllService(DataService dataService, LanguageService languageService)
+	public SearchAllService(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.languageService = requireNonNull(languageService);
 	}
 
 	public Result searchAll(final String searchTerm)
 	{
-		final String lang = languageService.getCurrentUserLanguageCode();
+		final String lang = getCurrentUserLanguageCode();
 		return Result.builder()
 					 .setEntityTypes(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
 												.filter(not(EntityUtils::isSystemEntity))

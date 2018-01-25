@@ -1,7 +1,7 @@
 package org.molgenis.security;
 
-import org.molgenis.auth.User;
-import org.molgenis.security.user.UserService;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;

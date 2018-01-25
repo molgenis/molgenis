@@ -7,6 +7,7 @@
 <#assign version = 2>
 
 <@header css js version/>
+
 <div id="app"></div>
 
 <script type="text/javascript">
@@ -23,4 +24,5 @@
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/manifest.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/vendor.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/molgenis-one-click-importer/app.js"/>"></script>
-<@footer/>
+
+<@footer version/>

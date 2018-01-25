@@ -21,8 +21,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.util.EntityUtils.getTypedValue;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
+import static org.molgenis.data.util.MolgenisDateFormat.*;
 import static org.springframework.util.StringUtils.capitalize;
 
 public class AttributeUtils

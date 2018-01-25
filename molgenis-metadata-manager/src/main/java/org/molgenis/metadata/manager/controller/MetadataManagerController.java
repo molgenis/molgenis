@@ -1,17 +1,16 @@
 package org.molgenis.metadata.manager.controller;
 
+import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
 import org.molgenis.metadata.manager.model.EditorEntityType;
 import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
 import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.controller.VuePluginController;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.settings.AppSettings;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -36,11 +35,10 @@ public class MetadataManagerController extends VuePluginController
 
 	private MetadataManagerService metadataManagerService;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, LanguageService languageService,
-			AppSettings appSettings, MetadataManagerService metadataManagerService,
-			UserAccountService userAccountService)
+	public MetadataManagerController(MenuReaderService menuReaderService, AppSettings appSettings,
+			MetadataManagerService metadataManagerService, UserAccountService userAccountService)
 	{
-		super(URI, menuReaderService, languageService, appSettings, userAccountService);
+		super(URI, menuReaderService, appSettings, userAccountService);
 		this.metadataManagerService = requireNonNull(metadataManagerService);
 
 	}

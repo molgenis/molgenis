@@ -2,7 +2,7 @@ package org.molgenis.data.meta;
 
 import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.GenericDependencyResolver;
+import org.molgenis.data.util.GenericDependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

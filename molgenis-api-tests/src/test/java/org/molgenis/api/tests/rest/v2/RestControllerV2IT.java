@@ -19,11 +19,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.given;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.security.owned.OwnedEntityType.OWNED;
+import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 
 public class RestControllerV2IT
 {
@@ -59,7 +59,7 @@ public class RestControllerV2IT
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);

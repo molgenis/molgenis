@@ -1,7 +1,7 @@
 package org.molgenis.r;
 
-import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
+import org.molgenis.settings.DefaultSettingsEntity;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

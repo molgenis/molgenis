@@ -1,8 +1,8 @@
 package org.molgenis.oneclickimporter.service.impl;
 
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

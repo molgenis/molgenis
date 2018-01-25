@@ -15,7 +15,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.semanticsearch.service.TagService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

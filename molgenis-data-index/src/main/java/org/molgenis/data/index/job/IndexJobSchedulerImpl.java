@@ -3,9 +3,9 @@ package org.molgenis.data.index.job;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexActionGroup;
-import org.molgenis.data.jobs.JobExecutor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,9 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
-import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
+import static org.molgenis.jobs.model.JobExecution.Status.SUCCESS;
+import static org.molgenis.jobs.model.JobExecutionMetaData.END_DATE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.STATUS;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 public class IndexJobSchedulerImpl implements IndexJobScheduler

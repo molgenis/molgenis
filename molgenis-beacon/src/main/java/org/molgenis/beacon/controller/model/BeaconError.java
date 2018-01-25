@@ -1,7 +1,7 @@
 package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 /**
  * BeaconResponse-specific error representing an unexpected problem.

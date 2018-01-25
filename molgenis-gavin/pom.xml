@@ -4,11 +4,12 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-gavin</artifactId>
 
     <name>gavin</name>
+    <description>Plugin module for Gene-Aware Variant INterpretation for medical sequencing.</description>
 
     <dependencies>
         <dependency>

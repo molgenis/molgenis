@@ -2,10 +2,10 @@ package org.molgenis.amazon.bucket;
 
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecutionMetaData;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.ScheduledJobType;
-import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
+import org.molgenis.jobs.Job;
+import org.molgenis.jobs.JobFactory;
+import org.molgenis.jobs.model.ScheduledJobType;
+import org.molgenis.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

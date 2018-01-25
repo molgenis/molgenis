@@ -1,6 +1,6 @@
 package org.molgenis.python;
 
-import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -18,7 +18,7 @@ public class MolgenisPythonController
 	private static final String API_URI = "/api/";
 
 	@GetMapping(URI)
-	public String showMolgenisPythonApiClient(HttpServletRequest request, Model model)
+	public String showMolgenisPythonApiClient(@TokenParam String token, HttpServletRequest request, Model model)
 	{
 		String apiUrl;
 		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
@@ -31,7 +31,6 @@ public class MolgenisPythonController
 		}
 
 		// If the request contains a molgenis security token, use it
-		String token = TokenExtractor.getToken(request);
 		if (token != null)
 		{
 			model.addAttribute("token", token);

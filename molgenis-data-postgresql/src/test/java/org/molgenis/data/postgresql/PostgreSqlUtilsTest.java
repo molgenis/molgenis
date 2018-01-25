@@ -2,11 +2,11 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.file.model.FileMetaMetaData;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

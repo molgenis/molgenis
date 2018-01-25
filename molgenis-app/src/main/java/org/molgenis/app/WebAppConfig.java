@@ -1,12 +1,12 @@
 package org.molgenis.app;
 
-import org.molgenis.DatabaseConfig;
+import org.molgenis.core.ui.MolgenisWebAppConfig;
+import org.molgenis.core.ui.data.config.HttpClientConfig;
+import org.molgenis.core.ui.freemarker.RepositoryTemplateLoader;
+import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
-import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
-import org.molgenis.ui.MolgenisWebAppConfig;
-import org.molgenis.ui.freemarker.RepositoryTemplateLoader;
-import org.molgenis.util.GsonConfig;
+import org.molgenis.data.postgresql.DatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

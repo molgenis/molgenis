@@ -2,13 +2,13 @@ package org.molgenis.file.ingest.execution;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobFactory;
-import org.molgenis.data.jobs.model.ScheduledJobType;
-import org.molgenis.data.jobs.model.ScheduledJobTypeFactory;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.jobs.Job;
+import org.molgenis.jobs.JobFactory;
+import org.molgenis.jobs.model.ScheduledJobType;
+import org.molgenis.jobs.model.ScheduledJobTypeFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

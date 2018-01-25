@@ -1,12 +1,12 @@
 package org.molgenis.ontology.sorta.job;
 
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.jobs.JobExecutionUpdater;
+import org.molgenis.jobs.ProgressImpl;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;

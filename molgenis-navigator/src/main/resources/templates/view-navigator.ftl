@@ -21,4 +21,5 @@
 <script type=text/javascript src="<@resource_href "/js/navigator/manifest.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/navigator/vendor.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/navigator/app.js"/>"></script>
-<@footer/>
+
+<@footer version/>

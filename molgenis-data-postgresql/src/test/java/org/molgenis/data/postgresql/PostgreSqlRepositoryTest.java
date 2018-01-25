@@ -122,6 +122,7 @@ public class PostgreSqlRepositoryTest
 		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getName()).thenReturn(refIdAttrName);
 		when(refIdAttr.getDataType()).thenReturn(INT);
+		when(refIdAttr.isUnique()).thenReturn(true);
 
 		String xrefAttrName = "xrefAttr";
 		Attribute xrefAttr = mock(Attribute.class);
@@ -146,6 +147,7 @@ public class PostgreSqlRepositoryTest
 
 		when(entityType.getId()).thenReturn("entityId");
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getAttribute("entityId")).thenReturn(idAttr);
 		doReturn(oneToManyAttr).when(entityType).getAttribute(oneToManyAttrName);
 		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
 		EntityType entityType = this.entityType;
@@ -155,7 +157,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"entityId\" = \"refEntityId#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(\"refEntityId\" ORDER BY \"refEntityId\" ASC) FROM \"refEntityId#07f902bf\" WHERE this.\"entityId\" = \"refEntityId#07f902bf\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"entityId#fc2928f6\" AS this LEFT JOIN \"refEntityId#07f902bf\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ? ORDER BY \"entityId\" ASC LIMIT 1000";
 
 		when(postgreSqlEntityFactory.createRowMapper(entityType, null)).thenReturn(rowMapper);
 		Entity entity0 = mock(Entity.class);

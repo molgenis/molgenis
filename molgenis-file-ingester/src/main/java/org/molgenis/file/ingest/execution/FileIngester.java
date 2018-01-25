@@ -1,25 +1,25 @@
 package org.molgenis.file.ingest.execution;
 
+import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.DataService;
-import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.FileRepositoryCollectionFactory;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
+import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 /**
  * Imports a file from a remote url.

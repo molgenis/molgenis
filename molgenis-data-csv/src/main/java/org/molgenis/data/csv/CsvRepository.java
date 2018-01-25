@@ -3,11 +3,11 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
 

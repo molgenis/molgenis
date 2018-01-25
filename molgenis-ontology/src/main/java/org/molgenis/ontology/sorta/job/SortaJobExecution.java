@@ -1,8 +1,8 @@
 package org.molgenis.ontology.sorta.job;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.jobs.model.JobExecution;
 
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.*;
 

@@ -8,7 +8,6 @@ import { searchall } from './store/state'
 
 import App from './App'
 
-import 'bootstrap/dist/css/bootstrap.css' // Bootstrap import
 import 'font-awesome/css/font-awesome.min.css' // Font awesome import
 
 sync(store, router)

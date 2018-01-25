@@ -32,6 +32,15 @@ public class Sort implements Iterable<Sort.Order>
 		this.orders = orders != null ? new ArrayList<>(orders) : new ArrayList<>();
 	}
 
+	public Sort(Sort sort)
+	{
+		orders = new ArrayList<>(sort.orders.size());
+		for (Sort.Order order : sort)
+		{
+			orders.add(new Order(order.getAttr(), order.getDirection()));
+		}
+	}
+
 	@Override
 	public Iterator<Order> iterator()
 	{

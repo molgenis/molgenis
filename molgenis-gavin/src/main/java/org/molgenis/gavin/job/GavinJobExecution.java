@@ -3,9 +3,9 @@ package org.molgenis.gavin.job;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.gavin.job.input.model.LineType;
+import org.molgenis.jobs.model.JobExecution;
 
 import static org.molgenis.gavin.job.input.model.LineType.*;
 import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.*;

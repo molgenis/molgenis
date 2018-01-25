@@ -1,10 +1,10 @@
 package org.molgenis.swagger.controller;
 
 import org.mockito.Mock;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.security.core.token.TokenService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;

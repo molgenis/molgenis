@@ -5,13 +5,14 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>molgenis-test</artifactId>
 
     <name>test</name>
+    <description>Utility test classes.</description>
 
     <build>
         <plugins>
