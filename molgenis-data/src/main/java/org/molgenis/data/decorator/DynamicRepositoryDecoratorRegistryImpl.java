@@ -1,12 +1,10 @@
 package org.molgenis.data.decorator;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.*;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
 import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -56,8 +54,9 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		if (!entityTypeId.equals(DECORATOR_CONFIGURATION) && repositoryCollection.hasRepository(
 				decoratorConfigurationMetadata))
 		{
-			DecoratorConfiguration configuration = dataService.query(DECORATOR_CONFIGURATION,
-					DecoratorConfiguration.class).eq(ENTITY_TYPE_ID, entityTypeId).findOne();
+			Query query = new QueryImpl().eq(ENTITY_TYPE_ID, entityTypeId);
+			DecoratorConfiguration configuration = dataService.findOne(DECORATOR_CONFIGURATION, query,
+					DecoratorConfiguration.class);
 
 			if (configuration != null)
 			{
@@ -83,6 +82,10 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 			if (factory != null)
 			{
 				repository = factory.createDecoratedRepository(repository);
+			}
+			else
+			{
+				//FIXME: throw appropriate exception
 			}
 		}
 		return repository;
