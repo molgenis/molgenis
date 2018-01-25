@@ -8,6 +8,8 @@ import org.molgenis.data.decorator.meta.*;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
+import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,8 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
-@ContextConfiguration(classes = { PlatformITConfig.class })
+@ContextConfiguration(classes = { PlatformITConfig.class, AddingRepositoryDecoratorFactory.class,
+		PostFixingRepositoryDecoratorFactory.class })
 public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);

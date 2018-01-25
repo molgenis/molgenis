@@ -25,8 +25,6 @@ import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
-import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
-import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.script.ScriptTestConfig;
 import org.molgenis.jobs.JobConfig;
 import org.molgenis.jobs.JobExecutionConfig;
@@ -101,8 +99,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AddingRepositoryDecoratorFactory.class,
-		PostFixingRepositoryDecoratorFactory.class })
+		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
