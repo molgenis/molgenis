@@ -1,8 +1,8 @@
 // @flow
 // $FlowFixMe
-import api from '@molgenis/molgenis-api-client'
 import { SET_ERROR, SET_FORM_DATA, SET_FORM_FIELDS, SET_MESSAGE, SET_SETTINGS } from './mutations'
 import { EntityToStateMapper } from '@molgenis/molgenis-ui-form'
+import api from '@molgenis/molgenis-api-client'
 
 export const GET_SETTINGS = '__GET_SETTINGS__'
 export const GET_SETTINGS_BY_ID = '__GET_SETTINGS_BY_ID__'
