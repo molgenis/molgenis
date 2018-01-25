@@ -13,7 +13,8 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
-import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.login;
 
 public class ImportPublicDataIT
 {

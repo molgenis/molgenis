@@ -68,8 +68,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 			switch (molgenisUiMenuItem.getType())
 			{
 				case MENU:
-					return new MolgenisUiMenuPermissionDecorator((UiMenu) molgenisUiMenuItem,
-							permissionService);
+					return new MolgenisUiMenuPermissionDecorator((UiMenu) molgenisUiMenuItem, permissionService);
 				case PLUGIN:
 					return molgenisUiMenuItem;
 				default:

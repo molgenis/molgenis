@@ -180,9 +180,7 @@ public class RestControllerIT
 			   .when()
 			   .post(PATH + "logout")
 			   .then()
-			   .statusCode(BAD_REQUEST)
-			   .log()
-			   .all();
+			   .statusCode(BAD_REQUEST).log().all();
 	}
 
 	@Test

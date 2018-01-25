@@ -134,7 +134,9 @@
                     </execution>
                     <execution>
                         <id>reserve-cargo-network-ports</id>
-                        <goals><goal>reserve-network-port</goal></goals>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
                         <phase>process-resources</phase>
                         <configuration>
                             <portNames>
@@ -178,7 +180,9 @@
                     <container>
                         <containerId>tomcat7x</containerId>
                         <zipUrlInstaller>
-                            <url>http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip</url>
+                            <url>
+                                http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
+                            </url>
                         </zipUrlInstaller>
                         <systemProperties>
                             <molgenis.home>${project.build.testOutputDirectory}/home</molgenis.home>
@@ -192,7 +196,8 @@
                             </configfile>
                         </configfiles>
                         <properties>
-                            <cargo.start.jvmargs>-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled</cargo.start.jvmargs>
+                            <cargo.start.jvmargs>-Xmx2g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled
+                            </cargo.start.jvmargs>
                             <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
                             <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
                             <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>

@@ -133,8 +133,7 @@ public class OneClickImporterControllerAPIIT
 		List<String> validJobStats = Arrays.asList("PENDING", "RUNNING", "SUCCESS");
 		assertTrue(validJobStats.contains(jobStatus));
 
-		await().pollDelay(500, MILLISECONDS)
-			   .atMost(30, SECONDS)
+		await().pollDelay(500, MILLISECONDS).atMost(30, SECONDS)
 			   .until(() -> pollJobForStatus(jobUrl), equalTo("SUCCESS"));
 
 		// Extract the id of the entity created by the import
@@ -168,17 +167,17 @@ public class OneClickImporterControllerAPIIT
 		entityResponse.statusCode(OKE);
 
 		//TODO: Fix broken test
-//		// Check first row for expected values
-//		entityResponse.body("items[0].first_name", equalTo("Mark"));
-//		entityResponse.body("items[0].last_name", equalTo("de Haan"));
-//		entityResponse.body("items[0].full_name", equalTo("Mark de Haan"));
-//		entityResponse.body("items[0].UMCG_employee", equalTo(true));
-//		entityResponse.body("items[0].Age", equalTo(26));
-//
-//		// Check last row for expected values
-//		entityResponse.body("items[9].first_name", equalTo("Jan"));
-//		entityResponse.body("items[9].UMCG_employee", equalTo(false));
-//		entityResponse.body("items[9].Age", equalTo(32));
+		//		// Check first row for expected values
+		//		entityResponse.body("items[0].first_name", equalTo("Mark"));
+		//		entityResponse.body("items[0].last_name", equalTo("de Haan"));
+		//		entityResponse.body("items[0].full_name", equalTo("Mark de Haan"));
+		//		entityResponse.body("items[0].UMCG_employee", equalTo(true));
+		//		entityResponse.body("items[0].Age", equalTo(26));
+		//
+		//		// Check last row for expected values
+		//		entityResponse.body("items[9].first_name", equalTo("Jan"));
+		//		entityResponse.body("items[9].UMCG_employee", equalTo(false));
+		//		entityResponse.body("items[9].Age", equalTo(32));
 	}
 
 	@AfterClass(alwaysRun = true)

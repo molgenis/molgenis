@@ -29,7 +29,8 @@ public class AnnotationException extends RuntimeException
 
 	public AnnotationException(AnnotationException ae)
 	{
-		this(ae.getFailedEntity(), ae.getEntityNumber(), ae.getRequiredAttributes(), ae.getAnnotatorName(), ae.getCause());
+		this(ae.getFailedEntity(), ae.getEntityNumber(), ae.getRequiredAttributes(), ae.getAnnotatorName(),
+				ae.getCause());
 	}
 
 	public Integer getEntityNumber()
