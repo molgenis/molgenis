@@ -1,5 +1,6 @@
 package org.molgenis.data.decorator;
 
+import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.decorator.meta.*;
 import org.molgenis.data.meta.model.EntityType;
@@ -24,23 +25,22 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 	@Autowired
 	DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
+	@Mock
 	private Repository repository;
+	@Mock
 	private DataService dataService;
+	@Mock
 	private EntityType entityType;
+	@Mock
 	private RepositoryCollection repositoryCollection;
+	@Mock
 	private DecoratorConfiguration decoratorConfiguration;
+	@Mock
 	private DynamicRepositoryDecoratorFactory dynamicRepositoryDecoratorFactory;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		repository = mock(Repository.class);
-		entityType = mock(EntityType.class);
-		repositoryCollection = mock(RepositoryCollection.class);
-		dataService = mock(DataService.class);
-		decoratorConfiguration = mock(DecoratorConfiguration.class);
-		dynamicRepositoryDecoratorFactory = mock(DynamicRepositoryDecoratorFactory.class);
-
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(repositoryCollection.hasRepository(decoratorConfigurationMetadata)).thenReturn(true);
 		when(repository.getEntityType()).thenReturn(entityType);
