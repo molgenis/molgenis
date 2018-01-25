@@ -1,25 +1,26 @@
+<#include "resource-macros.ftl">
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['questionnaire.css']>
-<#assign js=['questionnaire.js']>
+<#assign js = []>
+<#assign css = ["questionnaire/app.css"]>
+<#assign version = 2>
 
-<@header css js/>
+<@header css js version/>
 
-<a href="/menu/main/questionnaires" class="btn btn-default btn-md"><span
-        class="glyphicon glyphicon-chevron-left"></span> ${i18n.questionnaire_back_button?html}</a>
+<div id="app"></div>
 
-<div class="row">
-    <div class="col-md-8">
-        <h1>${questionnaire.label!}</h1>
-        <p>${questionnaire.description!}</p>
-        <legend></legend>
-    </div>
-</div>
+<script type="text/javascript">
+    window.QUESTIONNAIRE_STATE = {
+        baseUrl: '${baseUrl}',
+        lng: '${lng}',
+        fallbackLng: '${fallbackLng}',
+        questionnaires: ${questionnaires}
+    }
+</script>
 
-<div class="row">
-    <div id="form-holder" data-name="${questionnaire.name!?url('UTF-8')}" data-id="${questionnaire.id!}"
-         class="col-md-10"></div>
-</div>
+<script type=text/javascript src="<@resource_href "/js/questionnaire/manifest.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/questionnaire/vendor.js"/>"></script>
+<script type=text/javascript src="<@resource_href "/js/questionnaire/app.js"/>"></script>
 
-<@footer />
+<@footer version/>
