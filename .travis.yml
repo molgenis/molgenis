@@ -24,7 +24,7 @@ before_script:
 script:
   # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
   # Travis provides us with a travis user and travis database
-  - travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password
+  - travis_wait 50 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password
 notifications:
   slack:
     rooms:
