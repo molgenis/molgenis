@@ -10,7 +10,7 @@ export const UPDATE_SETTINGS = '__UPDATE_SETTINGS__'
 
 export default {
   [GET_SETTINGS] ({commit}: { commit: Function }) {
-    const uri = 'api/v2/sys_md_EntityType?q=extends==sys_set_settings'
+    const uri = '/api/v2/sys_md_EntityType?q=extends==sys_set_settings'
     api.get(uri).then(response => {
       commit(SET_SETTINGS, response.items.map(item => { return {id: item.id, label: item.label} }))
     }, error => {

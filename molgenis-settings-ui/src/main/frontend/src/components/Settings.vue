@@ -1,32 +1,34 @@
 <template>
-  <div class="card">
-    <div class="card-header">
-      <h5>{{ 'plugin-title' | i18n }}</h5>
-    </div>
-    <div class="card-body">
-      <div id="alert-message" v-if="message" class="alert" :class="error ? 'alert-danger' : 'alert-info'"
-           role="alert">
-        <button @click="message=null" type="button" class="close"><span aria-hidden="true">&times;</span>
-        </button>
-        <span id="message-span">{{message}}</span>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h5>{{ 'plugin-title' | i18n }}</h5>
       </div>
-      <div class="card-block">
-        <entity-select-component v-model.lazy="selectedEntity" :id="'settings-select'" :label="'Select entity'"
-                                 :description="'Select setting you want to edit'"
-                                 :entities="initSettingsOptions"></entity-select-component>
-      </div>
-      <div class="card-block">
-        <div v-if="createForm">
-          <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
-                          :hooks="hooks"></form-component>
+      <div class="card-body">
+        <div id="alert-message" v-if="message" class="alert" :class="error ? 'alert-danger' : 'alert-info'"
+             role="alert">
+          <button @click="message=null" type="button" class="close"><span aria-hidden="true">&times;</span>
+          </button>
+          <span id="message-span">{{message}}</span>
+        </div>
+        <div class="card-block">
+          <entity-select-component v-model.lazy="selectedEntity" :id="'settings-select'" :label="'Select entity'"
+                                   :description="'Select setting you want to edit'"
+                                   :entities="initSettingsOptions"></entity-select-component>
+        </div>
+        <div class="card-block">
+          <div v-if="createForm">
+            <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
+                            :hooks="hooks"></form-component>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="card-footer">
-      <button id="save-btn" class="btn btn-primary" type="submit" form="settings-form">Save</button>
-      <button id="cancel-btn" class="btn btn-secondary" type="reset" form="settings-form">Cancel</button>
-    </div>
+      <div class="card-footer">
+        <button id="save-btn" class="btn btn-primary" type="submit" form="settings-form">Save</button>
+        <button id="cancel-btn" class="btn btn-secondary" type="reset" form="settings-form">Cancel</button>
+      </div>
 
+    </div>
   </div>
 </template>
 
