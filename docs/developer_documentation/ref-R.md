@@ -8,10 +8,12 @@ source("http://molgenis.mydomain.example/molgenis.R")
 ``` 
 at the top of your script and you can connect to a MOLGENIS server. Typically the first thing you do is login and the last thing is logout.
 
-NOTE: For https connections use 
+**NOTE:** For https connections use 
 ```
 eval(expr = parse(text = getURL("https://molgenis.mydomain.example/molgenis.R?molgenis-token=${molgenisToken}")))
 ```  
+
+**NOTE:** The MOLGENIS R-api client supports up to R-version 3.2.x
 
 # Overview example
 
