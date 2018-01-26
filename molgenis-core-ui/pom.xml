@@ -207,7 +207,7 @@
                                     <goal>webpack</goal>
                                 </goals>
                                 <configuration>
-                                    <outputdir>target/classes/js/dist</outputdir>
+                                    <outputdir>target${file.separator}classes${file.separator}js${file.separator}dist</outputdir>
                                     <arguments>-p --config webpack.production.config.js</arguments>
                                 </configuration>
                             </execution>
