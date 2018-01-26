@@ -1,15 +1,14 @@
 package org.molgenis.data.validation.meta;
 
 import com.google.common.collect.Iterables;
-import org.hibernate.validator.constraints.impl.EmailValidator;
+import org.hibernate.validator.internal.constraintvalidators.EmailValidator;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.NameValidator;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 

@@ -48,7 +48,7 @@ public class RestControllerIT
 		LOG.info("adminUserName: " + adminUserName);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
-		String adminPassword = Strings.isNullOrEmpty(envHost) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
+		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
@@ -182,8 +182,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(BAD_REQUEST)
 			   .log()
-			   .all()
-			   .body("errors.message[0]", Matchers.equalTo("Missing token in header"));
+			   .all();
 	}
 
 	@Test

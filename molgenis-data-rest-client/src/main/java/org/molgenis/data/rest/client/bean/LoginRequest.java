@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.client.bean;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import org.molgenis.core.gson.AutoGson;
 
 @AutoGson(autoValueClass = AutoValue_LoginRequest.class)
 @AutoValue

@@ -1,9 +1,9 @@
 package org.molgenis.security.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import org.molgenis.auth.GroupMemberFactory;
-import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.GroupMemberFactory;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.UserDetailsService;

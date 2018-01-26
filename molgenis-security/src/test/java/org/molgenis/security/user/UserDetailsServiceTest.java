@@ -2,9 +2,9 @@ package org.molgenis.security.user;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,8 +19,8 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

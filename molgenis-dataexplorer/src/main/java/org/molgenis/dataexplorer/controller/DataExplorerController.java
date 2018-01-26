@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -20,18 +18,18 @@ import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
+import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -48,11 +46,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.util.EntityUtils.getTypedValue;
 
 /**
  * Controller class for the data explorer.
@@ -90,7 +88,7 @@ public class DataExplorerController extends PluginController
 	private Gson gson;
 
 	@Autowired
-	private LanguageService languageService;
+	private MessageSource messageSource;
 
 	@Autowired
 	private AttributeFactory attrMetaFactory;
@@ -275,8 +273,8 @@ public class DataExplorerController extends PluginController
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-		ResourceBundle i18n = languageService.getBundle();
-		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
+		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
+				LocaleContextHolder.getLocale());
 
 		if (pluginPermission != null)
 		{
@@ -513,15 +511,4 @@ public class DataExplorerController extends PluginController
 			return false;
 		}
 	}
-
-	@ExceptionHandler(RuntimeException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error(e.getMessage(), e);
-		return new ErrorMessageResponse(new ErrorMessage(
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
-	}
-
 }

@@ -2,10 +2,11 @@ package org.molgenis.script;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMeta;
-import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.script.core.*;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,8 @@ import java.util.UUID;
 
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.text.MessageFormat.format;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
 
 /**
  * Runs a script.

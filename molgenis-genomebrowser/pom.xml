@@ -4,12 +4,13 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-genomebrowser</artifactId>
     <packaging>jar</packaging>
 
     <name>genomebrowser</name>
+    <description>Genome browser for persisted genetic data.</description>
 
     <dependencies>
         <dependency>

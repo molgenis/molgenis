@@ -1,12 +1,11 @@
 package org.molgenis.settings.controller;
 
 import org.mockito.Mock;
-import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.core.ui.menu.Menu;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -30,9 +29,6 @@ public class SettingsControllerTest
 	private MenuReaderService menuReaderService;
 
 	@Mock
-	private LanguageService languageService;
-
-	@Mock
 	private AppSettings appSettings;
 
 	@Mock
@@ -46,13 +42,12 @@ public class SettingsControllerTest
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(SettingsController.ID)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(languageService.getCurrentUserLanguageCode()).thenReturn("AABBCC");
 		when(appSettings.getLanguageCode()).thenReturn("DDEEFF");
 		User user = mock(User.class);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(user.isSuperuser()).thenReturn(false);
 
-		SettingsController settingsController = new SettingsController(menuReaderService, languageService, appSettings,
+		SettingsController settingsController = new SettingsController(menuReaderService, appSettings,
 				userAccountService);
 		mockMvc = standaloneSetup(settingsController).build();
 	}
@@ -69,7 +64,7 @@ public class SettingsControllerTest
 			   .
 					   andExpect(model().attribute("baseUrl", "/test/path"))
 			   .
-					   andExpect(model().attribute("lng", "AABBCC"))
+					   andExpect(model().attribute("lng", "en"))
 			   .
 					   andExpect(model().attribute("fallbackLng", "DDEEFF"))
 			   .

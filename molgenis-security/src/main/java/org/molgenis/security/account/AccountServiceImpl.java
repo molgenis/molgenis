@@ -1,18 +1,18 @@
 package org.molgenis.security.account;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.Group;
-import org.molgenis.auth.GroupMember;
-import org.molgenis.auth.GroupMemberFactory;
-import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupMember;
+import org.molgenis.data.security.auth.GroupMemberFactory;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
-import org.molgenis.security.user.UserService;
+import org.molgenis.settings.AppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -27,12 +27,12 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.GroupMetaData.NAME;
-import static org.molgenis.auth.UserMetaData.*;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.UserMetaData.*;
 
 @Service
 public class AccountServiceImpl implements AccountService

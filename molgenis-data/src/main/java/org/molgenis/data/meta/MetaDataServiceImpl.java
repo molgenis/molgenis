@@ -8,7 +8,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -64,7 +64,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		EntityType entityType = getEntityType(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityTypeId));
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 		return !entityType.isAbstract() ? getRepository(entityType) : null;
 	}
@@ -224,7 +224,7 @@ public class MetaDataServiceImpl implements MetaDataService
 												   .findOne();
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityType.getId()));
+			throw new UnknownEntityTypeException(entityType.getId());
 		}
 
 		updateEntityType(entityType, existingEntityType);

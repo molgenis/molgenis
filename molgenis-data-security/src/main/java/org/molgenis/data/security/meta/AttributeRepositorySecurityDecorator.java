@@ -6,9 +6,9 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.util.EntityUtils;
 
 import java.util.Iterator;
 import java.util.List;

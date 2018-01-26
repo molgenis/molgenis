@@ -4,12 +4,13 @@
     <parent>
         <groupId>org.molgenis</groupId>
         <artifactId>molgenis</artifactId>
-        <version>5.3.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-core-ui</artifactId>
     <packaging>jar</packaging>
 
     <name>core-ui</name>
+    <description>Spaghetti module containing core plugins and legacy UI components.</description>
 
     <build>
         <plugins>
@@ -96,7 +97,7 @@
                         </goals>
                         <configuration>
                             <!--<quiet>true</quiet>-->
-                            <packageName>org.molgenis.ui</packageName>
+                            <packageName>org.molgenis.core.ui</packageName>
                             <schemaDirectory>src/main/resources/schemas</schemaDirectory>
                         </configuration>
                     </execution>
@@ -134,8 +135,8 @@
                             </info>
                             <springmvc>true</springmvc>
                             <locations>
-                                <location>org.molgenis.ui.admin.user</location>
-                                <location>org.molgenis.ui.admin.usermanager</location>
+                                <location>org.molgenis.core.ui.admin.user</location>
+                                <location>org.molgenis.core.ui.admin.usermanager</location>
                             </locations>
                             <swaggerDirectory>${project.build.directory}/generated-resources/swagger</swaggerDirectory>
                             <swaggerFileName>${project.name}-swagger</swaggerFileName>
@@ -384,7 +385,13 @@
             <scope>provided</scope>
         </dependency>
         <!-- test dependencies -->
-
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-i18n</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>

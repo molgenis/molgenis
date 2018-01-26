@@ -3,9 +3,9 @@ package org.molgenis.dataexplorer.settings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.settings.DefaultSettingsEntity;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;

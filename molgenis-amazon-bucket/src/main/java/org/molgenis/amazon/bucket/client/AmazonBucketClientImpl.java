@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.excel.ExcelFileExtensions;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

@@ -18,8 +18,8 @@ import java.util.stream.IntStream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component
 public class AttributeMapper

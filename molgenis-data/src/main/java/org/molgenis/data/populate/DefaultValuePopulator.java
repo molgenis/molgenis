@@ -20,8 +20,8 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.util.EntityUtils.asStream;
-import static org.molgenis.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.EntityUtils.asStream;
+import static org.molgenis.data.util.MolgenisDateFormat.*;
 
 /**
  * Populate entity values for attributes with default values

@@ -3,14 +3,15 @@ package org.molgenis.security.twofactor.service;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
 import org.molgenis.security.twofactor.model.UserSecretMetaData;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
+import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 	private UserSecretFactory userSecretFactory;
 	@Autowired
 	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	private org.molgenis.auth.User molgenisUser = mock(org.molgenis.auth.User.class);
+	private User molgenisUser = mock(User.class);
 	private UserSecret userSecret = mock(UserSecret.class);
 
 	@WithMockUser(value = USERNAME, roles = ROLE_SU)

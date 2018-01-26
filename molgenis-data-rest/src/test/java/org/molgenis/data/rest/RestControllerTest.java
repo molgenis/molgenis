@@ -2,11 +2,16 @@ package org.molgenis.data.rest;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.auth.User;
-import org.molgenis.auth.UserMetaData;
+import org.mockito.MockitoAnnotations;
+import org.molgenis.core.ui.data.rsql.MolgenisRSQL;
+import org.molgenis.core.ui.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.*;
-import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -15,21 +20,22 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
-import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.GsonConfig;
-import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -43,6 +49,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,6 +60,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Locale.ENGLISH;
+import static org.mockito.ArgumentMatchers.any;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 
 @WebAppConfiguration
@@ -67,13 +76,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private static final String CSV_HEADER = "\"name\",\"id\",\"enum\",\"int\"\n";
 	private static final String ENTITY_COLLECTION_RESPONSE_STRING = "{\"href\":\"" + HREF_ENTITY
-			+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+			+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 			+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 			+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}]}";
 	private static final String ENTITY_META_RESPONSE_STRING =
 			"{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
 					+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-					+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}";
+					+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":false}";
 
 	@Autowired
 	private RestController restController;
@@ -101,10 +110,19 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private MockMvc mockMvc;
 
+	@Autowired
+	private MessageSource messageSource;
+
+	@Mock
+	private LocaleResolver localeResolver;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		Mockito.reset(permissionService, dataService, metaDataService, tokenService);
+
+		MessageSourceHolder.setMessageSource(messageSource);
 		Mockito.when(dataService.getMeta()).thenReturn(metaDataService);
 
 		@SuppressWarnings("unchecked")
@@ -115,7 +133,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrId = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("id").getMock();
 		Mockito.when(attrId.getLabel()).thenReturn("id");
-		Mockito.when(attrId.getLabel(ArgumentMatchers.isNull())).thenReturn("id");
+		Mockito.when(attrId.getLabel("en")).thenReturn("id");
 		Mockito.when(attrId.getDataType()).thenReturn(AttributeType.STRING);
 		Mockito.when(attrId.isReadOnly()).thenReturn(true);
 		Mockito.when(attrId.isUnique()).thenReturn(true);
@@ -126,7 +144,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrName = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("name").getMock();
 		Mockito.when(attrName.getLabel()).thenReturn("name");
-		Mockito.when(attrName.getLabel(ArgumentMatchers.isNull())).thenReturn("name");
+		Mockito.when(attrName.getLabel("en")).thenReturn("name");
 		Mockito.when(attrName.getDataType()).thenReturn(AttributeType.STRING);
 		Mockito.when(attrName.isNillable()).thenReturn(true);
 		Mockito.when(attrName.isVisible()).thenReturn(true);
@@ -135,7 +153,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrEnum = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("enum").getMock();
 		Mockito.when(attrEnum.getLabel()).thenReturn("enum");
-		Mockito.when(attrEnum.getLabel(ArgumentMatchers.isNull())).thenReturn("enum");
+		Mockito.when(attrEnum.getLabel("en")).thenReturn("enum");
 		Mockito.when(attrEnum.getDataType()).thenReturn(AttributeType.ENUM);
 		Mockito.when(attrEnum.getEnumOptions()).thenReturn(singletonList("enum0, enum1"));
 		Mockito.when(attrEnum.isNillable()).thenReturn(true);
@@ -144,7 +162,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Attribute attrInt = Mockito.when(Mockito.mock(Attribute.class).getName()).thenReturn("int").getMock();
 		Mockito.when(attrInt.getLabel()).thenReturn("int");
-		Mockito.when(attrInt.getLabel(ArgumentMatchers.isNull())).thenReturn("int");
+		Mockito.when(attrInt.getLabel("en")).thenReturn("int");
 		Mockito.when(attrInt.getDataType()).thenReturn(AttributeType.INT);
 		Mockito.when(attrInt.isNillable()).thenReturn(true);
 		Mockito.when(attrInt.isVisible()).thenReturn(true);
@@ -161,7 +179,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Mockito.when(entityType.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		Mockito.when(entityType.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum, attrInt));
 		Mockito.when(entityType.getId()).thenReturn(ENTITY_NAME);
-		Mockito.when(entityType.getLabel(ArgumentMatchers.isNull())).thenReturn(null);
+		Mockito.when(entityType.getLabel("en")).thenReturn(null);
 
 		Mockito.when(repo.getEntityType()).thenReturn(entityType);
 		Mockito.when(repo.getName()).thenReturn(ENTITY_NAME);
@@ -197,9 +215,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Sort.Direction.DESC)).pageSize(100).offset(0);
 		Mockito.when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
+		Mockito.when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 								 .setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter())
 								 .setCustomArgumentResolvers(new TokenExtractor())
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new FallbackExceptionHandler(), new SpringExceptionHandler())
+								 .setLocaleResolver(localeResolver)
 								 .build();
 	}
 
@@ -351,7 +373,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 													   + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 													   + ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\""
 													   + HREF_ENTITY_META
-													   + "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
+													   + "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":true}"));
 	}
 
 	@Test
@@ -379,7 +401,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(MockMvcResultMatchers.content()
 											   .string("{\"href\":\"" + HREF_ENTITY_META
 													   + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-													   + ENTITY_NAME + "\",\"writable\":false}"));
+													   + ENTITY_NAME
+													   + "\",\"languageCode\":\"en\",\"writable\":false}"));
 	}
 
 	@Test
@@ -391,7 +414,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(MockMvcResultMatchers.content()
 											   .string("{\"href\":\"" + HREF_ENTITY_META
 													   + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-													   + ENTITY_NAME + "\",\"writable\":false}"));
+													   + ENTITY_NAME
+													   + "\",\"languageCode\":\"en\",\"writable\":false}"));
 	}
 
 	@Test
@@ -401,7 +425,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			   .andExpect(MockMvcResultMatchers.status().isOk())
 			   .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 			   .andExpect(MockMvcResultMatchers.content()
-											   .string("{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"isAggregatable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"int\":{\"href\":\"/api/v1/Person/meta/int\",\"fieldType\":\"INT\",\"name\":\"int\",\"label\":\"int\",\"attributes\":[],\"enumOptions\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
+											   .string("{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"isAggregatable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"int\":{\"href\":\"/api/v1/Person/meta/int\",\"fieldType\":\"INT\",\"name\":\"int\",\"label\":\"int\",\"attributes\":[],\"enumOptions\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":false}"));
 	}
 
 	@Test
@@ -819,12 +843,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public LanguageService languageService()
-		{
-			return Mockito.mock(LanguageService.class);
-		}
-
-		@Bean
 		public FileMetaFactory fileMetaFactory()
 		{
 			return Mockito.mock(FileMetaFactory.class);
@@ -848,7 +866,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			return new RestController(authenticationSettings(), dataService(), tokenService(), authenticationManager(),
 					permissionService(), userAccountService(), new MolgenisRSQL(new RSQLParser()),
 					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager(),
-							servletUriComponentsBuilderFactory()), languageService());
+							servletUriComponentsBuilderFactory()));
 		}
 	}
 }

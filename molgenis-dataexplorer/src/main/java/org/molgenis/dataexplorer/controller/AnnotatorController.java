@@ -13,7 +13,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
+import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 @Controller
 @RequestMapping(URI)

@@ -4,8 +4,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.processor.AbstractCellProcessor;
-import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.file.processor.AbstractCellProcessor;
+import org.molgenis.data.file.processor.CellProcessor;
 
 import java.io.File;
 import java.io.FileInputStream;

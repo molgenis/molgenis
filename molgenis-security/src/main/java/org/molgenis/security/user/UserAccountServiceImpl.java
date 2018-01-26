@@ -1,7 +1,8 @@
 package org.molgenis.security.user;
 
-import org.molgenis.auth.Group;
-import org.molgenis.auth.User;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

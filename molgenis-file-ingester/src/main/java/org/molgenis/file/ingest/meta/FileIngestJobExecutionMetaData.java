@@ -1,18 +1,18 @@
 package org.molgenis.file.ingest.meta;
 
 import com.google.common.collect.ImmutableList;
-import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.jobs.model.JobPackage;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobPackage.PACKAGE_JOB;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 @Component
 public class FileIngestJobExecutionMetaData extends SystemEntityType

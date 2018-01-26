@@ -2,6 +2,8 @@
 The R API is a script that allows access to your MOLGENIS data via the R-Project statistical package. It is available on every MOLGENIS on the URL `http://molgenis.mydomain.example/molgenis.R`.
 **
 
+**NOTE:** The MOLGENIS R-api client supports up to R-version 3.2.x
+
 ## Example
 As an example, let's create a plot for publicly available ASE data available on https://molgenis56.target.rug.nl/. For a description of the data, take a look at [http://molgenis.org/ase](http://molgenis.org/ase).
 

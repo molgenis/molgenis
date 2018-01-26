@@ -2,14 +2,16 @@
   <div class="input-group">
     <input v-model="query" type="text" class="form-control"
            :placeholder="$t('search-placeholder')" v-on:keyup.enter="submitQuery()">
-    <span class="input-group-btn">
-            <button @click="submitQuery()" class="btn btn-secondary" :disabled="!query"
-                    type="button"> {{'search-button-label' | i18n}}</button>
-          </span>
-    <span class="input-group-btn">
-            <button @click="clearQuery()" class="btn btn-secondary" :disabled="!query"
-                    type="button">  {{'clear-button-label' | i18n}}</button>
-          </span>
+
+    <div class="input-group-append">
+      <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query" type="button">
+        {{'search-button-label' | i18n}}
+      </button>
+
+      <button @click="clearQuery()" class="btn btn-outline-secondary" :disabled="!query" type="button">
+        {{'clear-button-label' | i18n}}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -17,7 +19,7 @@
   import _ from 'lodash'
   import { SEARCH_ALL } from '../store/actions'
   import { SET_SEARCHTERM, SET_SUBMITTED } from '../store/mutations'
-  
+
   export default {
     name: 'search-input',
     props: ['placeholder', 'searchLabel', 'clearLabel'],

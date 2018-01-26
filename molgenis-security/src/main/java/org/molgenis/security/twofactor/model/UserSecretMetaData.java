@@ -1,14 +1,14 @@
 package org.molgenis.security.twofactor.model;
 
-import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.security.auth.SecurityPackage;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
 /**
  * User secret key for 2 factor authentication

@@ -35,7 +35,7 @@ class JsScriptExecutor
 		}
 		catch (ScriptException e)
 		{
-			throw new org.molgenis.script.ScriptException(e);
+			throw new org.molgenis.script.core.ScriptException(e);
 		}
 	}
 }

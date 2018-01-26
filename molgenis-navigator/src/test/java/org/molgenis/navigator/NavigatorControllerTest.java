@@ -1,19 +1,22 @@
 package org.molgenis.navigator;
 
 import org.mockito.Mock;
-import org.molgenis.auth.User;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
+import org.molgenis.core.ui.menu.Menu;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Locale;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -30,13 +33,13 @@ public class NavigatorControllerTest
 	private MenuReaderService menuReaderService;
 
 	@Mock
-	private LanguageService languageService;
-
-	@Mock
 	private AppSettings appSettings;
 
 	@Mock
 	private UserAccountService userAccountService;
+
+	@Mock
+	private LocaleResolver localeResolver;
 
 	@BeforeMethod
 	public void before()
@@ -46,15 +49,14 @@ public class NavigatorControllerTest
 		Menu menu = mock(Menu.class);
 		when(menu.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(languageService.getCurrentUserLanguageCode()).thenReturn("AABBCC");
-		when(appSettings.getLanguageCode()).thenReturn("DDEEFF");
+		when(appSettings.getLanguageCode()).thenReturn("de");
 		User user = mock(User.class);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(user.isSuperuser()).thenReturn(false);
 
-		NavigatorController navigatorController = new NavigatorController(menuReaderService, languageService,
-				appSettings, userAccountService);
-		mockMvc = MockMvcBuilders.standaloneSetup(navigatorController).build();
+		NavigatorController navigatorController = new NavigatorController(menuReaderService, appSettings,
+				userAccountService);
+		mockMvc = MockMvcBuilders.standaloneSetup(navigatorController).setLocaleResolver(localeResolver).build();
 	}
 
 	/**
@@ -63,12 +65,14 @@ public class NavigatorControllerTest
 	@Test
 	public void testInit() throws Exception
 	{
-		mockMvc.perform(get(NavigatorController.URI)).andExpect(status().isOk())
-				.andExpect(view().name("view-navigator")).
-				andExpect(model().attribute("baseUrl", "/test/path")).
-				andExpect(model().attribute("lng", "AABBCC")).
-				andExpect(model().attribute("fallbackLng", "DDEEFF")).
-				andExpect(model().attribute("isSuperUser", false));
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.FRENCH);
+		mockMvc.perform(get(NavigatorController.URI))
+			   .andExpect(status().isOk())
+			   .andExpect(view().name("view-navigator"))
+			   .andExpect(model().attribute("baseUrl", "/test/path"))
+			   .andExpect(model().attribute("lng", "fr"))
+			   .andExpect(model().attribute("fallbackLng", "de"))
+			   .andExpect(model().attribute("isSuperUser", false));
 	}
 
 }

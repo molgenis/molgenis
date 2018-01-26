@@ -23,4 +23,5 @@
 <script type=text/javascript src="<@resource_href "/js/searchall/manifest.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/searchall/vendor.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/searchall/app.js"/>"></script>
-<@footer/>
+
+<@footer version/>

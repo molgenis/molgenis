@@ -1,7 +1,7 @@
 package org.molgenis.js.magma;
 
-import org.molgenis.script.Script;
-import org.molgenis.script.ScriptRunner;
+import org.molgenis.script.core.Script;
+import org.molgenis.script.core.ScriptRunner;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

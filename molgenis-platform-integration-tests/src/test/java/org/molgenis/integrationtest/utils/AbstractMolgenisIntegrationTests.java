@@ -1,7 +1,7 @@
 package org.molgenis.integrationtest.utils;
 
-import org.molgenis.DatabaseConfig;
-import org.molgenis.file.FileStore;
+import org.molgenis.data.file.FileStore;
+import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.integrationtest.data.platform.BootStrapperTestConfig;
 import org.molgenis.integrationtest.data.postgresql.PostgreSqlTestConfig;
 import org.molgenis.integrationtest.file.FileTestConfig;

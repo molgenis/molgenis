@@ -5,33 +5,33 @@ import freemarker.template.Template;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
+import org.molgenis.core.ui.menu.Menu;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.menumanager.MenuManagerService;
+import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.molgenis.ui.menu.Menu;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.ui.menumanager.MenuManagerService;
-import org.molgenis.util.GsonConfig;
-import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -39,10 +39,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,11 +89,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	MenuManagerService menuManager;
 	@Mock
-	LanguageService languageService;
-	@Mock
 	PermissionService permissionService = mock(PermissionService.class);
 	@Mock
 	MenuReaderService menuReaderService;
+	@Mock
+	LocaleResolver localeResolver;
 
 	@Mock
 	Menu menu;
@@ -141,6 +138,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 

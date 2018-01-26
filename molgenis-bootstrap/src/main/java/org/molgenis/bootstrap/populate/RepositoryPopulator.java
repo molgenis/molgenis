@@ -1,8 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.settings.SettingsPopulator;
-import org.molgenis.script.ScriptTypePopulator;
+import org.molgenis.script.core.ScriptTypePopulator;
+import org.molgenis.settings.SettingsPopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 
 /**
  * Populates {@link org.molgenis.data.Repository repositories} with data during bootstrapping.

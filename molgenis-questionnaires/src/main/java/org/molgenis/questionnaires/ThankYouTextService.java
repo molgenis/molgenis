@@ -1,6 +1,6 @@
 package org.molgenis.questionnaires;
 
-import org.molgenis.ui.controller.StaticContentService;
+import org.molgenis.core.ui.controller.StaticContentService;
 import org.springframework.stereotype.Service;
 
 @Service

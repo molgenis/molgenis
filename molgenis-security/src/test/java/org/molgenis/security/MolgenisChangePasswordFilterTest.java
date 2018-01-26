@@ -1,8 +1,8 @@
 package org.molgenis.security;
 
-import org.molgenis.auth.User;
-import org.molgenis.security.user.UserService;
-import org.molgenis.security.user.UserServiceImpl;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

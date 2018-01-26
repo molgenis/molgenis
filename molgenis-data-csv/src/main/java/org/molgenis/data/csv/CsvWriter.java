@@ -4,9 +4,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.file.processor.AbstractCellProcessor;
+import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.processor.AbstractCellProcessor;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
 import org.molgenis.util.UnexpectedEnumException;
 

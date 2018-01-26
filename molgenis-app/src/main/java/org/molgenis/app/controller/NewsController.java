@@ -1,6 +1,6 @@
 package org.molgenis.app.controller;
 
-import org.molgenis.ui.controller.AbstractStaticContentController;
+import org.molgenis.core.ui.controller.AbstractStaticContentController;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

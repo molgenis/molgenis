@@ -3,7 +3,7 @@ package org.molgenis.data.importer;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.importer.config.ImportTestConfig;
-import org.molgenis.security.user.UserService;
+import org.molgenis.data.security.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

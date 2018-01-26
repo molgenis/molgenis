@@ -3,9 +3,10 @@
         </div><#-- close col-md-12 -->
     </div><#-- close row -->
 </div><#-- close container-fluid -->
-<div id="footer-container">
-    <div class="container">
-        <#if version == 1>
+
+<#if version == 1>
+    <div id="footer-container">
+        <div class="container">
             <p class="text-muted text-center small footer">
                 <#if app_settings.footer??>
                 <span>
@@ -22,38 +23,38 @@
                         href="http://www.ncbi.nlm.nih.gov/pubmed/17297480">Swertz &amp; Jansen (2007)</a> on use.
                 </em>
             </p>
-        <#else>
-        <#-- VUE -->
-            <div id="footer"></div>
 
-            <script type=text/javascript>
-                window.molgenisFooter = {
-                        <#if app_settings.footer??>additionalMessage: '${app_settings.footer}'</#if>
-                    <#if app_settings.footer?? && (molgenis_version??||molgenis_build_date??)>,</#if>
-                        <#if molgenis_version??>version: '${molgenis_version}'</#if>
-                    <#if molgenis_version?? && molgenis_build_date??>,</#if>
-                        <#if molgenis_build_date??>buildDate: '${molgenis_build_date}'</#if>}
-            </script>
-
-
-            <script type=text/javascript src="<@resource_href "/js/footer/manifest.js"/>"></script>
-            <script type=text/javascript src="<@resource_href "/js/footer/vendor.js"/>"></script>
-            <script type=text/javascript src="<@resource_href "/js/footer/app.js"/>"></script>
-        </#if>
-
-        <#if app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??>
-            <p class="text-muted text-center small ga-opt-out">
-                <em>We use Google Analytics to review this site's usage and improve our services.<br/>
-                    To optimally protect your privacy we have signed the Data Processing Amendment, masked parts of
-                    your IP address and disabled data sharing with other Google services.</em><br/>
-                <em>Click <a href="javascript:gaOptout()">here</a> to opt-out of Google Analytics.</em>
-            </p>
-            <p class="text-muted text-center small ga-opted-out hidden">
-                <em>You have opted out of Google Analytics.</em>
-            </p>
-        </#if>
+            <#if app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??>
+                <p class="text-muted text-center small ga-opt-out">
+                    <em>We use Google Analytics to review this site's usage and improve our services.<br/>
+                        To optimally protect your privacy we have signed the Data Processing Amendment, masked parts of
+                        your IP address and disabled data sharing with other Google services.</em><br/>
+                    <em>Click <a href="javascript:gaOptout()">here</a> to opt-out of Google Analytics.</em>
+                </p>
+                <p class="text-muted text-center small ga-opted-out hidden">
+                    <em>You have opted out of Google Analytics.</em>
+                </p>
+            </#if>
+        </div>
     </div>
-</div>
+<#else>
+    <#-- VUE -->
+    <div id="molgenis-footer"></div>
+
+    <script type=text/javascript>
+        window.molgenisFooter = {
+                <#if app_settings.footer??>additionalMessage: '${app_settings.footer}'</#if>
+            <#if app_settings.footer?? && (molgenis_version??||molgenis_build_date??)>,</#if>
+                <#if molgenis_version??>version: '${molgenis_version}'</#if>
+            <#if molgenis_version?? && molgenis_build_date??>,</#if>
+                <#if molgenis_build_date??>buildDate: '${molgenis_build_date}'</#if>}
+    </script>
+
+    <#-- Include the Vue version of the molgenis footer  -->
+    <script type=text/javascript src="<@resource_href "/js/bootstrap-4/footer/molgenis-footer.js"/>"></script>
+</#if>
+
+
 <#if authenticated?? && authenticated>
 <#else>
     <#include "/login-modal.ftl">

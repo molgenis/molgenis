@@ -1,8 +1,8 @@
 package org.molgenis.security.settings;
 
-import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
+import org.molgenis.settings.DefaultSettingsEntity;
+import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;

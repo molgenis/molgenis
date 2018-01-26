@@ -1,30 +1,69 @@
 <template>
-  <div>
-    <h1>{{ 'plugin-title' | i18n }}</h1>
-    <form-component id="settings-form" :schema="schema" :data="data"></form-component>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <entity-select-component></entity-select-component>
+      </div>
+      <div class="card-body">
+        <div id="alert-message" v-if="message" class="alert" :class="error ? 'alert-danger' : 'alert-info'"
+             role="alert">
+          <button @click="message=null" type="button" class="close"><span aria-hidden="true">&times;</span>
+          </button>
+          <span id="message-span">{{message}}</span>
+        </div>
+        <div class="card-block">
+          <div v-if="initialFormData">
+            <form-component id="settings-form" :formState="state" :schema="initFormSchema"
+                            :initialFormData="initialFormData"></form-component>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button id="save-btn" class="btn btn-primary" type="submit" form="settings-form">Save</button>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script>
   import { FormComponent } from '@molgenis/molgenis-ui-form'
-  import { GET_SETTINGS } from '../store/actions'
+  import EntitySelectComponent from '../components/EntitySelectComponent'
+  import { GET_SETTINGS, UPDATE_SETTINGS } from '../store/actions'
+  import { SET_FORM_DATA } from '../store/mutations'
+
+  import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
+  import 'font-awesome/css/font-awesome.css'
 
   export default {
     name: 'Settings',
     components: {
-      FormComponent
+      FormComponent,
+      EntitySelectComponent
     },
     created: function () {
       this.$store.dispatch(GET_SETTINGS)
     },
+    data () {
+      return {
+        message: null,
+        error: null,
+        state: {}
+      }
+    },
+    method: {
+      onSubmit: (formData) => {
+        this.$store.commit(SET_FORM_DATA, formData)
+        this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
+        this.message = 'Changes saved'
+      }
+    },
     computed: {
-      schema () {
-        return {
-          fields: this.$store.state.formFields
-        }
-      },
-      data () {
+      initialFormData () {
         return this.$store.state.formData
+      },
+      initFormSchema () {
+        return {fields: this.$store.state.formFields}
       }
     }
   }

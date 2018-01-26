@@ -1,20 +1,20 @@
 package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
-import org.molgenis.auth.*;
 import org.molgenis.bootstrap.populate.SystemEntityRegistry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.security.auth.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupMetaData.GROUP;
-import static org.molgenis.auth.GroupMetaData.NAME;
-import static org.molgenis.auth.UserMetaData.USER;
-import static org.molgenis.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
