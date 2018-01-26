@@ -45,6 +45,9 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 	private ScheduledJobFactory scheduledJobFactory;
 
 	@Mock
+	private ScheduledJobMetadata scheduledJobMetadata;
+
+	@Mock
 	private ScheduledJobType scheduledJobType;
 
 	private String id = "id";
@@ -72,10 +75,12 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		verify(quartzScheduler).scheduleJob(ArgumentMatchers.any(JobDetail.class), ArgumentMatchers.any(Trigger.class));
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_job_ScheduledJob id:id")
 	public void runNowUnknownEntity()
 	{
 		when(dataService.findOneById(SCHEDULED_JOB, id)).thenReturn(null);
+		when(dataService.getEntityType(SCHEDULED_JOB)).thenReturn(scheduledJobMetadata);
+		when(scheduledJobMetadata.getId()).thenReturn(SCHEDULED_JOB);
 		jobScheduler.runNow(id);
 	}
 

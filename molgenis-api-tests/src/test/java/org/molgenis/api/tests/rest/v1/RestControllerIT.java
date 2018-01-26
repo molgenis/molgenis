@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 
@@ -25,6 +26,8 @@ public class RestControllerIT
 	// User credentials
 	private static final String REST_TEST_USER = "rest_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
+	public static final String FIRST_ERROR_CODE = "errors[0].code";
+	public static final String FIRST_ERROR_MESSAGE = "errors[0].message";
 	private String testUserId;
 	private String testUserToken;
 	private String adminToken;
@@ -70,23 +73,19 @@ public class RestControllerIT
 		ValidatableResponse response;
 
 		response = getWithoutToken("sys_FreemarkerTemplate");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		response = getWithoutToken("sys_scr_ScriptType");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
 
 		response = getWithoutToken("sys_sec_UserAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No read permission on entity type 'User authority' with id 'sys_sec_UserAuthority'"));
 
 		response = getWithoutToken("sys_sec_GroupAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
@@ -101,8 +100,7 @@ public class RestControllerIT
 	public void getWithoutReadPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_UserAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 	}
 
@@ -110,8 +108,7 @@ public class RestControllerIT
 	public void getWithoutCountPermissionIsNotAllowed()
 	{
 		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
+		response.statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
@@ -127,7 +124,9 @@ public class RestControllerIT
 			   .log()
 			   .all()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", Matchers.equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
+			   .body(FIRST_ERROR_CODE, is("D02"))
+			   .body(FIRST_ERROR_MESSAGE,
+					   is("Unknown entity 'non-existing-entity_id' of entity type 'File metadata'."));
 	}
 
 	@Test
@@ -141,8 +140,7 @@ public class RestControllerIT
 			   .when()
 			   .delete(PATH + "sys_scr_ScriptType/R")
 			   .then()
-			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
+			   .statusCode(UNAUTHORIZED).body(FIRST_ERROR_MESSAGE, is(
 					   "No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
 
 		given().log()
@@ -154,8 +152,8 @@ public class RestControllerIT
 			   .delete(PATH + "sys_sec_UserAuthority")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
+			   .body(FIRST_ERROR_MESSAGE,
+					   is("No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
 
 		given().log()
 			   .method()
@@ -166,8 +164,8 @@ public class RestControllerIT
 			   .delete(PATH + "sys_sec_GroupAuthority")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
+			   .body(FIRST_ERROR_MESSAGE,
+					   is("No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -209,8 +207,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body(FIRST_ERROR_MESSAGE,
+					   is("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		given().log()
 			   .uri()
@@ -220,8 +218,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body(FIRST_ERROR_MESSAGE,
+					   is("No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		// clean up after test
 		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
@@ -240,7 +238,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate/test.csv")
 			   .then()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", Matchers.equalTo("sys_FreemarkerTemplate test.csv not found"));
+			   .body(FIRST_ERROR_CODE, is("D02"))
+			   .body(FIRST_ERROR_MESSAGE, is("Unknown entity 'test.csv' of entity type 'Freemarker template'."));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
@@ -254,8 +253,7 @@ public class RestControllerIT
 			   .get(PATH + "sys_sec_User/meta")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]",
-					   Matchers.equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
+			   .body(FIRST_ERROR_MESSAGE, is("No read permission on entity type 'User' with id 'sys_sec_User'"));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
@@ -271,7 +269,7 @@ public class RestControllerIT
 			   .get(PATH + "sys_sec_User/meta")
 			   .then()
 			   .statusCode(RestTestUtils.OKE)
-			   .body("name", Matchers.equalTo("sys_sec_User"));
+			   .body("name", is("sys_sec_User"));
 	}
 
 	private ValidatableResponse getWithoutToken(String requestedEntity)

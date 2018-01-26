@@ -1,9 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
@@ -28,7 +26,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -46,15 +43,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.*;
-import org.testng.reporters.Files;
 
-import java.io.IOException;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -627,8 +620,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(
 				post("/api/v2/copy/unknown").content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'unknown'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'unknown'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -741,8 +735,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				post(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com', extraAttribute:'test'}]}")
 												.contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	/**
@@ -829,8 +824,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com'}]}")
 													   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -872,18 +868,18 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2" + "/" + "email").content("{entities:[{email:'test@email.com'}]}")
 																	   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@Test
 	public void testUpdateEntitiesSpecificAttributeReadOnlyAttribute() throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(
-				put(BASE_URI + "/" + "entity" + "/" + "decimal").content("{entities:[{decimal:'42'}]}")
-																.contentType(APPLICATION_JSON))
-											 .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
-													 is("Operation failed. Attribute 'decimal' of entity 'entity' is readonly")));
+		mockMvc.perform(put(BASE_URI + "/" + "entity" + "/" + "decimal").content("{entities:[{decimal:'42'}]}")
+																		.contentType(APPLICATION_JSON))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Operation failed. Attribute 'decimal' of entity 'entity' is readonly")));
 	}
 
 	@DataProvider(name = "testDeleteEntityCollection")
@@ -926,13 +922,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
-		when(dataService.getEntityType("MyEntityType")).thenThrow(
-				new UnknownEntityException("Unknown entity [MyEntityType]"));
+		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
 
 		mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity [MyEntityType]")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'MyEntityType'.")));
 	}
 
 	@Test
@@ -1009,7 +1005,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
 											   .contentType(APPLICATION_JSON))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("The entity you are trying to update [4] does not exist.")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D02")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity '4' of entity type 'entity'.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()

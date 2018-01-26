@@ -6,6 +6,10 @@ import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -46,6 +50,8 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter,
 										 new RdfConverter())
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new SpringExceptionHandler(), new FallbackExceptionHandler())
 								 .build();
 	}
 
@@ -79,9 +85,8 @@ public class FairControllerTest extends AbstractTestNGSpringContextTests
 	public void getCatalogTestUnknownCatalog() throws Exception
 	{
 		reset(dataService);
-
-		Entity answer = mock(Entity.class);
-
+		EntityType catalog = mock(EntityType.class);
+		when(dataService.getEntityType("fdp_Catalog")).thenReturn(catalog);
 		this.mockMvc.perform(get(URI.create("http://molgenis01.gcc.rug.nl:8080/fdp/catalogID?blah=value")).contentType(
 				MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
 	}
