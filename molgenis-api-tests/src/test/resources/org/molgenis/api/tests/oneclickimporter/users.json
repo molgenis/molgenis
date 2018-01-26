@@ -1,0 +1,159 @@
+{
+  "meta": {
+    "attributes": [
+      {
+        "fieldType": "STRING",
+        "name": "first_name",
+        "label": "first name",
+        "attributes": [
+        ],
+        "maxLength": 255,
+        "auto": false,
+        "nillable": false,
+        "readOnly": true,
+        "labelAttribute": true,
+        "unique": true,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      },
+      {
+        "fieldType": "STRING",
+        "name": "last_name",
+        "label": "last name",
+        "attributes": [
+        ],
+        "maxLength": 255,
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      },
+      {
+        "fieldType": "STRING",
+        "name": "full_name",
+        "label": "full name",
+        "attributes": [
+        ],
+        "maxLength": 255,
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      },
+      {
+        "fieldType": "BOOL",
+        "name": "UMCG_employee",
+        "label": "UMCG employee",
+        "attributes": [
+        ],
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      },
+      {
+        "fieldType": "INT",
+        "name": "Age",
+        "label": "Age",
+        "attributes": [
+        ],
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "first_name",
+    "idAttribute": "first_name",
+    "lookupAttributes": [
+    ],
+    "isAbstract": false,
+    "writable": true,
+    "languageCode": "en"
+  },
+  "start": 0,
+  "num": 100,
+  "total": 10,
+  "items": [
+    {
+      "first_name": "Bart",
+      "last_name": "Charbon",
+      "full_name": "Bart Charbon",
+      "UMCG_employee": true
+    },
+    {
+      "first_name": "Connor",
+      "last_name": "Stroomberg",
+      "full_name": "Connor Stroomberg",
+      "UMCG_employee": true
+    },
+    {
+      "first_name": "Dennis",
+      "last_name": "Hendriksen",
+      "full_name": "Dennis Hendriksen",
+      "UMCG_employee": true
+    },
+    {
+      "first_name": "Fleur",
+      "last_name": "Kelpin",
+      "full_name": "Fleur Kelpin",
+      "UMCG_employee": true
+    },
+    {
+      "first_name": "Jan",
+      "UMCG_employee": false,
+      "Age": 32
+    },
+    {
+      "first_name": "Mariska",
+      "last_name": "Slofstra",
+      "full_name": "Mariska Slofstra",
+      "UMCG_employee": true,
+      "Age": 22
+    },
+    {
+      "first_name": "Mark",
+      "last_name": "de Haan",
+      "full_name": "Mark de Haan",
+      "UMCG_employee": true,
+      "Age": 26
+    },
+    {
+      "first_name": "Piet",
+      "last_name": "Klaassen",
+      "full_name": "Piet Klaassen",
+      "UMCG_employee": false,
+      "Age": 53
+    },
+    {
+      "first_name": "Sido",
+      "last_name": "Haakma",
+      "full_name": "Sido Haakma",
+      "UMCG_employee": true
+    },
+    {
+      "first_name": "Tommy",
+      "last_name": "de Boer",
+      "full_name": "Tommy de Boer",
+      "UMCG_employee": true,
+      "Age": 27
+    }
+  ]
+}
