@@ -15,7 +15,7 @@
         <div class="col-md-10">
 
           <h1>{{ questionnaire.label }}</h1>
-          <p>{{ questionnaire.description }}</p>
+          <p v-html="questionnaire.description"></p>
 
           <div class="card mb-3">
             <div class="card-body">
@@ -27,9 +27,10 @@
             </div>
 
             <div class="card-footer text-right">
-              <router-link to="/" class="btn btn-outline-secondary">{{ 'questionnaire_save_and_continue' | i18n }}
+              <router-link to="/" class="btn btn-outline-secondary">
+                {{ 'questionnaire_save_and_continue' | i18n }}
               </router-link>
-              <button class="btn btn-primary">{{ 'questionnaire_submit' | i18n }}</button>
+              <button type="submit" class="btn btn-primary" :form="questionnaire.name">{{ 'questionnaire_submit' | i18n }}</button>
             </div>
           </div>
         </div>
@@ -86,7 +87,8 @@
         entity: null,
         hooks: {
           onSubmit: (formData) => {
-            console.log(formData)
+            this.entity.status === 'SUBMITTED'
+            console.log('submit', formData)
           },
           onCancel: () => {
             console.log('cancel')

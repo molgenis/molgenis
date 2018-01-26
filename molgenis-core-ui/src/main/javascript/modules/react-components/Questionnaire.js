@@ -90,9 +90,6 @@ var Questionnaire = React.createClass({
         this.setState({entityInstance: entityInstance});
     },
     _handleBeforeSubmit: function (arr, $form, options) {
-        console.log(arr)
-        console.log($form)
-        console.log(options)
         var values = {};
         _.each(this.state.entity.allAttributes, function (attr) {
             var value = this.state.entityInstance[attr.name];
