@@ -26,7 +26,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -59,9 +58,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;

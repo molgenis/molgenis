@@ -100,8 +100,8 @@
 </style>
 
 <script>
-  import { mapState } from 'vuex'
-  import { IMPORT_FILE } from '../store/actions'
+  import {mapState} from 'vuex'
+  import {IMPORT_FILE} from '../store/actions'
 
   export default {
     name: 'one-click-importer',

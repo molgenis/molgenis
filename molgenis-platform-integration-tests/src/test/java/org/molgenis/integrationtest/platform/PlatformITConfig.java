@@ -7,6 +7,8 @@ import org.molgenis.data.TestHarnessConfig;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
+import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactoryRegistrar;
+import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
 import org.molgenis.data.elasticsearch.client.ElasticsearchConfig;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.DataPersisterImpl;
@@ -80,10 +82,9 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
 		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.i18n", "org.molgenis.data.postgresql",
 		"org.molgenis.data.file.model", "org.molgenis.data.security.owned", "org.molgenis.data.security.user",
-		"org.molgenis.data.validation",
-		"org.molgenis.data.transaction", "org.molgenis.data.importer.emx", "org.molgenis.data.importer.config",
-		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.settings",
-		"org.molgenis.data.util" })
+		"org.molgenis.data.validation", "org.molgenis.data.transaction", "org.molgenis.data.importer.emx",
+		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.util",
+		"org.molgenis.data.decorator" })
 @Import({ TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class,
 		ElasticsearchConfig.class,
 		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
@@ -119,6 +120,8 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	private SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
 	@Autowired
 	private JobFactoryRegistrar jobFactoryRegistrar;
+	@Autowired
+	private DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -205,9 +208,13 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Registered entity factories");
 
 					LOG.trace("Registering entity factories ...");
-					systemRepositoryDecoratorFactoryRegistrar.register(event);
+					systemRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
 					LOG.trace("Registered entity factories");
 					LOG.debug("Bootstrapped registries");
+
+					LOG.trace("Registering dynamic decorator factories ...");
+					dynamicRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
+					LOG.trace("Registered dynamic repository decorator factories");
 
 					LOG.trace("Bootstrapping system entity types ...");
 					systemEntityTypeBootstrapper.bootstrap(event);
@@ -218,6 +225,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					LOG.trace("Registered job factories");
 
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
+					event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
 				});
 			}
 			catch (Exception unexpected)

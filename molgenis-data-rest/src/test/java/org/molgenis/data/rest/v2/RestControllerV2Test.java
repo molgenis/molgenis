@@ -1,9 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
@@ -28,7 +26,6 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
-import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -46,15 +43,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.annotations.*;
-import org.testng.reporters.Files;
 
-import java.io.IOException;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -374,10 +367,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		Query<Entity> q = new QueryImpl<>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
-		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(
-				entity);
-		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(
-				selfRefEntity);
+		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
+		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
