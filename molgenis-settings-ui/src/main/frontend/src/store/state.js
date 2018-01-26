@@ -7,8 +7,9 @@ const state = {
   message: undefined,
   token: undefined,
   formFields: [],
-  formData: {},
-  settings: []
+  formData: null,
+  settings: [],
+  selectedSetting: 'sys_set_app'
 }
 
 export default state
