@@ -8,6 +8,10 @@ cache:
     - '$HOME/.m2/repository'
     - '$HOME/.sonar/cache'
     - '$HOME/Library/Caches/Yarn'
+env:
+  - MAVEN_TESTS="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
+  - MAVEN_TESTS="travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -DskipUTs"
 services:
   - postgresql
 addons:
@@ -18,13 +22,11 @@ before_install:
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
 install:
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:
   - sudo sysctl -w vm.max_map_count=262144
 script:
-  # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
-  # Travis provides us with a travis user and travis database
-  - travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password
+  - $MAVEN_TESTS
 notifications:
   slack:
     rooms:

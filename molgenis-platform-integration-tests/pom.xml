@@ -29,6 +29,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>sql-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>create postgres integration database</id>
@@ -76,6 +79,9 @@
                     <plugin>
                         <groupId>com.github.alexcojocaru</groupId>
                         <artifactId>elasticsearch-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>start-elasticsearch</id>
@@ -106,6 +112,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipITs}</skip>
                             <includeGroupIds>${project.groupId}</includeGroupIds>
                             <includeArtifactIds>molgenis-data-elasticsearch</includeArtifactIds>
                             <excludeTransitive>true</excludeTransitive>

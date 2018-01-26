@@ -76,7 +76,7 @@
                         </goals>
                         <configuration>
                             <skip>${skip.js}</skip>
-                            <arguments>--frozen-lockfile</arguments>
+                            <arguments>--mutex network --frozen-lockfile</arguments>
                             <failOnError>true</failOnError>
                         </configuration>
                     </execution>
