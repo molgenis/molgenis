@@ -7,6 +7,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.when;
+
 public class UnknownEntityExceptionTest extends ExceptionMessageTest
 {
 	@Mock
@@ -22,6 +24,7 @@ public class UnknownEntityExceptionTest extends ExceptionMessageTest
 	@Override
 	public void testGetLocalizedMessage(String lang, String message)
 	{
+		when(entityType.getLabel(lang)).thenReturn("Entity Type label " + lang);
 		assertExceptionMessageEquals(new UnknownEntityException(entityType, "MyEntity"), lang, message);
 	}
 
@@ -29,8 +32,8 @@ public class UnknownEntityExceptionTest extends ExceptionMessageTest
 	@Override
 	public Object[][] languageMessageProvider()
 	{
-		Object[] enParams = { "en", "Unknown entity 'entityType' of entity type 'MyEntity'." };
-		Object[] nlParams = { "nl", "Onbekende entiteit 'entityType' van entiteitsoort 'MyEntity'." };
+		Object[] enParams = { "en", "Unknown entity 'MyEntity' of entity type 'Entity Type label en'." };
+		Object[] nlParams = { "nl", "Onbekende entiteit 'MyEntity' van entiteitsoort 'Entity Type label nl'." };
 		return new Object[][] { enParams, nlParams };
 	}
 }
