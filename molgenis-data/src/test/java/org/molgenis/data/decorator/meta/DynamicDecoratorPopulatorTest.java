@@ -3,6 +3,7 @@ package org.molgenis.data.decorator.meta;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.Test;
@@ -28,6 +29,8 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest
 	private DynamicDecorator decorator2;
 	@Mock
 	private DynamicDecorator decorator3;
+	@Mock
+	private DynamicRepositoryDecoratorFactory dynamicRepositoryDecoratorFactory;
 
 	@Test
 	public void testPopulate()
@@ -37,13 +40,19 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest
 		when(decorator3.getId()).thenReturn("id3");
 		DynamicDecoratorFactory dynamicDecoratorFactory = mock(DynamicDecoratorFactory.class);
 
+		when(decorator3.setLabel(any())).thenReturn(decorator3);
+		when(decorator3.setDescription(any())).thenReturn(decorator3);
+
 		when(registry.getFactoryIds()).thenAnswer(invocation -> Stream.of("id1", "id3"));
+		when(registry.getFactory("id3")).thenReturn(dynamicRepositoryDecoratorFactory);
 		when(dataService.findAll(DYNAMIC_DECORATOR, DynamicDecorator.class)).thenAnswer(
 				invocation -> Stream.of(decorator1, decorator2));
 
 		when(dataService.findOneById(DYNAMIC_DECORATOR, "id1", DynamicDecorator.class)).thenReturn(decorator1);
 
 		when(dynamicDecoratorFactory.create("id3")).thenReturn(decorator3);
+		when(dynamicRepositoryDecoratorFactory.getLabel()).thenReturn("label3");
+		when(dynamicRepositoryDecoratorFactory.getDescription()).thenReturn("desc3");
 
 		DynamicDecoratorPopulator populator = new DynamicDecoratorPopulator(dataService, registry,
 				dynamicDecoratorFactory);
