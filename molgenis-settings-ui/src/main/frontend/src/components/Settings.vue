@@ -34,6 +34,9 @@
   import { GET_SETTINGS, GET_SETTINGS_BY_ID, UPDATE_SETTINGS } from '../store/actions'
   import { SET_FORM_DATA } from '../store/mutations'
 
+  import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
+  import 'font-awesome/css/font-awesome.css'
+
   export default {
     name: 'Settings',
     components: {
@@ -41,8 +44,12 @@
       EntitySelectComponent
     },
     created: function () {
+      const defaultSettingsEntity = 'sys_set_app'
       this.$store.dispatch(GET_SETTINGS).then(() => {
-        this.$store.dispatch(GET_SETTINGS_BY_ID, 'sys_set_app').then(() => {
+        this.$store.dispatch(GET_SETTINGS_BY_ID, defaultSettingsEntity).then(() => {
+          this.selectedEntity = {
+            id: defaultSettingsEntity
+          }
           this.createForm = true
         })
       })
@@ -54,9 +61,6 @@
             this.$store.commit(SET_FORM_DATA, formData)
             this.$store.dispatch(UPDATE_SETTINGS, this.selectedEntity)
             this.message = 'Changes saved'
-          },
-          onValueChanged: (formData) => {
-            console.log('value changed')
           }
         },
         message: null,
@@ -67,6 +71,7 @@
     },
     watch: {
       selectedEntity (updatedValue) {
+        this.message = null
         this.createForm = false
         this.$store.dispatch(GET_SETTINGS_BY_ID, updatedValue).then(() => {
           this.createForm = true
