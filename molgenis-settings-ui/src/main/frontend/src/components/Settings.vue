@@ -2,9 +2,7 @@
   <div class="container">
     <div class="card">
       <div class="card-header">
-        <entity-select-component v-model.lazy="selectedEntity" :id="'settings-select'" :label="'Select entity'"
-                                 :description="'Select setting you want to edit'"
-                                 :entities="initSettingsOptions"></entity-select-component>
+        <entity-select-component></entity-select-component>
       </div>
       <div class="card-body">
         <div id="alert-message" v-if="message" class="alert" :class="error ? 'alert-danger' : 'alert-info'"
@@ -14,7 +12,7 @@
           <span id="message-span">{{message}}</span>
         </div>
         <div class="card-block">
-          <div v-if="createForm">
+          <div v-if="initialFormData">
             <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
                             :hooks="hooks"></form-component>
           </div>
@@ -31,7 +29,7 @@
 <script>
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import EntitySelectComponent from '../components/EntitySelectComponent'
-  import { GET_SETTINGS, GET_SETTINGS_BY_ID, UPDATE_SETTINGS } from '../store/actions'
+  import { GET_SETTINGS, UPDATE_SETTINGS } from '../store/actions'
   import { SET_FORM_DATA } from '../store/mutations'
 
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
@@ -44,14 +42,8 @@
       EntitySelectComponent
     },
     created: function () {
-      const defaultSettingsEntity = 'sys_set_app'
       this.$store.dispatch(GET_SETTINGS).then(() => {
-        this.$store.dispatch(GET_SETTINGS_BY_ID, defaultSettingsEntity).then(() => {
-          this.selectedEntity = {
-            id: defaultSettingsEntity
-          }
-          this.createForm = true
-        })
+        this.createForm = true
       })
     },
     data () {
@@ -59,23 +51,13 @@
         hooks: {
           onSubmit: (formData) => {
             this.$store.commit(SET_FORM_DATA, formData)
-            this.$store.dispatch(UPDATE_SETTINGS, this.selectedEntity)
+            this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
             this.message = 'Changes saved'
           }
         },
         message: null,
         error: null,
-        selectedEntity: null,
         createForm: false
-      }
-    },
-    watch: {
-      selectedEntity (updatedValue) {
-        this.message = null
-        this.createForm = false
-        this.$store.dispatch(GET_SETTINGS_BY_ID, updatedValue).then(() => {
-          this.createForm = true
-        })
       }
     },
     computed: {
@@ -84,9 +66,6 @@
       },
       initFormSchema () {
         return {fields: this.$store.state.formFields}
-      },
-      initSettingsOptions () {
-        return this.$store.state.settings
       }
     }
   }

@@ -1,7 +1,7 @@
 import mutations from '@/store/mutations'
 
 describe('mutations', () => {
-  describe('SET_FORM_FIELDS', () => {
+  describe('SET_FORM', () => {
     it('should set setting-response in the state', () => {
       const state = {
         formFields: [],
@@ -23,6 +23,34 @@ describe('mutations', () => {
     })
   })
 
+  describe('SET_SETTINGS', () => {
+    it('should set settings list in state', () => {
+      const state = {
+        settings: []
+      }
+
+      const settings = [
+        {id: 'setting_entity_1'}
+      ]
+
+      mutations.__SET_SETTINGS__(state, settings)
+      expect(state.settings).to.deep.equal(settings)
+    })
+  })
+
+  describe('UPDATE_SETTINGS', () => {
+    it('should set an occurred error', () => {
+      const state = {
+        error: []
+      }
+
+      const error = []
+
+      mutations.__UPDATE_SETTINGS__(state, error)
+      expect(state.error).to.deep.equal(error)
+    })
+  })
+
   describe('SET_ERROR', () => {
     it('should set an occurred error', () => {
       const state = {
@@ -33,6 +61,18 @@ describe('mutations', () => {
 
       mutations.__SET_ERROR__(state, error)
       expect(state.error).to.deep.equal(error)
+    })
+  })
+  describe('SET_MESSAGE', () => {
+    it('should set a message from server or validation library', () => {
+      const state = {
+        message: ''
+      }
+
+      const message = ''
+
+      mutations.__SET_MESSAGE__(state, message)
+      expect(state.message).to.deep.equal(message)
     })
   })
 })

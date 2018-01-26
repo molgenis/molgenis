@@ -1,6 +1,6 @@
 // @flow
 // $FlowFixMe
-import { SET_ERROR, SET_FORM_DATA, SET_FORM_FIELDS, SET_MESSAGE, SET_SETTINGS } from './mutations'
+import { SET_ERROR, SET_FORM_DATA, SET_FORM_FIELDS, SET_MESSAGE, SET_SELECTED_SETTING, SET_SETTINGS } from './mutations'
 import { EntityToStateMapper } from '@molgenis/molgenis-ui-form'
 import api from '@molgenis/molgenis-api-client'
 
@@ -9,10 +9,11 @@ export const GET_SETTINGS_BY_ID = '__GET_SETTINGS_BY_ID__'
 export const UPDATE_SETTINGS = '__UPDATE_SETTINGS__'
 
 export default {
-  [GET_SETTINGS] ({commit}: { commit: Function }) {
+  [GET_SETTINGS] ({commit, dispatch, state}: { commit: Function }) {
     const uri = '/api/v2/sys_md_EntityType?q=extends==sys_set_settings'
     api.get(uri).then(response => {
       commit(SET_SETTINGS, response.items.map(item => { return {id: item.id, label: item.label} }))
+      dispatch(GET_SETTINGS_BY_ID, state.selectedSetting)
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -21,9 +22,12 @@ export default {
     if (selectedEntity) {
       const uri = '/api/v2/' + selectedEntity
       return api.get(uri).then(response => {
+        commit(SET_FORM_FIELDS, null)
+        commit(SET_FORM_DATA, null)
         const formFields = EntityToStateMapper.generateFormFields(response.meta)
         commit(SET_FORM_FIELDS, formFields)
         commit(SET_FORM_DATA, EntityToStateMapper.generateFormData(formFields, response.items[0]))
+        commit(SET_SELECTED_SETTING, selectedEntity)
       }, error => {
         commit(SET_ERROR, error)
       })
