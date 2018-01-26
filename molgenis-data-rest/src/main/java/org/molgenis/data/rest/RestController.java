@@ -119,15 +119,7 @@ public class RestController
 	@GetMapping(value = "/{entityTypeId}/exist", produces = APPLICATION_JSON_VALUE)
 	public boolean entityExists(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		try
-		{
-			dataService.getRepository(entityTypeId);
-			return true;
-		}
-		catch (UnknownEntityTypeException e)
-		{
-			return false;
-		}
+		return dataService.hasRepository(entityTypeId);
 	}
 
 	/**

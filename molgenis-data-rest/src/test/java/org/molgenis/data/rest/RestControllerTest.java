@@ -694,6 +694,20 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void testExistsTrue() throws Exception
+	{
+		when(dataService.hasRepository(ENTITY_NAME)).thenReturn(true);
+		mockMvc.perform(get(HREF_ENTITY + "/exist")).andExpect(status().isOk()).andExpect(content().string("true"));
+	}
+
+	@Test
+	public void testExistsFalse() throws Exception
+	{
+		when(dataService.hasRepository(ENTITY_NAME)).thenReturn(false);
+		mockMvc.perform(get(HREF_ENTITY + "/exist")).andExpect(status().isOk()).andExpect(content().string("false"));
+	}
+
+	@Test
 	public void updateAttribute_unknownEntity() throws Exception
 	{
 		mockMvc.perform(post(BASE_URI + "/unknownentity/" + ENTITY_UNTYPED_ID + "/name").param("_method", "PUT")
