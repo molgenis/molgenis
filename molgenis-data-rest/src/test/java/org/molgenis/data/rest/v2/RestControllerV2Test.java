@@ -2,9 +2,8 @@ package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.core.util.GsonHttpMessageConverter;
@@ -27,29 +26,35 @@ import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.properties.AllPropertiesMessageSource;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
+import org.testng.reporters.Files;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -59,16 +64,20 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.reporters.Files.readFile;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Config.class, GsonConfig.class })
@@ -89,9 +98,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String REF_ENTITY0_ID = "ref0";
 	private static final String REF_ENTITY1_ID = "ref0";
 	private static final String REF_REF_ENTITY_ID = "refRef0";
-	private static final String HREF_ENTITY_COLLECTION = RestControllerV2.BASE_URI + '/' + ENTITY_NAME;
-	private static final String HREF_COPY_ENTITY = RestControllerV2.BASE_URI + "/copy/" + ENTITY_NAME;
+	private static final String HREF_ENTITY_COLLECTION = BASE_URI + '/' + ENTITY_NAME;
+	private static final String HREF_COPY_ENTITY = BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
+	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
+	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -121,9 +132,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private RepositoryCopier repoCopier;
 
 	@Autowired
-	private Gson gson;
-
-	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -144,8 +152,25 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		super(Strictness.WARN);
 	}
 
+	@BeforeClass
+	public void beforeClass()
+	{
+		ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
+		validationMessages.addBasenames("org.hibernate.validator.ValidationMessages");
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("data", "web");
+		messageSource.setParentMessageSource(validationMessages);
+		MessageSourceHolder.setMessageSource(messageSource);
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		MessageSourceHolder.setMessageSource(null);
+	}
+
 	@BeforeMethod
-	public void beforeMethod() throws ParseException
+	public void beforeMethod()
 	{
 		reset(dataService);
 		reset(repoCopier);
@@ -349,8 +374,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		Query<Entity> q = new QueryImpl<>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
-		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
-		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
+		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(
+				entity);
+		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(
+				selfRefEntity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
@@ -371,8 +398,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setLocaleResolver(localeResolver)
+		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
+								 .setLocaleResolver(localeResolver)
 								 .setMessageConverters(gsonHttpMessageConverter)
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new SpringExceptionHandler(), new FallbackExceptionHandler())
 								 .setConversionService(conversionService)
 								 .build();
 	}
@@ -419,7 +449,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_ID))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourceResponse));
+			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceResponse.json"))));
 	}
 
 	@Test
@@ -428,7 +458,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBoolName))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialAttributeResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialAttributeResponse.json"))));
 	}
 
 	@Test
@@ -437,7 +468,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrCompoundName + '(' + attrCompoundAttr0Name + ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialAttributeInCompoundResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialAttributeInCompoundResponse.json"))));
 	}
 
 	@Test
@@ -447,7 +479,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				attrCompoundName + '(' + attrCompoundAttrCompoundName + '(' + attrCompoundAttrCompoundAttr0Name + "))"))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialAttributeInCompoundInCompoundResponse));
+			   .andExpect(content().json(readFile(
+					   getClass().getResourceAsStream("resourcePartialAttributeInCompoundInCompoundResponse.json"))));
 	}
 
 	@Test
@@ -456,7 +489,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBoolName + ',' + attrStringName))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialAttributesResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialAttributesResponse.json"))));
 	}
 
 	@Test
@@ -465,7 +499,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + REF_ATTR_VALUE_NAME + ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialSubAttributeResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialSubAttributeResponse.json"))));
 	}
 
 	@Test
@@ -475,7 +510,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_VALUE_NAME + ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialSubAttributesResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialSubAttributesResponse.json"))));
 	}
 
 	@Test
@@ -486,7 +522,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 						+ ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourcePartialSubSubAttributesResponse));
+			   .andExpect(content().json(
+					   readFile(getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"))));
 	}
 
 	@Test
@@ -495,7 +532,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(resourceCollectionResponse));
+			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"))));
 	}
 
 	@Test
@@ -523,14 +560,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testCreateEntities() throws Exception
 	{
-		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
-		String responseBody =
-				"{\n  \"location\": \"/api/v2/entity?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
-						+ "    {\n      \"href\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
-		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+		mockMvc.perform(
+				post(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}")
+											.contentType(APPLICATION_JSON))
 			   .andExpect(status().isCreated())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(responseBody));
+			   .andExpect(jsonPath("$.location", is("/api/v2/entity?q=id=in=(\"p1\",\"p2\")")))
+			   .andExpect(jsonPath("$.resources", hasSize(2)))
+			   .andExpect(jsonPath("$.resources[0].href", is("/api/v2/entity/p1")))
+			   .andExpect(jsonPath("$.resources[1].href", is("/api/v2/entity/p2")));
 
 		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
@@ -549,15 +587,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(attribute1.getEntityType()).thenReturn(entityType);
 		when(entityManager.create(entityType, POPULATE)).thenReturn(attribute0).thenReturn(attribute1);
 
-		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
-		String responseBody = "{\n" + "  \"location\": \"/api/v2/sys_md_Attribute?q=id=in=(\\\"p1\\\",\\\"p2\\\")\",\n"
-				+ "  \"resources\": [\n" + "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p1\"\n" + "    },\n"
-				+ "    {\n" + "      \"href\": \"/api/v2/sys_md_Attribute/p2\"\n" + "    }\n" + "  ]\n" + "}";
-		mockMvc.perform(post(RestControllerV2.BASE_URI + '/' + ATTRIBUTE_META_DATA).content(content)
-																				   .contentType(APPLICATION_JSON))
+		mockMvc.perform(post(BASE_URI + '/' + ATTRIBUTE_META_DATA).content(
+				"{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}").contentType(APPLICATION_JSON))
 			   .andExpect(status().isCreated())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(responseBody));
+			   .andExpect(jsonPath("$.location", is("/api/v2/sys_md_Attribute?q=id=in=(\"p1\",\"p2\")")))
+			   .andExpect(jsonPath("$.resources", hasSize(2)))
+			   .andExpect(jsonPath("$.resources[0].href", is("/api/v2/sys_md_Attribute/p1")))
+			   .andExpect(jsonPath("$.resources[1].href", is("/api/v2/sys_md_Attribute/p2")));
 
 		verify(metadataService).addAttribute(attribute0);
 		verify(metadataService).addAttribute(attribute1);
@@ -569,17 +606,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		Package pack = mocksForCopyEntitySucces(repositoryToCopy);
+		Package pack = mocksForCopyEntitySuccess(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
-		String responseBody = "\"org_molgenis_blah_newEntity\"";
-		MockHttpServletRequestBuilder mockHttpServletRequestBuilder = post(HREF_COPY_ENTITY).content(content)
-																							.contentType(
-																									APPLICATION_JSON);
-		mockMvc.perform(mockHttpServletRequestBuilder)
+		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isCreated())
 			   .andExpect(content().contentType(APPLICATION_JSON))
-			   .andExpect(content().string(responseBody))
+			   .andExpect(content().string("\"org_molgenis_blah_newEntity\""))
 			   .andExpect(header().string("Location", "/api/v2/org_molgenis_blah_newEntity"));
 
 		verify(repoCopier).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
@@ -590,16 +623,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		mocksForCopyEntitySucces(repositoryToCopy);
+		mocksForCopyEntitySuccess(repositoryToCopy);
 
-		String content = "{newEntityName: 'newEntity'}";
-		ResultActions resultActions = mockMvc.perform(
-				post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().isBadRequest())
-											 .andExpect(content().contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		mockMvc.perform(
+				post("/api/v2/copy/unknown").content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'unknown'")));
+		verifyZeroInteractions(repoCopier);
 	}
 
 	@Test
@@ -607,18 +637,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		mocksForCopyEntitySucces(repositoryToCopy);
+		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		String content = "{newEntityName: 'duplicateEntity'}";
-		ResultActions resultActions = mockMvc.perform(
-				post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().isBadRequest())
-											 .andExpect(content().contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions,
-				"Operation failed. Duplicate entity: 'org" + PACKAGE_SEPARATOR + "molgenis" + PACKAGE_SEPARATOR + "blah"
-						+ PACKAGE_SEPARATOR + "duplicateEntity'");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
+		verifyZeroInteractions(repoCopier);
 	}
 
 	@Test
@@ -626,19 +654,18 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		mocksForCopyEntitySucces(repositoryToCopy);
+		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
 		when(permissionService.hasPermissionOnEntityType("entity", Permission.READ)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
-		ResultActions resultActions = mockMvc.perform(
-				post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().isUnauthorized())
-											 .andExpect(content().contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No read permission on entity entity")));
+		verifyZeroInteractions(repoCopier);
 	}
 
 	@Test
@@ -646,24 +673,21 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		mocksForCopyEntitySucces(repositoryToCopy);
+		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.AGGREGATEABLE,
 				RepositoryCapability.INDEXABLE, RepositoryCapability.QUERYABLE, RepositoryCapability.MANAGABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
-		String content = "{newEntityName: 'newEntity'}";
-		ResultActions resultActions = mockMvc.perform(
-				post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().isBadRequest())
-											 .andExpect(content().contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(repoCopier, never()).copyRepository(any(), any(), any(), any());
+		mockMvc.perform(post(HREF_COPY_ENTITY).content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No write capabilities for entity entity")));
+		verifyZeroInteractions(repoCopier);
 	}
 
-	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
+	private Package mocksForCopyEntitySuccess(Repository<Entity> repositoryToCopy)
 	{
 		Package pack = mock(Package.class);
 		when(pack.getId()).thenReturn("org_molgenis_blah");
@@ -693,34 +717,32 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		return pack;
 	}
 
-	/**
-	 * EXCEPTION_NO_ENTITIES
-	 */
 	@Test
-	public void testCreateEntitiesExceptions1() throws Exception
+	public void testCreateEntitiesNoneProvided() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", "{entities:[]}",
-				"Please provide at least one entity in the entities property.");
+		mockMvc.perform(post(BASE_URI + "/" + "entity").content("{entities:[]}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Please provide at least one entity in the entities property.")));
 	}
 
-	/**
-	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 */
 	@Test
-	public void testCreateEntitiesExceptions2() throws Exception
+	public void testCreateEntitiesMaxPlusOne() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Number of entities cannot be more than 1000.");
+		mockMvc.perform(post(BASE_URI + "/" + "entity").content(createMaxPlusOneEntitiesAsTestContent())
+													   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
 	}
 
-	/**
-	 * createUnknownEntityException
-	 */
 	@Test
-	public void testCreateEntitiesExceptions3() throws Exception
+	public void testCreateEntitiesUnknownEntityTypeException() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+		mockMvc.perform(
+				post(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com', extraAttribute:'test'}]}")
+												.contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
 	}
 
 	/**
@@ -738,9 +760,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 											 .andExpect(status().isBadRequest())
 											 .andExpect(content().contentType(APPLICATION_JSON))
-											 .andExpect(header().doesNotExist("Location"));
-
-		this.assertEqualsErrorMessage(resultActions, e.getMessage());
+											 .andExpect(header().doesNotExist("Location"))
+											 .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+													 is("Check if this exception is not swallowed by the system")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -761,14 +783,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
-		String content = "{entities:[{id:'p1', name:'Example data'}]}";
-		ResultActions resultActions = mockMvc.perform(
-				put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().isBadRequest())
-											 .andExpect(content().contentType(APPLICATION_JSON))
-											 .andExpect(header().doesNotExist("Location"));
-
-		this.assertEqualsErrorMessage(resultActions, e.getMessage());
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Example data'}]}")
+												   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(header().doesNotExist("Location"))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Check if this exception is not swallowed by the system")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -778,53 +798,47 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5L)));
 		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
-		String content = "{entities:[{id:'p1', name:'Example data'}]}";
-		ResultActions resultActions = mockMvc.perform(
-				put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-											 .andExpect(status().is4xxClientError())
-											 .andExpect(content().contentType(APPLICATION_JSON))
-											 .andExpect(header().doesNotExist("Location"));
-
-		this.assertEqualsErrorMessage(resultActions, e.getMessage());
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Example data'}]}")
+												   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(header().doesNotExist("Location"))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Message (entity 5)")));
 	}
 
-	/**
-	 * EXCEPTION_NO_ENTITIES
-	 */
 	@Test
-	public void testUpdateEntitiesExceptions1() throws Exception
+	public void testUpdateEntitiesNoEntities() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", "{entities:[]}",
-				"Please provide at least one entity in the entities property.");
+		mockMvc.perform(put(BASE_URI + "/" + "entity").content("{entities:[]}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Please provide at least one entity in the entities property.")));
 	}
 
-	/**
-	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 */
 	@Test
-	public void testUpdateEntitiesExceptions2() throws Exception
+	public void testUpdateEntitiesMaxEntitiesExceeded() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Number of entities cannot be more than 1000.");
+		mockMvc.perform(put(BASE_URI + "/" + "entity").content(this.createMaxPlusOneEntitiesAsTestContent())
+													  .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
 	}
 
-	/**
-	 * createUnknownEntityException
-	 */
 	@Test
-	public void testUpdateEntitiesExceptions3() throws Exception
+	public void testUpdateEntitiesUnknownEntity() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
-
+		mockMvc.perform(put(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com'}]}")
+													   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testUpdateEntitiesSpecificAttribute() throws Exception
 	{
-		String content = "{entities:[{id:'0', date_time:'1985-08-12T08:12:13+0200'}]}";
-		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/date_time").content(content).contentType(APPLICATION_JSON))
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/date_time").content(
+				"{entities:[{id:'0', date_time:'1985-08-12T08:12:13+0200'}]}").contentType(APPLICATION_JSON))
 			   .andExpect(status().isOk());
 
 		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
@@ -833,44 +847,43 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(entity.get("date_time"), MolgenisDateFormat.parseInstant("1985-08-12T08:12:13+0200"));
 	}
 
-	/**
-	 * EXCEPTION_NO_ENTITIES
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
+	public void testUpdateEntitiesSpecificAttributeNoExceptions() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{entities:[]}",
-				"Please provide at least one entity in the entities property.");
+		mockMvc.perform(
+				put(BASE_URI + "/" + "entity" + "/" + "email").content("{entities:[]}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Please provide at least one entity in the entities property.")));
 	}
 
-	/**
-	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
+	public void testUpdateEntitiesSpecificAttributeMaxEntitiesExceeded() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
+		mockMvc.perform(
+				put(BASE_URI + "/" + "entity" + "/" + "email").content(this.createMaxPlusOneEntitiesAsTestContent())
+															  .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
 	}
 
-	/**
-	 * createUnknownEntityException
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
+	public void testUpdateEntitiesSpecificAttributeUnknownEntity() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+		mockMvc.perform(put(BASE_URI + "/" + "entity2" + "/" + "email").content("{entities:[{email:'test@email.com'}]}")
+																	   .contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
 	}
 
-	/**
-	 * createMolgenisDataAccessExceptionReadOnlyAttribute
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
+	public void testUpdateEntitiesSpecificAttributeReadOnlyAttribute() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
-				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
+		ResultActions resultActions = mockMvc.perform(
+				put(BASE_URI + "/" + "entity" + "/" + "decimal").content("{entities:[{decimal:'42'}]}")
+																.contentType(APPLICATION_JSON))
+											 .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+													 is("Operation failed. Attribute 'decimal' of entity 'entity' is readonly")));
 	}
 
 	@DataProvider(name = "testDeleteEntityCollection")
@@ -903,14 +916,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		when(dataService.getEntityType("MyEntityType")).thenReturn(entityType);
-
-		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
-				+ "      \"message\": \"Cannot delete entities because type [MyEntityType] is abstract.\"\n" + "    }\n"
-				+ "  ]\n" + "}";
 		this.mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 					.andExpect(status().isBadRequest())
-					.andExpect(content().string(expectedContent));
+					.andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+							is("Cannot delete entities because type [MyEntityType] is abstract.")));
 	}
 
 	@Test
@@ -919,144 +929,87 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getEntityType("MyEntityType")).thenThrow(
 				new UnknownEntityException("Unknown entity [MyEntityType]"));
 
-		String expectedContent =
-				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Unknown entity [MyEntityType]\"\n"
-						+ "    }\n" + "  ]\n" + "}";
-		this.mockMvc.perform(
+		mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
-					.andExpect(status().isBadRequest())
-					.andExpect(content().string(expectedContent));
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity [MyEntityType]")));
 	}
 
 	@Test
 	public void testDeleteEntityCollectionExceptionNoEntitiesToDelete() throws Exception
 	{
-		String expectedContent = "{\n" + "  \"errors\": [\n" + "    {\n"
-				+ "      \"message\": \"Please provide at least one entity in the entityIds property.\"\n" + "    }\n"
-				+ "  ]\n" + "}";
-		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}"))
-					.andExpect(status().isBadRequest())
-					.andExpect(content().string(expectedContent));
+		mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[]}"))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Please provide at least one entity in the entityIds property.")));
 	}
 
 	@Test
 	public void testDeleteEntityCollectionExceptionInvalidRequestBody() throws Exception
 	{
-		String expectedContent =
-				"{\n" + "  \"errors\": [\n" + "    {\n" + "      \"message\": \"Invalid request body.\"\n" + "    }\n"
-						+ "  ]\n" + "}";
 		this.mockMvc.perform(delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("invalid"))
 					.andExpect(status().isBadRequest())
-					.andExpect(content().string(expectedContent));
+					.andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Invalid request body.")));
 	}
 
 	@Test
 	public void testSelfRefWithAllAttrsEqualsSelfRefWithoutAttrs() throws Exception
 	{
-		MockHttpServletResponse responseWithAttrs = mockMvc.perform(
-				get(RestControllerV2.BASE_URI + "/selfRefEntity/0?attrs=*").contentType(APPLICATION_JSON))
-														   .andReturn()
-														   .getResponse();
-		assertEquals(responseWithAttrs.getStatus(), 200);
-		MockHttpServletResponse responseWithoutAttrs = mockMvc.perform(
-				get(RestControllerV2.BASE_URI + "/selfRefEntity/0").contentType(APPLICATION_JSON))
-															  .andReturn()
-															  .getResponse();
-		assertEquals(responseWithoutAttrs.getStatus(), 200);
-		assertEquals(responseWithAttrs.getContentAsString(), responseWithoutAttrs.getContentAsString());
-		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(),
-				new TypeToken<Map<String, Object>>()
-				{
-				}.getType());
-		assertEquals(lvl1.get("selfRef").toString(), "{_href=/api/v2/selfRefEntity/0, id=0}");
+		String withAttrs = mockMvc.perform(get(BASE_URI + "/selfRefEntity/0?attrs=*").contentType(APPLICATION_JSON))
+								  .andExpect(status().isOk())
+								  .andExpect(jsonPath("$.selfRef._href", is("/api/v2/selfRefEntity/0")))
+								  .andExpect(jsonPath("$.selfRef.id", is("0")))
+								  .andReturn()
+								  .getResponse()
+								  .getContentAsString();
+		String withoutAttrs = mockMvc.perform(get(BASE_URI + "/selfRefEntity/0").contentType(APPLICATION_JSON))
+									 .andExpect(status().isOk())
+									 .andReturn()
+									 .getResponse()
+									 .getContentAsString();
+		assertEquals(withAttrs, withoutAttrs);
 	}
 
 	@Test
 	public void testSelfRefWithNestedFetch() throws Exception
 	{
-		MockHttpServletResponse responseWithAttrs = mockMvc.perform(
-				get(RestControllerV2.BASE_URI + "/selfRefEntity/0?attrs=*,selfRef(*,selfRef(*))").contentType(
-						APPLICATION_JSON)).andReturn().getResponse();
-		assertEquals(responseWithAttrs.getStatus(), 200);
-		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(),
-				new TypeToken<Map<String, Object>>()
-				{
-				}.getType());
-		@SuppressWarnings("unchecked")
-		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
-		assertEquals(lvl2.get("selfRef").toString(),
-				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
+		mockMvc.perform(get(BASE_URI + "/selfRefEntity/0?attrs=*,selfRef(*,selfRef(*))").contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk())
+			   .andExpect(jsonPath("$.selfRef.selfRef._href", is("/api/v2/selfRefEntity/0")))
+			   .andExpect(jsonPath("$.selfRef.selfRef.id", is("0")))
+			   .andExpect(jsonPath("$.selfRef.selfRef.selfRef._href", is("/api/v2/selfRefEntity/0")))
+			   .andExpect(jsonPath("$.selfRef.selfRef.selfRef.id", is("0")));
 	}
 
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue
 	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
+	public void testUpdateEntitiesMustProvideIdentifierAndValue() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue().getMessage());
+		mockMvc.perform(put(BASE_URI + "/" + "entity" + "/" + "email").content(
+				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Operation failed. Entities must provide only an identifier and a value")));
 	}
 
-	/**
-	 * createMolgenisDataExceptionUnknownIdentifier
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
+	public void testUpdateEntitiesSpecificAttributeUnknownIdentifier() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
+		mockMvc.perform(put(BASE_URI + "/" + "entity" + "/" + "email").content(
+				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}").contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest())
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown identifier on index 0")));
 	}
 
-	/**
-	 * createUnknownEntityExceptionNotValidId
-	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
+	public void testUpdateEntitiesSpecificAttributeInvalidId() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4").getMessage());
-	}
-
-	private void testCreateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
-	{
-		ResultActions resultActions = mockMvc.perform(
-				post(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, message);
-	}
-
-	private void testUpdateEntitiesExceptions(String entityTypeId, String content, String message) throws Exception
-	{
-		ResultActions resultActions = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityTypeId).content(content).contentType(APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, message);
-	}
-
-	private void testUpdateEntitiesSpecificAttributeExceptions(String entityTypeId, String attributeName,
-			String content, String message) throws Exception
-	{
-		ResultActions resultActions = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityTypeId + "/" + attributeName).content(content)
-																						 .contentType(
-																								 APPLICATION_JSON));
-
-		this.assertEqualsErrorMessage(resultActions, message);
-	}
-
-	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
-			throws JsonSyntaxException, UnsupportedEncodingException
-	{
-		MvcResult result = resultActions.andReturn();
-		String contentAsString = result.getResponse().getContentAsString();
-		System.out.println("content!" + contentAsString);
-		Gson gson = new Gson();
-		ResponseErrors errors = gson.fromJson(contentAsString, ResponseErrors.class);
-		assertEquals(errors.getErrors().get(0).getMessage(), message);
+		mockMvc.perform(
+				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
+											   .contentType(APPLICATION_JSON))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("The entity you are trying to update [4] does not exist.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
@@ -1164,1072 +1117,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 							servletUriComponentsBuilderFactory()), localizationService(), permissionSystemService(),
 					repositoryCopier());
 		}
-
 	}
-
-	private final String resourceResponse = "{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-			+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-			+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
-			+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": true,\n" + "        \"unique\": true,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": true,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
-			+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categorical\",\n"
-			+ "        \"label\": \"categorical\",\n" + "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mref\",\n"
-			+ "        \"label\": \"categorical_mref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/compound\",\n"
-			+ "        \"fieldType\": \"COMPOUND\",\n" + "        \"name\": \"compound\",\n"
-			+ "        \"label\": \"compound\",\n" + "        \"attributes\": [\n" + "          {\n"
-			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
-			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
-			+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
-			+ "            \"nillable\": false,\n" + "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-			+ "            \"isAggregatable\": false\n" + "          },\n" + "          {\n"
-			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0Optional\",\n"
-			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0Optional\",\n"
-			+ "            \"label\": \"compound_attr0Optional\",\n" + "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-			+ "            \"isAggregatable\": false\n" + "          },\n" + "          {\n"
-			+ "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
-			+ "            \"fieldType\": \"COMPOUND\",\n" + "            \"name\": \"compound_attrcompound\",\n"
-			+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
-			+ "              {\n" + "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
-			+ "                \"fieldType\": \"STRING\",\n"
-			+ "                \"name\": \"compound_attrcompound_attr0\",\n"
-			+ "                \"label\": \"compound_attrcompound_attr0\",\n" + "                \"attributes\": [],\n"
-			+ "                \"maxLength\": 255,\n" + "                \"auto\": false,\n"
-			+ "                \"nillable\": false,\n" + "                \"readOnly\": false,\n"
-			+ "                \"labelAttribute\": false,\n" + "                \"unique\": false,\n"
-			+ "                \"visible\": true,\n" + "                \"lookupAttribute\": false,\n"
-			+ "                \"isAggregatable\": false\n" + "              },\n" + "              {\n"
-			+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0Optional\",\n"
-			+ "                \"fieldType\": \"STRING\",\n"
-			+ "                \"name\": \"compound_attrcompound_attr0Optional\",\n"
-			+ "                \"label\": \"compound_attrcompound_attr0Optional\",\n"
-			+ "                \"attributes\": [],\n" + "                \"maxLength\": 255,\n"
-			+ "                \"auto\": false,\n" + "                \"nillable\": true,\n"
-			+ "                \"readOnly\": false,\n" + "                \"labelAttribute\": false,\n"
-			+ "                \"unique\": false,\n" + "                \"visible\": true,\n"
-			+ "                \"lookupAttribute\": false,\n" + "                \"isAggregatable\": false\n"
-			+ "              }\n" + "            ],\n" + "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-			+ "            \"isAggregatable\": false\n" + "          }\n" + "        ],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date\",\n" + "        \"fieldType\": \"DATE\",\n"
-			+ "        \"name\": \"date\",\n" + "        \"label\": \"date\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date_time\",\n"
-			+ "        \"fieldType\": \"DATE_TIME\",\n" + "        \"name\": \"date_time\",\n"
-			+ "        \"label\": \"date_time\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/decimal\",\n"
-			+ "        \"fieldType\": \"DECIMAL\",\n" + "        \"name\": \"decimal\",\n"
-			+ "        \"label\": \"decimal\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": true,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/email\",\n" + "        \"fieldType\": \"EMAIL\",\n"
-			+ "        \"name\": \"email\",\n" + "        \"label\": \"email\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/enum\",\n" + "        \"fieldType\": \"ENUM\",\n"
-			+ "        \"name\": \"enum\",\n" + "        \"label\": \"enum\",\n" + "        \"attributes\": [],\n"
-			+ "        \"enumOptions\": [\n" + "          \"enum0\",\n" + "          \"enum1\",\n"
-			+ "          \"enum2\"\n" + "        ],\n" + "        \"maxLength\": 255,\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/html\",\n" + "        \"fieldType\": \"HTML\",\n"
-			+ "        \"name\": \"html\",\n" + "        \"label\": \"html\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/hyperlink\",\n" + "        \"fieldType\": \"HYPERLINK\",\n"
-			+ "        \"name\": \"hyperlink\",\n" + "        \"label\": \"hyperlink\",\n"
-			+ "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/int\",\n" + "        \"fieldType\": \"INT\",\n"
-			+ "        \"name\": \"int\",\n" + "        \"label\": \"int\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/long\",\n" + "        \"fieldType\": \"LONG\",\n"
-			+ "        \"name\": \"long\",\n" + "        \"label\": \"long\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/mref\",\n" + "        \"fieldType\": \"MREF\",\n"
-			+ "        \"name\": \"mref\",\n" + "        \"label\": \"mref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/script\",\n"
-			+ "        \"fieldType\": \"SCRIPT\",\n" + "        \"name\": \"script\",\n"
-			+ "        \"label\": \"script\",\n" + "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/string\",\n"
-			+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"string\",\n"
-			+ "        \"label\": \"string\",\n" + "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/text\",\n" + "        \"fieldType\": \"TEXT\",\n"
-			+ "        \"name\": \"text\",\n" + "        \"label\": \"text\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
-			+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n"
-			+ "        \"fieldType\": \"BOOL\",\n" + "        \"name\": \"boolOptional\",\n"
-			+ "        \"label\": \"boolOptional\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categoricalOptional\",\n"
-			+ "        \"label\": \"categoricalOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mrefOptional\",\n"
-			+ "        \"label\": \"categorical_mrefOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n"
-			+ "        \"fieldType\": \"DATE\",\n" + "        \"name\": \"dateOptional\",\n"
-			+ "        \"label\": \"dateOptional\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
-			+ "        \"fieldType\": \"DATE_TIME\",\n" + "        \"name\": \"date_timeOptional\",\n"
-			+ "        \"label\": \"date_timeOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/decimalOptional\",\n"
-			+ "        \"fieldType\": \"DECIMAL\",\n" + "        \"name\": \"decimalOptional\",\n"
-			+ "        \"label\": \"decimalOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/emailOptional\",\n"
-			+ "        \"fieldType\": \"EMAIL\",\n" + "        \"name\": \"emailOptional\",\n"
-			+ "        \"label\": \"emailOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/enumOptional\",\n" + "        \"fieldType\": \"ENUM\",\n"
-			+ "        \"name\": \"enumOptional\",\n" + "        \"label\": \"enumOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"enumOptions\": [\n" + "          \"enum0\",\n"
-			+ "          \"enum1\",\n" + "          \"enum2\"\n" + "        ],\n" + "        \"maxLength\": 255,\n"
-			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/htmlOptional\",\n"
-			+ "        \"fieldType\": \"HTML\",\n" + "        \"name\": \"htmlOptional\",\n"
-			+ "        \"label\": \"htmlOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/hyperlinkOptional\",\n"
-			+ "        \"fieldType\": \"HYPERLINK\",\n" + "        \"name\": \"hyperlinkOptional\",\n"
-			+ "        \"label\": \"hyperlinkOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/intOptional\",\n" + "        \"fieldType\": \"INT\",\n"
-			+ "        \"name\": \"intOptional\",\n" + "        \"label\": \"intOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/longOptional\",\n" + "        \"fieldType\": \"LONG\",\n"
-			+ "        \"name\": \"longOptional\",\n" + "        \"label\": \"longOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/mrefOptional\",\n" + "        \"fieldType\": \"MREF\",\n"
-			+ "        \"name\": \"mrefOptional\",\n" + "        \"label\": \"mrefOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n"
-			+ "        \"fieldType\": \"SCRIPT\",\n" + "        \"name\": \"scriptOptional\",\n"
-			+ "        \"label\": \"scriptOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n" + "        \"fieldType\": \"STRING\",\n"
-			+ "        \"name\": \"stringOptional\",\n" + "        \"label\": \"stringOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/textOptional\",\n"
-			+ "        \"fieldType\": \"TEXT\",\n" + "        \"name\": \"textOptional\",\n"
-			+ "        \"label\": \"textOptional\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-			+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-			+ "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n" + "        \"fieldType\": \"XREF\",\n"
-			+ "        \"name\": \"xrefOptional\",\n" + "        \"label\": \"xrefOptional\",\n"
-			+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
-			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": true,\n" + "              \"isAggregatable\": false\n"
-			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n" + "            \"id\"\n"
-			+ "          ],\n" + "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-			+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [\n"
-			+ "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false,\n"
-			+ "    \"languageCode\": \"en\"\n" + "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n"
-			+ "  \"id\": \"0\",\n" + "  \"bool\": true,\n" + "  \"categorical\": {\n"
-			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\"\n" + "  },\n"
-			+ "  \"categorical_mref\": [\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
-			+ "      \"id\": \"ref0\"\n" + "    },\n" + "    {\n" + "      \"_href\": \"/api/v2/refEntity/ref0\",\n"
-			+ "      \"id\": \"ref0\"\n" + "    }\n" + "  ],\n" + "  \"compound_attr0\": \"compoundAttr0Str\",\n"
-			+ "  \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n" + "  \"date\": \"2015-05-22\",\n"
-			+ "  \"date_time\": \"2015-05-22T06:12:13Z\",\n" + "  \"decimal\": 3.14,\n"
-			+ "  \"email\": \"my@mail.com\",\n" + "  \"enum\": \"enum0\",\n" + "  \"html\": \"<h1>html</h1>\",\n"
-			+ "  \"hyperlink\": \"http://www.molgenis.org/\",\n" + "  \"int\": 123,\n"
-			+ "  \"long\": 9223372036854775807,\n" + "  \"mref\": [\n" + "    {\n"
-			+ "      \"_href\": \"/api/v2/refEntity/ref0\",\n" + "      \"id\": \"ref0\"\n" + "    },\n" + "    {\n"
-			+ "      \"_href\": \"/api/v2/refEntity/ref0\",\n" + "      \"id\": \"ref0\"\n" + "    }\n" + "  ],\n"
-			+ "  \"script\": \"print \\\"Hello world\\\"\",\n" + "  \"string\": \"str\",\n"
-			+ "  \"text\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.\",\n"
-			+ "  \"xref\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\"\n" + "  },\n"
-			+ "  \"categorical_mrefOptional\": [],\n" + "  \"mrefOptional\": []\n" + "}";
-
-	private final String resourcePartialAttributeResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
-					+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      }\n"
-					+ "    ],\n" + "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true\n" + "}";
-
-	private final String resourcePartialAttributeInCompoundResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
-					+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n"
-					+ "        \"attributes\": [\n" + "          {\n"
-					+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
-					+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
-					+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
-					+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
-					+ "            \"nillable\": false,\n" + "            \"readOnly\": false,\n"
-					+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-					+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-					+ "            \"isAggregatable\": false\n" + "          }\n" + "        ],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"compound_attr0\": \"compoundAttr0Str\"\n" + "}";
-
-	private final String resourcePartialAttributeInCompoundInCompoundResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
-					+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n"
-					+ "        \"attributes\": [\n" + "          {\n"
-					+ "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
-					+ "            \"fieldType\": \"COMPOUND\",\n"
-					+ "            \"name\": \"compound_attrcompound\",\n"
-					+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
-					+ "              {\n"
-					+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
-					+ "                \"fieldType\": \"STRING\",\n"
-					+ "                \"name\": \"compound_attrcompound_attr0\",\n"
-					+ "                \"label\": \"compound_attrcompound_attr0\",\n"
-					+ "                \"attributes\": [],\n" + "                \"maxLength\": 255,\n"
-					+ "                \"auto\": false,\n" + "                \"nillable\": false,\n"
-					+ "                \"readOnly\": false,\n" + "                \"labelAttribute\": false,\n"
-					+ "                \"unique\": false,\n" + "                \"visible\": true,\n"
-					+ "                \"lookupAttribute\": false,\n" + "                \"isAggregatable\": false\n"
-					+ "              }\n" + "            ],\n" + "            \"auto\": false,\n"
-					+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
-					+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-					+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-					+ "            \"isAggregatable\": false\n" + "          }\n" + "        ],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n"
-					+ "  \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\"\n" + "}";
-
-	private final String resourcePartialSubAttributeResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
-					+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n"
-					+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-					+ "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/value\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"value\",\n"
-					+ "              \"label\": \"value\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": true,\n" + "              \"readOnly\": false,\n"
-					+ "              \"labelAttribute\": false,\n" + "              \"unique\": false,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": false,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
-					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val0\"\n" + "  }\n" + "}";
-
-	private final String resourcePartialSubAttributesResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
-					+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n"
-					+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-					+ "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            },\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/value\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"value\",\n"
-					+ "              \"label\": \"value\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": true,\n" + "              \"readOnly\": false,\n"
-					+ "              \"labelAttribute\": false,\n" + "              \"unique\": false,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": false,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
-					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n"
-					+ "    \"value\": \"val0\"\n" + "  }\n" + "}";
-
-	private final String resourcePartialAttributesResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
-					+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/string\",\n"
-					+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"string\",\n"
-					+ "        \"label\": \"string\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      }\n"
-					+ "    ],\n" + "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true,\n" + "  \"string\": \"str\"\n" + "}";
-
-	private final String resourceCollectionResponse =
-			"{\n" + "  \"href\": \"/api/v2/entity\",\n" + "  \"meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
-					+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": true,\n"
-					+ "        \"unique\": true,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": true,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/bool\",\n"
-					+ "        \"fieldType\": \"BOOL\",\n" + "        \"name\": \"bool\",\n"
-					+ "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/categorical\",\n"
-					+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categorical\",\n"
-					+ "        \"label\": \"categorical\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
-					+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mref\",\n"
-					+ "        \"label\": \"categorical_mref\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
-					+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n"
-					+ "        \"attributes\": [\n" + "          {\n"
-					+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
-					+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
-					+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
-					+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
-					+ "            \"nillable\": false,\n" + "            \"readOnly\": false,\n"
-					+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-					+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-					+ "            \"isAggregatable\": false\n" + "          },\n" + "          {\n"
-					+ "            \"href\": \"/api/v2/entity/meta/compound_attr0Optional\",\n"
-					+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0Optional\",\n"
-					+ "            \"label\": \"compound_attr0Optional\",\n" + "            \"attributes\": [],\n"
-					+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
-					+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
-					+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-					+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-					+ "            \"isAggregatable\": false\n" + "          },\n" + "          {\n"
-					+ "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
-					+ "            \"fieldType\": \"COMPOUND\",\n"
-					+ "            \"name\": \"compound_attrcompound\",\n"
-					+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
-					+ "              {\n"
-					+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
-					+ "                \"fieldType\": \"STRING\",\n"
-					+ "                \"name\": \"compound_attrcompound_attr0\",\n"
-					+ "                \"label\": \"compound_attrcompound_attr0\",\n"
-					+ "                \"attributes\": [],\n" + "                \"maxLength\": 255,\n"
-					+ "                \"auto\": false,\n" + "                \"nillable\": false,\n"
-					+ "                \"readOnly\": false,\n" + "                \"labelAttribute\": false,\n"
-					+ "                \"unique\": false,\n" + "                \"visible\": true,\n"
-					+ "                \"lookupAttribute\": false,\n" + "                \"isAggregatable\": false\n"
-					+ "              },\n" + "              {\n"
-					+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0Optional\",\n"
-					+ "                \"fieldType\": \"STRING\",\n"
-					+ "                \"name\": \"compound_attrcompound_attr0Optional\",\n"
-					+ "                \"label\": \"compound_attrcompound_attr0Optional\",\n"
-					+ "                \"attributes\": [],\n" + "                \"maxLength\": 255,\n"
-					+ "                \"auto\": false,\n" + "                \"nillable\": true,\n"
-					+ "                \"readOnly\": false,\n" + "                \"labelAttribute\": false,\n"
-					+ "                \"unique\": false,\n" + "                \"visible\": true,\n"
-					+ "                \"lookupAttribute\": false,\n" + "                \"isAggregatable\": false\n"
-					+ "              }\n" + "            ],\n" + "            \"auto\": false,\n"
-					+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
-					+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
-					+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
-					+ "            \"isAggregatable\": false\n" + "          }\n" + "        ],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/date\",\n" + "        \"fieldType\": \"DATE\",\n"
-					+ "        \"name\": \"date\",\n" + "        \"label\": \"date\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date_time\",\n"
-					+ "        \"fieldType\": \"DATE_TIME\",\n" + "        \"name\": \"date_time\",\n"
-					+ "        \"label\": \"date_time\",\n" + "        \"attributes\": [],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/decimal\",\n" + "        \"fieldType\": \"DECIMAL\",\n"
-					+ "        \"name\": \"decimal\",\n" + "        \"label\": \"decimal\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/email\",\n"
-					+ "        \"fieldType\": \"EMAIL\",\n" + "        \"name\": \"email\",\n"
-					+ "        \"label\": \"email\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/enum\",\n"
-					+ "        \"fieldType\": \"ENUM\",\n" + "        \"name\": \"enum\",\n"
-					+ "        \"label\": \"enum\",\n" + "        \"attributes\": [],\n"
-					+ "        \"enumOptions\": [\n" + "          \"enum0\",\n" + "          \"enum1\",\n"
-					+ "          \"enum2\"\n" + "        ],\n" + "        \"maxLength\": 255,\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/html\",\n" + "        \"fieldType\": \"HTML\",\n"
-					+ "        \"name\": \"html\",\n" + "        \"label\": \"html\",\n"
-					+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/hyperlink\",\n"
-					+ "        \"fieldType\": \"HYPERLINK\",\n" + "        \"name\": \"hyperlink\",\n"
-					+ "        \"label\": \"hyperlink\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/int\",\n"
-					+ "        \"fieldType\": \"INT\",\n" + "        \"name\": \"int\",\n"
-					+ "        \"label\": \"int\",\n" + "        \"attributes\": [],\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/long\",\n" + "        \"fieldType\": \"LONG\",\n"
-					+ "        \"name\": \"long\",\n" + "        \"label\": \"long\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/mref\",\n"
-					+ "        \"fieldType\": \"MREF\",\n" + "        \"name\": \"mref\",\n"
-					+ "        \"label\": \"mref\",\n" + "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-					+ "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/script\",\n" + "        \"fieldType\": \"SCRIPT\",\n"
-					+ "        \"name\": \"script\",\n" + "        \"label\": \"script\",\n"
-					+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/string\",\n" + "        \"fieldType\": \"STRING\",\n"
-					+ "        \"name\": \"string\",\n" + "        \"label\": \"string\",\n"
-					+ "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/text\",\n" + "        \"fieldType\": \"TEXT\",\n"
-					+ "        \"name\": \"text\",\n" + "        \"label\": \"text\",\n"
-					+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
-					+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n"
-					+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-					+ "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n" + "        \"fieldType\": \"BOOL\",\n"
-					+ "        \"name\": \"boolOptional\",\n" + "        \"label\": \"boolOptional\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
-					+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categoricalOptional\",\n"
-					+ "        \"label\": \"categoricalOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
-					+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n"
-					+ "        \"name\": \"categorical_mrefOptional\",\n"
-					+ "        \"label\": \"categorical_mrefOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n" + "        \"fieldType\": \"DATE\",\n"
-					+ "        \"name\": \"dateOptional\",\n" + "        \"label\": \"dateOptional\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
-					+ "        \"fieldType\": \"DATE_TIME\",\n" + "        \"name\": \"date_timeOptional\",\n"
-					+ "        \"label\": \"date_timeOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/decimalOptional\",\n"
-					+ "        \"fieldType\": \"DECIMAL\",\n" + "        \"name\": \"decimalOptional\",\n"
-					+ "        \"label\": \"decimalOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/emailOptional\",\n"
-					+ "        \"fieldType\": \"EMAIL\",\n" + "        \"name\": \"emailOptional\",\n"
-					+ "        \"label\": \"emailOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/enumOptional\",\n"
-					+ "        \"fieldType\": \"ENUM\",\n" + "        \"name\": \"enumOptional\",\n"
-					+ "        \"label\": \"enumOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"enumOptions\": [\n" + "          \"enum0\",\n" + "          \"enum1\",\n"
-					+ "          \"enum2\"\n" + "        ],\n" + "        \"maxLength\": 255,\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/htmlOptional\",\n" + "        \"fieldType\": \"HTML\",\n"
-					+ "        \"name\": \"htmlOptional\",\n" + "        \"label\": \"htmlOptional\",\n"
-					+ "        \"attributes\": [],\n" + "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/hyperlinkOptional\",\n"
-					+ "        \"fieldType\": \"HYPERLINK\",\n" + "        \"name\": \"hyperlinkOptional\",\n"
-					+ "        \"label\": \"hyperlinkOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/intOptional\",\n"
-					+ "        \"fieldType\": \"INT\",\n" + "        \"name\": \"intOptional\",\n"
-					+ "        \"label\": \"intOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/longOptional\",\n" + "        \"fieldType\": \"LONG\",\n"
-					+ "        \"name\": \"longOptional\",\n" + "        \"label\": \"longOptional\",\n"
-					+ "        \"attributes\": [],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/mrefOptional\",\n"
-					+ "        \"fieldType\": \"MREF\",\n" + "        \"name\": \"mrefOptional\",\n"
-					+ "        \"label\": \"mrefOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      },\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n"
-					+ "        \"fieldType\": \"SCRIPT\",\n" + "        \"name\": \"scriptOptional\",\n"
-					+ "        \"label\": \"scriptOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n"
-					+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"stringOptional\",\n"
-					+ "        \"label\": \"stringOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/textOptional\",\n"
-					+ "        \"fieldType\": \"TEXT\",\n" + "        \"name\": \"textOptional\",\n"
-					+ "        \"label\": \"textOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"maxLength\": 65535,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-					+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n"
-					+ "        \"unique\": false,\n" + "        \"visible\": true,\n"
-					+ "        \"lookupAttribute\": false,\n" + "        \"isAggregatable\": false\n" + "      },\n"
-					+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n"
-					+ "        \"fieldType\": \"XREF\",\n" + "        \"name\": \"xrefOptional\",\n"
-					+ "        \"label\": \"xrefOptional\",\n" + "        \"attributes\": [],\n"
-					+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            }\n" + "          ],\n"
-					+ "          \"labelAttribute\": \"id\",\n" + "          \"idAttribute\": \"id\",\n"
-					+ "          \"lookupAttributes\": [\n" + "            \"id\"\n" + "          ],\n"
-					+ "          \"isAbstract\": false,\n" + "          \"writable\": false,\n"
-					+ "          \"languageCode\": \"en\"\n" + "        },\n" + "        \"auto\": false,\n"
-					+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n" + "  \"start\": 0,\n"
-					+ "  \"num\": 100,\n" + "  \"total\": 2,\n" + "  \"items\": [\n" + "    {\n"
-					+ "      \"_href\": \"/api/v2/entity/0\",\n" + "      \"id\": \"0\",\n" + "      \"bool\": true,\n"
-					+ "      \"categorical\": {\n" + "        \"_href\": \"/api/v2/refEntity/ref0\",\n"
-					+ "        \"id\": \"ref0\"\n" + "      },\n" + "      \"categorical_mref\": [\n" + "        {\n"
-					+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n" + "          \"id\": \"ref0\"\n"
-					+ "        },\n" + "        {\n" + "          \"_href\": \"/api/v2/refEntity/ref0\",\n"
-					+ "          \"id\": \"ref0\"\n" + "        }\n" + "      ],\n"
-					+ "      \"compound_attr0\": \"compoundAttr0Str\",\n"
-					+ "      \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n"
-					+ "      \"date\": \"2015-05-22\",\n" + "      \"date_time\": \"2015-05-22T06:12:13Z\",\n"
-					+ "      \"decimal\": 3.14,\n" + "      \"email\": \"my@mail.com\",\n"
-					+ "      \"enum\": \"enum0\",\n" + "      \"html\": \"<h1>html</h1>\",\n"
-					+ "      \"hyperlink\": \"http://www.molgenis.org/\",\n" + "      \"int\": 123,\n"
-					+ "      \"long\": 9223372036854775807,\n" + "      \"mref\": [\n" + "        {\n"
-					+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n" + "          \"id\": \"ref0\"\n"
-					+ "        },\n" + "        {\n" + "          \"_href\": \"/api/v2/refEntity/ref0\",\n"
-					+ "          \"id\": \"ref0\"\n" + "        }\n" + "      ],\n"
-					+ "      \"script\": \"print \\\"Hello world\\\"\",\n" + "      \"string\": \"str\",\n"
-					+ "      \"text\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.\",\n"
-					+ "      \"xref\": {\n" + "        \"_href\": \"/api/v2/refEntity/ref0\",\n"
-					+ "        \"id\": \"ref0\"\n" + "      },\n" + "      \"categorical_mrefOptional\": [],\n"
-					+ "      \"mrefOptional\": []\n" + "    }\n" + "  ]\n" + "}";
-
-	private static String resourcePartialSubSubAttributesResponse =
-			"{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
-					+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
-					+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-					+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
-					+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n"
-					+ "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
-					+ "          \"href\": \"/api/v2/refEntity\",\n"
-					+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
-					+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
-					+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"id\",\n"
-					+ "              \"label\": \"id\",\n" + "              \"attributes\": [],\n"
-					+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
-					+ "              \"nillable\": false,\n" + "              \"readOnly\": true,\n"
-					+ "              \"labelAttribute\": true,\n" + "              \"unique\": true,\n"
-					+ "              \"visible\": true,\n" + "              \"lookupAttribute\": true,\n"
-					+ "              \"isAggregatable\": false\n" + "            },\n" + "            {\n"
-					+ "              \"href\": \"/api/v2/refEntity/meta/ref\",\n"
-					+ "              \"fieldType\": \"XREF\",\n" + "              \"name\": \"ref\",\n"
-					+ "              \"label\": \"ref\",\n" + "              \"attributes\": [],\n"
-					+ "              \"refEntity\": {\n" + "                \"href\": \"/api/v2/refRefEntity\",\n"
-					+ "                \"hrefCollection\": \"/api/v2/refRefEntity\",\n"
-					+ "                \"name\": \"refRefEntity\",\n" + "                \"label\": \"refRefEntity\",\n"
-					+ "                \"attributes\": [\n" + "                  {\n"
-					+ "                    \"href\": \"/api/v2/refRefEntity/meta/value\",\n"
-					+ "                    \"fieldType\": \"STRING\",\n" + "                    \"name\": \"value\",\n"
-					+ "                    \"label\": \"value\",\n" + "                    \"attributes\": [],\n"
-					+ "                    \"maxLength\": 255,\n" + "                    \"auto\": false,\n"
-					+ "                    \"nillable\": true,\n" + "                    \"readOnly\": false,\n"
-					+ "                    \"labelAttribute\": false,\n" + "                    \"unique\": false,\n"
-					+ "                    \"visible\": true,\n" + "                    \"lookupAttribute\": false,\n"
-					+ "                    \"isAggregatable\": false\n" + "                  }\n"
-					+ "                ],\n" + "                \"labelAttribute\": \"id\",\n"
-					+ "                \"idAttribute\": \"id\",\n" + "                \"lookupAttributes\": [\n"
-					+ "                  \"id\"\n" + "                ],\n" + "                \"isAbstract\": false,\n"
-					+ "                \"writable\": false,\n" + "                \"languageCode\": \"en\"\n"
-					+ "              },\n" + "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-					+ "              \"readOnly\": false,\n" + "              \"labelAttribute\": false,\n"
-					+ "              \"unique\": false,\n" + "              \"visible\": true,\n"
-					+ "              \"lookupAttribute\": false,\n" + "              \"isAggregatable\": false\n"
-					+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
-					+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [\n"
-					+ "            \"id\"\n" + "          ],\n" + "          \"isAbstract\": false,\n"
-					+ "          \"writable\": false,\n" + "          \"languageCode\": \"en\"\n" + "        },\n"
-					+ "        \"auto\": false,\n" + "        \"nillable\": false,\n" + "        \"readOnly\": false,\n"
-					+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
-					+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
-					+ "        \"isAggregatable\": false\n" + "      }\n" + "    ],\n"
-					+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-					+ "    \"lookupAttributes\": [\n" + "      \"id\"\n" + "    ],\n" + "    \"isAbstract\": false,\n"
-					+ "    \"writable\": false,\n" + "    \"languageCode\": \"en\"\n" + "  },\n"
-					+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
-					+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"ref\": {\n"
-					+ "      \"_href\": \"/api/v2/refRefEntity/refRef0\",\n" + "      \"value\": \"value\"\n"
-					+ "    }\n" + "  }\n" + "}";
 }
+

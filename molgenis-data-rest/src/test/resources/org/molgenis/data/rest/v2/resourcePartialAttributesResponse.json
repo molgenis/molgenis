@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "href": "/api/v2/entity",
+    "hrefCollection": "/api/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/api/v2/entity/meta/bool",
+        "fieldType": "BOOL",
+        "name": "bool",
+        "label": "bool",
+        "attributes": [],
+        "auto": false,
+        "nillable": false,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      },
+      {
+        "href": "/api/v2/entity/meta/string",
+        "fieldType": "STRING",
+        "name": "string",
+        "label": "string",
+        "attributes": [],
+        "maxLength": 255,
+        "auto": false,
+        "nillable": false,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "en"
+  },
+  "_href": "/api/v2/entity/0",
+  "bool": true,
+  "string": "str"
+}
