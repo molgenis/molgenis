@@ -13,8 +13,8 @@
         </div>
         <div class="card-block">
           <div v-if="initialFormData">
-            <form-component id="settings-form" :schema="initFormSchema" :initialFormData="initialFormData"
-                            :hooks="hooks"></form-component>
+            <form-component id="settings-form" :formState="state" :schema="initFormSchema"
+                            :initialFormData="initialFormData"></form-component>
           </div>
         </div>
       </div>
@@ -42,22 +42,20 @@
       EntitySelectComponent
     },
     created: function () {
-      this.$store.dispatch(GET_SETTINGS).then(() => {
-        this.createForm = true
-      })
+      this.$store.dispatch(GET_SETTINGS)
     },
     data () {
       return {
-        hooks: {
-          onSubmit: (formData) => {
-            this.$store.commit(SET_FORM_DATA, formData)
-            this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
-            this.message = 'Changes saved'
-          }
-        },
         message: null,
         error: null,
-        createForm: false
+        state: {}
+      }
+    },
+    method: {
+      onSubmit: (formData) => {
+        this.$store.commit(SET_FORM_DATA, formData)
+        this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
+        this.message = 'Changes saved'
       }
     },
     computed: {
