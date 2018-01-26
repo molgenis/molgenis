@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -92,6 +93,11 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + REFERENCE_ENTITY));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + REFERENCE_ENTITY));
 		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + REFERENCE_ENTITY));
+
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + DECORATOR_CONFIGURATION));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + DECORATOR_CONFIGURATION));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + DECORATOR_CONFIGURATION));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + DECORATOR_CONFIGURATION));
 
 		return authorities;
 	}

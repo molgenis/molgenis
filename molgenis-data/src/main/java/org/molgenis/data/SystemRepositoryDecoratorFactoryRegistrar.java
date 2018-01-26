@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -18,10 +17,9 @@ public class SystemRepositoryDecoratorFactoryRegistrar
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 	}
 
-	public void register(ContextRefreshedEvent event)
+	public void register(ApplicationContext context)
 	{
-		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, SystemRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = ctx.getBeansOfType(
+		Map<String, SystemRepositoryDecoratorFactory> repositoryDecoratorFactoryMap = context.getBeansOfType(
 				SystemRepositoryDecoratorFactory.class);
 		repositoryDecoratorFactoryMap.values().forEach(repositoryDecoratorRegistry::addFactory);
 	}
