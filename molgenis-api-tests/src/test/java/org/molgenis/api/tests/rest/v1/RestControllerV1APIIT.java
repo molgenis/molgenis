@@ -24,6 +24,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 
@@ -694,7 +695,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].message", Matchers.equalTo("V1_API_TypeTestRefAPIV1 ref6 not found"));
+			   .body("errors[0].code", is("D02"))
+			   .body("errors[0].message", is("Unknown entity 'ref6' of entity type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
