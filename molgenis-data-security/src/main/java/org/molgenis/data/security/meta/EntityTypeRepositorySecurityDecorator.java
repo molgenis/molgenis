@@ -386,8 +386,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		EntityType entityType = findOneById(entityTypeId);
 		if (entityType == null)
 		{
-			throw new UnknownEntityException(
-					format("Unknown entity meta data [%s] with id [%s]", getName(), entityTypeId.toString()));
+			throw new UnknownEntityTypeException(entityTypeId.toString());
 		}
 		validateDeleteAllowed(entityType);
 	}
