@@ -11,7 +11,7 @@ cache:
 env:
   - MAVEN_TESTS="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
   # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
-  - MAVEN_TESTS="travis_wait 40 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -DskipUTs"
+  - MAVEN_TESTS="travis_wait 50 ./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -DskipUTs"
 services:
   - postgresql
 addons:
