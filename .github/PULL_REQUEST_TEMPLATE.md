@@ -7,3 +7,4 @@
 - [ ] Test plan template updated
 - [ ] Clean commits
 - [ ] Added Feature/Fix to release notes
+- [ ] Integration tests run correctly
