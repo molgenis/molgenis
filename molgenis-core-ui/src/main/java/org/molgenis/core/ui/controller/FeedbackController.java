@@ -1,7 +1,5 @@
 package org.molgenis.core.ui.controller;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotBlank;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.captcha.CaptchaException;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 
