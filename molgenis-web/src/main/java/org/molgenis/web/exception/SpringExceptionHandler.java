@@ -34,8 +34,8 @@ public class SpringExceptionHandler
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
 
-	@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod" })
-	@ExceptionHandler({ NoHandlerFoundException.class })
+	@SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
+	@ExceptionHandler(NoHandlerFoundException.class)
 	public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest)
 	{
 		return handleException(ex, httpServletRequest, NOT_FOUND, null);
