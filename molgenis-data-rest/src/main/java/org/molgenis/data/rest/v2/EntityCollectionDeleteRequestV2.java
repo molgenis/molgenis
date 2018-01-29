@@ -1,9 +1,9 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.auto.value.AutoValue;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.molgenis.core.gson.AutoGson;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
 

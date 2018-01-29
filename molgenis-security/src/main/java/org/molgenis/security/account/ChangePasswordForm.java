@@ -1,7 +1,8 @@
 package org.molgenis.security.account;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.ScriptAssert;
+
+import javax.validation.constraints.NotBlank;
 
 @ScriptAssert(lang = "jexl", script = "_this.password1 == _this.password2")
 public class ChangePasswordForm

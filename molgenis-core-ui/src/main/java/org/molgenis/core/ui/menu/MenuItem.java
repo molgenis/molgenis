@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.menu;
 
 import com.google.gson.annotations.SerializedName;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
