@@ -62,6 +62,7 @@
         <spring.version>5.0.3.RELEASE</spring.version>
         <spring.security.version>5.0.1.RELEASE</spring.security.version>
         <hibernate.validator.version>6.0.7.Final</hibernate.validator.version>
+        <javax.el.version>3.0.1-b09</javax.el.version>
         <httpclient.version>4.5.3</httpclient.version>
         <google.auto-value.version>1.4.1</google.auto-value.version>
         <caffeine.version>2.3.5</caffeine.version>
@@ -835,6 +836,11 @@
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${javax.el.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.auto.value</groupId>
