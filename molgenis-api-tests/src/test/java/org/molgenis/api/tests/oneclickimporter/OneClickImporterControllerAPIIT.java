@@ -142,7 +142,7 @@ public class OneClickImporterControllerAPIIT
 		await().pollDelay(500, MILLISECONDS)
 			   .atMost(3, MINUTES)
 			   .until(() -> pollJobForStatus(jobUrl), not(is("PENDING")));
-		await().pollDelay(500, MILLISECONDS).atMost(5, SECONDS).until(() -> pollJobForStatus(jobUrl), is("SUCCESS"));
+		await().pollDelay(500, MILLISECONDS).atMost(10, SECONDS).until(() -> pollJobForStatus(jobUrl), is("SUCCESS"));
 
 		// Extract the id of the entity created by the import
 		ValidatableResponse completedJobResponse = given().log()
