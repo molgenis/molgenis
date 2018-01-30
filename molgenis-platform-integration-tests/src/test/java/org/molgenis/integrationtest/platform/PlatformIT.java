@@ -3,7 +3,6 @@ package org.molgenis.integrationtest.platform;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.i18n.model.*;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
@@ -115,8 +114,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
-	@Autowired
-	private DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -221,7 +218,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(attributeMetadata.getId(), true, true, true));
 		authorities.addAll(makeAuthorities(l10nStringMetaData.getId(), true, false, false));
 		authorities.addAll(makeAuthorities(entityTypeMetadata.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(decoratorConfigurationMetadata.getId(), true, true, true));
 
 		SecurityContextHolder.getContext()
 							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));

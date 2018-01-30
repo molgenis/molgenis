@@ -38,7 +38,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.OneToManyTestHarness.*;
 import static org.molgenis.data.OneToManyTestHarness.TestCaseType.*;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -72,7 +71,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
 		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
 		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
-		authorities.addAll(makeAuthorities(DECORATOR_CONFIGURATION, false, true, true));
 
 		SecurityContextHolder.getContext()
 							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
