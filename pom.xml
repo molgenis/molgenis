@@ -92,7 +92,7 @@
 
         <!-- Integration test properties -->
         <cargo-plugin.version>1.6.6</cargo-plugin.version>
-        <tomcat.version>7.0.78</tomcat.version>
+        <tomcat.version>8.5.27</tomcat.version>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
         <!-- if profiles are inactive, set these props to use local infrastructure -->
