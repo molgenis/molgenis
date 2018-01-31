@@ -3,8 +3,8 @@ import store from './store'
 import router from './router'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
-import { sync } from 'vuex-router-sync'
-import { searchall } from './store/state'
+import {sync} from 'vuex-router-sync'
+import {searchall} from './store/state'
 
 import App from './App'
 

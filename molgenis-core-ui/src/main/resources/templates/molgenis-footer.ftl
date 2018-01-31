@@ -4,7 +4,7 @@
     </div><#-- close row -->
 </div><#-- close container-fluid -->
 
-<#if version == 1>
+    <#if version == 1>
     <div id="footer-container">
         <div class="container">
             <p class="text-muted text-center small footer">
@@ -37,7 +37,7 @@
             </#if>
         </div>
     </div>
-<#else>
+    <#else>
     <#-- VUE -->
     <div id="molgenis-footer"></div>
 
@@ -52,7 +52,7 @@
 
     <#-- Include the Vue version of the molgenis footer  -->
     <script type=text/javascript src="<@resource_href "/js/bootstrap-4/footer/molgenis-footer.js"/>"></script>
-</#if>
+    </#if>
 
 
 <#if authenticated?? && authenticated>

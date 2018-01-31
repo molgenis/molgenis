@@ -71,7 +71,7 @@ import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PAT
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
 @Import({ PlatformConfig.class, RdfConverter.class })
-public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
+public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 {
 	private static final String MOLGENIS_HOME = "molgenis.home";
 

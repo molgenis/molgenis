@@ -2,6 +2,7 @@ package org.molgenis.security.token;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -26,8 +27,9 @@ public class TokenExtractor implements HandlerMethodArgumentResolver
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws ServletRequestBindingException
+	public @Nullable
+	Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception
 	{
 		return getTokenInternal(webRequest.getHeader(TOKEN_HEADER), webRequest.getParameter(TOKEN_PARAMETER),
 				parameter.getParameterAnnotation(TokenParam.class).required());

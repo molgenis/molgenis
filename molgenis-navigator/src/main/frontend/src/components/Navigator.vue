@@ -74,10 +74,10 @@
 
 <script>
   import _ from 'lodash'
-  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE } from '../store/actions'
-  import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
-  import { Package, INITIAL_STATE } from '../store/state'
-  import { mapState } from 'vuex'
+  import {GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, QUERY_PACKAGES, RESET_STATE} from '../store/actions'
+  import {RESET_PATH, SET_ERROR, SET_PACKAGES, SET_QUERY} from '../store/mutations'
+  import {INITIAL_STATE, Package} from '../store/state'
+  import {mapState} from 'vuex'
 
   export default {
     name: 'Navigator',

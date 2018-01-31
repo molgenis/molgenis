@@ -21,10 +21,10 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
-  import { CREATE_ENTITY_TYPE } from '../store/actions'
-  import { SET_SELECTED_ENTITY_TYPE_ID } from '../store/mutations'
-  import { getConfirmBeforeLeavingProperties } from '../store/getters'
+  import {mapGetters, mapState} from 'vuex'
+  import {CREATE_ENTITY_TYPE} from '../store/actions'
+  import {SET_SELECTED_ENTITY_TYPE_ID} from '../store/mutations'
+  import {getConfirmBeforeLeavingProperties} from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
 

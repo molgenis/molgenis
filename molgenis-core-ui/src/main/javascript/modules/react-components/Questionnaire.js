@@ -134,9 +134,9 @@ var Questionnaire = React.createClass({
             }
 
             if (attrName === 'submitDate') {
-              // Generate submit timestamp
-              var currentTime = moment().toISOString();
-              arr[i].value = currentTime
+                // Generate submit timestamp
+                var currentTime = moment().toISOString();
+                arr[i].value = currentTime
             }
 
             // Set value of attribute with visibleExpression that is not visible to null
