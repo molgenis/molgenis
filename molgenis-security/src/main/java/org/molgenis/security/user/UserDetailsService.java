@@ -78,6 +78,9 @@ public class UserDetailsService implements org.springframework.security.core.use
 		if (user.isSuperuser() != null && user.isSuperuser() == true)
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP));
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_MODIFY_AUDITING));
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_GENERAL_CHANGES));
 		}
 		return grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities);
 	}
