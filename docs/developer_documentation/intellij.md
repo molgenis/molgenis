@@ -8,7 +8,7 @@ JetBrains on an open source license. Most of the time we use the latest IntelliJ
 Before you start, make sure the following middleware is installed on your system.
 * Java 8 JDK (latest version available from Oracle)
 * Maven >= 3.1.0 (The built-in maven version of IntelliJ is too old to compile molgenis.)
-* Apache Tomcat 7 or 8
+* Apache Tomcat 8.5.x
 * PostGreSQL server. 
 * ElasticSearch
 See [quickstart](./quickstart/guide-tomcat.html) for details
