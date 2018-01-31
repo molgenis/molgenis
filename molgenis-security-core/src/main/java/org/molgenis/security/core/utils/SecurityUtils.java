@@ -19,6 +19,10 @@ public class SecurityUtils
 	public static final String AUTHORITY_SU = "ROLE_SU";
 	public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
 
+	public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
+	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
+	public static final String ROLE_ACL_GENERAL_CHANGES = "ROLE_ACL_GENERAL_CHANGES";
+
 	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
 	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
 	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_";

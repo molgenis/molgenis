@@ -54,10 +54,9 @@ public class AclConfig
 	@Bean
 	public AclAuthorizationStrategy aclAuthorizationStrategy()
 	{
-		// TODO discuss which granted authorities to use
-		GrantedAuthority gaTakeOwnership = new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU);
-		GrantedAuthority gaModifyAuditing = new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU);
-		GrantedAuthority gaGeneralChanges = new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU);
+		GrantedAuthority gaTakeOwnership = new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP);
+		GrantedAuthority gaModifyAuditing = new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_MODIFY_AUDITING);
+		GrantedAuthority gaGeneralChanges = new SimpleGrantedAuthority(SecurityUtils.ROLE_ACL_GENERAL_CHANGES);
 		return new AclAuthorizationStrategyImpl(gaTakeOwnership, gaModifyAuditing, gaGeneralChanges);
 	}
 
