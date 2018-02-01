@@ -7,10 +7,17 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.domain.GrantedAuthoritySid;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -21,9 +28,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.data.plugin.model.PluginPermissionUtils.getCumulativePermission;
 import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
@@ -35,11 +46,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 {
 	private final DataService dataService;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+	private final MutableAclService mutableAclService;
 
-	public PermissionManagerServiceImpl(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
+	public PermissionManagerServiceImpl(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper,
+			MutableAclService mutableAclService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);
+		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -79,12 +93,106 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	public Permissions getGroupPluginPermissions(String groupId)
 	{
 		Group group = dataService.findOneById(GROUP, groupId, Group.class);
-		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		if (group == null)
+		{
+			throw new RuntimeException("unknown group id [" + groupId + "]");
+		}
+		return getPluginPermissions(group);
+	}
 
-		List<Authority> groupPermissions = getGroupPermissions(group);
-		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
-		permissions.setGroupId(groupId);
+	private Permissions getPluginPermissions(User user)
+	{
+		Sid sid = SidUtils.createSid(user);
+		return getPluginPermissions(sid);
+	}
+
+	private Permissions getPluginPermissions(Group group)
+	{
+		Sid sid = SidUtils.createSid(group);
+		return getPluginPermissions(sid);
+	}
+
+	private Permissions getPluginPermissions(Sid sid)
+	{
+		List<Plugin> plugins = getPlugins();
+
+		List<ObjectIdentity> pluginIdentities = plugins.stream().map(PluginIdentity::new).collect(toList());
+		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(pluginIdentities, singletonList(sid));
+
+		return toPermissions(plugins, aclMap, sid);
+	}
+
+	private Permissions toPermissions(List<Plugin> plugins, Map<ObjectIdentity, Acl> aclMap, Sid sid)
+	{
+		Permissions permissions = new Permissions();
+
+		// set permissions: entity ids
+		Map<String, String> pluginMap = plugins.stream().collect(toMap(Plugin::getId, Plugin::getId, (u, v) ->
+		{
+			throw new IllegalStateException(format("Duplicate key %s", u));
+		}, LinkedHashMap::new));
+		permissions.setEntityIds(pluginMap);
+
+		// set permissions: user of group id
+		boolean isUser = sid instanceof PrincipalSid;
+		if (isUser)
+		{
+			String userId = ((PrincipalSid) sid).getPrincipal();
+			permissions.setUserId(userId);
+		}
+		else
+		{
+			String groupId = ((GrantedAuthoritySid) sid).getGrantedAuthority().substring("ROLE_".length());
+			permissions.setGroupId(groupId);
+		}
+
+		// set permissions: permissions
+		aclMap.forEach((objectIdentity, acl) ->
+		{
+			String pluginId = objectIdentity.getIdentifier().toString();
+			acl.getEntries().forEach(ace ->
+			{
+				if (ace.getSid().equals(sid))
+				{
+					Permission pluginPermission = toPluginPermission(ace);
+					if (isUser)
+					{
+						permissions.addUserPermission(pluginId, pluginPermission);
+					}
+					else
+					{
+						permissions.addGroupPermission(pluginId, pluginPermission);
+					}
+				}
+			});
+		});
 		return permissions;
+	}
+
+	private Permission toPluginPermission(AccessControlEntry ace)
+	{
+		Permission pluginPermission = new Permission();
+		if (ace.getPermission().equals(getCumulativePermission(PluginPermission.WRITEMETA)))
+		{
+			pluginPermission.setType("writemeta");
+		}
+		else if (ace.getPermission().equals(getCumulativePermission(PluginPermission.WRITE)))
+		{
+			pluginPermission.setType("write");
+		}
+		else if (ace.getPermission().equals(getCumulativePermission(PluginPermission.READ)))
+		{
+			pluginPermission.setType("read");
+		}
+		else if (ace.getPermission().equals(getCumulativePermission(PluginPermission.COUNT)))
+		{
+			pluginPermission.setType("count");
+		}
+		else
+		{
+			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+		}
+		return pluginPermission;
 	}
 
 	@Override
@@ -105,10 +213,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public Permissions getUserPluginPermissions(String userId)
 	{
-		List<? extends Authority> userPermissions = getUserPermissions(userId);
-		Permissions permissions = createPermissions(userPermissions, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
-		permissions.setUserId(userId);
-		return permissions;
+		User user = dataService.findOneById(UserMetaData.USER, userId, User.class);
+		if (user == null)
+		{
+			throw new RuntimeException("unknown user id [" + userId + "]");
+		}
+		return getPluginPermissions(user);
 	}
 
 	@Override
@@ -152,7 +262,15 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional
 	public void replaceGroupPluginPermissions(List<GroupAuthority> pluginAuthorities, String groupId)
 	{
-		replaceGroupPermissions(pluginAuthorities, groupId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		if (group == null)
+		{
+			throw new RuntimeException("unknown group id [" + groupId + "]");
+		}
+
+		Sid sid = SidUtils.createSid(group);
+		Map<String, PluginPermission> pluginPermissions = toPluginPermissions(pluginAuthorities);
+		replaceSidPluginPermissions(sid, pluginPermissions);
 	}
 
 	@Override
@@ -185,7 +303,45 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional
 	public void replaceUserPluginPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
-		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+		User user = dataService.findOneById(USER, userId, User.class);
+		if (user == null)
+		{
+			throw new RuntimeException("unknown user id [" + userId + "]");
+		}
+
+		Sid sid = SidUtils.createSid(user);
+		Map<String, PluginPermission> pluginPermissions = toPluginPermissions(pluginAuthorities);
+		replaceSidPluginPermissions(sid, pluginPermissions);
+	}
+
+	private Map<String, PluginPermission> toPluginPermissions(List<? extends Authority> pluginAuthorities)
+	{
+		Map<String, PluginPermission> pluginPermissionMap = new HashMap<>();
+		pluginAuthorities.forEach(authority ->
+		{
+			String role = authority.getRole();
+			String pluginId = getAuthorityEntityId(role, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+			String pluginPermissionStr = getAuthorityType(role, SecurityUtils.AUTHORITY_PLUGIN_PREFIX);
+			pluginPermissionMap.put(pluginId, toPluginPermission(pluginPermissionStr));
+		});
+		return pluginPermissionMap;
+	}
+
+	private static PluginPermission toPluginPermission(String paramValue)
+	{
+		switch (paramValue.toUpperCase())
+		{
+			case "READ":
+				return PluginPermission.READ;
+			case "WRITE":
+				return PluginPermission.WRITE;
+			case "COUNT":
+				return PluginPermission.COUNT;
+			case "WRITEMETA":
+				return PluginPermission.WRITEMETA;
+			default:
+				throw new IllegalArgumentException(format("Unknown plugin permission '%s'", paramValue));
+		}
 	}
 
 	@Override
@@ -194,6 +350,29 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	public void replaceUserEntityClassPermissions(List<UserAuthority> pluginAuthorities, String userId)
 	{
 		replaceUserPermissions(pluginAuthorities, userId, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
+	}
+
+	private void replaceSidPluginPermissions(Sid sid, Map<String, PluginPermission> pluginPermissions)
+	{
+		List<ObjectIdentity> objectIdentities = pluginPermissions.keySet()
+																 .stream().map(PluginIdentity::new)
+																 .collect(toList());
+		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
+				objectIdentities, singletonList(sid));
+		acls.forEach(((objectIdentity, acl) ->
+		{
+			int nrEntries = acl.getEntries().size();
+			for (int i = nrEntries - 1; i >= 0; i--)
+			{
+				acl.deleteAce(i);
+			}
+
+			PluginPermission pluginPermission = pluginPermissions.get(objectIdentity.getIdentifier().toString());
+			CumulativePermission cumulativePermission = getCumulativePermission(pluginPermission);
+
+			acl.insertAce(0, cumulativePermission, sid, true);
+			mutableAclService.updateAcl(acl);
+		}));
 	}
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
@@ -308,7 +487,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			// add permissions for inherited authorities from authority that match prefix
 			SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority.getRole());
 			Collection<? extends GrantedAuthority> hierarchyAuthorities = grantedAuthoritiesMapper.mapAuthorities(
-					Collections.singletonList(grantedAuthority));
+					singletonList(grantedAuthority));
 			hierarchyAuthorities.remove(grantedAuthority);
 
 			for (GrantedAuthority hierarchyAuthority : hierarchyAuthorities)
