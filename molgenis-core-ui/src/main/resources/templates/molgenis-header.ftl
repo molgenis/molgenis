@@ -282,30 +282,41 @@
                 </ul>
 
                 <#if authenticated?? && authenticated>
-                    <form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
-                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank"
-                           class="btn btn-secondary">Help</a>
-                        <button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
-                        <script>
-                            $("#signout-button").click(function () {
-                                <#if googleSignIn>
-                                    var auth2 = gapi.auth2.getAuthInstance();
-                                auth2.signOut().then(function () {
-                                </#if>
-                                $('#logout-form').submit();
-                                <#if googleSignIn>
-                                });
-                                </#if>
-                            });
-                        </script>
-                    </form>
 
-                    <div id="language-select-box" class="navbar-right"></div>
+                <ul class="nav navbar-nav navbar-right" >
+                    <li>
+                        <form class="navbar-form">
+                            <div id="language-select-box"></div>
+                        </form>
+                    </li>
+                    <li>
+                        <a id="manual" href="https://molgenis.gitbooks.io/molgenis/content/" target="_blank">Help</a>
+                    </li>
+                    <li>
+                        <form id="logout-form" class="navbar-form" method="post" action="/logout">
+                            <button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
+                        </form>
+                    </li>
+                </ul>
+
+                <script>
+                     $("#signout-button").click(function () {
+                    <#if googleSignIn>
+                        var auth2 = gapi.auth2.getAuthInstance();
+                        auth2.signOut().then(function () {
+                    </#if>
+                            $('#logout-form').submit();
+                    <#if googleSignIn>
+                        });
+                    </#if>
+                     });
+                </script>
+
                 <#else>
-                    <form class="navbar-form navbar-right" method="post" action="/login">
-                        <a id="open-button" type="btn" class="btn btn-default" data-toggle="modal"
-                           data-target="#login-modal">Sign in</a>
-                    </form>
+                <form class="navbar-form navbar-right" method="post" action="/login">
+                    <a id="open-button" type="btn" class="btn btn-default" data-toggle="modal"
+                       data-target="#login-modal">Sign in</a>
+                </form>
                 </#if>
 
 
