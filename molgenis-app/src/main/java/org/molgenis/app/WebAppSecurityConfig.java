@@ -16,14 +16,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
 
 @Configuration
 @Import(AclConfig.class)
@@ -52,13 +48,6 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 									  .antMatchers("/fdp/**").permitAll()
 
 									  .antMatchers("/annotators/**").authenticated();
-	}
-
-	@Override
-	protected List<GrantedAuthority> createAnonymousUserAuthorities()
-	{
-		String s = getPluginReadAuthority("home");
-		return AuthorityUtils.createAuthorityList(s);
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -420,9 +421,15 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		public MutableAclService mutableAclService()
+		{
+			return mock(MutableAclService.class);
+		}
+
+		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService, grantedAuthoritiesMapper(), mutableAclService());
 		}
 
 		@Bean

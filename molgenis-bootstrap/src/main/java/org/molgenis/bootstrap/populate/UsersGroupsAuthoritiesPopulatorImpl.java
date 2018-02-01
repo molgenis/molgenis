@@ -1,11 +1,11 @@
 package org.molgenis.bootstrap.populate;
 
-import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +38,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	private final GroupFactory groupFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final GroupAuthorityFactory groupAuthorityFactory;
+	private final MutableAclService mutableAclService;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -47,13 +48,15 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	private String anonymousEmail;
 
 	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory,
-			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
+			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory,
+			MutableAclService mutableAclService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
 		this.groupFactory = requireNonNull(groupFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
+		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -94,11 +97,6 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
-		// allow all users to update their profile
-		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
-		usersGroupUserAccountAuthority.setGroup(allUsersGroup);
-		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + UserAccountController.ID);
-
 		// allow all users to read meta data entities
 		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
 				L10N_STRING, FILE_META, OWNED);
@@ -114,7 +112,6 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		dataService.add(GROUP_AUTHORITY,
-				Stream.concat(Stream.of(usersGroupUserAccountAuthority), entityGroupAuthorities));
+		dataService.add(GROUP_AUTHORITY, entityGroupAuthorities);
 	}
 }
