@@ -830,7 +830,8 @@ var TableCellContent = React.createClass({
                     if (value.length > maxLength) {
                         CellContent = span(null, Popover({
                             value: value.substring(0, maxLength - 3) + '...',
-                            popoverValue: value
+                            popoverValue: value,
+                            trigger: 'hover'
                         }));
                     } else {
                         CellContent = span(null, value);
