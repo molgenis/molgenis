@@ -112,7 +112,6 @@ public class LocalizationService implements MessageResolution
 	 * Deletes all localization strings for a given namespace
 	 */
 	@Transactional
-	@RunAsSystem
 	public void deleteNamespace(String namespace)
 	{
 		List<L10nString> namespaceEntities = getL10nStrings(namespace);
