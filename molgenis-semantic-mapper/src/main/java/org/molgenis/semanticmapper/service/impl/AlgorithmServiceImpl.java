@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.script.core.ScriptException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -104,14 +105,21 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(Attribute targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
 	{
-		return stream(sourceEntities.spliterator(), false).map(entity ->
-		{
+		return stream(sourceEntities.spliterator(), false).map(entity -> {
 			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 			Object derivedValue;
 
 			try
 			{
 				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
+
+				// jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
+				// so check instance of result object here
+				if (result instanceof ScriptException)
+				{
+					return algorithmResult.errorMessage(((ScriptException) result).getMessage());
+				}
+
 				derivedValue = convert(result, targetAttribute);
 			}
 			catch (RuntimeException e)
@@ -135,8 +143,16 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		Object value = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity);
-		return convert(value, attributeMapping.getTargetAttribute());
+		Object result = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity);
+
+		// jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
+		// so check instance of result object here
+		if (result instanceof ScriptException)
+		{
+			throw new ScriptException(((ScriptException) result).getMessage(), ((ScriptException) result).getCause());
+		}
+
+		return convert(result, attributeMapping.getTargetAttribute());
 	}
 
 	@Override
