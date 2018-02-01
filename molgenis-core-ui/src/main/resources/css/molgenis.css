@@ -162,12 +162,6 @@ body {
 	word-wrap: break-word;
 }
 
-#language-select-box {
-	width: 125px;
-	padding: 7px 0px;
-	height: 26px;
-}
-
 /* Change threshold for collapsing the menu, default is 768px*/
 @media (max-width: 1127px) {
     .navbar-toggle {
