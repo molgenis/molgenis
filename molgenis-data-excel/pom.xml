@@ -12,7 +12,7 @@
     <description>XLSX/XSL data reading/writing.</description>
 
     <properties>
-        <apache.poi.version>3.15</apache.poi.version>
+        <apache.poi.version>3.17</apache.poi.version>
     </properties>
 
     <dependencies>
