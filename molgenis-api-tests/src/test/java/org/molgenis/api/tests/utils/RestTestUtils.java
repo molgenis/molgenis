@@ -148,9 +148,9 @@ public class RestTestUtils
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
 	 *
-	 * @param adminToken to use for login
+	 * @param adminToken       to use for login
 	 * @param pathToFileFolder
-	 * @param fileName name of the file to upload
+	 * @param fileName         name of the file to upload
 	 */
 	public static void uploadEMX(String adminToken, String pathToFileFolder, String fileName)
 	{
@@ -161,17 +161,15 @@ public class RestTestUtils
 
 	private static void uploadEMXFile(String adminToken, File file)
 	{
-		String importJobURLString = given().multiPart(file)
-										   .param("file")
-										   .param("action", "ADD_UPDATE_EXISTING")
-										   .header(X_MOLGENIS_TOKEN, adminToken)
-										   .post("plugin/importwizard/importFile")
-										   .then()
-										   .extract()
-										   .asString();
-
-		// Remove the leading '/' character and leading and trailing '"' characters
-		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
+		String importJobURL = given().multiPart(file)
+									 .param("file")
+									 .param("action", "ADD_UPDATE_EXISTING")
+									 .header(X_MOLGENIS_TOKEN, adminToken)
+									 .post("plugin/importwizard/importFile")
+									 .then()
+									 .statusCode(CREATED)
+									 .extract()
+									 .header("Location");
 
 		LOG.info("############ " + importJobURL);
 		await().pollDelay(500, MILLISECONDS)
@@ -207,18 +205,16 @@ public class RestTestUtils
 	{
 		File file = getResourceFile(fileName);
 
-		String importJobURLString = given().multiPart(file)
-										   .param("file")
-										   .param("action", "ADD")
-										   .param("entityName", entityName)
-										   .header(X_MOLGENIS_TOKEN, adminToken)
-										   .post("plugin/importwizard/importFile")
-										   .then()
-										   .extract()
-										   .asString();
-
-		// Remove the leading '/' character and leading and trailing '"' characters
-		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
+		String importJobURL = given().multiPart(file)
+									 .param("file")
+									 .param("action", "ADD")
+									 .param("entityName", entityName)
+									 .header(X_MOLGENIS_TOKEN, adminToken)
+									 .post("plugin/importwizard/importFile")
+									 .then()
+									 .statusCode(CREATED)
+									 .extract()
+									 .header("Location");
 
 		LOG.info("############ " + importJobURL);
 		await().pollDelay(500, MILLISECONDS)
@@ -232,7 +228,7 @@ public class RestTestUtils
 		return given().contentType(APPLICATION_JSON)
 					  .header(X_MOLGENIS_TOKEN, adminToken)
 					  .get(importJobURL)
-					  .then()
+					  .then().statusCode(OKE)
 					  .extract()
 					  .path("status")
 					  .toString();
