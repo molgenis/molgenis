@@ -324,7 +324,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 												  .getResponse();
 		assertEquals(response.getContentAsString(), "true",
 				"When checking for a new entity type, the result should be the String \"true\"");
-		assertEquals(response.getContentType(), "application/json");
+		assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
 		Mockito.verify(dataService).getEntityType("blah");
 	}
 
@@ -335,7 +335,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		MockHttpServletResponse response = mockMvc.perform(
 				get(URI + "/isNewEntity").param("targetEntityTypeId", "it_emx_test_TypeTest")
 										 .accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
-		assertEquals(response.getContentType(), "application/json");
+		assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
 		assertEquals(response.getContentAsString(), "false",
 				"When checking for an existing entity type, the result should be the String \"false\"");
 	}

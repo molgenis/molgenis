@@ -74,6 +74,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
@@ -447,8 +448,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResource() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceResponse.json"))));
 	}
 
@@ -456,8 +456,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourcePartialResponseAttribute() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBoolName))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialAttributeResponse.json"))));
 	}
@@ -466,8 +465,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourcePartialResponseAttributeInCompound() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrCompoundName + '(' + attrCompoundAttr0Name + ')'))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialAttributeInCompoundResponse.json"))));
 	}
@@ -477,8 +475,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
 				attrCompoundName + '(' + attrCompoundAttrCompoundName + '(' + attrCompoundAttrCompoundAttr0Name + "))"))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(readFile(
 					   getClass().getResourceAsStream("resourcePartialAttributeInCompoundInCompoundResponse.json"))));
 	}
@@ -487,8 +484,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourcePartialResponseAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBoolName + ',' + attrStringName))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialAttributesResponse.json"))));
 	}
@@ -497,8 +493,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourcePartialResponseSubAttribute() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + REF_ATTR_VALUE_NAME + ')'))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialSubAttributeResponse.json"))));
 	}
@@ -508,8 +503,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
 				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_VALUE_NAME + ')'))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialSubAttributesResponse.json"))));
 	}
@@ -519,9 +513,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
 				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME + ')'
-						+ ')'))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+						+ ')')).andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   readFile(getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"))));
 	}
@@ -530,8 +522,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourceCollection() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"))));
 	}
 
@@ -563,8 +554,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				post(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}")
 											.contentType(APPLICATION_JSON))
-			   .andExpect(status().isCreated())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(jsonPath("$.location", is("/api/v2/entity?q=id=in=(\"p1\",\"p2\")")))
 			   .andExpect(jsonPath("$.resources", hasSize(2)))
 			   .andExpect(jsonPath("$.resources[0].href", is("/api/v2/entity/p1")))
@@ -589,8 +579,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(post(BASE_URI + '/' + ATTRIBUTE_META_DATA).content(
 				"{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}").contentType(APPLICATION_JSON))
-			   .andExpect(status().isCreated())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(jsonPath("$.location", is("/api/v2/sys_md_Attribute?q=id=in=(\"p1\",\"p2\")")))
 			   .andExpect(jsonPath("$.resources", hasSize(2)))
 			   .andExpect(jsonPath("$.resources[0].href", is("/api/v2/sys_md_Attribute/p1")))
@@ -610,8 +599,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		String content = "{newEntityName: 'newEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-			   .andExpect(status().isCreated())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string("\"org_molgenis_blah_newEntity\""))
 			   .andExpect(header().string("Location", "/api/v2/org_molgenis_blah_newEntity"));
 
@@ -641,8 +629,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		String content = "{newEntityName: 'duplicateEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
 					   is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
@@ -661,8 +648,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		String content = "{newEntityName: 'newEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-			   .andExpect(status().isUnauthorized())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No read permission on entity entity")));
 		verifyZeroInteractions(repoCopier);
@@ -681,8 +667,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
 		mockMvc.perform(post(HREF_COPY_ENTITY).content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No write capabilities for entity entity")));
 		verifyZeroInteractions(repoCopier);
 	}
@@ -759,7 +744,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResultActions resultActions = mockMvc.perform(
 				post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 											 .andExpect(status().isBadRequest())
-											 .andExpect(content().contentType(APPLICATION_JSON))
+											 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 											 .andExpect(header().doesNotExist("Location"))
 											 .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
 													 is("Check if this exception is not swallowed by the system")));
@@ -785,8 +770,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Example data'}]}")
 												   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(header().doesNotExist("Location"))
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Check if this exception is not swallowed by the system")));
 	}
@@ -800,8 +784,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content("{entities:[{id:'p1', name:'Example data'}]}")
 												   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(header().doesNotExist("Location"))
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Message (entity 5)")));
 	}
