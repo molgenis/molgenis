@@ -3,6 +3,7 @@ package org.molgenis.settings.controller;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -34,6 +35,9 @@ public class SettingsControllerTest
 	@Mock
 	private UserAccountService userAccountService;
 
+	@Mock
+	private DataService dataService;
+
 	@BeforeMethod
 	public void before()
 	{
@@ -48,27 +52,20 @@ public class SettingsControllerTest
 		when(user.isSuperuser()).thenReturn(false);
 
 		SettingsController settingsController = new SettingsController(menuReaderService, appSettings,
-				userAccountService);
+				userAccountService, dataService);
 		mockMvc = standaloneSetup(settingsController).build();
 	}
 
-	/**
-	 * Test that a get call to the plugin returns the correct view
-	 */
 	@Test
 	public void testInit() throws Exception
 	{
 		mockMvc.perform(get(SettingsController.URI))
 			   .andExpect(status().isOk())
 			   .andExpect(view().name(SettingsController.VIEW_TEMPLATE))
-			   .
-					   andExpect(model().attribute("baseUrl", "/test/path"))
-			   .
-					   andExpect(model().attribute("lng", "en"))
-			   .
-					   andExpect(model().attribute("fallbackLng", "DDEEFF"))
-			   .
-					   andExpect(model().attribute("isSuperUser", false));
+			   .andExpect(model().attribute("baseUrl", "/test/path"))
+			   .andExpect(model().attribute("lng", "en"))
+			   .andExpect(model().attribute("fallbackLng", "DDEEFF"))
+			   .andExpect(model().attribute("isSuperUser", false));
 	}
 
 }

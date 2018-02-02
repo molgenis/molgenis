@@ -1,24 +1,22 @@
 // @flow
 // $FlowFixMe
-import { SET_ERROR, SET_FORM_DATA, SET_FORM_FIELDS, SET_MESSAGE, SET_SELECTED_SETTING, SET_SETTINGS } from './mutations'
-import { EntityToStateMapper } from '@molgenis/molgenis-ui-form'
 import api from '@molgenis/molgenis-api-client'
 
-export const GET_SETTINGS = '__GET_SETTINGS__'
+import { SET_ALERT, SET_FORM_DATA, SET_FORM_FIELDS, SET_SELECTED_SETTING } from './mutations'
+import { EntityToStateMapper } from '@molgenis/molgenis-ui-form'
+
 export const GET_SETTINGS_BY_ID = '__GET_SETTINGS_BY_ID__'
 export const UPDATE_SETTINGS = '__UPDATE_SETTINGS__'
 
+const createAlert = (message, type) => {
+  return {
+    message: message,
+    type: type
+  }
+}
+
 export default {
-  [GET_SETTINGS] ({commit, dispatch, state}: { commit: Function }) {
-    const uri = '/api/v2/sys_md_EntityType?q=extends==sys_set_settings'
-    api.get(uri).then(response => {
-      commit(SET_SETTINGS, response.items.map(item => { return {id: item.id, label: item.label} }))
-      dispatch(GET_SETTINGS_BY_ID, state.selectedSetting)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
-  },
-  [GET_SETTINGS_BY_ID] ({commit}: { commit: Function }, selectedEntity: String) {
+  [GET_SETTINGS_BY_ID] ({commit}, selectedEntity: String) {
     if (selectedEntity) {
       const uri = '/api/v2/' + selectedEntity
       return api.get(uri).then(response => {
@@ -33,16 +31,16 @@ export default {
       })
     }
   },
-  [UPDATE_SETTINGS] ({commit, state}: { commit: Function }, selectedEntity: String) {
+  [UPDATE_SETTINGS] ({commit, state}, selectedEntity: String) {
     if (selectedEntity) {
       const options = {
         body: JSON.stringify(state.formData)
       }
       const uri = '/api/v1/' + selectedEntity + '/' + state.formData.id + '?_method=PUT'
-      api.post(uri, options).then(response => {
-        commit(SET_MESSAGE, 'Settings are successfully saved')
+      api.post(uri, options).then(() => {
+        commit(SET_ALERT, createAlert('Settings are successfully saved', 'success'))
       }, error => {
-        commit(SET_ERROR, error)
+        commit(SET_ALERT, createAlert(error, 'danger'))
       })
     }
   }

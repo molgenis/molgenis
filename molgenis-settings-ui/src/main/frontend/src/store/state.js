@@ -1,15 +1,14 @@
-// @flow
+const {initialSetting, settingEntities} = window.__INITIAL_STATE__
 
-export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
+export default {
+  /* Setting state */
+  selectedSetting: initialSetting,
+  settings: settingEntities,
 
-const state = {
-  error: undefined,
-  message: undefined,
-  token: undefined,
+  /* Form state */
   formFields: [],
   formData: null,
-  settings: [],
-  selectedSetting: 'sys_set_app'
-}
 
-export default state
+  /* Application alert state */
+  alert: null
+}
