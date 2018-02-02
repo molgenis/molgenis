@@ -1,7 +1,6 @@
 package org.molgenis.security.account;
 
-import org.hibernate.validator.constraints.Email;
-
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 class PasswordResetRequest

@@ -203,21 +203,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void registerUser_invalidRegisterRequest() throws Exception
-	{
-		// when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
-		this.mockMvc.perform(post("/account/register").param("username", "admin")
-													  .param("password", "adminpw-invalid")
-													  .param("confirmPassword", "adminpw-invalid")
-													  .param("lastname", "min")
-													  .param("firstname", "ad")
-													  .param("captcha", "validCaptcha")
-													  .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-					.andExpect(status().isBadRequest());
-		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
-	}
-
-	@Test
 	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	{
 		when(authenticationSettings.getSignUp()).thenReturn(true);
@@ -260,6 +245,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_invalidUserField() throws Exception
 	{
+		when(authenticationSettings.getSignUp()).thenReturn(true);
 		this.mockMvc.perform(post("/account/register").param("username", "admin")
 													  .param("password", "adminpw-invalid")
 													  .param("email", "admin@molgenis.org")
