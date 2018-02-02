@@ -652,6 +652,8 @@
                                     <excludes>
                                         <exclude>commons-logging:commons-logging</exclude>
                                         <exclude>org.apache.logging.log4j:log4j</exclude>
+                                        <!-- Use spring-jcl as logging bridge -->
+                                        <exclude>org.slf4j:jcl-over-slf4j</exclude>
                                         <exclude>com.google.guava:guava-jdk5</exclude>
                                         <!-- As of Java 1.6 StAX is part of the standard API -->
                                         <exclude>javax.xml.stream:stax-api</exclude>
@@ -875,11 +877,6 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
