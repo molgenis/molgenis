@@ -46,7 +46,7 @@ public class SettingsController extends VuePluginController
 	public String init(Model model)
 	{
 		super.init(model, ID);
-		model.addAttribute("initialSetting", "sys_set_app");
+		model.addAttribute("initialSelectedSetting", "sys_set_app");
 		model.addAttribute("settingEntities", getSettingEntities());
 		return VIEW_TEMPLATE;
 	}

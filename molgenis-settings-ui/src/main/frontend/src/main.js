@@ -5,7 +5,6 @@ import App from './App'
 import store from './store'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
-
 const {lng, fallbackLng} = window.__INITIAL_STATE__
 
 /* eslint-disable no-new */
@@ -16,7 +15,7 @@ Vue.use(i18n, {
   callback () {
     /* eslint-disable no-new */
     new Vue({
-      el: '#app',
+      el: '#settings-plugin',
       store,
       template: '<App />',
       components: {App}
