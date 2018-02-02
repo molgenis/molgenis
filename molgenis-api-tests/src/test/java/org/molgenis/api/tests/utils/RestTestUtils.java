@@ -5,8 +5,8 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.auth.GroupMemberMetaData;
-import org.molgenis.auth.GroupMetaData;
+import org.molgenis.data.security.auth.GroupMemberMetaData;
+import org.molgenis.data.security.auth.GroupMetaData;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -29,9 +29,8 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.auth.GroupMemberMetaData.USER;
-import static org.molgenis.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -119,7 +118,7 @@ public class RestTestUtils
 		JSONObject groupMembership = new JSONObject();
 		groupMembership.put(USER, getUserId(adminToken, userName));
 		groupMembership.put(GroupMemberMetaData.GROUP,
-				getEntityTypeId(adminToken, NAME, ALL_USER_GROUP, GroupMetaData.GROUP));
+				getEntityTypeId(adminToken, GroupMetaData.NAME, ALL_USER_GROUP, GroupMetaData.GROUP));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)
@@ -162,17 +161,7 @@ public class RestTestUtils
 
 	private static String uploadEMXFile(String adminToken, File file)
 	{
-		String importJobURLString = given().multiPart(file)
-										   .param("file")
-										   .param("action", "ADD_UPDATE_EXISTING")
-										   .header(X_MOLGENIS_TOKEN, adminToken)
-										   .post("plugin/importwizard/importFile")
-										   .then()
-										   .extract()
-										   .asString();
-
-		return monitorImportJob(adminToken, importJobURLString);
-		String importJobURL = given().multiPart(file)
+		String importJobStatusUrl = given().multiPart(file)
 									 .param("file")
 									 .param("action", "ADD_UPDATE_EXISTING")
 									 .header(X_MOLGENIS_TOKEN, adminToken)
@@ -182,11 +171,7 @@ public class RestTestUtils
 									 .extract()
 									 .header("Location");
 
-		LOG.info("############ " + importJobURL);
-		await().pollDelay(500, MILLISECONDS)
-			   .atMost(5, MINUTES)
-			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
-		LOG.info("Import completed");
+		return monitorImportJob(adminToken, importJobStatusUrl);
 	}
 
 	private static File getResourceFile(String fileName)
@@ -216,7 +201,7 @@ public class RestTestUtils
 	{
 		File file = getResourceFile(fileName);
 
-		String importJobURLString = given().multiPart(file)
+		String importJobStatusUrl = given().multiPart(file)
 										   .param("file")
 										   .param("action", "ADD")
 										   .param("entityName", entityName)
@@ -224,8 +209,8 @@ public class RestTestUtils
 										   .post("plugin/importwizard/importFile")
 										   .then()
 										   .extract()
-										   .asString();
-		return monitorImportJob(adminToken, importJobURLString);
+										   .header("Location");
+		return monitorImportJob(adminToken, importJobStatusUrl);
 	}
 
 	/**
@@ -241,36 +226,23 @@ public class RestTestUtils
 	{
 		File file = new File(pathToFileFolder + File.separator + fileName);
 
-		String importJobURLString = given().multiPart(file)
+		String importJobStatusUrl = given().multiPart(file)
 										   .param("file")
 										   .param("action", "ADD")
 										   .header(X_MOLGENIS_TOKEN, adminToken)
 										   .post("plugin/importwizard/importFile")
 										   .then()
 										   .extract()
-										   .asString();
-		return monitorImportJob(adminToken, importJobURLString);
+										   .header("Location");
+		return monitorImportJob(adminToken, importJobStatusUrl);
 	}
 
 
 	/**
 	 * Given the job uri and token, wait until the job is done and report back the status.
 	 */
-	private static String monitorImportJob(String adminToken, String importJobURLString)
+	private static String monitorImportJob(String adminToken, String importJobURL)
 	{
-		// Remove the leading '/' character and leading and trailing '"' characters
-		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
-		String importJobURL = given().multiPart(file)
-									 .param("file")
-									 .param("action", "ADD")
-									 .param("entityName", entityName)
-									 .header(X_MOLGENIS_TOKEN, adminToken)
-									 .post("plugin/importwizard/importFile")
-									 .then()
-									 .statusCode(CREATED)
-									 .extract()
-									 .header("Location");
-
 		LOG.info("############ " + importJobURL);
 		await().pollDelay(500, MILLISECONDS)
 			   .atMost(5, MINUTES)
