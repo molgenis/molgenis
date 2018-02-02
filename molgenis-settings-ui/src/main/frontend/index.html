@@ -7,11 +7,24 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>molgenis-settings</title>
+    <title>MOLGENIS - Settings</title>
   </head>
 
   <body>
-    <div id="app"></div>
+    <div class="container">
+
+      <div class="row">
+        <div class="col-md-12">
+          <h1>Settings</h1>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div id="settings-plugin"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- built files will be auto injected -->
     <script>
@@ -25,7 +38,7 @@
             label: 'Application settings'
           }
         ],
-        initialSetting: 'sys_set_app'
+        initialSelectedSetting: 'sys_set_app'
       }
     </script>
   </body>
