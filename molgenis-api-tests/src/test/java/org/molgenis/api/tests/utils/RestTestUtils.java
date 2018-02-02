@@ -5,8 +5,8 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.molgenis.data.security.auth.GroupMemberMetaData;
-import org.molgenis.data.security.auth.GroupMetaData;
+import org.molgenis.auth.GroupMemberMetaData;
+import org.molgenis.auth.GroupMetaData;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -29,9 +29,9 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.auth.GroupMemberMetaData.USER;
+import static org.molgenis.auth.GroupMetaData.NAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -132,35 +132,46 @@ public class RestTestUtils
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
+	 *
 	 */
-	public static void uploadEMX(String adminToken, String fileName)
+	public static String uploadEMX(String adminToken, String fileName)
 	{
 		File file = getResourceFile(fileName);
 
-		uploadEMXFile(adminToken, file);
+		return uploadEMXFile(adminToken, file);
 	}
 
 	/**
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken       to use for login
-	 * @param pathToFileFolder
+	 * @param pathToFileFolder path to folder to look for emx file to import
 	 * @param fileName         name of the file to upload
+	 * @return String indicating state of completed job
 	 */
-	public static void uploadEMX(String adminToken, String pathToFileFolder, String fileName)
+	public static String uploadEMX(String adminToken, String pathToFileFolder, String fileName)
 	{
 		File file = new File(pathToFileFolder + File.separator + fileName);
 
-		uploadEMXFile(adminToken, file);
+		return uploadEMXFile(adminToken, file);
 	}
 
-	private static void uploadEMXFile(String adminToken, File file)
+	private static String uploadEMXFile(String adminToken, File file)
 	{
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD_UPDATE_EXISTING")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
+
+		return monitorImportJob(adminToken, importJobURLString);
 		String importJobURL = given().multiPart(file)
 									 .param("file")
 									 .param("action", "ADD_UPDATE_EXISTING")
@@ -194,17 +205,61 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Import emx file using add/update.
+	 * Import vcf file using add
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
 	 */
-	public static void uploadVCF(String adminToken, String fileName, String entityName)
+	public static String uploadVCFToEntity(String adminToken, String fileName, String entityName)
 	{
 		File file = getResourceFile(fileName);
 
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD")
+										   .param("entityName", entityName)
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
+		return monitorImportJob(adminToken, importJobURLString);
+	}
+
+	/**
+	 * Import vcf file using add
+	 * <p>
+	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 * @param adminToken to use for login
+	 * @param pathToFileFolder path to folder to look for emx file to import
+	 * @param fileName   the file to upload
+	 * @return String indicating state of completed job
+	 */
+	public static String uploadVCF(String adminToken, String pathToFileFolder, String fileName)
+	{
+		File file = new File(pathToFileFolder + File.separator + fileName);
+
+		String importJobURLString = given().multiPart(file)
+										   .param("file")
+										   .param("action", "ADD")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .extract()
+										   .asString();
+		return monitorImportJob(adminToken, importJobURLString);
+	}
+
+
+	/**
+	 * Given the job uri and token, wait until the job is done and report back the status.
+	 */
+	private static String monitorImportJob(String adminToken, String importJobURLString)
+	{
+		// Remove the leading '/' character and leading and trailing '"' characters
+		String importJobURL = importJobURLString.substring(2, importJobURLString.length() - 1);
 		String importJobURL = given().multiPart(file)
 									 .param("file")
 									 .param("action", "ADD")
@@ -221,6 +276,7 @@ public class RestTestUtils
 			   .atMost(5, MINUTES)
 			   .until(() -> pollForStatus(adminToken, importJobURL), not(equalTo("RUNNING")));
 		LOG.info("Import completed");
+		return pollForStatus(adminToken, importJobURL);
 	}
 
 	private static String pollForStatus(String adminToken, String importJobURL)

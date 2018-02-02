@@ -19,13 +19,19 @@ Collection of integration tests to run against a live server. Tests use a java h
 
 The class `ImportPublicDataIT` is used as a template for running tests that upload public customer data to live molgenis server. 
 
+The test uploads a file and checks if the upload was successful. After the test has run the imported data is removed using the supplied 
+package or list of entities. 
+
+Supported file types: .xlsx and .vcf (make sure the file name is a valid molgenis entity id)
+
 ##### Properties and environment variables:
 
 All of the above mentioned maven properties + the following environment variables  
 `molgenis.test.upload.folder`  // path to folder to load data files from  
 `molgenis.test.upload.file`  // file to use in test  
-`molgenis.test.upload.package.to.remove`  // package to delete after test ( success or failure )  
-`molgenis.test.upload.check.url`  // url to test via GET for testing successful upload  
+`molgenis.test.upload.package.to.remove`  // optional package to delete after test (success or failure)  
+`molgenis.test.upload.entities.to.remove` // optional comma separated list of entities to remove after test  (success or failure) 
+`molgenis.test.upload.check.urls`  // comma separated list of urls to test via GET for testing successful upload  
 
 ##### Running on local machine:
 
