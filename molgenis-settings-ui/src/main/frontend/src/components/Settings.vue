@@ -16,8 +16,13 @@
     <!-- Setting select + form container -->
     <div class="card">
       <div class="card-header">
-        <v-select v-model="selectedSetting" :options="settings" :filterable="true"></v-select>
+        <v-select v-model="selectedSetting"
+                  :options="settings"
+                  :filterable="true"
+                  @input="updateSelectedSetting">
+        </v-select>
       </div>
+
       <div class="card-body">
         <div class="card-block">
           <div v-if="initialFormData">
@@ -26,6 +31,7 @@
           </div>
         </div>
       </div>
+
       <div class="card-footer">
         <button id="save-btn" class="btn btn-primary" type="submit" form="settings-form">Save</button>
       </div>
@@ -43,17 +49,23 @@
   import { UPDATE_SETTINGS, GET_SETTINGS_BY_ID } from '../store/actions'
   import { SET_FORM_DATA, SET_ALERT } from '../store/mutations'
 
+  const {initialSelectedSetting} = window.__INITIAL_STATE__
+
   export default {
     name: 'Settings',
     data () {
       return {
+        selectedSetting: initialSelectedSetting,
         state: {}
       }
     },
-    method: {
+    methods: {
       onSubmit: (formData) => {
         this.$store.commit(SET_FORM_DATA, formData)
         this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
+      },
+      updateSelectedSetting (selectedSetting) {
+        this.$store.dispatch(GET_SETTINGS_BY_ID, selectedSetting)
       },
       clearAlert: () => {
         this.$store.commit(SET_ALERT, null)
@@ -71,14 +83,6 @@
       },
       settings () {
         return this.$store.state.settings
-      },
-      selectedSetting: {
-        get () {
-          return this.$store.state.selectedSetting
-        },
-        set (selectedSetting) {
-          this.$store.dispatch(GET_SETTINGS_BY_ID, selectedSetting.id)
-        }
       }
     },
     created: function () {

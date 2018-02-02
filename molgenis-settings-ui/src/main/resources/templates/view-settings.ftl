@@ -17,7 +17,7 @@
         fallbackLng: '${fallbackLng}',
         isSuperUser: ${isSuperUser?c},
         settingEntities: ${settingEntities},
-        initialSetting: '${initialSetting}'
+        initialSelectedSetting: '${initialSelectedSetting}'
     }
 </script>
 

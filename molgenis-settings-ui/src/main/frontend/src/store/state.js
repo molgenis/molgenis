@@ -1,8 +1,7 @@
-const {initialSetting, settingEntities} = window.__INITIAL_STATE__
+const { settingEntities } = window.__INITIAL_STATE__
 
 export default {
   /* Setting state */
-  selectedSetting: initialSetting,
   settings: settingEntities,
 
   /* Form state */

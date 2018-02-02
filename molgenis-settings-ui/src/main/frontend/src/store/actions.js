@@ -2,7 +2,7 @@
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 
-import { SET_ALERT, SET_FORM_DATA, SET_FORM_FIELDS, SET_SELECTED_SETTING } from './mutations'
+import { SET_ALERT, SET_FORM_DATA, SET_FORM_FIELDS } from './mutations'
 import { EntityToStateMapper } from '@molgenis/molgenis-ui-form'
 
 export const GET_SETTINGS_BY_ID = '__GET_SETTINGS_BY_ID__'
@@ -25,9 +25,8 @@ export default {
         const formFields = EntityToStateMapper.generateFormFields(response.meta)
         commit(SET_FORM_FIELDS, formFields)
         commit(SET_FORM_DATA, EntityToStateMapper.generateFormData(formFields, response.items[0]))
-        commit(SET_SELECTED_SETTING, selectedEntity)
       }, error => {
-        commit(SET_ERROR, error)
+        commit(SET_ALERT, createAlert(error, 'danger'))
       })
     }
   },
