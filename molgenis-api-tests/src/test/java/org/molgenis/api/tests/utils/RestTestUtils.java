@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.molgenis.core.ui.admin.permission.PermissionManagerController;
 import org.molgenis.data.security.auth.GroupMemberMetaData;
 import org.molgenis.data.security.auth.GroupMetaData;
 import org.slf4j.Logger;
@@ -15,8 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -42,6 +45,7 @@ public class RestTestUtils
 	private static final Logger LOG = getLogger(RestTestUtils.class);
 
 	public static final String APPLICATION_JSON = "application/json";
+	public static final String X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String X_MOLGENIS_TOKEN = "x-molgenis-token";
 
 	// Admin credentials
@@ -350,22 +354,26 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Grant user read right on given plugin
+	 * Grant user read rights on given plugins
 	 *
 	 * @param adminToken the token to use for signin
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
-	 * @param plugin     the name of the plugin
+	 * @param plugins    the IDs of the plugins the user should be able to read
 	 */
-	public static void grantPluginRights(String adminToken, String userId, String plugin)
+	public static void grantPluginRights(String adminToken, String userId, String... plugins)
 	{
-		String right = "ROLE_PLUGIN_READ_" + plugin;
-		JSONObject body = new JSONObject(ImmutableMap.of("role", right, "User", userId));
+		Map<String, String> pluginParams = Arrays.stream(plugins)
+												 .collect(Collectors.toMap(pluginId -> "radio-" + pluginId,
+														 pluginId -> "READ"));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(body.toJSONString())
+			   .contentType(X_WWW_FORM_URLENCODED)
+			   .params(pluginParams)
+			   .param("userId", userId)
 			   .when()
-			   .post("api/v1/" + "sys_sec_UserAuthority");
+			   .post(PermissionManagerController.URI + "/update/plugin/user")
+			   .then()
+			   .statusCode(OKE);
 	}
 
 	/**
