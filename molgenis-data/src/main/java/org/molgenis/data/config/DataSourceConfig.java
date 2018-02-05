@@ -4,7 +4,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
@@ -14,7 +13,6 @@ import java.util.Properties;
  * Datasource configuration
  */
 @Configuration
-@EnableTransactionManagement(proxyTargetClass = true)
 public class DataSourceConfig
 {
 	/**
