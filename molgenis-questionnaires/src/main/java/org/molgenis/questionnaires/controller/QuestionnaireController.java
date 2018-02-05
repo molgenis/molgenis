@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+
 import static java.util.Objects.requireNonNull;
 
 @Controller
@@ -27,8 +29,8 @@ public class QuestionnaireController extends VuePluginController
 
 	private final QuestionnaireService questionnaireService;
 
-	public QuestionnaireController(QuestionnaireService questionnaireService, MenuReaderService menuReaderService, AppSettings appSettings,
-			UserAccountService userAccountService)
+	public QuestionnaireController(QuestionnaireService questionnaireService, MenuReaderService menuReaderService,
+			AppSettings appSettings, UserAccountService userAccountService)
 	{
 		super(URI, menuReaderService, appSettings, userAccountService);
 		this.questionnaireService = requireNonNull(questionnaireService);
@@ -38,13 +40,18 @@ public class QuestionnaireController extends VuePluginController
 	public String initView(Model model)
 	{
 		super.init(model, ID);
-
-		model.addAttribute("questionnaires", questionnaireService.getQuestionnaires());
 		return QUESTIONNAIRE_VIEW;
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/{name}", produces = "application/json")
+	@GetMapping(value = "/list")
+	public List<QuestionnaireResponse> getQuestionnaires()
+	{
+		return questionnaireService.getQuestionnaires();
+	}
+
+	@ResponseBody
+	@GetMapping(value = "/{name}")
 	public QuestionnaireResponse getQuestionnaire(@PathVariable("name") String name)
 	{
 		return questionnaireService.getQuestionnaire(name);

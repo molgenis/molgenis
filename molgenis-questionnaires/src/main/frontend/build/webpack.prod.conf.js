@@ -20,8 +20,8 @@ var webpackConfig = merge(baseWebpackConfig, {
   devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
     path: config.build.assetsRoot,
-    filename: utils.assetsPath('js/searchall/[name].js'),
-    chunkFilename: utils.assetsPath('js/searchall/[id].js')
+    filename: utils.assetsPath('js/questionnaires/[name].js'),
+    chunkFilename: utils.assetsPath('js/questionnaires/[id].js')
   },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
@@ -35,7 +35,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     }),
     // extract css into its own file
     new ExtractTextPlugin({
-      filename: utils.assetsPath('css/searchall/[name].css')
+      filename: utils.assetsPath('css/questionnaires/[name].css')
     }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html

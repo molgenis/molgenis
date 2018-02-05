@@ -66,15 +66,21 @@
 </template>
 
 <script>
-
-  const {questionnaires} = window.QUESTIONNAIRE_STATE
+  import api from '@molgenis/molgenis-api-client'
 
   export default {
     name: 'questionnaire-component',
     data () {
       return {
-        questionnaires: questionnaires
+        questionnaires: []
       }
+    },
+    created () {
+      api.get('/menu/plugins/questionnaires/list').then(response => {
+        response.json().then(data => {
+          this.questionnaires = data
+        })
+      })
     }
   }
 </script>

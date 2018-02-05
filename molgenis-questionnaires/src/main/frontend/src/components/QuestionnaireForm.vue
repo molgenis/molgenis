@@ -128,12 +128,15 @@
       }
     },
     created () {
-      api.get('/api/v2/' + this.questionnaireName).then(response => {
-        this.questionnaire = response.meta
-        this.entity = response.items.length > 0 ? response.items[0] : {}
+      api.get('/menu/plugins/questionnaires/' + this.questionnaireName).then(response => {
+        response.json().then(data => {
+          this.questionnaire = data.metadata
+          this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
 
-        this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
-        this.loading = false
+          // this.entity = response.items.length > 0 ? response.items[0] : {}
+
+          this.loading = false
+        })
       })
     },
     components: {
