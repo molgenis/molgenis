@@ -1,4 +1,5 @@
 [![Build Status](https://molgenis50.gcc.rug.nl/jenkins/buildStatus/icon?job=molgenis)](http://www.molgenis.org/jenkins/job/molgenis/)
+[![Quality Status](https://sonarcloud.io/api/project_badges/measure?project=org.molgenis%3Amolgenis&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.molgenis%3Amolgenis)
 
 # Welcome to MOLGENIS
 
