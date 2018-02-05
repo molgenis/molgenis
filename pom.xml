@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -49,14 +49,20 @@
 
         <!-- plugin versions -->
         <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+
+        <!-- skip stuff -->
         <skip.js>false</skip.js>
+        <skipTests>false</skipTests>
+        <skipITs>${skipTests}</skipITs>
+        <skipUTs>${skipTests}</skipUTs>
 
         <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
-        <spring.version>4.3.10.RELEASE</spring.version>
-        <spring.security.version>4.2.3.RELEASE</spring.security.version>
-        <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
+        <spring.version>5.0.3.RELEASE</spring.version>
+        <spring.security.version>5.0.1.RELEASE</spring.security.version>
+        <hibernate.validator.version>6.0.7.Final</hibernate.validator.version>
+        <javax.el.version>3.0.1-b09</javax.el.version>
         <httpclient.version>4.5.3</httpclient.version>
         <google.auto-value.version>1.4.1</google.auto-value.version>
         <caffeine.version>2.3.5</caffeine.version>
@@ -70,11 +76,11 @@
         <postgres.version>9.4.1211</postgres.version>
         <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
         <snakeyaml.version>1.15</snakeyaml.version>
-        <jackson-annotations.version>2.8.8</jackson-annotations.version>
-        <jackson-core.version>2.8.8</jackson-core.version>
-        <jackson-databind.version>2.8.8.1</jackson-databind.version>
-        <javax-servlet-api.version>3.0.1</javax-servlet-api.version>
-        <freemarker.version>2.3.23</freemarker.version>
+        <jackson-annotations.version>2.9.3</jackson-annotations.version>
+        <jackson-core.version>2.9.3</jackson-core.version>
+        <jackson-databind.version>2.9.3</jackson-databind.version>
+        <javax-servlet-api.version>3.1.0</javax-servlet-api.version>
+        <freemarker.version>2.3.27-incubating</freemarker.version>
         <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
@@ -87,7 +93,7 @@
 
         <!-- Integration test properties -->
         <cargo-plugin.version>1.6.6</cargo-plugin.version>
-        <tomcat.version>7.0.78</tomcat.version>
+        <tomcat.version>8.5.27</tomcat.version>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
         <!-- if profiles are inactive, set these props to use local infrastructure -->
@@ -305,6 +311,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.19.1</version>
                     <configuration>
+                        <skip>${skipUTs}</skip>
                         <argLine>${argLine}</argLine>
                     </configuration>
                 </plugin>
@@ -645,6 +652,8 @@
                                     <excludes>
                                         <exclude>commons-logging:commons-logging</exclude>
                                         <exclude>org.apache.logging.log4j:log4j</exclude>
+                                        <!-- Use spring-jcl as logging bridge -->
+                                        <exclude>org.slf4j:jcl-over-slf4j</exclude>
                                         <exclude>com.google.guava:guava-jdk5</exclude>
                                         <!-- As of Java 1.6 StAX is part of the standard API -->
                                         <exclude>javax.xml.stream:stax-api</exclude>
@@ -792,15 +801,6 @@
                 <version>${spring.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
@@ -808,15 +808,6 @@
                 <version>${spring.security.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-                <!-- Enable exclusions when dependency management import supports exclusions: https://issues.apache.org/jira/browse/MNG-5600 -->
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -847,6 +838,11 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${javax.el.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.auto.value</groupId>
@@ -881,11 +877,6 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>

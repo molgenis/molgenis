@@ -47,7 +47,7 @@ public class TokenExtractorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testResolveArgumentTokenInHeader() throws ServletRequestBindingException
+	public void testResolveArgumentTokenInHeader() throws Exception
 	{
 		when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
 		when(webRequest.getHeader(TOKEN_HEADER)).thenReturn(TEST_TOKEN);
@@ -55,7 +55,7 @@ public class TokenExtractorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testResolveArgumentTokenInParam() throws ServletRequestBindingException
+	public void testResolveArgumentTokenInParam() throws Exception
 	{
 		when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
 		when(webRequest.getParameter(TOKEN_PARAMETER)).thenReturn(TEST_TOKEN);
@@ -63,14 +63,14 @@ public class TokenExtractorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testResolveArgumentNoToken() throws ServletRequestBindingException
+	public void testResolveArgumentNoToken() throws Exception
 	{
 		when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
 		assertNull(tokenExtractor.resolveArgument(methodParameter, null, webRequest, null));
 	}
 
 	@Test(expectedExceptions = ServletRequestBindingException.class, expectedExceptionsMessageRegExp = "Missing molgenis token\\. Token should either be present in the x-molgenis-token request header or the molgenis-token parameter\\.")
-	public void testResolveArgumentNoTokenRequired() throws ServletRequestBindingException
+	public void testResolveArgumentNoTokenRequired() throws Exception
 	{
 		when(methodParameter.getParameterAnnotation(TokenParam.class)).thenReturn(tokenParameter);
 		when(tokenParameter.required()).thenReturn(true);

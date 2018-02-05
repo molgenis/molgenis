@@ -5,12 +5,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
+import org.hamcrest.Matchers;
 import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.reporters.Files;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,9 +28,12 @@ import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
@@ -101,7 +107,7 @@ public class OneClickImporterControllerAPIIT
 		oneClickImportTest(ONE_CLICK_IMPORT_CSV_FILE);
 	}
 
-	private void oneClickImportTest(String fileToImport) throws URISyntaxException
+	private void oneClickImportTest(String fileToImport) throws URISyntaxException, IOException
 	{
 		URL resourceUrl = getResource(RestControllerV2APIIT.class, fileToImport);
 		File file = new File(new URI(resourceUrl.toString()).getPath());
@@ -134,8 +140,9 @@ public class OneClickImporterControllerAPIIT
 		assertTrue(validJobStats.contains(jobStatus));
 
 		await().pollDelay(500, MILLISECONDS)
-			   .atMost(30, SECONDS)
-			   .until(() -> pollJobForStatus(jobUrl), equalTo("SUCCESS"));
+			   .atMost(3, MINUTES)
+			   .until(() -> pollJobForStatus(jobUrl), not(is("PENDING")));
+		await().pollDelay(500, MILLISECONDS).atMost(10, SECONDS).until(() -> pollJobForStatus(jobUrl), is("SUCCESS"));
 
 		// Extract the id of the entity created by the import
 		ValidatableResponse completedJobResponse = given().log()
@@ -167,18 +174,8 @@ public class OneClickImporterControllerAPIIT
 													.all();
 		entityResponse.statusCode(OKE);
 
-		//TODO: Fix broken test
-//		// Check first row for expected values
-//		entityResponse.body("items[0].first_name", equalTo("Mark"));
-//		entityResponse.body("items[0].last_name", equalTo("de Haan"));
-//		entityResponse.body("items[0].full_name", equalTo("Mark de Haan"));
-//		entityResponse.body("items[0].UMCG_employee", equalTo(true));
-//		entityResponse.body("items[0].Age", equalTo(26));
-//
-//		// Check last row for expected values
-//		entityResponse.body("items[9].first_name", equalTo("Jan"));
-//		entityResponse.body("items[9].UMCG_employee", equalTo(false));
-//		entityResponse.body("items[9].Age", equalTo(32));
+		JSONAssert.assertEquals(Files.readFile(getClass().getResourceAsStream("users.json")),
+				entityResponse.extract().body().asString(), false);
 	}
 
 	@AfterClass(alwaysRun = true)

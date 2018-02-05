@@ -1,10 +1,10 @@
 package org.molgenis.semanticmapper.data.request;
 
 import com.google.auto.value.AutoValue;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.molgenis.core.gson.AutoGson;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @AutoValue

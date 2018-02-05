@@ -5,7 +5,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>molgenis-navigator</artifactId>
@@ -73,7 +73,7 @@
                         </goals>
                         <configuration>
                             <skip>${skip.js}</skip>
-                            <arguments>--frozen-lockfile</arguments>
+                            <arguments>--mutex network --frozen-lockfile</arguments>
                             <failOnError>true</failOnError>
                         </configuration>
                     </execution>

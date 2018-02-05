@@ -39,7 +39,11 @@ var Popover = React.createClass({
         $(this.getDOMNode()).popover('destroy');
     },
     render: function () {
-        return span({}, this.props.value);
+        return span({
+            'data-content': this.props.popoverValue,
+            'data-toggle': 'popover',
+            ref: 'popover'
+        }, this.props.value);
     }
 });
 

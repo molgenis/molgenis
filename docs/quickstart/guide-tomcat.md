@@ -7,7 +7,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
 * [Java Platform (JDK) 8u144](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Apache Tomcat v7.0.79](http://tomcat.apache.org/)
+* [Apache Tomcat v8.5.x](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
 * [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
 * Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
@@ -15,7 +15,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 
-Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-7.0-doc/deployer-howto.html).
+Deploy Apache Tomcat, and place the molgenis-app WAR as the ROOT.war in your apache-tomcat/webapps folder. If you are unfamiliar with Apache Tomcat, follow one of their [Apache Tomcat installation guides](https://tomcat.apache.org/tomcat-8.5-doc/deployer-howto.html).
 
 Now that your Apache Tomcat is running and MOLGENIS is deployed, you will notice it will not work yet. This is because your database needs to be configured, and a single properties file needs to be set.
 

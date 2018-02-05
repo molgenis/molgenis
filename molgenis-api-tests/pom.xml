@@ -6,7 +6,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>6.0.0-SNAPSHOT</version>
+        <version>6.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>molgenis-api-tests</artifactId>
     <description>API integration test test-module.</description>
@@ -30,6 +30,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>sql-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>create postgres integration database</id>
@@ -63,6 +66,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>reserve-network-port</id>
@@ -77,6 +83,9 @@
                     <plugin>
                         <groupId>com.github.alexcojocaru</groupId>
                         <artifactId>elasticsearch-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>start-elasticsearch</id>
@@ -117,6 +126,9 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>reserve-mail-network-ports</id>
@@ -137,6 +149,7 @@
                         <goals><goal>reserve-network-port</goal></goals>
                         <phase>process-resources</phase>
                         <configuration>
+                            <skip>${skipITs}</skip>
                             <portNames>
                                 <portName>cargo.rmi.port</portName>
                                 <portName>cargo.servlet.port</portName>
@@ -151,6 +164,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.2</version>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -175,8 +191,9 @@
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
                 <configuration>
+                    <skip>${skipITs}</skip>
                     <container>
-                        <containerId>tomcat7x</containerId>
+                        <containerId>tomcat8x</containerId>
                         <zipUrlInstaller>
                             <url>http://repo1.maven.org/maven2/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip</url>
                         </zipUrlInstaller>
@@ -290,6 +307,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>${javax.el.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <version>1.3</version>
@@ -324,6 +347,12 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.skyscreamer</groupId>
+            <artifactId>jsonassert</artifactId>
+            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

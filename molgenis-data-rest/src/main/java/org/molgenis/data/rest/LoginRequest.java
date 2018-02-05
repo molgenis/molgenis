@@ -1,6 +1,6 @@
 package org.molgenis.data.rest;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 public class LoginRequest
 {
