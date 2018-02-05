@@ -1,7 +1,7 @@
 package org.molgenis.data.validation.meta;
 
 import com.google.common.collect.Iterables;
-import org.hibernate.validator.internal.constraintvalidators.EmailValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;

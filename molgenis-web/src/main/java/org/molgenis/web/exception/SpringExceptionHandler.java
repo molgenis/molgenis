@@ -22,7 +22,6 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,7 +35,7 @@ public class SpringExceptionHandler
 	private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
 
 	@SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
-	@ExceptionHandler({ NoSuchRequestHandlingMethodException.class, NoHandlerFoundException.class })
+	@ExceptionHandler(NoHandlerFoundException.class)
 	public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest)
 	{
 		return handleException(ex, httpServletRequest, NOT_FOUND, null);
