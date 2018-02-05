@@ -1,6 +1,6 @@
 package org.springframework.security.acls.jdbc;
 
-import org.molgenis.data.postgresql.DatabaseConfig;
+import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -29,7 +29,7 @@ import static java.util.Objects.requireNonNull;
  * TODO move to org.molgenis sub-package once we upgraded to a spring-security-acl release with https://github.com/spring-projects/spring-security/issues/4814.
  */
 @Configuration
-@Import(DatabaseConfig.class)
+@Import(DataSourceConfig.class)
 public class AclConfig
 {
 	private final DataSource dataSource;
