@@ -1,31 +1,19 @@
-package org.molgenis.data.postgresql;
+package org.molgenis.data.config;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.molgenis.data.config.DataSourceConfig;
-import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.postgresql.transaction.PostgreSqlTransactionManager;
-import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
-import org.molgenis.data.transaction.TransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.util.Properties;
 
 /**
- * Database configuration
+ * Datasource configuration
  */
 @Configuration
-@EnableTransactionManagement(proxyTargetClass = true)
-@Import(DataSourceConfig.class)
-public class DatabaseConfig implements TransactionManagementConfigurer
+public class DataSourceConfig
 {
 	/**
 	 * Max pool size must be <= the maximum number of connections of configured in the DBMS (e.g. PostgreSQL).
@@ -42,12 +30,6 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	private String dbUser;
 	@Value("${db_password:@null}")
 	private String dbPassword;
-
-	@Autowired
-	private IdGenerator idGenerator;
-
-	@Autowired
-	private TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
 
 	@Bean
 	public DataSource dataSource()
@@ -84,17 +66,5 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		dataSource.setProperties(properties);
 
 		return dataSource;
-	}
-
-	@Bean
-	public TransactionManager transactionManager()
-	{
-		return new PostgreSqlTransactionManager(idGenerator, dataSource(), transactionExceptionTranslatorRegistry);
-	}
-
-	@Override
-	public PlatformTransactionManager annotationDrivenTransactionManager()
-	{
-		return transactionManager();
 	}
 }
