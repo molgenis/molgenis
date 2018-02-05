@@ -2,7 +2,6 @@ package org.molgenis.core.ui.admin.permission;
 
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupAuthorityFactory;
@@ -13,6 +12,7 @@ import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;

@@ -2,7 +2,7 @@ package org.molgenis.security.account;
 
 import com.google.gson.Gson;
 import org.mockito.ArgumentCaptor;
-import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.security.auth.User;
@@ -64,7 +64,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		freeMarkerViewResolver.setSuffix(".ftl");
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
 								 .setMessageConverters(new FormHttpMessageConverter(),
-										 new GsonHttpMessageConverter(new Gson()))
+										 new MolgenisGsonHttpMessageConverter(new Gson()))
 								 .build();
 
 		reset(authenticationSettings);

@@ -21,10 +21,10 @@ import org.springframework.lang.Nullable;
 import java.io.*;
 import java.lang.reflect.Type;
 
-public class GsonHttpMessageConverter extends org.springframework.http.converter.json.GsonHttpMessageConverter
+public class MolgenisGsonHttpMessageConverter extends org.springframework.http.converter.json.GsonHttpMessageConverter
 {
 
-	public GsonHttpMessageConverter(Gson gson)
+	public MolgenisGsonHttpMessageConverter(Gson gson)
 	{
 		super(gson);
 	}
