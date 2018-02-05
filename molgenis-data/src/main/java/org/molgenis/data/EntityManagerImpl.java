@@ -81,13 +81,29 @@ public class EntityManagerImpl implements EntityManager
 			entityPopulator.populate(entity);
 		}
 
-		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
+		EntityFactory<? extends Entity, ?> entityFactory = resolveEntityFactory(entityType);
 		if (entityFactory != null)
 		{
 			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
 			return entityFactory.create(entity);
 		}
+
 		return entity;
+	}
+
+	private EntityFactory<? extends Entity, ?> resolveEntityFactory(EntityType entityType)
+	{
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
+		if (entityFactory == null)
+		{
+			// In case of dynamic entities extending a StaticEntity (e.g. Questionnaires), use the parent entityFactory
+			EntityType parent = entityType.getExtends();
+			if (parent != null)
+			{
+				return resolveEntityFactory(parent);
+			}
+		}
+		return entityFactory;
 	}
 
 	@Override
