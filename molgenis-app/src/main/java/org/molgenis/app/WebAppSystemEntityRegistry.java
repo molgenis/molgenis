@@ -1,23 +1,11 @@
 package org.molgenis.app;
 
-import org.molgenis.app.controller.HomeController;
 import org.molgenis.bootstrap.populate.SystemEntityRegistry;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.security.auth.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-
-import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
-import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import java.util.Collections;
 
 /**
  * Registry of application system entities to be added to an empty database.
@@ -25,35 +13,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_RE
 @Component
 public class WebAppSystemEntityRegistry implements SystemEntityRegistry
 {
-	private final DataService dataService;
-	private final UserAuthorityFactory userAuthorityFactory;
-	private final GroupAuthorityFactory groupAuthorityFactory;
-
-	public WebAppSystemEntityRegistry(DataService dataService, UserAuthorityFactory userAuthorityFactory,
-			GroupAuthorityFactory groupAuthorityFactory)
-	{
-		this.dataService = requireNonNull(dataService);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
-		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
-	}
-
 	@Override
 	public Collection<Entity> getEntities()
 	{
-		User anonymousUser = dataService.query(USER, User.class).eq(USERNAME, ANONYMOUS_USERNAME).findOne();
-
-		// allow anonymous user to see the home plugin
-		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
-		anonymousHomeAuthority.setUser(anonymousUser);
-		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + HomeController.ID);
-
-		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-
-		// allow users in the all users group to see the home plugin
-		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
-		usersGroupHomeAuthority.setGroup(allUsersGroup);
-		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + HomeController.ID);
-
-		return asList(anonymousHomeAuthority, usersGroupHomeAuthority);
+		return Collections.emptyList();
 	}
 }
