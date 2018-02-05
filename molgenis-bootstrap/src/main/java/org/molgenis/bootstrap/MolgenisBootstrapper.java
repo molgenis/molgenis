@@ -70,6 +70,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	{
 
 		LOG.info("Bootstrapping application ...");
+		bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 		LOG.trace("Updating MOLGENIS ...");
 		upgradeBootstrapper.bootstrap();
@@ -111,7 +112,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		bootstrapThemePopulator.populate();
 		LOG.debug("Populated bootstrap themes");
 
-		bootstrappingEventPublisher.createBoostrapEvent(true);
+		bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
 		LOG.info("Bootstrapping application completed");
 	}
 

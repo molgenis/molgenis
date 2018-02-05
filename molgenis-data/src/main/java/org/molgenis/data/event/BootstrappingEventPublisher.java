@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.STARTED;
+
 @Component
 public class BootstrappingEventPublisher
 {
@@ -15,8 +18,13 @@ public class BootstrappingEventPublisher
 		this.publisher = publisher;
 	}
 
-	public void createBoostrapEvent(boolean done)
+	public void publishBootstrappingStartedEvent()
 	{
-		publisher.publishEvent(new BootstrappingEvent(done));
+		publisher.publishEvent(new BootstrappingEvent(STARTED));
+	}
+
+	public void publishBootstrappingFinishedEvent()
+	{
+		publisher.publishEvent(new BootstrappingEvent(FINISHED));
 	}
 }

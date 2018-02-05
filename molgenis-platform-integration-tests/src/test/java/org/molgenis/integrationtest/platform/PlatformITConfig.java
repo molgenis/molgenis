@@ -230,7 +230,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 					event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
 
-					bootstrappingEventPublisher.createBoostrapEvent(true);
+					bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
 				});
 			}
 			catch (Exception unexpected)

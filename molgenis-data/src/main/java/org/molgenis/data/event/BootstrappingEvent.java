@@ -2,15 +2,20 @@ package org.molgenis.data.event;
 
 public class BootstrappingEvent
 {
-	private boolean done;
-
-	public BootstrappingEvent(boolean done)
+	public enum BootstrappingStatus
 	{
-		this.done = done;
+		STARTED, FINISHED;
 	}
 
-	public boolean isDone()
+	private final BootstrappingStatus status;
+
+	public BootstrappingEvent(BootstrappingStatus status)
 	{
-		return this.done;
+		this.status = status;
+	}
+
+	public BootstrappingStatus getStatus()
+	{
+		return this.status;
 	}
 }
