@@ -9,9 +9,9 @@ import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -26,6 +26,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -67,8 +68,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 		when(beaconInfoService.getAvailableBeacons()).thenReturn(Lists.newArrayList(beaconResponse));
 
 		mockMvc.perform(get("/beacon/list"))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getBeaconResponseListAsJson()));
 
 		verify(beaconInfoService).getAvailableBeacons();
@@ -84,8 +84,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 		when(beaconInfoService.info("beaconA")).thenReturn(beaconResponse);
 
 		mockMvc.perform(get("/beacon/{beaconId}", "beaconA"))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getBeaconResponseAsJson()));
 
 		verify(beaconInfoService).info("beaconA");
@@ -103,8 +102,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 																  .param("start", "100")
 																  .param("referenceBases", "A")
 																  .param("alternateBases", "T"))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getBeaconAlleleResponseAsJson()));
 
 		verify(beaconQueryService, times(1)).query("1", 100L, "A", "T", "beaconA");
@@ -120,8 +118,7 @@ public class BeaconControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc.perform(post("/beacon/{beaconId}/query", "beaconA").content(getBeaconAlleleRequestJson())
 																   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getBeaconAlleleResponseAsJson()));
 
 		verify(beaconQueryService, times(1)).query("beaconA", request);
