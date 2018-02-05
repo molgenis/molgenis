@@ -98,7 +98,6 @@ public class RestControllerV2APIIT
 
 		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
 
-		grantPluginRights(adminToken, testUserId, "one-click-importer");
 		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
 		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
 
