@@ -76,7 +76,7 @@ public class BeaconAPIIT
 		createUser(adminToken, BEACON_TEST_USER, BEACON_TEST_USER_PASSWORD);
 		testUserId = getUserId(adminToken, BEACON_TEST_USER);
 
-		RestTestUtils.uploadVCF(adminToken, "/beacon_set.vcf", BEACON_SET);
+		RestTestUtils.uploadVCFToEntity(adminToken, "/beacon_set.vcf", BEACON_SET);
 
 		Map<String, List<Map<String, String>>> beaconOrganisations = Maps.newHashMap();
 		Map<String, String> beaconOrganisation = Maps.newHashMap();
