@@ -53,7 +53,7 @@ public class PluginSecurityRepositoryDecorator extends AbstractRepositoryDecorat
 	@Override
 	public void deleteAll()
 	{
-		query().findAll().forEach(this::deleteAcl);
+		iterator().forEachRemaining(this::deleteAcl);
 		super.deleteAll();
 	}
 
