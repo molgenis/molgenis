@@ -17,9 +17,9 @@ public class SidUtilsTest
 	@Test
 	public void testCreateSidUser()
 	{
-		User user = when(mock(User.class).getId()).thenReturn("userId").getMock();
+		User user = when(mock(User.class).getUsername()).thenReturn("username").getMock();
 		Sid sid = SidUtils.createSid(user);
-		assertEquals(sid, new PrincipalSid("userId"));
+		assertEquals(sid, new PrincipalSid("username"));
 	}
 
 	@Test

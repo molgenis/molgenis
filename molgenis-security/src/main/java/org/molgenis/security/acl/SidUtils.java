@@ -19,7 +19,7 @@ public class SidUtils
 
 	public static Sid createSid(User user)
 	{
-		return new PrincipalSid(user.getId());
+		return new PrincipalSid(user.getUsername());
 	}
 
 	public static Sid createSid(Group group)
