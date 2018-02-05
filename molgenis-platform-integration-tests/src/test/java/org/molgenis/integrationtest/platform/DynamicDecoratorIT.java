@@ -128,7 +128,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		Entity entity = dataService.findOneById(entityTypeDynamic.getId(), "0");
 		dataService.update(entityTypeDynamic.getId(), entity);
 		entity = dataService.findOneById(entityTypeDynamic.getId(), "0");
-		assertEquals(entity.getString("string_attr"), "string1_TEST");
+		assertEquals("string1_TEST", entity.getString("string_attr"));
 		assertEquals(11, entity.getInt("int_attr").intValue());
 
 		//remove second decorator
@@ -139,7 +139,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		dataService.update(entityTypeDynamic.getId(), entity);
 		entity = dataService.findOneById(entityTypeDynamic.getId(), "0");
 		//stayed the same since the postfix decorator was removed
-		assertEquals(entity.getString("string_attr"), "string1_TEST");
+		assertEquals("string1_TEST", entity.getString("string_attr"));
 		//added 1
 		assertEquals(12, entity.getInt("int_attr").intValue());
 	}
