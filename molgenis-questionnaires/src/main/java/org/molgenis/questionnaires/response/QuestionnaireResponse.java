@@ -1,7 +1,9 @@
-package org.molgenis.questionnaires;
+package org.molgenis.questionnaires.response;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.core.gson.AutoGson;
+import org.molgenis.questionnaires.meta.Questionnaire;
+import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 
 import javax.annotation.Nullable;
 
@@ -20,8 +22,9 @@ public abstract class QuestionnaireResponse
 
 	public abstract Object getId();
 
-	public static QuestionnaireResponse create(String name, String label, String description, QuestionnaireStatus status, Object id)
+	public static QuestionnaireResponse create(Questionnaire questionnaire)
 	{
-		return new AutoValue_QuestionnaireResponse(name, label, description, status, id);
+		return new AutoValue_QuestionnaireResponse(questionnaire.getEntityType().getId(), questionnaire.getLabel(),
+				questionnaire.getDescription(), questionnaire.getStatus(), questionnaire.getIdValue());
 	}
 }

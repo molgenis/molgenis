@@ -8,14 +8,26 @@
 
 <@header css js version/>
 
+<div class="test">
+    <#list questionnaires as questionnaire>
+        ${questionnaire}
+    </#list>
+</div>
+
 <div id="app"></div>
 
 <script type="text/javascript">
+
+    var questionnaires = []
+    <#list questionnaires as questionnaire>
+        questionnaires.push(${questionnaire})
+    </#list>
+
     window.QUESTIONNAIRE_STATE = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}',
-        questionnaires: ${questionnaires}
+        questionnaires: questionnaires
     }
 </script>
 

@@ -1,11 +1,12 @@
 package org.molgenis.questionnaires.service.impl;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.questionnaires.QuestionnaireResponse;
-import org.molgenis.questionnaires.QuestionnaireStatus;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.questionnaires.meta.Questionnaire;
+import org.molgenis.questionnaires.meta.QuestionnaireFactory;
+import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +16,12 @@ import java.util.Objects;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.security.owned.OwnedEntityType.OWNER_USERNAME;
 import static org.molgenis.data.support.QueryImpl.EQ;
-import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
-import static org.molgenis.questionnaires.QuestionnaireMetaData.ATTR_STATUS;
-import static org.molgenis.questionnaires.QuestionnaireStatus.NOT_STARTED;
-import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
-import static org.molgenis.questionnaires.QuestionnaireUtils.findQuestionnairesMetaData;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
+import static org.molgenis.questionnaires.meta.QuestionnaireStatus.NOT_STARTED;
+import static org.molgenis.questionnaires.meta.QuestionnaireStatus.OPEN;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Component
@@ -30,82 +29,60 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 {
 	private final DataService dataService;
 	private final EntityManager entityManager;
+	private final QuestionnaireFactory questionnaireFactory;
 
-	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager)
+	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
+			QuestionnaireFactory questionnaireFactory)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
+		this.questionnaireFactory = requireNonNull(questionnaireFactory);
 	}
 
 	@Override
 	public List<QuestionnaireResponse> getQuestionnaires()
 	{
-		List<QuestionnaireResponse> questionnaires;
-		List<EntityType> questionnaireMeta = runAsSystem(
-				() -> findQuestionnairesMetaData(dataService).collect(toList()));
+		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
+						  .eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
+						  .findAll()
+						  .filter(entityType -> currentUserIsSu() || currentUserHasRole(
+								  AUTHORITY_ENTITY_WRITE_PREFIX + entityType.getId()))
+						  .map(entityType ->
+						  {
+							  String entityTypeId = entityType.getId();
+							  Questionnaire questionnaireEntity = findQuestionnaireEntity(entityTypeId);
 
-		questionnaires = questionnaireMeta.stream()
-										  .map(EntityType::getId)
-										  .filter(name -> currentUserIsSu() || currentUserHasRole(
-												  AUTHORITY_ENTITY_WRITE_PREFIX + name))
-										  .map(name -> {
-											  // Create entity if not yet exists for current user
-											  EntityType entityType = dataService.getMeta().getEntityType(name);
-											  Entity entity = findQuestionnaireEntity(name);
-											  if (entity == null)
-											  {
-												  entity = createQuestionnaireEntity(entityType, NOT_STARTED, name);
-											  }
+							  if (questionnaireEntity == null)
+							  {
+								  // Create a questionnaire entity for the current user
+								  Questionnaire questionnaire = questionnaireFactory.create(
+										  entityManager.create(entityType, POPULATE));
 
-											  return toQuestionnaireModel(entity, entityType);
-										  })
-										  .collect(toList());
-		return questionnaires;
+								  questionnaire.setOwner(getCurrentUsername());
+								  questionnaire.setStatus(NOT_STARTED);
+								  dataService.add(entityType.getId(), questionnaire);
+								  return QuestionnaireResponse.create(questionnaire);
+							  }
+							  return QuestionnaireResponse.create(questionnaireEntity);
+						  })
+						  .collect(toList());
 	}
 
 	@Override
-	public QuestionnaireResponse getQuestionnare(String name)
+	public QuestionnaireResponse getQuestionnaire(String questionnaireId)
 	{
-		EntityType entityType = dataService.getMeta().getEntityType(name);
-
-		// Once we showed the questionnaire it's status is 'OPEN'
-		Entity entity = findQuestionnaireEntity(name);
-		if (entity == null)
+		Questionnaire questionnaire = findQuestionnaireEntity(questionnaireId);
+		if (questionnaire.getStatus().equals(NOT_STARTED))
 		{
-			entity = createQuestionnaireEntity(entityType, OPEN, name);
+			// Set questionnaire status to open once it has been requested
+			questionnaire.setStatus(OPEN);
+			dataService.update(questionnaireId, questionnaire);
 		}
-		else if (entity.getString(ATTR_STATUS).equals(NOT_STARTED.toString()))
-		{
-			entity.set(ATTR_STATUS, OPEN.toString());
-			dataService.update(name, entity);
-		}
-
-		return toQuestionnaireModel(entity, entityType);
+		return QuestionnaireResponse.create(questionnaire);
 	}
 
-	private QuestionnaireResponse toQuestionnaireModel(Entity entity, EntityType entityType)
+	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
-		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return QuestionnaireResponse.create(entityType.getId(), entityType.getLabel(getCurrentUserLanguageCode()),
-				entityType.getDescription(getCurrentUserLanguageCode()), status, entity.getIdValue());
-	}
-
-	private synchronized Entity createQuestionnaireEntity(EntityType entityType, QuestionnaireStatus status,
-			String name)
-	{
-		Entity entity = findQuestionnaireEntity(name);
-		if (entity == null)
-		{
-			entity = entityManager.create(entityType, POPULATE);
-			entity.set(OWNER_USERNAME, getCurrentUsername());
-			entity.set(ATTR_STATUS, status.toString());
-			dataService.add(entityType.getId(), entity);
-		}
-		return entity;
-	}
-
-	private Entity findQuestionnaireEntity(String name)
-	{
-		return dataService.findOne(name, EQ(OWNER_USERNAME, getCurrentUsername()));
+		return dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername()), Questionnaire.class);
 	}
 }

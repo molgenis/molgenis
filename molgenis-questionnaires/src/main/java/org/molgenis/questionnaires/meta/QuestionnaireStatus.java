@@ -1,4 +1,4 @@
-package org.molgenis.questionnaires;
+package org.molgenis.questionnaires.meta;
 
 public enum QuestionnaireStatus
 {

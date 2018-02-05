@@ -19,10 +19,13 @@
 
           <div class="card mb-3">
             <div class="card-body">
-              <form-component :id="questionnaire.name"
-                              :schema="schema"
-                              :initialFormData="data"
-                              :hooks="hooks">
+              <form-component
+                v-if="!loading && schema.fields.length > 0"
+                :id=questionnaire.id
+                :schema="schema"
+                :formState="formState"
+                :formData="formData"
+                :onValueChanged="onValueChanged">
               </form-component>
             </div>
 
@@ -30,7 +33,10 @@
               <router-link to="/" class="btn btn-outline-secondary">
                 {{ 'questionnaire_save_and_continue' | i18n }}
               </router-link>
-              <button type="submit" class="btn btn-primary" :form="questionnaire.name">{{ 'questionnaire_submit' | i18n }}</button>
+
+              <button type="submit" class="btn btn-primary" :form="questionnaire.name">
+                {{ 'questionnaire_submit' | i18n }}
+              </button>
             </div>
           </div>
         </div>
@@ -67,7 +73,7 @@
 </style>
 
 <script>
-  import { FormComponent, EntityToStateMapper } from '@molgenis/molgenis-ui-form'
+  import { EntityToStateMapper, FormComponent } from '@molgenis/molgenis-ui-form'
   import api from '@molgenis/molgenis-api-client'
 
   import 'flatpickr/dist/flatpickr.css'
@@ -85,27 +91,9 @@
         loading: true,
         questionnaire: null,
         entity: null,
-        hooks: {
-          onSubmit: (formData) => {
-            this.entity.status === 'SUBMITTED'
-            console.log('submit', formData)
-          },
-          onCancel: () => {
-            console.log('cancel')
-          },
-          onValueChanged: (formData) => {
-            const idAttribute = this.questionnaire.idAttribute
-            const idValue = this.entity[idAttribute]
-            const options = {
-              body: JSON.stringify(formData)
-            }
-
-            console.log(options)
-
-            api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options).then(response => {
-              console.log(response)
-            })
-          }
+        formState: {},
+        schema: {
+          fields: []
         }
       }
     },
@@ -114,26 +102,37 @@
         // Forms generate fieldsets with ID 'element-id-fs'
         const element = document.getElementById(elementId + '-fs')
         element.scrollIntoView()
+      },
+      onValueChanged (formData) {
+//        const idAttribute = this.questionnaire.idAttribute
+//        const idValue = this.entity[idAttribute]
+//        const options = {
+//          body: JSON.stringify(formData)
+//        }
+
+        console.log(formData)
+
+//        api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options).then(response => {
+//          console.log(response)
+//        })
       }
     },
     computed: {
       topLevelChapters () {
         return this.questionnaire.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
       },
-      schema () {
-        return {
-          fields: EntityToStateMapper.generateFormFields(this.questionnaire)
+      formData () {
+        if (this.schema.fields.length > 0 && this.entity !== null) {
+          return EntityToStateMapper.generateFormData(this.schema.fields, this.entity)
         }
-      },
-      data () {
-        return EntityToStateMapper.generateFormData(this.schema.fields, this.entity)
       }
     },
-    mounted () {
+    created () {
       api.get('/api/v2/' + this.questionnaireName).then(response => {
         this.questionnaire = response.meta
-        this.entity = response.items[0]
+        this.entity = response.items.length > 0 ? response.items[0] : {}
 
+        this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
         this.loading = false
       })
     },

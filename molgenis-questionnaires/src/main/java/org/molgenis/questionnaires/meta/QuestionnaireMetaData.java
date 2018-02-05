@@ -1,4 +1,4 @@
-package org.molgenis.questionnaires;
+package org.molgenis.questionnaires.meta;
 
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.security.owned.OwnedEntityType;
@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-import static org.molgenis.questionnaires.QuestionnaireStatus.SUBMITTED;
+import static org.molgenis.questionnaires.meta.QuestionnaireStatus.SUBMITTED;
 
 /**
  * Base EntityType for 'questionnaire' entities

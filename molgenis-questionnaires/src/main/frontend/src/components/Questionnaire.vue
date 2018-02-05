@@ -66,11 +66,14 @@
 </template>
 
 <script>
+
+  const {questionnaires} = window.QUESTIONNAIRE_STATE
+
   export default {
     name: 'questionnaire-component',
     data () {
       return {
-        questionnaires: window.QUESTIONNAIRE_STATE.questionnaires ? window.QUESTIONNAIRE_STATE.questionnaires : []
+        questionnaires: questionnaires
       }
     }
   }
