@@ -2,7 +2,6 @@ package org.molgenis.questionnaires.response;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.core.gson.AutoGson;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 
@@ -23,12 +22,9 @@ public abstract class QuestionnaireResponse
 
 	public abstract Object getId();
 
-	public abstract EntityType getMetadata();
-
 	public static QuestionnaireResponse create(Questionnaire questionnaire)
 	{
 		return new AutoValue_QuestionnaireResponse(questionnaire.getEntityType().getId(), questionnaire.getLabel(),
-				questionnaire.getDescription(), questionnaire.getStatus(), questionnaire.getIdValue(),
-				questionnaire.getEntityType());
+				questionnaire.getDescription(), questionnaire.getStatus(), questionnaire.getIdValue());
 	}
 }

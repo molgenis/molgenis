@@ -10,18 +10,26 @@
       </div>
     </div>
 
-    <template v-if="!loading">
-      <div class="row">
-        <div class="col-md-10">
+    <!-- Loading spinner -->
+    <template v-if="loading">
+      <div class="spinner-container d-flex justify-content-center align-items-center">
+        <i class="fa fa-spinner fa-spin fa-5x"></i>
+      </div>
+    </template>
 
+    <template v-else>
+      <div class="row">
+
+        <!-- Form card -->
+        <div class="col-xs-12 col-sm-12 col-md-10 col-lg-10 col-xl-10">
           <h1>{{ questionnaire.label }}</h1>
           <p v-html="questionnaire.description"></p>
 
           <div class="card mb-3">
             <div class="card-body">
               <form-component
-                v-if="!loading && schema.fields.length > 0"
-                :id=questionnaire.id
+                v-if="!loading && questionnaire"
+                :id="questionnaire.name"
                 :schema="schema"
                 :formState="formState"
                 :formData="formData"
@@ -41,20 +49,20 @@
           </div>
         </div>
 
-        <div class="col-md-2">
+        <!-- Compound chapters -->
+        <div class="d-none d-md-block d-lg-block d-xl-block col-2">
           <ul class="list-group chapter-navigation-list">
+            <li class="list-group-item disabled">Chapters</li>
             <li class="list-group-item chapter-item" v-for="chapter in topLevelChapters"
                 @click="scrollInToView(chapter.name)">
               <a>{{ chapter.label }}</a>
             </li>
           </ul>
         </div>
+
       </div>
     </template>
 
-    <template v-else>
-      <i class="fa fa-spinner fa-spin fa-5x"></i>
-    </template>
   </div>
 </template>
 
@@ -69,6 +77,10 @@
     position: fixed;
     top: 70px;
     z-index: 100;
+  }
+
+  .spinner-container {
+    height: 80vh;
   }
 </style>
 
@@ -94,7 +106,8 @@
         formState: {},
         schema: {
           fields: []
-        }
+        },
+        formData: {}
       }
     },
     methods: {
@@ -104,38 +117,34 @@
         element.scrollIntoView()
       },
       onValueChanged (formData) {
-//        const idAttribute = this.questionnaire.idAttribute
-//        const idValue = this.entity[idAttribute]
-//        const options = {
-//          body: JSON.stringify(formData)
-//        }
+        const idAttribute = this.questionnaire.idAttribute
+        const idValue = this.entity[idAttribute]
+        const options = {
+          body: JSON.stringify(formData)
+        }
 
-        console.log(formData)
-
-//        api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options).then(response => {
-//          console.log(response)
-//        })
+        // Auto save feature
+        // FIXME Old questionnaire did a save on a specific attribute, this command updates the entire row
+        api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options)
       }
     },
     computed: {
       topLevelChapters () {
         return this.questionnaire.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
-      },
-      formData () {
-        if (this.schema.fields.length > 0 && this.entity !== null) {
-          return EntityToStateMapper.generateFormData(this.schema.fields, this.entity)
-        }
       }
     },
     created () {
+      // Retrieve questionnaire via questionnaire API first to set status to OPEN
       api.get('/menu/plugins/questionnaires/' + this.questionnaireName).then(response => {
         response.json().then(data => {
-          this.questionnaire = data.metadata
-          this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
+          api.get('/api/v2/' + data.name).then(response => {
+            this.questionnaire = response.meta
+            this.entity = response.items.length > 0 ? response.items[0] : {}
 
-          // this.entity = response.items.length > 0 ? response.items[0] : {}
-
-          this.loading = false
+            this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
+            this.formData = EntityToStateMapper.generateFormData(this.schema.fields, this.entity)
+            this.loading = false
+          })
         })
       })
     },
