@@ -6,6 +6,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
@@ -39,7 +41,27 @@ public class PermissionServiceImpl implements PermissionService
 		{
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			return authentication != null && permissionEvaluator.hasPermission(authentication, pluginId,
-					PluginIdentity.TYPE, PluginPermission.READ);
+					PluginIdentity.TYPE, toPluginPermission(permission));
+		}
+	}
+
+	private Object toPluginPermission(Permission permission)
+	{
+		switch (permission)
+		{
+			case COUNT:
+				return PluginPermission.COUNT;
+			case READ:
+				return PluginPermission.READ;
+			case WRITE:
+				return PluginPermission.WRITE;
+			case WRITEMETA:
+				return PluginPermission.WRITEMETA;
+			case NONE:
+				throw new IllegalArgumentException(
+						format("Permission evaluation for permission '%s' not allowed", permission.name()));
+			default:
+				throw new UnexpectedEnumException(permission);
 		}
 	}
 
