@@ -53,7 +53,7 @@
         <div class="d-none d-md-block d-lg-block d-xl-block col-2">
           <ul class="list-group chapter-navigation-list">
             <li class="list-group-item disabled">Chapters</li>
-            <li class="list-group-item chapter-item" v-for="chapter in topLevelChapters"
+            <li class="list-group-item chapter-item" v-for="chapter in chapters"
                 @click="scrollInToView(chapter.name)">
               <a>{{ chapter.label }}</a>
             </li>
@@ -93,6 +93,10 @@
   export default {
     name: 'questionnaire-form',
     props: {
+
+      /**
+       * The name of the questionnaire to load
+       */
       questionnaireName: {
         type: String,
         required: true
@@ -111,11 +115,19 @@
       }
     },
     methods: {
+
+      /**
+       * Click handler for compound chapters
+       */
       scrollInToView (elementId) {
-        // Forms generate fieldsets with ID 'element-id-fs'
-        const element = document.getElementById(elementId + '-fs')
+        const element = document.getElementById(elementId + '-fs') // Forms generate fieldsets with ID 'element-id-fs'
         element.scrollIntoView()
       },
+
+      /**
+       * Auto save
+       * @param formData
+       */
       onValueChanged (formData) {
         const idAttribute = this.questionnaire.idAttribute
         const idValue = this.entity[idAttribute]
@@ -123,13 +135,15 @@
           body: JSON.stringify(formData)
         }
 
-        // Auto save feature
-        // FIXME Old questionnaire did a save on a specific attribute, this command updates the entire row
         api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options)
       }
     },
     computed: {
-      topLevelChapters () {
+
+      /**
+       * Determine chapters based on compounds
+       */
+      chapters () {
         return this.questionnaire.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
       }
     },
