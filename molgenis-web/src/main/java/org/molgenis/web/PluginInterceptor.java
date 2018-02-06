@@ -71,7 +71,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 				pluginSettingsCanWrite = false;
 			}
 
-			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
+			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SHOW_SETTINGS_COG, pluginSettingsCanWrite);
 			modelAndView.addObject(PluginAttributes.KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
 			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING,
