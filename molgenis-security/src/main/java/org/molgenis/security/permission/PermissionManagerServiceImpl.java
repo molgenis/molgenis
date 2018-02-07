@@ -491,14 +491,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private String getAuthorityEntityId(String role, String authorityPrefix)
 	{
 		role = role.substring(authorityPrefix.length());
-		return role.substring(role.indexOf('_') + 1)
-				   .toLowerCase(); // FIXME collision in case of same authorities with different casing
+		return role.substring(role.indexOf('_') + 1);
 	}
 
 	private String getAuthorityType(String role, String authorityPrefix)
 	{
 		role = role.substring(authorityPrefix.length());
-		return role.substring(0, role.indexOf('_'))
-				   .toLowerCase(); // FIXME collision in case of same authorities with different casing
+		return role.substring(0, role.indexOf('_'));
 	}
 }
