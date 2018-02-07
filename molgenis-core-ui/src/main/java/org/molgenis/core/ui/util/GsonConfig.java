@@ -2,11 +2,12 @@ package org.molgenis.core.ui.util;
 
 import org.molgenis.core.gson.AutoValueTypeAdapterFactory;
 import org.molgenis.core.util.GsonFactoryBean;
-import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
 import org.molgenis.data.Entity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
 @Configuration
 public class GsonConfig
@@ -17,7 +18,7 @@ public class GsonConfig
 	@Bean
 	public GsonHttpMessageConverter gsonHttpMessageConverter()
 	{
-		return new GsonHttpMessageConverter(gsonFactoryBean().getObject());
+		return new MolgenisGsonHttpMessageConverter(gsonFactoryBean().getObject());
 	}
 
 	@Bean

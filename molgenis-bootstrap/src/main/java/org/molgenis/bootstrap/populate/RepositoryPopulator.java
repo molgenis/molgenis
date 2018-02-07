@@ -1,6 +1,7 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
 import org.molgenis.script.core.ScriptTypePopulator;
 import org.molgenis.settings.SettingsPopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;
@@ -28,12 +29,13 @@ public class RepositoryPopulator
 	private final I18nPopulator i18nPopulator;
 	private final ScriptTypePopulator scriptTypePopulator;
 	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
+	private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
 
 	public RepositoryPopulator(DataService dataService, UsersGroupsAuthoritiesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
-			SettingsPopulator settingsPopulator,
-			I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
-			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator)
+			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
+			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator,
+			DynamicDecoratorPopulator dynamicDecoratorPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.usersGroupsAuthoritiesPopulator = requireNonNull(usersGroupsAuthoritiesPopulator);
@@ -43,6 +45,7 @@ public class RepositoryPopulator
 		this.i18nPopulator = requireNonNull(i18nPopulator);
 		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
 		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
+		this.dynamicDecoratorPopulator = requireNonNull(dynamicDecoratorPopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
@@ -82,6 +85,10 @@ public class RepositoryPopulator
 		LOG.trace("Populating script type entities ...");
 		scriptTypePopulator.populate();
 		LOG.trace("Populated script type entities");
+
+		LOG.trace("Populating dynamic decorator entities ...");
+		dynamicDecoratorPopulator.populate();
+		LOG.trace("Populated dynamic decorator entities");
 
 	}
 
