@@ -429,7 +429,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService, grantedAuthoritiesMapper(), mutableAclService());
+			return new PermissionManagerServiceImpl(dataService, mutableAclService());
 		}
 
 		@Bean

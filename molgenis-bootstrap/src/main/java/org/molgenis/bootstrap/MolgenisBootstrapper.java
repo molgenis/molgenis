@@ -51,10 +51,9 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
 			RepositoryPopulator repositoryPopulator, PermissionPopulator systemPermissionPopulator,
-			JobBootstrapper jobBootstrapper,
-			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
-			EntityTypeRegistryPopulator entityTypeRegistryPopulator, BootstrapThemePopulator bootstrapThemePopulator,
-			BootstrappingEventPublisher bootstrappingEventPublisher)
+			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator,
+			BootstrapThemePopulator bootstrapThemePopulator,BootstrappingEventPublisher bootstrappingEventPublisher)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.dataSourceAclTablesPopulator = requireNonNull(dataSourceAclTablesPopulator);
@@ -100,12 +99,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.debug("Bootstrapped system entity meta data");
 
 		LOG.trace("Populating repositories ...");
-		repositoryPopulator.populate(event);
+		boolean wasDatabasePopulated = repositoryPopulator.populate(event);
 		LOG.debug("Populated repositories");
 
-		LOG.trace("Populating permissions ...");
-		systemPermissionPopulator.populate(event.getApplicationContext());
-		LOG.debug("Populated permissions");
+		if (!wasDatabasePopulated)
+		{
+			LOG.trace("Populating permissions ...");
+			systemPermissionPopulator.populate(event.getApplicationContext());
+			LOG.debug("Populated permissions");
+		}
 
 		LOG.trace("Bootstrapping jobs ...");
 		jobBootstrapper.bootstrap();

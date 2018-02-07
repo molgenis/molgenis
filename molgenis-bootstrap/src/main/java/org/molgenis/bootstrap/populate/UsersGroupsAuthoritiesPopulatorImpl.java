@@ -9,25 +9,14 @@ import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ANONYMOUS;
 
 @Service
 public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
@@ -98,21 +87,9 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
-		// allow all users to read meta data entities
-		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
-				L10N_STRING, FILE_META, OWNED, DECORATOR_CONFIGURATION);
-		Stream<GroupAuthority> entityGroupAuthorities = entityTypeIds.stream().map(entityTypeId ->
-		{
-			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
-			usersGroupAuthority.setGroup(allUsersGroup);
-			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityTypeId);
-			return usersGroupAuthority;
-		});
-
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
 		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
-		dataService.add(GROUP_AUTHORITY, entityGroupAuthorities);
 	}
 }

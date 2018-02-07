@@ -4,6 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +28,7 @@ import static org.molgenis.questionnaires.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.QuestionnaireStatus.OPEN;
 import static org.molgenis.questionnaires.QuestionnaireUtils.findQuestionnairesMetaData;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @Controller
 @RequestMapping(QuestionnairePluginController.URI)
@@ -38,14 +40,16 @@ public class QuestionnairePluginController extends PluginController
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
 	private final EntityManager entityManager;
+	private final PermissionService permissionService;
 
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
-			EntityManager entityManager)
+			EntityManager entityManager, PermissionService permissionService)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.thankYouTextService = requireNonNull(thankYouTextService);
 		this.entityManager = requireNonNull(entityManager);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@GetMapping
@@ -63,13 +67,12 @@ public class QuestionnairePluginController extends PluginController
 				() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
 		questionnaires = questionnaireMeta.stream()
-										  .map(EntityType::getId)
-										  .filter(name -> currentUserIsSu() || currentUserHasRole(
-												  AUTHORITY_ENTITY_WRITE_PREFIX + name))
-										  .map(name ->
+										  .filter(entityType -> permissionService.hasPermissionOnEntityType(
+												  entityType.getId(), Permission.WRITE))
+										  .map(entityType ->
 										  {
 											  // Create entity if not yet exists for current user
-											  EntityType entityType = dataService.getMeta().getEntityType(name);
+											  String name = entityType.getId();
 											  Entity entity = findQuestionnaireEntity(name);
 											  if (entity == null)
 											  {
@@ -142,8 +145,8 @@ public class QuestionnairePluginController extends PluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityType entityType)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(ATTR_STATUS));
-		return new Questionnaire(entityType.getId(), entityType.getLabel(getCurrentUserLanguageCode()),
-				status, entityType.getDescription(getCurrentUserLanguageCode()), entity.getIdValue());
+		return new Questionnaire(entityType.getId(), entityType.getLabel(getCurrentUserLanguageCode()), status,
+				entityType.getDescription(getCurrentUserLanguageCode()), entity.getIdValue());
 	}
 
 	private Entity findQuestionnaireEntity(String name)

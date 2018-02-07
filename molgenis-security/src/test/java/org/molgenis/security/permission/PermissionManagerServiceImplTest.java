@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -22,11 +21,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
@@ -45,7 +41,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService(), grantedAuthoritiesMapper(), mutableAclService());
+			return new PermissionManagerServiceImpl(dataService(), mutableAclService());
 		}
 
 		@Bean
@@ -171,7 +167,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	@Test(expectedExceptions = NullPointerException.class)
 	public void PluginPermissionManagerServiceImpl()
 	{
-		new PermissionManagerServiceImpl(null, null, null);
+		new PermissionManagerServiceImpl(null, null);
 	}
 
 	@Test
@@ -191,85 +187,5 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	public void getPlugins()
 	{
 		assertEquals(pluginPermissionManagerService.getPlugins(), Arrays.asList(plugin1, plugin2, plugin3));
-	}
-
-	@Test
-	public void getGroupEntityClassPermissions()
-	{
-		Permissions permissions = pluginPermissionManagerService.getGroupEntityClassPermissions("1");
-		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
-
-		Permission permission = new Permission();
-		permission.setType("read");
-		permission.setGroup("group1");
-		assertEquals(groupPermissions.get("entity1"), Arrays.asList(permission));
-		assertEquals(groupPermissions.get("entity2"), Arrays.asList(permission));
-		assertEquals(groupPermissions.size(), 2);
-	}
-
-	@Test
-	public void getUserEntityClassPermissions_noGroup()
-	{
-		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions("1");
-		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
-
-		Permission permission = new Permission();
-		permission.setType("read");
-		assertEquals(userPermissions.get("entity2"), Arrays.asList(permission));
-		assertEquals(userPermissions.get("entity3"), Arrays.asList(permission));
-		assertEquals(userPermissions.size(), 2);
-	}
-
-	@Test
-	public void getUserEntityClassPermissions_inGroup()
-	{
-		Permissions permissions = pluginPermissionManagerService.getUserEntityClassPermissions("2");
-
-		Map<String, List<Permission>> userPermissions = permissions.getUserPermissions();
-		Permission permission = new Permission();
-		permission.setType("read");
-		assertEquals(userPermissions.get("entity2"), Arrays.asList(permission));
-		assertEquals(userPermissions.get("entity3"), Arrays.asList(permission));
-		assertEquals(userPermissions.size(), 2);
-
-		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
-		Permission groupPermission = new Permission();
-		groupPermission.setType("read");
-		groupPermission.setGroup("group1");
-		assertEquals(groupPermissions.get("entity1"), Arrays.asList(groupPermission));
-		assertEquals(groupPermissions.get("entity2"), Arrays.asList(groupPermission));
-		assertEquals(groupPermissions.size(), 2);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
-	public void replaceGroupEntityClassPermissions()
-	{
-		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
-		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, "1");
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).delete(eq(GROUP_AUTHORITY), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), Arrays.asList(groupEntity1Authority, groupEntity2Authority));
-
-		ArgumentCaptor<Stream<Entity>> captor2 = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).add(eq(GROUP_AUTHORITY), captor2.capture());
-		assertEquals(captor2.getValue().collect(toList()), authorities);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
-	public void replaceUserEntityClassPermissions()
-	{
-		List<UserAuthority> authorities = Arrays.asList(mock(UserAuthority.class), mock(UserAuthority.class));
-		pluginPermissionManagerService.replaceUserEntityClassPermissions(authorities, "1");
-
-		ArgumentCaptor<Stream<UserAuthority>> captor1 = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).delete(eq(USER_AUTHORITY), captor1.capture());
-		assertEquals(captor1.getValue().collect(toList()), Arrays.asList(userEntity2Authority, userEntity3Authority));
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(dataService).add(eq(USER_AUTHORITY), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
 }

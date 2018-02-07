@@ -48,7 +48,10 @@ public class RepositoryPopulator
 		this.dynamicDecoratorPopulator = requireNonNull(dynamicDecoratorPopulator);
 	}
 
-	public void populate(ContextRefreshedEvent event)
+	/**
+	 * Returns whether the database was populated previously.
+	 */
+	public boolean populate(ContextRefreshedEvent event)
 	{
 		boolean databasePopulated = isDatabasePopulated();
 		if (!databasePopulated)
@@ -93,6 +96,8 @@ public class RepositoryPopulator
 		LOG.trace("Populating dynamic decorator entities ...");
 		dynamicDecoratorPopulator.populate();
 		LOG.trace("Populated dynamic decorator entities");
+
+		return databasePopulated;
 	}
 
 	private boolean isDatabasePopulated()

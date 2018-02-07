@@ -210,6 +210,9 @@ public class ImportWizard extends Wizard
 		this.selectedPackage = selectedPackage;
 	}
 
+	/**
+	 * Used via Freemarker?
+	 */
 	public boolean getAllowPermissions()
 	{
 		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP)
