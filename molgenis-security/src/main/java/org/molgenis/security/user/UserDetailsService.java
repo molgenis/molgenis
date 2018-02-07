@@ -95,6 +95,11 @@ public class UserDetailsService implements org.springframework.security.core.use
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		}
+
+		if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME))
+		{
+			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
+		}
 		allGrantedAuthorities.addAll(grantedGroupAuthorities);
 		return grantedAuthoritiesMapper.mapAuthorities(allGrantedAuthorities);
 	}
