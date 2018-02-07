@@ -1,11 +1,13 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupFactory;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +15,8 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ANONYMOUS;
 
 @Service
 public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
@@ -26,9 +26,6 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	private final DataService dataService;
 	private final UserFactory userFactory;
 	private final GroupFactory groupFactory;
-	private final UserAuthorityFactory userAuthorityFactory;
-	private final GroupAuthorityFactory groupAuthorityFactory;
-	private final MutableAclService mutableAclService;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -37,16 +34,11 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory,
-			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory,
-			MutableAclService mutableAclService)
+	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
 		this.groupFactory = requireNonNull(groupFactory);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
-		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
-		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -78,18 +70,12 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
 
-		// set anonymous role for anonymous user
-		UserAuthority anonymousAuthority = userAuthorityFactory.create();
-		anonymousAuthority.setUser(anonymousUser);
-		anonymousAuthority.setRole(AUTHORITY_ANONYMOUS);
-
 		// create all users group
 		Group allUsersGroup = groupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(USER_AUTHORITY, anonymousAuthority);
 		dataService.add(GROUP, allUsersGroup);
 	}
 }

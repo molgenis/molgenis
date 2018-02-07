@@ -4,6 +4,7 @@ import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class SecurityUtils
 	public static final String ANONYMOUS_USERNAME = "anonymous";
 
 	public static final String AUTHORITY_SU = "ROLE_SU";
-	public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
 
 	public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
 	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
@@ -124,7 +124,14 @@ public class SecurityUtils
 	public static boolean currentUserIsAuthenticated()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return authentication != null && authentication.isAuthenticated() && !currentUserHasRole(AUTHORITY_ANONYMOUS);
+		return authentication != null && authentication.isAuthenticated() && !currentUserIsAnonymous();
+	}
+
+	private static boolean currentUserIsAnonymous()
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication != null && ((User) authentication.getPrincipal()).getUsername()
+																			   .equals(ANONYMOUS_USERNAME);
 	}
 
 	/**
