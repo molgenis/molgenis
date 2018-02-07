@@ -76,7 +76,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<Object> getEntityClassIds()
 	{
-		return getEntityTypes().collect(toList());
+		return getEntityTypes().map(EntityType::getId).collect(toList());
 	}
 
 	@Override
@@ -241,13 +241,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 					Permission pluginPermission = toPluginPermission(ace);
 					if (isUser)
 					{
-						permissions.addUserPermission(pluginId.toLowerCase(),
-								pluginPermission);  // FIXME change interface such that cased entity type ids are allowed
+						permissions.addUserPermission(pluginId, pluginPermission);
 					}
 					else
 					{
-						permissions.addGroupPermission(pluginId.toLowerCase(),
-								pluginPermission);  // FIXME change interface such that cased entity type ids are allowed
+						permissions.addGroupPermission(pluginId, pluginPermission);
 					}
 				}
 			});
@@ -348,13 +346,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 					Permission entityTypePermission = toEntityTypePermission(ace);
 					if (isUser)
 					{
-						permissions.addUserPermission(entityTypeId.toLowerCase(),
-								entityTypePermission); // FIXME change interface such that cased entity type ids are allowed
+						permissions.addUserPermission(entityTypeId, entityTypePermission);
 					}
 					else
 					{
-						permissions.addGroupPermission(entityTypeId.toLowerCase(),
-								entityTypePermission); // FIXME change interface such that cased entity type ids are allowed
+						permissions.addGroupPermission(entityTypeId, entityTypePermission);
 					}
 				}
 			});
@@ -495,12 +491,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private String getAuthorityEntityId(String role, String authorityPrefix)
 	{
 		role = role.substring(authorityPrefix.length());
-		return role.substring(role.indexOf('_') + 1).toLowerCase();
+		return role.substring(role.indexOf('_') + 1)
+				   .toLowerCase(); // FIXME collision in case of same authorities with different casing
 	}
 
 	private String getAuthorityType(String role, String authorityPrefix)
 	{
 		role = role.substring(authorityPrefix.length());
-		return role.substring(0, role.indexOf('_')).toLowerCase();
+		return role.substring(0, role.indexOf('_'))
+				   .toLowerCase(); // FIXME collision in case of same authorities with different casing
 	}
 }
