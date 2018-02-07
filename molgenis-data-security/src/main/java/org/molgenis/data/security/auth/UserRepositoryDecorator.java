@@ -11,25 +11,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRepositoryDecorator(Repository<User> delegateRepository, UserAuthorityFactory userAuthorityFactory,
-			DataService dataService, PasswordEncoder passwordEncoder)
+	public UserRepositoryDecorator(Repository<User> delegateRepository, DataService dataService,
+			PasswordEncoder passwordEncoder)
 	{
 		super(delegateRepository);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.dataService = requireNonNull(dataService);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
@@ -39,7 +33,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		encodePassword(entity);
 		delegate().add(entity);
-		addSuperuserAuthority(entity);
 	}
 
 	@Override
@@ -47,7 +40,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		updatePassword(entity);
 		delegate().update(entity);
-		updateSuperuserAuthority(entity);
 	}
 
 	@Override
@@ -60,8 +52,6 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 
 			Integer batchCount = delegate().add(users.stream());
 			count.addAndGet(batchCount);
-
-			users.forEach(this::addSuperuserAuthority);
 		});
 		return count.get();
 	}
@@ -69,10 +59,10 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	@Override
 	public void update(Stream<User> entities)
 	{
-		entities = entities.map(entity ->
+		entities = entities.filter(entity ->
 		{
 			updatePassword(entity);
-			return entity;
+			return true;
 		});
 		delegate().update(entities);
 	}
@@ -98,48 +88,10 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 		user.setPassword(encodedPassword);
 	}
 
-	private void addSuperuserAuthority(User user)
-	{
-		Boolean isSuperuser = user.isSuperuser();
-		if (isSuperuser != null && isSuperuser)
-		{
-			UserAuthority userAuthority = userAuthorityFactory.create();
-			userAuthority.setUser(user);
-			userAuthority.setRole(AUTHORITY_SU);
-
-			dataService.add(USER_AUTHORITY, userAuthority);
-		}
-	}
-
-	private void updateSuperuserAuthority(User user)
-	{
-		UserAuthority suAuthority = dataService.findOne(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(USER, user).and().eq(ROLE, AUTHORITY_SU), UserAuthority.class);
-
-		Boolean isSuperuser = user.isSuperuser();
-		if (isSuperuser != null && isSuperuser)
-		{
-			if (suAuthority == null)
-			{
-				UserAuthority userAuthority = userAuthorityFactory.create();
-				userAuthority.setUser(user);
-				userAuthority.setRole(AUTHORITY_SU);
-				dataService.add(USER_AUTHORITY, userAuthority);
-			}
-		}
-		else
-		{
-			if (suAuthority != null)
-			{
-				dataService.deleteById(USER_AUTHORITY, suAuthority.getId());
-			}
-		}
-	}
-
 	@Override
 	public void delete(User entity)
 	{
-		deleteUserAuthoritiesAndGroupMember(entity);
+		deleteGroupMemberships(entity);
 		delegate().delete(entity);
 	}
 
@@ -148,7 +100,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		entities = entities.map(entity ->
 		{
-			deleteUserAuthoritiesAndGroupMember(entity);
+			deleteGroupMemberships(entity);
 			return entity;
 		});
 		delegate().delete(entities);
@@ -157,7 +109,7 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	@Override
 	public void deleteById(Object id)
 	{
-		deleteUserAuthoritiesAndGroupMember(findOneById(id));
+		deleteGroupMemberships(findOneById(id));
 		delegate().deleteById(id);
 	}
 
@@ -166,26 +118,22 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	{
 		ids = ids.map(id ->
 		{
-			deleteUserAuthoritiesAndGroupMember(findOneById(id));
+			deleteGroupMemberships(findOneById(id));
 			return id;
 		});
 		delegate().deleteAll(ids);
-	}
-
-	private void deleteUserAuthoritiesAndGroupMember(User user)
-	{
-		Stream<UserAuthority> userAuthorities = dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user), UserAuthority.class);
-		dataService.delete(USER_AUTHORITY, userAuthorities);
-
-		Stream<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class);
-		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 
 	@Override
 	public void deleteAll()
 	{
 		throw new UnsupportedOperationException("Deleting all users is not supported.");
+	}
+
+	private void deleteGroupMemberships(User user)
+	{
+		Stream<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class);
+		dataService.delete(GROUP_MEMBER, groupMembers);
 	}
 }
