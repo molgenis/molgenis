@@ -24,6 +24,16 @@ public class SidUtils
 
 	public static Sid createSid(Group group)
 	{
-		return new GrantedAuthoritySid("ROLE" + '_' + group.getId());
+		String groupAuthority = createGroupAuthority(group);
+		return new GrantedAuthoritySid(groupAuthority);
+	}
+
+	/**
+	 * @deprecated will be replaced with role retrieval based on persisted roles for a group.
+	 */
+	@Deprecated
+	public static String createGroupAuthority(Group group)
+	{
+		return "ROLE" + '_' + group.getId();
 	}
 }

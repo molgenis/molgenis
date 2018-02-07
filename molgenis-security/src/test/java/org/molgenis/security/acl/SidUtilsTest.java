@@ -29,4 +29,11 @@ public class SidUtilsTest
 		Sid sid = SidUtils.createSid(group);
 		assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_groupId")));
 	}
+
+	@Test
+	public void testCreateGroupAuthority()
+	{
+		Group group = when(mock(Group.class).getId()).thenReturn("groupId").getMock();
+		assertEquals("ROLE_groupId", SidUtils.createGroupAuthority(group));
+	}
 }
