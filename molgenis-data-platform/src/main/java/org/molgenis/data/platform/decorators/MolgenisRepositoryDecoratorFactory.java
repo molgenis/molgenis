@@ -140,7 +140,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 0. Dynamic decorators
 		decoratedRepository = dynamicRepositoryDecoratorRegistry.decorate(decoratedRepository);
-import org.molgenis.security.core.PermissionService;
 
 		return decoratedRepository;
 	}
