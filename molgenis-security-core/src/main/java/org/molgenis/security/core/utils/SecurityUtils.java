@@ -34,11 +34,6 @@ public class SecurityUtils
 	@Deprecated
 	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
 	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine plugin permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_";
-	/**
 	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
 	 */
 	@Deprecated
