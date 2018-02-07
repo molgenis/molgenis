@@ -1,6 +1,7 @@
 package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONArray;
@@ -80,26 +81,23 @@ public class RestControllerV2APIIT
 
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
-
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
-		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
-
-		grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
-
-		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
-
-		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
-
-		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
-		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
+														  .put("sys_md_EntityType", WRITE)
+														  .put("sys_md_Attribute", WRITE)
+														  .put("sys_FileMeta", WRITE)
+														  .put("sys_sec_Owned", READ)
+														  .put("sys_L10nString", WRITE)
+														  .put("V2_API_TypeTestAPIV2", WRITE)
+														  .put("V2_API_TypeTestRefAPIV2", WRITE)
+														  .put("V2_API_LocationAPIV2", WRITE)
+														  .put("V2_API_PersonAPIV2", WRITE)
+														  .put("base_v2APITest1", WRITEMETA)
+														  .put("base_v2APITest2", WRITEMETA)
+														  .put("base_APICopyTest", WRITEMETA)
+														  .put("sys_job_JobExecution", READ)
+														  .put("sys_job_OneClickImportJobExecution", READ)
+														  .build());
 
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}

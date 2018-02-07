@@ -1,10 +1,12 @@
 package org.molgenis.api.tests.rest.v1;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
 import org.molgenis.api.tests.utils.RestTestUtils;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -56,10 +58,13 @@ public class RestControllerIT
 		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
 		testUserId = getUserId(adminToken, REST_TEST_USER);
 
-		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", READ);
-		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", COUNT);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITEMETA);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_FreemarkerTemplate", WRITE)
+														  .put("sys_scr_ScriptType", READ)
+														  .put("sys_sec_UserAuthority", COUNT)
+														  .put("sys_FileMeta", WRITEMETA)
+														  .put(UserMetaData.USER, COUNT)
+														  .build());
 
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
@@ -262,8 +267,6 @@ public class RestControllerIT
 	@Test(dependsOnMethods = { "testRetrieveSystemEntityTypeNotAllowed" })
 	public void testRetrieveSystemEntityType()
 	{
-		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
-
 		given().log()
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)

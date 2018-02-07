@@ -1,6 +1,7 @@
 package org.molgenis.api.tests.rest.v1;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
@@ -78,25 +79,22 @@ public class RestControllerV1APIIT
 		testUserId = RestTestUtils.getUserId(adminToken, REST_TEST_USER);
 		LOG.info("testUserId: " + testUserId);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
-
-		grantRights(adminToken, testUserId, "V1_API_TypeTestAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_TypeTestRefAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_LocationAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_PersonAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_Items", WRITE);
-
-		grantRights(adminToken, testUserId, "base_APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest2", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest3", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest4", WRITEMETA);
-
-		grantRights(adminToken, testUserId, "base_ApiTestFile", WRITEMETA);
-
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
+														  .put("sys_md_EntityType", WRITE)
+														  .put("sys_md_Attribute", WRITE)
+														  .put("sys_FileMeta", WRITE)
+														  .put("V1_API_TypeTestAPIV1", WRITE)
+														  .put("V1_API_TypeTestRefAPIV1", WRITE)
+														  .put("V1_API_LocationAPIV1", WRITE)
+														  .put("V1_API_PersonAPIV1", WRITE)
+														  .put("V1_API_Items", WRITE)
+														  .put("base_APITest1", WRITEMETA)
+														  .put("base_APITest2", WRITEMETA)
+														  .put("base_APITest3", WRITEMETA)
+														  .put("base_APITest4", WRITEMETA)
+														  .put("base_ApiTestFile", WRITEMETA)
+														  .build());
 		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
 	}
 

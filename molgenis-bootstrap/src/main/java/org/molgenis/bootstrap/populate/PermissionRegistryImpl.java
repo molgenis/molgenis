@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
+import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
@@ -58,7 +60,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,
-						OWNED), EntityType.class).forEach(entityType ->
+						OWNED, DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
 			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
