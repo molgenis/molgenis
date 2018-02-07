@@ -52,16 +52,6 @@ public class SecurityUtils
 	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
 	 */
 	@Deprecated
-	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_ENTITY_COUNT_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
-	 */
-	@Deprecated
 	public static final String AUTHORITY_ENTITY_WRITEMETA_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITEMETA + "_";
 
 	public static String getCurrentUsername()

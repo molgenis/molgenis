@@ -1,11 +1,12 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardControllerTest.Config;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.SystemRepositoryDecoratorRegistry;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.support.FileRepositoryCollection;
@@ -14,12 +15,9 @@ import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.config.GroupAuthorityTestConfig;
 import org.molgenis.data.security.config.GroupTestConfig;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.user.UserAccountService;
@@ -31,15 +29,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.testng.annotations.BeforeMethod;
@@ -51,16 +43,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.testng.Assert.assertEquals;
 
@@ -68,22 +53,12 @@ import static org.testng.Assert.assertEquals;
 public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 {
 	private ImportWizardController controller;
-	private WebRequest webRequest;
 
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
-	private UserAccountService userAccountService;
-
-	@Autowired
 	private ImportRunFactory importRunFactory;
-
-	@Autowired
-	private GroupFactory groupFactory;
-
-	@Autowired
-	private GroupAuthorityFactory groupAuthorityFactory;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -93,7 +68,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private FileRepositoryCollection repositoryCollection;
 	private ImportService importService;
 	private Instant date;
-	private EntityType entityType;
 
 	public ImportWizardControllerTest()
 	{
@@ -118,86 +92,13 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		dataService = mock(DataService.class);
 		repositoryCollection = mock(FileRepositoryCollection.class);
 		importService = mock(ImportService.class);
-		entityType = mock(EntityType.class);
+		EntityType entityType = mock(EntityType.class);
 
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, importServiceFactory, fileStore,
 				fileRepositoryCollectionFactory, importRunService, executorService);
 
-		List<GroupAuthority> authorities = Lists.newArrayList();
-
-		Group group1 = groupFactory.create();
-		group1.setId("ID");
-		group1.setActive(true);
-		group1.setName("TestGroup");
-
-		Entity entity1 = groupAuthorityFactory.create("entity1");
-		entity1.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity1");
-		entity1.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority1 = groupAuthorityFactory.create();
-		authority1.set(entity1);
-
-		Entity entity2 = groupAuthorityFactory.create("entity2");
-		entity2.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity2");
-		entity2.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority2 = groupAuthorityFactory.create();
-		authority2.set(entity2);
-
-		Entity entity3 = groupAuthorityFactory.create("entity3");
-		entity3.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity3");
-		entity3.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority3 = groupAuthorityFactory.create();
-		authority3.set(entity3);
-
-		Entity entity4 = groupAuthorityFactory.create("entity4");
-		entity4.set(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "entity4");
-		entity4.set(GroupAuthorityMetaData.GROUP, group1);
-		GroupAuthority authority4 = groupAuthorityFactory.create();
-		authority4.set(entity4);
-
-		authorities.add(authority1);
-		authorities.add(authority2);
-		authorities.add(authority3);
-		authorities.add(authority4);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
-		when(dataService.findOneById(GROUP, "ID", Group.class)).thenReturn(group1);
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group1),
-				GroupAuthority.class)).thenAnswer(
-				invocation -> Stream.of(authority1, authority2, authority3, authority4));
-
-		when(dataService.findAll(eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA), any(),
-				eq(new Fetch().field(EntityTypeMetadata.ID).field(EntityTypeMetadata.PACKAGE)),
-				eq(EntityType.class))).thenAnswer(invocation -> Stream.of(entityType, entityType));
-
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, "ID"),
-				GroupAuthority.class)).thenAnswer(
-				invocation -> Stream.of(authority1, authority2, authority3, authority4));
-
-		when(dataService.getEntityTypeIds()).thenReturn(
-				Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
-
-		Authentication authentication = mock(Authentication.class);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		GrantedAuthority grantedAuthority1 = new SimpleGrantedAuthority(authority1.getRole());
-		GrantedAuthority grantedAuthority2 = new SimpleGrantedAuthority(authority2.getRole());
-		GrantedAuthority grantedAuthority3 = new SimpleGrantedAuthority(authority3.getRole());
-		GrantedAuthority grantedAuthority4 = new SimpleGrantedAuthority(authority4.getRole());
-		UserDetails userDetails = mock(UserDetails.class);
-		when(userDetails.getUsername()).thenReturn("username");
-		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
-				asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
-		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
-
 		date = Instant.parse("2016-01-01T12:34:28.123Z");
-
-		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(group1));
 
 		when(entityType.getId()).thenReturn("entityTypeId");
 		when(entityType.getId()).thenReturn("entityTypeName");
