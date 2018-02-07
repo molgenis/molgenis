@@ -45,7 +45,10 @@ public class RepositoryPopulator
 		this.genomeBrowserAttributesPopulator = requireNonNull(genomeBrowserAttributesPopulator);
 	}
 
-	public void populate(ContextRefreshedEvent event)
+	/**
+	 * Returns whether the database was populated previously.
+	 */
+	public boolean populate(ContextRefreshedEvent event)
 	{
 		boolean databasePopulated = isDatabasePopulated();
 		if (!databasePopulated)
@@ -86,6 +89,7 @@ public class RepositoryPopulator
 			systemEntityPopulator.populate(event);
 			LOG.trace("Populated database with application entities");
 		}
+		return databasePopulated;
 	}
 
 	private boolean isDatabasePopulated()
