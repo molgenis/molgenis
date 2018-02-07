@@ -4,15 +4,11 @@ import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.security.auth.Group;
-import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 
 public class ImportWizard extends Wizard
 {
@@ -208,15 +204,5 @@ public class ImportWizard extends Wizard
 	public void setSelectedPackage(String selectedPackage)
 	{
 		this.selectedPackage = selectedPackage;
-	}
-
-	/**
-	 * Used via Freemarker?
-	 */
-	public boolean getAllowPermissions()
-	{
-		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP)
-				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY);
-		return allowPermissions || SecurityUtils.currentUserIsSu();
 	}
 }

@@ -3,7 +3,6 @@ package org.molgenis.core.ui.data.importer.wizard;
 import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardControllerTest.Config;
 import org.molgenis.data.*;
@@ -22,9 +21,7 @@ import org.molgenis.data.security.config.GroupTestConfig;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.PermissionManagerServiceImpl;
-import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,11 +50,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
@@ -66,9 +61,6 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.testng.Assert.assertEquals;
 
@@ -82,9 +74,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 
 	@Autowired
-	private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-
-	@Autowired
 	private UserAccountService userAccountService;
 
 	@Autowired
@@ -95,12 +84,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private GroupAuthorityFactory groupAuthorityFactory;
-
-	@Autowired
-	private MetaDataService metaDataService;
-
-	@Captor
-	private ArgumentCaptor<GroupAuthority> groupAuthorityArgumentCaptor;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -119,7 +102,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
-	public void setUp() throws ParseException
+	public void setUp()
 	{
 		reset(dataService);
 		UploadWizardPage uploadWizardPage = mock(UploadWizardPage.class);
@@ -138,9 +121,8 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		entityType = mock(EntityType.class);
 
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
-				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
-				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory);
+				validationResultWizardPage, importResultsWizardPage, dataService, importServiceFactory, fileStore,
+				fileRepositoryCollectionFactory, importRunService, executorService);
 
 		List<GroupAuthority> authorities = Lists.newArrayList();
 
@@ -221,83 +203,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(entityType.getId()).thenReturn("entityTypeName");
 
 		reset(executorService);
-	}
-
-	@Test
-	public void getGroupEntityClassPermissionsTest()
-	{
-		Permissions permissions = controller.getGroupEntityClassPermissions("ID", webRequest);
-		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
-
-		Permission permission = new Permission();
-		permission.setType("writemeta");
-		permission.setGroup("TestGroup");
-		assertEquals(groupPermissions.get("entity1"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity2"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity3"), singletonList(permission));
-		assertEquals(groupPermissions.get("entity4"), singletonList(permission));
-
-		assertEquals(groupPermissions.size(), 4);
-	}
-
-	@Test
-	public void addGroupEntityClassPermissionsTest()
-	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(false);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity4");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity4")).thenReturn(WRITE.toString());
-
-		GroupAuthority authority = groupAuthorityFactory.create();
-		authority.setGroup(dataService.findOneById(GROUP, "ID", Group.class));
-		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3");
-
-		controller.addGroupEntityClassPermissions("ID", webRequest);
-
-		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void addGroupEntityClassPermissionsTestNoPermission()
-	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(false);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(WRITE.toString());
-		controller.addGroupEntityClassPermissions("ID", webRequest);
-	}
-
-	@Test()
-	public void addGroupEntityClassPermissionsTestNoPermissionSU()
-	{
-		User user = mock(User.class);
-		when(user.isSuperuser()).thenReturn(true);
-		when(userAccountService.getCurrentUser()).thenReturn(user);
-
-		webRequest = mock(WebRequest.class);
-		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(WRITE.toString());
-
-		controller.addGroupEntityClassPermissions("ID", webRequest);
-
-		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_entity3");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
-				dataService.findOneById(GROUP, "ID", Group.class));
-
-		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_entity5");
-		assertEquals(groupAuthorityArgumentCaptor.getValue().getGroup(),
-				dataService.findOneById(GROUP, "ID", Group.class));
 	}
 
 	@Test
