@@ -22,7 +22,7 @@ public class PluginAttributes
 	/**
 	 * Whether or not the current user can edit settings for the requested plugin
 	 */
-	static final String KEY_PLUGIN_SETTINGS_CAN_WRITE = "plugin_settings_can_write";
+	static final String KEY_PLUGIN_SHOW_SETTINGS_COG = "plugin_show_settings_cog";
 	public static final String KEY_I18N = "i18n";
 
 	private PluginAttributes()

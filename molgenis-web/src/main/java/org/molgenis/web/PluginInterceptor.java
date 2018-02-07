@@ -58,20 +58,20 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 			}
 
 			Entity pluginSettings = molgenisPlugin.getPluginSettings();
-			Boolean pluginSettingsCanWrite;
+			boolean pluginSettingsCanWrite;
 			if (pluginSettings != null)
 			{
 				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
 				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettingsEntityName,
 						Permission.WRITE);
+				modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
 			}
 			else
 			{
-				pluginSettingsCanWrite = null;
+				pluginSettingsCanWrite = false;
 			}
 
-			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
-			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE, pluginSettingsCanWrite);
+			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SHOW_SETTINGS_COG, pluginSettingsCanWrite);
 			modelAndView.addObject(PluginAttributes.KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
 			modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING,
