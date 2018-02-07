@@ -73,6 +73,8 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	static final String ROLE_COUNT_OWNED = "ENTITY_COUNT_sys_sec_Owned";
 	static final String ROLE_READ_FILE_META = "ENTITY_READ_sys_FileMeta";
 	static final String ROLE_COUNT_FILE_META = "ENTITY_COUNT_sys_FileMeta";
+	static final String ROLE_READ_DECORATOR_CONFIG = "ENTITY_READ_sys_dec_DecoratorConfiguration";
+	static final String ROLE_COUNT_DECORATOR_CONFIG = "ENTITY_COUNT_sys_dec_DecoratorConfiguration";
 
 	@Autowired
 	UserFactory userFactory;
