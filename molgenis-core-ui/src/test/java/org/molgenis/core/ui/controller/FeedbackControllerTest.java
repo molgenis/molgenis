@@ -2,7 +2,6 @@ package org.molgenis.core.ui.controller;
 
 import org.molgenis.core.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;

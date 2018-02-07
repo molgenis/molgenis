@@ -7,7 +7,6 @@ import org.mockito.MockitoAnnotations;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.core.util.GsonHttpMessageConverter;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.metadata.manager.model.*;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -32,7 +32,7 @@ import java.util.Locale;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -102,7 +102,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(metadataManagerService.getEditorPackages()).thenReturn(getEditorPackageResponse());
 		mockMvc.perform(get("/plugin/metadata-manager/editorPackages"))
 			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getEditorPackageResponseJson()));
 	}
 
@@ -112,7 +112,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(metadataManagerService.getEditorEntityType("id_1")).thenReturn(getEditorEntityTypeResponse());
 		mockMvc.perform(get("/plugin/metadata-manager/entityType/{id}", "id_1"))
 			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
 
@@ -123,14 +123,14 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(metadataManagerService.createEditorEntityType()).thenReturn(editorEntityTypeResponse);
 		mockMvc.perform(get("/plugin/metadata-manager/create/entityType"))
 			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getEditorEntityTypeResponseJson()));
 	}
 
 	@Test
 	public void testUpsertEntityType() throws Exception
 	{
-		mockMvc.perform(post("/plugin/metadata-manager/entityType").contentType(APPLICATION_JSON)
+		mockMvc.perform(post("/plugin/metadata-manager/entityType").contentType(APPLICATION_JSON_UTF8)
 																   .content(getEditorEntityTypeJson()))
 			   .andExpect(status().isOk());
 		verify(metadataManagerService, times(1)).upsertEntityType(getEditorEntityType());
@@ -142,7 +142,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
 		when(metadataManagerService.createEditorAttribute()).thenReturn(getEditorAttributeResponse());
 		mockMvc.perform(get("/plugin/metadata-manager/create/attribute"))
 			   .andExpect(status().isOk())
-			   .andExpect(content().contentType(APPLICATION_JSON))
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(getEditorAttributeResponseJson()));
 	}
 

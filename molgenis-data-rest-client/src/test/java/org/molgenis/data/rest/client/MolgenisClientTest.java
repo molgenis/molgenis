@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.client;
 
 import com.google.gson.GsonBuilder;
-import org.molgenis.core.util.GsonHttpMessageConverter;
+import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
 import org.molgenis.data.rest.client.bean.LoginResponse;
 import org.molgenis.data.rest.client.bean.QueryResponse;
 import org.springframework.web.client.RestTemplate;
@@ -20,7 +20,7 @@ public class MolgenisClientTest
 	public void beforeTest()
 	{
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(of(new GsonHttpMessageConverter(new GsonBuilder().setPrettyPrinting().create())));
+		template.setMessageConverters(of(new MolgenisGsonHttpMessageConverter(new GsonBuilder().setPrettyPrinting().create())));
 		molgenis = new MolgenisClient(template, "http://localhost:8080/api/v1");
 	}
 
