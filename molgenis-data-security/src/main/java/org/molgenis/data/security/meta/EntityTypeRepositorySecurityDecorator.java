@@ -6,12 +6,9 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.auth.GroupAuthority;
-import org.molgenis.data.security.auth.UserAuthority;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.model.MutableAclService;
 
 import java.util.Iterator;
@@ -23,9 +20,6 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
@@ -255,7 +249,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void delete(EntityType entity)
 	{
 		validateDeleteAllowed(entity);
-		deleteEntityPermissions(entity);
+		deleteAcl(new EntityTypeIdentity(entity));
 		super.delete(entity);
 	}
 
@@ -265,7 +259,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.delete(entities.filter(entityType ->
 		{
 			validateDeleteAllowed(entityType);
-			deleteEntityPermissions(entityType);
+			deleteAcl(new EntityTypeIdentity(entityType));
 			return true;
 		}));
 	}
@@ -274,7 +268,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void deleteById(Object id)
 	{
 		validateDeleteAllowed(id);
-		deleteEntityPermissions(id.toString());
+		deleteAcl(new EntityTypeIdentity(id.toString()));
 		super.deleteById(id);
 	}
 
@@ -284,7 +278,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.deleteAll(ids.filter(id ->
 		{
 			validateDeleteAllowed(id);
-			deleteEntityPermissions(id.toString());
+			deleteAcl(new EntityTypeIdentity(id.toString()));
 			return true;
 		}));
 	}
@@ -295,38 +289,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		iterator().forEachRemaining(entityType ->
 		{
 			this.validateDeleteAllowed(entityType);
-			deleteEntityPermissions(entityType);
+			deleteAcl(new EntityTypeIdentity(entityType));
 		});
 		super.deleteAll();
-	}
-
-	private void deleteEntityPermissions(EntityType entityType)
-	{
-		deleteEntityPermissions(entityType.getId());
-	}
-
-	private void deleteEntityPermissions(String entityTypeId)
-	{
-		List<String> authorities = SecurityUtils.getEntityAuthorities(entityTypeId);
-
-		// User permissions
-		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
-														 .in(ROLE, authorities)
-														 .findAll()
-														 .collect(toList());
-		if (!userPermissions.isEmpty())
-		{
-			dataService.delete(USER_AUTHORITY, userPermissions.stream());
-		}
-		// Group permissions
-		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
-														   .in(ROLE, authorities)
-														   .findAll()
-														   .collect(toList());
-		if (!groupPermissions.isEmpty())
-		{
-			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
-		}
 	}
 
 	@Override
@@ -447,6 +412,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void createAcl(EntityType entityType)
 	{
-		mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
+		mutableAclService.createAcl(new EntityTypeIdentity(entityType));
+	}
+
+	private void deleteAcl(EntityTypeIdentity id)
+	{
+		mutableAclService.deleteAcl(id, false);
 	}
 }
