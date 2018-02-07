@@ -139,6 +139,7 @@ public class BeaconAPIIT
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", READ)
 														  .put("sys_md_EntityType", READ)
 														  .put("sys_md_Attribute", READ)
+														  .put("sys_genomebrowser_GenomeBrowserAttributes", READ)
 														  .put(SYS_BEACON, READ)
 														  .put(SYS_BEACONS_BEACON_DATASET, READ)
 														  .put(SYS_BEACONS_BEACON_ORGANIZATION, READ)
