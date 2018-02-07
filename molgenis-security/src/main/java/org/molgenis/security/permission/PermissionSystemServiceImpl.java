@@ -29,6 +29,10 @@ import static org.molgenis.security.core.Permission.WRITEMETA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
 
+/**
+ * @deprecated use {@link org.springframework.security.acls.model.MutableAclService}
+ */
+@Deprecated
 @Component
 public class PermissionSystemServiceImpl implements PermissionSystemService
 {
@@ -39,10 +43,8 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	private final PrincipalSecurityContextRegistry principalSecurityContextRegistry;
 	private final AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater;
 
-	public PermissionSystemServiceImpl(UserService userService, UserAuthorityFactory userAuthorityFactory,
-			RoleHierarchy roleHierarchy, DataService dataService,
-			PrincipalSecurityContextRegistry principalSecurityContextRegistry,
-			AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater)
+	public PermissionSystemServiceImpl(UserService userService, UserAuthorityFactory userAuthorityFactory, RoleHierarchy roleHierarchy, DataService dataService,
+			PrincipalSecurityContextRegistry principalSecurityContextRegistry, AuthenticationAuthoritiesUpdater authenticationAuthoritiesUpdater)
 	{
 		this.userService = requireNonNull(userService);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
@@ -81,12 +83,10 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 
 		Collection<? extends GrantedAuthority> reachableAuthorities = roleHierarchy.getReachableGrantedAuthorities(
 				authorities);
-		securityContexts.forEach(
-				securityContext -> updateSecurityContextAuthorities(securityContext, reachableAuthorities));
+		securityContexts.forEach(securityContext -> updateSecurityContextAuthorities(securityContext, reachableAuthorities));
 	}
 
-	private void updateSecurityContextAuthorities(SecurityContext securityContext,
-			Collection<? extends GrantedAuthority> newAuthorities)
+	private void updateSecurityContextAuthorities(SecurityContext securityContext, Collection<? extends GrantedAuthority> newAuthorities)
 	{
 		Collection<? extends GrantedAuthority> authorities = securityContext.getAuthentication().getAuthorities();
 		List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authorities);
