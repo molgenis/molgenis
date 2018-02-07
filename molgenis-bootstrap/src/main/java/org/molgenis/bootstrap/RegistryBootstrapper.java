@@ -3,6 +3,7 @@ package org.molgenis.bootstrap;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
+import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
@@ -31,6 +32,7 @@ public class RegistryBootstrapper
 	private final SystemPackageRegistrar systemPackageRegistrar;
 	private final EntityFactoryRegistrar entityFactoryRegistrar;
 	private final SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
+	private final DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 	private final JobFactoryRegistrar jobFactoryRegistrar;
@@ -39,6 +41,7 @@ public class RegistryBootstrapper
 			SystemEntityTypeRegistrar systemEntityTypeRegistrar, SystemPackageRegistrar systemPackageRegistrar,
 			EntityFactoryRegistrar entityFactoryRegistrar,
 			SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar,
+			DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
 			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar,
 			JobFactoryRegistrar jobFactoryRegistrar)
 	{
@@ -47,6 +50,7 @@ public class RegistryBootstrapper
 		this.systemPackageRegistrar = requireNonNull(systemPackageRegistrar);
 		this.entityFactoryRegistrar = requireNonNull(entityFactoryRegistrar);
 		this.systemRepositoryDecoratorFactoryRegistrar = requireNonNull(systemRepositoryDecoratorFactoryRegistrar);
+		this.dynamicRepositoryDecoratorFactoryRegistrar = requireNonNull(dynamicRepositoryDecoratorFactoryRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
 		this.jobFactoryRegistrar = requireNonNull(jobFactoryRegistrar);
@@ -72,7 +76,11 @@ public class RegistryBootstrapper
 
 		LOG.trace("Registering repository decorator factories ...");
 		systemRepositoryDecoratorFactoryRegistrar.register(event);
-		LOG.trace("Registered entity factories");
+		LOG.trace("Registered repository decorator factories");
+
+		LOG.trace("Registering dynamic decorator factories ...");
+		dynamicRepositoryDecoratorFactoryRegistrar.register(event.getApplicationContext());
+		LOG.trace("Registered dynamic repository decorator factories");
 
 		LOG.trace("Registering importers ...");
 		importServiceRegistrar.register(event);

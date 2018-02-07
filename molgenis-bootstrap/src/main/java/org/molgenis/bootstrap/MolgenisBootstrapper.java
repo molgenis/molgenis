@@ -3,6 +3,7 @@ package org.molgenis.bootstrap;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
+import org.molgenis.data.event.BootstrappingEventPublisher;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -39,13 +40,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final IndexBootstrapper indexBootstrapper;
 	private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 	private final BootstrapThemePopulator bootstrapThemePopulator;
+	private final BootstrappingEventPublisher bootstrappingEventPublisher;
 
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
 			RepositoryPopulator repositoryPopulator, JobBootstrapper jobBootstrapper,
 			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
-			EntityTypeRegistryPopulator entityTypeRegistryPopulator, BootstrapThemePopulator bootstrapThemePopulator)
+			EntityTypeRegistryPopulator entityTypeRegistryPopulator, BootstrapThemePopulator bootstrapThemePopulator,
+			BootstrappingEventPublisher bootstrappingEventPublisher)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
@@ -57,6 +60,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
 		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
 		this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
+		this.bootstrappingEventPublisher = requireNonNull(bootstrappingEventPublisher);
 	}
 
 	@Transactional
@@ -66,6 +70,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	{
 
 		LOG.info("Bootstrapping application ...");
+		bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 		LOG.trace("Updating MOLGENIS ...");
 		upgradeBootstrapper.bootstrap();
@@ -107,6 +112,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		bootstrapThemePopulator.populate();
 		LOG.debug("Populated bootstrap themes");
 
+		bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
 		LOG.info("Bootstrapping application completed");
 	}
 

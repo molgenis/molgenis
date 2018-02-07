@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
@@ -101,7 +102,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 
 		// allow all users to read meta data entities
 		List<String> entityTypeIds = asList(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE,
-				L10N_STRING, FILE_META, OWNED);
+				L10N_STRING, FILE_META, OWNED, DECORATOR_CONFIGURATION);
 		Stream<GroupAuthority> entityGroupAuthorities = entityTypeIds.stream().map(entityTypeId ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
