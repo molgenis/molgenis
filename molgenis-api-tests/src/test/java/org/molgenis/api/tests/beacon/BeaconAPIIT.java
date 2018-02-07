@@ -253,13 +253,13 @@ public class BeaconAPIIT
 	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
-		// Cleanup beacon data
-		removeEntities(adminToken, Arrays.asList(BEACON_SET, BEACON_SET_SAMPLE));
-
 		// Cleanup beacon config
 		removeEntityFromTable(adminToken, SYS_BEACON, MY_FIRST_BEACON);
 		removeEntityFromTable(adminToken, SYS_BEACONS_BEACON_DATASET, MY_FIRST_BEACON_DATASET);
 		removeEntityFromTable(adminToken, SYS_BEACONS_BEACON_ORGANIZATION, MY_FIRST_BEACON_ORGANIZATION);
+
+		// Cleanup beacon data
+		removeEntities(adminToken, Arrays.asList(BEACON_SET, BEACON_SET_SAMPLE));
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);

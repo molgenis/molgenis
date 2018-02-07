@@ -472,8 +472,7 @@ public class RestTestUtils
 	{
 		if (adminToken != null && testUserId != null)
 		{
-			setGrantedRepositoryPermissions(adminToken, testUserId,
-					ImmutableMap.of(ENTITY_TYPE_META_DATA, Permission.NONE));
+			//TODO: no api to revoke permissions currently
 		}
 	}
 
