@@ -257,7 +257,10 @@ public class RestTestUtils
 	private static String pollForStatus(String adminToken, String importJobURL)
 	{
 		return given().contentType(APPLICATION_JSON)
-					  .header(X_MOLGENIS_TOKEN, adminToken).get(importJobURL).then().statusCode(OKE)
+					  .header(X_MOLGENIS_TOKEN, adminToken)
+					  .get(importJobURL)
+					  .then()
+					  .statusCode(OKE)
 					  .extract()
 					  .path("status")
 					  .toString();
