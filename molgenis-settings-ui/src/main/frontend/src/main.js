@@ -2,7 +2,6 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-import store from './store'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
 const {lng, fallbackLng} = window.__INITIAL_STATE__
@@ -16,7 +15,6 @@ Vue.use(i18n, {
     /* eslint-disable no-new */
     new Vue({
       el: '#settings-plugin',
-      store,
       template: '<App />',
       components: {App}
     })

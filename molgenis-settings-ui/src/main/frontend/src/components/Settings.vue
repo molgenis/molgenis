@@ -28,9 +28,9 @@
           <div v-if="formData">
             <form-component
               id="settings-form"
-              :schema="formSchema"
-              :formState="state"
-              :formData="formData">
+              :formFields="formFields"
+              :formData="formData"
+              :formState="state">
             </form-component>
           </div>
         </div>
@@ -46,51 +46,53 @@
 
 <script>
   import vSelect from 'vue-select'
-
-  import { FormComponent } from '@molgenis/molgenis-ui-form'
+  import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
-
-  import { UPDATE_SETTINGS, GET_SETTINGS_BY_ID } from '../store/actions'
-  import { SET_FORM_DATA, SET_ALERT } from '../store/mutations'
+  import api from '@molgenis/molgenis-api-client'
 
   const {initialSelectedSetting} = window.__INITIAL_STATE__
+  const { settingEntities } = window.__INITIAL_STATE__
 
   export default {
     name: 'Settings',
     data () {
       return {
         selectedSetting: initialSelectedSetting,
-        state: {}
+        state: {},
+        formFields: [],
+        formData: {},
+        settings: settingEntities,
+        alert: null
       }
     },
     methods: {
       onSubmit: (formData) => {
-        this.$store.commit(SET_FORM_DATA, formData)
-        this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
+        console.log('onSubmit')
+        // this.$store.commit(SET_FORM_DATA, formData)
+        // this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
       },
       updateSelectedSetting (selectedSetting) {
-        this.$store.dispatch(GET_SETTINGS_BY_ID, selectedSetting)
+        console.log('updateSelectedSetting')
+        // this.$store.dispatch(GET_SETTINGS_BY_ID, selectedSetting)
       },
       clearAlert: () => {
-        this.$store.commit(SET_ALERT, null)
-      }
-    },
-    computed: {
-      formData () {
-        return this.$store.state.formData
+        this.alert = null
       },
-      formSchema () {
-        return {fields: this.$store.state.formFields}
-      },
-      alert () {
-        return this.$store.state.alert
-      },
-      settings () {
-        return this.$store.state.settings
+      initializeFormComponent (response) {
+        const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
+        this.formFields = mappedData.formFields
+        this.formData = mappedData.formData
       }
     },
     created: function () {
-      this.$store.dispatch(GET_SETTINGS_BY_ID, this.$store.state.selectedSetting)
+      const uri = '/api/v2/' + this.selectedSetting
+      return api.get(uri).then(this.initializeFormComponent, error => {
+        console.log('error after get data')
+        this.alert = {
+          message: error,
+          type: 'danger'
+        }
+      })
     },
     components: {
       FormComponent,
