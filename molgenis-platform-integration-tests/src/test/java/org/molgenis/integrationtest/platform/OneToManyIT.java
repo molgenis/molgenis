@@ -14,12 +14,13 @@ import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.*;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,9 +49,11 @@ import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
 import static org.molgenis.integrationtest.platform.OneToManyIT.USERNAME;
-import static org.molgenis.integrationtest.platform.PlatformIT.*;
+import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
+import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
+import static org.springframework.security.core.context.SecurityContextHolder.*;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -72,7 +75,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	@Transactional
 	public void setUp()
 	{
-		populateUserPermissions();
+		runWithAuthorities(this::populateUserPermissions, ROLE_ACL_GENERAL_CHANGES);
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
@@ -80,8 +83,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	@Transactional
 	public void afterClass()
 	{
-		runAsSystem(() -> removeAclSidEntries(new PrincipalSid(USERNAME),
-				getEntityTypePermissionMap().keySet().stream().map(EntityTypeIdentity::new).collect(toList())));
+		runWithAuthorities(this::cleanupUserPermissions, ROLE_ACL_GENERAL_CHANGES);
 	}
 
 	@AfterMethod
@@ -481,16 +483,16 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MutableAclService mutableAclService;
 
-	public void populateUserPermissions()
+	private void populateUserPermissions()
 	{
 		Sid sid = new PrincipalSid(USERNAME);
 		Map<String, EntityTypePermission> entityTypePermissionMap = getEntityTypePermissionMap();
-		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
+		entityTypePermissionMap.forEach((entityTypeId, permission) ->
 		{
 			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
 			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
 			mutableAclService.updateAcl(acl);
-		}));
+		});
 	}
 
 	private Map<String, EntityTypePermission> getEntityTypePermissionMap()
@@ -510,27 +512,45 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		return entityTypePermissionMap;
 	}
 
-	public void removeAclSidEntries(Sid sid, List<ObjectIdentity> objectIdentities)
+	private void cleanupUserPermissions()
 	{
-		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
-				objectIdentities, singletonList(sid));
-		acls.forEach(((objectIdentity, acl) ->
+		removeAclSidEntries(new PrincipalSid(USERNAME),
+				getEntityTypePermissionMap().keySet().stream().map(EntityTypeIdentity::new).collect(toList()),
+				mutableAclService);
+	}
+
+	private static void removeAclSidEntries(Sid sid, List<ObjectIdentity> objectIdentities,
+			MutableAclService mutableAclService)
+	{
+		mutableAclService.readAclsById(objectIdentities, singletonList(sid))
+						 .values()
+						 .stream()
+						 .map(MutableAcl.class::cast)
+						 .filter(acl -> removeEntriesForSid(sid, acl))
+						 .forEach(mutableAclService::updateAcl);
+	}
+
+	private static boolean removeEntriesForSid(Sid sid, MutableAcl acl)
+	{
+		boolean aclUpdated = false;
+		int nrEntries = acl.getEntries().size();
+		for (int i = nrEntries - 1; i >= 0; i--)
 		{
-			boolean aclUpdated = false;
-			int nrEntries = acl.getEntries().size();
-			for (int i = nrEntries - 1; i >= 0; i--)
+			if (acl.getEntries().get(i).getSid().equals(sid))
 			{
-				AccessControlEntry accessControlEntry = acl.getEntries().get(i);
-				if (accessControlEntry.getSid().equals(sid))
-				{
-					acl.deleteAce(i);
-					aclUpdated = true;
-				}
+				acl.deleteAce(i);
+				aclUpdated = true;
 			}
-			if (aclUpdated)
-			{
-				mutableAclService.updateAcl(acl);
-			}
-		}));
+		}
+		return aclUpdated;
+	}
+
+	private static void runWithAuthorities(Runnable runnable, String... authorities)
+	{
+		SecurityContext context = createEmptyContext();
+		context.setAuthentication(new TestingAuthenticationToken("user", "", authorities));
+		setContext(context);
+		runnable.run();
+		clearContext();
 	}
 }
