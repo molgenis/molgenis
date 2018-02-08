@@ -260,13 +260,13 @@ public class RestControllerV2IT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
-			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .get(API_V2 + "sys_App?aggs=x==active;y==superuser")
 			   .then()
 			   .statusCode(UNAUTHORIZED);
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
-	@Test(dependsOnMethods = { "testRetrieveSystemEntityCollectionAggregatesNotAllowed" })
+	@Test
 	public void testRetrieveSystemEntityCollectionAggregates()
 	{
 
