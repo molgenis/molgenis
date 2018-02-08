@@ -57,23 +57,10 @@ public class QuestionnaireController extends VuePluginController
 		return questionnaireService.getQuestionnaire(name);
 	}
 
-	//	@GetMapping("/{name}/thanks")
-	//	public String showThanks(@PathVariable("name") String name, Model model, HttpServletResponse response)
-	//			throws IOException
-	//	{
-	//		EntityType entityType = dataService.getMeta().getEntityType(name);
-	//		if (entityType == null)
-	//		{
-	//			response.sendError(404);
-	//			return null;
-	//		}
-	//
-	//		model.addAttribute("thankYouText", getThankYouText(name));
-	//		return "view-thanks";
-	//	}
-	//
-	//	private String getThankYouText(String questionnaireName)
-	//	{
-	//		return runAsSystem(() -> thankYouTextService.getThankYouText(questionnaireName));
-	//	}
+	@ResponseBody
+	@GetMapping("/{name}/thanks")
+	public String getQuestionnaireSubmissionText(@PathVariable("name") String name)
+	{
+		return questionnaireService.getQuestionnaireSubmissionText(name);
+	}
 }

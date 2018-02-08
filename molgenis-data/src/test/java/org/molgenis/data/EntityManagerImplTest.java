@@ -90,29 +90,4 @@ public class EntityManagerImplTest
 		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityType, Stream.of(entity0, entity1), fetch);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
-
-	@Test
-	public void createDynamicEntityExtendingAbstractSystemEntity()
-	{
-		EntityType parent = mock(EntityType.class);
-
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn("testQuestionnaire");
-		when(entityType.getAtomicAttributes()).thenReturn(newArrayList());
-		when(entityType.hasAttributeWithExpression()).thenReturn(false);
-		when(entityType.getExtends()).thenReturn(parent);
-
-		Entity wrappedDynamicEntity = mock(Entity.class);
-
-		EntityFactory entityFactory = mock(EntityFactory.class);
-		when(entityFactoryRegistry.getEntityFactory(entityType)).thenReturn(null);
-
-		//noinspection unchecked
-		when(entityFactoryRegistry.getEntityFactory(parent)).thenReturn(entityFactory);
-
-		when(entityFactory.create(any())).thenReturn(wrappedDynamicEntity);
-
-		Entity actual = entityManagerImpl.create(entityType, POPULATE);
-		assertEquals(actual, wrappedDynamicEntity);
-	}
 }

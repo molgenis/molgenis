@@ -14,9 +14,10 @@
     "lint:fix": "eslint --fix --ext .js,.vue src test/unit/specs"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^2.1.1",
+    "@molgenis/molgenis-api-client": "^2.1.2",
     "@molgenis/molgenis-i18n-js": "^0.0.5",
-    "@molgenis/molgenis-ui-form": "^0.8.0",
+    "@molgenis/molgenis-ui-form": "^0.9.3",
+    "moment": "^2.20.1",
     "vue": "^2.5.13",
     "vue-flatpickr": "^2.3.0",
     "vue-router": "^3.0.1"
@@ -72,7 +73,6 @@
     "lodash": "^4.17.4",
     "lolex": "^1.5.2",
     "mocha": "^3.2.0",
-    "moment": "^2.18.1",
     "node-sass": "^4.5.3",
     "opn": "^4.0.2",
     "ora": "^1.1.0",

@@ -49,7 +49,7 @@
               <template v-if="questionnaire.status === 'SUBMITTED'">
                 <td>{{ 'questionnaires_table_status_submitted' | i18n }}</td>
                 <td>
-                  <router-link :to="'/' + questionnaire.name" class="btn btn-primary">
+                  <router-link :to="'/' + questionnaire.name + '/overview'" class="btn btn-primary">
                     {{ 'questionnaires_table_view_questionnaire_button' | i18n }}
                   </router-link>
                 </td>
@@ -69,7 +69,7 @@
   import api from '@molgenis/molgenis-api-client'
 
   export default {
-    name: 'questionnaire-component',
+    name: 'QuestionnaireList',
     data () {
       return {
         questionnaires: [],
@@ -78,10 +78,8 @@
     },
     created () {
       api.get('/menu/plugins/questionnaires/list').then(response => {
-        response.json().then(data => {
-          this.questionnaires = data
-          this.loading = false
-        })
+        this.questionnaires = response
+        this.loading = false
       })
     }
   }

@@ -1,15 +1,5 @@
 <template>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-8">
-
-        <router-link class="btn btn-outline-secondary my-3" to="/">
-          <i class="fa fa-chevron-left"></i> {{ 'questionnaire_back_button' | i18n }}
-        </router-link>
-
-      </div>
-    </div>
-
+  <div>
     <!-- Loading spinner -->
     <template v-if="loading">
       <div class="spinner-container d-flex justify-content-center align-items-center">
@@ -20,11 +10,11 @@
     <template v-else>
       <div class="row">
 
-        <!-- Form card -->
         <div class="col-xs-12 col-sm-12 col-md-10 col-lg-10 col-xl-10">
           <h1>{{ questionnaire.label }}</h1>
           <p v-html="questionnaire.description"></p>
 
+          <!-- Form card -->
           <div class="card mb-3">
             <div class="card-body">
               <form-component
@@ -42,7 +32,7 @@
                 {{ 'questionnaire_save_and_continue' | i18n }}
               </router-link>
 
-              <button type="submit" class="btn btn-primary" :form="questionnaire.name">
+              <button type="submit" class="btn btn-primary" @click="onSubmit">
                 {{ 'questionnaire_submit' | i18n }}
               </button>
             </div>
@@ -85,13 +75,15 @@
 </style>
 
 <script>
-  import { EntityToStateMapper, FormComponent } from '@molgenis/molgenis-ui-form'
+  import { EntityToFormMapper, FormComponent } from '@molgenis/molgenis-ui-form'
   import api from '@molgenis/molgenis-api-client'
+
+  import moment from 'moment'
 
   import 'flatpickr/dist/flatpickr.css'
 
   export default {
-    name: 'questionnaire-form',
+    name: 'QuestionnaireForm',
     props: {
 
       /**
@@ -105,7 +97,6 @@
     data () {
       return {
         loading: true,
-        questionnaire: null,
         entity: null,
         formState: {},
         schema: {
@@ -129,16 +120,53 @@
        * @param formData
        */
       onValueChanged (formData) {
-        const idAttribute = this.questionnaire.idAttribute
-        const idValue = this.entity[idAttribute]
         const options = {
           body: JSON.stringify(formData)
         }
 
-        api.post('/api/v1/' + this.questionnaire.name + '/' + idValue + '?_method=PUT', options)
+        api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireID + '?_method=PUT', options)
+      },
+
+      /**
+       * On submit handler
+       * 1) Set status to SUBMITTED
+       * 2) Trigger form validation
+       * 3) Post
+       */
+      onSubmit () {
+        // Trigger submit
+        this.formData.status = 'SUBMITTED'
+        this.formState.$submitted = true
+        this.formState._validate()
+
+        // Check if form is valid
+        if (this.formState.$valid) {
+          // Generate submit timestamp
+          this.formData.submitDate = moment().toISOString()
+          const options = {
+            body: JSON.stringify(this.formData)
+          }
+
+          // Submit to server and redirect to thank you page
+          api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireID + '?_method=PUT', options).then(() => {
+            this.$router.push({path: '/' + this.questionnaireName + '/thanks'})
+          }).catch(error => {
+            console.log('Something went wrong submitting the questionnaire', error)
+          })
+        } else {
+          this.formData.status = 'OPEN'
+          this.formState.$submitted = false
+        }
       }
     },
     computed: {
+
+      /**
+       * Computes the ID of the questionnaire belonging to the current user
+       */
+      questionnaireID () {
+        return this.entity[this.questionnaire.idAttribute]
+      },
 
       /**
        * Determine chapters based on compounds
@@ -148,18 +176,14 @@
       }
     },
     created () {
-      // Retrieve questionnaire via questionnaire API first to set status to OPEN
-      api.get('/menu/plugins/questionnaires/' + this.questionnaireName).then(response => {
-        response.json().then(data => {
-          api.get('/api/v2/' + data.name).then(response => {
-            this.questionnaire = response.meta
-            this.entity = response.items.length > 0 ? response.items[0] : {}
+      api.get('/api/v2/' + this.questionnaireName).then(response => {
+        this.questionnaire = response.meta
+        this.entity = response.items.length > 0 ? response.items[0] : {}
 
-            this.schema.fields = EntityToStateMapper.generateFormFields(this.questionnaire)
-            this.formData = EntityToStateMapper.generateFormData(this.schema.fields, this.entity)
-            this.loading = false
-          })
-        })
+        const form = EntityToFormMapper.generateForm(this.questionnaire, this.entity)
+        this.schema.fields = form.formFields
+        this.formData = form.formData
+        this.loading = false
       })
     },
     components: {

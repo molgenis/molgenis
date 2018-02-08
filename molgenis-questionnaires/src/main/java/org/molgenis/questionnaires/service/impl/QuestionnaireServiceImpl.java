@@ -1,5 +1,6 @@
 package org.molgenis.questionnaires.service.impl;
 
+import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
@@ -8,7 +9,7 @@ import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,19 +25,23 @@ import static org.molgenis.questionnaires.meta.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.meta.QuestionnaireStatus.OPEN;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
-@Component
+@Service
 public class QuestionnaireServiceImpl implements QuestionnaireService
 {
+	private static final String DEFAULT_SUBMISSION_TEXT = "<h3>Thank you for submitting the questionnaire.</h3>";
+
 	private final DataService dataService;
 	private final EntityManager entityManager;
 	private final QuestionnaireFactory questionnaireFactory;
+	private final StaticContentService staticContentService;
 
 	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
-			QuestionnaireFactory questionnaireFactory)
+			QuestionnaireFactory questionnaireFactory, StaticContentService staticContentService)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.questionnaireFactory = requireNonNull(questionnaireFactory);
+		this.staticContentService = requireNonNull(staticContentService);
 	}
 
 	@Override
@@ -69,20 +74,35 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	}
 
 	@Override
-	public QuestionnaireResponse getQuestionnaire(String questionnaireId)
+	public QuestionnaireResponse getQuestionnaire(String id)
 	{
-		Questionnaire questionnaire = findQuestionnaireEntity(questionnaireId);
+		Questionnaire questionnaire = findQuestionnaireEntity(id);
 		if (questionnaire.getStatus().equals(NOT_STARTED))
 		{
 			// Set questionnaire status to open once it has been requested
 			questionnaire.setStatus(OPEN);
-			dataService.update(questionnaireId, questionnaire);
+			dataService.update(id, questionnaire);
 		}
 		return QuestionnaireResponse.create(questionnaire);
 	}
 
+	@Override
+	public String getQuestionnaireSubmissionText(String id)
+	{
+		String key = id + "_submissionText";
+		String submissionText = staticContentService.getContent(key);
+
+		if (submissionText == null)
+		{
+			submissionText = DEFAULT_SUBMISSION_TEXT;
+			staticContentService.submitContent(key, submissionText);
+		}
+
+		return submissionText;
+	}
+
 	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
-		return dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername()), Questionnaire.class);
+		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
 	}
 }

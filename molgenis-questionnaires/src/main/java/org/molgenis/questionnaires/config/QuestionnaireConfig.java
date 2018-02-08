@@ -12,5 +12,4 @@ public class QuestionnaireConfig
 	{
 		return new PropertiesMessageSource("questionnaire");
 	}
-
 }
