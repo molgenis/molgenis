@@ -22,6 +22,15 @@ public class SidUtils
 		return new PrincipalSid(user.getUsername());
 	}
 
+	/**
+	 * @deprecated use {@link #createSid(User)}
+	 */
+	@Deprecated
+	public static Sid createSid(String username)
+	{
+		return new PrincipalSid(username);
+	}
+
 	public static Sid createSid(Group group)
 	{
 		String groupAuthority = createGroupAuthority(group);
