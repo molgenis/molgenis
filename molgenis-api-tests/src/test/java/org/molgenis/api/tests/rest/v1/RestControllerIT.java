@@ -257,15 +257,15 @@ public class RestControllerIT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
-			   .get(PATH + "sys_sec_User/meta")
+			   .get(PATH + "sys_App/meta")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]",
-					   Matchers.equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
+					   Matchers.equalTo("No read permission on entity type 'App' with id 'sys_App'"));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
-	@Test(dependsOnMethods = { "testRetrieveSystemEntityTypeNotAllowed" })
+	@Test
 	public void testRetrieveSystemEntityType()
 	{
 		given().log()
