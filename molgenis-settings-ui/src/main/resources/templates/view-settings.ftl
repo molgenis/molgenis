@@ -15,9 +15,7 @@
         baseUrl: '${baseUrl}',
         lng: '${lng}',
         fallbackLng: '${fallbackLng}',
-        isSuperUser: ${isSuperUser?c},
-        settingEntities: ${settingEntities},
-        initialSelectedSetting: '${initialSelectedSetting}'
+        isSuperUser: ${isSuperUser?c}
     }
 </script>
 

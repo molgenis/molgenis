@@ -37,7 +37,7 @@
       </div>
 
       <div class="card-footer">
-        <button id="save-btn" class="btn btn-primary" type="submit" form="settings-form">Save</button>
+        <button id="save-btn" class="btn btn-primary"type="submit" @click.prevent="onSubmit(formData)">Save</button>
       </div>
 
     </div>
@@ -50,26 +50,31 @@
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
 
-  const {initialSelectedSetting} = window.__INITIAL_STATE__
-  const { settingEntities } = window.__INITIAL_STATE__
-
   export default {
     name: 'Settings',
     data () {
       return {
-        selectedSetting: initialSelectedSetting,
+        selectedSetting: null,
         state: {},
         formFields: [],
         formData: {},
-        settings: settingEntities,
+        settingsOptions: [],
         alert: null
       }
     },
     methods: {
       onSubmit: (formData) => {
         console.log('onSubmit')
-        // this.$store.commit(SET_FORM_DATA, formData)
-        // this.$store.dispatch(UPDATE_SETTINGS, this.$store.state.selectedSetting)
+        const options = {
+          body: JSON.stringify(formData)
+        }
+        const uri = '/api/v1/' + this.selectedSetting + '/' + formData.id + '?_method=PUT'
+        api.post(uri, options).then(() => {
+          this.alert = {
+            message: 'Settings are successfully saved',
+            type: 'success'
+          }
+        }, this.handleError)
       },
       updateSelectedSetting (selectedSetting) {
         console.log('updateSelectedSetting')
@@ -78,21 +83,24 @@
       clearAlert: () => {
         this.alert = null
       },
-      initializeFormComponent (response) {
+      handleError (error) {
+        this.alert = {
+          message: error,
+          type: 'danger'
+        }
+      },
+      initializeSettingsOptions (response) {
+        this.settingsOptions = response.items
+      },
+      initializeForm (response) {
         const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
       }
     },
     created: function () {
-      const uri = '/api/v2/' + this.selectedSetting
-      return api.get(uri).then(this.initializeFormComponent, error => {
-        console.log('error after get data')
-        this.alert = {
-          message: error,
-          type: 'danger'
-        }
-      })
+      api.get('/api/v2/sys_set_settings').then(this.initializeSettingsOptions, this.handleError)
+      api.get('/api/v2/' + this.selectedSetting).then(this.initializeForm, this.handleError)
     },
     components: {
       FormComponent,

@@ -1,11 +1,8 @@
 import { createLocalVue, shallow } from 'vue-test-utils'
-import Vuex from 'vuex'
 import Settings from '@/components/Settings'
-import { GET_SETTINGS } from '@/store/actions'
 import td from 'testdouble'
 
 const localVue = createLocalVue()
-localVue.use(Vuex)
 
 describe('Settings.vue', () => {
   it('should display settings name', () => {
