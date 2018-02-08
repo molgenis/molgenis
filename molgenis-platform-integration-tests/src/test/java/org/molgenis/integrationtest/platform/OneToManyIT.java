@@ -6,34 +6,35 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
 import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.*;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.OneToManyTestHarness.*;
@@ -43,14 +44,22 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.integrationtest.platform.OneToManyIT.USERNAME;
 import static org.molgenis.integrationtest.platform.PlatformIT.*;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
+@WithMockUser(username = USERNAME)
 public class OneToManyIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
+	static final String USERNAME = "onetomany-user";
 
 	@Autowired
 	private IndexJobScheduler indexService;
@@ -60,23 +69,19 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 
 	@BeforeClass
+	@Transactional
 	public void setUp()
 	{
-		List<GrantedAuthority> authorities = newArrayList();
-		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
-		{
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Author" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Book" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys" + PACKAGE_SEPARATOR + "Person" + i, true, true, true));
-		}
-		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
-		authorities.addAll(makeAuthorities(DECORATOR_CONFIGURATION, false, true, true));
-
-		SecurityContextHolder.getContext()
-							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
+		populateUserPermissions();
 		waitForWorkToBeFinished(indexService, LOG);
+	}
+
+	@AfterClass
+	@Transactional
+	public void afterClass()
+	{
+		runAsSystem(() -> removeAclSidEntries(new PrincipalSid(USERNAME),
+				getEntityTypePermissionMap().keySet().stream().map(EntityTypeIdentity::new).collect(toList())));
 	}
 
 	@AfterMethod
@@ -471,5 +476,61 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	private Object[][] allTestCaseDataProvider()
 	{
 		return new Object[][] { { XREF_NULLABLE }, { XREF_REQUIRED }, { ASCENDING_ORDER }, { DESCENDING_ORDER } };
+	}
+
+	@Autowired
+	private MutableAclService mutableAclService;
+
+	public void populateUserPermissions()
+	{
+		Sid sid = new PrincipalSid(USERNAME);
+		Map<String, EntityTypePermission> entityTypePermissionMap = getEntityTypePermissionMap();
+		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
+		{
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
+			mutableAclService.updateAcl(acl);
+		}));
+	}
+
+	private Map<String, EntityTypePermission> getEntityTypePermissionMap()
+	{
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+
+		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
+		{
+			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Author" + i, WRITE);
+			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Book" + i, WRITE);
+			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Person" + i, WRITE);
+		}
+		entityTypePermissionMap.put(PACKAGE, READ);
+		entityTypePermissionMap.put(ENTITY_TYPE_META_DATA, READ);
+		entityTypePermissionMap.put(ATTRIBUTE_META_DATA, READ);
+		entityTypePermissionMap.put(DECORATOR_CONFIGURATION, READ);
+		return entityTypePermissionMap;
+	}
+
+	public void removeAclSidEntries(Sid sid, List<ObjectIdentity> objectIdentities)
+	{
+		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
+				objectIdentities, singletonList(sid));
+		acls.forEach(((objectIdentity, acl) ->
+		{
+			boolean aclUpdated = false;
+			int nrEntries = acl.getEntries().size();
+			for (int i = nrEntries - 1; i >= 0; i--)
+			{
+				AccessControlEntry accessControlEntry = acl.getEntries().get(i);
+				if (accessControlEntry.getSid().equals(sid))
+				{
+					acl.deleteAce(i);
+					aclUpdated = true;
+				}
+			}
+			if (aclUpdated)
+			{
+				mutableAclService.updateAcl(acl);
+			}
+		}));
 	}
 }
