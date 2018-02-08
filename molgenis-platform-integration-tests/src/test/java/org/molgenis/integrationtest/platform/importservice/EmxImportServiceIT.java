@@ -50,6 +50,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		return user;
 	}
 
+	// FIXME remove roles and replace with ACLs
 	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
 			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
 			ROLE_COUNT_DECORATOR_CONFIG })

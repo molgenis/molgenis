@@ -60,6 +60,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 {
 	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
+	// FIXME remove roles and replace with ACLs
 	static final String ROLE_SU = "SU";
 	static final String ROLE_READ_PACKAGE = "ENTITY_READ_sys_md_Package";
 	static final String ROLE_COUNT_PACKAGE = "ENTITY_COUNT_sys_md_Package";

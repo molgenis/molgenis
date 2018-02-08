@@ -194,6 +194,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType)));
 	}
 
+	// FIXME remove
 	static List<GrantedAuthority> makeAuthorities(String entityTypeId, boolean write, boolean read, boolean count)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
@@ -205,26 +206,27 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void setAuthentication()
 	{
-		List<GrantedAuthority> authorities = newArrayList();
-
-		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
-		authorities.addAll(makeAuthorities(LANGUAGE, false, true, true));
-		authorities.addAll(makeAuthorities(L10N_STRING, false, true, true));
-		authorities.addAll(makeAuthorities(refEntityTypeStatic.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(entityTypeStatic.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(entityTypeDynamic.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getId(), false, true, true));
-		authorities.addAll(makeAuthorities(selfXrefEntityType.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(languageMetadata.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(attributeMetadata.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(l10nStringMetaData.getId(), true, false, false));
-		authorities.addAll(makeAuthorities(entityTypeMetadata.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(decoratorConfigurationMetadata.getId(), true, true, true));
+		// TODO remove commented code
+		//		List<GrantedAuthority> authorities = newArrayList();
+		//
+		//		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
+		//		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
+		//		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
+		//		authorities.addAll(makeAuthorities(LANGUAGE, false, true, true));
+		//		authorities.addAll(makeAuthorities(L10N_STRING, false, true, true));
+		//		authorities.addAll(makeAuthorities(refEntityTypeStatic.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(entityTypeStatic.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(entityTypeDynamic.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getId(), false, true, true));
+		//		authorities.addAll(makeAuthorities(selfXrefEntityType.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(languageMetadata.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(attributeMetadata.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(l10nStringMetaData.getId(), true, false, false));
+		//		authorities.addAll(makeAuthorities(entityTypeMetadata.getId(), true, true, true));
+		//		authorities.addAll(makeAuthorities(decoratorConfigurationMetadata.getId(), true, true, true));
 
 		SecurityContextHolder.getContext()
-							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
+							 .setAuthentication(new TestingAuthenticationToken("user", "user", emptyList()));
 	}
 
 	@AfterMethod

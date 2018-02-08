@@ -5,44 +5,36 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.ontology.core.meta.Ontology;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class OntologyImportServiceIT extends ImportServiceIT
 {
 	private static final String USERNAME = "ontology_user";
-	private static final String ROLE_COUNT_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_COUNT_sys_ont_OntologyTermDynamicAnnotation";
-	private static final String ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_READ_sys_ont_OntologyTermDynamicAnnotation";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ENTITY_WRITE_sys_ont_OntologyTermDynamicAnnotation";
-	private static final String ROLE_COUNT_ONTOLOGY_TERM_NODE_PATH = "ENTITY_COUNT_sys_ont_OntologyTermNodePath";
-	private static final String ROLE_READ_ONTOLOGY_TERM_NODE_PATH = "ENTITY_READ_sys_ont_OntologyTermNodePath";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH = "ENTITY_WRITE_sys_ont_OntologyTermNodePath";
-	private static final String ROLE_COUNT_ONTOLOGY_TERM_SYNONYM = "ENTITY_COUNT_sys_ont_OntologyTermSynonym";
-	private static final String ROLE_READ_ONTOLOGY_TERM_SYNONYM = "ENTITY_READ_sys_ont_OntologyTermSynonym";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM_SYNONYM = "ENTITY_WRITE_sys_ont_OntologyTermSynonym";
-	private static final String ROLE_COUNT_ONTOLOGY = "ENTITY_COUNT_sys_ont_Ontology";
-	private static final String ROLE_READ_ONTOLOGY = "ENTITY_READ_sys_ont_Ontology";
-	private static final String ROLE_WRITE_ONTOLOGY = "ENTITY_WRITE_sys_ont_Ontology";
-	private static final String ROLE_COUNT_ONTOLOGY_TERM = "ENTITY_COUNT_sys_ont_OntologyTerm";
-	private static final String ROLE_READ_ONTOLOGY_TERM = "ENTITY_READ_sys_ont_OntologyTerm";
-	private static final String ROLE_WRITE_ONTOLOGY_TERM = "ENTITY_WRITE_sys_ont_OntologyTerm";
-	private static final String ROLE_COUNT_DECORATOR_CONFIG = "ENTITY_COUNT_sys_dec_DecoratorConfiguration";
-	private static final String ROLE_READ_DECORATOR_CONFIG = "ENTITY_READ_sys_dec_DecoratorConfiguration";
 
 	@Override
 	User getTestUser()
@@ -54,17 +46,11 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE,
-			ROLE_COUNT_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_COUNT_ONTOLOGY_TERM_SYNONYM,
-			ROLE_READ_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_COUNT_ONTOLOGY_TERM_NODE_PATH,
-			ROLE_READ_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_COUNT_ONTOLOGY,
-			ROLE_READ_ONTOLOGY, ROLE_WRITE_ONTOLOGY, ROLE_COUNT_ONTOLOGY_TERM, ROLE_READ_ONTOLOGY_TERM,
-			ROLE_WRITE_ONTOLOGY_TERM, ROLE_COUNT_DECORATOR_CONFIG, ROLE_READ_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportOboAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportObo();
 	}
 
@@ -88,7 +74,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemAspect.runAsSystem(this::verifyOboAsSystem);
+		runAsSystem(this::verifyOboAsSystem);
 	}
 
 	private void verifyOboAsSystem()
@@ -115,17 +101,11 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE,
-			ROLE_COUNT_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_READ_ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-			ROLE_WRITE_ONTOLOGY_TERM_DYNAMIC_ANNOTATION, ROLE_COUNT_ONTOLOGY_TERM_SYNONYM,
-			ROLE_READ_ONTOLOGY_TERM_SYNONYM, ROLE_WRITE_ONTOLOGY_TERM_SYNONYM, ROLE_COUNT_ONTOLOGY_TERM_NODE_PATH,
-			ROLE_READ_ONTOLOGY_TERM_NODE_PATH, ROLE_WRITE_ONTOLOGY_TERM_NODE_PATH, ROLE_COUNT_ONTOLOGY,
-			ROLE_READ_ONTOLOGY, ROLE_WRITE_ONTOLOGY, ROLE_COUNT_ONTOLOGY_TERM, ROLE_READ_ONTOLOGY_TERM,
-			ROLE_WRITE_ONTOLOGY_TERM, ROLE_COUNT_DECORATOR_CONFIG, ROLE_READ_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportOwlAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportOwl();
 	}
 
@@ -149,7 +129,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 				emptySet());
 
 		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		RunAsSystemAspect.runAsSystem(this::verifyOwlAsSystem);
+		runAsSystem(this::verifyOwlAsSystem);
 	}
 
 	private void verifyOwlAsSystem()
@@ -204,5 +184,28 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		// verify team ontology
 		ontology = (Ontology) team.get("ontology");
 		assertEquals(ontology.getOntologyName(), "ontology-small");
+	}
+
+	@Autowired
+	private MutableAclService mutableAclService;
+
+	private void populateUserPermissions()
+	{
+		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put("sys_ont_OntologyTermDynamicAnnotation", WRITE);
+		entityTypePermissionMap.put("sys_ont_OntologyTermNodePath", WRITE);
+		entityTypePermissionMap.put("sys_ont_OntologyTermSynonym", WRITE);
+		entityTypePermissionMap.put("sys_ont_Ontology", WRITE);
+		entityTypePermissionMap.put("sys_ont_OntologyTerm", WRITE);
+		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+
+		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
+		{
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
+			mutableAclService.updateAcl(acl);
+		}));
 	}
 }
