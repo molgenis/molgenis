@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@molgenis/molgenis-api-client@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.1.0.tgz#66cdcca5c4a2e0b413be7aef27cd5559ffdcb2e2"
+"@molgenis/molgenis-api-client@^2.1.3":
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.1.3.tgz#9332bae3e343c78c58582687bf1c1b157e4c396f"
   dependencies:
     babel-runtime "^6.11.6"
     form-data "^2.3.1"
