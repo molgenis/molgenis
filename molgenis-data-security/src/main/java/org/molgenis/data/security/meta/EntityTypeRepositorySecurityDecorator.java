@@ -332,7 +332,6 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	@Override
 	public void add(EntityType entity)
 	{
-		validateAddAllowed(entity);
 		createAcl(entity);
 		super.add(entity);
 	}
@@ -342,15 +341,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		return super.add(entities.filter(entityType ->
 		{
-			validateAddAllowed(entityType);
 			createAcl(entityType);
 			return true;
 		}));
-	}
-
-	private void validateAddAllowed(EntityType entityType)
-	{
-		validatePermission(entityType, Permission.WRITEMETA);
 	}
 
 	/**
