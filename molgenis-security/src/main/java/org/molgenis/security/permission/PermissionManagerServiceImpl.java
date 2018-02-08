@@ -264,19 +264,23 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private Permission toEntityTypePermission(AccessControlEntry ace)
 	{
 		Permission entityTypePermission = new Permission();
-		if (ace.getPermission().equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA)))
+		if (ace.getPermission()
+			   .equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA)))
 		{
 			entityTypePermission.setType("writemeta");
 		}
-		else if (ace.getPermission().equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITE)))
+		else if (ace.getPermission()
+					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITE)))
 		{
 			entityTypePermission.setType("write");
 		}
-		else if (ace.getPermission().equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.READ)))
+		else if (ace.getPermission()
+					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.READ)))
 		{
 			entityTypePermission.setType("read");
 		}
-		else if (ace.getPermission().equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.COUNT)))
+		else if (ace.getPermission()
+					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.COUNT)))
 		{
 			entityTypePermission.setType("count");
 		}
@@ -321,7 +325,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		Map<String, String> entityTypeMap = entityTypes.stream()
 													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
 													   {
-														   throw new IllegalStateException(format("Duplicate key %s", u));
+														   throw new IllegalStateException(
+																   format("Duplicate key %s", u));
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
@@ -475,7 +480,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceSidPluginPermissions(Sid sid, Map<String, PluginPermission> pluginPermissions)
 	{
-		List<ObjectIdentity> objectIdentities = pluginPermissions.keySet().stream().map(PluginIdentity::new).collect(toList());
+		List<ObjectIdentity> objectIdentities = pluginPermissions.keySet()
+																 .stream()
+																 .map(PluginIdentity::new)
+																 .collect(toList());
 		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
 				objectIdentities, singletonList(sid));
 		acls.forEach(((objectIdentity, acl) ->
@@ -496,17 +504,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceSidEntityTypePermissions(Sid sid, Map<String, EntityTypePermission> entityTypePermissions)
 	{
-		List<ObjectIdentity> objectIdentities = entityTypePermissions.keySet().stream().map(EntityTypeIdentity::new).collect(toList());
+		List<ObjectIdentity> objectIdentities = entityTypePermissions.keySet()
+																	 .stream()
+																	 .map(EntityTypeIdentity::new)
+																	 .collect(toList());
 		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
 				objectIdentities, singletonList(sid));
 		acls.forEach(((objectIdentity, acl) ->
 		{
-			int nrEntries = acl.getEntries().size();
-			for (int i = nrEntries - 1; i >= 0; i--)
-			{
-				acl.deleteAce(i);
-			}
-
 			EntityTypePermission entityTypePermission = entityTypePermissions.get(
 					objectIdentity.getIdentifier().toString());
 			CumulativePermission cumulativePermission = EntityTypePermissionUtils.getCumulativePermission(

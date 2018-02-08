@@ -16,6 +16,7 @@ import java.util.Collection;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
@@ -42,12 +43,15 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes)
 	{
 		Sid sid = SidUtils.createSid(getCurrentUsername());
-		CumulativePermission permission = getCumulativePermission(EntityTypePermission.WRITEMETA);
-		entityTypes.forEach(entityType ->
+		runAsSystem(() ->
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType));
-			acl.insertAce(acl.getEntries().size(), permission, sid, true);
-			mutableAclService.updateAcl(acl);
+			CumulativePermission permission = getCumulativePermission(EntityTypePermission.WRITEMETA);
+			entityTypes.forEach(entityType ->
+			{
+				MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType));
+				acl.insertAce(acl.getEntries().size(), permission, sid, true);
+				mutableAclService.updateAcl(acl);
+			});
 		});
 	}
 }
