@@ -81,13 +81,12 @@ public class EntityManagerImpl implements EntityManager
 			entityPopulator.populate(entity);
 		}
 
-		EntityFactory<? extends Entity, ?> entityFactory =  entityFactoryRegistry.getEntityFactory(entityType);
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityType);
 		if (entityFactory != null)
 		{
 			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
 			return entityFactory.create(entity);
 		}
-
 		return entity;
 	}
 
