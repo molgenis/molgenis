@@ -104,8 +104,9 @@ public class EntityServiceImpl implements EntityService
 		});
 
 		// Store the dataTable (metadata only)
-		permissionSystemService.giveUserWriteMetaPermissions(entityType);
 		metaDataService.addEntityType(entityType);
+		//TODO: the user who adds/owns should get WRITE META always.
+		permissionSystemService.giveUserWriteMetaPermissions(entityType);
 
 		List<Entity> rows = newArrayList();
 		int numberOfRows = dataCollection.getColumns().get(0).getDataValues().size();

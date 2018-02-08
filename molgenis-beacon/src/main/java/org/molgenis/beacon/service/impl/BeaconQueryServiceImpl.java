@@ -10,6 +10,8 @@ import org.molgenis.beacon.controller.model.exceptions.UnknownBeaconException;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -17,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class BeaconQueryServiceImpl implements BeaconQueryService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(BeaconQueryServiceImpl.class);
 	private final DataService dataService;
 
 	public BeaconQueryServiceImpl(DataService dataService)
@@ -47,6 +50,9 @@ public class BeaconQueryServiceImpl implements BeaconQueryService
 		}
 		catch (Exception e)
 		{
+			// TODO create @ControllerAdvice BeaconExceptionHandler to handle beacon exceptions returning proper responses.
+			// Till then, let's log the exception here instead of quietly eating it up.
+			LOG.error("An exception occurred while querying for beacon", e);
 			throw new NestedBeaconException(beaconId,
 					BeaconAlleleRequest.create(referenceName, start, referenceBases, alternateBases));
 		}

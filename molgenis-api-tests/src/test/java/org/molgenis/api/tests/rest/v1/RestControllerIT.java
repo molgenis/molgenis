@@ -1,10 +1,12 @@
 package org.molgenis.api.tests.rest.v1;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
 import org.molgenis.api.tests.utils.RestTestUtils;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -23,7 +25,7 @@ public class RestControllerIT
 	private static final String PATH = "api/v1/";
 
 	// User credentials
-	private static final String REST_TEST_USER = "rest_test_user";
+	private String testUserName;
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
 	private String testUserId;
 	private String testUserToken;
@@ -53,15 +55,19 @@ public class RestControllerIT
 
 		adminToken = login(adminUserName, adminPassword);
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserName = "rest_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, testUserName);
 
-		grantSystemRights(adminToken, testUserId, "sys_FreemarkerTemplate", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_scr_ScriptType", READ);
-		grantSystemRights(adminToken, testUserId, "sys_sec_UserAuthority", COUNT);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITEMETA);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_FreemarkerTemplate", WRITE)
+														  .put("sys_scr_ScriptType", READ)
+														  .put("sys_sec_UserAuthority", COUNT)
+														  .put("sys_FileMeta", WRITEMETA)
+														  .put(UserMetaData.USER, COUNT)
+														  .build());
 
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -224,7 +230,7 @@ public class RestControllerIT
 					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		// clean up after test
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		this.testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6575
@@ -251,19 +257,17 @@ public class RestControllerIT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
-			   .get(PATH + "sys_sec_User/meta")
+			   .get(PATH + "sys_App/meta")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]",
-					   Matchers.equalTo("No read permission on entity type 'User' with id 'sys_sec_User'"));
+					   Matchers.equalTo("No read permission on entity type 'App' with id 'sys_App'"));
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
-	@Test(dependsOnMethods = { "testRetrieveSystemEntityTypeNotAllowed" })
+	@Test
 	public void testRetrieveSystemEntityType()
 	{
-		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
-
 		given().log()
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
