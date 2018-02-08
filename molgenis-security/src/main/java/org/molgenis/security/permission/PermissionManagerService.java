@@ -10,7 +10,10 @@ import java.util.List;
 
 /**
  * Manage user and group permissions for plugins and entity classes
+ *
+ * @deprecated use {@link org.springframework.security.acls.model.MutableAclService}
  */
+@Deprecated
 public interface PermissionManagerService
 {
 	List<User> getUsers();

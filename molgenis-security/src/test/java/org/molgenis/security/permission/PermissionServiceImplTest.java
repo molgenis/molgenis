@@ -2,6 +2,7 @@ package org.molgenis.security.permission;
 
 import org.mockito.Mock;
 import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.access.PermissionEvaluator;
@@ -33,23 +34,35 @@ public class PermissionServiceImplTest extends AbstractMockitoTestNGSpringContex
 		permissionService = new PermissionServiceImpl(permissionEvaluator);
 	}
 
-	@WithMockUser(username = "USER", authorities = { "ROLE_ENTITY_READ_entity1", "ROLE_ENTITY_WRITE_entity2",
-			"ROLE_ENTITY_COUNT_entity3" })
+	@WithMockUser(username = "USER")
 	@Test
-	public void hasPermissionOnEntity()
+	public void hasPermissionOnEntityTypeTrue()
 	{
-		assertTrue(permissionService.hasPermissionOnEntityType("entity1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.COUNT));
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
+				EntityTypePermission.READ)).thenReturn(true);
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
+	}
+
+	@WithMockUser(username = "USER")
+	@Test
+	public void hasPermissionOnEntityTypeFalse()
+	{
+		assertFalse(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
+	@Test
+	public void hasPermissionOnEntityTypeSuperuser()
+	{
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void hasPermissionOnEntityTypeSystemUser()
+	{
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
 	}
 
 	@WithMockUser(username = "USER")

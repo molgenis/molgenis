@@ -1,10 +1,12 @@
 package org.molgenis.data.security.auth;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -17,32 +19,28 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
-public class UserRepositoryDecoratorTest
+public class UserRepositoryDecoratorTest extends AbstractMockitoTest
 {
+	@Mock
 	private Repository<User> delegateRepository;
-	private Repository<UserAuthority> userAuthorityRepository;
-	private Repository<GroupMember> groupMemberRepository;
-	private UserRepositoryDecorator userRepositoryDecorator;
-	private PasswordEncoder passwordEncoder;
+	@Mock
 	private DataService dataService;
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
-	@SuppressWarnings("unchecked")
+	private UserRepositoryDecorator userRepositoryDecorator;
+
 	@BeforeMethod
 	public void setUp()
 	{
-		delegateRepository = mock(Repository.class);
-		userAuthorityRepository = mock(Repository.class);
-		groupMemberRepository = mock(Repository.class);
-		UserAuthorityFactory userAuthorityFactory = mock(UserAuthorityFactory.class);
-		when(userAuthorityFactory.create()).thenAnswer(invocation -> mock(UserAuthority.class));
-		dataService = mock(DataService.class);
-		when(dataService.getRepository(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityRepository);
-		when(dataService.getRepository(GROUP_MEMBER, GroupMember.class)).thenReturn(groupMemberRepository);
-		passwordEncoder = mock(PasswordEncoder.class);
-		userRepositoryDecorator = new UserRepositoryDecorator(delegateRepository, userAuthorityFactory, dataService,
-				passwordEncoder);
+		userRepositoryDecorator = new UserRepositoryDecorator(delegateRepository, dataService, passwordEncoder);
+	}
+
+	@Test(expectedExceptions = NullPointerException.class)
+	public void testUserRepositoryDecorator()
+	{
+		new UserRepositoryDecorator(null, null, null);
 	}
 
 	@Test
@@ -51,11 +49,9 @@ public class UserRepositoryDecoratorTest
 		String password = "password";
 		User user = mock(User.class);
 		when(user.getPassword()).thenReturn(password);
-		when(user.isSuperuser()).thenReturn(false);
 		userRepositoryDecorator.add(user);
 		verify(passwordEncoder).encode(password);
 		verify(delegateRepository).add(user);
-		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -65,10 +61,8 @@ public class UserRepositoryDecoratorTest
 		String password = "password";
 		User user0 = mock(User.class);
 		when(user0.getPassword()).thenReturn(password);
-		when(user0.isSuperuser()).thenReturn(false);
 		User user1 = mock(User.class);
 		when(user1.getPassword()).thenReturn(password);
-		when(user1.isSuperuser()).thenReturn(false);
 
 		when(delegateRepository.add(any(Stream.class))).thenAnswer(invocation ->
 		{
@@ -78,7 +72,6 @@ public class UserRepositoryDecoratorTest
 		});
 		Assert.assertEquals(userRepositoryDecorator.add(Stream.of(user0, user1)), Integer.valueOf(2));
 		verify(passwordEncoder, times(2)).encode(password);
-		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@Test
@@ -87,16 +80,12 @@ public class UserRepositoryDecoratorTest
 		User user = mock(User.class);
 
 		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
-		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-				UserAuthority.class)).thenReturn(userAuthorities);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
 				GroupMember.class)).thenReturn(groupMembers);
 
 		userRepositoryDecorator.delete(user);
 
 		verify(delegateRepository, times(1)).delete(user);
-		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
 		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
@@ -108,9 +97,6 @@ public class UserRepositoryDecoratorTest
 
 		Stream<User> entities = Stream.of(user);
 		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
-		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-				UserAuthority.class)).thenReturn(userAuthorities);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
 				GroupMember.class)).thenReturn(groupMembers);
 
@@ -121,7 +107,6 @@ public class UserRepositoryDecoratorTest
 		captor.getValue().forEach(u ->
 		{
 		});
-		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
 		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
@@ -129,19 +114,14 @@ public class UserRepositoryDecoratorTest
 	public void deleteById()
 	{
 		User user = mock(User.class);
-		when(userRepositoryDecorator.findOneById("1")).thenReturn(user);
 
 		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
-		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-				UserAuthority.class)).thenReturn(userAuthorities);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
 				GroupMember.class)).thenReturn(groupMembers);
 
 		userRepositoryDecorator.delete(user);
 
 		verify(delegateRepository, times(1)).delete(user);
-		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
 		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
@@ -153,9 +133,6 @@ public class UserRepositoryDecoratorTest
 		when(userRepositoryDecorator.findOneById("1")).thenReturn(user);
 
 		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		Stream<UserAuthority> userAuthorities = Stream.of(mock(UserAuthority.class));
-		when(dataService.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, user),
-				UserAuthority.class)).thenReturn(userAuthorities);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
 				GroupMember.class)).thenReturn(groupMembers);
 
@@ -166,7 +143,6 @@ public class UserRepositoryDecoratorTest
 		captor.getValue().forEach(u ->
 		{
 		});
-		verify(dataService, times(1)).delete(USER_AUTHORITY, userAuthorities);
 		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
@@ -183,7 +159,6 @@ public class UserRepositoryDecoratorTest
 		when(passwordEncoder.encode("password")).thenReturn("passwordHash");
 
 		User currentUser = mock(User.class);
-		when(currentUser.getId()).thenReturn("1");
 		when(currentUser.getPassword()).thenReturn("currentPasswordHash");
 		when(userRepositoryDecorator.findOneById("1")).thenReturn(currentUser);
 
@@ -197,17 +172,13 @@ public class UserRepositoryDecoratorTest
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
 		verify(user).setPassword("passwordHash");
-		// TODO add authority tests
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStreamUnchangedPassword()
 	{
-		when(passwordEncoder.encode("currentPasswordHash")).thenReturn("blaat");
-
 		User currentUser = mock(User.class);
-		when(currentUser.getId()).thenReturn("1");
 		when(currentUser.getPassword()).thenReturn("currentPasswordHash");
 		when(userRepositoryDecorator.findOneById("1")).thenReturn(currentUser);
 
@@ -221,21 +192,5 @@ public class UserRepositoryDecoratorTest
 		userRepositoryDecorator.update(entities);
 		Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
 		verify(user).setPassword("currentPasswordHash");
-		// TODO add authority tests
-	}
-
-	@Test
-	public void addEntitySu()
-	{
-		String password = "password";
-		User user = mock(User.class);
-		when(user.getId()).thenReturn("1");
-		when(user.getPassword()).thenReturn(password);
-		when(user.isSuperuser()).thenReturn(true);
-		when(delegateRepository.findOneById("1")).thenReturn(user);
-
-		userRepositoryDecorator.add(user);
-		verify(passwordEncoder).encode(password);
-		verify(delegateRepository).add(user);
 	}
 }

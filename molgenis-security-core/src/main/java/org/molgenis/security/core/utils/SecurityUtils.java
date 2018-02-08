@@ -124,7 +124,13 @@ public class SecurityUtils
 	public static boolean currentUserIsAuthenticated()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return authentication != null && authentication.isAuthenticated() && !currentUserHasRole(AUTHORITY_ANONYMOUS);
+		return authentication != null && authentication.isAuthenticated() && !currentUserIsAnonymous();
+	}
+
+	private static boolean currentUserIsAnonymous()
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication == null || currentUserHasRole(AUTHORITY_ANONYMOUS);
 	}
 
 	/**

@@ -35,17 +35,15 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final PermissionService permissionService;
-	private final DataService dataService;
 	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
-			DataService dataService, MutableAclService mutableAclService)
+			MutableAclService mutableAclService)
 	{
 		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
-		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
@@ -249,7 +247,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void delete(EntityType entity)
 	{
 		validateDeleteAllowed(entity);
-		deleteAcl(new EntityTypeIdentity(entity));
+		deleteEntityPermissions(entity);
 		super.delete(entity);
 	}
 
@@ -259,7 +257,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.delete(entities.filter(entityType ->
 		{
 			validateDeleteAllowed(entityType);
-			deleteAcl(new EntityTypeIdentity(entityType));
+			deleteEntityPermissions(entityType);
 			return true;
 		}));
 	}
@@ -268,7 +266,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	public void deleteById(Object id)
 	{
 		validateDeleteAllowed(id);
-		deleteAcl(new EntityTypeIdentity(id.toString()));
+		deleteEntityPermissions(id.toString());
 		super.deleteById(id);
 	}
 
@@ -278,7 +276,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		super.deleteAll(ids.filter(id ->
 		{
 			validateDeleteAllowed(id);
-			deleteAcl(new EntityTypeIdentity(id.toString()));
+			deleteEntityPermissions(id.toString());
 			return true;
 		}));
 	}
@@ -289,15 +287,24 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		iterator().forEachRemaining(entityType ->
 		{
 			this.validateDeleteAllowed(entityType);
-			deleteAcl(new EntityTypeIdentity(entityType));
+			deleteEntityPermissions(entityType);
 		});
 		super.deleteAll();
+	}
+
+	private void deleteEntityPermissions(EntityType entityType)
+	{
+		deleteEntityPermissions(entityType.getId());
+	}
+
+	private void deleteEntityPermissions(String entityTypeId)
+	{
+		mutableAclService.deleteAcl(new EntityTypeIdentity(entityTypeId), true);
 	}
 
 	@Override
 	public void add(EntityType entity)
 	{
-		validateAddAllowed(entity);
 		createAcl(entity);
 		super.add(entity);
 	}
@@ -307,15 +314,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		return super.add(entities.filter(entityType ->
 		{
-			validateAddAllowed(entityType);
 			createAcl(entityType);
 			return true;
 		}));
-	}
-
-	private void validateAddAllowed(EntityType entityType)
-	{
-		validatePermission(entityType, Permission.WRITEMETA);
 	}
 
 	/**
@@ -412,11 +413,6 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void createAcl(EntityType entityType)
 	{
-		mutableAclService.createAcl(new EntityTypeIdentity(entityType));
-	}
-
-	private void deleteAcl(EntityTypeIdentity id)
-	{
-		mutableAclService.deleteAcl(id, false);
+		mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
 	}
 }

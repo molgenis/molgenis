@@ -6,7 +6,10 @@ import java.util.Collection;
 
 /**
  * Updates current user permissions as system user, changes take effect immediately.
+ *
+ * @deprecated use {@link org.springframework.security.acls.model.MutableAclService}
  */
+@Deprecated
 public interface PermissionSystemService
 {
 	void giveUserWriteMetaPermissions(EntityType entityType);

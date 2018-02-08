@@ -22,8 +22,27 @@ public class SidUtils
 		return new PrincipalSid(user.getUsername());
 	}
 
+	/**
+	 * @deprecated use {@link #createSid(User)}
+	 */
+	@Deprecated
+	public static Sid createSid(String username)
+	{
+		return new PrincipalSid(username);
+	}
+
 	public static Sid createSid(Group group)
 	{
-		return new GrantedAuthoritySid("ROLE" + '_' + group.getId());
+		String groupAuthority = createGroupAuthority(group);
+		return new GrantedAuthoritySid(groupAuthority);
+	}
+
+	/**
+	 * @deprecated will be replaced with role retrieval based on persisted roles for a group.
+	 */
+	@Deprecated
+	public static String createGroupAuthority(Group group)
+	{
+		return "ROLE" + '_' + group.getId();
 	}
 }

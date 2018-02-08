@@ -1,85 +1,174 @@
 package org.molgenis.security.user;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.security.auth.*;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.collections.Sets;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
-public class UserDetailsServiceTest
+public class UserDetailsServiceTest extends AbstractMockitoTest
 {
+	@Mock
+	private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+
+	@Mock
+	private DataService dataService;
+
 	private UserDetailsService userDetailsService;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		DataService dataService = mock(DataService.class);
-		User adminUser = when(mock(User.class).isSuperuser()).thenReturn(Boolean.TRUE).getMock();
-		when(adminUser.getUsername()).thenReturn("admin");
-		when(adminUser.getPassword()).thenReturn("password");
-		User userUser = when(mock(User.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
-		when(userUser.getUsername()).thenReturn("user");
-		when(userUser.getPassword()).thenReturn("password");
-		Query<User> qAdmin = new QueryImpl<User>().eq(UserMetaData.USERNAME, "admin");
-		when(dataService.findOne(USER, qAdmin, User.class)).thenReturn(adminUser);
-		Query<User> qUser = new QueryImpl<User>().eq(UserMetaData.USERNAME, "user");
-		when(dataService.findOne(USER, qUser, User.class)).thenReturn(userUser);
-		GrantedAuthoritiesMapper authoritiesMapper = authorities -> authorities;
-		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, userUser),
-				UserAuthority.class)).thenAnswer(invocation -> Stream.empty());
-		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.USER, adminUser),
-				UserAuthority.class)).thenAnswer(invocation -> Stream.empty());
-		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, userUser), GroupMember.class)).thenAnswer(
-				invocation -> Stream.empty());
-		when(dataService.findAll(GroupMemberMetaData.GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, adminUser), GroupMember.class)).thenAnswer(
-				invocation -> Stream.empty());
-		userDetailsService = new UserDetailsService(dataService, authoritiesMapper);
+		userDetailsService = new UserDetailsService(dataService, grantedAuthoritiesMapper);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
-	public void MolgenisUserDetailsService()
+	public void testUserDetailsService()
 	{
 		new UserDetailsService(null, null);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void loadUserByUsername_SuperUser()
+	public void testLoadUserByUsernameSuperuser()
 	{
-		UserDetails user = userDetailsService.loadUserByUsername("admin");
-		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
-				(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
-		assertTrue(authorities.contains(SecurityUtils.AUTHORITY_SU));
-		assertEquals(authorities.size(), 1);
+		String username = "user";
+		User user = mock(User.class);
+		when(user.getUsername()).thenReturn(username);
+		when(user.getPassword()).thenReturn("pw");
+		when(user.isActive()).thenReturn(true);
+		when(user.isSuperuser()).thenReturn(true);
+
+		Query<User> userQuery = mock(Query.class);
+		when(userQuery.findOne()).thenReturn(user);
+		Query<User> baseUserQuery = mock(Query.class);
+		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
+		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
+
+		Group group = mock(Group.class);
+		when(group.getId()).thenReturn("groupId");
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getGroup()).thenReturn(group);
+
+		Query<GroupMember> groupMemberQuery = mock(Query.class);
+		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
+		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
+		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
+		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+
+		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
+
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		assertEquals(userDetails.getUsername(), username);
+		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void loadUserByUsername_NonSuperUser()
+	public void testLoadUserByUsernameNonSuperuser()
 	{
-		UserDetails user = userDetailsService.loadUserByUsername("user");
-		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
-				(Function<GrantedAuthority, String>) GrantedAuthority::getAuthority));
-		assertEquals(authorities.size(), 0);
+		String username = "user";
+		User user = mock(User.class);
+		when(user.getUsername()).thenReturn(username);
+		when(user.getPassword()).thenReturn("pw");
+		when(user.isActive()).thenReturn(true);
+
+		Query<User> userQuery = mock(Query.class);
+		when(userQuery.findOne()).thenReturn(user);
+		Query<User> baseUserQuery = mock(Query.class);
+		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
+		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
+
+		Group group = mock(Group.class);
+		when(group.getId()).thenReturn("groupId");
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getGroup()).thenReturn(group);
+
+		Query<GroupMember> groupMemberQuery = mock(Query.class);
+		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
+		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
+		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
+		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+
+		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
+
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		assertEquals(userDetails.getUsername(), username);
+		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testLoadUserByUsernameAnonymous()
+	{
+		String username = "anonymous";
+		User user = mock(User.class);
+		when(user.getUsername()).thenReturn(username);
+		when(user.getPassword()).thenReturn("pw");
+		when(user.isActive()).thenReturn(true);
+
+		Query<User> userQuery = mock(Query.class);
+		when(userQuery.findOne()).thenReturn(user);
+		Query<User> baseUserQuery = mock(Query.class);
+		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
+		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
+
+		Group group = mock(Group.class);
+		when(group.getId()).thenReturn("groupId");
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getGroup()).thenReturn(group);
+
+		Query<GroupMember> groupMemberQuery = mock(Query.class);
+		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
+		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
+		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
+		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+
+		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
+
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		assertEquals(userDetails.getUsername(), username);
+		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+	}
+
+	@Test(expectedExceptions = UsernameNotFoundException.class, expectedExceptionsMessageRegExp = "unknown user 'unknownUser'")
+	public void testLoadUserByUsernameUnknownUser()
+	{
+		String username = "unknownUser";
+
+		Query<User> userQuery = mock(Query.class);
+		when(userQuery.findOne()).thenReturn(null);
+		Query<User> baseUserQuery = mock(Query.class);
+		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
+		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
+
+		userDetailsService.loadUserByUsername(username);
 	}
 }
