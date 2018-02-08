@@ -19,6 +19,8 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.security.EntityTypePermission.WRITEMETA;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Component
@@ -48,7 +50,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 
 		Sid sid = new PrincipalSid(SecurityContextHolder.getContext().getAuthentication());
 		runAsSystem(() -> insertAces(sid, entityTypes.stream().map(EntityTypeIdentity::new).collect(toList()),
-				EntityTypePermission.WRITEMETA));
+				getCumulativePermission(WRITEMETA)));
 	}
 
 	private void insertAces(Sid sid, Collection<ObjectIdentity> objectIdentities,

@@ -23,6 +23,8 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.security.EntityTypePermission.WRITEMETA;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PermissionSystemServiceImplTest.Config.class })
@@ -68,8 +70,8 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 
 		permissionSystemService.giveUserWriteMetaPermissions(asList(entityType0, entityType1));
 
-		verify(acl0).insertAce(0, EntityTypePermission.WRITEMETA, userSid, true);
-		verify(acl1).insertAce(0, EntityTypePermission.WRITEMETA, userSid, true);
+		verify(acl0).insertAce(0, getCumulativePermission(WRITEMETA), userSid, true);
+		verify(acl1).insertAce(0, getCumulativePermission(WRITEMETA), userSid, true);
 
 		verify(mutableAclService).updateAcl(acl0);
 		verify(mutableAclService).updateAcl(acl1);
