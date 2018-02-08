@@ -25,9 +25,13 @@
 
       <div class="card-body">
         <div class="card-block">
-          <div v-if="initialFormData">
-            <form-component id="settings-form" :formState="state" :schema="initFormSchema"
-                            :initialFormData="initialFormData"></form-component>
+          <div v-if="formData">
+            <form-component
+              id="settings-form"
+              :schema="formSchema"
+              :formState="state"
+              :formData="formData">
+            </form-component>
           </div>
         </div>
       </div>
@@ -72,10 +76,10 @@
       }
     },
     computed: {
-      initialFormData () {
+      formData () {
         return this.$store.state.formData
       },
-      initFormSchema () {
+      formSchema () {
         return {fields: this.$store.state.formFields}
       },
       alert () {
