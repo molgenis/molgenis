@@ -126,6 +126,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	{
 		Group group = getGroup(groupId);
 		Sid sid = SidUtils.createSid(group);
+		removeSidPluginPermissions(sid);
 		Map<String, PluginPermission> pluginPermissions = toPluginPermissions(pluginAuthorities);
 		replaceSidPluginPermissions(sid, pluginPermissions);
 	}
@@ -137,6 +138,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	{
 		Group group = getGroup(groupId);
 		Sid sid = SidUtils.createSid(group);
+		removeSidEntityTypePermissions(sid);
 		Map<String, EntityTypePermission> entityTypePermissions = toEntityTypePermissions(entityTypeAuthorities);
 		replaceSidEntityTypePermissions(sid, entityTypePermissions);
 	}
@@ -148,6 +150,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	{
 		User user = getUser(userId);
 		Sid sid = SidUtils.createSid(user);
+		removeSidPluginPermissions(sid);
 		Map<String, PluginPermission> pluginPermissions = toPluginPermissions(pluginAuthorities);
 		replaceSidPluginPermissions(sid, pluginPermissions);
 	}
@@ -159,6 +162,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	{
 		User user = getUser(userId);
 		Sid sid = SidUtils.createSid(user);
+		removeSidEntityTypePermissions(sid);
 		Map<String, EntityTypePermission> entityTypePermissions = toEntityTypePermissions(entityTypeAuthorities);
 		replaceSidEntityTypePermissions(sid, entityTypePermissions);
 	}
@@ -439,6 +443,36 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		}
 	}
 
+	private void removeSidPluginPermissions(Sid sid)
+	{
+		List<ObjectIdentity> objectIdentities = getPlugins().stream().map(PluginIdentity::new).collect(toList());
+		removeAclSidEntries(sid, objectIdentities);
+	}
+
+	private void removeAclSidEntries(Sid sid, List<ObjectIdentity> objectIdentities)
+	{
+		Map<ObjectIdentity, MutableAcl> acls = (Map<ObjectIdentity, MutableAcl>) (Map<?, ?>) mutableAclService.readAclsById(
+				objectIdentities, singletonList(sid));
+		acls.forEach(((objectIdentity, acl) ->
+		{
+			boolean aclUpdated = false;
+			int nrEntries = acl.getEntries().size();
+			for (int i = nrEntries - 1; i >= 0; i--)
+			{
+				AccessControlEntry accessControlEntry = acl.getEntries().get(i);
+				if (accessControlEntry.getSid().equals(sid))
+				{
+					acl.deleteAce(i);
+					aclUpdated = true;
+				}
+			}
+			if (aclUpdated)
+			{
+				mutableAclService.updateAcl(acl);
+			}
+		}));
+	}
+
 	private void replaceSidPluginPermissions(Sid sid, Map<String, PluginPermission> pluginPermissions)
 	{
 		List<ObjectIdentity> objectIdentities = pluginPermissions.keySet().stream().map(PluginIdentity::new).collect(toList());
@@ -446,18 +480,18 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				objectIdentities, singletonList(sid));
 		acls.forEach(((objectIdentity, acl) ->
 		{
-			int nrEntries = acl.getEntries().size();
-			for (int i = nrEntries - 1; i >= 0; i--)
-			{
-				acl.deleteAce(i);
-			}
-
 			PluginPermission pluginPermission = pluginPermissions.get(objectIdentity.getIdentifier().toString());
 			CumulativePermission cumulativePermission = PluginPermissionUtils.getCumulativePermission(pluginPermission);
 
-			acl.insertAce(0, cumulativePermission, sid, true);
+			acl.insertAce(acl.getEntries().size(), cumulativePermission, sid, true);
 			mutableAclService.updateAcl(acl);
 		}));
+	}
+
+	private void removeSidEntityTypePermissions(Sid sid)
+	{
+		List<ObjectIdentity> objectIdentities = getEntityTypes().map(EntityTypeIdentity::new).collect(toList());
+		removeAclSidEntries(sid, objectIdentities);
 	}
 
 	private void replaceSidEntityTypePermissions(Sid sid, Map<String, EntityTypePermission> entityTypePermissions)
