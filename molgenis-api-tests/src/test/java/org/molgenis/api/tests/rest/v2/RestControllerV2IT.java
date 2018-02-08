@@ -33,9 +33,9 @@ public class RestControllerV2IT
 
 	private static final String API_V2 = "api/v2/";
 
-	private static final String REST_TEST_USER = "rest_test_v2";
-	private static final String REST_TEST_USER_PASSWORD = REST_TEST_USER;
+	private static final String REST_TEST_USER_PASSWORD = "Blahdiblah";
 
+	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -74,8 +74,9 @@ public class RestControllerV2IT
 		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
 		LOG.info("Importing Done");
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserName = "rest_test_v2" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, testUserName);
 
 		ImmutableMap.Builder<String, Permission> permissionsBuilder = ImmutableMap.builder();
 		permissionsBuilder.put(PACKAGE, WRITE)
@@ -87,7 +88,7 @@ public class RestControllerV2IT
 		testEntities.forEach(entity -> permissionsBuilder.put(entity, WRITE));
 		setGrantedRepositoryPermissions(adminToken, testUserId, permissionsBuilder.build());
 
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test

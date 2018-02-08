@@ -25,7 +25,7 @@ public class RestControllerIT
 	private static final String PATH = "api/v1/";
 
 	// User credentials
-	private static final String REST_TEST_USER = "rest_test_user";
+	private String testUserName;
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
 	private String testUserId;
 	private String testUserToken;
@@ -55,8 +55,9 @@ public class RestControllerIT
 
 		adminToken = login(adminUserName, adminPassword);
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserName = "rest_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, testUserName);
 
 		setGrantedRepositoryPermissions(adminToken, testUserId,
 				ImmutableMap.<String, Permission>builder().put("sys_FreemarkerTemplate", WRITE)
@@ -66,7 +67,7 @@ public class RestControllerIT
 														  .put(UserMetaData.USER, COUNT)
 														  .build());
 
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -229,7 +230,7 @@ public class RestControllerIT
 					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
 
 		// clean up after test
-		this.testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		this.testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6575

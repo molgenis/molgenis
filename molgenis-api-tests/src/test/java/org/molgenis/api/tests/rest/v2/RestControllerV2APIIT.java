@@ -37,13 +37,13 @@ public class RestControllerV2APIIT
 {
 	private static final Logger LOG = getLogger(RestControllerV2APIIT.class);
 
-	private static final String REST_TEST_USER = "api_v2_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
 	private static final String V2_TEST_FILE = "/RestControllerV2_API_TestEMX.xlsx";
 	private static final String V2_DELETE_TEST_FILE = "/RestControllerV2_DeleteEMX.xlsx";
 	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
 	private static final String API_V2 = "api/v2/";
 
+	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -77,9 +77,10 @@ public class RestControllerV2APIIT
 		uploadEMX(adminToken, V2_COPY_TEST_FILE);
 		LOG.info("Importing Done");
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserName = "api_v2_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserId = getUserId(adminToken, testUserName);
 
 		setGrantedRepositoryPermissions(adminToken, testUserId,
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
@@ -99,7 +100,7 @@ public class RestControllerV2APIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test(enabled = false) // TODO

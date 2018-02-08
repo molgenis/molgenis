@@ -35,7 +35,7 @@ public class RestControllerV1APIIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV1APIIT.class);
 
-	private static final String REST_TEST_USER = "api_v1_test_user";
+	private String testUserName;
 	private static final String REST_TEST_USER_PASSWORD = "api_v1_test_user_password";
 	private static final String V1_TEST_FILE = "/RestControllerV1_API_TestEMX.xlsx";
 	private static final String V1_DELETE_TEST_FILE = "/RestControllerV1_API_DeleteEMX.xlsx";
@@ -74,9 +74,10 @@ public class RestControllerV1APIIT
 		RestTestUtils.uploadEMX(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);
 		LOG.info("Importing Done");
 
-		RestTestUtils.createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserName = "api_v1_test_user" + System.currentTimeMillis();
+		RestTestUtils.createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = RestTestUtils.getUserId(adminToken, REST_TEST_USER);
+		testUserId = RestTestUtils.getUserId(adminToken, testUserName);
 		LOG.info("testUserId: " + testUserId);
 
 		setGrantedRepositoryPermissions(adminToken, testUserId,
@@ -95,7 +96,7 @@ public class RestControllerV1APIIT
 														  .put("base_APITest4", WRITEMETA)
 														  .put("base_ApiTestFile", WRITEMETA)
 														  .build());
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
