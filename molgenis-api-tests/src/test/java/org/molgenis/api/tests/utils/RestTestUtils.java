@@ -1,12 +1,10 @@
 package org.molgenis.api.tests.utils;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.molgenis.core.ui.admin.permission.PermissionManagerController;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.security.auth.GroupMemberMetaData;
 import org.molgenis.data.security.auth.GroupMetaData;
 import org.slf4j.Logger;
@@ -17,15 +15,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
-import static com.google.common.collect.Maps.newHashMap;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -34,7 +29,6 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
@@ -138,10 +132,10 @@ public class RestTestUtils
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
 	 * @return String indicating state of completed job
-	 *
 	 */
 	public static String uploadEMX(String adminToken, String fileName)
 	{
@@ -154,6 +148,7 @@ public class RestTestUtils
 	 * Import emx file using add/update.
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
 	 * @param adminToken       to use for login
 	 * @param pathToFileFolder path to folder to look for emx file to import
 	 * @param fileName         name of the file to upload
@@ -169,14 +164,14 @@ public class RestTestUtils
 	private static String uploadEMXFile(String adminToken, File file)
 	{
 		String importJobStatusUrl = given().multiPart(file)
-									 .param("file")
-									 .param("action", "ADD_UPDATE_EXISTING")
-									 .header(X_MOLGENIS_TOKEN, adminToken)
-									 .post("plugin/importwizard/importFile")
-									 .then()
-									 .statusCode(CREATED)
-									 .extract()
-									 .header("Location");
+										   .param("file")
+										   .param("action", "ADD_UPDATE_EXISTING")
+										   .header(X_MOLGENIS_TOKEN, adminToken)
+										   .post("plugin/importwizard/importFile")
+										   .then()
+										   .statusCode(CREATED)
+										   .extract()
+										   .header("Location");
 
 		return monitorImportJob(adminToken, importJobStatusUrl);
 	}
@@ -200,6 +195,7 @@ public class RestTestUtils
 	 * Import vcf file using add
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
+	 *
 	 * @param adminToken to use for login
 	 * @param fileName   the file to upload
 	 * @return String indicating state of completed job
@@ -224,9 +220,10 @@ public class RestTestUtils
 	 * Import vcf file using add
 	 * <p>
 	 * Importing is done async in the backend, but this methods waits for importing to be done.
-	 * @param adminToken to use for login
+	 *
+	 * @param adminToken       to use for login
 	 * @param pathToFileFolder path to folder to look for emx file to import
-	 * @param fileName   the file to upload
+	 * @param fileName         the file to upload
 	 * @return String indicating state of completed job
 	 */
 	public static String uploadVCF(String adminToken, String pathToFileFolder, String fileName)
@@ -244,7 +241,6 @@ public class RestTestUtils
 		return monitorImportJob(adminToken, importJobStatusUrl);
 	}
 
-
 	/**
 	 * Given the job uri and token, wait until the job is done and report back the status.
 	 */
@@ -261,9 +257,7 @@ public class RestTestUtils
 	private static String pollForStatus(String adminToken, String importJobURL)
 	{
 		return given().contentType(APPLICATION_JSON)
-					  .header(X_MOLGENIS_TOKEN, adminToken)
-					  .get(importJobURL)
-					  .then().statusCode(OKE)
+					  .header(X_MOLGENIS_TOKEN, adminToken).get(importJobURL).then().statusCode(OKE)
 					  .extract()
 					  .path("status")
 					  .toString();
@@ -365,8 +359,8 @@ public class RestTestUtils
 	 */
 	public static void setGrantedPluginPermissions(String adminToken, String userId, String... plugins)
 	{
-		Map<String, String> pluginParams = stream(plugins).collect(toMap(pluginId -> "radio-" + pluginId,
-														 pluginId -> "READ"));
+		Map<String, String> pluginParams = stream(plugins).collect(
+				toMap(pluginId -> "radio-" + pluginId, pluginId -> "READ"));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(X_WWW_FORM_URLENCODED)
@@ -381,8 +375,8 @@ public class RestTestUtils
 	/**
 	 * Sets user permissions on repositories. Existing repository permissions will be removed.
 	 *
-	 * @param adminToken the token to use for authentication
-	 * @param userId     the id of the user to grant the permissions to
+	 * @param adminToken  the token to use for authentication
+	 * @param userId      the id of the user to grant the permissions to
 	 * @param permissions Map mapping entity type ID to permission to grant
 	 */
 	public static void setGrantedRepositoryPermissions(String adminToken, String userId,
