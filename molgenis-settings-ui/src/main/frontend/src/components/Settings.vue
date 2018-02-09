@@ -85,10 +85,6 @@
           }
         }, this.handleError)
       },
-      updateSelectedSetting (selectedSetting) {
-        console.log('updateSelectedSetting')
-        // this.$store.dispatch(GET_SETTINGS_BY_ID, selectedSetting)
-      },
       clearAlert: () => {
         this.alert = null
       },
