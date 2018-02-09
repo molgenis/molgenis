@@ -17,7 +17,7 @@
     <div class="card">
       <div class="card-header">
         <v-select v-model="selectedSetting"
-                  :options="settings"
+                  :options="settingsOptions"
                   :filterable="true"
                   @input="updateSelectedSetting">
         </v-select>
@@ -25,7 +25,7 @@
 
       <div class="card-body">
         <div class="card-block">
-          <div v-if="formData">
+          <div v-if="showForm">
             <form-component
               id="settings-form"
               :formFields="formFields"
@@ -37,7 +37,7 @@
       </div>
 
       <div class="card-footer">
-        <button id="save-btn" class="btn btn-primary"type="submit" @click.prevent="onSubmit(formData)">Save</button>
+        <button id="save-btn" class="btn btn-primary" type="submit" @click.prevent="onSubmit(formData)">Save</button>
       </div>
 
     </div>
@@ -59,7 +59,17 @@
         formFields: [],
         formData: {},
         settingsOptions: [],
-        alert: null
+        alert: null,
+        showForm: false
+      }
+    },
+    watch: {
+      // whenever question changes, this function will run
+      selectedSetting: function (setting) {
+        if (setting) {
+          this.showForm = false
+          api.get('/api/v2/' + setting.id).then(this.initializeForm, this.handleError)
+        }
       }
     },
     methods: {
@@ -91,16 +101,19 @@
       },
       initializeSettingsOptions (response) {
         this.settingsOptions = response.items
+        this.selectedSetting = this.settingsOptions[0]
       },
       initializeForm (response) {
         const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
+        this.state = {}
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
+        this.showForm = true
       }
     },
     created: function () {
-      api.get('/api/v2/sys_set_settings').then(this.initializeSettingsOptions, this.handleError)
-      api.get('/api/v2/' + this.selectedSetting).then(this.initializeForm, this.handleError)
+      api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==sys_set')
+        .then(this.initializeSettingsOptions, this.handleError)
     },
     components: {
       FormComponent,
