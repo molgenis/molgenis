@@ -16,11 +16,11 @@
     <!-- Setting select + form container -->
     <div class="card">
       <div class="card-header">
-        <v-select v-model="selectedSetting"
-                  :options="settingsOptions"
-                  :filterable="true"
-                  @input="updateSelectedSetting">
-        </v-select>
+        <select v-model="selectedSetting" class="form-control">
+          <option v-for="option in settingsOptions" v-bind:value="option.id">
+            {{ option.label}}
+          </option>
+        </select>
       </div>
 
       <div class="card-body">
@@ -45,7 +45,6 @@
 </template>
 
 <script>
-  import vSelect from 'vue-select'
   import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
@@ -68,7 +67,7 @@
       selectedSetting: function (setting) {
         if (setting) {
           this.showForm = false
-          api.get('/api/v2/' + setting.id).then(this.initializeForm, this.handleError)
+          api.get('/api/v2/' + setting).then(this.initializeForm, this.handleError)
         }
       }
     },
@@ -101,7 +100,7 @@
       },
       initializeSettingsOptions (response) {
         this.settingsOptions = response.items
-        this.selectedSetting = this.settingsOptions[0]
+        this.selectedSetting = this.settingsOptions[0].id
       },
       initializeForm (response) {
         const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
@@ -116,8 +115,7 @@
         .then(this.initializeSettingsOptions, this.handleError)
     },
     components: {
-      FormComponent,
-      vSelect
+      FormComponent
     }
   }
 </script>

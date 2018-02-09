@@ -20,8 +20,7 @@
     "font-awesome": "^4.7.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
-    "vue-router-sync": "^0.1.0",
-    "vue-select": "^2.4.0"
+    "vue-router-sync": "^0.1.0"
   },
   "devDependencies": {
     "@molgenis/molgenis-vue-test-utils": "^1.0.0",
