@@ -8,7 +8,7 @@
 
 <@header css js version/>
 
-<div id="app"></div>
+<div id="settings-plugin"></div>
 
 <script type="text/javascript">
     window.__INITIAL_STATE__ = {
