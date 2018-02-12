@@ -1,6 +1,8 @@
-// import { shallow } from 'vue-test-utils'
+import { shallow } from 'vue-test-utils'
 import SettingsUi from '@/components/SettingsUi'
-// import td from 'testdouble'
+import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+import api from '@molgenis/molgenis-api-client'
+import td from 'testdouble'
 
 describe('SettingsUi component', () => {
   it('should have "SettingsUi" as name', () => {
@@ -47,28 +49,73 @@ describe('SettingsUi component', () => {
     })
   })
 
-  // it('should contain created-method content', () => {
-  //   const mockDispatch = td.function('dispatch')
-  //   td.when(mockDispatch(GET_SETTINGS)).thenResolve()
-  //   Settings.$store =
-  //     {
-  //       dispatch: mockDispatch
-  //     }
-  //   Settings.created()
-  //   td.verify(mockDispatch(GET_SETTINGS))
-  // })
-  // it('should contain computed-method content', () => {
-  //   const actions = {
-  //     '__GET_SETTINGS__': function () {}
-  //   }
-  //   const state = {
-  //     settings: ['settings_entity_1']
-  //   }
-  //   const store = new Vuex.Store({
-  //     state,
-  //     actions
-  //   })
-  //   const wrapper = shallow(Settings, {store, localVue})
-  //   expect(wrapper.vm.settings).to.deep.equal(['settings_entity_1'])
-  // })
+  describe('on created', () => {
+    const settingItem = function () {
+      return {
+        formFields: [],
+        formData: {}
+      }
+    }
+
+    const settingsOptions = {
+      items: [{id: '1', label: 'set1'}, {id: '2', label: 'set2'}]
+    }
+
+    const settingResponse = {
+      items: [settingItem],
+      meta: {
+        label: 'my-setting'
+      }
+    }
+
+    const get = td.function('api.get')
+    td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==sys_set'))
+      .thenResolve(settingsOptions)
+    td.when(get('/api/v2/test-setting'))
+      .thenResolve(settingResponse)
+    td.replace(api, 'get', get)
+
+    td.replace(EntityToFormMapper, 'generateForm', settingItem)
+
+    let pushedRoute = {}
+    const $router = {
+      push: function (pushed) {
+        pushedRoute = pushed
+      }
+    }
+    const $route = {
+      params: {
+        setting: 'test-setting'
+      }
+    }
+    const wrapper = shallow(SettingsUi, {
+      mocks: {
+        $router,
+        $route
+      }
+    })
+
+    it('should fetch the settings data', () => {
+      expect(pushedRoute).to.deep.equal({path: '/test-setting'})
+    })
+
+    it('should make the route setting the selected setting', () => {
+      expect(wrapper.vm.selectedSetting).to.equal('test-setting')
+    })
+
+    describe('after creating', () => {
+      it('calling clear alert, clear the alert', () => {
+        wrapper.vm.clearAlert()
+        expect(wrapper.vm.alert).to.equal(null)
+      })
+
+      it('calling handle error, sets the alert', () => {
+        wrapper.vm.handleError('test-error')
+        expect(wrapper.vm.alert).to.deep.equal({
+          message: 'test-error',
+          type: 'danger'
+        })
+      })
+    })
+  })
 })

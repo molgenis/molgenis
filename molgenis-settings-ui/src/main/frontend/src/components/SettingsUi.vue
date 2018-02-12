@@ -72,7 +72,7 @@
       selectedSetting: function (setting) {
         this.showForm = false
         this.$router.push({ path: `/${setting}` })
-        this.fetchSettings(setting)
+        api.get('/api/v2/' + setting).then(this.initializeForm, this.handleError)
       }
     },
     methods: {
@@ -98,9 +98,6 @@
           message: 'Settings saved',
           type: 'success'
         }
-      },
-      fetchSettings (settingsId) {
-        api.get('/api/v2/' + settingsId).then(this.initializeForm, this.handleError)
       },
       initializeSettingsOptions (response) {
         this.settingsOptions = response.items
