@@ -36,7 +36,7 @@ public class QuestionnaireController extends VuePluginController
 		this.questionnaireService = requireNonNull(questionnaireService);
 	}
 
-	@GetMapping
+	@GetMapping("/**")
 	public String initView(Model model)
 	{
 		super.init(model, ID);
@@ -44,14 +44,14 @@ public class QuestionnaireController extends VuePluginController
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/list")
+	@GetMapping(value = "/meta/list")
 	public List<QuestionnaireResponse> getQuestionnaires()
 	{
 		return questionnaireService.getQuestionnaires();
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/{name}")
+	@GetMapping(value = "/meta/{name}")
 	public QuestionnaireResponse getQuestionnaire(@PathVariable("name") String name)
 	{
 		return questionnaireService.getQuestionnaire(name);

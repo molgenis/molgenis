@@ -39,7 +39,7 @@
       }
     },
     created () {
-      api.get('/menu/plugins/questionnaires/' + this.questionnaireName).then(questionnaire => {
+      api.get('/menu/plugins/questionnaires/meta' + this.questionnaireName).then(questionnaire => {
         this.questionnaire = questionnaire
       })
     }

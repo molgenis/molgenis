@@ -77,7 +77,7 @@
       }
     },
     created () {
-      api.get('/menu/plugins/questionnaires/list').then(response => {
+      api.get('/menu/plugins/questionnaires/meta/list').then(response => {
         this.questionnaires = response
         this.loading = false
       })
