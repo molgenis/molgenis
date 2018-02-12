@@ -13,16 +13,31 @@
       </div>
     </div>
 
-    <!-- Setting select + form container -->
-    <select v-model="selectedSetting" class="form-control">
-      <option v-for="option in settingsOptions" v-bind:value="option.id">
-        {{ option.label}}
-      </option>
-    </select>
+    <div class="row">
+      <div class="col-md-12">
+      <select v-model="selectedSetting" class="form-control">
+        <option v-for="option in settingsOptions" v-bind:value="option.id">
+          {{option.label}}
+        </option>
+      </select>
+
+      <button
+        id="save-btn-top"
+        class="btn btn-primary float-right mt-2"
+        type="submit"
+        @click.prevent="onSubmit(formData)"
+        :disabled="state.$pristine || !state.$valid">
+        Save changes
+      </button>
+      </div>
+    </div>
+
+
 
     <hr/>
 
     <div v-if="showForm">
+      <h2>{{settingLabel}}</h2>
       <form-component
         id="settings-form"
         :formFields="formFields"
@@ -30,15 +45,6 @@
         :formState="state">
       </form-component>
     </div>
-
-    <button
-      id="save-btn"
-      class="btn btn-primary"
-      type="submit"
-      @click.prevent="onSubmit(formData)"
-      :disabled="state.$pristine || !state.$valid">
-      Save changes
-    </button>
 
   </div>
 
@@ -59,7 +65,8 @@
         formData: {},
         settingsOptions: [],
         alert: null,
-        showForm: false
+        showForm: false,
+        settingLabel: ''
       }
     },
     watch: {
@@ -102,6 +109,7 @@
         this.state = {}
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
+        this.settingLabel = response.meta.label
         this.showForm = true
       }
     },
