@@ -42,7 +42,7 @@
         <!-- Compound chapters -->
         <div class="d-none d-md-block d-lg-block d-xl-block col-2">
           <ul class="list-group chapter-navigation-list">
-            <li class="list-group-item disabled">Chapters</li>
+            <li class="list-group-item disabled">{{ 'questionnaire_chapter_title' | i18n }}</li>
             <li class="list-group-item chapter-item" v-for="chapter in chapters"
                 @click="scrollInToView(chapter.name)">
               <a>{{ chapter.label }}</a>
