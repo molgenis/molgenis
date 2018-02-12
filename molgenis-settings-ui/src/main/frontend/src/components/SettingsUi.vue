@@ -55,7 +55,7 @@
   import api from '@molgenis/molgenis-api-client'
 
   export default {
-    name: 'Settings',
+    name: 'SettingsUi',
     data () {
       return {
         selectedSetting: null,
@@ -88,7 +88,7 @@
       },
       handleError (message) {
         this.alert = {
-          message: message,
+          message: typeof message !== 'string' ? 'An error has occurred.' : message,
           type: 'danger'
         }
       },

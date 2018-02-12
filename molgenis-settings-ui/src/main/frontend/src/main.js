@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import App from './App'
-import Settings from './components/Settings'
+import SettingsUi from './components/SettingsUi'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
 Vue.use(Router)
@@ -18,7 +18,7 @@ const settingsRouter = new Router({
     },
     {
       path: '/:setting',
-      component: Settings
+      component: SettingsUi
     }
   ]
 })
