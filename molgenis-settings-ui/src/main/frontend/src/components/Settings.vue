@@ -63,7 +63,6 @@
       }
     },
     watch: {
-      // whenever question changes, this function will run
       selectedSetting: function (setting) {
         if (setting) {
           this.showForm = false
@@ -72,26 +71,26 @@
       }
     },
     methods: {
-      onSubmit: (formData) => {
-        console.log('onSubmit')
+      onSubmit (formData) {
         const options = {
           body: JSON.stringify(formData)
         }
         const uri = '/api/v1/' + this.selectedSetting + '/' + formData.id + '?_method=PUT'
-        api.post(uri, options).then(() => {
-          this.alert = {
-            message: 'Settings are successfully saved',
-            type: 'success'
-          }
-        }, this.handleError)
+        api.post(uri, options).then(this.handleSuccess, this.handleError)
       },
-      clearAlert: () => {
+      clearAlert () {
         this.alert = null
       },
-      handleError (error) {
+      handleError (message) {
         this.alert = {
-          message: error,
+          message: message,
           type: 'danger'
+        }
+      },
+      handleSuccess () {
+        this.alert = {
+          message: 'Settings saved',
+          type: 'success'
         }
       },
       initializeSettingsOptions (response) {
