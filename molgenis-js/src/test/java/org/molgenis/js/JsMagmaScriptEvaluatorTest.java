@@ -104,6 +104,20 @@ public class JsMagmaScriptEvaluatorTest
 	}
 
 	@Test
+	public void testReferenceMapping()
+	{
+		Entity gender = new DynamicEntity(genderEntityType);
+		gender.set("id", "B");
+
+		Entity person = new DynamicEntity(personGenderEntityType);
+		person.set("gender", gender);
+
+		// value() calls for a reference mapping returns the entire entity
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').value()", person);
+		assertEquals(result, gender);
+	}
+
+	@Test
 	public void mapSimple()
 	{
 		Entity gender = new DynamicEntity(genderEntityType);
@@ -112,7 +126,7 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", person);
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'B':'B2'}).value()", person);
 		assertEquals(result.toString(), "B2");
 	}
 
@@ -125,14 +139,14 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2').value()", person);
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({}, 'B2').value()", person);
 		assertEquals(result.toString(), "B2");
 	}
 
 	@Test
 	public void mapNull()
 	{
-		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()",
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({}, 'B2', 'B3').value()",
 				new DynamicEntity(personGenderEntityType));
 		assertEquals(result.toString(), "B3");
 	}
