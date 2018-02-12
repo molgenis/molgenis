@@ -1,10 +1,27 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import Router from 'vue-router'
 import App from './App'
+import Settings from './components/Settings'
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
+Vue.use(Router)
+
 const {lng, fallbackLng} = window.__INITIAL_STATE__
+
+const settingsRouter = new Router({
+  mode: 'history',
+  base: window.__INITIAL_STATE__.baseUrl,
+  routes: [
+    {
+      path: '/',
+      redirect: '/sys_set_app'
+    },
+    {
+      path: '/:setting',
+      component: Settings
+    }
+  ]
+})
 
 /* eslint-disable no-new */
 Vue.use(i18n, {
@@ -15,6 +32,7 @@ Vue.use(i18n, {
     /* eslint-disable no-new */
     new Vue({
       el: '#settings-plugin',
+      router: settingsRouter,
       template: '<App />',
       components: {App}
     })

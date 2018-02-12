@@ -1,12 +1,7 @@
 <template>
-  <settings></settings>
+  <router-view></router-view>
 </template>
 
 <script>
-  import Settings from './components/Settings'
-
-  export default {
-    components: {Settings},
-    name: 'app'
-  }
+  export default { name: 'app' }
 </script>

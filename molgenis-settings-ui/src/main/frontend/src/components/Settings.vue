@@ -16,7 +16,7 @@
     <div class="row">
       <div class="col-md-12">
         <select v-model="selectedSetting" class="form-control">
-          <option v-for="option in settingsOptions" v-bind:value="option.id">
+          <option v-for="option in settingsOptions" :value="option.id">
             {{option.label}}
           </option>
         </select>
@@ -43,6 +43,7 @@
         :formState="state">
       </form-component>
     </div>
+    <div v-else class=""><i class="fa fa-spinner fa-spin fa-3x"></i></div>
 
   </div>
 
@@ -69,10 +70,9 @@
     },
     watch: {
       selectedSetting: function (setting) {
-        if (setting) {
-          this.showForm = false
-          api.get('/api/v2/' + setting).then(this.initializeForm, this.handleError)
-        }
+        this.showForm = false
+        this.$router.push({ path: `/${setting}` })
+        this.fetchSettings(setting)
       }
     },
     methods: {
@@ -99,9 +99,11 @@
           type: 'success'
         }
       },
+      fetchSettings (settingsId) {
+        api.get('/api/v2/' + settingsId).then(this.initializeForm, this.handleError)
+      },
       initializeSettingsOptions (response) {
         this.settingsOptions = response.items
-        this.selectedSetting = this.settingsOptions[0].id
       },
       initializeForm (response) {
         const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
@@ -113,6 +115,7 @@
       }
     },
     created: function () {
+      this.selectedSetting = this.$route.params.setting
       api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==sys_set')
         .then(this.initializeSettingsOptions, this.handleError)
     },
