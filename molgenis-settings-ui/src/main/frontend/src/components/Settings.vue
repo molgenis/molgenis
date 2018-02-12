@@ -15,24 +15,22 @@
 
     <div class="row">
       <div class="col-md-12">
-      <select v-model="selectedSetting" class="form-control">
-        <option v-for="option in settingsOptions" v-bind:value="option.id">
-          {{option.label}}
-        </option>
-      </select>
+        <select v-model="selectedSetting" class="form-control">
+          <option v-for="option in settingsOptions" v-bind:value="option.id">
+            {{option.label}}
+          </option>
+        </select>
 
-      <button
-        id="save-btn-top"
-        class="btn btn-primary float-right mt-2"
-        type="submit"
-        @click.prevent="onSubmit(formData)"
-        :disabled="state.$pristine || !state.$valid">
-        Save changes
-      </button>
+        <button
+          id="save-btn-top"
+          class="btn btn-primary float-right mt-2"
+          type="submit"
+          @click.prevent="onSubmit(formData)"
+          :disabled="state.$pristine || !state.$valid">
+          Save changes
+        </button>
       </div>
     </div>
-
-
 
     <hr/>
 
@@ -95,6 +93,7 @@
         }
       },
       handleSuccess () {
+        this.state._reset()
         this.alert = {
           message: 'Settings saved',
           type: 'success'
