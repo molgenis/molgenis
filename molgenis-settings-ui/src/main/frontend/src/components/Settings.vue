@@ -14,38 +14,38 @@
     </div>
 
     <!-- Setting select + form container -->
-    <div class="card">
-      <div class="card-header">
-        <select v-model="selectedSetting" class="form-control">
-          <option v-for="option in settingsOptions" v-bind:value="option.id">
-            {{ option.label}}
-          </option>
-        </select>
-      </div>
+    <select v-model="selectedSetting" class="form-control">
+      <option v-for="option in settingsOptions" v-bind:value="option.id">
+        {{ option.label}}
+      </option>
+    </select>
 
-      <div class="card-body">
-        <div class="card-block">
-          <div v-if="showForm">
-            <form-component
-              id="settings-form"
-              :formFields="formFields"
-              :formData="formData"
-              :formState="state">
-            </form-component>
-          </div>
-        </div>
-      </div>
+    <hr/>
 
-      <div class="card-footer">
-        <button id="save-btn" class="btn btn-primary" type="submit" @click.prevent="onSubmit(formData)">Save</button>
-      </div>
-
+    <div v-if="showForm">
+      <form-component
+        id="settings-form"
+        :formFields="formFields"
+        :formData="formData"
+        :formState="state">
+      </form-component>
     </div>
+
+    <button
+      id="save-btn"
+      class="btn btn-primary"
+      type="submit"
+      @click.prevent="onSubmit(formData)"
+      :disabled="state.$pristine || !state.$valid">
+      Save changes
+    </button>
+
   </div>
+
 </template>
 
 <script>
-  import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+  import {FormComponent, EntityToFormMapper} from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
 
