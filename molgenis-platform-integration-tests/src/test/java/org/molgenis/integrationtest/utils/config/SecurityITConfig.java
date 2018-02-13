@@ -34,8 +34,9 @@ import static org.mockito.Mockito.when;
 @EnableWebSecurity
 @Import({ PermissionServiceImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
 		TokenMetaData.class, SecurityPackage.class, UserMetaData.class, OwnedEntityType.class,
-		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class, UserFactory.class,
-		AggregationTestConfig.class, RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class,
+		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
+		PermissionSystemServiceImpl.class, UserFactory.class, AuthorityMetaData.class, AggregationTestConfig.class,
+		RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class,
 		AuthenticationSettingsImpl.class, PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig
