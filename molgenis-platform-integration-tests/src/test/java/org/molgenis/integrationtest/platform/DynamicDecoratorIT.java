@@ -4,35 +4,37 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
-import org.molgenis.data.decorator.meta.*;
+import org.molgenis.data.decorator.meta.DecoratorConfiguration;
+import org.molgenis.data.decorator.meta.DecoratorConfigurationFactory;
+import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
+import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.integrationtest.platform.PlatformIT.makeAuthorities;
+import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
@@ -40,9 +42,13 @@ import static org.testng.AssertJUnit.assertTrue;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, AddingRepositoryDecoratorFactory.class,
 		PostFixingRepositoryDecoratorFactory.class })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+@Transactional
 public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 {
-	private static final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DynamicDecoratorIT.class);
+
+	private static final String USERNAME = "dynamic-decorator-user";
 
 	@Autowired
 	private DataService dataService;
@@ -56,6 +62,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	private DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry;
 	@Autowired
 	private DecoratorConfigurationFactory decoratorConfigurationFactory;
+	@Autowired
+	private TestPermissionPopulator testPermissionPopulator;
 
 	private EntityType refEntityTypeDynamic;
 	private EntityType entityTypeDynamic;
@@ -78,46 +86,32 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 			dataService.add(refEntityTypeDynamic.getId(), refs.stream());
 			dataService.add(entityTypeDynamic.getId(), entities.stream());
 
+			waitForWorkToBeFinished(indexService, LOG);
+
+			addingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "add", DynamicDecorator.class);
+			postfixingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "postfix",
+					DynamicDecorator.class);
 		});
-		setAuthentication();
-		waitForWorkToBeFinished(indexService, LOG);
-
-		addingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "add", DynamicDecorator.class);
-		postfixingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "postfix",
-				DynamicDecorator.class);
-
 	}
 
-	private void setAuthentication()
-	{
-		List<GrantedAuthority> authorities = newArrayList();
-
-		authorities.addAll(makeAuthorities(ENTITY_TYPE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(ATTRIBUTE_META_DATA, false, true, true));
-		authorities.addAll(makeAuthorities(PACKAGE, false, true, true));
-		authorities.addAll(makeAuthorities(LANGUAGE, false, true, true));
-		authorities.addAll(makeAuthorities(L10N_STRING, false, true, true));
-		authorities.addAll(makeAuthorities(entityTypeDynamic.getId(), true, true, true));
-		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getId(), false, true, true));
-		authorities.addAll(makeAuthorities(DynamicDecoratorMetadata.DYNAMIC_DECORATOR, true, true, true));
-		authorities.addAll(makeAuthorities(DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION, true, true, true));
-
-		SecurityContextHolder.getContext()
-							 .setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
-	}
-
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testRegistry()
 	{
+		populatePermissions();
+
 		//check if all dynamic decorator factory beans get added to the registry
 		List<String> factories = dynamicRepositoryDecoratorRegistry.getFactoryIds().collect(Collectors.toList());
 		List<String> expected = Arrays.asList("add", "postfix");
 		assertTrue(factories.containsAll(expected));
 	}
 
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDynamicDecorator()
 	{
+		populatePermissions();
+
 		//Add decorator config
 		DecoratorConfiguration decoratorConfiguration = decoratorConfigurationFactory.create("identifier");
 		decoratorConfiguration.setDecorators(Arrays.asList(addingDynamicDecorator, postfixingDynamicDecorator));
@@ -145,7 +139,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	}
 
 	@AfterClass
-	public void afterMethod()
+	public void tearDownAfterClass()
 	{
 		runAsSystem(() ->
 		{
@@ -156,5 +150,21 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 			metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
 		});
 		waitForWorkToBeFinished(indexService, LOG);
+	}
+
+	private void populatePermissions()
+	{
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put("sys_md_Package", READ);
+		entityTypePermissionMap.put("sys_md_EntityType", READ);
+		entityTypePermissionMap.put("sys_md_Attribute", READ);
+		entityTypePermissionMap.put("sys_Language", READ);
+		entityTypePermissionMap.put("sys_L10nString", READ);
+		entityTypePermissionMap.put("sys_dec_DynamicDecorator", WRITE);
+		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", WRITE);
+		entityTypePermissionMap.put(entityTypeDynamic.getId(), WRITE);
+		entityTypePermissionMap.put(refEntityTypeDynamic.getId(), READ);
+
+		testPermissionPopulator.populate(entityTypePermissionMap);
 	}
 }

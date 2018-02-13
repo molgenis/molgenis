@@ -3,7 +3,11 @@ package org.molgenis.integrationtest.platform.datatypeediting;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import java.text.ParseException;
@@ -15,8 +19,11 @@ import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
+@Transactional
 public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
+	private static final String USERNAME = "date-attribute-type-update-user";
 
 	@BeforeClass
 	public void setup()
@@ -52,6 +59,7 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param typeToConvertTo The type to convert to
 	 * @param convertedValue  The expected value after converting the type
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "validConversionTestCases")
 	public void testValidConversion(LocalDate valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 			throws ParseException
@@ -109,6 +117,7 @@ public class DateAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "invalidConversionTestCases")
 	public void testInvalidConversions(Object valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
 			String exceptionMessage) throws ParseException
