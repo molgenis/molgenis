@@ -5,51 +5,51 @@ import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
 
 describe('SettingsUi component', () => {
-  it('should have "SettingsUi" as name', () => {
+  it('Should have "SettingsUi" as name.', () => {
     expect(SettingsUi.name).to.equal('SettingsUi')
   })
 
-  it('should have a "data" function', () => {
+  it('Should have a "data" function.', () => {
     expect(typeof SettingsUi.data).to.equal('function')
   })
 
-  describe('data should initialize', () => {
+  describe('Data should initialize', () => {
     const data = SettingsUi.data()
 
-    it('selectedSetting to null', () => {
+    it('selectedSetting to null.', () => {
       expect(data.selectedSetting).to.equal(null)
     })
 
-    it('state as a empty object', () => {
+    it('state as a empty object.', () => {
       expect(data.state).to.deep.equal({})
     })
 
-    it('formFields as a empty array', () => {
+    it('formFields as a empty array.', () => {
       expect(data.formFields).to.deep.equal([])
     })
 
-    it('formData as a empty object', () => {
+    it('formData as a empty object.', () => {
       expect(data.formData).to.deep.equal({})
     })
 
-    it('settingsOptions as a empty array', () => {
+    it('settingsOptions as a empty array.', () => {
       expect(data.settingsOptions).to.deep.equal([])
     })
 
-    it('alert to null', () => {
+    it('alert to null.', () => {
       expect(data.alert).to.equal(null)
     })
 
-    it('showForm to false', () => {
+    it('showForm to false.', () => {
       expect(data.showForm).to.equal(false)
     })
 
-    it('settingLabel as empty string', () => {
+    it('settingLabel as empty string.', () => {
       expect(data.settingLabel).to.equal('')
     })
   })
 
-  describe('on created', () => {
+  describe('On created', () => {
     const settingItem = function () {
       return {
         formFields: [],
@@ -95,25 +95,56 @@ describe('SettingsUi component', () => {
       }
     })
 
-    it('should fetch the settings data', () => {
+    it('Should fetch the settings data.', () => {
       expect(pushedRoute).to.deep.equal({path: '/test-setting'})
     })
 
-    it('should make the route setting the selected setting', () => {
+    it('Should make the route setting the selected setting.', () => {
       expect(wrapper.vm.selectedSetting).to.equal('test-setting')
     })
 
-    describe('after creating', () => {
-      it('calling clear alert, clear the alert', () => {
+    describe('After creating', () => {
+      it('Calling clear alert, clear the alert', () => {
         wrapper.vm.clearAlert()
         expect(wrapper.vm.alert).to.equal(null)
       })
 
-      it('calling handle error, sets the alert', () => {
+      it('Calling handle error, sets the alert', () => {
         wrapper.vm.handleError('test-error')
         expect(wrapper.vm.alert).to.deep.equal({
           message: 'test-error',
           type: 'danger'
+        })
+      })
+
+      it('Calling handle error with not passing a string sets the alert the default alert', () => {
+        wrapper.vm.handleError({foo: 'bar'})
+        expect(wrapper.vm.alert).to.deep.equal({
+          message: 'An error has occurred.',
+          type: 'danger'
+        })
+      })
+
+      it('Calling the success handler resets the form and signals succes to the user', () => {
+        wrapper.vm.state._reset = function () {}
+        wrapper.vm.handleSuccess()
+        expect(wrapper.vm.alert).to.deep.equal({
+          message: 'Settings saved',
+          type: 'success'
+        })
+      })
+
+      it('Submitting the form triggers post and triggers success handeler ', () => {
+        wrapper.vm.state._reset = function () {
+        }
+        const post = td.function('api.post')
+        td.when(post('/api/v1/test-setting/test_id?_method=PUT', {body: '{"id":"test_id","a":"a"}'}))
+          .thenResolve({status: 'OKE'})
+        td.replace(api, 'post', post)
+        wrapper.vm.onSubmit({id: 'test_id', a: 'a'})
+        expect(wrapper.vm.alert).to.deep.equal({
+          message: 'Settings saved',
+          type: 'success'
         })
       })
     })
