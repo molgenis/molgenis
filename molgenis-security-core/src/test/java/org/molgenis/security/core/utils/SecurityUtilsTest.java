@@ -4,7 +4,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -13,7 +12,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
@@ -139,15 +137,5 @@ public class SecurityUtilsTest
 		assertTrue(SecurityUtils.currentUserHasRole("authority1", "authority2"));
 		assertTrue(SecurityUtils.currentUserHasRole("authority2", "authority1"));
 		assertTrue(SecurityUtils.currentUserHasRole("authority1", "authority3"));
-	}
-
-	@Test
-	public void getEntityAuthorities()
-	{
-		List<String> authorities = SecurityUtils.getEntityAuthorities("test");
-		List<String> expected = Arrays.asList("ROLE_ENTITY_READ_test", "ROLE_ENTITY_WRITE_test",
-				"ROLE_ENTITY_COUNT_test", "ROLE_ENTITY_NONE_test", "ROLE_ENTITY_WRITEMETA_test");
-
-		Assert.assertEqualsNoOrder(authorities.toArray(), expected.toArray());
 	}
 }
