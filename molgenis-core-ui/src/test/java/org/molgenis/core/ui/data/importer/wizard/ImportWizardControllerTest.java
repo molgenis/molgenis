@@ -15,7 +15,6 @@ import org.molgenis.data.importer.config.ImportTestConfig;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.config.GroupAuthorityTestConfig;
 import org.molgenis.data.security.config.GroupTestConfig;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -201,7 +200,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@Import({ ImportTestConfig.class, GroupTestConfig.class, GroupAuthorityTestConfig.class })
+	@Import({ ImportTestConfig.class, GroupTestConfig.class })
 	static class Config
 	{
 		@Autowired
