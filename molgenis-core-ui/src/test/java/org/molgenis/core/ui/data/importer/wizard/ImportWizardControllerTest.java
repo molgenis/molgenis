@@ -19,7 +19,6 @@ import org.molgenis.data.security.config.GroupAuthorityTestConfig;
 import org.molgenis.data.security.config.GroupTestConfig;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionManagerServiceImpl;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -232,11 +231,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 			return mock(MutableAclService.class);
 		}
 
-		@Bean
-		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
-		{
-			return new PermissionManagerServiceImpl(dataService, mutableAclService());
-		}
 
 		@Bean
 		public MetaDataService metaDataService()
