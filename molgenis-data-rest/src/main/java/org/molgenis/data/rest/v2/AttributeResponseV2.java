@@ -1,7 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
@@ -13,7 +11,9 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
@@ -43,6 +43,7 @@ class AttributeResponseV2
 	private String nullableExpression;
 	private String visibleExpression;
 	private String validationExpression;
+	private List<CategoricalOptionV2> categoricalOptions;
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
@@ -65,11 +66,21 @@ class AttributeResponseV2
 		if (refEntity != null)
 		{
 			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService);
+
+			if (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
+					AttributeType.CATEGORICAL_MREF))
+			{
+				this.categoricalOptions = dataService.findAll(refEntity.getId())
+													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
+															 entity.getLabelValue()))
+													 .collect(Collectors.toList());
+			}
 		}
 		else
 		{
 			this.refEntity = null;
 		}
+
 		Attribute mappedByAttr = attr.getMappedBy();
 		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
@@ -78,34 +89,32 @@ class AttributeResponseV2
 		{
 			// filter attribute parts
 			attrParts = filterAttributes(fetch, attrParts);
-
-			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts, attr1 ->
+			this.attributes = stream(attrParts).map(attrPart ->
 			{
 				Fetch subAttrFetch;
 				if (fetch != null)
 				{
-					if (attr1.getDataType() == AttributeType.COMPOUND)
+					if (attrPart.getDataType() == AttributeType.COMPOUND)
 					{
 						subAttrFetch = fetch;
 					}
 					else
 					{
-						subAttrFetch = fetch.getFetch(attr1);
+						subAttrFetch = fetch.getFetch(attrPart);
 					}
 				}
-				else if (EntityTypeUtils.isReferenceType(attr1))
+				else if (EntityTypeUtils.isReferenceType(attrPart))
 				{
-					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
+					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attrPart,
 							getCurrentUserLanguageCode());
 				}
 				else
 				{
 					subAttrFetch = null;
 				}
-				return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch, permissionService,
+				return new AttributeResponseV2(entityParentName, entityType, attrPart, subAttrFetch, permissionService,
 						dataService);
-			}));
+			}).collect(Collectors.toList());
 		}
 		else
 		{
@@ -131,7 +140,7 @@ class AttributeResponseV2
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, attr -> filterAttributeRec(fetch, attr));
+			return stream(attrs).filter(attr -> filterAttributeRec(fetch, attr)).collect(Collectors.toList());
 		}
 		else
 		{
@@ -301,5 +310,10 @@ class AttributeResponseV2
 	public String getValidationExpression()
 	{
 		return validationExpression;
+	}
+
+	public List<CategoricalOptionV2> getCategoricalOptions()
+	{
+		return categoricalOptions;
 	}
 }
