@@ -3,7 +3,6 @@ package org.molgenis.settings.controller;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -35,9 +34,6 @@ public class SettingsControllerTest
 	@Mock
 	private UserAccountService userAccountService;
 
-	@Mock
-	private DataService dataService;
-
 	@BeforeMethod
 	public void before()
 	{
@@ -52,7 +48,7 @@ public class SettingsControllerTest
 		when(user.isSuperuser()).thenReturn(false);
 
 		SettingsController settingsController = new SettingsController(menuReaderService, appSettings,
-				userAccountService, dataService);
+				userAccountService);
 		mockMvc = standaloneSetup(settingsController).build();
 	}
 
