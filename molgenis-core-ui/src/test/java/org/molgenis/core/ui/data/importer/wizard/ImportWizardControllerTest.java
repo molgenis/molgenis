@@ -230,7 +230,6 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 			return mock(MutableAclService.class);
 		}
 
-
 		@Bean
 		public MetaDataService metaDataService()
 		{
