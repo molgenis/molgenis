@@ -3,6 +3,7 @@ package org.springframework.security.acls.jdbc;
 import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
+import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.NoOpCache;
@@ -88,7 +89,8 @@ public class AclConfig
 	@Bean
 	public MutableAclService aclService()
 	{
-		JdbcMutableAclService aclService = new JdbcMutableAclService(dataSource, lookupStrategy(), aclCache());
+		JdbcMutableAclService aclService = new TransactionalJdbcMutableAclService(dataSource, lookupStrategy(),
+				aclCache());
 		aclService.setAclClassIdSupported(true);
 		aclService.setAclClassIdUtils(aclClassIdUtils());
 		aclService.setClassIdentityQuery("select currval(pg_get_serial_sequence('acl_class', 'id'))");
