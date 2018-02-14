@@ -23,6 +23,13 @@ public class SidUtilsTest
 	}
 
 	@Test
+	public void testCreateSidUsernameAnonymous()
+	{
+		Sid sid = SidUtils.createSid("anonymous");
+		assertEquals(sid, new GrantedAuthoritySid("ROLE_ANONYMOUS"));
+	}
+
+	@Test
 	public void testCreateSidGroup()
 	{
 		Group group = when(mock(Group.class).getId()).thenReturn("groupId").getMock();
