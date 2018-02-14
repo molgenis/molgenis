@@ -66,10 +66,10 @@ public class ImportWriter
 		GroupedEntityTypes groupedEntityTypes = groupEntityTypes(job.parsedMetaData.getEntities());
 
 		validateEntityTypePermissions(groupedEntityTypes.getUpdatedEntityTypes());
-		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
 
 		PersistResult persistResult = runAsSystem(
 				() -> dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT, toDataMode(job.dbAction)));
+		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
 
 		persistResult.getNrPersistedEntitiesMap()
 					 .forEach((key, value) -> job.report.addEntityCount(key, Math.toIntExact(value)));

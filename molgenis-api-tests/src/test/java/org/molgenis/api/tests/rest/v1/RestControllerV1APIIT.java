@@ -1,6 +1,7 @@
 package org.molgenis.api.tests.rest.v1;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;
@@ -34,7 +35,7 @@ public class RestControllerV1APIIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV1APIIT.class);
 
-	private static final String REST_TEST_USER = "api_v1_test_user";
+	private String testUserName;
 	private static final String REST_TEST_USER_PASSWORD = "api_v1_test_user_password";
 	private static final String V1_TEST_FILE = "/RestControllerV1_API_TestEMX.xlsx";
 	private static final String V1_DELETE_TEST_FILE = "/RestControllerV1_API_DeleteEMX.xlsx";
@@ -73,31 +74,29 @@ public class RestControllerV1APIIT
 		RestTestUtils.uploadEMX(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);
 		LOG.info("Importing Done");
 
-		RestTestUtils.createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserName = "api_v1_test_user" + System.currentTimeMillis();
+		RestTestUtils.createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = RestTestUtils.getUserId(adminToken, REST_TEST_USER);
+		testUserId = RestTestUtils.getUserId(adminToken, testUserName);
 		LOG.info("testUserId: " + testUserId);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
-
-		grantRights(adminToken, testUserId, "V1_API_TypeTestAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_TypeTestRefAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_LocationAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_PersonAPIV1", WRITE);
-		grantRights(adminToken, testUserId, "V1_API_Items", WRITE);
-
-		grantRights(adminToken, testUserId, "base_APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest2", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest3", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_APITest4", WRITEMETA);
-
-		grantRights(adminToken, testUserId, "base_ApiTestFile", WRITEMETA);
-
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
+														  .put("sys_md_EntityType", WRITE)
+														  .put("sys_md_Attribute", WRITE)
+														  .put("sys_FileMeta", WRITE)
+														  .put("V1_API_TypeTestAPIV1", WRITE)
+														  .put("V1_API_TypeTestRefAPIV1", WRITE)
+														  .put("V1_API_LocationAPIV1", WRITE)
+														  .put("V1_API_PersonAPIV1", WRITE)
+														  .put("V1_API_Items", WRITE)
+														  .put("base_APITest1", WRITEMETA)
+														  .put("base_APITest2", WRITEMETA)
+														  .put("base_APITest3", WRITEMETA)
+														  .put("base_APITest4", WRITEMETA)
+														  .put("base_ApiTestFile", WRITEMETA)
+														  .build());
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test

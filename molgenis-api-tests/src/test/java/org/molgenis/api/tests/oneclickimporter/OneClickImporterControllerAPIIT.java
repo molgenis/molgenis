@@ -1,11 +1,11 @@
 package org.molgenis.api.tests.oneclickimporter;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
-import org.hamcrest.Matchers;
 import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -31,7 +31,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
@@ -44,7 +43,7 @@ public class OneClickImporterControllerAPIIT
 {
 	private static final Logger LOG = getLogger(OneClickImporterControllerAPIIT.class);
 
-	private static final String ONE_CLICK_IMPORTER_TEST_USER = "one_click_importer_test_user";
+	private String oneClickImporterTestUsername;
 	private static final String ONE_CLICK_IMPORTER_TEST_USER_PASSWORD = "one_click_importer_test_user_password";
 	private static final String API_V2 = "api/v2/";
 
@@ -77,22 +76,24 @@ public class OneClickImporterControllerAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-		createUser(adminToken, ONE_CLICK_IMPORTER_TEST_USER, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, ONE_CLICK_IMPORTER_TEST_USER);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
+		oneClickImporterTestUsername = "one_click_importer_test_user" + System.currentTimeMillis();
+		createUser(adminToken, oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, oneClickImporterTestUsername);
 
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
-		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
+														  .put("sys_md_EntityType", WRITE)
+														  .put("sys_md_Attribute", WRITE)
+														  .put("sys_FileMeta", WRITE)
+														  .put("sys_sec_Owned", READ)
+														  .put("sys_L10nString", WRITE)
+														  .put("sys_job_JobExecution", READ)
+														  .put("sys_job_OneClickImportJobExecution", READ)
+														  .build());
+		setGrantedPluginPermissions(adminToken, testUserId, "one-click-importer");
 
-		grantPluginRights(adminToken, testUserId, "one-click-importer");
-		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
-		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
-
-		testUserToken = login(ONE_CLICK_IMPORTER_TEST_USER, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
+		testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
 	}
 
 	@Test

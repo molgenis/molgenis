@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap;
 
+import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
@@ -10,6 +11,7 @@ import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
 import org.molgenis.jobs.JobBootstrapper;
+import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,12 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisBootstrapper.class);
 
 	private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
+	private final DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
 	private final TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar;
 	private final RegistryBootstrapper registryBootstrapper;
 	private final SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
 	private final RepositoryPopulator repositoryPopulator;
+	private final PermissionPopulator systemPermissionPopulator;
 	private final JobBootstrapper jobBootstrapper;
 	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
@@ -43,18 +47,21 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final BootstrappingEventPublisher bootstrappingEventPublisher;
 
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
+			DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
-			RepositoryPopulator repositoryPopulator, JobBootstrapper jobBootstrapper,
-			AnnotatorBootstrapper annotatorBootstrapper, IndexBootstrapper indexBootstrapper,
-			EntityTypeRegistryPopulator entityTypeRegistryPopulator, BootstrapThemePopulator bootstrapThemePopulator,
-			BootstrappingEventPublisher bootstrappingEventPublisher)
+			RepositoryPopulator repositoryPopulator, PermissionPopulator systemPermissionPopulator,
+			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator,
+			BootstrapThemePopulator bootstrapThemePopulator,BootstrappingEventPublisher bootstrappingEventPublisher)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
+		this.dataSourceAclTablesPopulator = requireNonNull(dataSourceAclTablesPopulator);
 		this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
 		this.systemEntityTypeBootstrapper = requireNonNull(systemEntityTypeBootstrapper);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
+		this.systemPermissionPopulator = requireNonNull(systemPermissionPopulator);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
@@ -68,13 +75,16 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-
 		LOG.info("Bootstrapping application ...");
 		bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 		LOG.trace("Updating MOLGENIS ...");
 		upgradeBootstrapper.bootstrap();
 		LOG.debug("Updated MOLGENIS");
+
+		LOG.trace("Populating data source with ACL tables ...");
+		dataSourceAclTablesPopulator.populate();
+		LOG.debug("Populated data source with ACL tables");
 
 		LOG.trace("Bootstrapping transaction exception translators ...");
 		transactionExceptionTranslatorRegistrar.register(event.getApplicationContext());
@@ -89,8 +99,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.debug("Bootstrapped system entity meta data");
 
 		LOG.trace("Populating repositories ...");
-		repositoryPopulator.populate(event);
+		boolean wasDatabasePopulated = repositoryPopulator.populate(event);
 		LOG.debug("Populated repositories");
+
+		if (!wasDatabasePopulated)
+		{
+			LOG.trace("Populating permissions ...");
+			systemPermissionPopulator.populate(event.getApplicationContext());
+			LOG.debug("Populated permissions");
+		}
 
 		LOG.trace("Bootstrapping jobs ...");
 		jobBootstrapper.bootstrap();

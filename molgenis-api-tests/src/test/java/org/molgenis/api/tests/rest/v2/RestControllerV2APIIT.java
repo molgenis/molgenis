@@ -1,6 +1,7 @@
 package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import net.minidev.json.JSONArray;
@@ -36,13 +37,13 @@ public class RestControllerV2APIIT
 {
 	private static final Logger LOG = getLogger(RestControllerV2APIIT.class);
 
-	private static final String REST_TEST_USER = "api_v2_test_user";
 	private static final String REST_TEST_USER_PASSWORD = "api_v2_test_user_password";
 	private static final String V2_TEST_FILE = "/RestControllerV2_API_TestEMX.xlsx";
 	private static final String V2_DELETE_TEST_FILE = "/RestControllerV2_DeleteEMX.xlsx";
 	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
 	private static final String API_V2 = "api/v2/";
 
+	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -76,33 +77,30 @@ public class RestControllerV2APIIT
 		uploadEMX(adminToken, V2_COPY_TEST_FILE);
 		LOG.info("Importing Done");
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserName = "api_v2_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserId = getUserId(adminToken, testUserName);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", WRITE);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
+														  .put("sys_md_EntityType", WRITE)
+														  .put("sys_md_Attribute", WRITE)
+														  .put("sys_FileMeta", WRITE)
+														  .put("sys_sec_Owned", READ)
+														  .put("sys_L10nString", WRITE)
+														  .put("V2_API_TypeTestAPIV2", WRITE)
+														  .put("V2_API_TypeTestRefAPIV2", WRITE)
+														  .put("V2_API_LocationAPIV2", WRITE)
+														  .put("V2_API_PersonAPIV2", WRITE)
+														  .put("base_v2APITest1", WRITEMETA)
+														  .put("base_v2APITest2", WRITEMETA)
+														  .put("base_APICopyTest", WRITEMETA)
+														  .put("sys_job_JobExecution", READ)
+														  .put("sys_job_OneClickImportJobExecution", READ)
+														  .build());
 
-		grantSystemRights(adminToken, testUserId, "sys_FileMeta", WRITE);
-		grantSystemRights(adminToken, testUserId, "sys_sec_Owned", READ);
-		grantSystemRights(adminToken, testUserId, "sys_L10nString", WRITE);
-
-		grantRights(adminToken, testUserId, "V2_API_TypeTestAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_TypeTestRefAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_LocationAPIV2", WRITE);
-		grantRights(adminToken, testUserId, "V2_API_PersonAPIV2", WRITE);
-
-		grantRights(adminToken, testUserId, "base_v2APITest1", WRITEMETA);
-		grantRights(adminToken, testUserId, "base_v2APITest2", WRITEMETA);
-
-		grantRights(adminToken, testUserId, "base_APICopyTest", WRITEMETA);
-
-		grantPluginRights(adminToken, testUserId, "one-click-importer");
-		grantSystemRights(adminToken, testUserId, "sys_job_JobExecution", READ);
-		grantSystemRights(adminToken, testUserId, "sys_job_OneClickImportJobExecution", READ);
-
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test(enabled = false) // TODO

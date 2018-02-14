@@ -6,28 +6,30 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
-import org.molgenis.data.security.auth.UserAuthorityMetaData;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.integrationtest.platform.TestPermissionPopulator;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.security.EntityTypePermission.*;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpringContextTests
 {
@@ -58,6 +60,9 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 	@Autowired
 	MetaDataService metaDataService;
 
+	@Autowired
+	private TestPermissionPopulator testPermissionPopulator;
+
 	private EntityType entityType;
 	private String mainId = "id";
 	private String mainAttribute = "mainAttribute";
@@ -66,40 +71,17 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 	private String refId = "id";
 	private String refLabel = "label";
 
-	List<GrantedAuthority> setAuthorities()
+	private void populateUserPermissions()
 	{
-		List<GrantedAuthority> authorities = newArrayList();
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put("sys_md_Package", WRITE);
+		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
+		entityTypePermissionMap.put("sys_md_Attribute", WRITE);
+		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+		entityTypePermissionMap.put(MAIN_ENTITY, WRITEMETA);
+		entityTypePermissionMap.put(REFERENCE_ENTITY, WRITEMETA);
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + EntityTypeMetadata.ENTITY_TYPE_META_DATA));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + AttributeMetadata.ATTRIBUTE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + AttributeMetadata.ATTRIBUTE_META_DATA));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + AttributeMetadata.ATTRIBUTE_META_DATA));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + PackageMetadata.PACKAGE));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + PackageMetadata.PACKAGE));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + PackageMetadata.PACKAGE));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + UserAuthorityMetaData.USER_AUTHORITY));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + MAIN_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + MAIN_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + MAIN_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + MAIN_ENTITY));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + REFERENCE_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + REFERENCE_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + REFERENCE_ENTITY));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + REFERENCE_ENTITY));
-
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITEMETA_" + DECORATOR_CONFIGURATION));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + DECORATOR_CONFIGURATION));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + DECORATOR_CONFIGURATION));
-		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + DECORATOR_CONFIGURATION));
-
-		return authorities;
+		testPermissionPopulator.populate(entityTypePermissionMap);
 	}
 
 	/**
@@ -173,12 +155,12 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 			metaDataService.upsertEntityTypes(newArrayList(entityType, referenceEntityType));
 			dataService.add(REFERENCE_ENTITY, Stream.of(refEntity_1, refEntity_2, refEntity_3));
 		});
-		List<GrantedAuthority> authorities = setAuthorities();
-		getContext().setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 	}
 
 	void testTypeConversion(Object valueToConvert, AttributeType typeToConvertTo) throws MolgenisValidationException
 	{
+		populateUserPermissions();
+
 		// Add a data row to the EntityType
 		Entity entity = entityManager.create(entityType, NO_POPULATE);
 		entity.set(mainId, MAIN_ENTITY_ID_VALUE);
@@ -220,22 +202,26 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 
 	void afterMethod(AttributeType type)
 	{
-		// Delete rows of data
-		dataService.deleteAll(MAIN_ENTITY);
+		runAsSystem(() ->
+		{
+			// Delete rows of data
+			dataService.deleteAll(MAIN_ENTITY);
 
-		// Remove attribute, some conversions back to the main attribute are not allowed
-		Attribute attribute = entityType.getAttribute(mainAttribute);
-		entityType.removeAttribute(attribute);
-		metaDataService.updateEntityType(entityType);
+			// Remove attribute, some conversions back to the main attribute are not allowed
+			Attribute attribute = entityType.getAttribute(mainAttribute);
+			entityType.removeAttribute(attribute);
+			metaDataService.updateEntityType(entityType);
 
-		// Add the main attribute again, with the original type
-		Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute);
-		if (referencingTypes.contains(type)) mainAttributeAttribute.setRefEntity(referenceEntityType);
-		else if (type.equals(ENUM)) mainAttributeAttribute.setEnumOptions(enumOptions);
+			// Add the main attribute again, with the original type
+			Attribute mainAttributeAttribute = attributeFactory.create().setDataType(type).setName(mainAttribute);
+			if (referencingTypes.contains(type)) mainAttributeAttribute.setRefEntity(referenceEntityType);
+			else if (type.equals(ENUM)) mainAttributeAttribute.setEnumOptions(enumOptions);
 
-		entityType.addAttribute(mainAttributeAttribute);
+			entityType.addAttribute(mainAttributeAttribute);
 
-		metaDataService.updateEntityType(entityType);
+			metaDataService.updateEntityType(entityType);
+		});
+
 	}
 
 	void afterClass()

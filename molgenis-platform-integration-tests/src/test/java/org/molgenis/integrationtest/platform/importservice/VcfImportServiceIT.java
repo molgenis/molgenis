@@ -5,8 +5,16 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
@@ -17,6 +25,9 @@ import java.util.Map;
 import static java.util.Collections.singleton;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 public class VcfImportServiceIT extends ImportServiceIT
 {
@@ -32,12 +43,11 @@ public class VcfImportServiceIT extends ImportServiceIT
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfWithoutSamplesAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportVcfWithoutSamples();
 	}
 
@@ -61,12 +71,11 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertVariants(entityTypeId, false);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfWithSamplesAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportVcfWithSamples();
 	}
 
@@ -91,12 +100,11 @@ public class VcfImportServiceIT extends ImportServiceIT
 		assertVariants(entityTypeId, true);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportVcfGzWithSamplesAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportVcfGzWithSamples();
 	}
 
@@ -209,5 +217,26 @@ public class VcfImportServiceIT extends ImportServiceIT
 		expectedLastRow.put("END", null);
 
 		verifyFirstAndLastRows(entityTypeId, expectedFirstRow, expectedLastRow);
+	}
+
+	@Autowired
+	private MutableAclService mutableAclService;
+
+	private void populateUserPermissions()
+	{
+		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put("sys_md_Package", READ);
+		entityTypePermissionMap.put("sys_md_EntityType", READ);
+		entityTypePermissionMap.put("sys_md_Attribute", READ);
+		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+
+		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
+		{
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
+			mutableAclService.updateAcl(acl);
+		}));
 	}
 }

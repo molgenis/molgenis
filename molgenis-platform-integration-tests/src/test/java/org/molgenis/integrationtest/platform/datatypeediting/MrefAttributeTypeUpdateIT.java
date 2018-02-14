@@ -4,7 +4,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import java.util.List;
@@ -12,11 +16,16 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
+@Transactional
 public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
+	private static final String USERNAME = "mref-attribute-type-update-user";
+
 	@BeforeClass
 	public void setup()
 	{
@@ -38,7 +47,7 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "validConversionData")
 	public Object[][] validConversionData()
 	{
-		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
+		List<Entity> entities = runAsSystem(() -> dataService.findAll("REFERENCEENTITY").collect(toList()));
 		return new Object[][] {
 				{ entities, CATEGORICAL_MREF, newArrayList("label1", "email label", "hyperlink label") } };
 	}
@@ -51,6 +60,7 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param typeToConvertTo The type to convert to
 	 * @param convertedValue  The expected value after converting the type
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "validConversionData")
 	public void testValidConversion(List<Entity> valueToConvert, AttributeType typeToConvertTo,
 			List<String> convertedValue)
@@ -69,7 +79,7 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		List<Entity> entities = dataService.findAll("REFERENCEENTITY").collect(toList());
+		List<Entity> entities = runAsSystem(() -> dataService.findAll("REFERENCEENTITY").collect(toList()));
 		return new Object[][] { { entities, BOOL, MolgenisValidationException.class,
 				"Attribute data type update from [MREF] to [BOOL] not allowed, allowed types are [CATEGORICAL_MREF]" },
 				{ entities, STRING, MolgenisValidationException.class,
@@ -117,6 +127,7 @@ public class MrefAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "invalidConversionTestCases")
 	public void testInvalidConversion(List<Object> valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
 			String exceptionMessage)

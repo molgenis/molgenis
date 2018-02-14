@@ -61,20 +61,6 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
 	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
 	static final String ROLE_SU = "SU";
-	static final String ROLE_READ_PACKAGE = "ENTITY_READ_sys_md_Package";
-	static final String ROLE_COUNT_PACKAGE = "ENTITY_COUNT_sys_md_Package";
-	static final String ROLE_READ_ENTITY_TYPE = "ENTITY_READ_sys_md_EntityType";
-	static final String ROLE_COUNT_ENTITY_TYPE = "ENTITY_COUNT_sys_md_EntityType";
-	static final String ROLE_READ_ATTRIBUTE = "ENTITY_READ_sys_md_Attribute";
-	static final String ROLE_COUNT_ATTRIBUTE = "ENTITY_COUNT_sys_md_Attribute";
-	static final String ROLE_READ_TAG = "ENTITY_READ_sys_md_Tag";
-	static final String ROLE_COUNT_TAG = "ENTITY_COUNT_sys_md_Tag";
-	static final String ROLE_READ_OWNED = "ENTITY_READ_sys_sec_Owned";
-	static final String ROLE_COUNT_OWNED = "ENTITY_COUNT_sys_sec_Owned";
-	static final String ROLE_READ_FILE_META = "ENTITY_READ_sys_FileMeta";
-	static final String ROLE_COUNT_FILE_META = "ENTITY_COUNT_sys_FileMeta";
-	static final String ROLE_READ_DECORATOR_CONFIG = "ENTITY_READ_sys_dec_DecoratorConfiguration";
-	static final String ROLE_COUNT_DECORATOR_CONFIG = "ENTITY_COUNT_sys_dec_DecoratorConfiguration";
 
 	@Autowired
 	UserFactory userFactory;

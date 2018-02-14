@@ -142,9 +142,9 @@ public class PermissionManagerController extends PluginController
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(Permission.READ.toString()) || value.equalsIgnoreCase(
+			if (value != null && (value.equalsIgnoreCase(Permission.READ.toString()) || value.equalsIgnoreCase(
 					Permission.COUNT.toString()) || value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString())))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId());
@@ -163,9 +163,9 @@ public class PermissionManagerController extends PluginController
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(Permission.READ.toString()) || value.equalsIgnoreCase(
+			if (value != null && (value.equalsIgnoreCase(Permission.READ.toString()) || value.equalsIgnoreCase(
 					Permission.COUNT.toString()) || value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString())))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId);

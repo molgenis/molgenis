@@ -1,92 +1,102 @@
 package org.molgenis.security.permission;
 
+import org.mockito.Mock;
+import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-public class PermissionServiceImplTest
+@ContextConfiguration(classes = { PermissionServiceImplTest.Config.class })
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+public class PermissionServiceImplTest extends AbstractMockitoTestNGSpringContextTests
 {
-	private static Authentication AUTHENTICATION;
+	@Mock
+	private PermissionEvaluator permissionEvaluator;
 
-	private static PermissionServiceImpl permissionService;
+	private PermissionServiceImpl permissionService;
 
-	@SuppressWarnings("unchecked")
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@BeforeMethod
+	public void setUpBeforeMethod()
 	{
-		AUTHENTICATION = SecurityContextHolder.getContext().getAuthentication();
-
-		Authentication authentication = mock(Authentication.class);
-		GrantedAuthority authority1 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.READ + "_entity1").getMock();
-		GrantedAuthority authority2 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_entity2").getMock();
-		GrantedAuthority authority3 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_entity3").getMock();
-		GrantedAuthority authority4 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_plugin1").getMock();
-		GrantedAuthority authority5 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_plugin2").getMock();
-		GrantedAuthority authority6 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
-				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.COUNT + "_plugin3").getMock();
-
-		when((Collection<GrantedAuthority>) (authentication.getAuthorities())).thenReturn(
-				Arrays.asList(authority1, authority2, authority3, authority4, authority5, authority6));
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		permissionService = new PermissionServiceImpl();
+		permissionService = new PermissionServiceImpl(permissionEvaluator);
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass()
-	{
-		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION);
-	}
-
+	@WithMockUser(username = "USER")
 	@Test
-	public void hasPermissionOnEntity()
+	public void hasPermissionOnEntityTypeTrue()
 	{
-		assertTrue(permissionService.hasPermissionOnEntityType("entity1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnEntityType("entity3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnEntityType("entity-unknown", Permission.COUNT));
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
+				EntityTypePermission.READ)).thenReturn(true);
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
 	}
 
+	@WithMockUser(username = "USER")
 	@Test
-	public void hasPermissionOnPlugin()
+	public void hasPermissionOnEntityTypeFalse()
 	{
+		assertFalse(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
+	@Test
+	public void hasPermissionOnEntityTypeSuperuser()
+	{
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void hasPermissionOnEntityTypeSystemUser()
+	{
+		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
+	}
+
+	@WithMockUser(username = "USER")
+	@Test
+	public void hasPermissionOnPluginTrue()
+	{
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", PluginPermission.READ)).thenReturn(
+				true);
 		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin2", Permission.READ));
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin2", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin2", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin3", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin3", Permission.WRITE));
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin3", Permission.COUNT));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.READ));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.WRITE));
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin-unknown", Permission.COUNT));
+	}
+
+	@WithMockUser(username = "USER")
+	@Test
+	public void hasPermissionOnPluginFalse()
+	{
+		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
+	@Test
+	public void hasPermissionOnPluginSuperuser()
+	{
+		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
+	}
+
+	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
+	@Test
+	public void hasPermissionOnPluginSystemUser()
+	{
+		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
+	}
+
+	static class Config
+	{
 	}
 }

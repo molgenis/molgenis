@@ -27,7 +27,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Created by mslofstra on 30/01/2018.
@@ -75,9 +76,8 @@ public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest
 	public void setUp()
 	{
 		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
-				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
-				userAccountService, importServiceFactory, fileStore, fileRepositoryCollectionFactory, importRunService,
-				executorService, groupAuthorityFactory);
+				validationResultWizardPage, importResultsWizardPage, dataService, importServiceFactory, fileStore,
+				fileRepositoryCollectionFactory, importRunService, executorService);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 	}
 

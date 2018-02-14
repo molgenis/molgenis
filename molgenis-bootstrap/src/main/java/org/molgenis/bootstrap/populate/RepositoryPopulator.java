@@ -48,22 +48,17 @@ public class RepositoryPopulator
 		this.dynamicDecoratorPopulator = requireNonNull(dynamicDecoratorPopulator);
 	}
 
-	public void populate(ContextRefreshedEvent event)
+	/**
+	 * Returns whether the database was populated previously.
+	 */
+	public boolean populate(ContextRefreshedEvent event)
 	{
-		if (!isDatabasePopulated())
+		boolean databasePopulated = isDatabasePopulated();
+		if (!databasePopulated)
 		{
-			LOG.trace("Populating database with users, groups and authorities ...");
-			usersGroupsAuthoritiesPopulator.populate();
-			LOG.trace("Populated database with users, groups and authorities");
-
 			LOG.trace("Populating database with I18N strings ...");
 			i18nPopulator.populateLanguages();
 			LOG.trace("Populated database with I18N strings");
-
-			// populate repositories with application-specific entities
-			LOG.trace("Populating database with application entities ...");
-			systemEntityPopulator.populate(event);
-			LOG.trace("Populated database with application entities");
 		}
 
 		LOG.trace("Populating plugin entities ...");
@@ -86,10 +81,23 @@ public class RepositoryPopulator
 		scriptTypePopulator.populate();
 		LOG.trace("Populated script type entities");
 
+		if (!databasePopulated)
+		{
+			LOG.trace("Populating database with users, groups and authorities ...");
+			usersGroupsAuthoritiesPopulator.populate();
+			LOG.trace("Populated database with users, groups and authorities");
+
+			// populate repositories with application-specific entities
+			LOG.trace("Populating database with application entities ...");
+			systemEntityPopulator.populate(event);
+			LOG.trace("Populated database with application entities");
+		}
+
 		LOG.trace("Populating dynamic decorator entities ...");
 		dynamicDecoratorPopulator.populate();
 		LOG.trace("Populated dynamic decorator entities");
 
+		return databasePopulated;
 	}
 
 	private boolean isDatabasePopulated()

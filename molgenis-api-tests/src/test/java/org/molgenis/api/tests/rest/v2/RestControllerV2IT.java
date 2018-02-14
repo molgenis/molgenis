@@ -1,12 +1,14 @@
 package org.molgenis.api.tests.rest.v2;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
 import org.molgenis.api.tests.rest.v1.RestControllerIT;
 import org.molgenis.api.tests.utils.RestTestUtils;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -31,9 +33,9 @@ public class RestControllerV2IT
 
 	private static final String API_V2 = "api/v2/";
 
-	private static final String REST_TEST_USER = "rest_test_v2";
-	private static final String REST_TEST_USER_PASSWORD = REST_TEST_USER;
+	private static final String REST_TEST_USER_PASSWORD = "Blahdiblah";
 
+	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -72,17 +74,21 @@ public class RestControllerV2IT
 		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
 		LOG.info("Importing Done");
 
-		createUser(adminToken, REST_TEST_USER, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, REST_TEST_USER);
+		testUserName = "rest_test_v2" + System.currentTimeMillis();
+		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, testUserName);
 
-		grantSystemRights(adminToken, testUserId, PACKAGE, WRITE);
-		grantSystemRights(adminToken, testUserId, ENTITY_TYPE_META_DATA, WRITE);
-		grantSystemRights(adminToken, testUserId, ATTRIBUTE_META_DATA, WRITE);
-		grantSystemRights(adminToken, testUserId, FILE_META, READ);
-		grantSystemRights(adminToken, testUserId, OWNED, READ);
+		ImmutableMap.Builder<String, Permission> permissionsBuilder = ImmutableMap.builder();
+		permissionsBuilder.put(PACKAGE, WRITE)
+						  .put(ENTITY_TYPE_META_DATA, WRITE)
+						  .put(ATTRIBUTE_META_DATA, WRITE)
+						  .put(FILE_META, READ)
+						  .put(OWNED, READ)
+						  .put(UserMetaData.USER, COUNT);
+		testEntities.forEach(entity -> permissionsBuilder.put(entity, WRITE));
+		setGrantedRepositoryPermissions(adminToken, testUserId, permissionsBuilder.build());
 
-		testEntities.forEach(entity -> grantRights(adminToken, testUserId, entity, WRITE));
-		testUserToken = login(REST_TEST_USER, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -254,16 +260,15 @@ public class RestControllerV2IT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
-			   .get(API_V2 + "sys_sec_User?aggs=x==active;y==superuser")
+			   .get(API_V2 + "sys_App?aggs=x==active;y==superuser")
 			   .then()
 			   .statusCode(UNAUTHORIZED);
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
-	@Test(dependsOnMethods = { "testRetrieveSystemEntityCollectionAggregatesNotAllowed" })
+	@Test
 	public void testRetrieveSystemEntityCollectionAggregates()
 	{
-		grantSystemRights(adminToken, testUserId, "sys_sec_User", COUNT);
 
 		given().log()
 			   .all()

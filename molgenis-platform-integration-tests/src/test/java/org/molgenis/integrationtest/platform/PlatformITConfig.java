@@ -33,6 +33,7 @@ import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
+import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
@@ -53,6 +54,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
+import org.springframework.security.acls.jdbc.AclConfig;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -79,34 +81,34 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
   */
 @ComponentScan({ "org.molgenis.data.security.aggregation", "org.molgenis.data.meta", "org.molgenis.data.index",
 		"org.molgenis.js", "org.molgenis.data.elasticsearch", "org.molgenis.data.security.auth",
-		"org.molgenis.data.platform",
-		"org.molgenis.data.meta.model", "org.molgenis.data.meta.util", "org.molgenis.data.system.model",
-		"org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.i18n", "org.molgenis.data.postgresql",
-		"org.molgenis.data.file.model", "org.molgenis.data.security.owned", "org.molgenis.data.security.user",
-		"org.molgenis.data.validation", "org.molgenis.data.transaction", "org.molgenis.data.importer.emx",
-		"org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings", "org.molgenis.data.util",
-		"org.molgenis.data.decorator", "org.molgenis.data.event" })
+		"org.molgenis.data.platform", "org.molgenis.data.meta.model", "org.molgenis.data.meta.util",
+		"org.molgenis.data.system.model", "org.molgenis.data.cache", "org.molgenis.data.i18n", "org.molgenis.i18n",
+		"org.molgenis.data.postgresql", "org.molgenis.data.file.model", "org.molgenis.data.security.owned",
+		"org.molgenis.data.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
+		"org.molgenis.data.importer.emx", "org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings",
+		"org.molgenis.data.util", "org.molgenis.data.decorator", "org.molgenis.data.event" })
 @Import({ TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class, DatabaseConfig.class,
-		ElasticsearchConfig.class,
-		PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class,
-		PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
+		ElasticsearchConfig.class, PostgreSqlConfiguration.class, RunAsSystemAspect.class, IdGeneratorImpl.class,
+		ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class, JobConfig.class,
 		org.molgenis.data.RepositoryCollectionRegistry.class, RepositoryCollectionDecoratorFactoryImpl.class,
-		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
-		org.molgenis.data.importer.emx.EmxImportService.class, DataPersisterImpl.class,
-		org.molgenis.data.importer.ImportServiceFactory.class, FileRepositoryCollectionFactory.class,
-		org.molgenis.data.excel.ExcelDataConfig.class,
+		DataSourceAclTablesPopulator.class, org.molgenis.data.RepositoryCollectionBootstrapper.class,
+		org.molgenis.data.EntityFactoryRegistrar.class, org.molgenis.data.importer.emx.EmxImportService.class,
+		DataPersisterImpl.class, org.molgenis.data.importer.ImportServiceFactory.class,
+		FileRepositoryCollectionFactory.class, org.molgenis.data.excel.ExcelDataConfig.class,
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class })
+		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, TestPermissionPopulator.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
 
 	@Autowired
 	private DataSource dataSource;
+	@Autowired
+	private DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
 	@Autowired
 	private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	@Autowired
@@ -194,6 +196,12 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 				RunAsSystemAspect.runAsSystem(() ->
 				{
 					LOG.info("Bootstrapping registries ...");
+					bootstrappingEventPublisher.publishBootstrappingStartedEvent();
+
+					LOG.trace("Populating data source with ACL tables ...");
+					dataSourceAclTablesPopulator.populate();
+					LOG.debug("Populated data source with ACL tables");
+
 					LOG.trace("Registering repository collections ...");
 					repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
 					LOG.trace("Registered repository collections");
