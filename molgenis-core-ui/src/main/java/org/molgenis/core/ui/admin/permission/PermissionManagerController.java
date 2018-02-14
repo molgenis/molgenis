@@ -98,6 +98,8 @@ public class PermissionManagerController extends PluginController
 		return getPluginPermissions(sid);
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
 	@GetMapping("/entityclass/user/{userId}")
 	@ResponseBody
 	public Permissions getUserEntityClassPermissions(@PathVariable String userId)
@@ -106,6 +108,8 @@ public class PermissionManagerController extends PluginController
 		return getEntityTypePermissions(sid);
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	@PostMapping("/update/plugin/group")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupPluginPermissions(@RequestParam String groupId, WebRequest webRequest)
@@ -114,6 +118,8 @@ public class PermissionManagerController extends PluginController
 		updatePluginPermission(webRequest, sid);
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	@PostMapping("/update/entityclass/group")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
@@ -122,6 +128,8 @@ public class PermissionManagerController extends PluginController
 		updateEntityTypePermissions(webRequest, sid);
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	@PostMapping("/update/plugin/user")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserPluginPermissions(@RequestParam String userId, WebRequest webRequest)
@@ -130,9 +138,7 @@ public class PermissionManagerController extends PluginController
 		updatePluginPermission(webRequest, sid);
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional
-	void removeSidPluginPermission(Plugin plugin, Sid sid)
+	private void removeSidPluginPermission(Plugin plugin, Sid sid)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
@@ -144,9 +150,7 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional
-	void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
+	private void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
 		createSidPermission(sid, objectIdentity, getCumulativePermission(pluginPermission));
@@ -162,13 +166,13 @@ public class PermissionManagerController extends PluginController
 		return getPluginPermissions(sid);
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true)
-	public List<Plugin> getPlugins()
+	private List<Plugin> getPlugins()
 	{
 		return dataService.findAll(PLUGIN, Plugin.class).collect(toList());
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
 	@PostMapping("/update/entityclass/user")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateUserEntityClassPermissions(@RequestParam String userId, WebRequest webRequest)
@@ -289,9 +293,7 @@ public class PermissionManagerController extends PluginController
 		return pluginPermission;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional
-	public void removeSidEntityTypePermission(EntityType entityType, Sid sid)
+	private void removeSidEntityTypePermission(EntityType entityType, Sid sid)
 	{
 		ObjectIdentity objectIdentity = new EntityTypeIdentity(entityType);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
@@ -303,9 +305,8 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional
-	public void createSidEntityTypePermission(EntityType entityType, Sid sid, EntityTypePermission entityTypePermission)
+	private void createSidEntityTypePermission(EntityType entityType, Sid sid,
+			EntityTypePermission entityTypePermission)
 	{
 		ObjectIdentity objectIdentity = new EntityTypeIdentity(entityType);
 		createSidPermission(sid, objectIdentity,
@@ -465,16 +466,12 @@ public class PermissionManagerController extends PluginController
 		return user;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true)
-	public List<User> getUsers()
+	private List<User> getUsers()
 	{
 		return dataService.findAll(USER, User.class).collect(toList());
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@Transactional(readOnly = true)
-	public List<Group> getGroups()
+	private List<Group> getGroups()
 	{
 		return dataService.findAll(GROUP, Group.class).collect(toList());
 	}
