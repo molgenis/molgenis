@@ -25,6 +25,6 @@ public class FallbackExceptionHandler
 	public Object handleException(Exception e, HandlerMethod handlerMethod)
 	{
 		LOG.error("", e);
-		return ExceptionHandlerUtils.handleException(e, handlerMethod, INTERNAL_SERVER_ERROR, environment, null);
+		return ExceptionHandlerUtils.handleException(e, handlerMethod, INTERNAL_SERVER_ERROR, null, environment);
 	}
 }
