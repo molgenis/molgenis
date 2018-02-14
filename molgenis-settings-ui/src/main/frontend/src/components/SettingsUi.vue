@@ -21,14 +21,29 @@
           </option>
         </select>
 
-        <button
-          id="save-btn-top"
-          class="btn btn-primary float-right mt-2"
-          type="submit"
-          @click.prevent="onSubmit(formData)"
-          :disabled="state.$pristine || !state.$valid">
-          Save changes
-        </button>
+        <div class="float-right mt-2">
+
+          <button
+            v-if="!isSaving"
+            id="save-btn-top"
+            class="btn btn-primary"
+            type="submit"
+            @click.prevent="onSubmit(formData)"
+            :disabled="state.$pristine || !state.$valid">
+            Save changes
+          </button>
+
+          <button
+            v-else
+            id="save-btn-saving"
+            class="btn btn-primary"
+            type="button"
+            disabled="disabled">
+            Saving.... <i class="fa fa-spinner fa-spin "></i>
+          </button>
+
+        </div>
+
       </div>
     </div>
 
@@ -65,7 +80,8 @@
         settingsOptions: [],
         alert: null,
         showForm: false,
-        settingLabel: ''
+        settingLabel: '',
+        isSaving: false
       }
     },
     watch: {
@@ -77,6 +93,7 @@
     },
     methods: {
       onSubmit (formData) {
+        this.isSaving = true
         const options = {
           body: JSON.stringify(formData)
         }
@@ -98,6 +115,7 @@
           message: 'Settings saved',
           type: 'success'
         }
+        this.isSaving = false
       },
       initializeSettingsOptions (response) {
         this.settingsOptions = response.items
