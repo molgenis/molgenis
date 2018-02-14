@@ -72,9 +72,9 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.9.3":
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.3.tgz#89936492b41e9741c09d0b7081fba14ea8392962"
+"@molgenis/molgenis-ui-form@^0.9.4":
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.4.tgz#44c4e6f865c4555ad9a4c541105a732f2e116b66"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     moment "^2.20.1"
@@ -2947,8 +2947,8 @@ flat-cache@^1.2.1:
     write "^0.2.1"
 
 flatpickr@^4.2.4:
-  version "4.2.4"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.2.4.tgz#abd6dedd0fa41e2118acb96a22f49819ba2d0157"
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.3.2.tgz#6a477043c075ef36c3ff54fadb49b936a64d635f"
 
 flatten@^1.0.2:
   version "1.0.2"
