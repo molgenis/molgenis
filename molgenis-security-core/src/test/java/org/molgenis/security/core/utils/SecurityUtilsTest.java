@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.*;
 
 public class SecurityUtilsTest
@@ -79,7 +79,7 @@ public class SecurityUtilsTest
 	public void currentUserIsAuthenticated_falseAnonymous()
 	{
 		when(authentication.isAuthenticated()).thenReturn(true);
-		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_ANONYMOUS)
+		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn("ROLE_ANONYMOUS")
 																						.getMock();
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
 				Collections.singletonList(authoritySu));
@@ -123,15 +123,6 @@ public class SecurityUtilsTest
 		when(userDetails.getUsername()).thenReturn("user");
 		assertFalse(SecurityUtils.currentUserIsSystem());
 		assertFalse(SecurityUtils.currentUserIsSuOrSystem());
-	}
-
-	@Test
-	public void defaultPluginAuthorities()
-	{
-		String pluginId = "plugin1";
-		String[] defaultPluginAuthorities = SecurityUtils.defaultPluginAuthorities(pluginId);
-		assertEquals(defaultPluginAuthorities, new String[] { AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId,
-				AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId });
 	}
 
 	@Test

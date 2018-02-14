@@ -1,5 +1,6 @@
 package org.molgenis.api.tests.beacon;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.molgenis.api.tests.utils.RestTestUtils;
@@ -30,7 +31,6 @@ public class BeaconAPIIT
 	private static final Logger LOG = LoggerFactory.getLogger(BeaconAPIIT.class);
 
 	// User credentials
-	private static final String BEACON_TEST_USER = "beacon_test_user";
 	private static final String BEACON_TEST_USER_PASSWORD = "beacon_test_user_password";
 
 	private String adminToken;
@@ -49,6 +49,7 @@ public class BeaconAPIIT
 
 	private static final String BEACON_SET = "beacon_set";
 	private static final String BEACON_SET_SAMPLE = "beacon_setSample";
+	private String testUsername;
 
 	/**
 	 * Pass down system properties via the mvn commandline argument
@@ -73,8 +74,9 @@ public class BeaconAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-		createUser(adminToken, BEACON_TEST_USER, BEACON_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, BEACON_TEST_USER);
+		testUsername = "beacon_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUsername, BEACON_TEST_USER_PASSWORD);
+		testUserId = getUserId(adminToken, testUsername);
 
 		RestTestUtils.uploadVCFToEntity(adminToken, "/beacon_set.vcf", BEACON_SET);
 
@@ -133,17 +135,18 @@ public class BeaconAPIIT
 			   .all()
 			   .statusCode(CREATED);
 
-		grantSystemRights(adminToken, testUserId, "sys_md_Package", READ);
-		grantSystemRights(adminToken, testUserId, "sys_md_EntityType", READ);
-		grantSystemRights(adminToken, testUserId, "sys_md_Attribute", READ);
-		grantSystemRights(adminToken, testUserId, "sys_genomebrowser_GenomeBrowserAttributes", READ);
+		setGrantedRepositoryPermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("sys_md_Package", READ)
+														  .put("sys_md_EntityType", READ)
+														  .put("sys_md_Attribute", READ)
+														  .put("sys_genomebrowser_GenomeBrowserAttributes", READ)
+														  .put(SYS_BEACON, READ)
+														  .put(SYS_BEACONS_BEACON_DATASET, READ)
+														  .put(SYS_BEACONS_BEACON_ORGANIZATION, READ)
+														  .put(BEACON_SET, READ)
+														  .build());
 
-		grantSystemRights(adminToken, testUserId, SYS_BEACON, READ);
-		grantSystemRights(adminToken, testUserId, SYS_BEACONS_BEACON_DATASET, READ);
-		grantSystemRights(adminToken, testUserId, SYS_BEACONS_BEACON_ORGANIZATION, READ);
-		grantSystemRights(adminToken, testUserId, BEACON_SET, READ);
-
-		userToken = login(BEACON_TEST_USER, BEACON_TEST_USER_PASSWORD);
+		userToken = login(testUsername, BEACON_TEST_USER_PASSWORD);
 
 	}
 
@@ -250,13 +253,13 @@ public class BeaconAPIIT
 	@AfterClass(alwaysRun = true)
 	public void afterClass()
 	{
-		// Cleanup beacon data
-		removeEntities(adminToken, Arrays.asList(BEACON_SET, BEACON_SET_SAMPLE));
-
 		// Cleanup beacon config
 		removeEntityFromTable(adminToken, SYS_BEACON, MY_FIRST_BEACON);
 		removeEntityFromTable(adminToken, SYS_BEACONS_BEACON_DATASET, MY_FIRST_BEACON_DATASET);
 		removeEntityFromTable(adminToken, SYS_BEACONS_BEACON_ORGANIZATION, MY_FIRST_BEACON_ORGANIZATION);
+
+		// Cleanup beacon data
+		removeEntities(adminToken, Arrays.asList(BEACON_SET, BEACON_SET_SAMPLE));
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);

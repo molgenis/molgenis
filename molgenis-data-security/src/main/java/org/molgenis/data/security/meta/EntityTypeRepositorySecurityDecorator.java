@@ -5,12 +5,11 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.auth.GroupAuthority;
-import org.molgenis.data.security.auth.UserAuthority;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.acls.model.MutableAclService;
 
 import java.util.Iterator;
 import java.util.List;
@@ -21,10 +20,6 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.data.security.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.data.security.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.security.util.SecurityDecoratorUtils.validatePermission;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
@@ -40,16 +35,16 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final PermissionService permissionService;
-	private final DataService dataService;
+	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
-			DataService dataService)
+			MutableAclService mutableAclService)
 	{
 		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
-		this.dataService = requireNonNull(dataService);
+		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
@@ -304,32 +299,13 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void deleteEntityPermissions(String entityTypeId)
 	{
-		List<String> authorities = SecurityUtils.getEntityAuthorities(entityTypeId);
-
-		// User permissions
-		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
-														 .in(ROLE, authorities)
-														 .findAll()
-														 .collect(toList());
-		if (!userPermissions.isEmpty())
-		{
-			dataService.delete(USER_AUTHORITY, userPermissions.stream());
-		}
-		// Group permissions
-		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
-														   .in(ROLE, authorities)
-														   .findAll()
-														   .collect(toList());
-		if (!groupPermissions.isEmpty())
-		{
-			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
-		}
+		mutableAclService.deleteAcl(new EntityTypeIdentity(entityTypeId), true);
 	}
 
 	@Override
 	public void add(EntityType entity)
 	{
-		validateAddAllowed(entity);
+		createAcl(entity);
 		super.add(entity);
 	}
 
@@ -338,14 +314,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		return super.add(entities.filter(entityType ->
 		{
-			validateAddAllowed(entityType);
+			createAcl(entityType);
 			return true;
 		}));
-	}
-
-	private void validateAddAllowed(EntityType entityType)
-	{
-		validatePermission(entityType, Permission.WRITEMETA);
 	}
 
 	/**
@@ -392,6 +363,17 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		validateDeleteAllowed(entityType);
 	}
 
+	private void validatePermission(EntityType entityType, Permission permission)
+	{
+		boolean hasPermission = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
+		if (!hasPermission)
+		{
+			throw new MolgenisDataAccessException(
+					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
+							entityType.getLabel(), entityType.getId()));
+		}
+	}
+
 	private EntityType filterCountPermission(EntityType entityType)
 	{
 		return entityType != null ? filterCountPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
@@ -427,5 +409,10 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}
+	}
+
+	private void createAcl(EntityType entityType)
+	{
+		mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
 	}
 }

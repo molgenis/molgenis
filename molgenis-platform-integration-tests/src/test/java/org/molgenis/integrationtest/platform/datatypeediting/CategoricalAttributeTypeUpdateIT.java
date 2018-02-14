@@ -4,15 +4,24 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
+@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
+@Transactional
 public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdateIT
 {
+	private static final String USERNAME = "categorical-attribute-type-update-user";
+
 	@BeforeClass
 	public void setup()
 	{
@@ -34,7 +43,7 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	@DataProvider(name = "validConversionData")
 	public Object[][] validConversionData()
 	{
-		Entity entity = dataService.findOneById("REFERENCEENTITY", "1");
+		Entity entity = runAsSystem(() -> dataService.findOneById("REFERENCEENTITY", "1"));
 		return new Object[][] { { entity, STRING, "1" }, { entity, INT, 1 }, { entity, LONG, 1L },
 				{ entity, XREF, "label1" } };
 	}
@@ -47,6 +56,7 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	 * @param typeToConvertTo The type to convert to
 	 * @param convertedValue  The expected value after converting the type
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "validConversionData")
 	public void testValidConversion(Entity valueToConvert, AttributeType typeToConvertTo, Object convertedValue)
 	{
@@ -60,8 +70,8 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	@DataProvider(name = "invalidConversionTestCases")
 	public Object[][] invalidConversionTestCases()
 	{
-		Entity entity1 = dataService.findOneById("REFERENCEENTITY", "1");
-		Entity entity2 = dataService.findOneById("REFERENCEENTITY", "molgenis@test.org");
+		Entity entity1 = runAsSystem(() -> dataService.findOneById("REFERENCEENTITY", "1"));
+		Entity entity2 = runAsSystem(() -> dataService.findOneById("REFERENCEENTITY", "molgenis@test.org"));
 		return new Object[][] { { entity1, BOOL, MolgenisValidationException.class,
 				"Attribute data type update from [CATEGORICAL] to [BOOL] not allowed, allowed types are [INT, LONG, STRING, XREF]" },
 				{ entity1, TEXT, MolgenisValidationException.class,
@@ -107,6 +117,7 @@ public class CategoricalAttributeTypeUpdateIT extends AbstractAttributeTypeUpdat
 	 * @param exceptionClass   The expected class of the exception that will be thrown
 	 * @param exceptionMessage The expected exception message
 	 */
+	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "invalidConversionTestCases")
 	public void testInvalidConversion(Entity valueToConvert, AttributeType typeToConvertTo, Class exceptionClass,
 			String exceptionMessage)

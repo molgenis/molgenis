@@ -5,8 +5,8 @@
         function createGroupPermissionTable(data) {
             var items = [];
             $.each(data.entityIds, function (entityId, entityTypeId) {
-                if (data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
-                    $.each(data.groupPermissionMap[entityId.toLowerCase()], function (idx, perm) {
+                if (data.groupPermissionMap && data.groupPermissionMap[entityId]) {
+                    $.each(data.groupPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>');
                         items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"' + (perm.type === "writemeta" ? ' checked' : '') + '></td>');
@@ -26,8 +26,8 @@
                     items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
                     items.push('</tr>');
                 }
-                if (data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
-                    $.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function (idx, perm) {
+                if (data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId]) {
+                    $.each(data.hierarchyPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
                         items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');
@@ -45,8 +45,8 @@
         function createUserPermissionTable(data) {
             var items = [];
             $.each(data.entityIds, function (entityId, entityTypeId) {
-                if (data.userPermissionMap && data.userPermissionMap[entityId.toLowerCase()]) {
-                    $.each(data.userPermissionMap[entityId.toLowerCase()], function (idx, perm) {
+                if (data.userPermissionMap && data.userPermissionMap[entityId]) {
+                    $.each(data.userPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>');
                         items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"' + (perm.type === "writemeta" ? ' checked' : '') + '></td>');
@@ -65,8 +65,8 @@
                     items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
                     items.push('</tr>');
                 }
-                if (data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
-                    $.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function (idx, perm) {
+                if (data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId]) {
+                    $.each(data.hierarchyPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
                         items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');
@@ -77,8 +77,8 @@
                         items.push('</tr>');
                     });
                 }
-                if (data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
-                    $.each(data.groupPermissionMap[entityId.toLowerCase()], function (idx, perm) {
+                if (data.groupPermissionMap && data.groupPermissionMap[entityId]) {
+                    $.each(data.groupPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
                         items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');

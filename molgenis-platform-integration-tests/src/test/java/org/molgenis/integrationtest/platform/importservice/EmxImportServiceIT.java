@@ -10,7 +10,15 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,6 +38,9 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
 public class EmxImportServiceIT extends ImportServiceIT
@@ -50,12 +61,11 @@ public class EmxImportServiceIT extends ImportServiceIT
 		return user;
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportEmxCsvZipAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportEmxCsvZip();
 	}
 
@@ -79,12 +89,11 @@ public class EmxImportServiceIT extends ImportServiceIT
 		verifyFirstAndLastRows(CSV_PATIENTS, patientsFirstRow, patientsLastRow);
 	}
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	@Test
 	public void testDoImportEmxTsvZipAsNonSuperuser()
 	{
+		populateUserPermissions();
 		testDoImportEmxTsvZip();
 	}
 
@@ -231,14 +240,17 @@ public class EmxImportServiceIT extends ImportServiceIT
 		assertEquals(getIdsAsSet(packageTags), newHashSet("packagetag0", "packagetag1"));
 	}
 
-	@Test(dataProvider = "doImportEmxAddProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
+	/*
+	, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
 			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_TAG, ROLE_READ_OWNED,
 			ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED, ROLE_COUNT_TAG, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
-	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
-			Set<String> addedEntityTypes, Runnable entityValidationMethod)
+			ROLE_COUNT_DECORATOR_CONFIG }
+	 */
+	@Test(dataProvider = "doImportEmxAddProvider")
+	@WithMockUser(username = USERNAME)
+	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
+		populateUserPermissions();
 		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
@@ -305,12 +317,11 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Test(dataProvider = "doImportEmxAddUpdateProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	public void testDoImportAddUpdateEmxAsNonSuperuser(File file, File addUpdateFile,
 			Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
+		populateUserPermissions();
 		executeAddUpdateOrUpdateTest(file, addUpdateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
@@ -406,12 +417,11 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Test(dataProvider = "doImportEmxUpdateProvider")
-	@WithMockUser(username = USERNAME, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG })
+	@WithMockUser(username = USERNAME)
 	public void testDoImportUpdateEmxAsNonSuperuser(File file, File updateFile, Map<String, Integer> entityCountMap,
 			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
+		populateUserPermissions();
 		executeAddUpdateOrUpdateTest(file, updateFile, entityCountMap, addedEntityTypes, entityValidationMethod);
 	}
 
@@ -869,5 +879,29 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		testAddUpdateLastRow.put("id", "2");
 		testAddUpdateLastRow.put("label", "Label #2");
+	}
+
+	@Autowired
+	private MutableAclService mutableAclService;
+
+	private void populateUserPermissions()
+	{
+		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+
+		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put("sys_md_Package", READ);
+		entityTypePermissionMap.put("sys_md_EntityType", READ);
+		entityTypePermissionMap.put("sys_md_Attribute", READ);
+		entityTypePermissionMap.put("sys_md_Tag", READ);
+		entityTypePermissionMap.put("sys_sec_Owned", READ);
+		entityTypePermissionMap.put("sys_FileMeta", READ);
+		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+
+		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
+		{
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
+			mutableAclService.updateAcl(acl);
+		}));
 	}
 }

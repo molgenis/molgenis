@@ -27,6 +27,6 @@ public class UserRepositoryDecoratorFactory extends AbstractSystemRepositoryDeco
 	@Override
 	public Repository<User> createDecoratedRepository(Repository<User> repository)
 	{
-		return new UserRepositoryDecorator(repository, userAuthorityFactory, dataService, passwordEncoder);
+		return new UserRepositoryDecorator(repository, dataService, passwordEncoder);
 	}
 }

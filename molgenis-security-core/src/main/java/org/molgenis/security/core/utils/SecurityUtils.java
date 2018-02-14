@@ -19,16 +19,34 @@ public class SecurityUtils
 	public static final String AUTHORITY_SU = "ROLE_SU";
 	public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
 
-	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
-	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
-	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_";
-	public static final String AUTHORITY_PLUGIN_COUNT_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.COUNT + "_";
-	public static final String AUTHORITY_PLUGIN_WRITEMETA_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITEMETA + "_";
+	public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
+	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
+	public static final String ROLE_ACL_GENERAL_CHANGES = "ROLE_ACL_GENERAL_CHANGES";
 
+	/**
+	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine plugin permissions
+	 */
+	@Deprecated
+	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
+	/**
+	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine plugin permissions
+	 */
+	@Deprecated
+	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
+	/**
+	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
+	 */
+	@Deprecated
 	public static final String AUTHORITY_ENTITY_PREFIX = "ROLE_ENTITY_";
+	/**
+	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
+	 */
+	@Deprecated
 	public static final String AUTHORITY_ENTITY_READ_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";
-	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_";
-	public static final String AUTHORITY_ENTITY_COUNT_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_";
+	/**
+	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
+	 */
+	@Deprecated
 	public static final String AUTHORITY_ENTITY_WRITEMETA_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITEMETA + "_";
 
 	public static String getCurrentUsername()
@@ -106,35 +124,13 @@ public class SecurityUtils
 	public static boolean currentUserIsAuthenticated()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return authentication != null && authentication.isAuthenticated() && !currentUserHasRole(AUTHORITY_ANONYMOUS);
+		return authentication != null && authentication.isAuthenticated() && !currentUserIsAnonymous();
 	}
 
-	/**
-	 * Returns the default (su, read, write) roles related to a plugin
-	 */
-	public static String[] defaultPluginAuthorities(String... pluginIds)
+	private static boolean currentUserIsAnonymous()
 	{
-		List<String> pluginAuthorities = new ArrayList<>();
-		pluginAuthorities.add(AUTHORITY_SU);
-		if (pluginIds != null)
-		{
-			for (String pluginId : pluginIds)
-			{
-				pluginAuthorities.add(getPluginReadAuthority(pluginId));
-				pluginAuthorities.add(getPluginWriteAuthority(pluginId));
-			}
-		}
-		return pluginAuthorities.toArray(new String[] {});
-	}
-
-	public static String getPluginReadAuthority(String pluginId)
-	{
-		return AUTHORITY_PLUGIN_READ_PREFIX + pluginId;
-	}
-
-	public static String getPluginWriteAuthority(String pluginId)
-	{
-		return AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication == null || currentUserHasRole(AUTHORITY_ANONYMOUS);
 	}
 
 	/**

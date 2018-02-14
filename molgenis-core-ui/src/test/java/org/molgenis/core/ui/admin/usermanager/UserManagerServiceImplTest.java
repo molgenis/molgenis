@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
@@ -342,10 +343,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private void setSecurityContextNonSuperUserWrite()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.asList(
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "USERMANAGER"),
-				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "USERMANAGER"));
 		SecurityContextHolder.getContext()
-							 .setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
+							 .setAuthentication(new UsernamePasswordAuthenticationToken(null, null, emptyList()));
 	}
 }
