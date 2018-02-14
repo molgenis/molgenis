@@ -5,7 +5,10 @@ import org.molgenis.data.security.owned.OwnedEntityType;
 import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.*;
+import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
+import org.molgenis.security.permission.PermissionServiceImpl;
+import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
+import org.molgenis.security.permission.SecurityContextRegistryImpl;
 import org.molgenis.security.settings.AuthenticationSettingsImpl;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenGenerator;
@@ -31,17 +34,13 @@ import static org.mockito.Mockito.when;
 @EnableWebSecurity
 @Import({ PermissionServiceImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
 		TokenMetaData.class, SecurityPackage.class, UserMetaData.class, OwnedEntityType.class,
-		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
-		PermissionSystemServiceImpl.class, UserAuthorityFactory.class, UserAuthorityMetaData.class, UserFactory.class,
-		AuthorityMetaData.class, AggregationTestConfig.class, RoleHierarchyAuthoritiesMapper.class,
-		GroupAuthorityFactory.class, GroupAuthorityMetaData.class, GroupMetaData.class,
+		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class, UserFactory.class,
+		AggregationTestConfig.class, RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class,
 		AuthenticationSettingsImpl.class, PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig
 {
-	public final static String ANONYMOUSE_USER = "anonymouse";
 	public final static String SUPERUSER_NAME = "admin";
-	public final static String SUPERUSER_ROLE = "SU";
 	public final static String TOKEN_DESCRIPTION = "REST token";
 
 	@Bean
