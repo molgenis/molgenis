@@ -4,9 +4,10 @@ import Router from 'vue-router'
 import QuestionnaireList from '../components/QuestionnaireList'
 // Questionnaire + child routes
 import QuestionnaireContainer from '../components/QuestionnaireContainer'
-import QuestionnaireForm from '../components/QuestionnaireForm'
+import QuestionnaireStart from '../components/QuestionnaireStart'
 import QuestionnaireThankYou from '../components/QuestionnaireThankYou'
 import QuestionnaireOverview from '../components/QuestionnaireOverview'
+import QuestionnaireChapter from '../components/QuestionnaireChapter'
 
 const {baseUrl} = window.QUESTIONNAIRE_STATE
 
@@ -27,7 +28,12 @@ export default new Router({
         {
           path: '',
           props: true,
-          component: QuestionnaireForm
+          redirect: 'start'
+        },
+        {
+          path: 'start',
+          props: true,
+          component: QuestionnaireStart
         },
         {
           path: 'thanks',
@@ -38,6 +44,11 @@ export default new Router({
           path: 'overview',
           props: true,
           component: QuestionnaireOverview
+        },
+        {
+          path: ':chapter_id',
+          props: true,
+          component: QuestionnaireChapter
         }
       ]
     }
