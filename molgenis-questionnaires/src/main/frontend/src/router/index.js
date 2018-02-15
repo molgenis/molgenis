@@ -21,7 +21,7 @@ export default new Router({
       component: QuestionnaireList
     },
     {
-      path: '/:questionnaireName',
+      path: '/:questionnaireId',
       props: true,
       component: QuestionnaireContainer,
       children: [

@@ -23,12 +23,7 @@ const state = {
   /**
    * The description of the questionnaire
    */
-  questionnaireDescription: '',
-
-  /**
-   * The ID of the questionnaire belonging to the current user
-   */
-  questionnaireRowId: ''
+  questionnaireDescription: ''
 }
 
 const mutations = {
@@ -43,9 +38,6 @@ const mutations = {
   },
   'SET_QUESTIONNAIRE_DESCRIPTION' (state, questionnaireDescription) {
     state.questionnaireDescription = questionnaireDescription
-  },
-  'SET_QUESTIONNAIRE_ROW_ID' (state, questionnaireRowId) {
-    state.questionnaireRowId = questionnaireRowId
   }
 }
 
@@ -59,8 +51,8 @@ const getters = {
 }
 
 const actions = {
-  'GET_QUESTIONNAIRE' ({commit}, questionnaireName) {
-    return api.get('/api/v2/' + questionnaireName).then(response => {
+  'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {
+    return api.get('/api/v2/' + questionnaireId).then(response => {
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
       commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
 
@@ -68,7 +60,6 @@ const actions = {
       const data = response.items.length > 0 ? response.items[0] : {}
       const form = EntityToFormMapper.generateForm({attributes: chapters}, data)
 
-      commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
       commit('SET_CHAPTER_FIELDS', form.formFields)
       commit('SET_FORM_DATA', form.formData)
     })
