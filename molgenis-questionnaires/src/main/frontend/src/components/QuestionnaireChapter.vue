@@ -107,7 +107,7 @@
     data () {
       return {
         loading: true,
-        formData: Object.assign({}, this.$store.state.formData),
+        formData: this.$store.state.formData,
         formState: {},
         options: {
           showEyeButton: false

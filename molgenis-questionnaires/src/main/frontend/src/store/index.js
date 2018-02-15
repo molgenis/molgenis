@@ -97,16 +97,18 @@ const actions = {
   },
 
   'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}, formData) {
-    const updatedAttribute = Object.keys(formData)[0]
-    const updateValue = formData[updatedAttribute]
+    commit('SET_FORM_DATA', formData)
     const options = {
-      body: JSON.stringify(updateValue)
+      body: JSON.stringify({
+        entities: [
+          state.formData
+        ]
+      }),
+      method: 'PUT'
     }
 
     const questionnaireId = state.route.params.questionnaireId
-    api.post('/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute + '?_method=PUT', options).then(() => {
-      commit('SET_FORM_DATA', formData)
-    }).catch(error => {
+    api.post('/api/v2/' + questionnaireId, options).catch(error => {
       console.log(error)
     })
   },
