@@ -1,14 +1,11 @@
 package org.molgenis.security.core.utils;
 
-import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
@@ -22,32 +19,6 @@ public class SecurityUtils
 	public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
 	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
 	public static final String ROLE_ACL_GENERAL_CHANGES = "ROLE_ACL_GENERAL_CHANGES";
-
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine plugin permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine plugin permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_ENTITY_PREFIX = "ROLE_ENTITY_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_ENTITY_READ_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";
-	/**
-	 * @deprecated use {@link org.molgenis.security.core.PermissionService} to determine entity type permissions
-	 */
-	@Deprecated
-	public static final String AUTHORITY_ENTITY_WRITEMETA_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITEMETA + "_";
 
 	public static String getCurrentUsername()
 	{
@@ -131,20 +102,5 @@ public class SecurityUtils
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return authentication == null || currentUserHasRole(AUTHORITY_ANONYMOUS);
-	}
-
-	/**
-	 * Get all possible authorities (roles) for an entity
-	 */
-	public static List<String> getEntityAuthorities(String entityTypeId)
-	{
-		List<String> authorities = new ArrayList<>();
-		for (Permission permission : Permission.values())
-		{
-			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityTypeId);
-			authorities.add(authority);
-		}
-
-		return authorities;
 	}
 }

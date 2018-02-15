@@ -112,4 +112,44 @@ public class Permissions
 			}
 		}
 	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Permissions that = (Permissions) o;
+		if (!Objects.equals(userId, that.userId))
+		{
+			return false;
+		}
+		if (!Objects.equals(groupId, that.groupId))
+		{
+			return false;
+		}
+		if (!Objects.equals(entityIds, that.entityIds))
+		{
+			return false;
+		}
+		if (!Objects.equals(userPermissionMap, that.userPermissionMap))
+		{
+			return false;
+		}
+		if (!Objects.equals(groupPermissionMap, that.groupPermissionMap))
+		{
+			return false;
+		}
+		if (!Objects.equals(hierarchyPermissionMap, that.hierarchyPermissionMap))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode()
+	{
+
+		return Objects.hash(userId, groupId, entityIds, userPermissionMap, groupPermissionMap, hierarchyPermissionMap);
+	}
 }

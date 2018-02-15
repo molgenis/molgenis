@@ -11,15 +11,13 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class UserRepositoryDecoratorFactory extends AbstractSystemRepositoryDecoratorFactory<User, UserMetaData>
 {
-	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRepositoryDecoratorFactory(UserMetaData userMetaData, UserAuthorityFactory userAuthorityFactory,
+	public UserRepositoryDecoratorFactory(UserMetaData userMetaData,
 			DataService dataService, PasswordEncoder passwordEncoder)
 	{
 		super(userMetaData);
-		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.dataService = requireNonNull(dataService);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
