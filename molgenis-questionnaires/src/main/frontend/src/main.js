@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import App from './App'
+import QuestionnaireApp from './QuestionnaireApp'
 
 import store from './store'
 import router from './router'
@@ -13,11 +13,11 @@ Vue.use(i18n, {
   callback () {
     /* eslint-disable no-new */
     new Vue({
-      el: '#app',
+      el: '#questionnaire-app',
       store,
       router,
-      template: '<App />',
-      components: {App}
+      template: '<QuestionnaireApp />',
+      components: {QuestionnaireApp}
     })
   }
 })
