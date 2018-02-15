@@ -207,18 +207,16 @@ public class PermissionManagerController extends PluginController
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value == null)
+			if (value != null)
 			{
-				throw new RuntimeException(
-						String.format("Invalid request, missing value for plugin: %s", plugin.getId()));
-			}
-			if (!value.equals("none"))
-			{
-				createSidPluginPermission(plugin, sid, toPluginPermission(value));
-			}
-			else
-			{
-				removeSidPluginPermission(plugin, sid);
+				if (!value.equals("none"))
+				{
+					createSidPluginPermission(plugin, sid, toPluginPermission(value));
+				}
+				else
+				{
+					removeSidPluginPermission(plugin, sid);
+				}
 			}
 		}
 	}
@@ -322,13 +320,16 @@ public class PermissionManagerController extends PluginController
 		{
 			String param = "radio-" + entityType.getId();
 			String value = webRequest.getParameter(param);
-			if (value != null && !value.equals("none"))
+			if (value != null)
 			{
-				createSidEntityTypePermission(entityType, sid, toEntityTypePermission(value));
-			}
-			else
-			{
-				removeSidEntityTypePermission(entityType, sid);
+				if (!value.equals("none"))
+				{
+					createSidEntityTypePermission(entityType, sid, toEntityTypePermission(value));
+				}
+				else
+				{
+					removeSidEntityTypePermission(entityType, sid);
+				}
 			}
 		});
 	}

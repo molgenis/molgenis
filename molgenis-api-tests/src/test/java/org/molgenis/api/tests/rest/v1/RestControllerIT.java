@@ -62,7 +62,6 @@ public class RestControllerIT
 		setGrantedRepositoryPermissions(adminToken, testUserId,
 				ImmutableMap.<String, Permission>builder().put("sys_FreemarkerTemplate", WRITE)
 														  .put("sys_scr_ScriptType", READ)
-														  .put("sys_sec_UserAuthority", COUNT)
 														  .put("sys_FileMeta", WRITEMETA)
 														  .put(UserMetaData.USER, COUNT)
 														  .build());
