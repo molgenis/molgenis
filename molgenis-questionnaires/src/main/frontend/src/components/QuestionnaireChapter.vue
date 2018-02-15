@@ -50,7 +50,6 @@
             </div>
 
             <div class="card-body">
-
               <form-component
                 :id="questionnaireId"
                 :formFields="chapterField"
@@ -100,8 +99,6 @@
 
 <script>
   import { FormComponent } from '@molgenis/molgenis-ui-form'
-  import api from '@molgenis/molgenis-api-client'
-
   import 'flatpickr/dist/flatpickr.css'
 
   export default {
@@ -110,7 +107,7 @@
     data () {
       return {
         loading: true,
-        formData: this.$store.state.formData,
+        formData: Object.assign({}, this.$store.state.formData),
         formState: {},
         options: {
           showEyeButton: false
@@ -118,59 +115,12 @@
       }
     },
     methods: {
-
-      /**
-       * Auto save
-       * @param formData
-       */
       onValueChanged (formData) {
-        console.log(formData)
-        const options = {
-          body: JSON.stringify({
-            entities: [formData]
-          }),
-          method: 'PUT'
-        }
-
-        api.post('/api/v2/' + this.questionnaireId, options)
+        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData)
       },
 
-      /**
-       * Submit the questionnaire
-       */
       submitQuestionnaire () {
-        console.log('submit')
-        //      /**
-//       * On submit handler
-//       * 1) Set status to SUBMITTED
-//       * 2) Trigger form validation
-//       * 3) Post
-//       */
-//      onSubmit () {
-//        // Trigger submit
-//        this.formData.status = 'SUBMITTED'
-//        this.formState.$submitted = true
-//        this.formState._validate()
-//
-//        // Check if form is valid
-//        if (this.formState.$valid) {
-//          // Generate submit timestamp
-//          this.formData.submitDate = moment().toISOString()
-//          const options = {
-//            body: JSON.stringify(this.formData)
-//          }
-//
-//          // Submit to server and redirect to thank you page
-//          api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireId + '?_method=PUT', options).then(() => {
-//            this.$router.push({path: '/' + this.questionnaireId + '/thanks'})
-//          }).catch(error => {
-//            console.log('Something went wrong submitting the questionnaire', error)
-//          })
-//        } else {
-//          this.formData.status = 'OPEN'
-//          this.formState.$submitted = false
-//        }
-//      }
+        this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData)
       }
     },
     computed: {
@@ -227,8 +177,7 @@
        * @return {number} progress percentage
        */
       progressPercentage () {
-        const chapterIdNumber = parseInt(this.chapterId)
-        return chapterIdNumber === 1 ? 0 : (chapterIdNumber / this.totalNumberOfChapters) * 100
+        return (parseInt(this.chapterId) / this.totalNumberOfChapters) * 100
       },
 
       /**

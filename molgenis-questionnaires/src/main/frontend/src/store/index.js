@@ -4,6 +4,16 @@ import Vuex from 'vuex'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
+const getters = {
+  getChapterByIndex: (state) => (index) => {
+    return [state.chapterFields[(index - 1)]]
+  },
+
+  getTotalNumberOfChapters: state => {
+    return state.chapterFields.length
+  }
+}
+
 const state = {
 
   /**
@@ -54,21 +64,13 @@ const mutations = {
   }
 }
 
-const getters = {
-  getChapterByIndex: (state) => (index) => {
-    return [state.chapterFields[(index - 1)]]
-  },
-  getTotalNumberOfChapters: state => {
-    return state.chapterFields.length
-  }
-}
-
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}) {
     return api.get('/menu/plugins/questionnaires/meta/list').then(response => {
       commit('SET_QUESTIONNAIRE_LIST', response)
     })
   },
+
   'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
@@ -81,6 +83,49 @@ const actions = {
       commit('SET_CHAPTER_FIELDS', form.formFields)
       commit('SET_FORM_DATA', form.formData)
     })
+  },
+
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}, formData) {
+    const options = {
+      body: JSON.stringify({
+        entities: [formData]
+      }),
+      method: 'PUT'
+    }
+
+    const questionnaireId = state.route.params.questionnaireId
+    api.post('/api/v2/' + questionnaireId, options).then(() => {
+      commit('SET_FORM_DATA', formData)
+    }).catch(error => {
+      console.log(error)
+    })
+  },
+
+  'SUBMIT_QUESTIONNAIRE' ({state}, formData) {
+    console.log('submit', formData)
+    // Trigger submit
+//        this.formData.status = 'SUBMITTED'
+//        this.formState.$submitted = true
+//        this.formState._validate()
+//
+//        // Check if form is valid
+//        if (this.formState.$valid) {
+//          // Generate submit timestamp
+//          this.formData.submitDate = moment().toISOString()
+//          const options = {
+//            body: JSON.stringify(this.formData)
+//          }
+//
+//          // Submit to server and redirect to thank you page
+//          api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireId + '?_method=PUT', options).then(() => {
+//            this.$router.push({path: '/' + this.questionnaireId + '/thanks'})
+//          }).catch(error => {
+//            console.log('Something went wrong submitting the questionnaire', error)
+//          })
+//        } else {
+//          this.formData.status = 'OPEN'
+//          this.formState.$submitted = false
+//        }
   }
 }
 
