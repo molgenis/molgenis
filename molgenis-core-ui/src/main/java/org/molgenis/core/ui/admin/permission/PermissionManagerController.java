@@ -166,7 +166,10 @@ public class PermissionManagerController extends PluginController
 		return getPluginPermissions(sid);
 	}
 
-	private List<Plugin> getPlugins()
+	/**
+	 * package-private for testability
+	 */
+	List<Plugin> getPlugins()
 	{
 		return dataService.findAll(PLUGIN, Plugin.class).collect(toList());
 	}
@@ -466,12 +469,18 @@ public class PermissionManagerController extends PluginController
 		return user;
 	}
 
-	private List<User> getUsers()
+	/**
+	 * package-private for testability
+	 */
+	List<User> getUsers()
 	{
 		return dataService.findAll(USER, User.class).collect(toList());
 	}
 
-	private List<Group> getGroups()
+	/**
+	 * package-private for testability
+	 */
+	List<Group> getGroups()
 	{
 		return dataService.findAll(GROUP, Group.class).collect(toList());
 	}
