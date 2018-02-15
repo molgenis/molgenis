@@ -282,4 +282,12 @@ public class ImportWizardController extends AbstractWizardController
 		}
 		return databaseAction;
 	}
+
+	/**
+	 * Added for testability
+	 */
+	void setExecutorService(ExecutorService executorService)
+	{
+		this.asyncImportJobs = executorService;
+	}
 }
