@@ -39,7 +39,12 @@ const state = {
   /**
    * The description of the questionnaire
    */
-  questionnaireDescription: ''
+  questionnaireDescription: '',
+
+  /**
+   * The ID of the row holding the questionnaire data for the current user
+   */
+  questionnaireRowId: ''
 }
 
 const mutations = {
@@ -52,7 +57,8 @@ const mutations = {
   },
 
   'SET_FORM_DATA' (state, formData) {
-    state.formData = formData
+    // formData contains either the entire set of data or a single parameter with updated values
+    state.formData = Object.assign(state.formData, formData)
   },
 
   'SET_QUESTIONNAIRE_LABEL' (state, questionnaireLabel) {
@@ -61,6 +67,10 @@ const mutations = {
 
   'SET_QUESTIONNAIRE_DESCRIPTION' (state, questionnaireDescription) {
     state.questionnaireDescription = questionnaireDescription
+  },
+
+  'SET_QUESTIONNAIRE_ROW_ID' (state, questionnaireRowId) {
+    state.questionnaireRowId = questionnaireRowId
   }
 }
 
@@ -76,25 +86,25 @@ const actions = {
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
       commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
 
-      const chapters = response.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
       const data = response.items.length > 0 ? response.items[0] : {}
-      const form = EntityToFormMapper.generateForm({attributes: chapters}, data)
+      const form = EntityToFormMapper.generateForm(response.meta, data)
+      const chapters = form.formFields.filter(field => field.type === 'field-group')
 
-      commit('SET_CHAPTER_FIELDS', form.formFields)
+      commit('SET_CHAPTER_FIELDS', chapters)
+      commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
       commit('SET_FORM_DATA', form.formData)
     })
   },
 
   'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}, formData) {
+    const updatedAttribute = Object.keys(formData)[0]
+    const updateValue = formData[updatedAttribute]
     const options = {
-      body: JSON.stringify({
-        entities: [formData]
-      }),
-      method: 'PUT'
+      body: JSON.stringify(updateValue)
     }
 
     const questionnaireId = state.route.params.questionnaireId
-    api.post('/api/v2/' + questionnaireId, options).then(() => {
+    api.post('/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute + '?_method=PUT', options).then(() => {
       commit('SET_FORM_DATA', formData)
     }).catch(error => {
       console.log(error)

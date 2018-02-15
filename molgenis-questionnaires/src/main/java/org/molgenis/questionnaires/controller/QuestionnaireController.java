@@ -51,10 +51,10 @@ public class QuestionnaireController extends VuePluginController
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/meta/{name}")
-	public QuestionnaireResponse getQuestionnaire(@PathVariable("name") String name)
+	@GetMapping(value = "/meta/{id}")
+	public QuestionnaireResponse getQuestionnaire(@PathVariable("id") String id)
 	{
-		return questionnaireService.getQuestionnaire(name);
+		return questionnaireService.getQuestionnaire(id);
 	}
 
 	@ResponseBody

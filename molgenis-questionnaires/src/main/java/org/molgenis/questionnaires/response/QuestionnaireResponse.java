@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 @AutoGson(autoValueClass = AutoValue_QuestionnaireResponse.class)
 public abstract class QuestionnaireResponse
 {
-	public abstract String getName();
+	public abstract String getId();
 
 	public abstract String getLabel();
 
@@ -20,7 +20,7 @@ public abstract class QuestionnaireResponse
 
 	public abstract QuestionnaireStatus getStatus();
 
-	public abstract Object getId();
+	public abstract Object getQuestionnaireRowId();
 
 	public static QuestionnaireResponse create(Questionnaire questionnaire)
 	{
