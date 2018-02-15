@@ -47,6 +47,9 @@ import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.plugin.model.PluginPermissionUtils.getCumulativePermission;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
+import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Controller
 @RequestMapping(URI)
@@ -488,16 +491,24 @@ public class PermissionManagerController extends PluginController
 
 	private boolean setUserOrGroup(Sid sid, Permissions permissions)
 	{
-		boolean isUser = sid instanceof PrincipalSid;
-		if (isUser)
+		boolean isUser;
+		if (sid instanceof PrincipalSid)
 		{
 			String userId = ((PrincipalSid) sid).getPrincipal();
 			permissions.setUserId(userId);
+			isUser = true;
+		}
+		else if (sid.equals(createAnonymousSid()))
+		{
+			String userId = dataService.query(USER, User.class).eq(USERNAME, ANONYMOUS_USERNAME).findOne().getId();
+			permissions.setUserId(userId);
+			isUser = true;
 		}
 		else
 		{
 			String groupId = ((GrantedAuthoritySid) sid).getGrantedAuthority().substring("ROLE_".length());
 			permissions.setGroupId(groupId);
+			isUser = false;
 		}
 		return isUser;
 	}

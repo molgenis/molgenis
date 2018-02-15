@@ -39,7 +39,7 @@ public class SidUtils
 		}
 	}
 
-	private static Sid createAnonymousSid()
+	public static Sid createAnonymousSid()
 	{
 		return new GrantedAuthoritySid(SecurityUtils.AUTHORITY_ANONYMOUS);
 	}
