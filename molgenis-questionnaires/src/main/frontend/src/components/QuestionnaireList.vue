@@ -19,7 +19,6 @@
             <thead>
             <tr>
               <th>{{ 'questionnaires_table_questionnaire_header' | i18n }}</th>
-              <th>{{ 'questionnaires_table_status_header' | i18n }}</th>
               <th></th>
             </tr>
             </thead>
@@ -27,33 +26,11 @@
 
             <tr v-for="questionnaire in questionnaires">
               <td>{{ questionnaire.label }}</td>
-
-              <template v-if="questionnaire.status === 'NOT_STARTED'">
-                <td>{{ 'questionnaires_table_status_not_started' | i18n }}</td>
-                <td>
-                  <router-link :to="'/' + questionnaire.name" class="btn btn-primary">
-                    {{ 'questionnaires_table_start_questionnaire_button' | i18n }}
-                  </router-link>
-                </td>
-              </template>
-
-              <template v-if="questionnaire.status === 'OPEN'">
-                <td>{{ 'questionnaires_table_status_open' | i18n }}</td>
-                <td>
-                  <router-link :to="'/' + questionnaire.name" class="btn btn-primary">
-                    {{ 'questionnaires_table_continue_questionnaire_button' | i18n }}
-                  </router-link>
-                </td>
-              </template>
-
-              <template v-if="questionnaire.status === 'SUBMITTED'">
-                <td>{{ 'questionnaires_table_status_submitted' | i18n }}</td>
-                <td>
-                  <router-link :to="'/' + questionnaire.name + '/overview'" class="btn btn-primary">
-                    {{ 'questionnaires_table_view_questionnaire_button' | i18n }}
-                  </router-link>
-                </td>
-              </template>
+              <td>
+                <router-link :to="'/' + questionnaire.id" class="btn btn-primary">
+                  {{ 'questionnaires_view_questionnaire' | i18n }}
+                </router-link>
+              </td>
             </tr>
 
             </tbody>
