@@ -4,7 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
@@ -67,8 +68,8 @@ public class QuestionnairePluginController extends PluginController
 				() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
 		questionnaires = questionnaireMeta.stream()
-										  .filter(entityType -> permissionService.hasPermissionOnEntityType(
-												  entityType.getId(), Permission.WRITE))
+										  .filter(entityType -> permissionService.hasPermission(EntityTypeIdentity.TYPE,
+												  entityType.getId(), EntityTypePermission.WRITE))
 										  .map(entityType ->
 										  {
 											  // Create entity if not yet exists for current user

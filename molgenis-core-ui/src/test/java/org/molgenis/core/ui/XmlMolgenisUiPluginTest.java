@@ -1,6 +1,7 @@
 package org.molgenis.core.ui;
 
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItemType;
@@ -97,7 +98,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setName(type);
 		pluginType.setId(id);
-		when(permissionService.hasPermissionOnPlugin(id, Permission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(PluginIdentity.TYPE, id, PluginPermission.READ)).thenReturn(true);
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
 				permissionService);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());

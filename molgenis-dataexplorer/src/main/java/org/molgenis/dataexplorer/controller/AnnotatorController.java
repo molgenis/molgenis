@@ -10,7 +10,8 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.ErrorMessageResponse;
@@ -132,7 +133,8 @@ public class AnnotatorController
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
-						permissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
+						permissionService.hasPermission(EntityTypeIdentity.TYPE, settingsEntityName,
+								EntityTypePermission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

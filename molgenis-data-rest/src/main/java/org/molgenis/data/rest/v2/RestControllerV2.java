@@ -11,13 +11,14 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.ErrorMessageResponse;
@@ -354,8 +355,8 @@ public class RestControllerV2
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntityType(repositoryToCopyFrom.getName(),
-				Permission.READ);
+		boolean readPermission = permissionService.hasPermission(EntityTypeIdentity.TYPE,
+				repositoryToCopyFrom.getName(), EntityTypePermission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 
 		// Capabilities

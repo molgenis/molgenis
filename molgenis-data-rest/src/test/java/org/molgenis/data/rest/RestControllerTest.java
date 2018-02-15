@@ -19,6 +19,8 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -26,7 +28,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -378,7 +379,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
-		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, ENTITY_NAME,
+				EntityTypePermission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
@@ -392,7 +394,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
-		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, ENTITY_NAME,
+				EntityTypePermission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))

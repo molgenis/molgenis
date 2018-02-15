@@ -5,7 +5,8 @@ import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
@@ -64,7 +65,7 @@ public class AppsController extends PluginController
 		Query<App> query = dataService.query(APP, App.class);
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermissionOnEntityType(APP, Permission.WRITE))
+		if (!permissionService.hasPermission(EntityTypeIdentity.TYPE, APP, EntityTypePermission.WRITE))
 		{
 			apps = apps.filter(App::isActive);
 		}

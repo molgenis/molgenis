@@ -1,9 +1,10 @@
 package org.molgenis.security.permission;
 
 import org.mockito.Mock;
+import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -41,28 +42,28 @@ public class PermissionServiceImplTest extends AbstractMockitoTestNGSpringContex
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
 				EntityTypePermission.READ)).thenReturn(true);
-		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
+		assertTrue(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entityType0", EntityTypePermission.READ));
 	}
 
 	@WithMockUser(username = "USER")
 	@Test
 	public void hasPermissionOnEntityTypeFalse()
 	{
-		assertFalse(permissionService.hasPermissionOnEntityType("entityType0", Permission.READ));
+		assertFalse(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entityType0", EntityTypePermission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
 	@Test
 	public void hasPermissionOnEntityTypeSuperuser()
 	{
-		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
+		assertTrue(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entityType0", EntityTypePermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnEntityTypeSystemUser()
 	{
-		assertTrue(permissionService.hasPermissionOnEntityType("entityType0", Permission.WRITE));
+		assertTrue(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entityType0", EntityTypePermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER")
@@ -72,28 +73,28 @@ public class PermissionServiceImplTest extends AbstractMockitoTestNGSpringContex
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", PluginPermission.READ)).thenReturn(
 				true);
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
+		assertTrue(permissionService.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.READ));
 	}
 
 	@WithMockUser(username = "USER")
 	@Test
 	public void hasPermissionOnPluginFalse()
 	{
-		assertFalse(permissionService.hasPermissionOnPlugin("plugin1", Permission.READ));
+		assertFalse(permissionService.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
 	@Test
 	public void hasPermissionOnPluginSuperuser()
 	{
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
+		assertTrue(permissionService.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnPluginSystemUser()
 	{
-		assertTrue(permissionService.hasPermissionOnPlugin("plugin1", Permission.WRITE));
+		assertTrue(permissionService.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.WRITE));
 	}
 
 	static class Config

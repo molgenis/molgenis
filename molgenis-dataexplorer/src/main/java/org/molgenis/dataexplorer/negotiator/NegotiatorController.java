@@ -6,6 +6,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -13,7 +15,6 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.web.ErrorMessageResponse;
@@ -74,7 +75,7 @@ public class NegotiatorController extends PluginController
 	public boolean showDirectoryButton(String entityTypeId)
 	{
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
-		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ);
+		return settings != null && permissions.hasPermission(PluginIdentity.TYPE, ID, PluginPermission.READ);
 	}
 
 	@PostMapping("/validate")
@@ -118,7 +119,8 @@ public class NegotiatorController extends PluginController
 			throw new MolgenisDataException(
 					messageSource.getMessage("dataexplorer_directory_no_config", new Object[] {}, getLocale()));
 		}
-		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels , disabledCollectionLabels);
+		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels,
+				disabledCollectionLabels);
 	}
 
 	@PostMapping("/export")

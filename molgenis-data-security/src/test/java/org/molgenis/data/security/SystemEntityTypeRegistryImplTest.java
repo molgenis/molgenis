@@ -58,7 +58,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
@@ -70,7 +71,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
@@ -82,7 +84,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()), singletonList(systemEntityType));
@@ -94,7 +97,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().count(), 0);
@@ -125,7 +129,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
@@ -138,7 +143,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		when(systemEntityType.getAllAttributes()).thenReturn(emptyList());
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertNull(systemEntityTypeRegistry.getSystemAttribute("attr"));
@@ -152,7 +158,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
@@ -170,7 +177,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(compoundAttr.getDataType()).thenReturn(AttributeType.COMPOUND);
 		when(compoundAttr.getChildren()).thenReturn(singletonList(attr));
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(compoundAttr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
@@ -188,7 +196,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(compoundAttr.getDataType()).thenReturn(AttributeType.COMPOUND);
 		when(compoundAttr.getChildren()).thenReturn(singletonList(attr));
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(compoundAttr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertNull(systemEntityTypeRegistry.getSystemAttribute("unknownAttr"));
@@ -202,7 +211,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertTrue(systemEntityTypeRegistry.hasSystemAttribute("attr"));
@@ -215,7 +225,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		when(systemEntityType.getAllAttributes()).thenReturn(emptyList());
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertFalse(systemEntityTypeRegistry.hasSystemAttribute("attr"));
@@ -229,7 +240,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
-		when(permissionService.hasPermissionOnEntityType(entityTypeId, Permission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				EntityTypePermission.COUNT)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertTrue(systemEntityTypeRegistry.hasSystemAttribute("attr"));

@@ -17,10 +17,11 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -114,8 +115,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
-		when(permissionService.hasPermissionOnEntityType("yes", Permission.WRITEMETA)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntityType("no", Permission.WRITEMETA)).thenReturn(false);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "yes",
+				EntityTypePermission.WRITEMETA)).thenReturn(true);
+		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "no", EntityTypePermission.WRITEMETA)).thenReturn(
+				false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);

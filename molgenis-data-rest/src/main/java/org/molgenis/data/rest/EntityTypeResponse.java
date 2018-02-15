@@ -9,7 +9,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.PermissionService;
 
 import java.util.*;
@@ -124,9 +125,8 @@ public class EntityTypeResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable =
-				permissionService.hasPermissionOnEntityType(name, Permission.WRITE) && dataService.getCapabilities(name)
-																								  .contains(
+		this.writable = permissionService.hasPermission(EntityTypeIdentity.TYPE, name, EntityTypePermission.WRITE)
+				&& dataService.getCapabilities(name).contains(
 																										  RepositoryCapability.WRITABLE);
 	}
 

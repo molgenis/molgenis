@@ -2,7 +2,8 @@ package org.molgenis.core.ui.security;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.UiMenu;
@@ -68,8 +69,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 			switch (molgenisUiMenuItem.getType())
 			{
 				case MENU:
-					return new MolgenisUiMenuPermissionDecorator((UiMenu) molgenisUiMenuItem,
-							permissionService);
+					return new MolgenisUiMenuPermissionDecorator((UiMenu) molgenisUiMenuItem, permissionService);
 				case PLUGIN:
 					return molgenisUiMenuItem;
 				default:
@@ -109,7 +109,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
-				hasPermission = permissionService.hasPermissionOnPlugin(menuItemId, Permission.READ);
+				hasPermission = permissionService.hasPermission(PluginIdentity.TYPE, menuItemId, PluginPermission.READ);
 				break;
 			default:
 				throw new UnexpectedEnumException(molgenisUiMenuItem.getType());

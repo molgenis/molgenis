@@ -15,6 +15,8 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
@@ -34,7 +36,6 @@ import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
@@ -250,8 +251,8 @@ public class SortaController extends PluginController
 
 	private void tryDeleteRepository(String entityTypeId)
 	{
-		if (dataService.hasRepository(entityTypeId) && permissionService.hasPermissionOnEntityType(entityTypeId,
-				Permission.WRITEMETA))
+		if (dataService.hasRepository(entityTypeId) && permissionService.hasPermission(EntityTypeIdentity.TYPE,
+				entityTypeId, EntityTypePermission.WRITEMETA))
 		{
 			RunAsSystemAspect.runAsSystem(() -> deleteRepository(entityTypeId));
 		}
