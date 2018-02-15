@@ -135,8 +135,42 @@
         api.post('/api/v2/' + this.questionnaireId, options)
       },
 
+      /**
+       * Submit the questionnaire
+       */
       submitQuestionnaire () {
         console.log('submit')
+        //      /**
+//       * On submit handler
+//       * 1) Set status to SUBMITTED
+//       * 2) Trigger form validation
+//       * 3) Post
+//       */
+//      onSubmit () {
+//        // Trigger submit
+//        this.formData.status = 'SUBMITTED'
+//        this.formState.$submitted = true
+//        this.formState._validate()
+//
+//        // Check if form is valid
+//        if (this.formState.$valid) {
+//          // Generate submit timestamp
+//          this.formData.submitDate = moment().toISOString()
+//          const options = {
+//            body: JSON.stringify(this.formData)
+//          }
+//
+//          // Submit to server and redirect to thank you page
+//          api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireId + '?_method=PUT', options).then(() => {
+//            this.$router.push({path: '/' + this.questionnaireId + '/thanks'})
+//          }).catch(error => {
+//            console.log('Something went wrong submitting the questionnaire', error)
+//          })
+//        } else {
+//          this.formData.status = 'OPEN'
+//          this.formState.$submitted = false
+//        }
+//      }
       }
     },
     computed: {
@@ -144,7 +178,7 @@
       /**
        * Determine the number for the next chapter
        *
-       * @return {number}
+       * @return {number} number of the next chapter
        */
       nextChapterNumber () {
         return parseInt(this.chapterId) + 1
@@ -153,7 +187,7 @@
       /**
        * Determine the number for the previous chapter
        *
-       * @return {number}
+       * @return {number} number for the previous chapter
        */
       previousChapterNumber () {
         return parseInt(this.chapterId) - 1
@@ -162,7 +196,7 @@
       /**
        * Determine whether to show the next button
        *
-       * @return {boolean}
+       * @return {boolean} show next button
        */
       showNextButton () {
         return parseInt(this.chapterId) < this.totalNumberOfChapters
@@ -171,7 +205,7 @@
       /**
        * Determine whether to show the previous button
        *
-       * @return {boolean}
+       * @return {boolean} show previous button
        */
       showPreviousButton () {
         return parseInt(this.chapterId) > 1
@@ -190,7 +224,7 @@
        * Calculate the percentage of progress based on the
        * current chapter and total number of chapters
        *
-       * @return {number}
+       * @return {number} progress percentage
        */
       progressPercentage () {
         const chapterIdNumber = parseInt(this.chapterId)

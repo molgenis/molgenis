@@ -5,6 +5,12 @@ import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const state = {
+
+  /**
+   * List of questionnaires available to the current user
+   */
+  questionnaireList: [],
+
   /**
    * All the compound fields of the questionnaire metadata as chapters
    */
@@ -27,15 +33,22 @@ const state = {
 }
 
 const mutations = {
+  'SET_QUESTIONNAIRE_LIST' (state, questionnaireList) {
+    state.questionnaireList = questionnaireList
+  },
+
   'SET_CHAPTER_FIELDS' (state, chapterFields) {
     state.chapterFields = chapterFields
   },
+
   'SET_FORM_DATA' (state, formData) {
     state.formData = formData
   },
+
   'SET_QUESTIONNAIRE_LABEL' (state, questionnaireLabel) {
     state.questionnaireLabel = questionnaireLabel
   },
+
   'SET_QUESTIONNAIRE_DESCRIPTION' (state, questionnaireDescription) {
     state.questionnaireDescription = questionnaireDescription
   }
@@ -51,6 +64,11 @@ const getters = {
 }
 
 const actions = {
+  'GET_QUESTIONNAIRE_LIST' ({commit}) {
+    return api.get('/menu/plugins/questionnaires/meta/list').then(response => {
+      commit('SET_QUESTIONNAIRE_LIST', response)
+    })
+  },
   'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)

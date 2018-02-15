@@ -8,18 +8,17 @@
       </div>
     </template>
 
+    <!-- Questionnaire description + start button -->
     <template v-else>
       <div class="row">
-
         <div class="col-lg-8 col-md-12">
           <p v-html="questionnaireDescription"></p>
 
-          <router-link @click="startQuestionnaire" class="btn btn-lg btn-primary mt-2"
+          <router-link class="btn btn-lg btn-primary mt-2"
                        :to="'/' + questionnaireId + '/chapter/1'">
             {{ 'questionnaire_start' | i18n }}
           </router-link>
         </div>
-
       </div>
     </template>
 
@@ -35,40 +34,12 @@
         loading: true
       }
     },
-    methods: {
-//      /**
-//       * On submit handler
-//       * 1) Set status to SUBMITTED
-//       * 2) Trigger form validation
-//       * 3) Post
-//       */
-//      onSubmit () {
-//        // Trigger submit
-//        this.formData.status = 'SUBMITTED'
-//        this.formState.$submitted = true
-//        this.formState._validate()
-//
-//        // Check if form is valid
-//        if (this.formState.$valid) {
-//          // Generate submit timestamp
-//          this.formData.submitDate = moment().toISOString()
-//          const options = {
-//            body: JSON.stringify(this.formData)
-//          }
-//
-//          // Submit to server and redirect to thank you page
-//          api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireId + '?_method=PUT', options).then(() => {
-//            this.$router.push({path: '/' + this.questionnaireId + '/thanks'})
-//          }).catch(error => {
-//            console.log('Something went wrong submitting the questionnaire', error)
-//          })
-//        } else {
-//          this.formData.status = 'OPEN'
-//          this.formState.$submitted = false
-//        }
-//      }
-    },
     computed: {
+
+      /**
+       * Retrieve the questionnaire description from the store
+       * @return {string} Questionnaire description
+       */
       questionnaireDescription () {
         return this.$store.state.questionnaireDescription
       }
