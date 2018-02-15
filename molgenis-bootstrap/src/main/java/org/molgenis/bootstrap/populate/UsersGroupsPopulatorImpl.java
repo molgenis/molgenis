@@ -19,7 +19,7 @@ import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Service
-public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoritiesPopulator
+public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 {
 	private static final String USERNAME_ADMIN = "admin";
 
@@ -34,7 +34,7 @@ public class UsersGroupsAuthoritiesPopulatorImpl implements UsersGroupsAuthoriti
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	UsersGroupsAuthoritiesPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory)
+	UsersGroupsPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);

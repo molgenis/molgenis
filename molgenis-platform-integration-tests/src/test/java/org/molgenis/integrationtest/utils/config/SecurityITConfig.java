@@ -5,10 +5,7 @@ import org.molgenis.data.security.owned.OwnedEntityType;
 import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
-import org.molgenis.security.permission.PermissionServiceImpl;
-import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
-import org.molgenis.security.permission.SecurityContextRegistryImpl;
+import org.molgenis.security.permission.*;
 import org.molgenis.security.settings.AuthenticationSettingsImpl;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenGenerator;
@@ -34,9 +31,10 @@ import static org.mockito.Mockito.when;
 @EnableWebSecurity
 @Import({ PermissionServiceImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
 		TokenMetaData.class, SecurityPackage.class, UserMetaData.class, OwnedEntityType.class,
-		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class, UserFactory.class,
-		AggregationTestConfig.class, RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class,
-		AuthenticationSettingsImpl.class, PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
+		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
+		PermissionSystemServiceImpl.class, UserFactory.class, AggregationTestConfig.class,
+		RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class, AuthenticationSettingsImpl.class,
+		PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig
 {

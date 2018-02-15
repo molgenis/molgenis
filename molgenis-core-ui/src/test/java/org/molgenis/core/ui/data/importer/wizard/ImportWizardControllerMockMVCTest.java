@@ -6,7 +6,6 @@ import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.importer.ImportRunService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.security.auth.GroupAuthorityFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -63,8 +62,6 @@ public class ImportWizardControllerMockMVCTest extends AbstractMockitoTest
 	private ImportRunService importRunService;
 	@Mock
 	private ExecutorService executorService;
-	@Mock
-	private GroupAuthorityFactory groupAuthorityFactory;
 	@Mock
 	private org.molgenis.data.meta.MetaDataService metaDataService;
 	@Mock
