@@ -19,7 +19,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,12 +41,12 @@ public class ImportWriter
 {
 	private final MetaDataService metaDataService;
 	private final PermissionSystemService permissionSystemService;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final EntityManager entityManager;
 	private final DataPersister dataPersister;
 
 	ImportWriter(MetaDataService metaDataService, PermissionSystemService permissionSystemService,
-			PermissionService permissionService, EntityManager entityManager, DataPersister dataPersister)
+			UserPermissionEvaluator permissionService, EntityManager entityManager, DataPersister dataPersister)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);

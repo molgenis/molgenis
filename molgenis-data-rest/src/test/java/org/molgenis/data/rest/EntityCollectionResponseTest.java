@@ -3,7 +3,7 @@ package org.molgenis.data.rest;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,7 +17,7 @@ import static org.testng.Assert.assertNull;
 public class EntityCollectionResponseTest
 {
 	private EntityType entityType;
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private DataService dataService;
 
 	@BeforeMethod
@@ -25,7 +25,7 @@ public class EntityCollectionResponseTest
 	{
 		entityType = Mockito.mock(EntityType.class);
 		when(entityType.getAttributes()).thenReturn(Collections.emptyList());
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		dataService = mock(DataService.class);
 	}
 

@@ -7,7 +7,7 @@ import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Permission;
 
 import java.io.IOException;
@@ -17,9 +17,9 @@ import static java.lang.String.format;
 
 public abstract class PermissionDirective implements TemplateDirectiveModel
 {
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public PermissionDirective(PermissionService permissionService)
+	public PermissionDirective(UserPermissionEvaluator permissionService)
 	{
 		this.permissionService = permissionService;
 	}

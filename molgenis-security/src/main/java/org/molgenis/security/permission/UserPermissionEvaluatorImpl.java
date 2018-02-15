@@ -1,6 +1,6 @@
 package org.molgenis.security.permission;
 
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 
 @Component
-public class PermissionServiceImpl implements PermissionService
+public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 {
 	private final PermissionEvaluator permissionEvaluator;
 
-	PermissionServiceImpl(PermissionEvaluator permissionEvaluator)
+	UserPermissionEvaluatorImpl(PermissionEvaluator permissionEvaluator)
 	{
 		this.permissionEvaluator = requireNonNull(permissionEvaluator);
 	}

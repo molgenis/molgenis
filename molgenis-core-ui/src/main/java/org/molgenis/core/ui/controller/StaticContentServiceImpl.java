@@ -8,7 +8,7 @@ import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,10 @@ public class StaticContentServiceImpl implements StaticContentService
 	private final DataService dataService;
 	private final StaticContentFactory staticContentFactory;
 
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
 	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory,
-			PermissionService permissionService)
+			UserPermissionEvaluator permissionService)
 	{
 		this.permissionService = requireNonNull(permissionService);
 		this.dataService = requireNonNull(dataService);

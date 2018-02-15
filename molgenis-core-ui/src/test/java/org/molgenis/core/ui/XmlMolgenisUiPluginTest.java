@@ -2,7 +2,7 @@ package org.molgenis.core.ui;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItemType;
 import org.springframework.security.core.Authentication;
@@ -17,14 +17,14 @@ import static org.testng.Assert.*;
 @SuppressWarnings("deprecation")
 public class XmlMolgenisUiPluginTest
 {
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private Authentication authentication;
 	private UiMenu molgenisUiMenu;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		molgenisUiMenu = mock(UiMenu.class);

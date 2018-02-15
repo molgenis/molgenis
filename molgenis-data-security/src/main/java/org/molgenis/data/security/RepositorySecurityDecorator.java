@@ -4,7 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -20,9 +20,9 @@ import static java.util.Objects.requireNonNull;
  */
 public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public RepositorySecurityDecorator(Repository<Entity> delegateRepository, PermissionService permissionService)
+	public RepositorySecurityDecorator(Repository<Entity> delegateRepository, UserPermissionEvaluator permissionService)
 	{
 		super(delegateRepository);
 		this.permissionService = requireNonNull(permissionService);

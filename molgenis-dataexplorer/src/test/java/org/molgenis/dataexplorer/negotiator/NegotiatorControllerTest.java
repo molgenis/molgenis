@@ -20,7 +20,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -50,7 +50,7 @@ public class NegotiatorControllerTest
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	@Mock
 	private DataService dataService;
 	@Mock

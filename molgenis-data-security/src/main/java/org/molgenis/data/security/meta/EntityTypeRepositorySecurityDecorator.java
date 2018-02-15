@@ -8,7 +8,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 
 import java.util.Iterator;
@@ -33,11 +33,11 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem
 public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDecorator<EntityType>
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
 			MutableAclService mutableAclService)
 	{
 		super(delegateRepository);
@@ -393,9 +393,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private static class FilteredConsumer
 	{
 		private final Consumer<List<EntityType>> consumer;
-		private final PermissionService permissionService;
+		private final UserPermissionEvaluator permissionService;
 
-		FilteredConsumer(Consumer<List<EntityType>> consumer, PermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, UserPermissionEvaluator permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);

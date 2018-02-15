@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.*;
 
@@ -36,7 +36,7 @@ public class EntityTypeResponse
 	 */
 	private final Boolean writable;
 
-	public EntityTypeResponse(EntityType meta, PermissionService permissionService, DataService dataService)
+	public EntityTypeResponse(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		this(meta, null, null, permissionService, dataService);
 	}
@@ -46,7 +46,7 @@ public class EntityTypeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);

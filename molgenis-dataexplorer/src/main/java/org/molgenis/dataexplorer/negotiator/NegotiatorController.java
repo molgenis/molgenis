@@ -15,7 +15,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
@@ -52,13 +52,13 @@ public class NegotiatorController extends PluginController
 	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
-	private final PermissionService permissions;
+	private final UserPermissionEvaluator permissions;
 	private final DataService dataService;
 	private final QueryRsqlConverter rsqlQueryConverter;
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final MessageSource messageSource;
 
-	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
+	public NegotiatorController(RestTemplate restTemplate, UserPermissionEvaluator permissions, DataService dataService,
 			QueryRsqlConverter rsqlQueryConverter, JsMagmaScriptEvaluator jsMagmaScriptEvaluator,
 			MessageSource messageSource)
 	{

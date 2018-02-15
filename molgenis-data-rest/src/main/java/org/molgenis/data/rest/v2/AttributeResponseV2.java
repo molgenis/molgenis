@@ -10,7 +10,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ class AttributeResponseV2
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			PermissionService permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);

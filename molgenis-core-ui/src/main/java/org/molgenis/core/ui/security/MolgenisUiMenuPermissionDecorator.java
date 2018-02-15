@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
@@ -15,9 +15,9 @@ import java.util.List;
 public class MolgenisUiMenuPermissionDecorator implements UiMenu
 {
 	private final UiMenu molgenisUiMenu;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public MolgenisUiMenuPermissionDecorator(UiMenu molgenisUiMenu, PermissionService permissionService)
+	public MolgenisUiMenuPermissionDecorator(UiMenu molgenisUiMenu, UserPermissionEvaluator permissionService)
 	{
 		if (molgenisUiMenu == null) throw new IllegalArgumentException("menu is null");
 		if (permissionService == null) throw new IllegalArgumentException("permissionService is null");

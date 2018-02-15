@@ -2,7 +2,7 @@ package org.molgenis.security.permission;
 
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +15,9 @@ import static java.util.Objects.requireNonNull;
 @RequestMapping("/permission")
 public class MolgenisPermissionController
 {
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public MolgenisPermissionController(PermissionService permissionService)
+	public MolgenisPermissionController(UserPermissionEvaluator permissionService)
 	{
 		this.permissionService = requireNonNull(permissionService);
 	}

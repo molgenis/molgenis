@@ -2,7 +2,7 @@ package org.molgenis.core.ui.security;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
@@ -60,9 +60,9 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 	/**
 	 * Can't be autowired due to circular dependency resolving
 	 */
-	private PermissionService getMolgenisPermissionService()
+	private UserPermissionEvaluator getMolgenisPermissionService()
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(PermissionService.class);
+		return ApplicationContextProvider.getApplicationContext().getBean(UserPermissionEvaluator.class);
 	}
 
 	/**

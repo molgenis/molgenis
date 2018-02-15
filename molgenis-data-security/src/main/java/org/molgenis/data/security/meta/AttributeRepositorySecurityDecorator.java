@@ -9,7 +9,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.Iterator;
 import java.util.List;
@@ -31,10 +31,10 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDecorator<Attribute>
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
 	public AttributeRepositorySecurityDecorator(Repository<Attribute> delegateRepository,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService)
+			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService)
 	{
 		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);

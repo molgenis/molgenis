@@ -28,7 +28,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
@@ -106,7 +106,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	private RestController restController;
 
 	@Autowired
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	@Autowired
 	private DataService dataService;
@@ -794,9 +794,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public UserPermissionEvaluator permissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(UserPermissionEvaluator.class);
 		}
 
 		@Bean

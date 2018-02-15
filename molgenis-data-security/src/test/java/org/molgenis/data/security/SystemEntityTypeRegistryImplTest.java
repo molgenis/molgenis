@@ -7,7 +7,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,7 +25,7 @@ import static org.testng.Assert.*;
 public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 {
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	private SystemEntityTypeRegistryImpl systemEntityTypeRegistry;
 

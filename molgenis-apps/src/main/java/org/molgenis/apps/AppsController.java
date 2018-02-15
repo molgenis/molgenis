@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -42,9 +42,9 @@ public class AppsController extends PluginController
 	private static final String VIEW_NAME = "view-apps";
 
 	private final DataService dataService;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public AppsController(DataService dataService, PermissionService permissionService)
+	public AppsController(DataService dataService, UserPermissionEvaluator permissionService)
 	{
 		super(URI);
 

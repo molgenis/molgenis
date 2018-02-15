@@ -19,7 +19,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.RepositoryCopier;
 import org.molgenis.data.validation.meta.NameValidator;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
@@ -75,7 +75,7 @@ public class RestControllerV2
 
 	private final DataService dataService;
 	private final RestService restService;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final PermissionSystemService permissionSystemService;
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
@@ -123,7 +123,7 @@ public class RestControllerV2
 				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
-	public RestControllerV2(DataService dataService, PermissionService permissionService, RestService restService,
+	public RestControllerV2(DataService dataService, UserPermissionEvaluator permissionService, RestService restService,
 			LocalizationService localizationService, PermissionSystemService permissionSystemService,
 			RepositoryCopier repoCopier)
 	{

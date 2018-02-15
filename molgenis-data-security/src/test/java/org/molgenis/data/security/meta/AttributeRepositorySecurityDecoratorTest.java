@@ -15,7 +15,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
@@ -57,7 +57,7 @@ public class AttributeRepositorySecurityDecoratorTest extends AbstractMockitoTes
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	@Mock
 	private Attribute attribute;
 	@Mock

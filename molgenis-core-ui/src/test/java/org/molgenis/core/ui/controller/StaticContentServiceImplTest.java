@@ -9,7 +9,7 @@ import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,7 +28,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	@Mock
 	private StaticContent staticContent;
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	private StaticContentServiceImpl staticContentService;
 

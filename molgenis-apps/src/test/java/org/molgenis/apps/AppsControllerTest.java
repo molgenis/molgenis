@@ -11,7 +11,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -45,7 +45,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	private DataService dataService;
 
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	private MockMvc mockMvc;
 

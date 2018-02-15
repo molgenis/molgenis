@@ -22,7 +22,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@Mock
 	MenuManagerService menuManager;
 	@Mock
-	PermissionService permissionService = mock(PermissionService.class);
+	UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
 	@Mock
 	MenuReaderService menuReaderService;
 	@Mock

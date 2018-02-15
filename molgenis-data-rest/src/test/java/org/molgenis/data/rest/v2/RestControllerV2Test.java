@@ -28,7 +28,7 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
@@ -118,7 +118,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
@@ -1029,9 +1029,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public UserPermissionEvaluator permissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(UserPermissionEvaluator.class);
 		}
 
 		@Bean

@@ -4,7 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -26,7 +26,7 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Mock
 	private Repository<Entity> delegateRepository;
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 

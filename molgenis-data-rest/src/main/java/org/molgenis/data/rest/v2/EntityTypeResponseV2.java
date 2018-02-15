@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	public EntityTypeResponseV2(EntityType meta, PermissionService permissionService, DataService dataService)
+	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		this(meta, null, permissionService, dataService);
 	}
@@ -46,7 +46,7 @@ class EntityTypeResponseV2
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, PermissionService permissionService,
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator permissionService,
 			DataService dataService)
 	{
 		String name = meta.getId();

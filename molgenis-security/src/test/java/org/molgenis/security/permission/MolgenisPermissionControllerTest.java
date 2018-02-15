@@ -2,7 +2,7 @@ package org.molgenis.security.permission;
 
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -14,13 +14,13 @@ import static org.testng.Assert.assertTrue;
 public class MolgenisPermissionControllerTest
 {
 
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private MolgenisPermissionController molgenisPermissionController;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		molgenisPermissionController = new MolgenisPermissionController(permissionService);
 	}
 

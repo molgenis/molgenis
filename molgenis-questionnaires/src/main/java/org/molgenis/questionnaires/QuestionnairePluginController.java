@@ -6,7 +6,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,10 +41,10 @@ public class QuestionnairePluginController extends PluginController
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
 	private final EntityManager entityManager;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
-			EntityManager entityManager, PermissionService permissionService)
+			EntityManager entityManager, UserPermissionEvaluator permissionService)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);

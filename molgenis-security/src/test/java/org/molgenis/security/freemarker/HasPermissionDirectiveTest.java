@@ -8,7 +8,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -23,14 +23,14 @@ import static org.testng.Assert.assertEquals;
 public class HasPermissionDirectiveTest
 {
 	private HasPermissionDirective directive;
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private StringWriter envWriter;
 	private Template fakeTemplate;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		directive = new HasPermissionDirective(permissionService);
 		envWriter = new StringWriter();
 		fakeTemplate = Template.getPlainTextTemplate("name", "content",

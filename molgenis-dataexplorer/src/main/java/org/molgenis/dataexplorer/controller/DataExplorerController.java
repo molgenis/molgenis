@@ -22,7 +22,7 @@ import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.util.UnexpectedEnumException;
@@ -81,7 +81,7 @@ public class DataExplorerController extends PluginController
 	private DataService dataService;
 
 	@Autowired
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	@Autowired
 	private FreeMarkerConfigurer freemarkerConfigurer;

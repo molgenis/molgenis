@@ -36,7 +36,7 @@ import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
@@ -97,7 +97,7 @@ public class SortaController extends PluginController
 	private final SortaJobFactory sortaMatchJobFactory;
 	private final ExecutorService taskExecutor;
 	private final FileStore fileStore;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
 	private final PermissionSystemService permissionSystemService;
@@ -110,7 +110,7 @@ public class SortaController extends PluginController
 
 	public SortaController(OntologyService ontologyService, SortaService sortaService,
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
-			FileStore fileStore, PermissionService permissionService, DataService dataService,
+			FileStore fileStore, UserPermissionEvaluator permissionService, DataService dataService,
 			MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,

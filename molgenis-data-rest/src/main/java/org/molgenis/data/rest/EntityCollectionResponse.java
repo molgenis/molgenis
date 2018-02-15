@@ -2,7 +2,7 @@ package org.molgenis.data.rest;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class EntityCollectionResponse
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponse(EntityPager entityPager, List<Map<String, Object>> items, String href,
-			EntityType meta, PermissionService permissionService, DataService dataService)
+			EntityType meta, UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		this.href = href;
 		this.meta = meta != null ? new EntityTypeResponse(meta, permissionService, dataService) : null;
