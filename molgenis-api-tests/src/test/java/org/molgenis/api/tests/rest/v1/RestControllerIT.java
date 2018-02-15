@@ -84,16 +84,6 @@ public class RestControllerIT
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]", Matchers.equalTo(
 						"No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
-
-		response = getWithoutToken("sys_sec_UserAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No read permission on entity type 'User authority' with id 'sys_sec_UserAuthority'"));
-
-		response = getWithoutToken("sys_sec_GroupAuthority");
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -101,24 +91,6 @@ public class RestControllerIT
 	{
 		getWithToken("sys_FreemarkerTemplate", this.testUserToken).log().body().statusCode(200);
 		getWithToken("sys_scr_ScriptType", this.testUserToken).log().body().statusCode(200);
-	}
-
-	@Test
-	public void getWithoutReadPermissionIsNotAllowed()
-	{
-		ValidatableResponse response = getWithToken("sys_sec_UserAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No [READ] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
-	}
-
-	@Test
-	public void getWithoutCountPermissionIsNotAllowed()
-	{
-		ValidatableResponse response = getWithToken("sys_sec_GroupAuthority", this.testUserToken);
-		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
@@ -150,30 +122,6 @@ public class RestControllerIT
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.message[0]", Matchers.equalTo(
 					   "No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
-
-		given().log()
-			   .method()
-			   .log()
-			   .uri()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
-			   .when()
-			   .delete(PATH + "sys_sec_UserAuthority")
-			   .then()
-			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No [WRITE] permission on entity type [User authority] with id [sys_sec_UserAuthority]"));
-
-		given().log()
-			   .method()
-			   .log()
-			   .uri()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
-			   .when()
-			   .delete(PATH + "sys_sec_GroupAuthority")
-			   .then()
-			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Group authority' with id 'sys_sec_GroupAuthority'"));
 	}
 
 	@Test
