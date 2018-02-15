@@ -2,8 +2,9 @@
   <div>
     <!-- Loading spinner -->
     <template v-if="loading">
-      <div class="spinner-container d-flex justify-content-center align-items-center text-muted">
-        <i class="fa fa-spinner fa-spin fa-1x"> </i>&nbsp; {{ loadingMessage }}
+      <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
+        <i class="fa fa-spinner fa-spin fa-2x my-2"></i>
+        <p>Initializing questionnaire...</p>
       </div>
     </template>
 
@@ -14,7 +15,7 @@
           <h1>{{ questionnaireLabel }}</h1>
           <p v-html="questionnaireDescription"></p>
 
-          <router-link class="btn btn-lg btn-primary mt-2" to="/chapter_1">
+          <router-link class="btn btn-lg btn-primary mt-2" :to="'/' + questionnaireName + '/chapter/1'">
             {{ 'questionnaire_start' | i18n }}
           </router-link>
         </div>
@@ -25,26 +26,7 @@
   </div>
 </template>
 
-<style>
-  .chapter-item:hover {
-    cursor: pointer;
-    background-color: whitesmoke;
-  }
-
-  .chapter-navigation-list {
-    background-color: #c0c0c0;
-    position: fixed;
-    top: 70px;
-    z-index: 100;
-  }
-
-  .spinner-container {
-    height: 80vh;
-  }
-</style>
-
 <script>
-  import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
   import api from '@molgenis/molgenis-api-client'
 
   import moment from 'moment'
@@ -65,14 +47,8 @@
       return {
         loading: true,
         loadingMessage: '',
-        entity: null,
-        formState: {},
-        formData: {},
-        chapterFields: [],
-        questionnaireLabel: '',
-        questionnaireDescription: '',
-        rowId: '',
-        chapters: []
+        formData: this.$store.state.formData,
+        chapterFields: []
       }
     },
     methods: {
@@ -117,28 +93,17 @@
         }
       }
     },
+    computed: {
+      questionnaireLabel () {
+        return this.$store.state.questionnaireLabel
+      },
+
+      questionnaireDescription () {
+        return this.$store.state.questionnaireDescription
+      }
+    },
     created () {
-      this.loadingMessage = 'Initializing questionnaire...'
-      api.get('/api/v2/' + this.questionnaireName).then(response => {
-        this.loadingMessage = 'Building questionnaire data...'
-        this.questionnaireLabel = response.meta.label
-        this.questionnaireDescription = response.meta.description
-
-        this.entity = response.items.length > 0 ? response.items[0] : {}
-
-        // The ID of the questionnaire belonging to the current use
-        this.rowId = this.entity[response.meta.idAttribute]
-
-        this.chapters = response.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
-
-        const form = EntityToFormMapper.generateForm(response.meta, this.entity)
-
-        this.loadingMessage = 'Setup completed...'
-
-        this.chapterFields = form.formFields.slice(1, 2)
-        // const restFields = form.formFields.slice(2, form.formFields.length - 1)
-
-        this.formData = form.formData
+      this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireName).then(() => {
         this.loading = false
       })
     }

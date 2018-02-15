@@ -28,12 +28,12 @@ export default new Router({
         {
           path: '',
           props: true,
-          redirect: 'start'
+          component: QuestionnaireStart
         },
         {
-          path: 'start',
+          path: 'chapter/:chapterId',
           props: true,
-          component: QuestionnaireStart
+          component: QuestionnaireChapter
         },
         {
           path: 'thanks',
@@ -44,11 +44,6 @@ export default new Router({
           path: 'overview',
           props: true,
           component: QuestionnaireOverview
-        },
-        {
-          path: ':chapter_id',
-          props: true,
-          component: QuestionnaireChapter
         }
       ]
     }

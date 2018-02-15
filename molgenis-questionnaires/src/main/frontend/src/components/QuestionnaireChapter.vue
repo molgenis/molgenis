@@ -1,51 +1,90 @@
 <template>
-  <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-10 col-lg-10 col-xl-10">
+  <div>
+    <template v-if="loading">
+      <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
+        <i class="fa fa-spinner fa-spin fa-2x my-2"></i>
+        <p>Loading chapters...</p>
+      </div>
+    </template>
 
-      <form-component
-        :id="questionnaireName"
-        :formFields="chapterFields"
-        :formState="formState"
-        :formData="formData"
-        :onValueChanged="onValueChanged">
-      </form-component>
+    <template v-else>
+      <div class="row">
+        <div class="col-12">
 
-      <router-link to="/" class="btn btn-outline-secondary">
-        {{ 'questionnaire_save_and_continue' | i18n }}
-      </router-link>
+          <div class="card my-2">
+            <div class="card-header text-center">
+              <router-link v-show="showPreviousButton"
+                           :to="'/' + questionnaireName + '/chapter/' + previousChapterNumber"
+                           class="btn btn-outline-secondary float-left">
+                {{ 'questionnaire_previous_chapter' | i18n }}
+              </router-link>
 
-      <!--<button type="submit" class="btn btn-primary" @click="onSubmit">-->
-        <!--{{ 'questionnaire_submit' | i18n }}-->
-      <!--</button>-->
+              <span class="chapter-progress-container text-muted align-middle">
+                  Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
+              </span>
 
-    </div>
+              <router-link v-show="showNextButton" :to="'/' + questionnaireName + '/chapter/' + nextChapterNumber"
+                           class="btn btn-primary float-right">
+                {{ 'questionnaire_next_chapter' | i18n }}
+              </router-link>
+            </div>
+
+            <div class="card-body">
+              <form-component
+                :id="questionnaireName"
+                :formFields="chapterField"
+                :formState="formState"
+                :formData="formData"
+                :options="options"
+                :onValueChanged="onValueChanged">
+              </form-component>
+            </div>
+
+
+            <div class="card-footer text-center">
+              <router-link v-show="showPreviousButton"
+                           :to="'/' + questionnaireName + '/chapter/' + previousChapterNumber"
+                           class="btn btn-outline-secondary float-left">
+                {{ 'questionnaire_previous_chapter' | i18n }}
+              </router-link>
+
+              <span class="chapter-progress-container text-muted align-middle">
+                Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
+              </span>
+
+              <router-link v-show="showNextButton" :to="'/' + questionnaireName + '/chapter/' + nextChapterNumber"
+                           class="btn btn-primary float-right">
+                {{ 'questionnaire_next_chapter' | i18n }}
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
-  import api from '@molgenis/molgenis-api-client'
   import { FormComponent } from '@molgenis/molgenis-ui-form'
+  import api from '@molgenis/molgenis-api-client'
 
   import 'flatpickr/dist/flatpickr.css'
 
   export default {
     name: 'QuestionnaireChapter',
-    props: {
-      chapterFields: {
-        type: Array,
-        required: true
-      },
-      formData: {
-        type: Object,
-        required: true
-      }
-    },
+    props: ['questionnaireName', 'chapterId'],
     data () {
       return {
-        formState: {}
+        loading: true,
+        formData: this.$store.state.formData,
+        formState: {},
+        options: {
+          showEyeButton: false
+        }
       }
     },
     methods: {
+
       /**
        * Auto save
        * @param formData
@@ -55,7 +94,41 @@
           body: JSON.stringify(formData)
         }
 
-        api.post('/api/v1/' + this.questionnaire.name + '/' + this.questionnaireID + '?_method=PUT', options)
+        api.post('/api/v1/' + this.questionnaireName + '/' + this.$store.state.questionnaireRowId + '?_method=PUT', options)
+      }
+    },
+    computed: {
+      nextChapterNumber () {
+        return parseInt(this.chapterId) + 1
+      },
+
+      showPreviousButton () {
+        return parseInt(this.chapterId) > 1
+      },
+
+      totalNumberOfChapters () {
+        return this.$store.getters.getTotalNumberOfChapters
+      },
+
+      showNextButton () {
+        return parseInt(this.chapterId) <= this.totalNumberOfChapters
+      },
+
+      previousChapterNumber () {
+        return parseInt(this.chapterId) - 1
+      },
+
+      chapterField () {
+        return this.$store.getters.getChapterByIndex(this.chapterId)
+      }
+    },
+    created () {
+      if (this.$store.state.chapterFields.length === 0) {
+        this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireName).then(() => {
+          this.loading = false
+        })
+      } else {
+        this.loading = false
       }
     },
     components: {

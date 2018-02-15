@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App'
 
+import store from './store'
 import router from './router'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
@@ -13,6 +14,7 @@ Vue.use(i18n, {
     /* eslint-disable no-new */
     new Vue({
       el: '#app',
+      store,
       router,
       template: '<App />',
       components: {App}
