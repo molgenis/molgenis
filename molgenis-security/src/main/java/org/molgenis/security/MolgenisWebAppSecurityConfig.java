@@ -45,6 +45,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -137,7 +138,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.authenticationProvider(runAsAuthenticationProvider());
 
-		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.addFilterBefore(tokenAuthenticationFilter(), AnonymousAuthenticationFilter.class);
 
 		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
 
@@ -248,8 +249,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.and()
 
 				.logout()
-				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) -> {
+				.deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -257,7 +258,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 					}
 				})
 
-				.logoutSuccessHandler((req, res, auth) -> {
+				.logoutSuccessHandler((req, res, auth) ->
+				{
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -298,10 +300,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	protected abstract RoleHierarchy roleHierarchy();
 
 	@Bean
-	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
+	public AnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
-				userDetailsService());
+		return new AnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
+				AuthorityUtils.createAuthorityList(SecurityUtils.AUTHORITY_ANONYMOUS));
 	}
 
 	@Bean
