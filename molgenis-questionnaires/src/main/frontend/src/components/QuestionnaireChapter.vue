@@ -115,16 +115,22 @@
       }
     },
     methods: {
+
+      /**
+       * Run the auto save action with the updated form data
+       */
       onValueChanged (formData) {
         this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData)
       },
 
+      /**
+       * Submit the questionnaire
+       */
       submitQuestionnaire () {
-        this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData)
+        this.$store.dispatch('SUBMIT_QUESTIONNAIRE')
       }
     },
     computed: {
-
       /**
        * Determine the number for the next chapter
        *

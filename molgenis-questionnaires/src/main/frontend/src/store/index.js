@@ -113,8 +113,8 @@ const actions = {
     })
   },
 
-  'SUBMIT_QUESTIONNAIRE' ({state}, formData) {
-    console.log('submit', formData)
+  'SUBMIT_QUESTIONNAIRE' ({state}) {
+    console.log('submit', state.formData)
     // Trigger submit
 //        this.formData.status = 'SUBMITTED'
 //        this.formState.$submitted = true
