@@ -4,6 +4,6 @@
 
 <script>
   export default {
-    name: 'molgenis-questionnaire'
+    name: 'QuestionnaireApp'
   }
 </script>
