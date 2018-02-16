@@ -18,6 +18,11 @@
                        :to="'/' + questionnaireId + '/chapter/1'">
             {{ 'questionnaire_start' | i18n }}
           </router-link>
+
+          <router-link class="btn btn-lg btn-outline-secondary mt-2"
+                       to="/">
+            {{ 'questionnaire_back_to_questionnaire_list' | i18n }}
+          </router-link>
         </div>
       </div>
     </template>
