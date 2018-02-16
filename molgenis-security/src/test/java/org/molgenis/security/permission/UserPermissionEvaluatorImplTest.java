@@ -91,14 +91,14 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionOnPluginSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnPluginSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ));
 	}
 
 	static class Config

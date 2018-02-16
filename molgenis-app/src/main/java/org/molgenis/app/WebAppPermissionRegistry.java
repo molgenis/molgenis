@@ -16,7 +16,6 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.plugin.model.PluginPermissionUtils.getCumulativePermission;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.GroupMetaData.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
@@ -45,9 +44,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(HomeController.ID);
-		Permission pluginPermissions = getCumulativePermission(PluginPermission.READ);
 		return new ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>>().putAll(pluginIdentity,
-				new Pair<>(pluginPermissions, createSid(anonymousUser)),
-				new Pair<>(pluginPermissions, createSid(allUsersGroup))).build();
+				new Pair<>(PluginPermission.READ, createSid(anonymousUser)),
+				new Pair<>(PluginPermission.READ, createSid(allUsersGroup))).build();
 	}
 }

@@ -19,7 +19,7 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 {
 	private final UserPermissionEvaluator permissionService;
 
-	public PermissionDirective(UserPermissionEvaluator permissionService)
+	PermissionDirective(UserPermissionEvaluator permissionService)
 	{
 		this.permissionService = permissionService;
 	}
@@ -79,14 +79,8 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 	{
 		switch (permission)
 		{
-			case "COUNT":
-				return PluginPermission.COUNT;
 			case "READ":
 				return PluginPermission.READ;
-			case "WRITE":
-				return PluginPermission.WRITE;
-			case "WRITEMETA":
-				return PluginPermission.WRITEMETA;
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));

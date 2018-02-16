@@ -24,10 +24,7 @@
                             <thead>
                             <tr>
                                 <th>Plugin</th>
-                                <th>Edit metadata</th>
-                                <th>Edit</th>
                                 <th>View</th>
-                                <th>Count</th>
                                 <th>None</th>
                             </tr>
                             </thead>
@@ -61,10 +58,7 @@
                             <thead>
                             <tr>
                                 <th>Plugin</th>
-                                <th>Edit metadata</th>
-                                <th>Edit</th>
                                 <th>View</th>
-                                <th>Count</th>
                                 <th>None</th>
                             </tr>
                             </thead>
