@@ -1,6 +1,5 @@
 <template>
   <div class="container-fluid">
-    <h5 class="display-4">{{questionnaireLabel}}</h5>
     <div class="row">
       <div class="col-12">
         <router-view/>
@@ -16,13 +15,7 @@
 </style>
 
 <script>
-
   export default {
-    name: 'QuestionnaireContainer',
-    computed: {
-      questionnaireLabel () {
-        return this.$store.state.questionnaireLabel
-      }
-    }
+    name: 'QuestionnaireContainer'
   }
 </script>
