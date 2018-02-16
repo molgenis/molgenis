@@ -70,8 +70,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return permissionService.hasPermission(PluginIdentity.TYPE, pluginId, PluginPermission.WRITE)
-				&& permissionService.hasPermission(EntityTypeIdentity.TYPE, STATIC_CONTENT, EntityTypePermission.WRITE);
+		return permissionService.hasPermission(new PluginIdentity(pluginId), PluginPermission.WRITE)
+				&& permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
 	}
 
 	@Override
@@ -84,11 +84,11 @@ public class StaticContentServiceImpl implements StaticContentService
 
 	public void checkPermissions(String pluginId)
 	{
-		if (!permissionService.hasPermission(PluginIdentity.TYPE, pluginId, PluginPermission.WRITE))
+		if (!permissionService.hasPermission(new PluginIdentity(pluginId), PluginPermission.WRITE))
 		{
 			throw new MolgenisDataAccessException("No write permissions on " + pluginId + " plugin.");
 		}
-		if (!permissionService.hasPermission(EntityTypeIdentity.TYPE, STATIC_CONTENT, EntityTypePermission.WRITE))
+		if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE))
 		{
 			throw new MolgenisDataAccessException("No write permission on static content entity type.");
 		}

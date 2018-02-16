@@ -68,8 +68,9 @@ public class QuestionnairePluginController extends PluginController
 				() -> findQuestionnairesMetaData(dataService).collect(toList()));
 
 		questionnaires = questionnaireMeta.stream()
-										  .filter(entityType -> permissionService.hasPermission(EntityTypeIdentity.TYPE,
-												  entityType.getId(), EntityTypePermission.WRITE))
+										  .filter(entityType -> permissionService.hasPermission(
+												  new EntityTypeIdentity(entityType.getId()),
+												  EntityTypePermission.WRITE))
 										  .map(entityType ->
 										  {
 											  // Create entity if not yet exists for current user

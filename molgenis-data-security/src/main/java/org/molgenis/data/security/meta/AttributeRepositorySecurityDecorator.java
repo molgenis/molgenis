@@ -331,7 +331,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, EntityTypePermission permission)
 	{
 		return attrs.filter(
-				attr -> permissionService.hasPermission(EntityTypeIdentity.TYPE, attr.getEntity().getId(), permission));
+				attr -> permissionService.hasPermission(new EntityTypeIdentity(attr.getEntity().getId()), permission));
 	}
 
 	private class FilteredConsumer

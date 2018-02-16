@@ -438,7 +438,7 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 			when(entityType.getLabel()).thenReturn(entityTypeLabel);
 		}
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, permission)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), permission)).thenReturn(
 				hasPermission);
 	}
 }

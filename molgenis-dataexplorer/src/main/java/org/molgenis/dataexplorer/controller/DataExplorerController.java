@@ -169,7 +169,7 @@ public class DataExplorerController extends PluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = permissionService.hasPermission(EntityTypeIdentity.TYPE, selectedEntityName,
+		boolean hasEntityPermission = permissionService.hasPermission(new EntityTypeIdentity(selectedEntityName),
 				EntityTypePermission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
@@ -226,7 +226,7 @@ public class DataExplorerController extends PluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId,
+				if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
 						EntityTypePermission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
@@ -248,7 +248,7 @@ public class DataExplorerController extends PluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.READ)
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ)
 				&& dataService.getCapabilities(
 				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
@@ -272,11 +272,11 @@ public class DataExplorerController extends PluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.WRITE))
+		if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITE))
 			pluginPermission = WRITE;
-		else if (permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.READ))
+		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ))
 			pluginPermission = READ;
-		else if (permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.COUNT))
+		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();

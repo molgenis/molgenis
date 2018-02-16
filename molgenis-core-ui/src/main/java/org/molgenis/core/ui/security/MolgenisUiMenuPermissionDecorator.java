@@ -109,7 +109,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
-				hasPermission = permissionService.hasPermission(PluginIdentity.TYPE, menuItemId, PluginPermission.READ);
+				hasPermission = permissionService.hasPermission(new PluginIdentity(menuItemId), PluginPermission.READ);
 				break;
 			default:
 				throw new UnexpectedEnumException(molgenisUiMenuItem.getType());

@@ -38,7 +38,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -113,11 +112,11 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@BeforeMethod
-	public void beforeTest() throws IOException
+	public void beforeTest()
 	{
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "yes",
-				EntityTypePermission.WRITEMETA)).thenReturn(true);
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "no", EntityTypePermission.WRITEMETA)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("yes"), EntityTypePermission.WRITEMETA)).thenReturn(
+				true);
+		when(permissionService.hasPermission(new EntityTypeIdentity("no"), EntityTypePermission.WRITEMETA)).thenReturn(
 				false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -146,7 +145,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@Test
-	public void initSetNavigatorMenuPathNoNavigator() throws Exception
+	public void initSetNavigatorMenuPathNoNavigator()
 	{
 		String selectedEntityname = "selectedEntityname";
 		String selectedEntityId = "selectedEntityId";
@@ -224,14 +223,14 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	}
 
 	@Test
-	public void getAnnotatorModuleSuccess() throws Exception
+	public void getAnnotatorModuleSuccess()
 	{
 		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void getAnnotatorModuleFail() throws Exception
+	public void getAnnotatorModuleFail()
 	{
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
 	}

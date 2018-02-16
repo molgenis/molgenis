@@ -40,7 +40,7 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entity", EntityTypePermission.COUNT)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.COUNT)).thenReturn(
 				true);
 
 		Map<String, Object> params = Maps.newHashMap();
@@ -56,7 +56,7 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithoutPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, "entity", EntityTypePermission.WRITE)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.WRITE)).thenReturn(
 				false);
 
 		Map<String, Object> params = Maps.newHashMap();

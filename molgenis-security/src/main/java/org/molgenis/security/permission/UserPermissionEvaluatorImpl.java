@@ -3,6 +3,8 @@ package org.molgenis.security.permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,7 +22,7 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 	}
 
 	@Override
-	public boolean hasPermission(String type, String id, org.springframework.security.acls.model.Permission permission)
+	public boolean hasPermission(ObjectIdentity objectIdentity, Permission permission)
 	{
 		if (SecurityUtils.currentUserIsSuOrSystem())
 		{
@@ -29,7 +31,8 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 		else
 		{
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			return authentication != null && permissionEvaluator.hasPermission(authentication, id, type, permission);
+			return authentication != null && permissionEvaluator.hasPermission(authentication,
+					objectIdentity.getIdentifier(), objectIdentity.getType(), permission);
 		}
 	}
 }

@@ -120,7 +120,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeName, EntityTypePermission.COUNT))
+		if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeName), EntityTypePermission.COUNT))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));

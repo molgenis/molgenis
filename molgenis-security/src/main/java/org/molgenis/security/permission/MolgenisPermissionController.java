@@ -26,13 +26,13 @@ public class MolgenisPermissionController
 	@ResponseBody
 	public boolean hasReadPermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.READ);
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ);
 	}
 
 	@GetMapping("/{entityTypeId}/write")
 	@ResponseBody
 	public boolean hasWritePermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		return permissionService.hasPermission(EntityTypeIdentity.TYPE, entityTypeId, EntityTypePermission.WRITE);
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITE);
 	}
 }

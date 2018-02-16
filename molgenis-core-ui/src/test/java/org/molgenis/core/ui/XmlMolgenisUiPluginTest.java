@@ -98,7 +98,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setName(type);
 		pluginType.setId(id);
-		when(permissionService.hasPermission(PluginIdentity.TYPE, id, PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity(id), PluginPermission.READ)).thenReturn(true);
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
 				permissionService);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());
@@ -108,8 +108,9 @@ public class XmlMolgenisUiPluginTest
 	public void isAuthorized_notAuthorized()
 	{
 		PluginType pluginType = new PluginType();
+		pluginType.setId("plugin1");
 		pluginType.setName("type_notauthorized");
-		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(new PluginType(), molgenisUiMenu,
+		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
 				permissionService);
 		assertFalse(xmlMolgenisUiPlugin.isAuthorized());
 	}

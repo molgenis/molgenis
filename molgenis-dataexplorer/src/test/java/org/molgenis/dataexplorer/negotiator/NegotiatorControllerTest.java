@@ -243,23 +243,21 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
-		when(permissionService.hasPermission(PluginIdentity.TYPE, "directory", PluginPermission.READ)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
 		assertFalse(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButton()
 	{
-		when(permissionService.hasPermission(PluginIdentity.TYPE, "directory", PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(true);
 		assertTrue(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButtonPermissionsOnPluginNoConfig()
 	{
-		when(permissionService.hasPermission(PluginIdentity.TYPE, "directory", PluginPermission.READ)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
 		when(entityType.getId()).thenReturn("blah2");
 
 		assertFalse(negotiatorController.showDirectoryButton("blah2"));

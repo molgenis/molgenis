@@ -98,7 +98,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		Sort sort = mock(Sort.class);
 		when(query.sort()).thenReturn(sort);
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
-		when(permissionService.hasPermission(EntityTypeIdentity.TYPE, APP, EntityTypePermission.WRITE)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.WRITE)).thenReturn(
 				hasWriteAppPermission);
 
 		AppInfoDto appInfoDto0 = AppInfoDto.builder()

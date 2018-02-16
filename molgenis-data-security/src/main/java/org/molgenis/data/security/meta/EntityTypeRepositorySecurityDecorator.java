@@ -364,14 +364,39 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void validatePermission(EntityType entityType, EntityTypePermission permission)
 	{
-		boolean hasPermission = permissionService.hasPermission(EntityTypeIdentity.TYPE, entityType.getId(),
-				permission);
+		boolean hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission);
 		if (!hasPermission)
 		{
 			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
+					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(permission),
 							entityType.getLabel(), entityType.getId()));
 		}
+	}
+
+	private static String toMessagePermission(EntityTypePermission permission)
+	{
+		String permissionStr;
+		if (permission == EntityTypePermission.COUNT)
+		{
+			permissionStr = "COUNT";
+		}
+		else if (permission == EntityTypePermission.READ)
+		{
+			permissionStr = "READ";
+		}
+		else if (permission == EntityTypePermission.WRITE)
+		{
+			permissionStr = "WRITE";
+		}
+		else if (permission == EntityTypePermission.WRITEMETA)
+		{
+			permissionStr = "WRITEMETA";
+		}
+		else
+		{
+			throw new IllegalArgumentException("Illegal entity type permission");
+		}
+		return permissionStr;
 	}
 
 	private EntityType filterCountPermission(EntityType entityType)
@@ -387,7 +412,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, EntityTypePermission permission)
 	{
 		return EntityTypeStream.filter(
-				entityType -> permissionService.hasPermission(EntityTypeIdentity.TYPE, entityType.getId(), permission));
+				entityType -> permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission));
 	}
 
 	private static class FilteredConsumer
@@ -405,7 +430,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
 															  .filter(entityType -> permissionService.hasPermission(
-																	  EntityTypeIdentity.TYPE, entityType.getId(),
+																	  new EntityTypeIdentity(entityType.getId()),
 																	  EntityTypePermission.COUNT))
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);

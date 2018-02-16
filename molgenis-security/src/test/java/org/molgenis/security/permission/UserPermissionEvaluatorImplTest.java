@@ -42,7 +42,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
 				EntityTypePermission.READ)).thenReturn(true);
-		assertTrue(userPermissionEvaluator.hasPermission(EntityTypeIdentity.TYPE, "entityType0",
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
 				EntityTypePermission.READ));
 	}
 
@@ -50,7 +50,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionOnEntityTypeFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(EntityTypeIdentity.TYPE, "entityType0",
+		assertFalse(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
 				EntityTypePermission.READ));
 	}
 
@@ -58,7 +58,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionOnEntityTypeSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(EntityTypeIdentity.TYPE, "entityType0",
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
 				EntityTypePermission.WRITE));
 	}
 
@@ -66,7 +66,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionOnEntityTypeSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(EntityTypeIdentity.TYPE, "entityType0",
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
 				EntityTypePermission.WRITE));
 	}
 
@@ -77,28 +77,28 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", PluginPermission.READ)).thenReturn(
 				true);
-		assertTrue(userPermissionEvaluator.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ));
 	}
 
 	@WithMockUser(username = "USER")
 	@Test
 	public void hasPermissionOnPluginFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.READ));
+		assertFalse(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
 	@Test
 	public void hasPermissionOnPluginSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnPluginSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(PluginIdentity.TYPE, "plugin1", PluginPermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.WRITE));
 	}
 
 	static class Config

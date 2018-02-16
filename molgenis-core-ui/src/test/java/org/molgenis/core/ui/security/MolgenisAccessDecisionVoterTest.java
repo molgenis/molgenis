@@ -23,9 +23,9 @@ public class MolgenisAccessDecisionVoterTest
 	public void setUp()
 	{
 		UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
-		when(permissionService.hasPermission(PluginIdentity.TYPE, "plugingranted", PluginPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugingranted"), PluginPermission.READ)).thenReturn(
 				true);
-		when(permissionService.hasPermission(PluginIdentity.TYPE, "plugindenied", PluginPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugindenied"), PluginPermission.READ)).thenReturn(
 				false);
 
 		Ui molgenisUi = mock(Ui.class);
