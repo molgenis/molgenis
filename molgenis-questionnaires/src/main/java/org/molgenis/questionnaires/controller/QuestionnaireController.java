@@ -9,14 +9,12 @@ import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static org.springframework.http.HttpStatus.OK;
 
 @Controller
 @RequestMapping(QuestionnaireController.URI)
@@ -44,17 +42,17 @@ public class QuestionnaireController extends VuePluginController
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/meta/list")
+	@GetMapping(value = "/list")
 	public List<QuestionnaireResponse> getQuestionnaires()
 	{
 		return questionnaireService.getQuestionnaires();
 	}
 
-	@ResponseBody
-	@GetMapping(value = "/meta/{id}")
-	public QuestionnaireResponse getQuestionnaire(@PathVariable("id") String id)
+	@GetMapping(value = "/start/{id}")
+	@ResponseStatus(value = OK)
+	public void startQuestionnaire(@PathVariable("id") String id)
 	{
-		return questionnaireService.getQuestionnaire(id);
+		questionnaireService.startQuestionnaire(id);
 	}
 
 	@ResponseBody

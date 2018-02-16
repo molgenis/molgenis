@@ -5,9 +5,13 @@ import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}) {
-    return api.get('/menu/plugins/questionnaires/meta/list').then(response => {
+    return api.get('/menu/plugins/questionnaires/list').then(response => {
       commit('SET_QUESTIONNAIRE_LIST', response)
     })
+  },
+
+  'START_QUESTIONNAIRE' ({commit}, questionnaireId) {
+    return api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
   },
 
   'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {

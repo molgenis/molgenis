@@ -79,7 +79,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	}
 
 	@Override
-	public QuestionnaireResponse getQuestionnaire(String id)
+	public void startQuestionnaire(String id)
 	{
 		Questionnaire questionnaire = findQuestionnaireEntity(id);
 		if (questionnaire.getStatus().equals(NOT_STARTED))
@@ -88,7 +88,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 			questionnaire.setStatus(OPEN);
 			dataService.update(id, questionnaire);
 		}
-		return QuestionnaireResponse.create(questionnaire);
 	}
 
 	@Override

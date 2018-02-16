@@ -15,13 +15,13 @@ public interface QuestionnaireService
 	List<QuestionnaireResponse> getQuestionnaires();
 
 	/**
-	 * Retrieve a Questionnaire by id
-	 * Sets the questionnaire status to 'OPEN' when it is retrieved for the first time
+	 * Start a questionnaire based on ID
+	 * Sets the questionnaire status to 'OPEN'
 	 *
 	 * @param id The ID of a questionnaire
 	 * @return A {@link QuestionnaireResponse}
 	 */
-	QuestionnaireResponse getQuestionnaire(String id);
+	void startQuestionnaire(String id);
 
 	/**
 	 * Retrieve static content for a specific questionnaire containing a "Thank you" text which is shown
