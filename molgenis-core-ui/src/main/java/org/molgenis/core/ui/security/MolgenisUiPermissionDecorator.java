@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.security;
 
 import org.molgenis.core.ui.menu.MenuUtils;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
 
@@ -10,9 +10,9 @@ import static java.util.Objects.requireNonNull;
 public class MolgenisUiPermissionDecorator implements Ui
 {
 	private final Ui molgenisUi;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public MolgenisUiPermissionDecorator(Ui molgenisUi, PermissionService permissionService)
+	public MolgenisUiPermissionDecorator(Ui molgenisUi, UserPermissionEvaluator permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);
 		this.permissionService = requireNonNull(permissionService);

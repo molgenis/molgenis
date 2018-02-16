@@ -1,7 +1,7 @@
 package org.molgenis.web;
 
 import org.molgenis.data.DataService;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,14 +19,14 @@ import static org.testng.Assert.*;
 public class PluginInterceptorTest
 {
 	private Ui molgenisUi;
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private Authentication authentication;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		molgenisUi = mock(Ui.class);
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		authentication = mock(Authentication.class);
 		when(authentication.getPrincipal()).thenReturn("username");
 		SecurityContextHolder.getContext().setAuthentication(authentication);

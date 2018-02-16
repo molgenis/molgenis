@@ -1,8 +1,9 @@
 package org.molgenis.web;
 
 import org.molgenis.data.Entity;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,9 +20,9 @@ import static java.util.Objects.requireNonNull;
 public class PluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final Ui molgenisUi;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public PluginInterceptor(Ui molgenisUi, PermissionService permissionService)
+	public PluginInterceptor(Ui molgenisUi, UserPermissionEvaluator permissionService)
 	{
 		this.molgenisUi = requireNonNull(molgenisUi);
 		this.permissionService = requireNonNull(permissionService);
@@ -62,8 +63,8 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 			if (pluginSettings != null)
 			{
 				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
-				pluginSettingsCanWrite = permissionService.hasPermissionOnEntityType(pluginSettingsEntityName,
-						Permission.WRITE);
+				pluginSettingsCanWrite = permissionService.hasPermission(
+						new EntityTypeIdentity(pluginSettingsEntityName), EntityTypePermission.WRITE);
 				modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
 			}
 			else

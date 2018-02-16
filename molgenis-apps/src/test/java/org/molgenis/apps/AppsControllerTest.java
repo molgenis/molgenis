@@ -9,8 +9,9 @@ import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -44,7 +45,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 	private DataService dataService;
 
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	private MockMvc mockMvc;
 
@@ -97,7 +98,8 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		Sort sort = mock(Sort.class);
 		when(query.sort()).thenReturn(sort);
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
-		when(permissionService.hasPermissionOnEntityType(APP, Permission.WRITE)).thenReturn(hasWriteAppPermission);
+		when(permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.WRITE)).thenReturn(
+				hasWriteAppPermission);
 
 		AppInfoDto appInfoDto0 = AppInfoDto.builder()
 										   .setId("id0")

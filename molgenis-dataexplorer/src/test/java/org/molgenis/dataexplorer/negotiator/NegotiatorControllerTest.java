@@ -11,6 +11,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
@@ -18,8 +20,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -49,7 +50,7 @@ public class NegotiatorControllerTest
 	@Mock
 	private RestTemplate restTemplate;
 	@Mock
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	@Mock
 	private DataService dataService;
 	@Mock
@@ -242,21 +243,21 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
-		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
 		assertFalse(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButton()
 	{
-		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(true);
 		assertTrue(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButtonPermissionsOnPluginNoConfig()
 	{
-		when(permissionService.hasPermissionOnPlugin("directory", Permission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
 		when(entityType.getId()).thenReturn("blah2");
 
 		assertFalse(negotiatorController.showDirectoryButton("blah2"));

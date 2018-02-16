@@ -21,7 +21,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.*;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -49,7 +49,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PlatformTransactionManager transactionManager;
 	private final QueryValidator queryValidator;
 	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -60,7 +60,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
-			DefaultValueReferenceValidator defaultValueReferenceValidator, PermissionService permissionService)
+			DefaultValueReferenceValidator defaultValueReferenceValidator, UserPermissionEvaluator permissionService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);

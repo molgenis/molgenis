@@ -2,7 +2,7 @@ package org.molgenis.core.ui;
 
 import com.google.common.collect.Lists;
 import org.molgenis.core.ui.menu.MenuItemToMolgenisUiMenuAdapter;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
@@ -19,14 +19,14 @@ public class XmlMolgenisUiMenu implements UiMenu
 {
 	private final MenuType menuType;
 	private final UiMenu parentMenu;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public XmlMolgenisUiMenu(MenuType menuType, PermissionService permissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, UserPermissionEvaluator permissionService)
 	{
 		this(menuType, null, permissionService);
 	}
 
-	public XmlMolgenisUiMenu(MenuType menuType, UiMenu parentMenu, PermissionService permissionService)
+	public XmlMolgenisUiMenu(MenuType menuType, UiMenu parentMenu, UserPermissionEvaluator permissionService)
 	{
 		if (menuType == null) throw new IllegalArgumentException("menu type is null");
 		if (permissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");

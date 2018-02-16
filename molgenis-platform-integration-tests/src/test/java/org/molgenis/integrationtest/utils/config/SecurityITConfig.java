@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 @Configuration
 @EnableWebSecurity
-@Import({ PermissionServiceImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
+@Import({ UserPermissionEvaluatorImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
 		TokenMetaData.class, SecurityPackage.class, UserMetaData.class, OwnedEntityType.class,
 		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
 		PermissionSystemServiceImpl.class, UserFactory.class, AggregationTestConfig.class,

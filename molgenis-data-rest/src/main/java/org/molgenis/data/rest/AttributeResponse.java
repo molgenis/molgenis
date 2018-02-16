@@ -8,7 +8,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +45,7 @@ public class AttributeResponse
 	private String validationExpression;
 
 	public AttributeResponse(String entityParentName, EntityType entityType, Attribute attr,
-			PermissionService permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		this(entityParentName, entityType, attr, null, null, permissionService, dataService);
 	}
@@ -56,7 +56,7 @@ public class AttributeResponse
 	 */
 	public AttributeResponse(final String entityParentName, EntityType entityType, Attribute attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			PermissionService permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
