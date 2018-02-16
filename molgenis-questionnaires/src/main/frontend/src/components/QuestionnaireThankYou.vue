@@ -2,36 +2,24 @@
   <div class="row">
     <div class="col-md-12">
       <p v-html="submissionText"></p>
+      <router-link to="/" class="btn btn-outline-secondary">
+        {{ 'questionnaire_back_to_questionnaire_list' | i18n }}
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
-  import api from '@molgenis/molgenis-api-client'
-
   export default {
     name: 'QuestionnaireThankYou',
-    props: {
-
-      /**
-       * The name of the questionnaire
-       */
-      questionnaireName: {
-        type: String,
-        required: true
-      }
-    },
-    data () {
-      return {
-        submissionText: null
+    props: ['questionnaireId'],
+    computed: {
+      submissionText () {
+        return this.$store.state.submissionText
       }
     },
     created () {
-      api.get('/menu/plugins/questionnaires/' + this.questionnaireName + '/thanks').then(response => {
-        this.submissionText = response
-      }).catch(error => {
-        console.log('Something went wrong fetching the questionnaire submission text', error)
-      })
+      this.$store.dispatch('GET_SUBMISSION_TEXT', this.questionnaireId)
     }
   }
 </script>
