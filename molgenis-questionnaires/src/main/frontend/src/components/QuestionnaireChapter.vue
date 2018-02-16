@@ -42,7 +42,7 @@
 
             </div>
 
-            <div class="progress mt-0 pt-0">
+            <div v-if="showProgressBar" class="progress mt-0 pt-0">
               <div class="progress-bar" role="progressbar"
                    :style="'width:' + progressPercentage + '%;'"
                    :aria-valuenow="chapterId" aria-valuemin="1"
