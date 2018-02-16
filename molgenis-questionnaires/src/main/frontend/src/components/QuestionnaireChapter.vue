@@ -10,11 +10,24 @@
 
     <template v-else>
       <div class="row">
-        <div class="col-12">
-
+        <div class="col-9">
           <h5 class="display-4">{{ questionnaireLabel }}</h5>
+        </div>
+        <div class="col-3">
+          <div class="text-muted float-left pt-5" v-if="changesMade && saving">
+            <i class="fa fa-spinner fa-spin"></i> {{ 'questionnaire_saving_changes' | i18n }}
+          </div>
 
-          <div class="card my-2">
+          <div class="text-muted float-left pt-5" v-else-if="changesMade && !saving">
+            {{ 'questionnaire_changes_saved' | i18n }}
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-9">
+
+          <div class="card mb-2">
             <div class="card-header">
 
               <div class="row">
@@ -93,11 +106,38 @@
             </div>
           </div>
         </div>
+
+        <div class="col-3">
+          <ul class="list-group chapter-navigation">
+            <a class="list-group-item list-group-item-action disabled">
+              {{ 'questionnaire_jump_to_chapter' | i18n }}
+            </a>
+
+            <router-link
+              v-for="chapter in chapterNavigationList"
+              :to="'/' + questionnaireId + '/chapter/' + chapter.index"
+              :key="chapter.index"
+              class="list-group-item list-group-item-action chapter-navigation-item">
+              {{ chapter.label }}
+            </router-link>
+          </ul>
+        </div>
+
       </div>
     </template>
 
   </div>
 </template>
+
+<style scoped>
+  .list-group-item.disabled {
+    background-color: #f5f5f5;
+  }
+
+  .router-link-active.chapter-navigation-item {
+    border-left: solid 4px #c9302c;
+  }
+</style>
 
 <script>
   import { debounce } from 'lodash'
@@ -110,6 +150,8 @@
     data () {
       return {
         loading: true,
+        saving: false,
+        changesMade: false,
         formState: {},
         formData: this.$store.state.formData,
         options: {
@@ -123,8 +165,16 @@
        * Run the auto save action with the updated form data
        * debounce for 2 seconds so not every key press triggers a server call
        */
-      onValueChanged: debounce(function (formData) {
-        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData)
+      onValueChanged (formData) {
+        this.saving = true
+        this.changesMade = true
+        this.autoSave(formData)
+      },
+
+      autoSave: debounce(function (formData) {
+        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData).then(() => {
+          this.saving = false
+        })
       }, 2000),
 
       /**
@@ -207,6 +257,15 @@
        */
       chapterField () {
         return this.$store.getters.getChapterByIndex(this.chapterId)
+      },
+
+      /**
+       * Get a list of chapters to provide a navigation menu
+       *
+       * @return {Array<Object>} A list of chapters with label and chapter index
+       */
+      chapterNavigationList () {
+        return this.$store.getters.getChapterNavigationList
       },
 
       /**
