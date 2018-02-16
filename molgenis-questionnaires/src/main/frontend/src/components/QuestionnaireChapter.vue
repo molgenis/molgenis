@@ -12,6 +12,8 @@
       <div class="row">
         <div class="col-12">
 
+          <h5 class="display-4">{{ questionnaireLabel }}</h5>
+
           <div class="card my-2">
             <div class="card-header">
 
@@ -98,6 +100,7 @@
 </template>
 
 <script>
+  import { debounce } from 'lodash'
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import 'flatpickr/dist/flatpickr.css'
 
@@ -107,8 +110,8 @@
     data () {
       return {
         loading: true,
-        formData: this.$store.state.formData,
         formState: {},
+        formData: this.$store.state.formData,
         options: {
           showEyeButton: false
         }
@@ -118,16 +121,19 @@
 
       /**
        * Run the auto save action with the updated form data
+       * debounce for 2 seconds so not every key press triggers a server call
        */
-      onValueChanged (formData) {
+      onValueChanged: debounce(function (formData) {
         this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData)
-      },
+      }, 2000),
 
       /**
        * Submit the questionnaire
        */
       submitQuestionnaire () {
-        this.$store.dispatch('SUBMIT_QUESTIONNAIRE')
+        this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData).then(() => {
+          this.$router.push('/' + this.questionnaireId + '/thanks')
+        })
       }
     },
     computed: {
@@ -187,12 +193,28 @@
       },
 
       /**
+       * Show the progress bar if there is more then 1 chapter
+       * @return {boolean} Whether to show the progress bar
+       */
+      showProgressBar () {
+        return this.totalNumberOfChapters > 1
+      },
+
+      /**
        * Get the current chapter field schema from the store
        *
        * @return {Array<Object>} A field schema for the current chapter wrapped in an array
        */
       chapterField () {
         return this.$store.getters.getChapterByIndex(this.chapterId)
+      },
+
+      /**
+       * Get the label of the questionnaire from the store
+       * @return {string} The label of the questionnaire
+       */
+      questionnaireLabel () {
+        return this.$store.state.questionnaireLabel
       }
     },
     created () {
