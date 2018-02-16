@@ -2,27 +2,25 @@
     "use strict";
 
     $(function () {
-        function createGroupPermissionTable(data) {
+        function createGroupPermissionTable(data, permissions) {
             var items = [];
             $.each(data.entityIds, function (entityId, entityTypeId) {
                 if (data.groupPermissionMap && data.groupPermissionMap[entityId]) {
                     $.each(data.groupPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"' + (perm.type === "writemeta" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
+                        for (var i = 0; i < permissions.length; i++) {
+                            items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"' + (perm.type === permissions[i] ? ' checked' : '') + '></td>');
+                        }
                         items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
                         items.push('</tr>');
                     });
                 } else {
                     items.push('<tr>');
                     items.push('<td>' + entityTypeId + '</td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
+                    for (var i = 0; i < permissions.length; i++) {
+                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"></td>');
+                    }
                     items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
                     items.push('</tr>');
                 }
@@ -30,10 +28,9 @@
                     $.each(data.hierarchyPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
+                        for (var i = 0; i < permissions.length; i++) {
+                            items.push('<td><input type="radio"' + (perm.type === permissions[i] ? ' checked' : '') + ' disabled></td>');
+                        }
                         items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
                         items.push('</tr>');
                     });
@@ -42,26 +39,24 @@
             return items.join('');
         }
 
-        function createUserPermissionTable(data) {
+        function createUserPermissionTable(data, permissions) {
             var items = [];
             $.each(data.entityIds, function (entityId, entityTypeId) {
                 if (data.userPermissionMap && data.userPermissionMap[entityId]) {
                     $.each(data.userPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"' + (perm.type === "writemeta" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
+                        for (var i = 0; i < permissions.length; i++) {
+                            items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"' + (perm.type === permissions[i] ? ' checked' : '') + '></td>');
+                        }
                         items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
                     });
                 } else {
                     items.push('<tr>');
                     items.push('<td>' + entityTypeId + '</td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="writemeta"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
+                    for (var i = 0; i < permissions.length; i++) {
+                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"></td>');
+                    }
                     items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
                     items.push('</tr>');
                 }
@@ -69,10 +64,9 @@
                     $.each(data.hierarchyPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
+                        for (var i = 0; i < permissions.length; i++) {
+                            items.push('<td><input type="radio"' + (perm.type === permissions[i] ? ' checked' : '') + ' disabled></td>');
+                        }
                         items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
                         items.push('</tr>');
                     });
@@ -81,10 +75,9 @@
                     $.each(data.groupPermissionMap[entityId], function (idx, perm) {
                         items.push('<tr>');
                         items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "writemeta" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-                        items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
+                        for (var i = 0; i < permissions.length; i++) {
+                            items.push('<td><input type="radio"' + (perm.type === permissions[i] ? ' checked' : '') + ' disabled></td>');
+                        }
                         items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
                         items.push('</tr>');
                     });
@@ -95,23 +88,23 @@
 
         $('#plugin-group-select').change(function () {
             $.get(molgenis.getContextUrl() + '/plugin/group/' + $(this).val(), function (data) {
-                $('#plugin-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
+                $('#plugin-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['read']));
             });
 
         });
         $('#plugin-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/plugin/user/' + $(this).val(), function (data) {
-                $('#plugin-user-permission-table tbody').empty().html(createUserPermissionTable(data));
+                $('#plugin-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['read']));
             });
         });
         $('#entity-class-group-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/group/' + $(this).val(), function (data) {
-                $('#entity-class-group-permission-table tbody').empty().html(createGroupPermissionTable(data));
+                $('#entity-class-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['writemeta', 'write', 'read', 'count']));
             });
         });
         $('#entity-class-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/user/' + $(this).val(), function (data) {
-                $('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data));
+                $('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']));
             });
         });
 
