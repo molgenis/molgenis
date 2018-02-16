@@ -3,7 +3,6 @@ package org.molgenis.data;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
@@ -18,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
@@ -35,17 +35,11 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
 	@Captor
-	ArgumentCaptor<Stream<Entity>> streamArgumentCaptor;
-
-	public EntityReferenceResolverDecoratorTest()
-	{
-		super(Strictness.WARN);
-	}
+	private ArgumentCaptor<Stream<Entity>> streamArgumentCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		entityReferenceResolverDecorator = new EntityReferenceResolverDecorator(delegateRepository, entityManager);
 	}
 
@@ -157,6 +151,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findAllAsStreamFetch()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
@@ -166,12 +161,13 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		when(delegateRepository.findAll(query)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityType, entities, fetch)).thenReturn(entities);
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(expectedEntities.collect(Collectors.toList()), singletonList(entity0));
 	}
 
 	@Test
 	public void findAllAsStreamNoFetch()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Entity entity0 = mock(Entity.class);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
@@ -179,12 +175,13 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		when(delegateRepository.findAll(query)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityType, entities, null)).thenReturn(entities);
 		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(expectedEntities.collect(Collectors.toList()), singletonList(entity0));
 	}
 
 	@Test
 	public void findAllStream()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Object id0 = "id0";
 		Object id1 = "id1";
 		Entity entity0 = mock(Entity.class);
@@ -203,6 +200,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findAllStreamFetch()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Fetch fetch = new Fetch();
 		Object id0 = "id0";
 		Object id1 = "id1";
@@ -222,6 +220,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void streamFetch()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Fetch fetch = new Fetch();
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
@@ -246,8 +245,9 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void findOneQueryFetchEntity()
+	public void findOneQueryEntity()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Fetch fetch = new Fetch();
 		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
@@ -260,19 +260,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void findOneQueryFetchEntityNull()
-	{
-		Fetch fetch = new Fetch();
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
-		when(q.getFetch()).thenReturn(fetch);
-		entityReferenceResolverDecorator.findOne(q);
-		verify(delegateRepository, times(1)).findOne(q);
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void findOneQueryNoFetch()
+	public void findOneQueryEntityNull()
 	{
 		@SuppressWarnings("unchecked")
 		Query<Entity> q = mock(Query.class);
@@ -293,6 +281,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void findOneObjectFetch()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Object id = 1;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
@@ -322,6 +311,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void getEntityType()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		entityReferenceResolverDecorator.getEntityType();
 		verify(delegateRepository, times(1)).getEntityType();
 		verifyZeroInteractions(entityManager);
@@ -338,6 +328,7 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void iterator()
 	{
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		QueryImpl<Entity> q = new QueryImpl<>();
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(delegateRepository.findAll(q)).thenReturn(entities);
@@ -372,6 +363,6 @@ public class EntityReferenceResolverDecoratorTest extends AbstractMockitoTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		doNothing().when(delegateRepository).update(captor.capture());
 		entityReferenceResolverDecorator.update(entities);
-		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(entity0));
 	}
 }
