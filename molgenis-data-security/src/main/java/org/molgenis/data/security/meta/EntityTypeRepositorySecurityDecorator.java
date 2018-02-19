@@ -7,14 +7,12 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
-import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 
