@@ -4,12 +4,17 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
 
 import java.util.Iterator;
 import java.util.List;
@@ -227,10 +232,11 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	}
 
 	@Override
-	public void update(EntityType entity)
+	public void update(EntityType entityType)
 	{
-		validateUpdateAllowed(entity);
-		super.update(entity);
+		updateAcl(entityType);
+		validateUpdateAllowed(entityType);
+		super.update(entityType);
 	}
 
 	@Override
@@ -238,17 +244,18 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		super.update(entities.filter(entityType ->
 		{
+			updateAcl(entityType);
 			validateUpdateAllowed(entityType);
 			return true;
 		}));
 	}
 
 	@Override
-	public void delete(EntityType entity)
+	public void delete(EntityType entityType)
 	{
-		validateDeleteAllowed(entity);
-		deleteEntityPermissions(entity);
-		super.delete(entity);
+		validateDeleteAllowed(entityType);
+		deleteEntityPermissions(entityType);
+		super.delete(entityType);
 	}
 
 	@Override
@@ -413,6 +420,23 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void createAcl(EntityType entityType)
 	{
-		mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
+		MutableAcl acl = mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
+		Package package_ = entityType.getPackage();
+		ObjectIdentity objectIdentity = new PackageIdentity(package_);
+		acl.setParent(mutableAclService.readAclById(objectIdentity));
+		mutableAclService.updateAcl(acl);
+	}
+
+	private void updateAcl(EntityType entityType)
+	{
+		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType.getId()));
+		Package package_ = entityType.getPackage();
+		ObjectIdentity objectIdentity = new PackageIdentity(package_);
+		Acl parentAcl = mutableAclService.readAclById(objectIdentity);
+		if (!parentAcl.equals(acl.getParentAcl()))
+		{
+			acl.setParent(parentAcl);
+			mutableAclService.updateAcl(acl);
+		}
 	}
 }
