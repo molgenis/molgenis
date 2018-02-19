@@ -8,11 +8,13 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 
@@ -25,7 +27,6 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 
@@ -39,11 +40,11 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem
 public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDecorator<EntityType>
 {
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
 			MutableAclService mutableAclService)
 	{
 		super(delegateRepository);
@@ -335,7 +336,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	 */
 	private void validateUpdateAllowed(EntityType entityType)
 	{
-		validatePermission(entityType, Permission.WRITEMETA);
+		validatePermission(entityType, EntityTypePermission.WRITEMETA);
 
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityType.getId());
 		//FIXME: should only be possible to update system entities during bootstrap!
@@ -348,7 +349,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private void validateDeleteAllowed(EntityType entityType)
 	{
-		validatePermission(entityType, Permission.WRITEMETA);
+		validatePermission(entityType, EntityTypePermission.WRITEMETA);
 
 		String entityTypeId = entityType.getId();
 		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityTypeId);
@@ -370,15 +371,41 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		validateDeleteAllowed(entityType);
 	}
 
-	private void validatePermission(EntityType entityType, Permission permission)
+	private void validatePermission(EntityType entityType, EntityTypePermission permission)
 	{
-		boolean hasPermission = permissionService.hasPermissionOnEntityType(entityType.getId(), permission);
+		boolean hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission);
 		if (!hasPermission)
 		{
 			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", permission.toString(),
+					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(permission),
 							entityType.getLabel(), entityType.getId()));
 		}
+	}
+
+	private static String toMessagePermission(EntityTypePermission permission)
+	{
+		String permissionStr;
+		if (permission == EntityTypePermission.COUNT)
+		{
+			permissionStr = "COUNT";
+		}
+		else if (permission == EntityTypePermission.READ)
+		{
+			permissionStr = "READ";
+		}
+		else if (permission == EntityTypePermission.WRITE)
+		{
+			permissionStr = "WRITE";
+		}
+		else if (permission == EntityTypePermission.WRITEMETA)
+		{
+			permissionStr = "WRITEMETA";
+		}
+		else
+		{
+			throw new IllegalArgumentException("Illegal entity type permission");
+		}
+		return permissionStr;
 	}
 
 	private EntityType filterCountPermission(EntityType entityType)
@@ -388,21 +415,21 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 
 	private Stream<EntityType> filterCountPermission(Stream<EntityType> EntityTypeStream)
 	{
-		return filterPermission(EntityTypeStream, COUNT);
+		return filterPermission(EntityTypeStream, EntityTypePermission.COUNT);
 	}
 
-	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
+	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, EntityTypePermission permission)
 	{
 		return EntityTypeStream.filter(
-				entityType -> permissionService.hasPermissionOnEntityType(entityType.getId(), permission));
+				entityType -> permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission));
 	}
 
 	private static class FilteredConsumer
 	{
 		private final Consumer<List<EntityType>> consumer;
-		private final PermissionService permissionService;
+		private final UserPermissionEvaluator permissionService;
 
-		FilteredConsumer(Consumer<List<EntityType>> consumer, PermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, UserPermissionEvaluator permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);
@@ -411,8 +438,9 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 		void filter(List<EntityType> entityTypes)
 		{
 			List<EntityType> filteredEntityTypes = entityTypes.stream()
-															  .filter(entityType -> permissionService.hasPermissionOnEntityType(
-																	  entityType.getId(), COUNT))
+															  .filter(entityType -> permissionService.hasPermission(
+																	  new EntityTypeIdentity(entityType.getId()),
+																	  EntityTypePermission.COUNT))
 															  .collect(toList());
 			consumer.accept(filteredEntityTypes);
 		}

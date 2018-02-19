@@ -152,4 +152,12 @@ public class Permissions
 
 		return Objects.hash(userId, groupId, entityIds, userPermissionMap, groupPermissionMap, hierarchyPermissionMap);
 	}
+
+	@Override
+	public String toString()
+	{
+		return "Permissions{" + "userId='" + userId + '\'' + ", groupId='" + groupId + '\'' + ", entityIds=" + entityIds
+				+ ", userPermissionMap=" + userPermissionMap + ", groupPermissionMap=" + groupPermissionMap
+				+ ", hierarchyPermissionMap=" + hierarchyPermissionMap + '}';
+	}
 }

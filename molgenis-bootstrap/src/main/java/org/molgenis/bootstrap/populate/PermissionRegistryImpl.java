@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.plugin.model.PluginPermissionUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.EntityTypePermissionUtils;
@@ -54,8 +53,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 		Sid allUsersGroupSid = createSid(allUsersGroup);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
-		Permission pluginPermissions = PluginPermissionUtils.getCumulativePermission(PluginPermission.WRITE);
-		mapBuilder.putAll(pluginIdentity, new Pair<>(pluginPermissions, allUsersGroupSid));
+		mapBuilder.putAll(pluginIdentity, new Pair<>(PluginPermission.READ, allUsersGroupSid));
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,

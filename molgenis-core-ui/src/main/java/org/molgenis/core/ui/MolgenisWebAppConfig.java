@@ -21,7 +21,7 @@ import org.molgenis.data.file.FileStore;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.security.CorsInterceptor;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -85,7 +85,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	private AuthenticationSettings authenticationSettings;
 
 	@Autowired
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;

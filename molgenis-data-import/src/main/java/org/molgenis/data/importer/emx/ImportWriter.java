@@ -14,11 +14,12 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,12 +41,12 @@ public class ImportWriter
 {
 	private final MetaDataService metaDataService;
 	private final PermissionSystemService permissionSystemService;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final EntityManager entityManager;
 	private final DataPersister dataPersister;
 
 	ImportWriter(MetaDataService metaDataService, PermissionSystemService permissionSystemService,
-			PermissionService permissionService, EntityManager entityManager, DataPersister dataPersister)
+			UserPermissionEvaluator permissionService, EntityManager entityManager, DataPersister dataPersister)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
@@ -119,7 +120,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermissionOnEntityType(entityTypeName, Permission.COUNT))
+		if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeName), EntityTypePermission.COUNT))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));

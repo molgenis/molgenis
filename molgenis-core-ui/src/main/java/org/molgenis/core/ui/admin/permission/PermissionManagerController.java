@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.plugin.model.PluginPermissionUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.EntityTypePermissionUtils;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.*;
@@ -44,7 +42,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.plugin.model.PluginPermissionUtils.getCumulativePermission;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
@@ -156,7 +153,7 @@ public class PermissionManagerController extends PluginController
 	private void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
-		createSidPermission(sid, objectIdentity, getCumulativePermission(pluginPermission));
+		createSidPermission(sid, objectIdentity, pluginPermission);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -193,12 +190,6 @@ public class PermissionManagerController extends PluginController
 		{
 			case "READ":
 				return PluginPermission.READ;
-			case "WRITE":
-				return PluginPermission.WRITE;
-			case "COUNT":
-				return PluginPermission.COUNT;
-			case "WRITEMETA":
-				return PluginPermission.WRITEMETA;
 			default:
 				throw new IllegalArgumentException(format("Unknown plugin permission '%s'", paramValue));
 		}
@@ -274,21 +265,9 @@ public class PermissionManagerController extends PluginController
 	private org.molgenis.security.permission.Permission toPluginPermission(AccessControlEntry ace)
 	{
 		org.molgenis.security.permission.Permission pluginPermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission().equals(PluginPermissionUtils.getCumulativePermission(PluginPermission.WRITEMETA)))
-		{
-			pluginPermission.setType("writemeta");
-		}
-		else if (ace.getPermission().equals(PluginPermissionUtils.getCumulativePermission(PluginPermission.WRITE)))
-		{
-			pluginPermission.setType("write");
-		}
-		else if (ace.getPermission().equals(PluginPermissionUtils.getCumulativePermission(PluginPermission.READ)))
+		if (ace.getPermission().equals(PluginPermission.READ))
 		{
 			pluginPermission.setType("read");
-		}
-		else if (ace.getPermission().equals(PluginPermissionUtils.getCumulativePermission(PluginPermission.COUNT)))
-		{
-			pluginPermission.setType("count");
 		}
 		else
 		{
@@ -432,12 +411,12 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity, CumulativePermission cumulativePermission)
+	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity, Permission permission)
 	{
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
 
 		deleteAceIfExists(sid, acl);
-		acl.insertAce(0, cumulativePermission, sid, true);
+		acl.insertAce(0, permission, sid, true);
 		mutableAclService.updateAcl(acl);
 	}
 

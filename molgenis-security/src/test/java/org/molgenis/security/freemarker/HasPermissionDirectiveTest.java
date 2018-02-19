@@ -6,8 +6,9 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -22,14 +23,14 @@ import static org.testng.Assert.assertEquals;
 public class HasPermissionDirectiveTest
 {
 	private HasPermissionDirective directive;
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 	private StringWriter envWriter;
 	private Template fakeTemplate;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		permissionService = mock(PermissionService.class);
+		permissionService = mock(UserPermissionEvaluator.class);
 		directive = new HasPermissionDirective(permissionService);
 		envWriter = new StringWriter();
 		fakeTemplate = Template.getPlainTextTemplate("name", "content",
@@ -39,7 +40,8 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermissionOnEntityType("entity", Permission.COUNT)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.COUNT)).thenReturn(
+				true);
 
 		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityTypeId", "entity");
@@ -54,7 +56,8 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithoutPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermissionOnEntityType("entity", Permission.WRITE)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.WRITE)).thenReturn(
+				false);
 
 		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityTypeId", "entity");

@@ -19,7 +19,7 @@ import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -93,13 +93,14 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final UserAccountService userAccountService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
 
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
-			TokenService tokenService, AuthenticationManager authenticationManager, PermissionService permissionService,
+			TokenService tokenService, AuthenticationManager authenticationManager,
+			UserPermissionEvaluator permissionService,
 			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService)
 	{
 		this.authenticationSettings = requireNonNull(authenticationSettings);
