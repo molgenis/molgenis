@@ -550,7 +550,8 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
-		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1))).thenReturn(newArrayList(entityType1, entityType0));
+		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1))).thenReturn(
+				newArrayList(entityType1, entityType0));
 		metaDataServiceImpl.upsertEntityTypes(newArrayList(entityType0, entityType1));
 
 		InOrder inOrder = inOrder(dataService);
@@ -593,7 +594,8 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Attribute entity1Attr1 = mock(Attribute.class);
 		when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
-		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1))).thenReturn(newArrayList(entityType1, entityType0));
+		when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1))).thenReturn(
+				newArrayList(entityType1, entityType0));
 		metaDataServiceImpl.upsertEntityTypes(newArrayList(entityType0, entityType1));
 
 		InOrder inOrder = inOrder(dataService);
@@ -933,7 +935,8 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	public static Iterator<Object[]> isMetaEntityTypeProvider()
 	{
 		return newArrayList(new Object[] { ENTITY_TYPE_META_DATA, true }, new Object[] { ATTRIBUTE_META_DATA, true },
-				new Object[] { TAG, true }, new Object[] { PACKAGE, true }, new Object[] { "noMeta", false }).iterator();
+				new Object[] { TAG, true }, new Object[] { PACKAGE, true },
+				new Object[] { "noMeta", false }).iterator();
 	}
 
 	@Test(dataProvider = "isMetaEntityTypeProvider")

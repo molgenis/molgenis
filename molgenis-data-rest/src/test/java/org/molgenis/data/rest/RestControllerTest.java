@@ -319,7 +319,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void createFromFormPost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY).contentType(MediaType.APPLICATION_FORM_URLENCODED)
-										 .param("id", "p1").param("name", "Piet")).andExpect(status().isCreated())
+										 .param("id", "p1")
+										 .param("name", "Piet")).andExpect(status().isCreated())
 			   .andExpect(MockMvcResultMatchers.header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));

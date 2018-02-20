@@ -12,8 +12,8 @@ public interface UserPermissionEvaluator
 	/**
 	 * Returns whether the current authenticated user has permission on the given domain object.
 	 *
-	 * @param objectIdentity       domain object identity
-	 * @param permission permission granted to a {@link Sid} for a given domain object.
+	 * @param objectIdentity domain object identity
+	 * @param permission     permission granted to a {@link Sid} for a given domain object.
 	 * @return <tt>true</tt> if the permission is granted, <tt>false</tt> otherwise
 	 */
 	boolean hasPermission(ObjectIdentity objectIdentity, Permission permission);
