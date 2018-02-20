@@ -155,7 +155,7 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/package/group")
 	@ResponseStatus(HttpStatus.OK)
-	public void updatePackageClassPermissions(@RequestParam String groupId, WebRequest webRequest)
+	public void updateGroupPackagePermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
 		Sid sid = getSidForGroupId(groupId);
 		updatePackagePermissions(webRequest, sid);
