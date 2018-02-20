@@ -54,11 +54,11 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void delete(Stream<Package> packages)
 	{
-		packages.forEach(package_ ->
+		delegate().delete(packages.filter(package_ ->
 		{
 			deleteAcl(package_);
-		});
-		delegate().delete(packages);
+			return true;
+		}));
 	}
 
 	@Override
