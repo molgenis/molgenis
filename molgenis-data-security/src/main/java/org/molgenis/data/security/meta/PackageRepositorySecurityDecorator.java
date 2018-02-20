@@ -47,36 +47,45 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void delete(Package package_)
 	{
-		//TODO delete ACL
+		deleteAcl(package_);
 		delegate().delete(package_);
 	}
 
 	@Override
 	public void delete(Stream<Package> packages)
 	{
-		//TODO delete ACL
+		packages.forEach(package_ ->
+		{
+			deleteAcl(package_);
+		});
 		delegate().delete(packages);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		//TODO delete ACL
+		deleteAcl(id.toString());
 		delegate().deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		//TODO delete ACL
-		delegate().deleteAll(ids);
+		super.deleteAll(ids.filter(id ->
+		{
+			deleteAcl(id.toString());
+			return true;
+		}));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		//TODO delete ACL
-		delegate().deleteAll();
+		iterator().forEachRemaining(package_ ->
+		{
+			deleteAcl(package_);
+		});
+		super.deleteAll();
 	}
 
 	@Override
@@ -128,6 +137,17 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			mutableAclService.updateAcl(acl);
 		}
 		return acl;
+	}
+
+	private void deleteAcl(String id)
+	{
+		PackageIdentity packageIdentity = new PackageIdentity(id);
+		mutableAclService.deleteAcl(packageIdentity, true);
+	}
+
+	private void deleteAcl(Package package_)
+	{
+		deleteAcl(package_.getId());
 	}
 
 	private MutableAcl updateAcl(Package package_)
