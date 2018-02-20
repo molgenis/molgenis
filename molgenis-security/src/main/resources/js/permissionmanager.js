@@ -98,12 +98,12 @@
       })
     })
     $('#package-group-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/plugin/group/' + $(this).val(), function (data) {
+      $.get(molgenis.getContextUrl() + '/package/group/' + $(this).val(), function (data) {
         $('#package-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
       })
     })
     $('#package-user-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/plugin/user/' + $(this).val(), function (data) {
+      $.get(molgenis.getContextUrl() + '/package/user/' + $(this).val(), function (data) {
         $('#package-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
       })
     })

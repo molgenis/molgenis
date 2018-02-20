@@ -103,6 +103,26 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
+	@GetMapping("/package/user/{userId}")
+	@ResponseBody
+	public Permissions getUserPackagePermissions(@PathVariable String userId)
+	{
+		Sid sid = getSidForUserId(userId);
+		return getPackagePermissions(sid);
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
+	@GetMapping("/package/group/{groupId}")
+	@ResponseBody
+	public Permissions getGroupPackagePermissions(@PathVariable String groupId)
+	{
+		Sid sid = getSidForGroupId(groupId);
+		return getPackagePermissions(sid);
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional(readOnly = true)
 	@GetMapping("/entityclass/user/{userId}")
 	@ResponseBody
 	public Permissions getUserEntityClassPermissions(@PathVariable String userId)
@@ -250,6 +270,16 @@ public class PermissionManagerController extends PluginController
 				}
 			}
 		}
+	}
+
+	private Permissions getPackagePermissions(Sid sid)
+	{
+		List<Package> packages = getPackages();
+		List<ObjectIdentity> packageIdentities = packages.stream().map(PackageIdentity::new).collect(toList());
+		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(packageIdentities, singletonList(sid));
+
+		return toPackagePermissions(packages, aclMap, sid);
+
 	}
 
 	private Permissions getPluginPermissions(Sid sid)
@@ -424,6 +454,26 @@ public class PermissionManagerController extends PluginController
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
+		return toEntityTypePermissions(aclMap, sid, permissions);
+	}
+
+	private Permissions toPackagePermissions(List<Package> packages, Map<ObjectIdentity, Acl> aclMap, Sid sid)
+	{
+		Permissions permissions = new Permissions();
+
+		// set permissions: entity ids
+		Map<String, String> entityTypeMap = packages.stream().collect(toMap(Package::getId, Package::getId, (u, v) ->
+		{
+			throw new IllegalStateException(format("Duplicate key %s", u));
+		}, LinkedHashMap::new));
+
+		permissions.setEntityIds(entityTypeMap);
+
+		return toEntityTypePermissions(aclMap, sid, permissions);
+	}
+
+	private Permissions toEntityTypePermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions)
+	{
 		boolean isUser = setUserOrGroup(sid, permissions);
 
 		// set permissions: permissions
