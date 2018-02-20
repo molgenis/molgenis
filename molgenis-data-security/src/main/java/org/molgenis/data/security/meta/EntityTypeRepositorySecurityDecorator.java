@@ -448,21 +448,27 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	{
 		MutableAcl acl = mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
 		Package package_ = entityType.getPackage();
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
-		acl.setParent(mutableAclService.readAclById(objectIdentity));
-		mutableAclService.updateAcl(acl);
+		if (package_ != null)
+		{
+			ObjectIdentity objectIdentity = new PackageIdentity(package_);
+			acl.setParent(mutableAclService.readAclById(objectIdentity));
+			mutableAclService.updateAcl(acl);
+		}
 	}
 
 	private void updateAcl(EntityType entityType)
 	{
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType.getId()));
 		Package package_ = entityType.getPackage();
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
-		Acl parentAcl = mutableAclService.readAclById(objectIdentity);
-		if (!parentAcl.equals(acl.getParentAcl()))
+		if (package_ != null)
 		{
-			acl.setParent(parentAcl);
-			mutableAclService.updateAcl(acl);
+			ObjectIdentity objectIdentity = new PackageIdentity(package_);
+			Acl parentAcl = mutableAclService.readAclById(objectIdentity);
+			if (!parentAcl.equals(acl.getParentAcl()))
+			{
+				acl.setParent(parentAcl);
+				mutableAclService.updateAcl(acl);
+			}
 		}
 	}
 }
