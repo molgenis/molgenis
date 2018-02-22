@@ -10,17 +10,8 @@
 
     <template v-else>
       <div class="row">
-        <div class="col-9">
+        <div class="col-12">
           <h5 class="display-4">{{ questionnaireLabel }}</h5>
-        </div>
-        <div class="col-3">
-          <div class="text-muted float-left pt-5" v-if="changesMade && saving">
-            <i class="fa fa-spinner fa-spin"></i> {{ 'questionnaire_saving_changes' | i18n }}
-          </div>
-
-          <div class="text-muted float-left pt-5" v-else-if="changesMade && !saving">
-            {{ 'questionnaire_changes_saved' | i18n }}
-          </div>
         </div>
       </div>
 
@@ -69,9 +60,9 @@
                 :id="questionnaireId"
                 :formFields="chapterField"
                 :formState="formState"
-                :formData="formData"
+                :initialFormData="formData"
                 :options="options"
-                :onValueChanged="onValueChanged">
+                @valueChange="onValueChanged">
               </form-component>
             </div>
 
@@ -108,19 +99,11 @@
         </div>
 
         <div class="col-3">
-          <ul class="list-group chapter-navigation">
-            <a class="list-group-item list-group-item-action disabled">
-              {{ 'questionnaire_jump_to_chapter' | i18n }}
-            </a>
-
-            <router-link
-              v-for="chapter in chapterNavigationList"
-              :to="'/' + questionnaireId + '/chapter/' + chapter.index"
-              :key="chapter.index"
-              class="list-group-item list-group-item-action chapter-navigation-item">
-              {{ chapter.label }}
-            </router-link>
-          </ul>
+          <chapter-list
+            :questionnaireId="questionnaireId"
+            :changesMade="changesMade"
+            :saving="saving">
+          </chapter-list>
         </div>
 
       </div>
@@ -129,17 +112,9 @@
   </div>
 </template>
 
-<style scoped>
-  .list-group-item.disabled {
-    background-color: #f5f5f5;
-  }
-
-  .router-link-active.chapter-navigation-item {
-    border-left: solid 4px #c9302c;
-  }
-</style>
-
 <script>
+  import ChapterList from './ChapterList'
+
   import { debounce } from 'lodash'
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import 'flatpickr/dist/flatpickr.css'
@@ -260,15 +235,6 @@
       },
 
       /**
-       * Get a list of chapters to provide a navigation menu
-       *
-       * @return {Array<Object>} A list of chapters with label and chapter index
-       */
-      chapterNavigationList () {
-        return this.$store.getters.getChapterNavigationList
-      },
-
-      /**
        * Get the label of the questionnaire from the store
        * @return {string} The label of the questionnaire
        */
@@ -286,7 +252,8 @@
       }
     },
     components: {
-      FormComponent
+      FormComponent,
+      ChapterList
     }
   }
 </script>
