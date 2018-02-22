@@ -125,8 +125,10 @@ public class EntityTypeResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE)
-				&& dataService.getCapabilities(name).contains(
+		this.writable =
+				permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE) && dataService
+						.getCapabilities(name)
+						.contains(
 																										  RepositoryCapability.WRITABLE);
 	}
 
