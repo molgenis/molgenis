@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecorator<Package>
 {
-	private MutableAclService mutableAclService;
+	private final MutableAclService mutableAclService;
 
 	public PackageRepositorySecurityDecorator(Repository<Package> delegateRepository,
 			MutableAclService mutableAclService)
@@ -28,35 +28,35 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	}
 
 	@Override
-	public void update(Package package_)
+	public void update(Package pack)
 	{
-		updateAcl(package_);
-		delegate().update(package_);
+		updateAcl(pack);
+		delegate().update(pack);
 	}
 
 	@Override
 	public void update(Stream<Package> packages)
 	{
-		super.update(packages.filter(package_ ->
+		super.update(packages.filter(pack ->
 		{
-			updateAcl(package_);
+			updateAcl(pack);
 			return true;
 		}));
 	}
 
 	@Override
-	public void delete(Package package_)
+	public void delete(Package pack)
 	{
-		deleteAcl(package_);
-		delegate().delete(package_);
+		deleteAcl(pack);
+		delegate().delete(pack);
 	}
 
 	@Override
 	public void delete(Stream<Package> packages)
 	{
-		delegate().delete(packages.filter(package_ ->
+		delegate().delete(packages.filter(pack ->
 		{
-			deleteAcl(package_);
+			deleteAcl(pack);
 			return true;
 		}));
 	}
@@ -81,28 +81,25 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(package_ ->
-		{
-			deleteAcl(package_);
-		});
+		iterator().forEachRemaining(this::deleteAcl);
 		super.deleteAll();
 	}
 
 	@Override
-	public void add(Package package_)
+	public void add(Package pack)
 	{
-		createAcl(package_);
-		delegate().add(package_);
+		createAcl(pack);
+		delegate().add(pack);
 	}
 
 	@Override
 	public Integer add(Stream<Package> packages)
 	{
-		LinkedList<Package> resolved = new LinkedList();
+		LinkedList<Package> resolved = new LinkedList<>();
 		resolveDependencies(packages.collect(Collectors.toList()), resolved);
-		return super.add(resolved.stream().filter(package_ ->
+		return super.add(resolved.stream().filter(pack ->
 		{
-			createAcl(package_);
+			createAcl(pack);
 			return true;
 		}));
 	}
@@ -113,30 +110,27 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		{
 			for (Package pack : packages)
 			{
-				if (!resolved.contains(pack))
-				{
-					if (!packages.contains(pack.getParent()) || resolved.contains(pack.getParent()))
+				if (!resolved.contains(pack) && !packages.contains(pack.getParent()) || resolved.contains(
+						pack.getParent()))
 					{
 						resolved.add(pack);
 					}
-				}
 			}
 			resolveDependencies(packages, resolved);
 		}
 	}
 
-	private MutableAcl createAcl(Package package_)
+	private void createAcl(Package pack)
 	{
-		PackageIdentity packageIdentity = new PackageIdentity(package_);
+		PackageIdentity packageIdentity = new PackageIdentity(pack);
 		MutableAcl acl = mutableAclService.createAcl(packageIdentity);
-		if (package_.getParent() != null)
+		if (pack.getParent() != null)
 		{
-			ObjectIdentity parentIdentity = new PackageIdentity(package_.getParent());
+			ObjectIdentity parentIdentity = new PackageIdentity(pack.getParent());
 			Acl parentAcl = mutableAclService.readAclById(parentIdentity);
 			acl.setParent(parentAcl);
 			mutableAclService.updateAcl(acl);
 		}
-		return acl;
 	}
 
 	private void deleteAcl(String id)
@@ -145,18 +139,18 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		mutableAclService.deleteAcl(packageIdentity, true);
 	}
 
-	private void deleteAcl(Package package_)
+	private void deleteAcl(Package pack)
 	{
-		deleteAcl(package_.getId());
+		deleteAcl(pack.getId());
 	}
 
-	private MutableAcl updateAcl(Package package_)
+	private void updateAcl(Package pack)
 	{
-		PackageIdentity packageIdentity = new PackageIdentity(package_);
+		PackageIdentity packageIdentity = new PackageIdentity(pack);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(packageIdentity);
-		if (package_.getParent() != null)
+		if (pack.getParent() != null)
 		{
-			ObjectIdentity parentIdentity = new PackageIdentity(package_.getParent());
+			ObjectIdentity parentIdentity = new PackageIdentity(pack.getParent());
 			Acl parentAcl = mutableAclService.readAclById(parentIdentity);
 			if (!parentAcl.equals(acl.getParentAcl()))
 			{
@@ -164,6 +158,5 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 				mutableAclService.updateAcl(acl);
 			}
 		}
-		return acl;
 	}
 }

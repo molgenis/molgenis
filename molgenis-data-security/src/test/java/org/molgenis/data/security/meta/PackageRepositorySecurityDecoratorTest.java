@@ -27,8 +27,6 @@ import static org.testng.Assert.assertEquals;
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestNGSpringContextTests
 {
-	private static final String USERNAME = "user";
-
 	@Mock
 	private Repository<Package> delegateRepository;
 	@Mock
@@ -45,12 +43,12 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 	@Test
 	public void testUpdate()
 	{
-		Package package_ = mock(Package.class);
+		Package pack = mock(Package.class);
 		Package parent = mock(Package.class);
 
-		when(package_.getId()).thenReturn("1");
+		when(pack.getId()).thenReturn("1");
 		when(parent.getId()).thenReturn("2");
-		when(package_.getParent()).thenReturn(parent);
+		when(pack.getParent()).thenReturn(parent);
 
 		MutableAcl acl = mock(MutableAcl.class);
 		MutableAcl parentAcl = mock(MutableAcl.class);
@@ -67,10 +65,10 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 			}
 			return null;
 		});
-		repo.update(package_);
+		repo.update(pack);
 
 		verify(mutableAclService).updateAcl(acl);
-		verify(delegateRepository).update(package_);
+		verify(delegateRepository).update(pack);
 	}
 
 	@Test
@@ -93,13 +91,13 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 	@Test
 	public void testDelete()
 	{
-		Package package_ = mock(Package.class);
-		when(package_.getId()).thenReturn("1");
+		Package pack = mock(Package.class);
+		when(pack.getId()).thenReturn("1");
 
-		repo.delete(package_);
+		repo.delete(pack);
 
 		verify(mutableAclService).deleteAcl(new PackageIdentity("1"), true);
-		verify(delegateRepository).delete(package_);
+		verify(delegateRepository).delete(pack);
 	}
 
 	@Test
@@ -157,22 +155,22 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 	@Test
 	public void testAdd()
 	{
-		Package package_ = mock(Package.class);
+		Package pack = mock(Package.class);
 		Package parent = mock(Package.class);
 
-		when(package_.getId()).thenReturn("1");
+		when(pack.getId()).thenReturn("1");
 		when(parent.getId()).thenReturn("2");
-		when(package_.getParent()).thenReturn(parent);
+		when(pack.getParent()).thenReturn(parent);
 
 		MutableAcl acl = mock(MutableAcl.class);
 		MutableAcl parentAcl = mock(MutableAcl.class);
 		when(mutableAclService.createAcl(new PackageIdentity("1"))).thenReturn(acl);
 		when(mutableAclService.readAclById(new PackageIdentity("2"))).thenReturn(parentAcl);
-		repo.add(package_);
+		repo.add(pack);
 
 		verify(mutableAclService).createAcl(new PackageIdentity("1"));
 		verify(mutableAclService).updateAcl(acl);
-		verify(delegateRepository).add(package_);
+		verify(delegateRepository).add(pack);
 	}
 
 	@Test
@@ -191,6 +189,6 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 
 	static class Config
 	{
-		//FIXME: why is this necessary
+
 	}
 }
