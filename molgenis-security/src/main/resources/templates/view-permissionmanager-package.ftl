@@ -17,6 +17,8 @@
                             </select>
                         </div>
                     </div>
+                    <span>Package permissions determine the permission on entity types within the package and its child packages.<br/>
+                    They do <b>not</b> effect permissions on the package metadata itself.</span>
                     <div class="form-group">
                         <div class="permission-table-container">
                             <table class="table table-condensed table-borderless" id="package-group-permission-table">
@@ -54,6 +56,8 @@
                             </select>
                         </div>
                     </div>
+                    <span>Package permissions determine the permission on entity types within the package and its child packages.<br/>
+                    They do <b>not</b> effect permissions on the package metadata itself.<br/></span>
                     <div class="form-group">
                         <div class="permission-table-container">
                             <table class="table table-condensed table-borderless" id="package-user-permission-table">
