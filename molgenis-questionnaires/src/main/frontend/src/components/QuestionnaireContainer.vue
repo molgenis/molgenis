@@ -9,6 +9,7 @@
 </template>
 
 <style>
+  /* Centers the loading spinner */
   .spinner-container {
     height: 80vh;
   }
