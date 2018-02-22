@@ -12,6 +12,7 @@
     <template v-else>
       <div class="row">
         <div class="col-lg-8 col-md-12">
+          <h5 class="display-4">{{ questionnaireLabel }}</h5>
           <p v-html="questionnaireDescription"></p>
 
           <router-link class="btn btn-lg btn-primary mt-2"
@@ -47,6 +48,14 @@
        */
       questionnaireDescription () {
         return this.$store.state.questionnaireDescription
+      },
+
+      /**
+       * Get the label of the questionnaire from the store
+       * @return {string} The label of the questionnaire
+       */
+      questionnaireLabel () {
+        return this.$store.state.questionnaireLabel
       }
     },
     created () {
