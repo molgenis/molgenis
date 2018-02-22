@@ -110,8 +110,8 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		{
 			for (Package pack : packages)
 			{
-				if (!resolved.contains(pack) && !packages.contains(pack.getParent()) || resolved.contains(
-						pack.getParent()))
+				if (!resolved.contains(pack) && (!packages.contains(pack.getParent()) || resolved.contains(
+						pack.getParent())))
 					{
 						resolved.add(pack);
 					}
