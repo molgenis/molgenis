@@ -106,7 +106,15 @@ You can navigate to the permission module under the Admin menu, and then navigat
 
 ![Menu manager screen](../images//permission_manager.png?raw=true, "permission manager")
 
-Here you can set permissions for different groups and users. These permissions allow users to either Edit, View, Count, or do nothing with the different data sets and modules in MOLGENIS.
+Here you can manage permissions for groups and users. Permissions can be set on datasets, packages and plugins. Permission on a package are permissions on datasets within this package, not permissions on the package itself.
+For datasets and packages 5 categories of permissions are available
+-	None: the user has no permissions on the dataset at all.
+-	Count: This means a user can see the counts and aggregates of the dataset, but not the values itself.
+-	Read: This means the user can view the values of the dataset but not edit anything. The user also inherits count permissions.
+-	Write: This means the user can edit the values in the dataset. The user also inherits count and read permissions.
+-	WriteMeta: this means the user has permission to edit the metadata of a dataset. The user also inherits count, read and write permissions.
+
+For plugins a user either has permission to view a plugin or they don’t.
 
 **Try it out**  
 Remember that molgenis_user that we created in the user management section? If you go to the users tab and look for molgenis_user, you will find it does not have any permissions yet, except for those inherited from the All users group. Let's change it so that our test_group has the permission to open the Data explorer, and the molgenis_user will be able to see the example_data_table data set, which we created in the [Upload](guide-upload) guide.
