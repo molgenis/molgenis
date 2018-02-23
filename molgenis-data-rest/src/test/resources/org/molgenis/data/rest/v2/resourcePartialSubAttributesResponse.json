@@ -27,7 +27,7 @@
               "auto": false,
               "nillable": false,
               "readOnly": true,
-              "labelAttribute": true,
+              "labelAttribute": false,
               "unique": true,
               "visible": true,
               "lookupAttribute": true,
@@ -43,14 +43,14 @@
               "auto": false,
               "nillable": true,
               "readOnly": false,
-              "labelAttribute": false,
+              "labelAttribute": true,
               "unique": false,
               "visible": true,
               "lookupAttribute": false,
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "id",
+          "labelAttribute": "value",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
@@ -82,6 +82,6 @@
   "xref": {
     "_href": "/api/v2/refEntity/ref0",
     "id": "ref0",
-    "value": "val0"
+    "value": "label0"
   }
 }

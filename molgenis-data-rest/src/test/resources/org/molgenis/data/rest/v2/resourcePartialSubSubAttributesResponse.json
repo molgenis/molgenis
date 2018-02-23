@@ -27,7 +27,7 @@
               "auto": false,
               "nillable": false,
               "readOnly": true,
-              "labelAttribute": true,
+              "labelAttribute": false,
               "unique": true,
               "visible": true,
               "lookupAttribute": true,
@@ -55,14 +55,14 @@
                     "auto": false,
                     "nillable": true,
                     "readOnly": false,
-                    "labelAttribute": false,
+                    "labelAttribute": true,
                     "unique": false,
                     "visible": true,
                     "lookupAttribute": false,
                     "isAggregatable": false
                   }
                 ],
-                "labelAttribute": "id",
+                "labelAttribute": "value",
                 "idAttribute": "id",
                 "lookupAttributes": [
                   "id"
@@ -81,7 +81,7 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "id",
+          "labelAttribute": "value",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
