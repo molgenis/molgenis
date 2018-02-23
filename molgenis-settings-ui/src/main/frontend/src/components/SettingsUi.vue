@@ -28,8 +28,8 @@
             id="save-btn-top"
             class="btn btn-primary"
             type="submit"
-            @click.prevent="onSubmit(formData)"
-            :disabled="state.$pristine || !state.$valid">
+            @click.prevent="onSubmit"
+            :disabled="formState.$pristine || formState.$invalid">
             Save changes
           </button>
 
@@ -54,8 +54,9 @@
       <form-component
         id="settings-form"
         :formFields="formFields"
-        :formData="formData"
-        :formState="state">
+        :initialFormData="formData"
+        :formState="formState"
+        @valueChange="onValueChanged">
       </form-component>
     </div>
     <div v-else class=""><i class="fa fa-spinner fa-spin fa-3x"></i></div>
@@ -65,7 +66,7 @@
 </template>
 
 <script>
-  import {FormComponent, EntityToFormMapper} from '@molgenis/molgenis-ui-form'
+  import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
 
@@ -74,9 +75,9 @@
     data () {
       return {
         selectedSetting: null,
-        state: {},
         formFields: [],
         formData: {},
+        formState: {},
         settingsOptions: [],
         alert: null,
         showForm: false,
@@ -87,17 +88,20 @@
     watch: {
       selectedSetting: function (setting) {
         this.showForm = false
-        this.$router.push({ path: `/${setting}` })
+        this.$router.push({path: `/${setting}`})
         api.get('/api/v2/' + setting).then(this.initializeForm, this.handleError)
       }
     },
     methods: {
-      onSubmit (formData) {
+      onValueChanged (formData) {
+        this.formData = formData
+      },
+      onSubmit () {
         this.isSaving = true
         const options = {
-          body: JSON.stringify(formData)
+          body: JSON.stringify(this.formData)
         }
-        const uri = '/api/v1/' + this.selectedSetting + '/' + formData.id + '?_method=PUT'
+        const uri = '/api/v1/' + this.selectedSetting + '/' + this.formData.id + '?_method=PUT'
         api.post(uri, options).then(this.handleSuccess, this.handleError)
       },
       clearAlert () {
@@ -110,7 +114,7 @@
         }
       },
       handleSuccess () {
-        this.state._reset()
+        this.formState._reset()
         this.alert = {
           message: 'Settings saved',
           type: 'success'
@@ -122,7 +126,6 @@
       },
       initializeForm (response) {
         const mappedData = EntityToFormMapper.generateForm(response.meta, response.items[0])
-        this.state = {}
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
         this.settingLabel = response.meta.label
