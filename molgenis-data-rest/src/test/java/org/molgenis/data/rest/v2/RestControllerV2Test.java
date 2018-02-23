@@ -96,8 +96,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String REF_ENTITY1_LABEL = "label1";
 	private static final String REF_REF_ENTITY_ID = "refRef0";
 	private static final String HREF_ENTITY_COLLECTION = BASE_URI + '/' + ENTITY_NAME;
+	private static final String HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE = BASE_URI + '/' + ENTITY_NAME + "?includeCategories=true";
 	private static final String HREF_COPY_ENTITY = BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
+	private static final String HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
 	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
 	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
 
@@ -449,10 +451,21 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResource() throws Exception
 	{
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceResponse.json"))));
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
+	public void retrieveResourceIncludingCategories() throws Exception
+	{
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponseIncludingCategories.json"));
+		mockMvc.perform(get(HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test
@@ -520,22 +533,26 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
+
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
 				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME + ')'
 						+ ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(
-					   readFile(getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"))));
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test
 	public void retrieveResourceCollection() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponse.json"));
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"))));
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test

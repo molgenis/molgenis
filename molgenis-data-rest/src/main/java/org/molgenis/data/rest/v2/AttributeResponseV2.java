@@ -46,10 +46,14 @@ class AttributeResponseV2
 	private List<CategoricalOptionV2> categoricalOptions;
 
 	/**
-	 * @param fetch set of lowercase attribute names to include in response
+	 * Constructs AttributeResponseV2 using params
+	 *
+	 * @param fetch             set of lowercase attribute names to include in response
+	 * @param includeCategories if set to true fetches options list for CATEGORICAL and CATEGORICAL_MREF types,
+	 *                          if set to false references to the entities are returned
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			UserPermissionEvaluator permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService, boolean includeCategories)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -65,10 +69,11 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService);
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
+					includeCategories);
 
-			if (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
-					AttributeType.CATEGORICAL_MREF))
+			if (includeCategories && (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
+					AttributeType.CATEGORICAL_MREF)))
 			{
 				this.categoricalOptions = dataService.findAll(refEntity.getId())
 													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
@@ -134,6 +139,17 @@ class AttributeResponseV2
 		this.nullableExpression = attr.getNullableExpression();
 		this.visibleExpression = attr.getVisibleExpression();
 		this.validationExpression = attr.getValidationExpression();
+	}
+
+	/**
+	 * Default AttributeResponseV2 with @param isCategoricalGetEager set to false
+	 *
+	 * @param fetch set of lowercase attribute names to include in response
+	 */
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
+			UserPermissionEvaluator permissionService, DataService dataService)
+	{
+		this(entityParentName, entityType, attr, fetch, permissionService, dataService, false);
 	}
 
 	public static Iterable<Attribute> filterAttributes(Fetch fetch, Iterable<Attribute> attrs)
