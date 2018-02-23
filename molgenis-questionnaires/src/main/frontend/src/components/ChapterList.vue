@@ -10,7 +10,7 @@
 
     <ul class="list-group chapter-navigation">
       <a class="list-group-item list-group-item-action disabled">
-        {{ 'questionnaire_jump_to_chapter' | i18n }}
+        {{ 'questionnaire_chapters' | i18n }}
       </a>
 
       <router-link
