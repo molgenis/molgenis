@@ -12,6 +12,10 @@ const mutations = {
     state.formData = Object.assign(state.formData, formData)
   },
 
+  'SET_QUESTIONNAIRE_ID' (state, questionnaireId) {
+    state.questionnaireId = questionnaireId
+  },
+
   'SET_QUESTIONNAIRE_LABEL' (state, questionnaireLabel) {
     state.questionnaireLabel = questionnaireLabel
   },
@@ -26,6 +30,15 @@ const mutations = {
 
   'SET_SUBMISSION_TEXT' (state, submissionText) {
     state.submissionText = submissionText
+  },
+
+  'CLEAR_STATE' (state) {
+    state.questionnaireId = ''
+    state.chapterFields = []
+    state.formData = {}
+    state.questionnaireLabel = ''
+    state.questionnaireDescription = ''
+    state.questionnaireRowId = ''
   }
 }
 

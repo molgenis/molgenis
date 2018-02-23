@@ -13,6 +13,13 @@ const state = {
   questionnaireList: [],
 
   /**
+   * The ID of the currently selected questionnaire
+   * This is also recorded in the URL, but if we store utit in the state we can use it to
+   * check if we should clear the current state because a new questionnaire is selected
+   */
+  questionnaireId: '',
+
+  /**
    * All the compound fields of the questionnaire metadata as chapters
    */
   chapterFields: [],

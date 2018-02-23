@@ -10,12 +10,17 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit}, questionnaireId) {
+  'START_QUESTIONNAIRE' ({commit, state}, questionnaireId) {
+    if (state.questionnaireId !== questionnaireId) {
+      commit('CLEAR_STATE')
+    }
+
     return api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
   },
 
   'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
+      commit('SET_QUESTIONNAIRE_ID', questionnaireId)
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
       commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
 

@@ -59,15 +59,15 @@
       }
     },
     created () {
-      if (this.$store.state.chapterFields.length === 0) {
-        this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId).then(() => {
+      this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId).then(() => {
+        if (this.$store.state.chapterFields.length === 0) {
           this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId).then(() => {
             this.loading = false
           })
-        })
-      } else {
-        this.loading = false
-      }
+        } else {
+          this.loading = false
+        }
+      })
     }
   }
 </script>
