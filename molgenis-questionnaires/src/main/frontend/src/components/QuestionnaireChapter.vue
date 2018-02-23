@@ -23,11 +23,20 @@
 
               <div class="row">
                 <div class="col-4">
-                  <router-link v-show="showPreviousButton"
-                               :to="'/' + questionnaireId + '/chapter/' + previousChapterNumber"
-                               class="btn btn-outline-secondary float-left">
+                  <router-link
+                    v-show="showPreviousButton"
+                    :to="'/' + questionnaireId + '/chapter/' + previousChapterNumber"
+                    class="btn btn-outline-secondary float-left">
                     {{ 'questionnaire_previous_chapter' | i18n }}
                   </router-link>
+
+                  <router-link
+                    v-show="!showPreviousButton"
+                    :to="'/' + questionnaireId"
+                    class="btn btn-outline-secondary float-left">
+                    {{ 'questionnaire_back_to_start' | i18n }}
+                  </router-link>
+
                 </div>
 
                 <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
@@ -242,7 +251,7 @@
         return this.$store.state.questionnaireLabel
       }
     },
-    created () {
+    mounted () {
       if (this.$store.state.chapterFields.length === 0) {
         this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId).then(() => {
           this.loading = false
