@@ -196,7 +196,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 				RunAsSystemAspect.runAsSystem(() ->
 				{
 					LOG.info("Bootstrapping registries ...");
-					bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 					LOG.trace("Populating data source with ACL tables ...");
 					dataSourceAclTablesPopulator.populate();
@@ -238,7 +237,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 					event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
 
-					bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
+					bootstrappingEventPublisher.publishBootstrappingSystemEntitiesFinishedEvent();
 				});
 			}
 			catch (Exception unexpected)
