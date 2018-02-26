@@ -32,7 +32,12 @@ export default new Router({
         },
         {
           path: 'chapter/:chapterId',
-          props: true,
+          props: (route) => {
+            return {
+              questionnaireId: route.params.questionnaireId,
+              chapterId: parseInt(route.params.chapterId)
+            }
+          },
           component: QuestionnaireChapter
         },
         {
