@@ -1,196 +1,110 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
-import org.mockito.quality.Strictness;
-import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
-public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringTest
+public class MapOfStringsExpressionEvaluatorTest extends AbstractMockitoTest
 {
-	private Entity entity;
-	private EntityType emd;
-	private EntityType refEmd;
+	@Mock
+	private Attribute attribute;
+	@Mock
+	private EntityType entityType;
 
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
-	@Autowired
-	private AttributeFactory attributeFactory;
-
-	public MapOfStringsExpressionEvaluatorTest()
+	@Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Attribute has no expression.")
+	public void testMapOfStringsExpressionEvaluatorAttributeWithoutExpression()
 	{
-		super(Strictness.WARN);
+		new MapOfStringsExpressionEvaluator(attribute, entityType);
 	}
 
-	private EntityType createDynamicLocationMetaData()
+	@Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "refEntity not specified.")
+	public void testMapOfStringsExpressionEvaluatorAttributeWithoutRefEntity()
 	{
-		return entityTypeFactory.create("Location")
-								.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING),
-										ROLE_ID)
-								.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
-								.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
+		when(attribute.getExpression()).thenReturn("{'a':b}");
+		new MapOfStringsExpressionEvaluator(attribute, entityType);
 	}
 
-	private EntityType createDynamicSourceMetaData()
+	@Test(expectedExceptions = JsonSyntaxException.class)
+	public void testMapOfStringsExpressionEvaluatorExpressionSyntaxError()
 	{
-		return entityTypeFactory.create("Source")
-								.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING),
-										ROLE_ID)
-								.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
-								.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))
-								.addAttribute(attributeFactory.create().setName("NonNumericString").setDataType(STRING))
-								.addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
+		EntityType refEntityType = mock(EntityType.class);
+		when(attribute.getRefEntity()).thenReturn(refEntityType);
+		when(attribute.getExpression()).thenReturn("hallo");
+		new MapOfStringsExpressionEvaluator(attribute, entityType);
 	}
 
-	@BeforeMethod
-	public void createEntity()
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Unknown target attribute: hallo.")
+	public void testMapOfStringsExpressionEvaluatorUnknownTargetAttribute()
 	{
-		emd = createDynamicSourceMetaData();
-		refEmd = createDynamicLocationMetaData();
-
-		entity = new DynamicEntity(emd);
-		entity.set("Int", 1);
-		entity.set("String", "12");
-		entity.set("Long", 10L);
-		entity.set("NonNumericString", "Hello World!");
+		EntityType refEntityType = mock(EntityType.class);
+		when(attribute.getRefEntity()).thenReturn(refEntityType);
+		when(attribute.getExpression()).thenReturn("{'hallo':String}");
+		new MapOfStringsExpressionEvaluator(attribute, entityType);
 	}
 
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.")
+	public void testMapOfStringsExpressionEvaluatorUnknownReferencedAttribute()
 	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-		when(amd.getDataType()).thenReturn(STRING);
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected NPE");
-		}
-		catch (NullPointerException expected)
-		{
-			assertEquals(expected.getMessage(), "Attribute has no expression.");
-		}
-	}
+		EntityType refEntityType = getRefEntityTypeMock();
 
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity()
-	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
-		when(amd.getDataType()).thenReturn(XREF);
-		when(amd.getExpression()).thenReturn("{'a':b}");
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected IllegalArgumentException.");
-		}
-		catch (NullPointerException expected)
-		{
-			assertEquals(expected.getMessage(), "refEntity not specified.");
-		}
-	}
-
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap()
-	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
-		when(amd.getDataType()).thenReturn(XREF);
-		when(amd.getRefEntity()).thenReturn(refEmd);
-		when(amd.getExpression()).thenReturn("hallo");
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected JSON exception");
-		}
-		catch (JsonSyntaxException expected)
-		{
-
-		}
-	}
-
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings()
-	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-		when(amd.getDataType()).thenReturn(XREF);
-		when(amd.getRefEntity()).thenReturn(refEmd);
-		when(amd.getExpression()).thenReturn("{'Chromosome':{'hallo1':'bla'}}");
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException expected)
-		{
-			assertEquals(expected.getMessage(),
-					"Nested expressions not supported, expression must be Map<String,String>.");
-		}
-	}
-
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist()
-	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-		when(amd.getDataType()).thenReturn(STRING);
-		when(amd.getRefEntity()).thenReturn(refEmd);
-		when(amd.getExpression()).thenReturn("{'hallo':String}");
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected illegal argument exception");
-		}
-		catch (IllegalArgumentException expected)
-		{
-			assertEquals(expected.getMessage(), "Unknown target attribute: hallo.");
-		}
-	}
-
-	@Test
-	public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist()
-	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-		when(amd.getDataType()).thenReturn(STRING);
-		when(amd.getRefEntity()).thenReturn(refEmd);
-		when(amd.getExpression()).thenReturn("{'Chromosome':hallo}");
-		try
-		{
-			new MapOfStringsExpressionEvaluator(amd, emd);
-			fail("Expected illegal argument exception");
-		}
-		catch (IllegalArgumentException expected)
-		{
-			assertEquals(expected.getMessage(),
-					"Expression for attribute 'Chromosome' references non-existant attribute 'hallo'.");
-		}
+		Attribute refAttribute = mock(Attribute.class);
+		when(refAttribute.getName()).thenReturn("Chromosome");
+		when(refAttribute.getEntityType()).thenReturn(refEntityType);
+		doReturn(refAttribute).when(refEntityType).getAttribute("Chromosome");
+		when(attribute.getRefEntity()).thenReturn(refEntityType);
+		when(attribute.getExpression()).thenReturn("{'Chromosome':hallo}");
+		new MapOfStringsExpressionEvaluator(attribute, entityType);
 	}
 
 	@Test
 	public void testEvaluate()
 	{
-		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
-		when(amd.getDataType()).thenReturn(XREF);
-		when(amd.getRefEntity()).thenReturn(refEmd);
-		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
-		when(amd.getEntityType()).thenReturn(mock(EntityType.class));
-		when(amd.getDataType()).thenReturn(XREF);
-		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
-		Entity expected = new DynamicEntity(refEmd);
+		EntityType refEntityType = getRefEntityTypeMock();
+
+		when(attribute.getName()).thenReturn("#CHROM").getMock();
+		when(attribute.getDataType()).thenReturn(XREF);
+		when(attribute.getRefEntity()).thenReturn(refEntityType);
+		when(attribute.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
+		when(attribute.getEntityType()).thenReturn(mock(EntityType.class));
+		when(attribute.getDataType()).thenReturn(XREF);
+
+		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(attribute, entityType);
+		Entity expected = new DynamicEntity(refEntityType);
 		expected.set("Chromosome", "12");
 		expected.set("Position", "1");
+		Entity entity = mock(Entity.class);
 		Entity actual = (Entity) evaluator.evaluate(entity);
 		assertTrue(EntityUtils.equals(actual, expected));
+	}
+
+	private EntityType getRefEntityTypeMock()
+	{
+		Attribute typeAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute nillableAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute autoAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute visibleAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute aggregatableAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute readOnlyAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+		Attribute uniqueAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
+
+		EntityType refEntityType = mock(EntityType.class);
+		doReturn(typeAttribute).when(refEntityType).getAttribute("type");
+		doReturn(nillableAttribute).when(refEntityType).getAttribute("isNullable");
+		doReturn(autoAttribute).when(refEntityType).getAttribute("isAuto");
+		doReturn(visibleAttribute).when(refEntityType).getAttribute("isVisible");
+		doReturn(aggregatableAttribute).when(refEntityType).getAttribute("isAggregatable");
+		doReturn(readOnlyAttribute).when(refEntityType).getAttribute("isReadOnly");
+		doReturn(uniqueAttribute).when(refEntityType).getAttribute("isUnique");
+
+		return refEntityType;
 	}
 }
