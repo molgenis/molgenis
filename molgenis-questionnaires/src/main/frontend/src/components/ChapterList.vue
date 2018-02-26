@@ -45,12 +45,6 @@
     name: 'ChapterList',
     props: ['questionnaireId', 'changesMade', 'saving'],
     computed: {
-
-      /**
-       * Get a list of chapters to provide a navigation menu
-       *
-       * @return {Array<Object>} A list of chapters with label and chapter index
-       */
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
       }

@@ -14,7 +14,7 @@ const state = {
 
   /**
    * The ID of the currently selected questionnaire
-   * This is also recorded in the URL, but if we store utit in the state we can use it to
+   * This is also recorded in the URL, but if we store it in the state we can use it to
    * check if we should clear the current state because a new questionnaire is selected
    */
   questionnaireId: '',

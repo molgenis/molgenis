@@ -8,7 +8,11 @@ const mutations = {
   },
 
   'SET_FORM_DATA' (state, formData) {
-    state.formData = Object.assign(state.formData, formData)
+    state.formData = formData
+  },
+
+  'UPDATE_FORM_STATUS' (state, status) {
+    state.formData.status = status
   },
 
   'SET_QUESTIONNAIRE_ID' (state, questionnaireId) {

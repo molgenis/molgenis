@@ -41,19 +41,9 @@
       }
     },
     computed: {
-
-      /**
-       * Retrieve the questionnaire description from the store
-       * @return {string} Questionnaire description
-       */
       questionnaireDescription () {
         return this.$store.state.questionnaireDescription
       },
-
-      /**
-       * Get the label of the questionnaire from the store
-       * @return {string} The label of the questionnaire
-       */
       questionnaireLabel () {
         return this.$store.state.questionnaireLabel
       }

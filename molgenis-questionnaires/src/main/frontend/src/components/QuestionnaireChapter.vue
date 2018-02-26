@@ -176,92 +176,78 @@
       }
     },
     methods: {
-
-      /**
-       * Run the auto save action with the updated form data
-       * debounce for 2 seconds so not every key press triggers a server call
-       */
       onValueChanged (formData) {
-        this.saving = true
-        this.changesMade = true
-        this.autoSave(formData)
+        this.$store.commit('SET_FORM_DATA', formData)
       },
 
-      autoSave: debounce(function (formData) {
-        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData).then(() => {
-          this.saving = false
-        })
-      }, 2000),
-
       /**
-       * Navigates to a certain chapter.
        * Forces validation if a user wants to go to the next chapter
-       * @param chapterNumber The number of chapter that should be navigated to
+       * Triggers client side validation by setting status to 'SUBMITTED'
        */
       navigateToChapter (chapterNumber) {
-        this.$store.commit('SET_FORM_DATA', {
-          status: 'SUBMITTED'
-        })
-
+        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState.$submitted = true
+
+        this.$nextTick(() => {
+          if (this.formState.$valid) {
+            this.$router.push('/' + this.questionnaireId + '/chapter/' + chapterNumber)
+          }
+        })
       },
 
       /**
-       * Submit the questionnaire
+       * Redirect to thank you page when submit is succesfull
        */
       submitQuestionnaire () {
         this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData).then(() => {
           this.$router.push('/' + this.questionnaireId + '/thanks')
         })
+      },
+
+      /**
+       * Debounce for 2 seconds so not every key press triggers a server call
+       */
+      autoSave: debounce(function (lastUpdated) {
+        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', lastUpdated).then(() => {
+          this.saving = false
+        })
+      }, 2000)
+    },
+    watch: {
+
+      /**
+       * Watch changes in formData to run the auto save action with ONLY the updated attribute
+       */
+      formData (newValue, oldValue) {
+        this.saving = true
+        this.changesMade = true
+
+        const lastUpdatedAttribute = Object.keys(newValue).find(key => {
+          return newValue[key] !== oldValue[key]
+        })
+
+        this.autoSave({
+          'attribute': lastUpdatedAttribute,
+          'value': newValue[lastUpdatedAttribute]
+        })
       }
     },
     computed: {
-
       formData () {
         return this.$store.state.formData
       },
-
-      /**
-       * Determine the number for the next chapter
-       *
-       * @return {number} number of the next chapter
-       */
       nextChapterNumber () {
         return this.chapterId + 1
       },
-
-      /**
-       * Determine the number for the previous chapter
-       *
-       * @return {number} number for the previous chapter
-       */
       previousChapterNumber () {
         return this.chapterId - 1
       },
-
-      /**
-       * Determine whether to show the next button
-       *
-       * @return {boolean} show next button
-       */
       showNextButton () {
         return this.chapterId < this.totalNumberOfChapters
       },
-
-      /**
-       * Determine whether to show the previous button
-       *
-       * @return {boolean} show previous button
-       */
       showPreviousButton () {
         return this.chapterId > 1
       },
-
-      /**
-       * Get the total number of chapters from the store
-       *
-       * @return {number} Total number of chapters
-       */
       totalNumberOfChapters () {
         return this.$store.getters.getTotalNumberOfChapters
       },
@@ -269,34 +255,16 @@
       /**
        * Calculate the percentage of progress based on the
        * current chapter and total number of chapters
-       *
-       * @return {number} progress percentage
        */
       progressPercentage () {
         return (this.chapterId / this.totalNumberOfChapters) * 100
       },
-
-      /**
-       * Show the progress bar if there is more then 1 chapter
-       * @return {boolean} Whether to show the progress bar
-       */
       showProgressBar () {
         return this.totalNumberOfChapters > 1
       },
-
-      /**
-       * Get the current chapter field schema from the store
-       *
-       * @return {Array<Object>} A field schema for the current chapter wrapped in an array
-       */
       chapterField () {
         return this.$store.getters.getChapterByIndex(this.chapterId)
       },
-
-      /**
-       * Get the label of the questionnaire from the store
-       * @return {string} The label of the questionnaire
-       */
       questionnaireLabel () {
         return this.$store.state.questionnaireLabel
       }
