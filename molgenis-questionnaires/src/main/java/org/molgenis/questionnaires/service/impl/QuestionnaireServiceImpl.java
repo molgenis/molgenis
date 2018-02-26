@@ -2,12 +2,17 @@ package org.molgenis.questionnaires.service.impl;
 
 import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
+import org.molgenis.questionnaires.request.QuestionnaireSubmitRequest;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
+import org.molgenis.questionnaires.response.QuestionnaireSubmitResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -34,19 +39,21 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 
 	private final DataService dataService;
 	private final EntityManager entityManager;
-	private final QuestionnaireFactory questionnaireFactory;
-	private final StaticContentService staticContentService;
 	private final PermissionService permissionService;
+	private final QuestionnaireFactory questionnaireFactory;
+	private final RestService restService;
+	private final StaticContentService staticContentService;
 
 	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
-			QuestionnaireFactory questionnaireFactory, StaticContentService staticContentService,
-			PermissionService permissionService)
+			PermissionService permissionService, QuestionnaireFactory questionnaireFactory, RestService restService,
+			StaticContentService staticContentService)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
-		this.questionnaireFactory = requireNonNull(questionnaireFactory);
-		this.staticContentService = requireNonNull(staticContentService);
 		this.permissionService = requireNonNull(permissionService);
+		this.questionnaireFactory = requireNonNull(questionnaireFactory);
+		this.restService = requireNonNull(restService);
+		this.staticContentService = requireNonNull(staticContentService);
 	}
 
 	@Override
