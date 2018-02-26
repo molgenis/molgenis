@@ -3,10 +3,9 @@ package org.molgenis.data.validation.meta.model;
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.security.meta.RowLevelSecured;
 import org.molgenis.data.security.meta.RowLevelSecuredMetadata;
-import org.molgenis.data.security.owned.RowLevelSecurityEntityDecorator;
-import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.meta.RowLevelSecurityConfiguration;
+import org.molgenis.data.security.owned.RowLevelSecurityConfigurationEntityDecorator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
@@ -17,24 +16,23 @@ import static java.util.Objects.requireNonNull;
  */
 @Component
 public class RowLevelSecurityRepositoryDecoratorFactory
-		extends AbstractSystemRepositoryDecoratorFactory<RowLevelSecured, RowLevelSecuredMetadata>
+		extends AbstractSystemRepositoryDecoratorFactory<RowLevelSecurityConfiguration, RowLevelSecuredMetadata>
 {
 	private final DataService dataService;
-	private final UserService userService;
 	private final MutableAclService mutableAclService;
 
 	public RowLevelSecurityRepositoryDecoratorFactory(DataService dataService,
-			RowLevelSecuredMetadata entityTypeMetadata, UserService userService, MutableAclService mutableAclService)
+			RowLevelSecuredMetadata entityTypeMetadata, MutableAclService mutableAclService)
 	{
 		super(entityTypeMetadata);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
-		this.userService = requireNonNull(userService);
 	}
 
 	@Override
-	public Repository<RowLevelSecured> createDecoratedRepository(Repository<RowLevelSecured> repository)
+	public Repository<RowLevelSecurityConfiguration> createDecoratedRepository(
+			Repository<RowLevelSecurityConfiguration> repository)
 	{
-		return new RowLevelSecurityEntityDecorator(repository, mutableAclService, dataService, userService);
+		return new RowLevelSecurityConfigurationEntityDecorator(repository, mutableAclService, dataService);
 	}
 }

@@ -14,13 +14,11 @@ import static org.molgenis.data.security.meta.SecurityMetadataPackage.PACKAGE_SE
 @Component
 public class RowLevelSecuredMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "RowLevelSecured";
+	private static final String SIMPLE_NAME = "RowLevelSecurityConfiguration";
 	public static final String ROW_LEVEL_SECURED = PACKAGE_SECURITY_METADATA + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IS_ROW_LEVEL_SECURED = "rowLevelSecured";
 	public static final String ENTITYTYPE_ID = "entityTypeId";
-
-	public static final String ID = "id";
 
 	private final Package securityMetadataPackage;
 
@@ -38,10 +36,9 @@ public class RowLevelSecuredMetadata extends SystemEntityType
 		setLabel("Row Level Secured");
 		setDescription("Administration of which entity types are row level secured");
 
-		addAttribute(ID, ROLE_ID).setLabel("Identifier");
-		addAttribute(ENTITYTYPE_ID, ROLE_LABEL).setLabel("EntityType Id")
-											   .setDataType(AttributeType.STRING)
-											   .setNillable(false);
+		addAttribute(ENTITYTYPE_ID, ROLE_ID, ROLE_LABEL).setLabel("EntityType Id")
+														.setDataType(AttributeType.STRING)
+														.setNillable(false);
 		addAttribute(IS_ROW_LEVEL_SECURED).setDataType(AttributeType.BOOL)
 										  .setLabel("Row Level Secured")
 										  .setNillable(false);

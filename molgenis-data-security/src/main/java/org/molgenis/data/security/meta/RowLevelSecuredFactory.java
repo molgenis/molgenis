@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RowLevelSecuredFactory
-		extends AbstractSystemEntityFactory<RowLevelSecured, RowLevelSecuredMetadata, String>
+		extends AbstractSystemEntityFactory<RowLevelSecurityConfiguration, RowLevelSecuredMetadata, String>
 {
 	RowLevelSecuredFactory(RowLevelSecuredMetadata rowLevelSecuredMetadata, EntityPopulator entityPopulator)
 	{
-		super(RowLevelSecured.class, rowLevelSecuredMetadata, entityPopulator);
+		super(RowLevelSecurityConfiguration.class, rowLevelSecuredMetadata, entityPopulator);
 	}
 }
