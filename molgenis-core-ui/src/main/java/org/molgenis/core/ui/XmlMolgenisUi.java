@@ -1,7 +1,7 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.core.ui.menu.MenuMolgenisUi;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
@@ -18,9 +18,9 @@ import static java.util.Objects.requireNonNull;
 public class XmlMolgenisUi implements Ui
 {
 	private final Molgenis molgenisUi;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, PermissionService permissionService)
+	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, UserPermissionEvaluator permissionService)
 			throws IOException
 	{
 		this.molgenisUi = requireNonNull(xmlMolgenisUiLoader).load();

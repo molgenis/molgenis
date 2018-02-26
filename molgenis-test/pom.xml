@@ -5,7 +5,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>6.1.0-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,11 +50,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-        </dependency>
-        <!-- If AllEncompassingFormHttpMessageConverter detects com.fasterxml.jackson.dataformat.smile.SmileFactory it also requires databind -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
         </dependency>
         <!-- If AllEncompassingFormHttpMessageConverter detects com.fasterxml.jackson.dataformat.smile.SmileFactory it also requires databind -->
         <dependency>

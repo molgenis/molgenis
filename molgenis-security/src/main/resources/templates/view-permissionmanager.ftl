@@ -10,6 +10,7 @@
                 <ul class="nav nav-pills nav-stacked" role="tablist">
                     <li class="active"><a href="#plugin-permission-manager" role="tab" data-toggle="tab">Plugin
                         Permissions</a></li>
+                    <li><a href="#package-permission-manager" role="tab" data-toggle="tab">Package Permissions</a></li>
                     <li><a href="#entity-class-permission-manager" role="tab" data-toggle="tab">Entity Class
                         Permissions</a></li>
                     <li><a href="#entity-permission-manager" role="tab" data-toggle="tab">Entity Permissions</a></li>
@@ -19,6 +20,9 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="plugin-permission-manager">
                     <#include "/view-permissionmanager-plugin.ftl">
+                    </div>
+                    <div class="tab-pane" id="package-permission-manager">
+                    <#include "/view-permissionmanager-package.ftl">
                     </div>
                     <div class="tab-pane" id="entity-class-permission-manager">
                     <#include "/view-permissionmanager-entity-class.ftl">

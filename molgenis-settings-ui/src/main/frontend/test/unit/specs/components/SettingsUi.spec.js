@@ -20,8 +20,8 @@ describe('SettingsUi component', () => {
       expect(data.selectedSetting).to.equal(null)
     })
 
-    it('state as a empty object.', () => {
-      expect(data.state).to.deep.equal({})
+    it('formState as a empty object.', () => {
+      expect(data.formState).to.deep.equal({})
     })
 
     it('formFields as a empty array.', () => {
@@ -109,6 +109,11 @@ describe('SettingsUi component', () => {
         expect(wrapper.vm.alert).to.equal(null)
       })
 
+      it('Calling onValueChanged should pass state of the form to settings data', () => {
+        wrapper.vm.onValueChanged({foo: 'bar'})
+        expect(wrapper.vm.formData).to.deep.equal({foo: 'bar'})
+      })
+
       it('Calling handle error, sets the alert', () => {
         wrapper.vm.handleError('test-error')
         expect(wrapper.vm.alert).to.deep.equal({
@@ -126,7 +131,7 @@ describe('SettingsUi component', () => {
       })
 
       it('Calling the success handler resets the form and signals succes to the user', () => {
-        wrapper.vm.state._reset = function () {}
+        wrapper.vm.formState._reset = function () {}
         wrapper.vm.handleSuccess()
         expect(wrapper.vm.alert).to.deep.equal({
           message: 'Settings saved',
@@ -135,13 +140,14 @@ describe('SettingsUi component', () => {
       })
 
       it('Submitting the form triggers post and triggers success handeler ', () => {
-        wrapper.vm.state._reset = function () {
+        wrapper.vm.formState._reset = function () {
         }
+        wrapper.setData({formData: {id: 'test_id', a: 'a'}})
         const post = td.function('api.post')
         td.when(post('/api/v1/test-setting/test_id?_method=PUT', {body: '{"id":"test_id","a":"a"}'}))
           .thenResolve({status: 'OKE'})
         td.replace(api, 'post', post)
-        wrapper.vm.onSubmit({id: 'test_id', a: 'a'})
+        wrapper.vm.onSubmit()
         expect(wrapper.vm.alert).to.deep.equal({
           message: 'Settings saved',
           type: 'success'

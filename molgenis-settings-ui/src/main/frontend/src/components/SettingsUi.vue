@@ -28,9 +28,8 @@
             id="save-btn-top"
             class="btn btn-primary"
             type="submit"
-            @click.prevent="onSubmit(formData)"
+            @click.prevent="onSubmit"
             :disabled="formState.$pristine || formState.$invalid">
-            Save changes
           </button>
 
           <button

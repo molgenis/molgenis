@@ -10,7 +10,6 @@ import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
@@ -45,9 +44,7 @@ public class PermissionRegistryImplTest extends AbstractMockitoTest
 		Group group = when(mock(Group.class).getId()).thenReturn("group0").getMock();
 		when(query.findOne()).thenReturn(group);
 		Multimap<ObjectIdentity, Pair<Permission, Sid>> expectedPermissions = ImmutableListMultimap.of(
-				new PluginIdentity("useraccount"), new Pair<>(new CumulativePermission().set(PluginPermission.WRITE)
-																						.set(PluginPermission.READ)
-																						.set(PluginPermission.COUNT),
+				new PluginIdentity("useraccount"), new Pair<>(PluginPermission.READ,
 						new GrantedAuthoritySid("ROLE_group0")));
 		assertEquals(permissionRegistryImpl.getPermissions(), expectedPermissions);
 	}

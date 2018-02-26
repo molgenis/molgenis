@@ -11,7 +11,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.meta.EntityTypeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +26,13 @@ public class EntityTypeRepositoryDecoratorFactory
 {
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final EntityTypeValidator entityTypeValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, PermissionService permissionService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
 			EntityTypeValidator entityTypeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver,
 			MutableAclService mutableAclService)
 	{

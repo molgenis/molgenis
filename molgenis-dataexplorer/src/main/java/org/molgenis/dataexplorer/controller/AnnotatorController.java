@@ -10,8 +10,9 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -41,14 +42,14 @@ public class AnnotatorController
 	public static final String URI = "/annotators";
 	private final DataService dataService;
 	private final AnnotationService annotationService;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
 	private final AnnotationJobExecutionFactory annotationJobExecutionFactory;
 
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			PermissionService permissionService, UserAccountService userAccountService,
+			UserPermissionEvaluator permissionService, UserAccountService userAccountService,
 			AnnotationJobFactory annotationJobFactory, ExecutorService taskExecutor,
 			AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
@@ -132,7 +133,8 @@ public class AnnotatorController
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
-						permissionService.hasPermissionOnEntityType(settingsEntityName, Permission.WRITE));
+						permissionService.hasPermission(new EntityTypeIdentity(settingsEntityName),
+								EntityTypePermission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

@@ -19,6 +19,8 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -26,8 +28,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
@@ -105,7 +106,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	private RestController restController;
 
 	@Autowired
-	private PermissionService permissionService;
+	private UserPermissionEvaluator permissionService;
 
 	@Autowired
 	private DataService dataService;
@@ -371,18 +372,21 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityType() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().string(ENTITY_META_RESPONSE_STRING));
 	}
 
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
-		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME),
+				EntityTypePermission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 							   + ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
@@ -392,11 +396,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
-		when(permissionService.hasPermissionOnEntityType(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME),
+				EntityTypePermission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(ENTITY_META_RESPONSE_STRING));
 	}
 
@@ -405,7 +411,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 							   + ENTITY_NAME + "\",\"languageCode\":\"en\",\"writable\":false}"));
@@ -415,7 +422,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityTypeSelectAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
 							   + ENTITY_NAME + "\",\"languageCode\":\"en\",\"writable\":false}"));
@@ -425,7 +433,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityTypeExpandAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
 					   "{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"isAggregatable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false},\"int\":{\"href\":\"/api/v1/Person/meta/int\",\"fieldType\":\"INT\",\"name\":\"int\",\"label\":\"int\",\"attributes\":[],\"enumOptions\":[],\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"isAggregatable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"languageCode\":\"en\",\"writable\":false}"));
 	}
@@ -436,7 +445,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		restController.retrieveEntity(ENTITY_NAME, ENTITY_UNTYPED_ID, new String[] {}, new String[] {});
 
 		mockMvc.perform(get(HREF_ENTITY_ID))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID
 					   + "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}"));
 
@@ -446,7 +456,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveSelectAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", "notname"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID + "\"}"));
 
 	}
@@ -459,7 +470,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										.param("q[0].operator", "EQUALS")
 										.param("q[0].field", "name")
 										.param("q[0].value", "Piet"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(ENTITY_COLLECTION_RESPONSE_STRING));
 
 	}
@@ -471,7 +483,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET")
 										 .content("{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}")
 										 .contentType(APPLICATION_JSON))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(ENTITY_COLLECTION_RESPONSE_STRING));
 	}
 
@@ -479,7 +492,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityAttribute() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
@@ -496,7 +510,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
@@ -614,7 +629,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 								 .build();
 
 		mockMvc.perform(get(HREF_ENTITY_ID + "/xrefValue"))
-			   .andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(
 					   content().string("{\"href\":\"/api/v1/Person/p1/xrefValue\",\"id\":\"p1\",\"name\":\"Piet\"}"));
 	}
@@ -791,9 +807,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public UserPermissionEvaluator permissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(UserPermissionEvaluator.class);
 		}
 
 		@Bean

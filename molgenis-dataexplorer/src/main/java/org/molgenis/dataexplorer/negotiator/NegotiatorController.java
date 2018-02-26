@@ -6,6 +6,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -13,8 +15,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
@@ -51,13 +52,13 @@ public class NegotiatorController extends PluginController
 	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
-	private final PermissionService permissions;
+	private final UserPermissionEvaluator permissions;
 	private final DataService dataService;
 	private final QueryRsqlConverter rsqlQueryConverter;
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final MessageSource messageSource;
 
-	public NegotiatorController(RestTemplate restTemplate, PermissionService permissions, DataService dataService,
+	public NegotiatorController(RestTemplate restTemplate, UserPermissionEvaluator permissions, DataService dataService,
 			QueryRsqlConverter rsqlQueryConverter, JsMagmaScriptEvaluator jsMagmaScriptEvaluator,
 			MessageSource messageSource)
 	{
@@ -74,7 +75,7 @@ public class NegotiatorController extends PluginController
 	public boolean showDirectoryButton(String entityTypeId)
 	{
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
-		return settings != null && permissions.hasPermissionOnPlugin(ID, Permission.READ);
+		return settings != null && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.READ);
 	}
 
 	@PostMapping("/validate")
@@ -118,7 +119,8 @@ public class NegotiatorController extends PluginController
 			throw new MolgenisDataException(
 					messageSource.getMessage("dataexplorer_directory_no_config", new Object[] {}, getLocale()));
 		}
-		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels , disabledCollectionLabels);
+		return ExportValidationResponse.create(isValidRequest, message, enabledCollectionsLabels,
+				disabledCollectionLabels);
 	}
 
 	@PostMapping("/export")

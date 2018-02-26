@@ -37,9 +37,9 @@ import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
-import org.molgenis.security.permission.PermissionServiceImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
 import org.molgenis.security.permission.SecurityContextRegistryImpl;
+import org.molgenis.security.permission.UserPermissionEvaluatorImpl;
 import org.molgenis.semanticsearch.config.SemanticSearchConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		PermissionServiceImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
 		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, TestPermissionPopulator.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>

@@ -8,7 +8,6 @@ const mutations = {
   },
 
   'SET_FORM_DATA' (state, formData) {
-    // formData contains either the entire set of data or a single parameter with updated values
     state.formData = Object.assign(state.formData, formData)
   },
 

@@ -1,7 +1,7 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.core.ui.XmlMolgenisUiTest.Config;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -60,9 +60,9 @@ public class XmlMolgenisUiTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public PermissionService permissionService()
+		public UserPermissionEvaluator permissionService()
 		{
-			return mock(PermissionService.class);
+			return mock(UserPermissionEvaluator.class);
 		}
 	}
 }

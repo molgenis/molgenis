@@ -6,7 +6,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,9 +25,9 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	private static final Logger LOG = LoggerFactory.getLogger(SystemEntityTypeRegistryImpl.class);
 
 	private final Map<String, SystemEntityType> systemEntityTypeMap;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator permissionService;
 
-	SystemEntityTypeRegistryImpl(PermissionService permissionService)
+	SystemEntityTypeRegistryImpl(UserPermissionEvaluator permissionService)
 	{
 		this.permissionService = requireNonNull(permissionService);
 		systemEntityTypeMap = Maps.newHashMap();
@@ -92,7 +92,8 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	 */
 	private boolean isReadAllowed(SystemEntityType systemEntityType)
 	{
-		return permissionService.hasPermissionOnEntityType(systemEntityType.getId(), Permission.COUNT);
+		return permissionService.hasPermission(new EntityTypeIdentity(systemEntityType.getId()),
+				EntityTypePermission.COUNT);
 	}
 
 	private void validateReadPermission(SystemEntityType systemEntityType)

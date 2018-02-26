@@ -64,10 +64,6 @@ const actions = {
   },
 
   'SUBMIT_QUESTIONNAIRE' ({state}, formData) {
-    // Generate submit timestamp
-    formData.submitDate = moment().toISOString()
-    formData.status = 'SUBMITTED'
-
     const options = {
       body: JSON.stringify({
         entities: [
@@ -76,6 +72,9 @@ const actions = {
       }),
       method: 'PUT'
     }
+
+    formData.status = 'SUBMITTED'
+    formData.submitDate = moment().toISOString()
 
     const questionnaireId = state.route.params.questionnaireId
     api.post('/api/v2/' + questionnaireId, options).catch(error => {
