@@ -4,15 +4,11 @@ import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.data.rest.service.RestService;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
-import org.molgenis.questionnaires.request.QuestionnaireSubmitRequest;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
-import org.molgenis.questionnaires.response.QuestionnaireSubmitResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionService;
@@ -41,18 +37,16 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	private final EntityManager entityManager;
 	private final PermissionService permissionService;
 	private final QuestionnaireFactory questionnaireFactory;
-	private final RestService restService;
 	private final StaticContentService staticContentService;
 
 	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
-			PermissionService permissionService, QuestionnaireFactory questionnaireFactory, RestService restService,
+			PermissionService permissionService, QuestionnaireFactory questionnaireFactory,
 			StaticContentService staticContentService)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.permissionService = requireNonNull(permissionService);
 		this.questionnaireFactory = requireNonNull(questionnaireFactory);
-		this.restService = requireNonNull(restService);
 		this.staticContentService = requireNonNull(staticContentService);
 	}
 
@@ -112,6 +106,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 		return submissionText;
 	}
 
+	/**
+	 * Find 1 row in the Questionnaire table that belongs to the current user
+	 *
+	 * @param entityTypeId The ID of a questionnaire table
+	 * @return An {@link Entity} of type {@link Questionnaire}
+	 */
 	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
 		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
