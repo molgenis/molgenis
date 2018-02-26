@@ -6,12 +6,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,17 +36,17 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 
 	private final DataService dataService;
 	private final EntityManager entityManager;
-	private final PermissionService permissionService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final QuestionnaireFactory questionnaireFactory;
 	private final StaticContentService staticContentService;
 
 	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
-			PermissionService permissionService, QuestionnaireFactory questionnaireFactory,
+			UserPermissionEvaluator userPermissionEvaluator, QuestionnaireFactory questionnaireFactory,
 			StaticContentService staticContentService)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
-		this.permissionService = requireNonNull(permissionService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.questionnaireFactory = requireNonNull(questionnaireFactory);
 		this.staticContentService = requireNonNull(staticContentService);
 	}
@@ -56,8 +57,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 		return dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)
 						  .eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
 						  .findAll()
-						  .filter(entityType -> permissionService.hasPermissionOnEntityType(entityType.getId(),
-								  Permission.WRITE))
+						  .filter(entityType -> userPermissionEvaluator.hasPermission(
+								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.WRITE))
 						  .map(entityType ->
 						  {
 							  String entityTypeId = entityType.getId();
