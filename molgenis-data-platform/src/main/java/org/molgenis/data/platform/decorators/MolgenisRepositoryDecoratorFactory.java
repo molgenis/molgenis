@@ -16,18 +16,19 @@ import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.security.RepositorySecurityDecorator;
 import org.molgenis.data.security.aggregation.AggregateAnonymizer;
 import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecorator;
-import org.molgenis.data.security.owned.OwnedEntityRepositoryDecorator;
+import org.molgenis.data.security.owned.RowLevelSecurityRepositoryDecorator;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
-import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.*;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -50,6 +51,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final QueryValidator queryValidator;
 	private final DefaultValueReferenceValidator defaultValueReferenceValidator;
 	private final UserPermissionEvaluator permissionService;
+	private final MutableAclService mutableAclService;
+	private final UserService userService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AggregateAnonymizer aggregateAnonymizer,
@@ -60,7 +63,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			IndexedRepositoryDecoratorFactory indexedRepositoryDecoratorFactory, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			L3Cache l3Cache, PlatformTransactionManager transactionManager, QueryValidator queryValidator,
-			DefaultValueReferenceValidator defaultValueReferenceValidator, UserPermissionEvaluator permissionService)
+			DefaultValueReferenceValidator defaultValueReferenceValidator, UserPermissionEvaluator permissionService,
+			MutableAclService mutableAclService, UserService userService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -81,6 +85,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.queryValidator = requireNonNull(queryValidator);
 		this.defaultValueReferenceValidator = requireNonNull(defaultValueReferenceValidator);
 		this.permissionService = requireNonNull(permissionService);
+		this.mutableAclService = requireNonNull(mutableAclService);
+		this.userService = userService;
 	}
 
 	@Override
@@ -109,10 +115,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 9. Perform cascading deletes
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
 
-		// 8. Owned decorator
-		if (EntityUtils.doesExtend(decoratedRepository.getEntityType(), OWNED))
+		// 8. Row level security decorator
+		if (!SecurityUtils.currentUserIsSystem())
 		{
-			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
+			decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository, dataService,
+					permissionService, mutableAclService, userService);
 		}
 
 		// 7. Entity reference resolver decorator
