@@ -154,7 +154,7 @@ public class RestControllerV2APIIT
 	}
 
 	@Test
-	public void testRetrieveEntityIncludingCategoriesTest()
+	public void testRetrieveEntityIncludingCategories()
 	{
 		ValidatableResponse response = given().log()
 											  .all()
