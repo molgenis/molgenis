@@ -27,7 +27,7 @@
                   <button
                     type="button"
                     v-if="showPreviousButton"
-                    @click="navigateToChapter(previousChapterNumber)"
+                    @click="navigateToPreviousChapter"
                     class="btn btn-outline-secondary float-left">
                     {{ 'questionnaire_previous_chapter' | i18n }}
                   </button>
@@ -50,7 +50,7 @@
                   <button
                     type="button"
                     v-if="showNextButton"
-                    @click="navigateToChapter(nextChapterNumber)"
+                    @click="navigateToNextChapter"
                     class="btn btn-primary float-right">
                     {{ 'questionnaire_next_chapter' | i18n }}
                   </button>
@@ -106,7 +106,7 @@
                   <button
                     type="button"
                     v-if="showPreviousButton"
-                    @click="navigateToChapter(previousChapterNumber)"
+                    @click="navigateToPreviousChapter"
                     class="btn btn-outline-secondary float-left">
                     {{ 'questionnaire_previous_chapter' | i18n }}
                   </button>
@@ -117,7 +117,7 @@
                   <button
                     type="button"
                     v-if="showNextButton"
-                    @click="navigateToChapter(nextChapterNumber)"
+                    @click="navigateToNextChapter"
                     class="btn btn-primary float-right">
                     {{ 'questionnaire_next_chapter' | i18n }}
                   </button>
@@ -134,7 +134,7 @@
 
         <!-- Renders chapter navigation list -->
         <div class="col-3">
-          <chapter-list
+          <chapter-list v-if="totalNumberOfChapters > 0"
             :questionnaireId="questionnaireId"
             :currentChapterId="chapterId"
             :changesMade="changesMade"
@@ -151,7 +151,6 @@
 <script>
   import ChapterList from './ChapterList'
 
-  import { debounce } from 'lodash'
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import 'flatpickr/dist/flatpickr.css'
 
@@ -187,18 +186,25 @@
        * Forces validation if a user wants to go to the next chapter
        * Triggers client side validation by setting status to 'SUBMITTED'
        */
-      navigateToChapter (chapterNumber) {
+      navigateToNextChapter () {
         this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState.$submitted = true
 
         this.$nextTick(() => {
           if (this.formState.$valid) {
             this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
-            this.$router.push('/' + this.questionnaireId + '/chapter/' + chapterNumber)
+            this.$router.push('/' + this.questionnaireId + '/chapter/' + this.nextChapterNumber)
           } else {
             this.navigationBlocked = true
           }
         })
+      },
+
+      navigateToPreviousChapter () {
+        if (this.navigationBlocked) {
+          this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
+        }
+        this.$router.push('/' + this.questionnaireId + '/chapter/' + this.previousChapterNumber)
       },
 
       /**
@@ -208,16 +214,7 @@
         this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData).then(() => {
           this.$router.push('/' + this.questionnaireId + '/thanks')
         })
-      },
-
-      /**
-       * Debounce for 2 seconds so not every key press triggers a server call
-       */
-      autoSave: debounce(function (lastUpdated) {
-        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', lastUpdated).then(() => {
-          this.saving = false
-        })
-      }, 2000)
+      }
     },
     watch: {
 
@@ -232,9 +229,13 @@
           return newValue[key] !== oldValue[key]
         })
 
-        this.autoSave({
+        const lastUpdated = {
           'attribute': lastUpdatedAttribute,
           'value': newValue[lastUpdatedAttribute]
+        }
+
+        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', lastUpdated).then(() => {
+          this.saving = false
         })
       }
     },
