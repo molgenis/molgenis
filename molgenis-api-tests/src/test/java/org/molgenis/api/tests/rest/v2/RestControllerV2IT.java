@@ -25,7 +25,6 @@ import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 
 public class RestControllerV2IT
 {
@@ -83,7 +82,6 @@ public class RestControllerV2IT
 						  .put(ENTITY_TYPE_META_DATA, WRITE)
 						  .put(ATTRIBUTE_META_DATA, WRITE)
 						  .put(FILE_META, READ)
-						  .put(OWNED, READ)
 						  .put(UserMetaData.USER, COUNT);
 		testEntities.forEach(entity -> permissionsBuilder.put(entity, WRITE));
 		setGrantedRepositoryPermissions(adminToken, testUserId, permissionsBuilder.build());
