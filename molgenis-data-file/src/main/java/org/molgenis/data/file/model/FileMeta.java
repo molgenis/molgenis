@@ -2,13 +2,13 @@ package org.molgenis.data.file.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.owned.OwnedEntity;
+import org.molgenis.data.support.StaticEntity;
 
 import javax.annotation.Nullable;
 
 import static org.molgenis.data.file.model.FileMetaMetaData.*;
 
-public class FileMeta extends OwnedEntity
+public class FileMeta extends StaticEntity
 {
 	public FileMeta(Entity entity)
 	{
@@ -22,7 +22,6 @@ public class FileMeta extends OwnedEntity
 
 	public FileMeta(String id, EntityType entityType)
 	{
-		super(entityType);
 		setId(id);
 	}
 
