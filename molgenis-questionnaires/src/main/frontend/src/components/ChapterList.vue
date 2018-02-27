@@ -18,10 +18,8 @@
           <i class="fa fa-check text-success"></i>
         </span>
 
-        {{ chapter.label }}
-
-        <span v-if="chapter.index === currentChapterId">
-          <i class="fa fa-eye"></i>
+        <span :class="{'active-chapter-text': chapter.index === currentChapterId}">
+          {{ chapter.label }}
         </span>
       </a>
     </ul>
@@ -37,6 +35,10 @@
 
   .list-group-item.disabled.header {
     background-color: #f5f5f5;
+  }
+
+  .active-chapter-text {
+    font-weight: bold;
   }
 </style>
 
