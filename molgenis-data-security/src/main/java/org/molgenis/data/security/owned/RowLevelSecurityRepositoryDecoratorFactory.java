@@ -19,7 +19,6 @@ public class RowLevelSecurityRepositoryDecoratorFactory
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
-	private final UserService userService;
 
 	RowLevelSecurityRepositoryDecoratorFactory(UserPermissionEvaluator userPermissionEvaluator,
 			MutableAclService mutableAclService, MutableAclClassService mutableAclClassService, UserService userService)
@@ -27,12 +26,11 @@ public class RowLevelSecurityRepositoryDecoratorFactory
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
-		this.userService = requireNonNull(userService);
 	}
 
 	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
 		return new RowLevelSecurityRepositoryDecorator(repository, userPermissionEvaluator, mutableAclService,
-				mutableAclClassService, userService);
+				mutableAclClassService);
 	}
 }
