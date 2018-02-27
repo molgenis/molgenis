@@ -9,7 +9,7 @@ import QuestionnaireThankYou from '../components/QuestionnaireThankYou'
 import QuestionnaireOverview from '../components/QuestionnaireOverview'
 import QuestionnaireChapter from '../components/QuestionnaireChapter'
 
-const {baseUrl} = window.QUESTIONNAIRE_STATE
+const {baseUrl} = window.QUESTIONNAIRE_STATE || ''
 
 Vue.use(Router)
 export default new Router({
