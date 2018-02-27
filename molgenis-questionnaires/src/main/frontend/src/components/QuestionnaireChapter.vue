@@ -134,7 +134,7 @@
 
         <!-- Renders chapter navigation list -->
         <div class="col-3">
-          <chapter-list v-if="totalNumberOfChapters > 0"
+          <chapter-list
             :questionnaireId="questionnaireId"
             :currentChapterId="chapterId"
             :changesMade="changesMade"
@@ -211,8 +211,19 @@
        * Redirect to thank you page when submit is succesfull
        */
       submitQuestionnaire () {
-        this.$store.dispatch('SUBMIT_QUESTIONNAIRE', this.formData).then(() => {
-          this.$router.push('/' + this.questionnaireId + '/thanks')
+        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
+        this.formState.$submitted = true
+
+        this.$nextTick(() => {
+          if (this.formState.$valid) {
+            this.$store.dispatch('SUBMIT_QUESTIONNAIRE').then(() => {
+              this.$router.push('/' + this.questionnaireId + '/thanks')
+            }, error => {
+              console.log('Something went wrong: ', error)
+            })
+          } else {
+            this.navigationBlocked = true
+          }
         })
       }
     },

@@ -59,23 +59,21 @@ const actions = {
     })
   },
 
-  'SUBMIT_QUESTIONNAIRE' ({state}, formData) {
+  'SUBMIT_QUESTIONNAIRE' ({state}) {
+    const submitData = Object.assign({}, state.formData)
+    submitData.submitDate = moment().toISOString()
+
     const options = {
       body: JSON.stringify({
         entities: [
-          formData
+          submitData
         ]
       }),
       method: 'PUT'
     }
 
-    formData.status = 'SUBMITTED'
-    formData.submitDate = moment().toISOString()
-
     const questionnaireId = state.route.params.questionnaireId
-    api.post('/api/v2/' + questionnaireId, options).catch(error => {
-      console.log('Something went wrong submitting the questionnaire', error)
-    })
+    return api.post('/api/v2/' + questionnaireId, options)
   }
 }
 
