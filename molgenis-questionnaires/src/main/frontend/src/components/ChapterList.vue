@@ -13,15 +13,16 @@
         {{ 'questionnaire_chapters' | i18n }}
       </a>
 
-      <a v-for="chapter in chapterNavigationList"
-         class="list-group-item list-group-item-action disabled"
-         :class="{'active-chapter' : chapter.index === currentChapterId}">
-
+      <a v-for="chapter in chapterNavigationList" class="list-group-item list-group-item-action disabled">
         <span v-if="isChapterCompleted(chapter.id)">
           <i class="fa fa-check text-success"></i>
         </span>
 
         {{ chapter.label }}
+
+        <span v-if="chapter.index === currentChapterId">
+          <i class="fa fa-eye"></i>
+        </span>
       </a>
     </ul>
   </div>
@@ -37,10 +38,6 @@
   .list-group-item.disabled.header {
     background-color: #f5f5f5;
   }
-
-  .active-chapter {
-    background-color: #e5f6ff;
-  }
 </style>
 
 <script>
@@ -49,10 +46,13 @@
     props: ['questionnaireId', 'currentChapterId', 'changesMade', 'saving'],
     methods: {
       isChapterCompleted (chapterId) {
-        return this.$store.getters.getChapterProgress[chapterId] === 'complete'
+        return this.chapterProgress[chapterId] === 'complete'
       }
     },
     computed: {
+      chapterProgress () {
+        return this.$store.getters.getChapterProgress
+      },
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
       }
