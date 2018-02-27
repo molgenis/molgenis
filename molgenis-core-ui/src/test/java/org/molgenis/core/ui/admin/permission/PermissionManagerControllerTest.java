@@ -13,7 +13,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.meta.RowLevelSecuredFactory;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,27 +87,27 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	public static class Config extends WebMvcConfigurerAdapter
 	{
 		@Bean
-		public MutableAclService mutableAclService()
-		{
-			return mock(MutableAclService.class);
-		}
-
-		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
 		}
 
 		@Bean
-		public RowLevelSecuredFactory rowLevelSecuredFactory()
+		public MutableAclService mutableAclService()
 		{
-			return mock(RowLevelSecuredFactory.class);
+			return mock(MutableAclService.class);
+		}
+
+		@Bean
+		public MutableAclClassService mutableAclClassService()
+		{
+			return mock(MutableAclClassService.class);
 		}
 
 		@Bean
 		public PermissionManagerController permissionManagerController()
 		{
-			return new PermissionManagerController(dataService(), mutableAclService(), rowLevelSecuredFactory());
+			return new PermissionManagerController(dataService(), mutableAclService(), mutableAclClassService());
 		}
 	}
 

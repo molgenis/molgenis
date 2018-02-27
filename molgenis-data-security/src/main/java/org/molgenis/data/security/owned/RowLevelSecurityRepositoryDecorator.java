@@ -5,15 +5,12 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.acl.SidUtils;
-import org.molgenis.data.security.meta.RowLevelSecuredMetadata;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.Sid;
 
 import java.util.Iterator;
 import java.util.List;
@@ -35,20 +32,20 @@ import static org.molgenis.data.security.EntityTypePermission.WRITE;
  */
 public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
-	private final DataService dataService;
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final MutableAclService mutableAclService;
+	private final MutableAclClassService mutableAclClassService;
 	private final UserService userService;
 
-	public RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository, DataService dataService,
+	public RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository,
 			UserPermissionEvaluator userPermissionEvaluator, MutableAclService mutableAclService,
-			UserService userService)
+			MutableAclClassService mutableAclClassService, UserService userService)
 	{
 		super(delegateRepository);
-		this.dataService = requireNonNull(dataService);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
-		this.mutableAclService = mutableAclService;
-		this.userService = userService;
+		this.mutableAclService = requireNonNull(mutableAclService);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
+		this.userService = requireNonNull(userService);
 	}
 
 	@Override
@@ -118,7 +115,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		Entity entity = delegate().findOne(q);
 
-		if (isRowLevelSecured() && !hasPermissionOnEntity(entity, READ))
+		if (entity != null && isRowLevelSecured() && !hasPermissionOnEntity(entity, READ))
 		{
 			return null;
 		}
@@ -277,17 +274,8 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private boolean isRowLevelSecured()
 	{
-		// TODO remove this temporary workaround for bootstrapping issues
-		if (!SecurityUtils.currentUserIsSystem())
-		{
-			return false;
-		}
-		if (this.getName().equals(RowLevelSecuredMetadata.ROW_LEVEL_SECURED))
-		{
-			return false;
-		}
-		return RunAsSystemAspect.runAsSystem(() -> dataService.findOne(RowLevelSecuredMetadata.ROW_LEVEL_SECURED,
-				new QueryImpl<>().eq(RowLevelSecuredMetadata.ENTITYTYPE_ID, delegate().getName()))) != null;
+		// TODO 'entity-' code duplication
+		return mutableAclClassService.hasAclClass("entity-" + getName());
 	}
 
 	private boolean hasPermissionOnEntity(Entity entity, EntityTypePermission permission)
@@ -297,10 +285,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private boolean hasPermissionOnEntity(Object id, EntityTypePermission permission)
 	{
-		Sid owner = SidUtils.createSid(userService.getUser(SecurityUtils.getCurrentUsername()));
 		EntityIdentity entityIdentity = new EntityIdentity(getEntityType().getId(), id);
-
-		return mutableAclService.readAclById(entityIdentity).getOwner().equals(owner)
-				|| userPermissionEvaluator.hasPermission(entityIdentity, permission);
+		return userPermissionEvaluator.hasPermission(entityIdentity, permission);
 	}
 }

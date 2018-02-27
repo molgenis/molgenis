@@ -2,6 +2,7 @@ package org.molgenis.core.ui.admin.permission;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -15,10 +16,10 @@ import org.molgenis.data.security.EntityTypePermissionUtils;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.meta.RowLevelSecuredFactory;
-import org.molgenis.data.security.meta.RowLevelSecurityConfiguration;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.permission.Permissions;
+import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +44,13 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
-import static org.molgenis.data.security.meta.RowLevelSecuredMetadata.ROW_LEVEL_SECURED;
 import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
@@ -63,15 +64,15 @@ public class PermissionManagerController extends PluginController
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
-	private final RowLevelSecuredFactory rowLevelSecuredFactory;
+	private final MutableAclClassService mutableAclClassService;
 
 	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
-			RowLevelSecuredFactory rowLevelSecuredFactory)
+			MutableAclClassService mutableAclClassService)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
-		this.rowLevelSecuredFactory = requireNonNull(rowLevelSecuredFactory);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	@GetMapping
@@ -91,14 +92,11 @@ public class PermissionManagerController extends PluginController
 	{
 		List<EntityType> entityTypes = getEntityTypes().filter(entityType -> !entityType.isAbstract())
 													   .collect(toList());
-		Set<String> rowLevelSecuredEntityTypeIds = dataService.findAll(ROW_LEVEL_SECURED,
-				RowLevelSecurityConfiguration.class)
-															  .map(RowLevelSecurityConfiguration::getEntityTypeId)
-															  .collect(toSet());
+		Collection<String> aclClasses = mutableAclClassService.getAclClasses();
 		entityTypes.sort(comparing(EntityType::getLabel));
 		return entityTypes.stream()
 						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
-								  rowLevelSecuredEntityTypeIds.contains(entityType.getId())))
+								  aclClasses.contains(toAclClassType(entityType))))
 						  .collect(toList());
 	}
 
@@ -300,17 +298,48 @@ public class PermissionManagerController extends PluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateEntityClassRls(@Valid @RequestBody EntityTypeRlsRequest entityTypeRlsRequest)
 	{
+		EntityType entityType = dataService.getEntityType(entityTypeRlsRequest.getId());
+		String aclClassType = toAclClassType(entityType);
+		boolean hasAclClass = mutableAclClassService.hasAclClass(aclClassType);
 		if (entityTypeRlsRequest.isRlsEnabled())
 		{
-			RowLevelSecurityConfiguration rowLevelSecurityConfiguration = rowLevelSecuredFactory.create(
-					entityTypeRlsRequest.getId());
-			rowLevelSecurityConfiguration.setRowLevelSecured(entityTypeRlsRequest.isRlsEnabled());
-			dataService.add(ROW_LEVEL_SECURED, rowLevelSecurityConfiguration);
+			if (!hasAclClass)
+			{
+				mutableAclClassService.createAclClass(aclClassType, toIdClass(entityType));
+				// TODO create ACLs for existing entities
+			}
 		}
 		else
 		{
-			dataService.deleteById(ROW_LEVEL_SECURED, entityTypeRlsRequest.getId());
+			if (hasAclClass)
+			{
+				mutableAclClassService.deleteAclClass(aclClassType);
+			}
 		}
+	}
+
+	private static Class<?> toIdClass(EntityType entityType)
+	{
+		AttributeType attributeType = entityType.getIdAttribute().getDataType();
+		//noinspection EnumSwitchStatementWhichMissesCases
+		switch (attributeType)
+		{
+			case EMAIL:
+			case HYPERLINK:
+			case STRING:
+				return String.class;
+			case INT:
+				return Integer.class;
+			case LONG:
+				return Long.class;
+			default:
+				throw new UnexpectedEnumException(attributeType);
+		}
+	}
+
+	private static String toAclClassType(EntityType entityType)
+	{
+		return "entity-" + entityType.getId();
 	}
 
 	private static PluginPermission toPluginPermission(String paramValue)
