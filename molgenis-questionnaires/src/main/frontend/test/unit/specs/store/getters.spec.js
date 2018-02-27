@@ -10,11 +10,18 @@ describe('getters', () => {
         children: [
           {
             id: 'chapter-1-field-1',
-            type: 'text'
+            type: 'text',
+            visible: () => true
           },
           {
             id: 'chapter-1-field-2',
-            type: 'number'
+            type: 'number',
+            visible: () => true
+          },
+          {
+            id: 'chapter-1-field-3',
+            type: 'number',
+            visible: () => false
           }
         ]
       },
@@ -25,7 +32,8 @@ describe('getters', () => {
         children: [
           {
             id: 'chapter-2-field-1',
-            type: 'text'
+            type: 'text',
+            visible: () => true
           }
         ]
       },
@@ -40,9 +48,44 @@ describe('getters', () => {
             children: [
               {
                 id: 'chapter-3-field-2',
-                type: 'text'
+                type: 'text',
+                visible: () => true
               }
             ]
+          }
+        ]
+      },
+      {
+        id: 'chapter-4',
+        label: 'Fourth chapter',
+        type: 'field-group',
+        children: [
+          {
+            id: 'chapter-4-field-1',
+            type: 'field-group',
+            children: [
+              {
+                id: 'chapter-4-field-2',
+                type: 'text',
+                visible: () => false
+              }
+            ]
+          },
+          {
+            id: 'chapter-4-field-3',
+            type: 'field-group',
+            children: [
+              {
+                id: 'chapter-4-field-4',
+                type: 'text',
+                visible: () => false
+              }
+            ]
+          },
+          {
+            id: 'chapter-4-field-5',
+            type: 'text',
+            visible: () => true
           }
         ]
       }
@@ -50,8 +93,12 @@ describe('getters', () => {
     formData: {
       'chapter-1-field-1': 'value',
       'chapter-1-field-2': 'value',
+      'chapter-1-field-3': undefined,
       'chapter-2-field-1': undefined,
-      'chapter-3-field-2': undefined
+      'chapter-3-field-2': undefined,
+      'chapter-4-field-2': undefined,
+      'chapter-4-field-4': undefined,
+      'chapter-4-field-5': 'value'
     }
   }
 
@@ -91,6 +138,11 @@ describe('getters', () => {
           id: 'chapter-3',
           label: 'Third chapter',
           index: 3
+        },
+        {
+          id: 'chapter-4',
+          label: 'Fourth chapter',
+          index: 4
         }
       ]
 
@@ -101,7 +153,7 @@ describe('getters', () => {
   describe('getTotalNumberOfChapters', () => {
     it('should return the total number of chapters', () => {
       const actual = getters.getTotalNumberOfChapters(state)
-      const expected = 3
+      const expected = 4
 
       expect(actual).to.deep.equal(expected)
     })
@@ -113,7 +165,8 @@ describe('getters', () => {
       const expected = {
         'chapter-1': 'complete',
         'chapter-2': 'incomplete',
-        'chapter-3': 'incomplete'
+        'chapter-3': 'incomplete',
+        'chapter-4': 'complete'
       }
 
       expect(actual).to.deep.equal(expected)

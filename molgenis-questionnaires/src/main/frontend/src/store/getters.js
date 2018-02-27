@@ -1,9 +1,12 @@
 const getAllFields = (chapter) => {
   return chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
-      return getAllFields(child)
+      return [...accumulator, ...getAllFields(child)]
     }
-    accumulator.push(child.id)
+
+    if (child.visible()) {
+      accumulator.push(child.id)
+    }
     return accumulator
   }, [])
 }
