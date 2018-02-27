@@ -15,6 +15,8 @@ import org.molgenis.data.security.EntityTypePermissionUtils;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.meta.RowLevelSecuredFactory;
+import org.molgenis.data.security.meta.RowLevelSecurityConfiguration;
 import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
@@ -31,23 +33,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.meta.RowLevelSecuredMetadata.ROW_LEVEL_SECURED;
 import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
@@ -61,12 +63,15 @@ public class PermissionManagerController extends PluginController
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
+	private final RowLevelSecuredFactory rowLevelSecuredFactory;
 
-	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService)
+	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
+			RowLevelSecuredFactory rowLevelSecuredFactory)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
+		this.rowLevelSecuredFactory = requireNonNull(rowLevelSecuredFactory);
 	}
 
 	@GetMapping
@@ -78,7 +83,75 @@ public class PermissionManagerController extends PluginController
 			return superuser == null || !superuser;
 		}).collect(Collectors.toList())));
 		model.addAttribute("groups", getGroups());
+		model.addAttribute("entityTypes", getEntityTypeDtos());
 		return "view-permissionmanager";
+	}
+
+	private List<EntityTypeRlsResponse> getEntityTypeDtos()
+	{
+		List<EntityType> entityTypes = getEntityTypes().filter(entityType -> !entityType.isAbstract())
+													   .collect(toList());
+		Set<String> rowLevelSecuredEntityTypeIds = dataService.findAll(ROW_LEVEL_SECURED,
+				RowLevelSecurityConfiguration.class)
+															  .map(RowLevelSecurityConfiguration::getEntityTypeId)
+															  .collect(toSet());
+		entityTypes.sort(comparing(EntityType::getLabel));
+		return entityTypes.stream()
+						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
+								  rowLevelSecuredEntityTypeIds.contains(entityType.getId())))
+						  .collect(toList());
+	}
+
+	public static class EntityTypeRlsResponse
+	{
+		private final String id;
+		private final String label;
+		private final boolean rlsEnabled;
+
+		EntityTypeRlsResponse(String id, String label, boolean rlsEnabled)
+		{
+			this.id = requireNonNull(id);
+			this.label = requireNonNull(label);
+			this.rlsEnabled = rlsEnabled;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		public boolean isRlsEnabled()
+		{
+			return rlsEnabled;
+		}
+	}
+
+	public static class EntityTypeRlsRequest
+	{
+		@NotNull
+		private final String id;
+		private final boolean rlsEnabled;
+
+		EntityTypeRlsRequest(String id, boolean rlsEnabled)
+		{
+			this.id = requireNonNull(id);
+			this.rlsEnabled = rlsEnabled;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public boolean isRlsEnabled()
+		{
+			return rlsEnabled;
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -219,6 +292,25 @@ public class PermissionManagerController extends PluginController
 	{
 		Sid sid = getSidForUserId(userId);
 		updateEntityTypePermissions(webRequest, sid);
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
+	@PostMapping("/update/entityclass/rls")
+	@ResponseStatus(HttpStatus.OK)
+	public void updateEntityClassRls(@Valid @RequestBody EntityTypeRlsRequest entityTypeRlsRequest)
+	{
+		if (entityTypeRlsRequest.isRlsEnabled())
+		{
+			RowLevelSecurityConfiguration rowLevelSecurityConfiguration = rowLevelSecuredFactory.create(
+					entityTypeRlsRequest.getId());
+			rowLevelSecurityConfiguration.setRowLevelSecured(entityTypeRlsRequest.isRlsEnabled());
+			dataService.add(ROW_LEVEL_SECURED, rowLevelSecurityConfiguration);
+		}
+		else
+		{
+			dataService.deleteById(ROW_LEVEL_SECURED, entityTypeRlsRequest.getId());
+		}
 	}
 
 	private static PluginPermission toPluginPermission(String paramValue)

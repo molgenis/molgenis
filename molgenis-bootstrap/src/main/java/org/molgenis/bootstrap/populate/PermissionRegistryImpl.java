@@ -30,7 +30,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.GroupMetaData.NAME;
-import static org.molgenis.data.security.owned.OwnedEntityType.OWNED;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.acl.SidUtils.createSid;
 
@@ -57,7 +56,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,
-						OWNED, DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
+						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
 			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(

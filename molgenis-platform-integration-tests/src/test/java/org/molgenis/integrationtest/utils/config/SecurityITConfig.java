@@ -1,7 +1,6 @@
 package org.molgenis.integrationtest.utils.config;
 
 import org.molgenis.data.security.auth.*;
-import org.molgenis.data.security.owned.OwnedEntityType;
 import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -30,7 +29,7 @@ import static org.mockito.Mockito.when;
 @Configuration
 @EnableWebSecurity
 @Import({ UserPermissionEvaluatorImpl.class, DataServiceTokenService.class, TokenGenerator.class, TokenFactory.class,
-		TokenMetaData.class, SecurityPackage.class, UserMetaData.class, OwnedEntityType.class,
+		TokenMetaData.class, SecurityPackage.class, UserMetaData.class,
 		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
 		PermissionSystemServiceImpl.class, UserFactory.class, AggregationTestConfig.class,
 		RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class, AuthenticationSettingsImpl.class,

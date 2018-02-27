@@ -13,6 +13,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.meta.RowLevelSecuredFactory;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,9 +99,15 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		}
 
 		@Bean
+		public RowLevelSecuredFactory rowLevelSecuredFactory()
+		{
+			return mock(RowLevelSecuredFactory.class);
+		}
+
+		@Bean
 		public PermissionManagerController permissionManagerController()
 		{
-			return new PermissionManagerController(dataService(), mutableAclService());
+			return new PermissionManagerController(dataService(), mutableAclService(), rowLevelSecuredFactory());
 		}
 	}
 
@@ -185,7 +192,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test(expectedExceptions = NullPointerException.class)
 	public void PermissionManagerController()
 	{
-		new PermissionManagerController(null, null);
+		new PermissionManagerController(null, null, null);
 	}
 
 	@Test

@@ -13,7 +13,7 @@
                     <li><a href="#package-permission-manager" role="tab" data-toggle="tab">Package Permissions</a></li>
                     <li><a href="#entity-class-permission-manager" role="tab" data-toggle="tab">Entity Class
                         Permissions</a></li>
-                    <li><a href="#entity-permission-manager" role="tab" data-toggle="tab">Entity Permissions</a></li>
+                    <li><a href="#entity-permission-manager" role="tab" data-toggle="tab">Row-Level Security</a></li>
                 </ul>
             </div>
             <div class="col-md-9">
