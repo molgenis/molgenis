@@ -21,7 +21,6 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
 import org.molgenis.data.validation.*;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -112,10 +111,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new CascadeDeleteRepositoryDecorator(decoratedRepository, dataService);
 
 		// 8. Row level security decorator
-		if (!SecurityUtils.currentUserIsSystem())
-		{
-			decoratedRepository = rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(repository);
-		}
+		decoratedRepository = rowLevelSecurityRepositoryDecoratorFactory.createDecoratedRepository(decoratedRepository);
 
 		// 7. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);

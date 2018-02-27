@@ -277,6 +277,11 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private boolean isRowLevelSecured()
 	{
+		// TODO remove this temporary workaround for bootstrapping issues
+		if (!SecurityUtils.currentUserIsSystem())
+		{
+			return false;
+		}
 		if (this.getName().equals(RowLevelSecuredMetadata.ROW_LEVEL_SECURED))
 		{
 			return false;
