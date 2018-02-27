@@ -54,9 +54,8 @@ const actions = {
 
     const questionnaireId = state.route.params.questionnaireId
     const uri = '/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute.attribute
-    return api.post(uri, options).catch(error => {
-      console.log(error)
-    })
+
+    return api.post(uri, options)
   },
 
   'SUBMIT_QUESTIONNAIRE' ({state}) {
