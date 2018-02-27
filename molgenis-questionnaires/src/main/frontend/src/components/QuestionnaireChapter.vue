@@ -63,11 +63,6 @@
               </div>
             </div>
 
-            <!-- Error message container -->
-            <div v-if="errorMessage" class="alert alert-warning" role="alert">
-              {{ errorMessage }}
-            </div>
-
             <!-- Progress bar container -->
             <div v-if="showProgressBar" class="progress mt-0 pt-0">
               <div class="progress-bar" role="progressbar"
@@ -77,12 +72,19 @@
               </div>
             </div>
 
+            <!-- Error message container -->
+            <div v-if="navigationBlocked" class="error-message-container">
+              <div class="alert alert-warning" role="alert">
+                {{ 'chapter_incomplete_message' | i18n }}
+              </div>
+            </div>
+
             <!-- Form Container -->
             <div class="card-body">
               <div v-if="showForm">
                 <form-component
                   :id="questionnaireId"
-                  :formFields="chapterField"
+                  :formFields="currentChapter"
                   :formState="formState"
                   :initialFormData="formData"
                   :options="options"
@@ -170,6 +172,7 @@
         errorMessage: null,
         changesMade: false,
         formState: {},
+        navigationBlocked: false,
         options: {
           showEyeButton: false
         }
@@ -190,7 +193,10 @@
 
         this.$nextTick(() => {
           if (this.formState.$valid) {
+            this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
             this.$router.push('/' + this.questionnaireId + '/chapter/' + chapterNumber)
+          } else {
+            this.navigationBlocked = true
           }
         })
       },
