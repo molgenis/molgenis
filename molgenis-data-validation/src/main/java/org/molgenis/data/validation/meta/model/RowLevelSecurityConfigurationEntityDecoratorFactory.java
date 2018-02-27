@@ -15,13 +15,13 @@ import static java.util.Objects.requireNonNull;
  * Due to a circular dependency this decorator factory is not stored in molgenis-data.
  */
 @Component
-public class RowLevelSecurityRepositoryDecoratorFactory
+public class RowLevelSecurityConfigurationEntityDecoratorFactory
 		extends AbstractSystemRepositoryDecoratorFactory<RowLevelSecurityConfiguration, RowLevelSecuredMetadata>
 {
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
 
-	public RowLevelSecurityRepositoryDecoratorFactory(DataService dataService,
+	public RowLevelSecurityConfigurationEntityDecoratorFactory(DataService dataService,
 			RowLevelSecuredMetadata entityTypeMetadata, MutableAclService mutableAclService)
 	{
 		super(entityTypeMetadata);
