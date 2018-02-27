@@ -31,6 +31,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -78,7 +81,71 @@ public class PermissionManagerController extends PluginController
 			return superuser == null || !superuser;
 		}).collect(Collectors.toList())));
 		model.addAttribute("groups", getGroups());
+		model.addAttribute("entityTypes", getEntityTypeDtos());
 		return "view-permissionmanager";
+	}
+
+	private List<EntityTypeRlsResponse> getEntityTypeDtos()
+	{
+		List<EntityType> entityTypes = getEntityTypes().filter(entityType -> !entityType.isAbstract())
+													   .collect(toList());
+		entityTypes.sort(comparing(EntityType::getLabel));
+		return entityTypes.stream()
+						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
+								  false))
+						  .collect(toList());
+	}
+
+	public static class EntityTypeRlsResponse
+	{
+		private final String id;
+		private final String label;
+		private final boolean rlsEnabled;
+
+		EntityTypeRlsResponse(String id, String label, boolean rlsEnabled)
+		{
+			this.id = requireNonNull(id);
+			this.label = requireNonNull(label);
+			this.rlsEnabled = rlsEnabled;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public String getLabel()
+		{
+			return label;
+		}
+
+		public boolean isRlsEnabled()
+		{
+			return rlsEnabled;
+		}
+	}
+
+	public static class EntityTypeRlsRequest
+	{
+		@NotNull
+		private final String id;
+		private final boolean rlsEnabled;
+
+		EntityTypeRlsRequest(String id, boolean rlsEnabled)
+		{
+			this.id = requireNonNull(id);
+			this.rlsEnabled = rlsEnabled;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public boolean isRlsEnabled()
+		{
+			return rlsEnabled;
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -219,6 +286,17 @@ public class PermissionManagerController extends PluginController
 	{
 		Sid sid = getSidForUserId(userId);
 		updateEntityTypePermissions(webRequest, sid);
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
+	@PostMapping("/update/entityclass/rls")
+	@ResponseStatus(HttpStatus.OK)
+	public void updateEntityClassRls(@Valid @RequestBody EntityTypeRlsRequest entityTypeRlsRequest)
+	{
+		throw new UnsupportedOperationException(
+				"TODO use dataService to update rls to '" + entityTypeRlsRequest.isRlsEnabled() + "' for '"
+						+ entityTypeRlsRequest.getId() + "'");
 	}
 
 	private static PluginPermission toPluginPermission(String paramValue)
