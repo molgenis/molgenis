@@ -193,6 +193,7 @@
         this.$nextTick(() => {
           if (this.formState.$valid) {
             this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
+            this.navigationBlocked = false
             this.$router.push('/' + this.questionnaireId + '/chapter/' + this.nextChapterNumber)
           } else {
             this.navigationBlocked = true
@@ -217,6 +218,7 @@
         this.$nextTick(() => {
           if (this.formState.$valid) {
             this.$store.dispatch('SUBMIT_QUESTIONNAIRE').then(() => {
+              this.navigationBlocked = false
               this.$router.push('/' + this.questionnaireId + '/thanks')
             }, error => {
               console.log('Something went wrong: ', error)
