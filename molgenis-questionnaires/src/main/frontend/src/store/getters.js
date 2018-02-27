@@ -1,10 +1,10 @@
-const getAllFields = (chapter) => {
+const getAllFields = (chapter, data) => {
   return chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
-      return [...accumulator, ...getAllFields(child)]
+      return [...accumulator, ...getAllFields(child, data)]
     }
 
-    if (child.visible()) {
+    if (child.visible(data)) {
       accumulator.push(child.id)
     }
     return accumulator
@@ -12,8 +12,8 @@ const getAllFields = (chapter) => {
 }
 
 const doesChapterHaveUndefinedValues = (chapter, data) => {
-  const fields = getAllFields(chapter)
-  return fields.some(id => data[id] === undefined)
+  const fields = getAllFields(chapter, data)
+  return fields.some(id => data[id] === undefined || data[id].length === 0)
 }
 
 const getters = {

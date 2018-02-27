@@ -11,17 +11,17 @@ describe('getters', () => {
           {
             id: 'chapter-1-field-1',
             type: 'text',
-            visible: () => true
+            visible: (data) => true
           },
           {
             id: 'chapter-1-field-2',
             type: 'number',
-            visible: () => true
+            visible: (data) => true
           },
           {
             id: 'chapter-1-field-3',
             type: 'number',
-            visible: () => false
+            visible: (data) => false
           }
         ]
       },
@@ -33,7 +33,7 @@ describe('getters', () => {
           {
             id: 'chapter-2-field-1',
             type: 'text',
-            visible: () => true
+            visible: (data) => true
           }
         ]
       },
@@ -49,7 +49,7 @@ describe('getters', () => {
               {
                 id: 'chapter-3-field-2',
                 type: 'text',
-                visible: () => true
+                visible: (data) => true
               }
             ]
           }
@@ -67,7 +67,7 @@ describe('getters', () => {
               {
                 id: 'chapter-4-field-2',
                 type: 'text',
-                visible: () => false
+                visible: (data) => false
               }
             ]
           },
@@ -78,14 +78,14 @@ describe('getters', () => {
               {
                 id: 'chapter-4-field-4',
                 type: 'text',
-                visible: () => false
+                visible: (data) => false
               }
             ]
           },
           {
             id: 'chapter-4-field-5',
             type: 'text',
-            visible: () => true
+            visible: (data) => data['chapter-1-field-1'] === 'value'
           }
         ]
       }
