@@ -9,17 +9,20 @@
     </div>
 
     <ul class="list-group chapter-navigation">
-      <a class="list-group-item list-group-item-action disabled">
+      <a class="list-group-item list-group-item-action disabled header">
         {{ 'questionnaire_chapters' | i18n }}
       </a>
 
-      <router-link
-        v-for="chapter in chapterNavigationList"
-        :to="'/' + questionnaireId + '/chapter/' + chapter.index"
-        :key="chapter.index"
-        class="list-group-item list-group-item-action chapter-navigation-item">
+      <a v-for="chapter in chapterNavigationList"
+         class="list-group-item list-group-item-action disabled"
+         :class="{'active-chapter' : chapter.index === currentChapterId}">
+
+        <span v-if="isChapterCompleted(chapter.id)">
+          <i class="fa fa-check text-success"></i>
+        </span>
+
         {{ chapter.label }}
-      </router-link>
+      </a>
     </ul>
   </div>
 </template>
@@ -31,19 +34,24 @@
     top: 20px;
   }
 
-  .list-group-item.disabled {
+  .list-group-item.disabled.header {
     background-color: #f5f5f5;
   }
 
-  .router-link-active.chapter-navigation-item {
-    border-left: solid 4px #c9302c;
+  .active-chapter {
+    background-color: #e5f6ff;
   }
 </style>
 
 <script>
   export default {
     name: 'ChapterList',
-    props: ['questionnaireId', 'changesMade', 'saving'],
+    props: ['questionnaireId', 'currentChapterId', 'changesMade', 'saving'],
+    methods: {
+      isChapterCompleted (chapterId) {
+        return this.$store.getters.getChapterProgress[chapterId] === 'complete'
+      }
+    },
     computed: {
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
