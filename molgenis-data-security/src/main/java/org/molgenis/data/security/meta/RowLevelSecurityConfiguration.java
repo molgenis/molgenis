@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.security.meta.RowLevelSecuredMetadata.ENTITYTYPE_ID;
-import static org.molgenis.data.security.meta.RowLevelSecuredMetadata.ROW_LEVEL_SECURED;
+import static org.molgenis.data.security.meta.RowLevelSecuredMetadata.IS_ROW_LEVEL_SECURED;
 
 public class RowLevelSecurityConfiguration extends StaticEntity
 {
@@ -27,12 +27,12 @@ public class RowLevelSecurityConfiguration extends StaticEntity
 
 	public void setRowLevelSecured(Boolean rowLevelSecured)
 	{
-		set(ROW_LEVEL_SECURED, rowLevelSecured);
+		set(IS_ROW_LEVEL_SECURED, rowLevelSecured);
 	}
 
 	public Boolean isRowLevelSecured()
 	{
-		return getBoolean(ROW_LEVEL_SECURED);
+		return getBoolean(IS_ROW_LEVEL_SECURED);
 	}
 
 	public void setEntityTypeId(String entityTypeId)
