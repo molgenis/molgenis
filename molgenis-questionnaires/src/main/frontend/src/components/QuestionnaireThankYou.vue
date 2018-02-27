@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-md-12">
-      <p v-html="submissionText"></p>
+      <p class="mt-3" v-html="submissionText"></p>
       <router-link to="/" class="btn btn-outline-secondary">
         {{ 'questionnaire_back_to_questionnaire_list' | i18n }}
       </router-link>
