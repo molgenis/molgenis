@@ -136,6 +136,7 @@
         <div class="col-3">
           <chapter-list
             :questionnaireId="questionnaireId"
+            :currentChapterId="chapterId"
             :changesMade="changesMade"
             :saving="saving">
           </chapter-list>
@@ -157,25 +158,24 @@
   export default {
     name: 'QuestionnaireChapter',
     props: {
-      questionnaireId: {
-        type: String
-      },
       chapterId: {
         type: Number
+      },
+      questionnaireId: {
+        type: String
       }
     },
     data () {
       return {
-        loading: true,
-        saving: false,
-        showForm: true,
-        errorMessage: null,
         changesMade: false,
         formState: {},
+        loading: true,
         navigationBlocked: false,
         options: {
           showEyeButton: false
-        }
+        },
+        saving: false,
+        showForm: true
       }
     },
     methods: {
@@ -268,7 +268,7 @@
       showProgressBar () {
         return this.totalNumberOfChapters > 1
       },
-      chapterField () {
+      currentChapter () {
         return this.$store.getters.getChapterByIndex(this.chapterId)
       },
       questionnaireLabel () {
