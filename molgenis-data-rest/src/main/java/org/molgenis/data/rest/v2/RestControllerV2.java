@@ -638,7 +638,7 @@ public class RestControllerV2
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityTypeId,
-			EntityCollectionRequestV2 request, HttpServletRequest httpRequest, boolean includeLookup)
+			EntityCollectionRequestV2 request, HttpServletRequest httpRequest, boolean includeCategories)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
 
@@ -709,7 +709,7 @@ public class RestControllerV2
 			}
 
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,
-					permissionService, dataService, prevHref, nextHref, includeLookup);
+					permissionService, dataService, prevHref, nextHref, includeCategories);
 		}
 	}
 
@@ -733,20 +733,20 @@ public class RestControllerV2
 		return createEntityResponse(entity, fetch, includeMetaData, false);
 	}
 
-	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData, boolean includeLookup)
+	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData, boolean includeCategories)
 	{
 		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
 		{
-			createEntityTypeResponse(entity.getEntityType(), fetch, responseData, includeLookup);
+			createEntityTypeResponse(entity.getEntityType(), fetch, responseData, includeCategories);
 		}
 		createEntityValuesResponse(entity, fetch, responseData);
 		return responseData;
 	}
 
-	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData, boolean includeLookup)
+	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData, boolean includeCategories)
 	{
-		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, includeLookup));
+		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, includeCategories));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)

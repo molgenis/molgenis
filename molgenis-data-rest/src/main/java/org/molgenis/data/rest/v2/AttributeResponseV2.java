@@ -49,8 +49,7 @@ class AttributeResponseV2
 	 * Constructs AttributeResponseV2 using params
 	 *
 	 * @param fetch             set of lowercase attribute names to include in response
-	 * @param includeCategories if set to true fetches options list for CATEGORICAL and CATEGORICAL_MREF types,
-	 *                          if set to false references to the entities are returned
+	 * @param includeCategories if set to true includes options list for CATEGORICAL and CATEGORICAL_MREF types in the attribute metadata
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
 			UserPermissionEvaluator permissionService, DataService dataService, boolean includeCategories)
@@ -142,7 +141,7 @@ class AttributeResponseV2
 	}
 
 	/**
-	 * Default AttributeResponseV2 with @param isCategoricalGetEager set to false
+	 * Default AttributeResponseV2 with @param includeCategories set to false
 	 *
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
