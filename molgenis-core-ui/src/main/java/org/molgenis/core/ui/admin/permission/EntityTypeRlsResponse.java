@@ -2,14 +2,14 @@ package org.molgenis.core.ui.admin.permission;
 
 import static java.util.Objects.requireNonNull;
 
-class EntityTypeRlsResponse
+public class EntityTypeRlsResponse
 {
 	private final String id;
 	private final String label;
 
 	private final boolean rlsEnabled;
 
-	EntityTypeRlsResponse(String id, String label, boolean rlsEnabled)
+	public EntityTypeRlsResponse(String id, String label, boolean rlsEnabled)
 	{
 		this.id = requireNonNull(id);
 		this.label = requireNonNull(label);

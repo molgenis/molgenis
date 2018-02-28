@@ -4,13 +4,13 @@ import javax.validation.constraints.NotNull;
 
 import static java.util.Objects.requireNonNull;
 
-class EntityTypeRlsRequest
+public class EntityTypeRlsRequest
 {
 	@NotNull
 	private final String id;
 	private final boolean rlsEnabled;
 
-	EntityTypeRlsRequest(String id, boolean rlsEnabled)
+	public EntityTypeRlsRequest(String id, boolean rlsEnabled)
 	{
 		this.id = requireNonNull(id);
 		this.rlsEnabled = rlsEnabled;
