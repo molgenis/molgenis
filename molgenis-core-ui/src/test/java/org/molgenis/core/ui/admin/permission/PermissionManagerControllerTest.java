@@ -5,6 +5,7 @@ import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
@@ -105,9 +106,16 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		}
 
 		@Bean
+		public SystemEntityTypeRegistry systemEntityTypeRegistry()
+		{
+			return mock(SystemEntityTypeRegistry.class);
+		}
+
+		@Bean
 		public PermissionManagerController permissionManagerController()
 		{
-			return new PermissionManagerController(dataService(), mutableAclService(), mutableAclClassService());
+			return new PermissionManagerController(dataService(), mutableAclService(), mutableAclClassService(),
+					systemEntityTypeRegistry());
 		}
 	}
 
@@ -192,7 +200,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test(expectedExceptions = NullPointerException.class)
 	public void PermissionManagerController()
 	{
-		new PermissionManagerController(null, null, null);
+		new PermissionManagerController(null, null, null, null);
 	}
 
 	@Test

@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
@@ -59,14 +60,16 @@ public class PermissionManagerController extends PluginController
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService)
+			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	@GetMapping
@@ -88,10 +91,12 @@ public class PermissionManagerController extends PluginController
 													   .collect(toList());
 		Collection<String> aclClasses = mutableAclClassService.getAclClassTypes();
 		entityTypes.sort(comparing(EntityType::getLabel));
-		return entityTypes.stream()
-						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
-								  aclClasses.contains(EntityIdentityUtils.toType(entityType))))
-						  .collect(toList());
+		return entityTypes.stream().map(entityType ->
+		{
+			boolean rlsEnabled = aclClasses.contains(EntityIdentityUtils.toType(entityType));
+			boolean readOnly = systemEntityTypeRegistry.hasSystemEntityType(entityType.getId());
+			return new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(), rlsEnabled, readOnly);
+		}).collect(toList());
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -240,7 +245,13 @@ public class PermissionManagerController extends PluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void updateEntityClassRls(@Valid @RequestBody EntityTypeRlsRequest entityTypeRlsRequest)
 	{
-		EntityType entityType = dataService.getEntityType(entityTypeRlsRequest.getId());
+		String entityTypeId = entityTypeRlsRequest.getId();
+		if (systemEntityTypeRegistry.hasSystemEntityType(entityTypeId))
+		{
+			throw new IllegalArgumentException("Updating system entity type not allowed");
+		}
+
+		EntityType entityType = dataService.getEntityType(entityTypeId);
 		String aclClassType = EntityIdentityUtils.toType(entityType);
 		boolean hasAclClass = mutableAclClassService.hasAclClass(aclClassType);
 		if (entityTypeRlsRequest.isRlsEnabled())
@@ -248,10 +259,8 @@ public class PermissionManagerController extends PluginController
 			if (!hasAclClass)
 			{
 				mutableAclClassService.createAclClass(aclClassType, EntityIdentityUtils.toIdType(entityType));
-				dataService.findAll(entityType.getId()).forEach(entity ->
-				{
-					mutableAclService.createAcl(new EntityIdentity(entity));
-				});
+				dataService.findAll(entityType.getId())
+						   .forEach(entity -> mutableAclService.createAcl(new EntityIdentity(entity)));
 			}
 		}
 		else
