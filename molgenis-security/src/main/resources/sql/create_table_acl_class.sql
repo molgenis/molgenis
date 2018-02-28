@@ -1,6 +1,6 @@
-create table if not exists acl_class(
-	id bigserial not null primary key,
-	class varchar not null,
-	class_id_type varchar not null,
-	constraint unique_uk_2 unique(class)
+CREATE TABLE IF NOT EXISTS acl_class (
+  id            BIGSERIAL NOT NULL PRIMARY KEY,
+  class         VARCHAR   NOT NULL,
+  class_id_type VARCHAR   NOT NULL,
+  CONSTRAINT unique_uk_2 UNIQUE (class)
 );

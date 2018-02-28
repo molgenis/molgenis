@@ -32,7 +32,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		userPermissionEvaluator = new UserPermissionEvaluatorImpl(permissionEvaluator);
+		//TODO: fix + add "ownership tests"
+		userPermissionEvaluator = new UserPermissionEvaluatorImpl(permissionEvaluator, null, null);
 	}
 
 	@WithMockUser(username = "USER")

@@ -5,7 +5,6 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -19,6 +18,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.security.EntityIdentity.TYPE_PREFIX;
 import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 
@@ -35,17 +35,15 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
-	private final UserService userService;
 
 	public RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository,
 			UserPermissionEvaluator userPermissionEvaluator, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService, UserService userService)
+			MutableAclClassService mutableAclClassService)
 	{
 		super(delegateRepository);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
-		this.userService = requireNonNull(userService);
 	}
 
 	@Override
@@ -265,17 +263,21 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		return delegate().add(entities.filter(entity ->
+		if (isRowLevelSecured())
 		{
-			mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
-			return true;
-		}));
+			return delegate().add(entities.filter(entity ->
+			{
+				mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
+				return true;
+			}));
+		}
+		return delegate().add(entities);
 	}
 
 	private boolean isRowLevelSecured()
 	{
 		// TODO 'entity-' code duplication
-		return mutableAclClassService.hasAclClass("entity-" + getName());
+		return mutableAclClassService.hasAclClass(TYPE_PREFIX + getName());
 	}
 
 	private boolean hasPermissionOnEntity(Entity entity, EntityTypePermission permission)

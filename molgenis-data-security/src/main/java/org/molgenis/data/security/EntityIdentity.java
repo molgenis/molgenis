@@ -6,7 +6,7 @@ import org.springframework.security.acls.domain.ObjectIdentityImpl;
 
 public class EntityIdentity extends ObjectIdentityImpl
 {
-	private static final String TYPE_PREFIX = "entity";
+	public static final String TYPE_PREFIX = "entity-";
 
 	public EntityIdentity(EntityType entityType, Entity entity)
 	{
@@ -15,6 +15,6 @@ public class EntityIdentity extends ObjectIdentityImpl
 
 	public EntityIdentity(String entityTypeId, Object entityId)
 	{
-		super(TYPE_PREFIX + '-' + entityTypeId, entityId.toString());
+		super(TYPE_PREFIX + entityTypeId, entityId.toString());
 	}
 }
