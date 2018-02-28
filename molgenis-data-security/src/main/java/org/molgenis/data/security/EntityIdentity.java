@@ -3,6 +3,8 @@ package org.molgenis.data.security;
 import org.molgenis.data.Entity;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 
+import java.io.Serializable;
+
 public class EntityIdentity extends ObjectIdentityImpl
 {
 	public EntityIdentity(Entity entity)
@@ -12,6 +14,6 @@ public class EntityIdentity extends ObjectIdentityImpl
 
 	public EntityIdentity(String entityTypeId, Object entityId)
 	{
-		super(EntityIdentityUtils.toType(entityTypeId), entityId.toString());
+		super(EntityIdentityUtils.toType(entityTypeId), (Serializable) entityId);
 	}
 }

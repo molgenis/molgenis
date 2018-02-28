@@ -11,7 +11,8 @@
             <#list entityTypes as entityType>
             <tr>
                 <td>${entityType.label?html}</td>
-                <td><input type="checkbox" id="${entityType.id?html}"<#if entityType.rlsEnabled> checked</#if>></td>
+                <td><input type="checkbox" id="${entityType.id?html}"<#if entityType.rlsEnabled>
+                           checked</#if><#if entityType.readonly> disabled</#if>></td>
             </tr>
             </#list>
             </tbody>
