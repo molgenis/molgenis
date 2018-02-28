@@ -14,7 +14,9 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
@@ -38,16 +40,17 @@ class EntityTypeResponseV2
 	private final Boolean writable;
 	private String languageCode;
 
-	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService)
+	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService,
+			boolean includeCategories)
 	{
-		this(meta, null, permissionService, dataService);
+		this(meta, null, permissionService, dataService, includeCategories);
 	}
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator permissionService,
-			DataService dataService)
+			DataService dataService, boolean includeCategories)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -60,12 +63,12 @@ class EntityTypeResponseV2
 		// filter attribute parts
 		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
-		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs, attr ->
+		this.attributes = stream(filteredAttrs).map(attr ->
 		{
-			Fetch subAttrFetch;
+			Fetch subAttrFetch = null;
 			if (fetch != null)
 			{
-				if (attr.getDataType() == COMPOUND)
+				if (attr.getDataType().equals(COMPOUND))
 				{
 					subAttrFetch = fetch;
 				}
@@ -78,12 +81,8 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr, languageCode);
 			}
-			else
-			{
-				subAttrFetch = null;
-			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService);
-		}));
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService, includeCategories);
+		}).collect(Collectors.toList());
 
 		languageCode = getCurrentUserLanguageCode();
 

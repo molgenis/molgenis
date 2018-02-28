@@ -1,5 +1,6 @@
 {
-  "_meta": {
+  "href": "/api/v2/entity",
+  "meta": {
     "href": "/api/v2/entity",
     "hrefCollection": "/api/v2/entity",
     "name": "entity",
@@ -97,7 +98,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/categorical_mref",
@@ -160,7 +171,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/compound",
@@ -652,7 +673,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/categorical_mrefOptional",
@@ -715,7 +746,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/dateOptional",
@@ -1045,51 +1086,58 @@
     "writable": false,
     "languageCode": "en"
   },
-  "_href": "/api/v2/entity/0",
-  "id": "0",
-  "bool": true,
-  "categorical": {
-    "_href": "/api/v2/refEntity/ref0",
-    "id": "ref0"
-  },
-  "categorical_mref": [
+  "start": 0,
+  "num": 100,
+  "total": 2,
+  "items": [
     {
-      "_href": "/api/v2/refEntity/ref0",
-      "id": "ref0"
-    },
-    {
-      "_href": "/api/v2/refEntity/ref1",
-      "id": "ref1"
+      "_href": "/api/v2/entity/0",
+      "id": "0",
+      "bool": true,
+      "categorical": {
+        "_href": "/api/v2/refEntity/ref0",
+        "id": "ref0"
+      },
+      "categorical_mref": [
+        {
+          "_href": "/api/v2/refEntity/ref0",
+          "id": "ref0"
+        },
+        {
+          "_href": "/api/v2/refEntity/ref1",
+          "id": "ref1"
+        }
+      ],
+      "compound_attr0": "compoundAttr0Str",
+      "compound_attrcompound_attr0": "compoundAttrCompoundAttr0Str",
+      "date": "2015-05-22",
+      "date_time": "2015-05-22T06:12:13Z",
+      "decimal": 3.14,
+      "email": "my@mail.com",
+      "enum": "enum0",
+      "html": "<h1>html</h1>",
+      "hyperlink": "http://www.molgenis.org/",
+      "int": 123,
+      "long": 9223372036854775807,
+      "mref": [
+        {
+          "_href": "/api/v2/refEntity/ref0",
+          "id": "ref0"
+        },
+        {
+          "_href": "/api/v2/refEntity/ref1",
+          "id": "ref1"
+        }
+      ],
+      "script": "print \"Hello world\"",
+      "string": "str",
+      "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.",
+      "xref": {
+        "_href": "/api/v2/refEntity/ref0",
+        "id": "ref0"
+      },
+      "categorical_mrefOptional": [],
+      "mrefOptional": []
     }
-  ],
-  "compound_attr0": "compoundAttr0Str",
-  "compound_attrcompound_attr0": "compoundAttrCompoundAttr0Str",
-  "date": "2015-05-22",
-  "date_time": "2015-05-22T06:12:13Z",
-  "decimal": 3.14,
-  "email": "my@mail.com",
-  "enum": "enum0",
-  "html": "<h1>html</h1>",
-  "hyperlink": "http://www.molgenis.org/",
-  "int": 123,
-  "long": 9223372036854775807,
-  "mref": [
-    {
-      "_href": "/api/v2/refEntity/ref0",
-      "id": "ref0"
-    },
-    {
-      "_href": "/api/v2/refEntity/ref1",
-      "id": "ref1"
-    }
-  ],
-  "script": "print \"Hello world\"",
-  "string": "str",
-  "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.",
-  "xref": {
-    "_href": "/api/v2/refEntity/ref0",
-    "id": "ref0"
-  },
-  "categorical_mrefOptional": [],
-  "mrefOptional": []
+  ]
 }

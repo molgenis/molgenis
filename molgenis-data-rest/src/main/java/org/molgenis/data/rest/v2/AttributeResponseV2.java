@@ -1,7 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
@@ -13,7 +11,9 @@ import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 
@@ -43,12 +43,16 @@ class AttributeResponseV2
 	private String nullableExpression;
 	private String visibleExpression;
 	private String validationExpression;
+	private List<CategoricalOptionV2> categoricalOptions;
 
 	/**
-	 * @param fetch set of lowercase attribute names to include in response
+	 * Constructs AttributeResponseV2 using params
+	 *
+	 * @param fetch             set of lowercase attribute names to include in response
+	 * @param includeCategories if set to true includes options list for CATEGORICAL and CATEGORICAL_MREF types in the attribute metadata
 	 */
 	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
-			UserPermissionEvaluator permissionService, DataService dataService)
+			UserPermissionEvaluator permissionService, DataService dataService, boolean includeCategories)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -64,12 +68,23 @@ class AttributeResponseV2
 		EntityType refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService);
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
+					includeCategories);
+
+			if (includeCategories && (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
+					AttributeType.CATEGORICAL_MREF)))
+			{
+				this.categoricalOptions = dataService.findAll(refEntity.getId())
+													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
+															 entity.getLabelValue()))
+													 .collect(Collectors.toList());
+			}
 		}
 		else
 		{
 			this.refEntity = null;
 		}
+
 		Attribute mappedByAttr = attr.getMappedBy();
 		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
@@ -78,34 +93,32 @@ class AttributeResponseV2
 		{
 			// filter attribute parts
 			attrParts = filterAttributes(fetch, attrParts);
-
-			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts, attr1 ->
+			this.attributes = stream(attrParts).map(attrPart ->
 			{
 				Fetch subAttrFetch;
 				if (fetch != null)
 				{
-					if (attr1.getDataType() == AttributeType.COMPOUND)
+					if (attrPart.getDataType() == AttributeType.COMPOUND)
 					{
 						subAttrFetch = fetch;
 					}
 					else
 					{
-						subAttrFetch = fetch.getFetch(attr1);
+						subAttrFetch = fetch.getFetch(attrPart);
 					}
 				}
-				else if (EntityTypeUtils.isReferenceType(attr1))
+				else if (EntityTypeUtils.isReferenceType(attrPart))
 				{
-					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr1,
+					subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attrPart,
 							getCurrentUserLanguageCode());
 				}
 				else
 				{
 					subAttrFetch = null;
 				}
-				return new AttributeResponseV2(entityParentName, entityType, attr1, subAttrFetch, permissionService,
+				return new AttributeResponseV2(entityParentName, entityType, attrPart, subAttrFetch, permissionService,
 						dataService);
-			}));
+			}).collect(Collectors.toList());
 		}
 		else
 		{
@@ -127,11 +140,22 @@ class AttributeResponseV2
 		this.validationExpression = attr.getValidationExpression();
 	}
 
+	/**
+	 * Default AttributeResponseV2 with @param includeCategories set to false
+	 *
+	 * @param fetch set of lowercase attribute names to include in response
+	 */
+	public AttributeResponseV2(final String entityParentName, EntityType entityType, Attribute attr, Fetch fetch,
+			UserPermissionEvaluator permissionService, DataService dataService)
+	{
+		this(entityParentName, entityType, attr, fetch, permissionService, dataService, false);
+	}
+
 	public static Iterable<Attribute> filterAttributes(Fetch fetch, Iterable<Attribute> attrs)
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, attr -> filterAttributeRec(fetch, attr));
+			return stream(attrs).filter(attr -> filterAttributeRec(fetch, attr)).collect(Collectors.toList());
 		}
 		else
 		{
@@ -301,5 +325,10 @@ class AttributeResponseV2
 	public String getValidationExpression()
 	{
 		return validationExpression;
+	}
+
+	public List<CategoricalOptionV2> getCategoricalOptions()
+	{
+		return categoricalOptions;
 	}
 }

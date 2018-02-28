@@ -97,7 +97,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/categorical_mref",
@@ -160,7 +170,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/compound",
@@ -652,7 +672,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/categorical_mrefOptional",
@@ -715,7 +745,17 @@
         "unique": false,
         "visible": true,
         "lookupAttribute": false,
-        "isAggregatable": false
+        "isAggregatable": false,
+        "categoricalOptions": [
+          {
+            "id": "ref0",
+            "label": "label0"
+          },
+          {
+            "id": "ref1",
+            "label": "label1"
+          }
+        ]
       },
       {
         "href": "/api/v2/entity/meta/dateOptional",
