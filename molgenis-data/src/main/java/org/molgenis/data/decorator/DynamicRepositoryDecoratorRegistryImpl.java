@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
-import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED_SYSTEM_ENTITY_TYPES;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 
 @Component
 public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepositoryDecoratorRegistry
@@ -100,6 +100,6 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	@EventListener
 	public void onApplicationEvent(BootstrappingEvent bootstrappingEvent)
 	{
-		this.bootstrappingDone = bootstrappingEvent.getStatus() == FINISHED_SYSTEM_ENTITY_TYPES;
+		this.bootstrappingDone = bootstrappingEvent.getStatus() == FINISHED;
 	}
 }

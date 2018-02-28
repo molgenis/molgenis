@@ -17,7 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
-import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED_SYSTEM_ENTITY_TYPES;
+import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { DecoratorConfigurationMetadata.class, DecoratorPackage.class,
@@ -65,7 +65,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 		DynamicRepositoryDecoratorRegistryImpl dynamicRepositoryDecoratorRegistry = new DynamicRepositoryDecoratorRegistryImpl(
 				dataService);
 		//fake the event to tell the registry that bootstrapping is done.
-		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED_SYSTEM_ENTITY_TYPES));
+		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED));
 
 		dynamicRepositoryDecoratorRegistry.addFactory(dynamicRepositoryDecoratorFactory);
 
@@ -82,7 +82,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 		DynamicRepositoryDecoratorRegistryImpl dynamicRepositoryDecoratorRegistry = new DynamicRepositoryDecoratorRegistryImpl(
 				dataService);
 		//fake the event to tell the registry that bootstrapping is done.
-		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED_SYSTEM_ENTITY_TYPES));
+		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED));
 
 		assertEquals(dynamicRepositoryDecoratorRegistry.decorate(repository).getName(), "repositoryName");
 	}

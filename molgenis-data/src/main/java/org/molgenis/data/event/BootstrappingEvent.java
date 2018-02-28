@@ -4,7 +4,7 @@ public class BootstrappingEvent
 {
 	public enum BootstrappingStatus
 	{
-		FINISHED_SYSTEM_ENTITY_TYPES;
+		STARTED, FINISHED;
 	}
 
 	private final BootstrappingStatus status;
