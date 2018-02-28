@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,6 +26,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -42,6 +45,8 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 	@Mock
 	private SystemPackageRegistry systemPackageRegistry;
+	@Mock
+	private MutableAclClassService mutableAclClassService;
 
 	private SystemEntityTypePersister systemEntityTypePersister;
 
@@ -65,7 +70,7 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver, systemPackageRegistry);
+				entityTypeDependencyResolver, systemPackageRegistry, mutableAclClassService);
 	}
 
 	@Test

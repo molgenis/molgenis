@@ -51,5 +51,7 @@ public class QuestionnaireMetaData extends SystemEntityType
 										 "$('" + ATTR_STATUS + "').value() !== '" + SUBMITTED.toString() + "'")
 								 .setVisibleExpression(
 										 "$('" + ATTR_STATUS + "').value() === '" + SUBMITTED.toString() + "'");
+
+		setRowLevelSecured(true);
 	}
 }
