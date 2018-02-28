@@ -2,7 +2,6 @@ package org.molgenis.core.ui.admin.permission;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -10,16 +9,12 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.EntityTypePermissionUtils;
-import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.permission.Permissions;
-import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +91,7 @@ public class PermissionManagerController extends PluginController
 		entityTypes.sort(comparing(EntityType::getLabel));
 		return entityTypes.stream()
 						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
-								  aclClasses.contains(toAclClassType(entityType))))
+								  aclClasses.contains(EntityIdentityUtils.toType(entityType))))
 						  .collect(toList());
 	}
 
@@ -299,13 +294,13 @@ public class PermissionManagerController extends PluginController
 	public void updateEntityClassRls(@Valid @RequestBody EntityTypeRlsRequest entityTypeRlsRequest)
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeRlsRequest.getId());
-		String aclClassType = toAclClassType(entityType);
+		String aclClassType = EntityIdentityUtils.toType(entityType);
 		boolean hasAclClass = mutableAclClassService.hasAclClass(aclClassType);
 		if (entityTypeRlsRequest.isRlsEnabled())
 		{
 			if (!hasAclClass)
 			{
-				mutableAclClassService.createAclClass(aclClassType, toIdClass(entityType));
+				mutableAclClassService.createAclClass(aclClassType, EntityIdentityUtils.toIdType(entityType));
 				// TODO create ACLs for existing entities
 			}
 		}
@@ -316,30 +311,6 @@ public class PermissionManagerController extends PluginController
 				mutableAclClassService.deleteAclClass(aclClassType);
 			}
 		}
-	}
-
-	private static Class<?> toIdClass(EntityType entityType)
-	{
-		AttributeType attributeType = entityType.getIdAttribute().getDataType();
-		//noinspection EnumSwitchStatementWhichMissesCases
-		switch (attributeType)
-		{
-			case EMAIL:
-			case HYPERLINK:
-			case STRING:
-				return String.class;
-			case INT:
-				return Integer.class;
-			case LONG:
-				return Long.class;
-			default:
-				throw new UnexpectedEnumException(attributeType);
-		}
-	}
-
-	private static String toAclClassType(EntityType entityType)
-	{
-		return "entity-" + entityType.getId();
 	}
 
 	private static PluginPermission toPluginPermission(String paramValue)

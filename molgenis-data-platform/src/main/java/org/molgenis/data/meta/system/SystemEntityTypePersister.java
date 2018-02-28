@@ -8,7 +8,9 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.util.EntityUtils;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,14 +35,17 @@ public class SystemEntityTypePersister
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final SystemPackageRegistry systemPackageRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final MutableAclClassService mutableAclClassService;
 
-	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, SystemPackageRegistry systemPackageRegistry)
+	SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			EntityTypeDependencyResolver entityTypeDependencyResolver, SystemPackageRegistry systemPackageRegistry,
+			MutableAclClassService mutableAclClassService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	public void persist()
@@ -56,6 +61,21 @@ public class SystemEntityTypePersister
 		// persist EntityType entities
 		List<EntityType> metaEntityMetaSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
 		injectExistingEntityTypeAttributeIdentifiers(metaEntityMetaSet);
+		metaEntityMetaSet.forEach(systemEntityType ->
+		{
+			String aclClass = EntityIdentityUtils.toType(systemEntityType);
+			// TODO remove casting
+			if (((SystemEntityType) systemEntityType).isRowLevelSecured() && !mutableAclClassService.hasAclClass(
+					aclClass))
+			{
+				mutableAclClassService.createAclClass(aclClass, String.class);
+			}
+			else if (!((SystemEntityType) systemEntityType).isRowLevelSecured() && mutableAclClassService.hasAclClass(
+					aclClass))
+			{
+				mutableAclClassService.deleteAclClass(aclClass);
+			}
+		});
 		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
 		// remove non-existing metadata
@@ -94,6 +114,8 @@ public class SystemEntityTypePersister
 															   .collect(toList());
 
 		dataService.getMeta().deleteEntityType(removedSystemEntityMetas);
+		removedSystemEntityMetas.forEach(
+				entityType -> mutableAclClassService.deleteAclClass(EntityIdentityUtils.toType(entityType)));
 	}
 
 	private void removeNonExistingSystemPackages()

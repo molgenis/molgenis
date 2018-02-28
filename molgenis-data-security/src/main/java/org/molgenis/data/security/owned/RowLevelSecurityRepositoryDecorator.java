@@ -4,6 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
@@ -18,7 +19,6 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.EntityIdentity.TYPE_PREFIX;
 import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 
@@ -276,8 +276,8 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private boolean isRowLevelSecured()
 	{
-		// TODO 'entity-' code duplication
-		return mutableAclClassService.hasAclClass(TYPE_PREFIX + getName());
+		String aclClass = EntityIdentityUtils.toType(getEntityType());
+		return mutableAclClassService.hasAclClass(aclClass);
 	}
 
 	private boolean hasPermissionOnEntity(Entity entity, EntityTypePermission permission)

@@ -38,5 +38,7 @@ public class FileMetaMetaData extends SystemEntityType
 						 .setDescription("File download URL")
 						 .setUnique(true)
 						 .setNillable(false);
+
+		setRowLevelSecured(true);
 	}
 }
