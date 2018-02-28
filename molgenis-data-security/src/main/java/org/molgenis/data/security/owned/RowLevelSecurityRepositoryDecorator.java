@@ -264,7 +264,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 			// as user #1 with superuser=true access remove set superuser=false for user #0
 			// can user #0 still access the imported data? (if an ace exists --> yes, otherwise no)
 
-			MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
+			MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
 			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 			acl.insertAce(acl.getEntries().size(),
 					EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA), sid, true);
@@ -280,7 +280,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 		{
 			return delegate().add(entities.filter(entity ->
 			{
-				mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
+				mutableAclService.createAcl(new EntityIdentity(entity));
 				return true;
 			}));
 		}
