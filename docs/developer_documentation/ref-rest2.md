@@ -94,12 +94,15 @@ Key | Type | Description
 
 ## Example request - response
 **TableA**
+
 | id | category |
 |----|----------|
 | 1  | A        |
 
 **TableB**
+
 | id | label |
+|----|-------|
 | A  | A very awesome category |
 | B  | A very busy category |
 | C  | A very complex category |
@@ -112,28 +115,25 @@ GET http://molgenis.mydomain.example/api/v2/TableA?includeCategories=true
 *Response*
 ```json
 {
-  ...,
-  meta: {
-    attributes: [
+  "meta": {
+    "attributes": [
       {
-        ...,
-        name: id
+        "name": "id"
       },
       {
-        ...,
-        name: category,
-        categoricalOptions: [
+        "name": "category",
+        "categoricalOptions": [
           {
-            id: A,
-            label: A very awesome category
+            "id": "A",
+            "label": "A very awesome category"
           },
           {
-            id: B,
-            label: A very busy category
+            "id": "B",
+            "label": "A very busy category"
           },
           {
-            id: C,
-            label: A very complex category
+            "id": "C",
+            "label": "A very complex category"
           }
         ]
       }
@@ -141,7 +141,6 @@ GET http://molgenis.mydomain.example/api/v2/TableA?includeCategories=true
   }
 }
 ```
-
 
 # Batch 
 
