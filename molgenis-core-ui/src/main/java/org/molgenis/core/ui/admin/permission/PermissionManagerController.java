@@ -250,7 +250,7 @@ public class PermissionManagerController extends PluginController
 				mutableAclClassService.createAclClass(aclClassType, EntityIdentityUtils.toIdType(entityType));
 				dataService.findAll(entityType.getId()).forEach(entity ->
 				{
-					mutableAclService.createAcl(new EntityIdentity(entityType, entity));
+					mutableAclService.createAcl(new EntityIdentity(entity));
 				});
 			}
 		}
