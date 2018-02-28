@@ -95,6 +95,8 @@ public class AclConfig
 		aclService.setAclClassIdUtils(aclClassIdUtils());
 		aclService.setClassIdentityQuery("select currval(pg_get_serial_sequence('acl_class', 'id'))");
 		aclService.setSidIdentityQuery("select currval(pg_get_serial_sequence('acl_sid', 'id'))");
+		aclService.setObjectIdentityPrimaryKeyQuery(
+				"select acl_object_identity.id from acl_object_identity, acl_class where acl_object_identity.object_id_class = acl_class.id and acl_class.class=? and acl_object_identity.object_id_identity = ?::varchar");
 		return aclService;
 	}
 
