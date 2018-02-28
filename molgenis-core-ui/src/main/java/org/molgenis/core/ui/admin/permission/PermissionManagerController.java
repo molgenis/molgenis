@@ -92,7 +92,7 @@ public class PermissionManagerController extends PluginController
 	{
 		List<EntityType> entityTypes = getEntityTypes().filter(entityType -> !entityType.isAbstract())
 													   .collect(toList());
-		Collection<String> aclClasses = mutableAclClassService.getAclClasses();
+		Collection<String> aclClasses = mutableAclClassService.getAclClassTypes();
 		entityTypes.sort(comparing(EntityType::getLabel));
 		return entityTypes.stream()
 						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),

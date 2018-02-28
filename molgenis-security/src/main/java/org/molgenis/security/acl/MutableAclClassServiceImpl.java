@@ -54,7 +54,7 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 
 	@Transactional(readOnly = true)
 	@Override
-	public Collection<String> getAclClasses()
+	public Collection<String> getAclClassTypes()
 	{
 		return jdbcTemplate.queryForList(SQL_SELECT_ACL_CLASS, String.class);
 	}
