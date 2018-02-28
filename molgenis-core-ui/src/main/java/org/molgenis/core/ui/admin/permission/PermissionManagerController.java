@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,7 +60,7 @@ public class PermissionManagerController extends PluginController
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
 
-	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
+	PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
 			MutableAclClassService mutableAclClassService)
 	{
 		super(URI);
@@ -93,58 +92,6 @@ public class PermissionManagerController extends PluginController
 						  .map(entityType -> new EntityTypeRlsResponse(entityType.getId(), entityType.getLabel(),
 								  aclClasses.contains(EntityIdentityUtils.toType(entityType))))
 						  .collect(toList());
-	}
-
-	public static class EntityTypeRlsResponse
-	{
-		private final String id;
-		private final String label;
-		private final boolean rlsEnabled;
-
-		EntityTypeRlsResponse(String id, String label, boolean rlsEnabled)
-		{
-			this.id = requireNonNull(id);
-			this.label = requireNonNull(label);
-			this.rlsEnabled = rlsEnabled;
-		}
-
-		public String getId()
-		{
-			return id;
-		}
-
-		public String getLabel()
-		{
-			return label;
-		}
-
-		public boolean isRlsEnabled()
-		{
-			return rlsEnabled;
-		}
-	}
-
-	public static class EntityTypeRlsRequest
-	{
-		@NotNull
-		private final String id;
-		private final boolean rlsEnabled;
-
-		EntityTypeRlsRequest(String id, boolean rlsEnabled)
-		{
-			this.id = requireNonNull(id);
-			this.rlsEnabled = rlsEnabled;
-		}
-
-		public String getId()
-		{
-			return id;
-		}
-
-		public boolean isRlsEnabled()
-		{
-			return rlsEnabled;
-		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -301,7 +248,10 @@ public class PermissionManagerController extends PluginController
 			if (!hasAclClass)
 			{
 				mutableAclClassService.createAclClass(aclClassType, EntityIdentityUtils.toIdType(entityType));
-				// TODO create ACLs for existing entities
+				dataService.findAll(entityType.getId()).forEach(entity ->
+				{
+					mutableAclService.createAcl(new EntityIdentity(entityType, entity));
+				});
 			}
 		}
 		else
