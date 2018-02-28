@@ -42,6 +42,7 @@ const mutations = {
     state.questionnaireLabel = ''
     state.questionnaireDescription = ''
     state.questionnaireRowId = ''
+    state.submissionText = ''
   }
 }
 
