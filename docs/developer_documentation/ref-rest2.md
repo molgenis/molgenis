@@ -81,6 +81,67 @@ GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1
 GET http://molgenis.mydomain.example/api/v2/<entity_name>?aggs=x==attr0;y==attr1;distinct=attr2&q=attr4==val
 ```
 
+## Including categorical options
+
+For simple lookup lists, it might be a convenience to include the list in the initial API response.
+You can do this for CATEGORICAL, and CATEGORICAL_MREF attributes using `includeCategories`.
+
+Not including the query option will set it to the default `false`.
+
+Key | Type | Description
+--- | --- | ---
+*includeCategories* | boolean | Includes a list of categorical options in attribute metadata for CATEGORICAL and CATEGORICAL_MREF attributes
+
+## Example request - response
+**TableA**
+
+| id | category |
+|----|----------|
+| 1  | A        |
+
+**TableB**
+
+| id | label |
+|----|-------|
+| A  | A very awesome category |
+| B  | A very busy category |
+| C  | A very complex category |
+
+*Request*
+```
+GET http://molgenis.mydomain.example/api/v2/TableA?includeCategories=true
+```
+
+*Response*
+```json
+{
+  "meta": {
+    "attributes": [
+      {
+        "name": "id"
+      },
+      {
+        "name": "category",
+        "categoricalOptions": [
+          {
+            "id": "A",
+            "label": "A very awesome category"
+          },
+          {
+            "id": "B",
+            "label": "A very busy category"
+          },
+          {
+            "id": "C",
+            "label": "A very complex category"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 # Batch 
 
 When working with larger datasets the RESTv2 api provides batching via the 'entities' parameter:
