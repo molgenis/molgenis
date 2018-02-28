@@ -68,7 +68,7 @@ public class SystemEntityTypePersister
 			if (((SystemEntityType) systemEntityType).isRowLevelSecured() && !mutableAclClassService.hasAclClass(
 					aclClass))
 			{
-				mutableAclClassService.createAclClass(aclClass, String.class);
+				mutableAclClassService.createAclClass(aclClass, EntityIdentityUtils.toIdType(systemEntityType));
 			}
 			else if (!((SystemEntityType) systemEntityType).isRowLevelSecured() && mutableAclClassService.hasAclClass(
 					aclClass))
