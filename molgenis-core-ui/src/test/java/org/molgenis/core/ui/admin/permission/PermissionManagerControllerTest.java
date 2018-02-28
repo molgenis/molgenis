@@ -157,6 +157,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		entityType1 = when(mock(EntityType.class).getId()).thenReturn("1").getMock();
 		entityType2 = when(mock(EntityType.class).getId()).thenReturn("2").getMock();
 		entityType3 = when(mock(EntityType.class).getId()).thenReturn("3").getMock();
+		when(entityType1.getLabel()).thenReturn("label1");
+		when(entityType2.getLabel()).thenReturn("label2");
+		when(entityType3.getLabel()).thenReturn("label3");
 
 		entityIdentity1 = new EntityTypeIdentity(entityType1);
 		entityIdentity2 = new EntityTypeIdentity(entityType2);
