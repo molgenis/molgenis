@@ -8,7 +8,7 @@
 
 <@header css js version/>
 
-<div id="app"></div>
+<div id="questionnaire-app"></div>
 
 <script type="text/javascript">
     window.QUESTIONNAIRE_STATE = {
