@@ -88,9 +88,9 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.9.6":
-  version "0.9.6"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.6.tgz#e27ca353bd59a7f4d5cda509bb52532a2728ff3d"
+"@molgenis/molgenis-ui-form@^0.9.7":
+  version "0.9.7"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.7.tgz#4a76ccc317c07c2d8a028309875ec9d3f6e626b3"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     moment "^2.20.1"

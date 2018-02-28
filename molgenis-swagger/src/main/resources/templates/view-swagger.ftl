@@ -396,6 +396,11 @@ paths:
           type: string
           in: query
           description: Defines which fields from the Entity to select
+        - name: includeCategories
+          type: boolean
+          in: query
+          required: false
+          description: Flag to include category options as part of meta data, if not set defaults to false.
         - name: _method
           type: string
           in: query
@@ -767,6 +772,10 @@ definitions:
         type: string
       validationExpression:
         type: string
+      categoricalOptions:
+        type: array
+        items:
+          $ref: "#/definitions/CategoricalOptionV2"
     required:
       - href
       - fieldType
@@ -789,6 +798,13 @@ definitions:
       max:
         type: integer
         format: int64
+  CategoricalOptionV2:
+    type: object
+    properties:
+      id:
+        type: object
+      label:
+        type: object
   Error:
     type: object
     properties:
