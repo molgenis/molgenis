@@ -6,11 +6,15 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.EntityTypePermissionUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.Sid;
 
 import java.util.Iterator;
 import java.util.List;
@@ -255,7 +259,16 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		if (isRowLevelSecured())
 		{
-			mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
+			// TODO decide whether we want to write ACEs for superusers, considering the following use case:
+			// as user #0 with superuser=true access import dataset
+			// as user #1 with superuser=true access remove set superuser=false for user #0
+			// can user #0 still access the imported data? (if an ace exists --> yes, otherwise no)
+
+			MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(getEntityType(), entity));
+			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+			acl.insertAce(acl.getEntries().size(),
+					EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA), sid, true);
+			mutableAclService.updateAcl(acl);
 		}
 		delegate().add(entity);
 	}
