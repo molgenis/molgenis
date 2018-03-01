@@ -102,9 +102,7 @@ public class RestControllerIT
 			   .delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
 			   .then()
 			   .log()
-			   .all()
-			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", Matchers.equalTo("Unknown [File metadata] with id [non-existing-entity_id]"));
+			   .all().statusCode(NO_CONTENT);
 	}
 
 	@Test
