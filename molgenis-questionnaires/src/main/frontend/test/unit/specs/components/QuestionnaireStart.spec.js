@@ -15,7 +15,7 @@ localVue.filter('i18n', (key) => {
   return translations[key]
 })
 
-describe.only('QuestionnaireStart component', () => {
+describe('QuestionnaireStart component', () => {
   let actions
   let state
   let store
@@ -45,8 +45,13 @@ describe.only('QuestionnaireStart component', () => {
 
   it('should dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when created and no chapters are present', () => {
     const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
-    expect(wrapper.vm.loading).to.equal(false)
+    wrapper.vm.$nextTick(() => {
+      td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
+
+      wrapper.vm.$nextTick(() => {
+        expect(wrapper.vm.loading).to.equal(false)
+      })
+    })
   })
 
   it('should not dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when there are chapters present', () => {
@@ -55,7 +60,10 @@ describe.only('QuestionnaireStart component', () => {
 
     const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
     td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
-    expect(wrapper.vm.loading).to.equal(false)
+
+    wrapper.vm.$nextTick(() => {
+      expect(wrapper.vm.loading).to.equal(false)
+    })
   })
 
   it('should retrieve the description from the store', () => {
@@ -70,9 +78,13 @@ describe.only('QuestionnaireStart component', () => {
 
   it('should toggle template based on loading value', () => {
     const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    expect(wrapper.find('.spinner-container').exists()).to.equal(false)
-    wrapper.setData({loading: true})
     expect(wrapper.find('.spinner-container').exists()).to.equal(true)
+
+    wrapper.vm.$nextTick(() => {
+      wrapper.vm.$nextTick(() => {
+        expect(wrapper.find('.spinner-container').exists()).to.equal(false)
+      })
+    })
   })
 })
 
