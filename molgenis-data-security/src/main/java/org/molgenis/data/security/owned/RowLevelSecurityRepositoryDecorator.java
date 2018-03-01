@@ -6,7 +6,6 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityPermission;
 import org.molgenis.data.security.EntityPermissionUtils;
-import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -22,8 +21,9 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.security.EntityPermission.READ;
+import static org.molgenis.data.security.EntityPermission.WRITE;
 
 /**
  * RepositoryDecorator that works on EntityType that extends OwnedEntityType.
@@ -47,43 +47,35 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	}
 
 	@Override
-	public Query<Entity> query()
-	{
-		return new QueryImpl<>(this);
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl<>()).filter(entity -> hasPermissionOnEntity(entity, READ)).iterator();
+		Iterable<Entity> iterable = () -> delegate().iterator();
+		return stream(iterable.spliterator(), false).filter(entity -> hasPermissionOnEntity(entity, READ)).iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		delegate().forEachBatched(fetch, entities ->
-		{
-			//TODO: This results in smaller batches! Should do a findAll instead!
-			consumer.accept(entities.stream().filter(entity -> hasPermissionOnEntity(entity, READ)).collect(toList()));
-		}, batchSize);
+		delegate().forEachBatched(fetch, entities -> consumer.accept(
+				entities.stream().filter(entity -> hasPermissionOnEntity(entity, READ)).collect(toList())), batchSize);
 	}
 
 	@Override
 	public long count()
 	{
-		return count(new QueryImpl<>());
+		return findAllPermitted(EntityPermission.COUNT).count();
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		return findAll(q).collect(toList()).size();
+		return findAllPermitted(q, EntityPermission.COUNT).count();
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		return delegate().findAll(q).filter(entity -> hasPermissionOnEntity(entity, READ));
+		return findAllPermitted(q, EntityPermission.READ);
 	}
 
 	@Override
@@ -167,6 +159,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		if (hasPermissionOnEntity(entity, WRITE))
 		{
+			deleteAcl(entity);
 			delegate().delete(entity);
 		}
 	}
@@ -174,9 +167,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		entities = entities.filter(entity -> hasPermissionOnEntity(entity, WRITE));
-
-		delegate().delete(entities);
+		deleteStream(entities);
 	}
 
 	@Override
@@ -184,6 +175,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		if (hasPermissionOnEntity(id, WRITE))
 		{
+			deleteAcl(id);
 			delegate().deleteById(id);
 		}
 	}
@@ -191,30 +183,27 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		ids = ids.filter(entity -> hasPermissionOnEntity(entity, WRITE));
-		delegate().deleteAll(ids);
+		delegate().deleteAll(ids.filter(id ->
+		{
+			boolean deleteAllowed = hasPermissionOnEntity(id, WRITE);
+			if (deleteAllowed)
+			{
+				deleteAcl(id);
+			}
+			return deleteAllowed;
+		}));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		delegate().forEachBatched(entities -> delete(entities.stream()), 1000);
+		delegate().delete(findAllPermitted(new QueryImpl<>(), EntityPermission.WRITE));
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		// TODO decide whether we want to write ACEs for superusers, considering the following use case:
-		// as user #0 with superuser=true access import dataset
-		// as user #1 with superuser=true access remove set superuser=false for user #0
-		// can user #0 still access the imported data? (if an ace exists --> yes, otherwise no)
-
-		MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
-		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-		acl.insertAce(acl.getEntries().size(), EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE),
-				sid, true);
-		mutableAclService.updateAcl(acl);
-
+		createAcl(entity);
 		delegate().add(entity);
 	}
 
@@ -223,25 +212,78 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		return delegate().add(entities.filter(entity ->
 		{
-			mutableAclService.createAcl(new EntityIdentity(entity));
+			createAcl(entity);
 			return true;
 		}));
 	}
 
-	private boolean hasPermissionOnEntity(Entity entity, EntityTypePermission permission)
+	private boolean hasPermissionOnEntity(Entity entity, EntityPermission permission)
 	{
 		EntityIdentity entityIdentity = new EntityIdentity(entity);
 		return hasPermissionOnEntity(entityIdentity, permission);
 	}
 
-	private boolean hasPermissionOnEntity(Object id, EntityTypePermission permission)
+	private boolean hasPermissionOnEntity(Object id, EntityPermission permission)
 	{
-		EntityIdentity entityIdentity = new EntityIdentity(getEntityType().getId(), id);
+		EntityIdentity entityIdentity = toEntityIdentity(id);
 		return hasPermissionOnEntity(entityIdentity, permission);
 	}
 
-	private boolean hasPermissionOnEntity(EntityIdentity entityIdentity, EntityTypePermission permission)
+	private boolean hasPermissionOnEntity(EntityIdentity entityIdentity, EntityPermission permission)
 	{
 		return userPermissionEvaluator.hasPermission(entityIdentity, permission);
+	}
+
+	private void createAcl(Entity entity)
+	{
+		MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
+		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		acl.insertAce(acl.getEntries().size(), EntityPermissionUtils.getCumulativePermission(WRITE), sid, true);
+		mutableAclService.updateAcl(acl);
+	}
+
+	private void deleteAcl(Entity entity)
+	{
+		EntityIdentity entityIdentity = new EntityIdentity(entity);
+		deleteAcl(entityIdentity);
+	}
+
+	private void deleteAcl(Object id)
+	{
+		EntityIdentity entityIdentity = toEntityIdentity(id);
+		deleteAcl(entityIdentity);
+	}
+
+	private void deleteAcl(EntityIdentity entityIdentity)
+	{
+		mutableAclService.deleteAcl(entityIdentity, true);
+	}
+
+	private EntityIdentity toEntityIdentity(Object entityId)
+	{
+		return new EntityIdentity(getEntityType().getId(), entityId);
+	}
+
+	private void deleteStream(Stream<Entity> entityStream)
+	{
+		delegate().delete(entityStream.filter(entity ->
+		{
+			boolean deleteAllowed = hasPermissionOnEntity(entity, WRITE);
+			if (deleteAllowed)
+			{
+				deleteAcl(entity);
+			}
+			return deleteAllowed;
+		}));
+	}
+
+	private Stream<Entity> findAllPermitted(EntityPermission entityPermission)
+	{
+		return findAllPermitted(new QueryImpl<>(), entityPermission);
+	}
+
+	private Stream<Entity> findAllPermitted(Query<Entity> query, EntityPermission entityPermission)
+	{
+		return delegate().findAll(query).filter(entity -> hasPermissionOnEntity(entity, entityPermission));
 	}
 }
