@@ -14,7 +14,7 @@ const actions = {
       commit('CLEAR_STATE')
     }
 
-    return api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
+    api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
   },
 
   'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {

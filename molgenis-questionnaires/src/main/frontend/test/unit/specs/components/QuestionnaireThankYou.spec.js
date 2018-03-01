@@ -22,13 +22,8 @@ describe('QuestionnaireThankYou component', () => {
     GET_SUBMISSION_TEXT: td.function()
   }
 
-  const store = new Vuex.Store({
-    state,
-    actions
-  })
-
+  const store = new Vuex.Store({state, actions})
   const stubs = ['router-link', 'router-view']
-
   const propsData = {questionnaireId: 'test_quest'}
   const wrapper = shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
 
