@@ -150,6 +150,7 @@
 
 <script>
   import ChapterList from './ChapterList'
+  import moment from 'moment'
 
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import 'flatpickr/dist/flatpickr.css'
@@ -209,7 +210,7 @@
       },
 
       /**
-       * Redirect to thank you page when submit is succesfull
+       * Redirect to thank you page when submit is successful
        */
       submitQuestionnaire () {
         this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
@@ -217,7 +218,9 @@
 
         this.$nextTick(() => {
           if (this.formState.$valid) {
-            this.$store.dispatch('SUBMIT_QUESTIONNAIRE').then(() => {
+            const submitDate = moment().toISOString()
+
+            this.$store.dispatch('SUBMIT_QUESTIONNAIRE', submitDate).then(() => {
               this.navigationBlocked = false
               this.$router.push('/' + this.questionnaireId + '/thanks')
             }, error => {

@@ -34,15 +34,13 @@ const actions = {
     })
   },
 
-  'GET_RAW_QUESTIONNAIRE' ({commit}, questionnaireId) {
+  'GET_QUESTIONNAIRE_OVERVIEW' ({}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId)
   },
 
   'GET_SUBMISSION_TEXT' ({commit}, questionnaireId) {
-    api.get('/menu/plugins/questionnaires/' + questionnaireId + '/thanks').then(response => {
+    return api.get('/menu/plugins/questionnaires/' + questionnaireId + '/thanks').then(response => {
       commit('SET_SUBMISSION_TEXT', response)
-    }).catch(error => {
-      console.log('Something went wrong fetching the questionnaire submission text', error)
     })
   },
 
@@ -58,9 +56,9 @@ const actions = {
     return api.post(uri, options)
   },
 
-  'SUBMIT_QUESTIONNAIRE' ({state}) {
+  'SUBMIT_QUESTIONNAIRE' ({state}, submitDate) {
     const submitData = Object.assign({}, state.formData)
-    submitData.submitDate = moment().toISOString()
+    submitData.submitDate = submitDate
 
     const options = {
       body: JSON.stringify({
