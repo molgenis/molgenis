@@ -3,9 +3,11 @@ package org.molgenis.data.security.owned;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityPermission;
+import org.molgenis.data.security.EntityPermissionUtils;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -35,16 +37,13 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 {
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final MutableAclService mutableAclService;
-	private final MutableAclClassService mutableAclClassService;
 
-	public RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository,
-			UserPermissionEvaluator userPermissionEvaluator, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService)
+	RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository,
+			UserPermissionEvaluator userPermissionEvaluator, MutableAclService mutableAclService)
 	{
 		super(delegateRepository);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.mutableAclService = requireNonNull(mutableAclService);
-		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	@Override
@@ -56,9 +55,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		if (isRowLevelSecured())
-			return findAll(new QueryImpl<>()).filter(entity -> hasPermissionOnEntity(entity, READ)).iterator();
-		return delegate().iterator();
+		return findAll(new QueryImpl<>()).filter(entity -> hasPermissionOnEntity(entity, READ)).iterator();
 	}
 
 	@Override
@@ -66,47 +63,27 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		delegate().forEachBatched(fetch, entities ->
 		{
-			if (isRowLevelSecured())
-			{
-				//TODO: This results in smaller batches! Should do a findAll instead!
-				consumer.accept(
-						entities.stream().filter(entity -> hasPermissionOnEntity(entity, READ)).collect(toList()));
-			}
-			else
-			{
-				consumer.accept(entities);
-			}
+			//TODO: This results in smaller batches! Should do a findAll instead!
+			consumer.accept(entities.stream().filter(entity -> hasPermissionOnEntity(entity, READ)).collect(toList()));
 		}, batchSize);
 	}
 
 	@Override
 	public long count()
 	{
-		if (isRowLevelSecured())
-		{
-			return count(new QueryImpl<>());
-		}
-		return delegate().count();
+		return count(new QueryImpl<>());
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		if (isRowLevelSecured())
-		{
-			return findAll(q).collect(toList()).size();
-		}
-		return delegate().count(q);
+		return findAll(q).collect(toList()).size();
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		if (isRowLevelSecured())
-		{
-			return delegate().findAll(q).filter(entity -> hasPermissionOnEntity(entity, READ));
-		}
-		return delegate().findAll(q);
+		return delegate().findAll(q).filter(entity -> hasPermissionOnEntity(entity, READ));
 	}
 
 	@Override
@@ -114,7 +91,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		Entity entity = delegate().findOne(q);
 
-		if (entity != null && isRowLevelSecured() && !hasPermissionOnEntity(entity, READ))
+		if (entity != null && !hasPermissionOnEntity(entity, READ))
 		{
 			return null;
 		}
@@ -127,7 +104,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	{
 		Entity entity = null;
 
-		if (!isRowLevelSecured() || hasPermissionOnEntity(id, READ))
+		if (hasPermissionOnEntity(id, READ))
 		{
 			entity = delegate().findOneById(id);
 		}
@@ -139,7 +116,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	public Entity findOneById(Object id, Fetch fetch)
 	{
 		Entity entity = null;
-		if (!isRowLevelSecured() || hasPermissionOnEntity(id, READ))
+		if (hasPermissionOnEntity(id, READ))
 		{
 			entity = delegate().findOneById(id, fetch);
 		}
@@ -150,41 +127,30 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		Stream<Entity> entities = delegate().findAll(ids);
-		if (isRowLevelSecured())
-		{
-			entities = entities.filter(entity -> hasPermissionOnEntity(entity, READ));
-		}
+		entities = entities.filter(entity -> hasPermissionOnEntity(entity, READ));
 		return entities;
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		if (isRowLevelSecured())
-		{
-			return delegate().findAll(ids, fetch).filter(entity -> hasPermissionOnEntity(entity, READ));
-		}
-		return delegate().findAll(ids, fetch);
+		return delegate().findAll(ids, fetch).filter(entity -> hasPermissionOnEntity(entity, READ));
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		if (isRowLevelSecured())
+		if (!SecurityUtils.currentUserIsSuOrSystem())
 		{
-			if (!SecurityUtils.currentUserIsSuOrSystem())
-			{
-				throw new UnsupportedOperationException();
-			}
+			throw new UnsupportedOperationException();
 		}
-
 		return delegate().aggregate(aggregateQuery);
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		if (!isRowLevelSecured() || hasPermissionOnEntity(entity, WRITE))
+		if (hasPermissionOnEntity(entity, WRITE))
 		{
 			delegate().update(entity);
 		}
@@ -208,10 +174,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		if (isRowLevelSecured())
-		{
-			entities = entities.filter(entity -> hasPermissionOnEntity(entity, WRITE));
-		}
+		entities = entities.filter(entity -> hasPermissionOnEntity(entity, WRITE));
 
 		delegate().delete(entities);
 	}
@@ -219,7 +182,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public void deleteById(Object id)
 	{
-		if (!isRowLevelSecured() || hasPermissionOnEntity(id, WRITE))
+		if (hasPermissionOnEntity(id, WRITE))
 		{
 			delegate().deleteById(id);
 		}
@@ -228,76 +191,57 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		if (isRowLevelSecured())
-		{
-			ids = ids.filter(entity -> hasPermissionOnEntity(entity, WRITE));
-		}
-
+		ids = ids.filter(entity -> hasPermissionOnEntity(entity, WRITE));
 		delegate().deleteAll(ids);
-
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		if (isRowLevelSecured())
-		{
-			delegate().forEachBatched(entities -> delete(entities.stream()), 1000);
-		}
-		else
-		{
-			delegate().deleteAll();
-		}
-
+		delegate().forEachBatched(entities -> delete(entities.stream()), 1000);
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		if (isRowLevelSecured())
-		{
-			// TODO decide whether we want to write ACEs for superusers, considering the following use case:
-			// as user #0 with superuser=true access import dataset
-			// as user #1 with superuser=true access remove set superuser=false for user #0
-			// can user #0 still access the imported data? (if an ace exists --> yes, otherwise no)
+		// TODO decide whether we want to write ACEs for superusers, considering the following use case:
+		// as user #0 with superuser=true access import dataset
+		// as user #1 with superuser=true access remove set superuser=false for user #0
+		// can user #0 still access the imported data? (if an ace exists --> yes, otherwise no)
 
-			MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
-			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-			acl.insertAce(acl.getEntries().size(),
-					EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE), sid, true);
-			mutableAclService.updateAcl(acl);
-		}
+		MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
+		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		acl.insertAce(acl.getEntries().size(), EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE),
+				sid, true);
+		mutableAclService.updateAcl(acl);
+
 		delegate().add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		if (isRowLevelSecured())
+		return delegate().add(entities.filter(entity ->
 		{
-			return delegate().add(entities.filter(entity ->
-			{
-				mutableAclService.createAcl(new EntityIdentity(entity));
-				return true;
-			}));
-		}
-		return delegate().add(entities);
-	}
-
-	private boolean isRowLevelSecured()
-	{
-		String aclClass = EntityIdentityUtils.toType(getEntityType());
-		return mutableAclClassService.hasAclClass(aclClass);
+			mutableAclService.createAcl(new EntityIdentity(entity));
+			return true;
+		}));
 	}
 
 	private boolean hasPermissionOnEntity(Entity entity, EntityTypePermission permission)
 	{
-		return hasPermissionOnEntity(entity.getIdValue(), permission);
+		EntityIdentity entityIdentity = new EntityIdentity(entity);
+		return hasPermissionOnEntity(entityIdentity, permission);
 	}
 
 	private boolean hasPermissionOnEntity(Object id, EntityTypePermission permission)
 	{
 		EntityIdentity entityIdentity = new EntityIdentity(getEntityType().getId(), id);
+		return hasPermissionOnEntity(entityIdentity, permission);
+	}
+
+	private boolean hasPermissionOnEntity(EntityIdentity entityIdentity, EntityTypePermission permission)
+	{
 		return userPermissionEvaluator.hasPermission(entityIdentity, permission);
 	}
 }
