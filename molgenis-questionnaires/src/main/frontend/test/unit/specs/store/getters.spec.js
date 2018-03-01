@@ -1,4 +1,4 @@
-import getters from '../../../../src/store/getters'
+import getters from 'src/store/getters'
 
 describe('getters', () => {
   const state = {
