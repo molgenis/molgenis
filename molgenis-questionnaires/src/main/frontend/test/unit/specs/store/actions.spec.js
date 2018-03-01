@@ -2,7 +2,6 @@ import actions from 'src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
-import moment from 'moment'
 
 const testAction = (action, payload, state, expectedMutations, done) => {
   let count = 0

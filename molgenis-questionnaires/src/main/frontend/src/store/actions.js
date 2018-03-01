@@ -1,5 +1,4 @@
 import api from '@molgenis/molgenis-api-client'
-import moment from 'moment'
 
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
