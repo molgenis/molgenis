@@ -49,7 +49,7 @@
       getReadableValue (attribute) {
         const value = this.data[attribute.name]
 
-        if (value) {
+        if (value !== undefined) {
           switch (attribute.fieldType) {
             case 'MREF':
             case 'CATEGORICAL_MREF':
