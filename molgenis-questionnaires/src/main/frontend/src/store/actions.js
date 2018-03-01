@@ -33,6 +33,7 @@ const actions = {
     })
   },
 
+  /* eslint-disable no-empty-pattern */
   'GET_QUESTIONNAIRE_OVERVIEW' ({}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId)
   },
