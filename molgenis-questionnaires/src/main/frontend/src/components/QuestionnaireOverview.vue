@@ -44,7 +44,7 @@
       }
     },
     created () {
-      this.$store.dispatch('GET_RAW_QUESTIONNAIRE', this.questionnaireId).then(response => {
+      this.$store.dispatch('GET_QUESTIONNAIRE_OVERVIEW', this.questionnaireId).then(response => {
         this.questionnaire = response
         this.loading = false
       })
