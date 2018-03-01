@@ -14,7 +14,7 @@ localVue.filter('i18n', (key) => {
   return translations[key]
 })
 
-describe.only('QuestionnaireOverview component', () => {
+describe('QuestionnaireOverview component', () => {
   let actions
   let store
   let questionnaire
