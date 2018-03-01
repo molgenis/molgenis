@@ -3,10 +3,7 @@ package org.molgenis.data.security.owned;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
-import org.molgenis.data.security.EntityIdentity;
-import org.molgenis.data.security.EntityIdentityUtils;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.EntityTypePermissionUtils;
+import org.molgenis.data.security.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -267,7 +264,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 			MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
 			Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 			acl.insertAce(acl.getEntries().size(),
-					EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA), sid, true);
+					EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE), sid, true);
 			mutableAclService.updateAcl(acl);
 		}
 		delegate().add(entity);
