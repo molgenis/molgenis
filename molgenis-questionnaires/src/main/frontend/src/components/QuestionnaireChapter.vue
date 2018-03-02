@@ -223,8 +223,6 @@
             this.$store.dispatch('SUBMIT_QUESTIONNAIRE', submitDate).then(() => {
               this.navigationBlocked = false
               this.$router.push('/' + this.questionnaireId + '/thanks')
-            }, error => {
-              console.log('Something went wrong: ', error)
             })
           } else {
             this.navigationBlocked = true
