@@ -893,7 +893,6 @@ public class EmxImportServiceIT extends ImportServiceIT
 		entityTypePermissionMap.put("sys_md_EntityType", READ);
 		entityTypePermissionMap.put("sys_md_Attribute", READ);
 		entityTypePermissionMap.put("sys_md_Tag", READ);
-		entityTypePermissionMap.put("sys_sec_Owned", READ);
 		entityTypePermissionMap.put("sys_FileMeta", READ);
 		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
 
