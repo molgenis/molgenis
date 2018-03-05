@@ -30,7 +30,6 @@
             type="submit"
             @click.prevent="onSubmit"
             :disabled="formState.$pristine || formState.$invalid">
-            Save changes
           </button>
 
           <button
@@ -96,6 +95,7 @@
       onValueChanged (formData) {
         this.formData = formData
       },
+
       onSubmit () {
         this.isSaving = true
         const options = {
