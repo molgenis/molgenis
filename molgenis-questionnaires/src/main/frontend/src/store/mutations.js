@@ -35,6 +35,10 @@ const mutations = {
     state.submissionText = submissionText
   },
 
+  'SET_MAPPER_OPTIONS' (state, mapperOptions) {
+    state.mapperOptions = mapperOptions
+  },
+
   'CLEAR_STATE' (state) {
     state.questionnaireId = ''
     state.chapterFields = []

@@ -47,7 +47,12 @@ const state = {
   /**
    * Submission text shown after completing a questionnaire
    */
-  submissionText: ''
+  submissionText: '',
+
+  /**
+   * Option object to be used in the EntityToFormMapper
+   */
+  mapperOptions : {}
 }
 
 Vue.use(Vuex)

@@ -93,6 +93,19 @@ describe('mutations', () => {
     })
   })
 
+  describe('SET_MAPPER_OPTIONS', () => {
+    it('should update the mapperOptions in the state with the payload', () => {
+      const payload = {
+        booleanLabels: {
+          'true': 'Yes'
+        }
+      }
+      mutations.SET_SUBMISSION_TEXT(state, payload)
+
+      expect(state.submissionText).to.deep.equal(payload)
+    })
+  })
+
   describe('CLEAR_STATE', () => {
     it('should clear the state', () => {
       mutations.CLEAR_STATE(state)
