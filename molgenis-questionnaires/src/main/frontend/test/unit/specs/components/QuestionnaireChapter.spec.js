@@ -19,7 +19,7 @@ localVue.filter('i18n', (key) => {
   return translations[key]
 })
 
-describe.only('QuestionnaireChapter component', () => {
+describe('QuestionnaireChapter component', () => {
   let actions
   let getters
   let mutations
@@ -27,6 +27,8 @@ describe.only('QuestionnaireChapter component', () => {
   let state
 
   beforeEach(() => {
+    td.reset()
+
     actions = {
       AUTO_SAVE_QUESTIONNAIRE: td.function(),
       GET_QUESTIONNAIRE: td.function(),
@@ -61,7 +63,7 @@ describe.only('QuestionnaireChapter component', () => {
 
   it('should not dispatch action [GET_QUESTIONNAIRE] when chapters are present', () => {
     shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    td.verify(actions.GET_QUESTIONNAIRE, {times: 0})
+    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined), {times: 0})
   })
 
   it('should dispatch action [GET_QUESTIONNAIRE] when no chapters are present', () => {
@@ -170,7 +172,7 @@ describe.only('QuestionnaireChapter component', () => {
     it('should commit [UPDATE_FORM_STATUS] with value "SUBMITTED"', () => {
       const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
       wrapper.vm.navigateToNextChapter()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)))
+      td.verify(mutations.UPDATE_FORM_STATUS(state, 'SUBMITTED'))
     })
 
     it('should set navigationBlocked to true if form is not valid', () => {
@@ -213,7 +215,7 @@ describe.only('QuestionnaireChapter component', () => {
       wrapper.vm.navigateToPreviousChapter()
 
       wrapper.vm.$nextTick(() => {
-        td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)), {times: 0})
+        td.verify(mutations.UPDATE_FORM_STATUS(state, 'OPEN'), {times: 0})
       })
     })
   })

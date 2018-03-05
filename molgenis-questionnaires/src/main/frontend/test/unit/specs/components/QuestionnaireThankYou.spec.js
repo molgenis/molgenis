@@ -14,24 +14,32 @@ localVue.filter('i18n', (key) => {
 })
 
 describe('QuestionnaireThankYou component', () => {
-  const state = {
-    submissionText: 'thank you'
-  }
+  let state
+  let actions
+  let store
 
-  const actions = {
-    GET_SUBMISSION_TEXT: td.function()
-  }
+  beforeEach(() => {
+    state = {
+      submissionText: 'thank you'
+    }
 
-  const store = new Vuex.Store({state, actions})
+    actions = {
+      GET_SUBMISSION_TEXT: td.function()
+    }
+
+    store = new Vuex.Store({state, actions})
+  })
+
   const stubs = ['router-link', 'router-view']
   const propsData = {questionnaireId: 'test_quest'}
-  const wrapper = shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
 
   it('should dispatch an action to get the submissionText on created', () => {
+    shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
     td.verify(actions.GET_SUBMISSION_TEXT(td.matchers.anything(), 'test_quest', undefined))
   })
 
   it('should render the submissionText from the state correctly', () => {
+    const wrapper = shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
     expect(wrapper.vm.submissionText).to.equal('thank you')
   })
 })

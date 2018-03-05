@@ -21,6 +21,8 @@ describe('QuestionnaireStart component', () => {
   let store
 
   beforeEach(() => {
+    td.reset()
+
     state = {
       questionnaireDescription: 'description',
       questionnaireLabel: 'label',
