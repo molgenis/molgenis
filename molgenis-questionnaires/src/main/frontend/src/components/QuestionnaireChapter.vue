@@ -75,7 +75,7 @@
             <!-- Error message container -->
             <div v-if="navigationBlocked" class="error-message-container">
               <div class="alert alert-warning" role="alert">
-                {{ 'chapter_incomplete_message' | i18n }}
+                {{ 'questionnaire_chapter_incomplete_message' | i18n }}
               </div>
             </div>
 
