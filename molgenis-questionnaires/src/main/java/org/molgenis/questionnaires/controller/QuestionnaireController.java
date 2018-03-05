@@ -56,9 +56,9 @@ public class QuestionnaireController extends VuePluginController
 	}
 
 	@ResponseBody
-	@GetMapping("/{name}/thanks")
-	public String getQuestionnaireSubmissionText(@PathVariable("name") String name)
+	@GetMapping("/{id}/thanks")
+	public String getQuestionnaireSubmissionText(@PathVariable("id") String id)
 	{
-		return questionnaireService.getQuestionnaireSubmissionText(name);
+		return questionnaireService.getQuestionnaireSubmissionText(id);
 	}
 }
