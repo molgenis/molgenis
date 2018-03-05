@@ -284,6 +284,19 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private Stream<Entity> findAllPermitted(Query<Entity> query, EntityPermission entityPermission)
 	{
-		return delegate().findAll(query).filter(entity -> hasPermissionOnEntity(entity, entityPermission));
+		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(query);
+		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+		Stream<Entity> permittedEntityStream = delegate().findAll(query)
+														 .filter(entity -> hasPermissionOnEntity(entity,
+																 entityPermission));
+		if (query.getOffset() > 0)
+		{
+			permittedEntityStream = permittedEntityStream.skip(query.getOffset());
+		}
+		if (query.getPageSize() > 0)
+		{
+			permittedEntityStream = permittedEntityStream.limit(query.getPageSize());
+		}
+		return permittedEntityStream;
 	}
 }
