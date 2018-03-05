@@ -27,14 +27,14 @@
               "auto": false,
               "nillable": true,
               "readOnly": false,
-              "labelAttribute": false,
+              "labelAttribute": true,
               "unique": false,
               "visible": true,
               "lookupAttribute": false,
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "id",
+          "labelAttribute": "value",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
@@ -65,6 +65,6 @@
   "_href": "/api/v2/entity/0",
   "xref": {
     "_href": "/api/v2/refEntity/ref0",
-    "value": "val0"
+    "value": "label0"
   }
 }

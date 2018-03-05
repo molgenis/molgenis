@@ -91,11 +91,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	private static final String ENTITY_ID = "0";
 	private static final String REF_ENTITY0_ID = "ref0";
-	private static final String REF_ENTITY1_ID = "ref0";
+	private static final String REF_ENTITY1_ID = "ref1";
+	private static final String REF_ENTITY0_LABEL = "label0";
+	private static final String REF_ENTITY1_LABEL = "label1";
 	private static final String REF_REF_ENTITY_ID = "refRef0";
 	private static final String HREF_ENTITY_COLLECTION = BASE_URI + '/' + ENTITY_NAME;
+	private static final String HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE = BASE_URI + '/' + ENTITY_NAME + "?includeCategories=true";
 	private static final String HREF_COPY_ENTITY = BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
+	private static final String HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
 	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
 	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
 
@@ -174,9 +178,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 													   .setLabel(REF_REF_ENTITY_NAME)
 													   .addAttribute(
 															   attributeFactory.create().setName(REF_REF_ATTR_ID_NAME),
-															   ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
+															   ROLE_ID, ROLE_LOOKUP)
 													   .addAttribute(attributeFactory.create()
-																					 .setName(REF_REF_ATTR_VALUE_NAME));
+																					 .setName(REF_REF_ATTR_VALUE_NAME),
+															   ROLE_LABEL);
 
 		EntityType selfRefEntityType = entityTypeFactory.create(SELF_REF_ENTITY_NAME)
 														.setLabel(SELF_REF_ENTITY_NAME)
@@ -192,13 +197,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		EntityType refEntityType = entityTypeFactory.create(REF_ENTITY_NAME)
 													.setLabel(REF_ENTITY_NAME)
 													.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME),
-															ROLE_ID, ROLE_LABEL, ROLE_LOOKUP)
+															ROLE_ID, ROLE_LOOKUP)
 													.addAttribute(
-															attributeFactory.create().setName(REF_ATTR_VALUE_NAME))
+															attributeFactory.create().setName(REF_ATTR_VALUE_NAME),
+															ROLE_LABEL)
 													.addAttribute(attributeFactory.create()
 																				  .setName(REF_ATTR_REF_NAME)
 																				  .setDataType(XREF)
 																				  .setRefEntity(refRefEntityType));
+
 		// required
 		String attrIdName = "id";
 		attrBoolName = "bool";
@@ -314,12 +321,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		Entity refEntity0 = new DynamicEntity(refEntityType);
 		refEntity0.set(REF_ATTR_ID_NAME, REF_ENTITY0_ID);
-		refEntity0.set(REF_ATTR_VALUE_NAME, "val0");
+		refEntity0.set(REF_ATTR_VALUE_NAME, REF_ENTITY0_LABEL);
 		refEntity0.set(REF_ATTR_REF_NAME, refRefEntity);
 
 		Entity refEntity1 = new DynamicEntity(refEntityType);
 		refEntity1.set(REF_ATTR_ID_NAME, REF_ENTITY1_ID);
-		refEntity1.set(REF_ATTR_VALUE_NAME, "val1");
+		refEntity1.set(REF_ATTR_VALUE_NAME, REF_ENTITY1_LABEL);
 		refEntity1.set(REF_ATTR_REF_NAME, refRefEntity);
 
 		Entity entity = new DynamicEntity(entityType);
@@ -373,6 +380,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
+
+		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
+
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
 		when(dataService.findOneById(REF_REF_ENTITY_NAME, REF_REF_ENTITY_ID)).thenReturn(refRefEntity);
@@ -383,7 +393,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		assertEquals(entity.getIdValue(), ENTITY_ID);
 		assertEquals(refEntity0.getIdValue(), REF_ENTITY0_ID);
+		assertEquals(refEntity0.getLabelValue(), REF_ENTITY0_LABEL);
 		assertEquals(refEntity1.getIdValue(), REF_ENTITY1_ID);
+		assertEquals(refEntity1.getLabelValue(), REF_ENTITY1_LABEL);
 		assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
 		assertEquals(selfRefEntity.getIdValue(), "0");
 
@@ -439,10 +451,21 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResource() throws Exception
 	{
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceResponse.json"))));
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
+	public void retrieveResourceIncludingCategories() throws Exception
+	{
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponseIncludingCategories.json"));
+		mockMvc.perform(get(HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test
@@ -510,20 +533,26 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
+
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
 				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME + ')'
-						+ ')')).andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(
-					   readFile(getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"))));
+						+ ')'))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test
 	public void retrieveResourceCollection() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_COLLECTION))
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponse.json"));
+		mockMvc.perform(get(HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(content().json(readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"))));
+			   .andExpect(content().json(expectedContent));
 	}
 
 	@Test

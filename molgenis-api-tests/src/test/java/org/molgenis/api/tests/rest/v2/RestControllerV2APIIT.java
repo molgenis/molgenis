@@ -154,6 +154,53 @@ public class RestControllerV2APIIT
 	}
 
 	@Test
+	public void testRetrieveEntityIncludingCategories()
+	{
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .param("includeCategories", newArrayList("true"))
+											  .param("attrs", newArrayList("xcategorical_value"))
+											  .get(API_V2 + "V2_API_TypeTestAPIV2/1")
+											  .then()
+											  .log()
+											  .all();
+		response.statusCode(OKE);
+		response.body("_meta.attributes[0].categoricalOptions.id", Matchers.hasItems("ref1", "ref2","ref3"));
+	}
+
+	@Test
+	public void testRetrieveEntityExcludingCategoriesResultsInNoCategoricalOptions()
+	{
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .param("includeCategories", newArrayList("false"))
+											  .param("attrs", newArrayList("xcategorical_value"))
+											  .get(API_V2 + "V2_API_TypeTestAPIV2/1")
+											  .then()
+											  .log()
+											  .all();
+		response.statusCode(OKE);
+		response.body("_meta.attributes[0].categoricalOptions", Matchers.nullValue());
+	}
+
+	@Test
+	public void testRetrieveEntityWithoutSettingCategoriesResultsInNoCategoricalOptions()
+	{
+		ValidatableResponse response = given().log()
+											  .all()
+											  .header(X_MOLGENIS_TOKEN, testUserToken)
+											  .param("attrs", newArrayList("xcategorical_value"))
+											  .get(API_V2 + "V2_API_TypeTestAPIV2/1")
+											  .then()
+											  .log()
+											  .all();
+		response.statusCode(OKE);
+		response.body("_meta.attributes[0].categoricalOptions", Matchers.nullValue());
+	}
+
+	@Test
 	public void testRetrieveEntityWithAttributeFilterPost()
 	{
 		ValidatableResponse response = given().log()
