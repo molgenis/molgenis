@@ -93,6 +93,11 @@ public class AclConfig
 				aclCache());
 		aclService.setAclClassIdSupported(true);
 		aclService.setAclClassIdUtils(aclClassIdUtils());
+		aclService.setFindChildrenQuery("select obj.object_id_identity as obj_id, class.class as class "
+				+ "from acl_object_identity obj, acl_object_identity parent, acl_class class "
+				+ "where obj.parent_object = parent.id and obj.object_id_class = class.id "
+				+ "and parent.object_id_identity = ?::varchar and parent.object_id_class = ("
+				+ "select id FROM acl_class where acl_class.class = ?)");
 		aclService.setClassIdentityQuery("select currval(pg_get_serial_sequence('acl_class', 'id'))");
 		aclService.setSidIdentityQuery("select currval(pg_get_serial_sequence('acl_sid', 'id'))");
 		aclService.setObjectIdentityPrimaryKeyQuery(
