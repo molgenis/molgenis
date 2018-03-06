@@ -13,7 +13,8 @@
         {{ 'questionnaire_chapters' | i18n }}
       </a>
 
-      <a v-for="chapter in chapterNavigationList" class="list-group-item list-group-item-action disabled">
+      <a v-for="chapter in chapterNavigationList" class="list-group-item list-group-item-action disabled"
+         @click="navigateToChapter(chapter.index)">
         <span v-if="isChapterCompleted(chapter.id)">
           <i class="fa fa-check text-success"></i>
         </span>
@@ -37,6 +38,11 @@
     background-color: #f5f5f5;
   }
 
+  .list-group-item:hover {
+    cursor: pointer;
+    background-color: #f5f5f5;
+  }
+
   .active-chapter-text {
     font-weight: bold;
   }
@@ -49,6 +55,9 @@
     methods: {
       isChapterCompleted (chapterId) {
         return this.chapterProgress[chapterId] === 'complete'
+      },
+      navigateToChapter (index) {
+        this.$router.push('/' + this.questionnaireId + '/chapter/' + index)
       }
     },
     computed: {
