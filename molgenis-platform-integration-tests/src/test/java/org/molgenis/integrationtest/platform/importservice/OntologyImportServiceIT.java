@@ -5,8 +5,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptySet;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
-import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.data.security.RepositoryPermission.READ;
+import static org.molgenis.data.security.RepositoryPermission.WRITE;
+import static org.molgenis.data.security.RepositoryPermissionUtils.getCumulativePermission;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -193,7 +193,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 	{
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_ont_OntologyTermDynamicAnnotation", WRITE);
 		entityTypePermissionMap.put("sys_ont_OntologyTermNodePath", WRITE);
 		entityTypePermissionMap.put("sys_ont_OntologyTermSynonym", WRITE);
@@ -203,7 +203,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 
 		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(entityTypeId));
 			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
 			mutableAclService.updateAcl(acl);
 		}));

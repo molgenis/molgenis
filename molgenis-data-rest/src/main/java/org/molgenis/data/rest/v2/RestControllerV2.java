@@ -11,8 +11,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -355,8 +355,8 @@ public class RestControllerV2
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
-		boolean readPermission = permissionService.hasPermission(new EntityTypeIdentity(repositoryToCopyFrom.getName()),
-				EntityTypePermission.READ);
+		boolean readPermission = permissionService.hasPermission(new RepositoryIdentity(repositoryToCopyFrom.getName()),
+				RepositoryPermission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 
 		// Capabilities

@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.platform.TestPermissionPopulator;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.security.EntityTypePermission.*;
+import static org.molgenis.data.security.RepositoryPermission.*;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -73,7 +73,7 @@ public abstract class AbstractAttributeTypeUpdateIT extends AbstractTestNGSpring
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_md_Package", WRITE);
 		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
 		entityTypePermissionMap.put("sys_md_Attribute", WRITE);

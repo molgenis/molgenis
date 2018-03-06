@@ -5,8 +5,8 @@ import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -47,7 +47,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void isCurrentUserCanEditTrue()
 	{
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 		assertTrue(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
@@ -61,7 +61,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void isCurrentUserCanEditNoEntityTypePermissionFalse()
 	{
 		doReturn(false).when(permissionService)
-					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					   .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
@@ -75,7 +75,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void checkPermissionsNoException()
 	{
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 		staticContentService.checkPermissions("home");
 	}
 
@@ -90,7 +90,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	{
 		//		doReturn(true).when(permissionService).hasPermission(new PluginIdentity("home"), PluginPermission.WRITE);
 		doReturn(false).when(permissionService)
-					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					   .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");
 	}
 
@@ -99,7 +99,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	{
 		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 
 		assertTrue(this.staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 
@@ -113,7 +113,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(null);
 		when(staticContentFactory.create("home")).thenReturn(staticContent);
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new RepositoryIdentity(STATIC_CONTENT), RepositoryPermission.WRITE);
 
 		assertTrue(this.staticContentService.submitContent("home", "<p>New Content!</p>"));
 

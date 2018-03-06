@@ -5,8 +5,8 @@ import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Permission;
 
@@ -39,7 +39,7 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		boolean hasPermission = true;
 		if (entityTypeIdValue != null)
 		{
-			hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityTypeIdValue),
+			hasPermission = permissionService.hasPermission(new RepositoryIdentity(entityTypeIdValue),
 					toEntityTypePermission(permissionValue));
 		}
 
@@ -60,13 +60,13 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		switch (permission)
 		{
 			case "COUNT":
-				return EntityTypePermission.COUNT;
+				return RepositoryPermission.COUNT;
 			case "READ":
-				return EntityTypePermission.READ;
+				return RepositoryPermission.READ;
 			case "WRITE":
-				return EntityTypePermission.WRITE;
+				return RepositoryPermission.WRITE;
 			case "WRITEMETA":
-				return EntityTypePermission.WRITEMETA;
+				return RepositoryPermission.WRITEMETA;
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));

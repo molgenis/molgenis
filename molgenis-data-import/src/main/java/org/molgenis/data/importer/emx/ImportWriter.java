@@ -14,8 +14,8 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -58,19 +58,15 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		runAsSystem(() ->
-		{
-			importTags(job.parsedMetaData);
-			importPackages(job.parsedMetaData);
-		});
+		importTags(job.parsedMetaData);
+		importPackages(job.parsedMetaData);
 
 		GroupedEntityTypes groupedEntityTypes = groupEntityTypes(job.parsedMetaData.getEntities());
 
 		validateEntityTypePermissions(groupedEntityTypes.getUpdatedEntityTypes());
 
-		PersistResult persistResult = runAsSystem(
-				() -> dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT, toDataMode(job.dbAction)));
-		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
+		PersistResult persistResult = dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT,
+				toDataMode(job.dbAction));
 
 		persistResult.getNrPersistedEntitiesMap()
 					 .forEach((key, value) -> job.report.addEntityCount(key, Math.toIntExact(value)));
@@ -120,7 +116,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeName), EntityTypePermission.COUNT))
+		if (!permissionService.hasPermission(new RepositoryIdentity(entityTypeName), RepositoryPermission.COUNT))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));

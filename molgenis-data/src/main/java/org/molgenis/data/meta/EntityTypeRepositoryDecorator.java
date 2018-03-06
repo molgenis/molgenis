@@ -116,7 +116,8 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 	{
 		// add row to entities table
 		delegate().add(entityType);
-		if (!entityType.isAbstract() && !MetaDataService.isMetaEntityType(entityType))
+		if (!entityType.isAbstract() && !MetaDataService.isMetaEntityType(
+				entityType)) // TODO can we remove !MetaDataService.isMetaEntityType(entityType)
 		{
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType);
 			if (repoCollection == null)

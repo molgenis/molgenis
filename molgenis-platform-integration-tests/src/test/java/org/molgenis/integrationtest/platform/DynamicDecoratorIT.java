@@ -11,7 +11,7 @@ import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.slf4j.Logger;
@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static org.molgenis.data.security.RepositoryPermission.READ;
+import static org.molgenis.data.security.RepositoryPermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
@@ -154,7 +154,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 
 	private void populatePermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_md_Package", READ);
 		entityTypePermissionMap.put("sys_md_EntityType", READ);
 		entityTypePermissionMap.put("sys_md_Attribute", READ);

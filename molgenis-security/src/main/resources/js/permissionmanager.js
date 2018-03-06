@@ -86,6 +86,20 @@
       return items.join('')
     }
 
+      function createPermissionTable(data, nrPermissions, type, sid) {
+          var items = []
+          $.each(data.permissions, function (idx, permission) {
+              items.push('<tr data-id="' + permission.resource.id + '" data-type="' + type + '" data-sid="' + sid + '" data-mask="' + permission.mask + '">')
+              items.push('<td>' + permission.resource.label + '</td>')
+              for (var i = nrPermissions - 1; i >= 0; --i) {
+                  var checked = (permission.mask >> i) & 1 === 1
+                  items.push('<td><input type="checkbox"' + (checked ? ' checked' : '') + ' data-index="' + i + '"></td>')
+              }
+              items.push('</tr>')
+          })
+          return items.join('')
+      }
+
     $('#plugin-group-select').change(function () {
       $.get(molgenis.getContextUrl() + '/plugin/group/' + $(this).val(), function (data) {
         $('#plugin-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['read']))
@@ -108,13 +122,15 @@
       })
     })
     $('#entity-class-group-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/entityclass/group/' + $(this).val(), function (data) {
-        $('#entity-class-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+        var sid = $(this).val()
+        $.get(molgenis.getContextUrl() + '/repository/group/' + sid, function (data) {
+            $('#entity-class-group-permission-table tbody').empty().html(createPermissionTable(data, 5, 'group', sid))
       })
     })
     $('#entity-class-user-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/entityclass/user/' + $(this).val(), function (data) {
-        $('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+        var sid = $(this).val()
+        $.get(molgenis.getContextUrl() + '/repository/user/' + sid, function (data) {
+            $('#entity-class-user-permission-table tbody').empty().html(createPermissionTable(data, 5, 'user', sid))
       })
     })
       $('input:checkbox', '#entity-type-rls-table').change(function () {
@@ -131,12 +147,17 @@
           })
       })
 
+      $('#entity-class-group-permission-table,#entity-class-user-permission-table').on('change', 'input:checkbox', function () {
+          var element = $(this)
+          var parent = element.closest('tr')
+          var mask = parent.data('mask') ^ 1 << element.data('index')
+          parent.data('mask', mask)
+          $.post(molgenis.getContextUrl() + "/repository/" + parent.data('id') + "/" + parent.data('type') + "/" + parent.data('sid') + "/" + parent.data('mask'))
+      });
     $('#plugin-group-permission-form,' +
       '#plugin-user-permission-form,' +
       '#package-group-permission-form,' +
-      '#package-user-permission-form,' +
-      '#entity-class-group-permission-form,' +
-      '#entity-class-user-permission-form').submit(function (e) {
+        '#package-user-permission-form').submit(function (e) {
       e.preventDefault()
       $.ajax({
         type: $(this).attr('method'),

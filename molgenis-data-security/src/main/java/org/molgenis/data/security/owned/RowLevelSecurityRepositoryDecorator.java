@@ -26,12 +26,8 @@ import static org.molgenis.data.security.EntityPermission.READ;
 import static org.molgenis.data.security.EntityPermission.WRITE;
 
 /**
- * RepositoryDecorator that works on EntityType that extends OwnedEntityType.
- * <p>
- * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, delete
- * their own entities.
- * <p>
- * Admins are not effected.
+ * Entity decorator that checks whether the current user is allowed to add, update, delete entities. For entity count
+ * and read only include the permitted entities. Limitation: aggregation is only allowed for superusers and the system user.
  */
 public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
@@ -284,6 +280,19 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 
 	private Stream<Entity> findAllPermitted(Query<Entity> query, EntityPermission entityPermission)
 	{
-		return delegate().findAll(query).filter(entity -> hasPermissionOnEntity(entity, entityPermission));
+		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(query);
+		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+		Stream<Entity> permittedEntityStream = delegate().findAll(qWithoutLimitOffset)
+														 .filter(entity -> hasPermissionOnEntity(entity,
+																 entityPermission));
+		if (query.getOffset() > 0)
+		{
+			permittedEntityStream = permittedEntityStream.skip(query.getOffset());
+		}
+		if (query.getPageSize() > 0)
+		{
+			permittedEntityStream = permittedEntityStream.limit(query.getPageSize());
+		}
+		return permittedEntityStream;
 	}
 }

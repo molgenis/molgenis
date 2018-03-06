@@ -7,11 +7,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.EntityTypePermissionUtils;
+import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.util.Pair;
+import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.Sid;
@@ -58,10 +57,15 @@ public class PermissionRegistryImpl implements PermissionRegistry
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,
 						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
-			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
-			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
-					EntityTypePermission.READ);
-			mapBuilder.putAll(entityTypeIdentity, new Pair<>(entityTypePermissions, allUsersGroupSid));
+			ObjectIdentity repositoryIdentity = new RepositoryIdentity(entityType);
+			Permission repositoryPermissions = new CumulativePermission().set(RepositoryPermission.CREATE)
+																		 .set(RepositoryPermissionUtils.getCumulativePermission(
+																				 RepositoryPermission.READ));
+			mapBuilder.putAll(repositoryIdentity, new Pair<>(repositoryPermissions, allUsersGroupSid));
+
+			ObjectIdentity entityTypeIdentity = new EntityIdentity(entityType);
+			Permission entityPermissions = EntityPermissionUtils.getCumulativePermission(EntityPermission.READ);
+			mapBuilder.putAll(entityTypeIdentity, new Pair<>(entityPermissions, allUsersGroupSid));
 		});
 
 		return mapBuilder.build();
