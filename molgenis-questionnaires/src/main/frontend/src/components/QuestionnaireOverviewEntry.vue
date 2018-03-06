@@ -3,8 +3,11 @@
     <template v-for="attribute in attributes">
 
       <template v-if="attribute.fieldType === 'COMPOUND'">
-        <h4>{{ attribute.label }}</h4>
-        <hr>
+        <div v-if="hasAChildWithData(attribute)">
+          <h4>{{ attribute.label }}</h4>
+          <hr>
+        </div>
+
         <questionnaire-overview-entry
           :attributes="attribute.attributes"
           :data="data"
@@ -45,6 +48,15 @@
       hasValue (attribute) {
         const value = this.data[attribute.name]
         return !((Array.isArray(value) && value.length === 0) || value === undefined)
+      },
+      hasAChildWithData (attribute) {
+        return attribute.attributes.some(attribute => {
+          if (attribute.fieldType === 'COMPOUND') {
+            return this.hasAChildWithData(attribute)
+          }
+
+          return this.data[attribute.name] !== undefined
+        })
       },
       getReadableValue (attribute) {
         const value = this.data[attribute.name]

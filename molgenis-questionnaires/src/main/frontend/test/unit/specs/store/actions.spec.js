@@ -95,7 +95,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/' + questionnaireId)).thenResolve(questionnaire)
+      td.when(get('/api/v2/' + questionnaireId + '?includeCategories=true')).thenResolve(questionnaire)
       td.replace(api, 'get', get)
 
       const generatedForm = {

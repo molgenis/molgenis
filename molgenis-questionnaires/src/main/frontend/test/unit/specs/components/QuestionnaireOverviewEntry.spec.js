@@ -6,8 +6,8 @@ const $t = (key) => {
   const translations = {
     'questionnaire_overview_loading_text': 'loading overview',
     'questionnaires_overview_title': 'overview',
-    'questionnaire_bool_true': 'Ja',
-    'questionnaire_bool_false': 'Nee'
+    'questionnaire_boolean_true': 'Ja',
+    'questionnaire_boolean_false': 'Nee'
   }
   return translations[key]
 }
@@ -132,6 +132,77 @@ describe('QuestionnaireOverviewEntry component', () => {
 
     it('should return [FALSE] if there is an empty list', () => {
       expect(wrapper.vm.hasValue(propsData.attributes[2])).to.equal(false)
+    })
+  })
+
+  describe('hasAChildWithData', () => {
+    it('should return false if compound does not have a child with a value', () => {
+      const propsData = {
+        attributes: [
+          {
+            name: 'compound',
+            label: 'Compound group',
+            fieldType: 'COMPOUND',
+            attributes: [
+              {
+                name: 'field1',
+                label: 'Field 1',
+                fieldType: 'STRING'
+              },
+              {
+                name: 'field2',
+                label: 'Field 2',
+                fieldType: 'STRING'
+              }
+            ]
+          }
+        ],
+        data: {
+          field1: undefined,
+          field2: undefined
+        }
+      }
+
+      const wrapper = shallow(QuestionnaireOverviewEntry, {propsData})
+      expect(wrapper.vm.hasAChildWithData(propsData.attributes[0])).to.equal(false)
+    })
+
+    it('should return true if compound has one child with a value', () => {
+      const propsData = {
+        attributes: [
+          {
+            name: 'compound',
+            label: 'Compound group',
+            fieldType: 'COMPOUND',
+            attributes: [
+              {
+                name: 'compound1',
+                label: 'Compound 1',
+                fieldType: 'COMPOUND',
+                attributes: [
+                  {
+                    name: 'field1',
+                    label: 'Field 1',
+                    fieldType: 'STRING'
+                  }
+                ]
+              },
+              {
+                name: 'field2',
+                label: 'Field 2',
+                fieldType: 'STRING'
+              }
+            ]
+          }
+        ],
+        data: {
+          field1: 'value',
+          field2: undefined
+        }
+      }
+
+      const wrapper = shallow(QuestionnaireOverviewEntry, {propsData})
+      expect(wrapper.vm.hasAChildWithData(propsData.attributes[0])).to.equal(true)
     })
   })
 
