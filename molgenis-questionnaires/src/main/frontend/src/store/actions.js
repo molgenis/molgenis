@@ -18,7 +18,7 @@ const actions = {
   },
 
   'GET_QUESTIONNAIRE' ({state, commit}, questionnaireId) {
-    return api.get('/api/v2/' + questionnaireId).then(response => {
+    return api.get('/api/v2/' + questionnaireId + '?includeCategories=true').then(response => {
       commit('SET_QUESTIONNAIRE_ID', questionnaireId)
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
       commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
