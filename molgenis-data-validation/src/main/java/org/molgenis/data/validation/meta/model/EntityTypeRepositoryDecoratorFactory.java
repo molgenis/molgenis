@@ -9,7 +9,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
-import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
@@ -24,17 +23,14 @@ public class EntityTypeRepositoryDecoratorFactory
 	private final DataService dataService;
 	private final EntityTypeValidator entityTypeValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final MutableAclService mutableAclService;
 
 	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
-			EntityTypeValidator entityTypeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			MutableAclService mutableAclService)
+			EntityTypeValidator entityTypeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		super(entityTypeMetadata);
 		this.dataService = requireNonNull(dataService);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.mutableAclService = requireNonNull(mutableAclService);
 	}
 
 	@Override
