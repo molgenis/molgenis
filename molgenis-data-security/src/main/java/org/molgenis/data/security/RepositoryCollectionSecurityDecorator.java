@@ -104,8 +104,7 @@ public class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCol
 		Package updatedPackage = updatedEntityType.getPackage();
 		if (updatedPackage != null && (package_ == null || !updatedPackage.getId().equals(package_.getId())))
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(
-					new RepositoryIdentity(updatedEntityType.getId()));
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(entityType));
 			ObjectIdentity objectIdentity = new PackageIdentity(updatedPackage);
 			Acl parentAcl = mutableAclService.readAclById(objectIdentity);
 			acl.setParent(parentAcl);
@@ -113,8 +112,7 @@ public class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCol
 		}
 		else if (updatedPackage == null && package_ != null)
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(
-					new RepositoryIdentity(updatedEntityType.getId()));
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(entityType));
 			acl.setParent(null);
 			mutableAclService.updateAcl(acl);
 		}
