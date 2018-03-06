@@ -660,7 +660,6 @@ public class RestControllerV2APIIT
 				"dataexplorer_directory_export_dialog_yes", Matchers.equalTo("Yes, Send to Negotiator"),
 				"dataexplorer_wizard_button", Matchers.equalTo("Wizard"), "dataexplorer_wizard_apply",
 				Matchers.equalTo("Apply"), "questionnaires_table_status_open", Matchers.equalTo("Open"),
-				"questionnaire_thank_you_page_back_button", Matchers.equalTo("Back to My questionnaires"),
 				"form_bool_true", Matchers.equalTo("Yes"), "form_xref_control_placeholder",
 				Matchers.equalTo("Search for a Value"), "form_url_control_placeholder", Matchers.equalTo("URL"),
 				"questionnaires_table_continue_questionnaire_button", Matchers.equalTo("Continue questionnaire"),
@@ -680,7 +679,6 @@ public class RestControllerV2APIIT
 				"dataexplorer_aggregates_distinct", Matchers.equalTo("Distinct"), "form_number_control_placeholder",
 				Matchers.equalTo("Number"), "dataexplorer_aggregates_group_by", Matchers.equalTo("Group by"),
 				"dataexplorer_directory_export_dialog_no", Matchers.equalTo("No, I want to keep filtering"),
-				"questionnaire_back_button", Matchers.equalTo("Back to my questionnaires"),
 				"form_date_control_placeholder", Matchers.equalTo("Date"),
 				"questionnaires_no_questionnaires_found_message", Matchers.equalTo("No questionnaires found"));
 	}
