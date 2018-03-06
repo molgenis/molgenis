@@ -2,18 +2,25 @@ import QuestionnaireOverviewEntry from 'src/components/QuestionnaireOverviewEntr
 import { createLocalVue, shallow } from '@vue/test-utils'
 import Vuex from 'vuex'
 
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-localVue.filter('i18n', (key) => {
+const $t = (key) => {
   const translations = {
     'questionnaire_overview_loading_text': 'loading overview',
-    'questionnaires_overview_title': 'overview'
+    'questionnaires_overview_title': 'overview',
+    'questionnaire_bool_true': 'Ja',
+    'questionnaire_bool_false': 'Nee'
   }
   return translations[key]
-})
+}
 
 describe('QuestionnaireOverviewEntry component', () => {
+  let localVue
+
+  beforeEach(() => {
+    localVue = createLocalVue()
+    localVue.use(Vuex)
+    localVue.filter('i18n', $t)
+  })
+
   it('should render 1 level deep entry correctly', () => {
     const propsData = {
       attributes: [
@@ -221,18 +228,10 @@ describe('QuestionnaireOverviewEntry component', () => {
         noValue: undefined
       }
     }
-
-    const mocks = {
-      $t: (key) => {
-        const translations = {
-          'questionnaire_bool_true': 'Ja',
-          'questionnaire_bool_false': 'Nee'
-        }
-        return translations[key]
-      }
-    }
+    const mocks = {$t}
 
     const wrapper = shallow(QuestionnaireOverviewEntry, {propsData, mocks})
+
     it('should generate a readable value for [STRING] attributes', () => {
       expect(wrapper.vm.getReadableValue(propsData.attributes[0])).to.equal('value')
     })

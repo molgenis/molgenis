@@ -12,6 +12,7 @@ module.exports = function (config) {
     preprocessors: {
       './index.js': ['webpack', 'sourcemap']
     },
+    concurrency: 1,
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true

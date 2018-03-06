@@ -291,6 +291,17 @@
       }
     },
     created () {
+      if (!this.$store.state.mapperOptions.booleanLabels) {
+        const mapperOptions = {
+          booleanLabels: {
+            trueLabel: this.$t('questionnaire_boolean_true'),
+            falseLabel: this.$t('questionnaire_boolean_false'),
+            nillLabel: this.$t('questionnaire_boolean_null')
+          }
+        }
+        this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
+      }
+
       if (this.$store.state.chapterFields.length === 0) {
         this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId).then(() => {
           this.loading = false

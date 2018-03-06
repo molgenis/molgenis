@@ -52,7 +52,7 @@ const state = {
   /**
    * Option object to be used in the EntityToFormMapper
    */
-  mapperOptions : {}
+  mapperOptions: {}
 }
 
 Vue.use(Vuex)

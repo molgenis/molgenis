@@ -119,8 +119,18 @@ describe('actions', () => {
         }
       }
 
+      const state = {
+        mapperOptions: {
+          booleanLabels: {
+            trueLabel: 'Yes',
+            falseLabel: 'No',
+            nillLabel: 'No idea'
+          }
+        }
+      }
+
       const generateForm = td.function('EntityToFormMapper.generateForm')
-      td.when(generateForm(questionnaire.meta, {})).thenReturn(generatedForm)
+      td.when(generateForm(questionnaire.meta, {}, state.mapperOptions)).thenReturn(generatedForm)
       td.replace(EntityToFormMapper, 'generateForm', generateForm)
 
       const chapters = [{
@@ -142,7 +152,7 @@ describe('actions', () => {
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, done)
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, done)
     })
   })
 

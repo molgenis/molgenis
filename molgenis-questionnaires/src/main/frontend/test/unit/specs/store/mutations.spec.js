@@ -100,9 +100,9 @@ describe('mutations', () => {
           'true': 'Yes'
         }
       }
-      mutations.SET_SUBMISSION_TEXT(state, payload)
+      mutations.SET_MAPPER_OPTIONS(state, payload)
 
-      expect(state.submissionText).to.deep.equal(payload)
+      expect(state.mapperOptions).to.deep.equal(payload)
     })
   })
 

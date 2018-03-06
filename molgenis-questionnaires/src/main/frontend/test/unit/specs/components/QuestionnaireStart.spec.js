@@ -2,31 +2,41 @@ import QuestionnaireStart from 'src/components/QuestionnaireStart'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
+import { generateError } from '../../utils'
 
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-localVue.filter('i18n', (key) => {
+const $t = (key) => {
   const translations = {
     'questionnaire_loading_text': 'loading',
     'questionnaire_start': 'start',
-    'questionnaire_back_to_questionnaire_list': 'back'
+    'questionnaire_back_to_questionnaire_list': 'back',
+    'questionnaire_boolean_true': 'Yes',
+    'questionnaire_boolean_false': 'No',
+    'questionnaire_boolean_null': 'No idea'
   }
   return translations[key]
-})
+}
 
-describe('QuestionnaireStart component', () => {
+describe('QuestionnaireStart component', function () {
+  const spec = this.title
+
   let actions
+  let localVue
+  let mutations
   let state
   let store
 
   beforeEach(() => {
     td.reset()
 
+    localVue = createLocalVue()
+    localVue.use(Vuex)
+    localVue.filter('i18n', $t)
+
     state = {
       questionnaireDescription: 'description',
       questionnaireLabel: 'label',
-      chapterFields: []
+      chapterFields: [],
+      mapperOptions: {booleanLabels: 'labels'}
     }
 
     actions = {
@@ -34,10 +44,15 @@ describe('QuestionnaireStart component', () => {
       GET_QUESTIONNAIRE: td.function()
     }
 
-    store = new Vuex.Store({state, actions})
+    mutations = {
+      SET_MAPPER_OPTIONS: td.function()
+    }
+
+    store = new Vuex.Store({state, actions, mutations})
   })
 
   const stubs = ['router-link', 'router-view']
+  const mocks = {$t: $t}
   const propsData = {questionnaireId: 'test_quest'}
 
   it('should dispatch action [START_QUESTIONNAIRE] to start a questionnaire when created', () => {
@@ -45,14 +60,38 @@ describe('QuestionnaireStart component', () => {
     td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })
 
-  it('should dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when created and no chapters are present', () => {
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick(() => {
-      td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
+  it('should dispatch a mutation to set mapperOptions', function (done) {
+    const test = this.test.title
 
-      wrapper.vm.$nextTick(() => {
-        expect(wrapper.vm.loading).to.equal(false)
-      })
+    state.mapperOptions = {}
+    store = new Vuex.Store({state, actions, mutations})
+
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, mocks, stubs, localVue})
+    wrapper.vm.$nextTick().then(() => {
+      td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()))
+      done()
+    }).catch(error => done(generateError(error, spec, test)))
+  })
+
+  it('should not dispatch a mutation to set mapperOptions if already set', function (done) {
+    const test = this.test.title
+
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+    wrapper.vm.$nextTick().then(() => {
+      td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()), {times: 0})
+      done()
+    }).catch(error => done(generateError(error, spec, test)))
+  })
+
+  it('should dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when created and no chapters are present', function (done) {
+    const test = this.test.title
+
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+    wrapper.vm.$nextTick().then(() => {
+      wrapper.vm.$nextTick().then(() => {
+        td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
+        done()
+      }).catch(error => done(generateError(error, spec, test)))
     })
   })
 
@@ -60,12 +99,8 @@ describe('QuestionnaireStart component', () => {
     state.chapterFields = ['chapter1']
     store = new Vuex.Store({state, actions})
 
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
-
-    wrapper.vm.$nextTick(() => {
-      expect(wrapper.vm.loading).to.equal(false)
-    })
+    shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined), {times: 0})
   })
 
   it('should retrieve the description from the store', () => {
@@ -76,17 +111,6 @@ describe('QuestionnaireStart component', () => {
   it('should retrieve the label from the store', () => {
     const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
     expect(wrapper.vm.questionnaireLabel).to.equal('label')
-  })
-
-  it('should toggle template based on loading value', () => {
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    expect(wrapper.find('.spinner-container').exists()).to.equal(true)
-
-    wrapper.vm.$nextTick(() => {
-      wrapper.vm.$nextTick(() => {
-        expect(wrapper.find('.spinner-container').exists()).to.equal(false)
-      })
-    })
   })
 })
 

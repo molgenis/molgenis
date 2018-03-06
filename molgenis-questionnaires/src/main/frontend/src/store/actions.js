@@ -17,14 +17,14 @@ const actions = {
     api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
   },
 
-  'GET_QUESTIONNAIRE' ({commit}, questionnaireId) {
+  'GET_QUESTIONNAIRE' ({state, commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
       commit('SET_QUESTIONNAIRE_ID', questionnaireId)
       commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
       commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
 
       const data = response.items.length > 0 ? response.items[0] : {}
-      const form = EntityToFormMapper.generateForm(response.meta, data)
+      const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
       const chapters = form.formFields.filter(field => field.type === 'field-group')
 
       commit('SET_CHAPTER_FIELDS', chapters)

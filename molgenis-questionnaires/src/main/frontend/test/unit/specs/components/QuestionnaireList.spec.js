@@ -2,11 +2,9 @@ import QuestionnaireList from 'src/components/QuestionnaireList'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
+import { generateError } from '../../utils'
 
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-localVue.filter('i18n', (key) => {
+const $t = (key) => {
   const translations = {
     'questionnaires_title': 'questionnaires',
     'questionnaires_description': 'list of questionnaires',
@@ -19,15 +17,22 @@ localVue.filter('i18n', (key) => {
     'questionnaires_view_questionnaire': 'view'
   }
   return translations[key]
-})
+}
 
-describe('QuestionnaireList component', () => {
+describe('QuestionnaireList component', function () {
+  const spec = this.title
+
   let actions
+  let localVue
   let state
   let store
 
   beforeEach(() => {
     td.reset()
+
+    localVue = createLocalVue()
+    localVue.use(Vuex)
+    localVue.filter('i18n', $t)
 
     state = {
       questionnaireList: [
@@ -60,11 +65,14 @@ describe('QuestionnaireList component', () => {
     td.verify(actions.GET_QUESTIONNAIRE_LIST(td.matchers.anything(), undefined, undefined))
   })
 
-  it('should set loading to false when action is done in created function', () => {
+  it('should set loading to false when action is done in created function', function (done) {
+    const test = this.test.title
+
     const wrapper = shallow(QuestionnaireList, {store, localVue, stubs})
-    wrapper.vm.$nextTick(() => {
+    wrapper.vm.$nextTick().then(() => {
       expect(wrapper.vm.loading).to.equal(false)
-    })
+      done()
+    }).catch(error => done(generateError(error, spec, test)))
   })
 
   it('should render the list of questionnaires from the state correctly', () => {
@@ -72,30 +80,32 @@ describe('QuestionnaireList component', () => {
     expect(wrapper.vm.questionnaireList).to.deep.equal(state.questionnaireList)
   })
 
-  it('should render a table of questionnaires', () => {
+  it('should render a table of questionnaires', function (done) {
+    const test = this.test.title
+
     const wrapper = shallow(QuestionnaireList, {store, localVue, stubs})
+    wrapper.vm.$nextTick().then(() => {
+      const rows = wrapper.findAll('tbody > tr')
+      expect(rows.length).to.equal(3)
 
-    wrapper.vm.$nextTick(() => {
-      wrapper.vm.$nextTick(() => {
-        const rows = wrapper.findAll('tbody > tr')
-        expect(rows.length).to.equal(3)
+      expect(rows.at(0).contains('Questionnaire not started'))
+      expect(rows.at(1).contains('Questionnaire open'))
+      expect(rows.at(2).contains('Questionnaire submitted'))
 
-        expect(rows.at(0).contains('Questionnaire not started'))
-        expect(rows.at(1).contains('Questionnaire open'))
-        expect(rows.at(2).contains('Questionnaire submitted'))
-      })
-    })
+      done()
+    }).catch(error => done(generateError(error, spec, test)))
   })
 
-  it('should say it does not have questionnaires if list is empty', () => {
+  it('should say it does not have questionnaires if list is empty', function (done) {
+    const test = this.test.title
+
     state.questionnaireList = []
     store = new Vuex.Store({state, actions})
-    const wrapper = shallow(QuestionnaireList, {store, localVue, stubs})
 
-    wrapper.vm.$nextTick(() => {
-      wrapper.vm.$nextTick(() => {
-        expect(wrapper.find('h3').text()).to.equal('no questionnaires')
-      })
-    })
+    const wrapper = shallow(QuestionnaireList, {store, localVue, stubs})
+    wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.find('h3').text()).to.equal('no questionnaires')
+      done()
+    }).catch(error => done(generateError(error, spec, test)))
   })
 })

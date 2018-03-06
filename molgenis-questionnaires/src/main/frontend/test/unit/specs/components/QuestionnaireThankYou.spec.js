@@ -3,22 +3,24 @@ import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
 
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-localVue.filter('i18n', (key) => {
+const $t = (key) => {
   const translations = {
     'questionnaire_back_to_questionnaire_list': 'go back'
   }
   return translations[key]
-})
+}
 
 describe('QuestionnaireThankYou component', () => {
-  let state
   let actions
+  let localVue
+  let state
   let store
 
   beforeEach(() => {
+    localVue = createLocalVue()
+    localVue.use(Vuex)
+    localVue.filter('i18n', $t)
+
     state = {
       submissionText: 'thank you'
     }

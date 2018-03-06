@@ -2,25 +2,27 @@ import ChapterList from 'src/components/ChapterList'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import Vuex from 'vuex'
 
-const localVue = createLocalVue()
-
-localVue.use(Vuex)
-localVue.filter('i18n', (key) => {
+const $t = (key) => {
   const translations = {
     'questionnaire_saving_changes': 'saving',
     'questionnaire_changes_saved': 'saved',
     'questionnaire_chapters': 'chapters'
   }
   return translations[key]
-})
+}
 
 describe('ChapterList component', () => {
-  let getters
-  let store
-  let chapterProgress
   let chapterNavigationList
+  let chapterProgress
+  let getters
+  let localVue
+  let store
 
   beforeEach(() => {
+    localVue = createLocalVue()
+    localVue.use(Vuex)
+    localVue.filter('i18n', $t)
+
     chapterProgress = {
       1: 'complete',
       2: 'incomplete'
