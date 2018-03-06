@@ -89,7 +89,7 @@
       function createPermissionTable(data, nrPermissions, type, sid) {
           var items = []
           $.each(data.permissions, function (idx, permission) {
-              items.push('<tr data-id="' + permission.resource.id + '" data-type="' + type + '" data-sid="' + sid + '" data-mask="' + permission.mask + '">')
+              items.push('<tr data-id="' + permission.resource.id + '" data-mask="' + permission.mask + '">')
               items.push('<td>' + permission.resource.label + '</td>')
               for (var i = nrPermissions - 1; i >= 0; --i) {
                   var checked = (permission.mask >> i) & 1 === 1
@@ -124,13 +124,19 @@
     $('#entity-class-group-select').change(function () {
         var sid = $(this).val()
         $.get(molgenis.getContextUrl() + '/repository/group/' + sid, function (data) {
-            $('#entity-class-group-permission-table tbody').empty().html(createPermissionTable(data, 5, 'group', sid))
+            var tbody = $('#entity-class-group-permission-table tbody')
+            tbody.empty().html(createPermissionTable(data, 5))
+            tbody.data('type', 'group')
+            tbody.data('sid', sid)
       })
     })
     $('#entity-class-user-select').change(function () {
         var sid = $(this).val()
         $.get(molgenis.getContextUrl() + '/repository/user/' + sid, function (data) {
-            $('#entity-class-user-permission-table tbody').empty().html(createPermissionTable(data, 5, 'user', sid))
+            var tbody = $('#entity-class-user-permission-table tbody')
+            tbody.empty().html(createPermissionTable(data, 5))
+            tbody.data('type', 'user')
+            tbody.data('sid', sid)
       })
     })
       $('input:checkbox', '#entity-type-rls-table').change(function () {
@@ -148,11 +154,18 @@
       })
 
       $('#entity-class-group-permission-table,#entity-class-user-permission-table').on('change', 'input:checkbox', function () {
-          var element = $(this)
-          var parent = element.closest('tr')
-          var mask = parent.data('mask') ^ 1 << element.data('index')
-          parent.data('mask', mask)
-          $.post(molgenis.getContextUrl() + "/repository/" + parent.data('id') + "/" + parent.data('type') + "/" + parent.data('sid') + "/" + parent.data('mask'))
+          var col = $(this)
+          var row = col.closest('tr')
+          var table = row.closest('tbody')
+
+          var id = row.data('id')
+          var type = table.data('type')
+          var sid = table.data('sid')
+          var mask = row.data('mask') ^ 1 << col.data('index')
+
+          row.data('mask', mask)
+
+          $.post(molgenis.getContextUrl() + "/repository/" + id + "/" + type + "/" + sid + "/" + mask)
       });
     $('#plugin-group-permission-form,' +
       '#plugin-user-permission-form,' +

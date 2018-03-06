@@ -295,16 +295,26 @@ public class PermissionManagerController extends PluginController
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(repository),
 				singletonList(sid));
 		List<AccessControlEntry> accessControlEntries = acl.getEntries();
+
+		// update existing entry if exists
+		boolean aclUpdated = false;
 		for (int i = 0; i < accessControlEntries.size(); ++i)
 		{
 			AccessControlEntry accessControlEntry = accessControlEntries.get(i);
 			if (accessControlEntry.getSid().equals(sid))
 			{
 				acl.updateAce(i, new RepositoryPermission(mask));
-				mutableAclService.updateAcl(acl);
+				aclUpdated = true;
 				break;
 			}
 		}
+
+		// otherwise create new entry
+		if (!aclUpdated)
+		{
+			acl.insertAce(acl.getEntries().size(), new RepositoryPermission(mask), sid, true);
+		}
+		mutableAclService.updateAcl(acl);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
