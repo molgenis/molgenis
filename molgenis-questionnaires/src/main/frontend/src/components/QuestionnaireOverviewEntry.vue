@@ -55,7 +55,7 @@
             case 'CATEGORICAL_MREF':
               return value.map(v => v[attribute.refEntity.labelAttribute]).join(', ')
             case 'BOOL':
-              return value ? this.$t('questionnaire_bool_true') : this.$t('questionnaire_bool_false')
+              return value ? this.$t('questionnaire_boolean_true') : this.$t('questionnaire_boolean_false')
             case 'ENUM':
               return value.join(', ')
             case 'XREF':
