@@ -80,8 +80,6 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(entity);
 	}
 
-	// TODO add tests for findOne etc. that return null
-
 	@WithMockUser(username = USERNAME)
 	@Test
 	public void testAddStream()
@@ -366,6 +364,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()), emptyList());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllStream()
 	{
@@ -373,10 +372,10 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
-		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()),
-				singletonList(entity));
+		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()), singletonList(entity));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllStreamPermissionDenied()
 	{
@@ -386,6 +385,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()), emptyList());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllStreamFetch()
 	{
@@ -398,6 +398,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 				singletonList(entity));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindAllStreamFetchPermissionDenied()
 	{
@@ -468,6 +469,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(newArrayList(rowLevelSecurityRepositoryDecorator.iterator()), emptyList());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testForEachBatched()
 	{
@@ -484,6 +486,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(actualEntities, singletonList(entity));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testForEachBatchedPermissionDenied()
 	{

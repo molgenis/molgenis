@@ -668,7 +668,7 @@ public class RestControllerV2
 		}
 		else
 		{
-			Long count = dataService.count(entityTypeId, q);
+			Long count = dataService.count(entityTypeId, new QueryImpl<>(q).setOffset(0).setPageSize(0));
 			Iterable<Entity> it;
 			if (count > 0 && q.getPageSize() > 0)
 			{
