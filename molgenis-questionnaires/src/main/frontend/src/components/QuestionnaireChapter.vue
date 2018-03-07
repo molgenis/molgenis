@@ -222,7 +222,7 @@
 
             this.$store.dispatch('SUBMIT_QUESTIONNAIRE', submitDate).then(() => {
               this.navigationBlocked = false
-              this.$router.push('/' + this.questionnaireId + '/thanks')
+              this.$router.push('/' + this.questionnaireId + '/submitted')
             })
           } else {
             this.navigationBlocked = true

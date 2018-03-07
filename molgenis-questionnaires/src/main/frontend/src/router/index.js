@@ -44,7 +44,7 @@ export default new Router({
           component: QuestionnaireChapter
         },
         {
-          path: 'thanks',
+          path: 'submitted',
           props: true,
           component: QuestionnaireThankYou
         },
