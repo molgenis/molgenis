@@ -10,6 +10,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
+import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -59,24 +60,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 						  .findAll()
 						  .filter(entityType -> userPermissionEvaluator.hasPermission(
 								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.WRITE))
-						  .map(entityType ->
-						  {
-							  String entityTypeId = entityType.getId();
-							  Questionnaire questionnaireEntity = findQuestionnaireEntity(entityTypeId);
-
-							  if (questionnaireEntity == null)
-							  {
-								  // Create a questionnaire entity for the current user
-								  Questionnaire questionnaire = questionnaireFactory.create(
-										  entityManager.create(entityType, POPULATE));
-
-								  questionnaire.setOwner(getCurrentUsername());
-								  questionnaire.setStatus(NOT_STARTED);
-								  dataService.add(entityType.getId(), questionnaire);
-								  return QuestionnaireResponse.create(questionnaire);
-							  }
-							  return QuestionnaireResponse.create(questionnaireEntity);
-						  })
+						  .map(this::createQuestionnaireResponse)
 						  .collect(toList());
 	}
 
@@ -84,11 +68,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	public void startQuestionnaire(String id)
 	{
 		Questionnaire questionnaire = findQuestionnaireEntity(id);
-		if (questionnaire.getStatus().equals(NOT_STARTED))
+		if (questionnaire == null)
 		{
-			// Set questionnaire status to open once it has been requested
+			EntityType questionnaireEntityType = dataService.getEntityType(id);
+			questionnaire = questionnaireFactory.create(entityManager.create(questionnaireEntityType, POPULATE));
+			questionnaire.setOwner(getCurrentUsername());
 			questionnaire.setStatus(OPEN);
-			dataService.update(id, questionnaire);
+			dataService.add(id, questionnaire);
 		}
 	}
 
@@ -108,7 +94,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	}
 
 	/**
-	 * Find 1 row in the Questionnaire table that belongs to the current user
+	 * Find 1 row in the Questionnaire table that belongs to the current user.
+	 * Returns null if no row is found, or the questionnaire ID does not exist.
 	 *
 	 * @param entityTypeId The ID of a questionnaire table
 	 * @return An {@link Entity} of type {@link Questionnaire}
@@ -116,5 +103,25 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
 		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
+	}
+
+	/**
+	 * Create a {@link QuestionnaireResponse} based on an {@link EntityType}
+	 * Will set status to {@link QuestionnaireStatus}.OPEN if there is a data entry for the current user.
+	 *
+	 * @param entityType A Questionnaire EntityType
+	 * @return A {@link QuestionnaireResponse}
+	 */
+	private QuestionnaireResponse createQuestionnaireResponse(EntityType entityType)
+	{
+		String entityTypeId = entityType.getId();
+
+		QuestionnaireStatus status = NOT_STARTED;
+		Questionnaire questionnaireEntity = findQuestionnaireEntity(entityTypeId);
+		if (questionnaireEntity != null)
+		{
+			status = questionnaireEntity.getStatus();
+		}
+		return QuestionnaireResponse.create(entityTypeId, entityType.getLabel(), entityType.getDescription(), status);
 	}
 }
