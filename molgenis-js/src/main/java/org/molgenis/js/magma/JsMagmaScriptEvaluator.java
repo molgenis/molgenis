@@ -16,12 +16,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * JavaScript script evaluator using the Nashorn script engine.
@@ -53,7 +53,9 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity);
+		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity,
+				expressionIsMapExpression(expression));
+
 		Object value;
 		try
 		{
@@ -73,16 +75,22 @@ public class JsMagmaScriptEvaluator
 		return value;
 	}
 
-	private static Map<String, Object> toScriptEngineValueMap(Entity entity)
+	private boolean expressionIsMapExpression(String expression)
+	{
+		return expression.contains("').map({");
+	}
+
+	private static Map<String, Object> toScriptEngineValueMap(Entity entity, boolean isMapExpression)
 	{
 		Map<String, Object> map = Maps.newHashMap();
 		entity.getEntityType()
 			  .getAtomicAttributes()
-			  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr)));
+			  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr, isMapExpression)));
+
 		return map;
 	}
 
-	private static Object toScriptEngineValue(Entity entity, Attribute attr)
+	private static Object toScriptEngineValue(Entity entity, Attribute attr, boolean isMapExpression)
 	{
 		Object value = null;
 
@@ -97,16 +105,30 @@ public class JsMagmaScriptEvaluator
 			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
-				value = xrefEntity != null ? toScriptEngineValue(xrefEntity,
-						xrefEntity.getEntityType().getIdAttribute()) : null;
+				if (isMapExpression)
+				{
+					value = xrefEntity == null ? null : toScriptEngineValue(xrefEntity,
+							xrefEntity.getEntityType().getIdAttribute(), isMapExpression);
+				}
+				else
+				{
+					value = xrefEntity;
+				}
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
-				value = stream(mrefEntities.spliterator(), false).map(
-						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
-																 .collect(toList());
+				if (isMapExpression)
+				{
+					value = stream(mrefEntities).map(
+							mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute(),
+									isMapExpression)).collect(Collectors.toList());
+				}
+				else
+				{
+					value = stream(mrefEntities).collect(Collectors.toList());
+				}
 				break;
 			case DATE:
 				LocalDate localDate = entity.getLocalDate(attrName);
