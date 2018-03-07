@@ -26,12 +26,7 @@ import static org.molgenis.data.security.EntityPermission.READ;
 import static org.molgenis.data.security.EntityPermission.WRITE;
 
 /**
- * RepositoryDecorator that works on EntityType that extends OwnedEntityType.
- * <p>
- * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, delete
- * their own entities.
- * <p>
- * Admins are not effected.
+ * RepositoryDecorator that works on EntityTypes that are row-level secured.
  */
 public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
