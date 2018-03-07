@@ -77,9 +77,6 @@
             <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
         </#list>
     <#else>
-        <!-- Include Font Awesome v4.7.0 CSS for Vue plugins -->
-        <link rel="stylesheet" href="<@resource_href "/css/font-awesome.min.css"/>" type="text/css">
-
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
