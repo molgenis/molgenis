@@ -7,16 +7,20 @@ import java.util.List;
 public interface QuestionnaireService
 {
 	/**
-	 * Return a list of all questionnaires
-	 * Creates a questionnaire entry for the current user if it does not yet exist
+	 * Return a list of all questionnaires.
+	 * Checks current user progress to set status.
+	 * <p>
+	 * If user does not have a data entry for a questionnaire, status is set to 'NOT_STARTED'.
 	 *
 	 * @return A List of {@link QuestionnaireResponse}
 	 */
 	List<QuestionnaireResponse> getQuestionnaires();
 
 	/**
-	 * Start a questionnaire based on ID
-	 * Sets the questionnaire status to 'OPEN'
+	 * Start a questionnaire based on ID.
+	 * If current user does not have a row for the specified questionnaire, one is created.
+	 * <p>
+	 * Created questionnaire entries get the status 'OPEN'.
 	 *
 	 * @param id The ID of a questionnaire
 	 */
