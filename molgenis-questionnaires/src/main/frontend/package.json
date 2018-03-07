@@ -1,8 +1,9 @@
 {
-  "name": "questionnaire",
+  "name": "molgenis-questionnaire-ui",
   "version": "1.0.0",
   "description": "MOLGENIS questionnaires",
-  "author": "Mark de Haan",
+  "author": "Mark de Haan <markdehaan90@gmail.com>",
+  "license": "LGPL-3.0",
   "private": false,
   "scripts": {
     "dev": "node build/dev-server.js",
