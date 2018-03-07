@@ -55,6 +55,26 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 	public void testCreateRepository()
 	{
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("MyEntityType").getMock();
+		Package entityTypePackage = when(mock(Package.class).getId()).thenReturn("MyPackage").getMock();
+		when(entityType.getPackage()).thenReturn(entityTypePackage);
+		MutableAcl acl = mock(MutableAcl.class);
+		when(mutableAclService.createAcl(new RepositoryIdentity(entityType))).thenReturn(acl);
+		Acl parentAcl = mock(Acl.class);
+		when(mutableAclService.readAclById(new PackageIdentity(entityTypePackage))).thenReturn(parentAcl);
+		repositoryCollectionSecurityDecorator.createRepository(entityType);
+
+		verify(acl).insertAce(0, new CumulativePermission().set(CREATE).set(WRITEMETA).set(WRITE).set(READ).set(COUNT),
+				new PrincipalSid(USERNAME), true);
+		verify(acl).setParent(parentAcl);
+		verify(mutableAclService).updateAcl(acl);
+		verify(delegateRepositoryCollection).createRepository(entityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test
+	public void testCreateRepositoryEntityTypeWithoutPackage()
+	{
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("MyEntityType").getMock();
 		MutableAcl acl = mock(MutableAcl.class);
 		when(mutableAclService.createAcl(new RepositoryIdentity(entityType))).thenReturn(acl);
 		repositoryCollectionSecurityDecorator.createRepository(entityType);
@@ -63,13 +83,6 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 				new PrincipalSid(USERNAME), true);
 		verify(mutableAclService).updateAcl(acl);
 		verify(delegateRepositoryCollection).createRepository(entityType);
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void testCreateRepositoryEntityTypeWithPackage()
-	{
-		new RuntimeException("TODO write test");
 	}
 
 	@Test
