@@ -96,10 +96,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String REF_ENTITY1_LABEL = "label1";
 	private static final String REF_REF_ENTITY_ID = "refRef0";
 	private static final String HREF_ENTITY_COLLECTION = BASE_URI + '/' + ENTITY_NAME;
-	private static final String HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE = BASE_URI + '/' + ENTITY_NAME + "?includeCategories=true";
+	private static final String HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE =
+			BASE_URI + '/' + ENTITY_NAME + "?includeCategories=true";
 	private static final String HREF_COPY_ENTITY = BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
-	private static final String HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
+	private static final String HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE =
+			HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
 	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
 	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
 
@@ -142,6 +144,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private String attrXrefName;
 	private String attrCompoundName;
 	private String attrCompoundAttr0Name;
+	private String attrCompoundCategorical;
 	private String attrCompoundAttrCompoundName;
 	private String attrCompoundAttrCompoundAttr0Name;
 	private EntityType entityType;
@@ -213,6 +216,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String attrCategoricalMrefName = "categorical_mref";
 		attrCompoundName = "compound";
 		attrCompoundAttr0Name = "compound_attr0";
+		attrCompoundCategorical = "compound_categorical";
 		attrCompoundAttrCompoundName = "compound_attrcompound";
 		attrCompoundAttrCompoundAttr0Name = "compound_attrcompound_attr0";
 		String attrDateName = "date";
@@ -229,6 +233,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		attrStringName = "string";
 		String attrTextName = "text";
 		attrXrefName = "xref";
+
 		// optional
 		String attrBoolOptionalName = "boolOptional";
 		String attrCategoricalOptionalName = "categoricalOptional";
@@ -264,9 +269,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
-		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false)
-																								.setParent(
-																										attrCompound);
+		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false).setParent(attrCompound);
+		Attribute compoundAttrCategorical = createAttributeMeta(entityType, attrCompoundCategorical, CATEGORICAL,
+				refEntityType).setNillable(false).setParent(attrCompound);
 		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName,
 				STRING).setNillable(true).setParent(attrCompound);
 		Attribute compoundAttrCompound = createAttributeMeta(entityType, attrCompoundAttrCompoundName,
@@ -337,6 +342,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		entity.set(attrCategoricalName, refEntity0);
 		entity.set(attrCategoricalMrefName, asList(refEntity0, refEntity1));
 		entity.set(attrCompoundAttr0Name, "compoundAttr0Str");
+		entity.set(attrCompoundCategorical, refEntity0);
 		entity.set(attrCompoundAttrCompoundAttr0Name, "compoundAttrCompoundAttr0Str");
 		entity.set(attrDateName, LocalDate.parse("2015-05-22"));
 		entity.set(attrDateTimeName, Instant.parse("2015-05-22T06:12:13Z"));
@@ -353,6 +359,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String textValue = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.";
 		entity.set(attrTextName, textValue);
 		entity.set(attrXrefName, refEntity0);
+
 		// optional
 		entity.set(attrBoolOptionalName, null);
 		entity.set(attrCategoricalOptionalName, null);
@@ -547,8 +554,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResourceCollection() throws Exception
 	{
-		String expectedContent = readFile(
-				getClass().getResourceAsStream("resourceCollectionResponse.json"));
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
