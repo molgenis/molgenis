@@ -117,6 +117,19 @@
         $('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
       })
     })
+      $('input:checkbox', '#entity-type-rls-table').change(function () {
+          var id = $(this).attr('id');
+          var rlsEnabled = this.checked;
+          $.ajax({
+              url: molgenis.getContextUrl() + "/update/entityclass/rls",
+              type: "POST",
+              data: JSON.stringify({
+                  id: id,
+                  rlsEnabled: rlsEnabled
+              }),
+              contentType: "application/json; charset=utf-8"
+          })
+      })
 
     $('#plugin-group-permission-form,' +
       '#plugin-user-permission-form,' +

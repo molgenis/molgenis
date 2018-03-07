@@ -378,7 +378,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
-		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
+		when(dataService.count(ENTITY_NAME, new QueryImpl<>())).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
 		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));

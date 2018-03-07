@@ -87,7 +87,6 @@ public class RestControllerV2APIIT
 														  .put("sys_md_EntityType", WRITE)
 														  .put("sys_md_Attribute", WRITE)
 														  .put("sys_FileMeta", WRITE)
-														  .put("sys_sec_Owned", READ)
 														  .put("sys_L10nString", WRITE)
 														  .put("V2_API_TypeTestAPIV2", WRITE)
 														  .put("V2_API_TypeTestRefAPIV2", WRITE)
