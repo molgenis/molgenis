@@ -100,8 +100,8 @@ public class RestController
 
 	public RestController(AuthenticationSettings authenticationSettings, DataService dataService,
 			TokenService tokenService, AuthenticationManager authenticationManager,
-			UserPermissionEvaluator permissionService,
-			UserAccountService userAccountService, MolgenisRSQL molgenisRSQL, RestService restService)
+			UserPermissionEvaluator permissionService, UserAccountService userAccountService, MolgenisRSQL molgenisRSQL,
+			RestService restService)
 	{
 		this.authenticationSettings = requireNonNull(authenticationSettings);
 		this.dataService = requireNonNull(dataService);
@@ -1074,7 +1074,7 @@ public class RestController
 		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = () -> dataService.findAll(entityTypeId, q).iterator();
-		Long count = repository.count(q);
+		Long count = repository.count(new QueryImpl<>(q).setOffset(0).setPageSize(0));
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
 		List<Map<String, Object>> entities = new ArrayList<>();
