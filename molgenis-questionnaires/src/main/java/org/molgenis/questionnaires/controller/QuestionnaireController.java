@@ -34,6 +34,9 @@ public class QuestionnaireController extends VuePluginController
 		this.questionnaireService = requireNonNull(questionnaireService);
 	}
 
+	/**
+	 * Loads the questionnaire view
+	 */
 	@GetMapping("/**")
 	public String initView(Model model)
 	{
@@ -41,6 +44,12 @@ public class QuestionnaireController extends VuePluginController
 		return QUESTIONNAIRE_VIEW;
 	}
 
+	/**
+	 * <h1>Internal Questionnaire API</h1>
+	 * Retrieves a list of all the available questionnaires
+	 *
+	 * @return A list of {@link QuestionnaireResponse}
+	 */
 	@ResponseBody
 	@GetMapping(value = "/list")
 	public List<QuestionnaireResponse> getQuestionnaires()
@@ -48,6 +57,12 @@ public class QuestionnaireController extends VuePluginController
 		return questionnaireService.getQuestionnaires();
 	}
 
+	/**
+	 * <h1>Internal Questionnaire API</h1>
+	 * Starts a questionnaire
+	 *
+	 * @param id A questionnaire ID
+	 */
 	@GetMapping(value = "/start/{id}")
 	@ResponseStatus(value = OK)
 	public void startQuestionnaire(@PathVariable("id") String id)
@@ -55,8 +70,15 @@ public class QuestionnaireController extends VuePluginController
 		questionnaireService.startQuestionnaire(id);
 	}
 
+	/**
+	 * <h1>Internal Questionnaire API</h1>
+	 * Retrieves a submission text for a questionnaire
+	 *
+	 * @param id A questionnaire ID
+	 * @return A "thank you" text shown on submit of a questionnaire
+	 */
 	@ResponseBody
-	@GetMapping("/{id}/thanks")
+	@GetMapping("/submission-text/{id}")
 	public String getQuestionnaireSubmissionText(@PathVariable("id") String id)
 	{
 		return questionnaireService.getQuestionnaireSubmissionText(id);

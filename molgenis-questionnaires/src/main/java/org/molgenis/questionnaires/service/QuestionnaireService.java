@@ -19,13 +19,14 @@ public interface QuestionnaireService
 	 * Sets the questionnaire status to 'OPEN'
 	 *
 	 * @param id The ID of a questionnaire
-	 * @return A {@link QuestionnaireResponse}
 	 */
 	void startQuestionnaire(String id);
 
 	/**
 	 * Retrieve static content for a specific questionnaire containing a "Thank you" text which is shown
-	 * on submission
+	 * on submission.
+	 * <p>
+	 * If no static content is specified, will return a text with HTML contents by default.
 	 *
 	 * @param id The ID of a questionnaire
 	 * @return A piece of text which can be shown after submission of a questionnaire
