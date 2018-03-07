@@ -63,13 +63,13 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 	@Override
 	public long count()
 	{
-		return findAllPermitted(EntityPermission.COUNT).count();
+		return findAllPermittedWithoutLimitOffset(EntityPermission.COUNT).count();
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		return findAllPermitted(q, EntityPermission.COUNT).count();
+		return findAllPermittedWithoutLimitOffset(q, EntityPermission.COUNT).count();
 	}
 
 	@Override
@@ -277,18 +277,9 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 		}));
 	}
 
-	private Stream<Entity> findAllPermitted(EntityPermission entityPermission)
-	{
-		return findAllPermitted(new QueryImpl<>(), entityPermission);
-	}
-
 	private Stream<Entity> findAllPermitted(Query<Entity> query, EntityPermission entityPermission)
 	{
-		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(query);
-		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-		Stream<Entity> permittedEntityStream = delegate().findAll(qWithoutLimitOffset)
-														 .filter(entity -> hasPermissionOnEntity(entity,
-																 entityPermission));
+		Stream<Entity> permittedEntityStream = findAllPermittedWithoutLimitOffset(query, entityPermission);
 		if (query.getOffset() > 0)
 		{
 			permittedEntityStream = permittedEntityStream.skip(query.getOffset());
@@ -298,5 +289,18 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecor
 			permittedEntityStream = permittedEntityStream.limit(query.getPageSize());
 		}
 		return permittedEntityStream;
+	}
+
+	private Stream<Entity> findAllPermittedWithoutLimitOffset(Query<Entity> query, EntityPermission entityPermission)
+	{
+		Query<Entity> qWithoutLimitOffset = new QueryImpl<>(query);
+		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+		return delegate().findAll(qWithoutLimitOffset)
+						 .filter(entity -> hasPermissionOnEntity(entity, entityPermission));
+	}
+
+	private Stream<Entity> findAllPermittedWithoutLimitOffset(EntityPermission entityPermission)
+	{
+		return findAllPermitted(new QueryImpl<>(), entityPermission);
 	}
 }
