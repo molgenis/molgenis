@@ -65,8 +65,11 @@ public class QuestionnaireServiceTest
 	@Test
 	public void testGetQuestionnaires()
 	{
+		// =========== Setup ===========
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
+		when(entityType.getLabel()).thenReturn("label");
+		when(entityType.getDescription()).thenReturn("description");
 
 		Query<EntityType> typedQuery = mock(Query.class);
 		Query<EntityType> query = mock(Query.class);
@@ -76,19 +79,18 @@ public class QuestionnaireServiceTest
 		when(query.findAll()).thenReturn(Stream.of(entityType));
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID), WRITE)).thenReturn(true);
 
-		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getEntityType()).thenReturn(entityType);
-		when(questionnaire.getLabel()).thenReturn("label");
-		when(questionnaire.getDescription()).thenReturn("description");
-		when(questionnaire.getStatus()).thenReturn(NOT_STARTED);
-		when(questionnaire.getIdValue()).thenReturn("1");
-
 		Entity entity = mock(Entity.class);
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
+
+		Questionnaire questionnaire = mock(Questionnaire.class);
+		when(questionnaire.getStatus()).thenReturn(OPEN);
 		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
 
+		// =========== Test ===========
 		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		List<QuestionnaireResponse> expected = newArrayList(QuestionnaireResponse.create(questionnaire));
+		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
+				"description", OPEN);
+		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
 
 		assertEquals(actual, expected);
 	}
@@ -96,8 +98,11 @@ public class QuestionnaireServiceTest
 	@Test
 	public void testGetQuestionnairesWithNoExistingRow()
 	{
+		// =========== Setup ===========
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
+		when(entityType.getLabel()).thenReturn("label");
+		when(entityType.getDescription()).thenReturn("description");
 
 		Query<EntityType> typedQuery = mock(Query.class);
 		Query<EntityType> query = mock(Query.class);
@@ -107,56 +112,54 @@ public class QuestionnaireServiceTest
 		when(query.findAll()).thenReturn(Stream.of(entityType));
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID), WRITE)).thenReturn(true);
 
-		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getEntityType()).thenReturn(entityType);
-		when(questionnaire.getLabel()).thenReturn("label");
-		when(questionnaire.getDescription()).thenReturn("description");
-		when(questionnaire.getStatus()).thenReturn(NOT_STARTED);
-		when(questionnaire.getIdValue()).thenReturn("1");
-
 		Entity entity = null;
-		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(null);
+		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
 		when(questionnaireFactory.create(entity)).thenReturn(null);
 
-		Entity questionnaireEntity = mock(Entity.class);
-		when(entityManager.create(entityType, POPULATE)).thenReturn(questionnaireEntity);
-		when(questionnaireFactory.create(questionnaireEntity)).thenReturn(questionnaire);
-
+		// =========== Test ===========
 		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		List<QuestionnaireResponse> expected = newArrayList(QuestionnaireResponse.create(questionnaire));
+		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
+				"description", NOT_STARTED);
+		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
 
 		assertEquals(actual, expected);
-		verify(questionnaire).setOwner(null);
-		verify(questionnaire).setStatus(NOT_STARTED);
-		verify(dataService).add(QUESTIONNAIRE_ID, questionnaire);
 	}
 
 	@Test
 	public void testStartQuestionnaire()
 	{
-		Entity entity = mock(Entity.class);
-		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getStatus()).thenReturn(NOT_STARTED);
-
+		// =========== Setup ===========
+		Entity entity = null;
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
-		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
+		when(questionnaireFactory.create(entity)).thenReturn(null);
 
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.getEntityType(QUESTIONNAIRE_ID)).thenReturn(entityType);
+
+		Entity questionnaireEntity = mock(Entity.class);
+		when(entityManager.create(entityType, POPULATE)).thenReturn(questionnaireEntity);
+
+		Questionnaire questionnaire = mock(Questionnaire.class);
+		when(questionnaireFactory.create(questionnaireEntity)).thenReturn(questionnaire);
+
+		// =========== Test ===========
 		questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
-		verify(dataService).update(QUESTIONNAIRE_ID, questionnaire);
+		verify(dataService).add(QUESTIONNAIRE_ID, questionnaire);
 	}
 
 	@Test
 	public void testStartQuestionnaireAlreadyOpen()
 	{
+		// =========== Setup ===========
 		Entity entity = mock(Entity.class);
-		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getStatus()).thenReturn(OPEN);
-
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
+
+		Questionnaire questionnaire = mock(Questionnaire.class);
 		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
 
+		// =========== Test ===========
 		questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
-		verify(dataService, times(0)).update(QUESTIONNAIRE_ID, questionnaire);
+		verify(dataService, times(0)).add(QUESTIONNAIRE_ID, questionnaire);
 	}
 
 	@Test

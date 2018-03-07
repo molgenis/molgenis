@@ -4,9 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
@@ -101,8 +99,8 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void testGetQuestionnaireList() throws Exception
 	{
-		QuestionnaireResponse questionnaire = getMockQuestionnaire();
-		List<QuestionnaireResponse> questionnaires = newArrayList(questionnaire);
+		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label", "description", NOT_STARTED);
+		List<QuestionnaireResponse> questionnaires = newArrayList(questionnaireResponse);
 		when(questionnaireService.getQuestionnaires()).thenReturn(questionnaires);
 
 		MvcResult result = mockMvc.perform(get(QuestionnaireController.URI + "/list"))
@@ -110,7 +108,7 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 								  .andReturn();
 
 		String actual = result.getResponse().getContentAsString();
-		String expected = "[{\"id\":\"test_quest\",\"label\":\"label\",\"description\":\"description\",\"status\":\"NOT_STARTED\",\"questionnaireRowId\":\"1\"}]";
+		String expected = "[{\"id\":\"test_quest\",\"label\":\"label\",\"description\":\"description\",\"status\":\"NOT_STARTED\"}]";
 
 		assertEquals(actual, expected);
 	}
@@ -126,7 +124,7 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 	public void testGetQuestionnaireSubmissionText() throws Exception
 	{
 		when(questionnaireService.getQuestionnaireSubmissionText("1")).thenReturn("thanks!");
-		MvcResult result = mockMvc.perform(get(QuestionnaireController.URI + "/1/thanks"))
+		MvcResult result = mockMvc.perform(get(QuestionnaireController.URI + "/submission-text/1"))
 								  .andExpect(status().isOk())
 								  .andReturn();
 
@@ -135,20 +133,4 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 
 		assertEquals(actual, expected);
 	}
-
-	private QuestionnaireResponse getMockQuestionnaire()
-	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
-
-		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getEntityType()).thenReturn(entityType);
-		when(questionnaire.getLabel()).thenReturn("label");
-		when(questionnaire.getDescription()).thenReturn("description");
-		when(questionnaire.getStatus()).thenReturn(NOT_STARTED);
-		when(questionnaire.getIdValue()).thenReturn("1");
-
-		return QuestionnaireResponse.create(questionnaire);
-	}
-
 }

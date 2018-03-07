@@ -94,18 +94,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	}
 
 	/**
-	 * Find 1 row in the Questionnaire table that belongs to the current user.
-	 * Returns null if no row is found, or the questionnaire ID does not exist.
-	 *
-	 * @param entityTypeId The ID of a questionnaire table
-	 * @return An {@link Entity} of type {@link Questionnaire}
-	 */
-	private Questionnaire findQuestionnaireEntity(String entityTypeId)
-	{
-		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
-	}
-
-	/**
 	 * Create a {@link QuestionnaireResponse} based on an {@link EntityType}
 	 * Will set status to {@link QuestionnaireStatus}.OPEN if there is a data entry for the current user.
 	 *
@@ -123,5 +111,17 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 			status = questionnaireEntity.getStatus();
 		}
 		return QuestionnaireResponse.create(entityTypeId, entityType.getLabel(), entityType.getDescription(), status);
+	}
+
+	/**
+	 * Find 1 row in the Questionnaire table that belongs to the current user.
+	 * Returns null if no row is found, or the questionnaire ID does not exist.
+	 *
+	 * @param entityTypeId The ID of a questionnaire table
+	 * @return An {@link Entity} of type {@link Questionnaire}
+	 */
+	private Questionnaire findQuestionnaireEntity(String entityTypeId)
+	{
+		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
 	}
 }

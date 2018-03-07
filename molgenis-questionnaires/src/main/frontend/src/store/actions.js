@@ -39,7 +39,7 @@ const actions = {
   },
 
   'GET_SUBMISSION_TEXT' ({commit}, questionnaireId) {
-    return api.get('/menu/plugins/questionnaires//submission-text/' + questionnaireId).then(response => {
+    return api.get('/menu/plugins/questionnaires/submission-text/' + questionnaireId).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
     })
   },

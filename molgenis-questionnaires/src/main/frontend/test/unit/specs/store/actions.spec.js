@@ -180,7 +180,7 @@ describe('actions', () => {
       const submissionText = 'thanks'
 
       const get = td.function('api.get')
-      td.when(get('/menu/plugins/questionnaires/' + questionnaireId + '/thanks')).thenResolve(submissionText)
+      td.when(get('/menu/plugins/questionnaires/submission-text/' + questionnaireId)).thenResolve(submissionText)
       td.replace(api, 'get', get)
 
       const expectedMutations = [
