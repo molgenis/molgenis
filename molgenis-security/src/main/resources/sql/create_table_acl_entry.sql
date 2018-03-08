@@ -1,13 +1,13 @@
-create table if not exists acl_entry(
-	id bigserial primary key,
-	acl_object_identity bigint not null,
-	ace_order int not null,
-	sid bigint not null,
-	mask integer not null,
-	granting boolean not null,
-	audit_success boolean not null,
-	audit_failure boolean not null,
-	constraint unique_uk_4 unique(acl_object_identity,ace_order),
-	constraint foreign_fk_4 foreign key(acl_object_identity) references acl_object_identity(id),
-	constraint foreign_fk_5 foreign key(sid) references acl_sid(id)
+CREATE TABLE IF NOT EXISTS acl_entry (
+  id                  BIGSERIAL PRIMARY KEY,
+  acl_object_identity BIGINT  NOT NULL,
+  ace_order           INT     NOT NULL,
+  sid                 BIGINT  NOT NULL,
+  mask                INTEGER NOT NULL,
+  granting            BOOLEAN NOT NULL,
+  audit_success       BOOLEAN NOT NULL,
+  audit_failure       BOOLEAN NOT NULL,
+  CONSTRAINT unique_uk_4 UNIQUE (acl_object_identity, ace_order),
+  CONSTRAINT foreign_fk_4 FOREIGN KEY (acl_object_identity) REFERENCES acl_object_identity (id) ON DELETE CASCADE,
+  CONSTRAINT foreign_fk_5 FOREIGN KEY (sid) REFERENCES acl_sid (id)
 );

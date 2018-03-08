@@ -27,9 +27,7 @@ import java.util.List;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.*;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -86,7 +84,6 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_md_EntityType", WRITE)
 														  .put("sys_md_Attribute", WRITE)
 														  .put("sys_FileMeta", WRITE)
-														  .put("sys_sec_Owned", READ)
 														  .put("sys_L10nString", WRITE)
 														  .put("sys_job_JobExecution", READ)
 														  .put("sys_job_OneClickImportJobExecution", READ)

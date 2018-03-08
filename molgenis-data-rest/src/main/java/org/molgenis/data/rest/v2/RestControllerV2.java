@@ -159,9 +159,10 @@ public class RestControllerV2
 	@GetMapping("/{entityTypeId}/{id:.+}")
 	public Map<String, Object> retrieveEntity(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
-			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
+			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
+			@RequestParam(value = "includeCategories", defaultValue = "false") boolean includeCategories)
 	{
-		return getEntityResponse(entityTypeId, untypedId, attributeFilter);
+		return getEntityResponse(entityTypeId, untypedId, attributeFilter, includeCategories);
 	}
 
 	/**
@@ -170,13 +171,14 @@ public class RestControllerV2
 	@PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET")
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityTypeId") String entityTypeId,
 			@PathVariable("id") String untypedId,
-			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
+			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
+			@RequestParam(value = "includeCategories", defaultValue = "false") boolean includeCategories)
 	{
-		return getEntityResponse(entityTypeId, untypedId, attributeFilter);
+		return getEntityResponse(entityTypeId, untypedId, attributeFilter, includeCategories);
 	}
 
 	private Map<String, Object> getEntityResponse(String entityTypeId, String untypedId,
-			AttributeFilter attributeFilter)
+			AttributeFilter attributeFilter, boolean includeCategories)
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeId);
 		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
@@ -190,7 +192,7 @@ public class RestControllerV2
 			throw new UnknownEntityException(entityTypeId + " [" + untypedId + "] not found");
 		}
 
-		return createEntityResponse(entity, fetch, true);
+		return createEntityResponse(entity, fetch, true, includeCategories);
 	}
 
 	@Transactional
@@ -235,16 +237,18 @@ public class RestControllerV2
 	 */
 	@GetMapping("/{entityTypeId}")
 	public EntityCollectionResponseV2 retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
-			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
+			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest,
+			@RequestParam(value = "includeCategories", defaultValue = "false") boolean includeCategories)
 	{
-		return createEntityCollectionResponse(entityTypeId, request, httpRequest);
+		return createEntityCollectionResponse(entityTypeId, request, httpRequest, includeCategories);
 	}
 
 	@PostMapping(value = "/{entityTypeId}", params = "_method=GET")
 	public EntityCollectionResponseV2 retrieveEntityCollectionPost(@PathVariable("entityTypeId") String entityTypeId,
-			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
+			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest,
+			@RequestParam(value = "includeCategories", defaultValue = "false") boolean includeCategories)
 	{
-		return createEntityCollectionResponse(entityTypeId, request, httpRequest);
+		return createEntityCollectionResponse(entityTypeId, request, httpRequest, includeCategories);
 	}
 
 	/**
@@ -634,7 +638,7 @@ public class RestControllerV2
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityTypeId,
-			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
+			EntityCollectionRequestV2 request, HttpServletRequest httpRequest, boolean includeCategories)
 	{
 		EntityType meta = dataService.getEntityType(entityTypeId);
 
@@ -668,7 +672,7 @@ public class RestControllerV2
 		}
 		else
 		{
-			Long count = dataService.count(entityTypeId, q);
+			Long count = dataService.count(entityTypeId, new QueryImpl<>(q).setOffset(0).setPageSize(0));
 			Iterable<Entity> it;
 			if (count > 0 && q.getPageSize() > 0)
 			{
@@ -705,7 +709,7 @@ public class RestControllerV2
 			}
 
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,
-					permissionService, dataService, prevHref, nextHref);
+					permissionService, dataService, prevHref, nextHref, includeCategories);
 		}
 	}
 
@@ -726,18 +730,23 @@ public class RestControllerV2
 
 	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)
 	{
+		return createEntityResponse(entity, fetch, includeMetaData, false);
+	}
+
+	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData, boolean includeCategories)
+	{
 		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
 		{
-			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
+			createEntityTypeResponse(entity.getEntityType(), fetch, responseData, includeCategories);
 		}
 		createEntityValuesResponse(entity, fetch, responseData);
 		return responseData;
 	}
 
-	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData)
+	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData, boolean includeCategories)
 	{
-		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService));
+		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, includeCategories));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
