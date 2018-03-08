@@ -1,4 +1,8 @@
 const mutations = {
+  'SET_QUESTIONNAIRE_OVERVIEW' (state, questionnaireOverview) {
+    state.questionnaireOverview = questionnaireOverview
+  },
+
   'SET_QUESTIONNAIRE_LIST' (state, questionnaireList) {
     state.questionnaireList = questionnaireList
   },

@@ -1,4 +1,4 @@
-import QuestionnaireThankYou from 'src/pages/QuestionnaireThankYou'
+import QuestionnaireSubmitted from 'src/pages/QuestionnaireSubmitted'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
@@ -36,12 +36,12 @@ describe('QuestionnaireThankYou component', () => {
   const propsData = {questionnaireId: 'test_quest'}
 
   it('should dispatch an action to get the submissionText on created', () => {
-    shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
+    shallow(QuestionnaireSubmitted, {propsData, store, localVue, stubs})
     td.verify(actions.GET_SUBMISSION_TEXT(td.matchers.anything(), 'test_quest', undefined))
   })
 
   it('should render the submissionText from the state correctly', () => {
-    const wrapper = shallow(QuestionnaireThankYou, {propsData, store, localVue, stubs})
+    const wrapper = shallow(QuestionnaireSubmitted, {propsData, store, localVue, stubs})
     expect(wrapper.vm.submissionText).to.equal('thank you')
   })
 })

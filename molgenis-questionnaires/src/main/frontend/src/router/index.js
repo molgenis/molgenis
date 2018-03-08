@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import QuestionnaireList from '../pages/QuestionnaireList'
 import QuestionnaireStart from '../pages/QuestionnaireStart'
-import QuestionnaireThankYou from '../pages/QuestionnaireThankYou'
+import QuestionnaireSubmitted from '../pages/QuestionnaireSubmitted'
 import QuestionnaireOverview from '../pages/QuestionnaireOverview'
 import QuestionnaireChapter from '../pages/QuestionnaireChapter'
 
@@ -38,7 +38,7 @@ export default new Router({
     {
       path: '/:questionnaireId/submitted',
       props: true,
-      component: QuestionnaireThankYou
+      component: QuestionnaireSubmitted
     },
     {
       path: '/:questionnaireId/overview',

@@ -8,6 +8,11 @@ import mutations from './mutations'
 const state = {
 
   /**
+   * A "raw" questionnaire containing an API v2 EntityType with the filled in data
+   */
+  questionnaireOverview: {},
+
+  /**
    * List of questionnaires available to the current user
    */
   questionnaireList: [],

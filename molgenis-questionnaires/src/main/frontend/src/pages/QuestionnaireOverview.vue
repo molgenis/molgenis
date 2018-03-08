@@ -1,55 +1,66 @@
 <template>
-  <div id="pdf-container">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
 
-    <template v-if="loading">
-      <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
-        <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
-        <p>{{ 'questionnaire_overview_loading_text' | i18n }}</p>
+        <!-- Loading spinner -->
+        <template v-if="loading">
+          <loading-spinner :message="$t('questionnaire_overview_loading_text')"></loading-spinner>
+        </template>
+
+        <!-- Error handler -->
+        <template v-else-if="!loading && error">
+          <questionnaire-error :error="error"></questionnaire-error>
+        </template>
+
+        <!-- Questionnaire overview -->
+        <template v-else>
+          <div id="pdf-container">
+            <h1 class="display-3">{{ 'questionnaires_overview_title' | i18n }}</h1>
+            <hr>
+
+            <questionnaire-overview-entry
+              :attributes="getQuestionnaireFields()"
+              :data="getQuestionnaireData()">
+            </questionnaire-overview-entry>
+          </div>
+        </template>
+
       </div>
-    </template>
-
-    <template v-else>
-      <h1 class="display-3">
-        {{ 'questionnaires_overview_title' | i18n }}
-      </h1>
-
-      <hr>
-
-      <questionnaire-overview-entry
-        :attributes="attributes"
-        :data="data">
-      </questionnaire-overview-entry>
-    </template>
+    </div>
   </div>
 </template>
 
 <script>
+  import LoadingSpinner from '../components/LoadingSpinner'
+  import QuestionnaireError from '../components/QuestionnaireError'
   import QuestionnaireOverviewEntry from '../components/QuestionnaireOverviewEntry'
 
   export default {
     name: 'QuestionnaireOverview',
     props: ['questionnaireId'],
-    data () {
-      return {
-        loading: true,
-        questionnaire: null
+    methods: {
+      getQuestionnaireFields () {
+        return this.$store.state.questionnaireOverview.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
+      },
+      getQuestionnaireData () {
+        return this.$store.state.questionnaireOverview.items[0]
       }
     },
     computed: {
-      data () {
-        return this.questionnaire.items[0]
+      loading () {
+        return this.$store.state.loading
       },
-      attributes () {
-        return this.questionnaire.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
+      error () {
+        return this.$store.state.error
       }
     },
     created () {
-      this.$store.dispatch('GET_QUESTIONNAIRE_OVERVIEW', this.questionnaireId).then(response => {
-        this.questionnaire = response
-        this.loading = false
-      })
+      this.$store.dispatch('GET_QUESTIONNAIRE_OVERVIEW', this.questionnaireId)
     },
     components: {
+      LoadingSpinner,
+      QuestionnaireError,
       QuestionnaireOverviewEntry
     }
   }

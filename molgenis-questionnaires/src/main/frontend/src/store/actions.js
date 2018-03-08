@@ -51,14 +51,21 @@ const actions = {
     })
   },
 
-  /* eslint-disable no-empty-pattern */
-  'GET_QUESTIONNAIRE_OVERVIEW' ({}, questionnaireId) {
-    return api.get('/api/v2/' + questionnaireId)
+  'GET_QUESTIONNAIRE_OVERVIEW' ({commit}, questionnaireId) {
+    return api.get('/api/v2/' + questionnaireId).then(response => {
+      commit('SET_QUESTIONNAIRE_OVERVIEW', response)
+      commit('SET_LOADING', false)
+    }, error => {
+      handleError(commit, error)
+    })
   },
 
   'GET_SUBMISSION_TEXT' ({commit}, questionnaireId) {
     return api.get('/menu/plugins/questionnaires/submission-text/' + questionnaireId).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
+      commit('SET_LOADING', false)
+    }, error => {
+      handleError(commit, error)
     })
   },
 
