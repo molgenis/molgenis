@@ -13,9 +13,10 @@ const $t = (key) => {
 
 describe('ChapterList component', () => {
   let chapterNavigationList
-  let chapterProgress
+  let allVisibleFieldIdsInChapters
   let getters
   let localVue
+  let state
   let store
 
   beforeEach(() => {
@@ -23,24 +24,33 @@ describe('ChapterList component', () => {
     localVue.use(Vuex)
     localVue.filter('i18n', $t)
 
-    chapterProgress = {
-      1: 'complete',
-      2: 'incomplete'
+    allVisibleFieldIdsInChapters = {
+      'chapter1': ['field1', 'field2'],
+      'chapter2': ['field3', 'field4', 'field5', 'field6']
     }
 
     chapterNavigationList = [
-      {id: 1, index: 1, label: 'Chapter 1'},
-      {id: 2, index: 2, label: 'Chapter 2'}
+      {id: 'chapter1', index: 1, label: 'Chapter 1'},
+      {id: 'chapter2', index: 2, label: 'Chapter 2'}
     ]
 
-    getters = {
-      getChapterProgress: () => chapterProgress,
-      getChapterNavigationList: () => chapterNavigationList
+    state = {
+      formData: {
+        'field1': 'value',
+        'field2': 'value',
+        'field3': ['value'],
+        'field4': undefined,
+        'field5': [],
+        'field6': 'value'
+      }
     }
 
-    store = new Vuex.Store({
-      getters
-    })
+    getters = {
+      getChapterNavigationList: () => chapterNavigationList,
+      getVisibleFieldIdsForAllChapters: () => allVisibleFieldIdsInChapters
+    }
+
+    store = new Vuex.Store({state, getters})
   })
 
   const propsData = {
@@ -50,25 +60,33 @@ describe('ChapterList component', () => {
     saving: false
   }
 
-  it('should return the chapterProgress via a getter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
-    expect(wrapper.vm.chapterProgress).to.deep.equal(chapterProgress)
-  })
-
   it('should return the chapterNavigationList via a getter', () => {
     const wrapper = shallow(ChapterList, {propsData, store, localVue})
     expect(wrapper.vm.chapterNavigationList).to.deep.equal(chapterNavigationList)
   })
 
-  describe('isChapterCompleted method', () => {
-    it('should return [TRUE] when complete', () => {
-      const wrapper = shallow(ChapterList, {propsData, store, localVue})
-      expect(wrapper.vm.isChapterCompleted(1)).to.equal(true)
-    })
+  it('should return the allVisibleFieldIdsInChapters via a getter', () => {
+    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    expect(wrapper.vm.allVisibleFieldIdsInChapters).to.deep.equal(allVisibleFieldIdsInChapters)
+  })
 
-    it('should return [FALSE] when incomplete', () => {
-      const wrapper = shallow(ChapterList, {propsData, store, localVue})
-      expect(wrapper.vm.isChapterCompleted(2)).to.equal(false)
-    })
+  it('should use the allVisibleFieldIdsInChapters to compute the number of visible fields per chapter', () => {
+    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const expected = {'chapter1': 2, 'chapter2': 4}
+
+    expect(wrapper.vm.numberOfVisibleFieldsPerChapter).to.deep.equal(expected)
+  })
+
+  it('should use the allVisibleFieldIdsInChapters to compute the number of filled in field per chapter', () => {
+    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const expected = {'chapter1': 2, 'chapter2': 2}
+
+    expect(wrapper.vm.numberOfFilledInFieldsPerChapter).to.deep.equal(expected)
+  })
+
+  it('should use the numbe of filled in fields and total visible fields to compute the total progress per chapter', () => {
+    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const expected = {'chapter1': 100, 'chapter2': 50}
+    expect(wrapper.vm.progressPerChapter).to.deep.equal(expected)
   })
 })
