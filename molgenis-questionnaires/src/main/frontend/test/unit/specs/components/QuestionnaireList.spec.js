@@ -1,4 +1,4 @@
-import QuestionnaireList from 'src/components/QuestionnaireList'
+import QuestionnaireList from 'src/pages/QuestionnaireList'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'

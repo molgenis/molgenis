@@ -1,4 +1,4 @@
-import QuestionnaireOverview from 'src/components/QuestionnaireOverview'
+import QuestionnaireOverview from 'src/pages/QuestionnaireOverview'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
