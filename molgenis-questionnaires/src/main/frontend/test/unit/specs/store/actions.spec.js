@@ -80,7 +80,7 @@ const mockApiPostError = (uri, options, error) => {
   td.replace(api, 'post', post)
 }
 
-describe.only('actions', () => {
+describe('actions', () => {
   beforeEach(() => {
     td.reset()
   })
@@ -209,9 +209,9 @@ describe.only('actions', () => {
 
       const expectedMutations = [
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
-        {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: 'id'},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
+        {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'SET_LOADING', payload: false}
       ]
 
