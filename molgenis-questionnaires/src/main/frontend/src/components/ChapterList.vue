@@ -31,7 +31,7 @@
   .chapter-navigation-container {
     position: -webkit-sticky;
     position: sticky;
-    top: 80px;
+    top: 0rem;
   }
 
   .list-group-item.disabled.header {

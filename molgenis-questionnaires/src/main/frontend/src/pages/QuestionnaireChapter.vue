@@ -15,13 +15,7 @@
         <!-- Questionnaire chapters -->
         <template v-else>
           <div class="row">
-            <div class="col-12">
-              <h5 class="display-4">{{ questionnaireLabel }}</h5>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-9">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 col-xl-9 mt-5">
 
               <div class="card mb-2">
                 <div class="card-header">
@@ -138,7 +132,7 @@
             </div>
 
             <!-- Renders chapter navigation list -->
-            <div class="col-3">
+            <div class="hidden-md-down col-lg-3 col-xl-3 mt-5">
               <chapter-list
                 :questionnaireId="questionnaireId"
                 :currentChapterId="chapterId"
@@ -244,26 +238,31 @@
        * Watch changes in formData to run the auto save action with ONLY the updated attribute
        */
       formData (newValue, oldValue) {
-        this.saving = true
-        this.changesMade = true
-
         const lastUpdatedAttribute = Object.keys(newValue).find(key => {
           return newValue[key] !== oldValue[key]
         })
 
-        const lastUpdated = {
-          'attribute': lastUpdatedAttribute,
-          'value': newValue[lastUpdatedAttribute]
-        }
+        if (lastUpdatedAttribute !== this.$store.state.questionnaire.meta.idAttribute) {
+          this.saving = true
+          this.changesMade = true
 
-        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', lastUpdated).then(() => {
-          this.saving = false
-        })
+          const lastUpdated = {
+            'attribute': lastUpdatedAttribute,
+            'value': newValue[lastUpdatedAttribute]
+          }
+
+          this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', lastUpdated).then(() => {
+            this.saving = false
+          })
+        }
       }
     },
     computed: {
       loading () {
         return this.$store.state.loading
+      },
+      error () {
+        return this.$store.state.error
       },
       formData () {
         return this.$store.state.formData
@@ -296,9 +295,6 @@
       },
       currentChapter () {
         return this.$store.getters.getChapterByIndex(this.chapterId)
-      },
-      questionnaireLabel () {
-        return this.$store.state.questionnaireLabel
       }
     },
     created () {

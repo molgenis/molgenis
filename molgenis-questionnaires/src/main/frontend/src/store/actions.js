@@ -43,6 +43,8 @@ const actions = {
       commit('SET_CHAPTER_FIELDS', chapters)
       commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
       commit('SET_FORM_DATA', form.formData)
+
+      commit('SET_LOADING', false)
     }, error => {
       handleError(commit, error)
     })
