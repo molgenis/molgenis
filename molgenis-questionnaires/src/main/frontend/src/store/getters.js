@@ -1,6 +1,5 @@
 const getAllVisibleFieldIds = (chapter, data) => {
   return chapter.children.reduce((accumulator, child) => {
-    // console.log(child.id)
     if (child.type === 'field-group') {
       return [...accumulator, ...getAllVisibleFieldIds(child, data)]
     }
