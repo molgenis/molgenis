@@ -1,46 +1,53 @@
 <template>
-  <div>
-    <!-- Loading spinner -->
-    <template v-if="loading">
-      <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
-        <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
-        <p>{{ 'questionnaire_loading_text' | i18n }}...</p>
-      </div>
-    </template>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
 
-    <!-- Questionnaire description + start button -->
-    <template v-else>
-      <div class="row">
-        <div class="col-lg-8 col-md-12">
-          <h5 class="display-4">{{ questionnaireLabel }}</h5>
-          <p v-html="questionnaireDescription"></p>
+        <!-- Loading spinner -->
+        <template v-if="loading">
+          <loading-spinner :message="$t('questionnaire_loading_text')"></loading-spinner>
+        </template>
 
-          <router-link class="btn btn-lg btn-primary mt-2"
-                       :to="'/' + questionnaireId + '/chapter/1'">
-            {{ 'questionnaire_start' | i18n }}
-          </router-link>
+        <!-- Error handler -->
+        <template v-else-if="!loading && error">
+          <questionnaire-error :error="error"></questionnaire-error>
+        </template>
 
-          <router-link class="btn btn-lg btn-outline-secondary mt-2"
+        <!-- Questionnaire start -->
+        <template v-else>
+          <router-link class="btn btn-sm btn-outline-secondary mt-2"
                        to="/">
             {{ 'questionnaire_back_to_questionnaire_list' | i18n }}
           </router-link>
-        </div>
-      </div>
-    </template>
+          <hr>
 
+          <h5 class="display-4">{{ questionnaireLabel }}</h5>
+          <p v-html="questionnaireDescription"></p>
+          <router-link class="btn btn-lg btn-primary mt-2 float-right"
+                       :to="'/' + questionnaireId + '/chapter/1'">
+            {{ 'questionnaire_start' | i18n }}
+          </router-link>
+        </template>
+
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+  import QuestionnaireError from './QuestionnaireError'
+  import LoadingSpinner from './LoadingSpinner'
+
   export default {
     name: 'QuestionnaireStart',
     props: ['questionnaireId'],
-    data () {
-      return {
-        loading: true
-      }
-    },
     computed: {
+      loading () {
+        return this.$store.state.loading
+      },
+      error () {
+        return this.$store.state.error
+      },
       questionnaireDescription () {
         return this.$store.state.questionnaireDescription
       },
@@ -60,15 +67,11 @@
           }
           this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
         }
-
-        if (this.$store.state.chapterFields.length === 0) {
-          this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId).then(() => {
-            this.loading = false
-          })
-        } else {
-          this.loading = false
-        }
       })
+    },
+    components: {
+      LoadingSpinner,
+      QuestionnaireError
     }
   }
 </script>

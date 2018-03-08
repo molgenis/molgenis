@@ -1,13 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-// List of questionnaires
-import QuestionnaireList from '../components/QuestionnaireList'
-// Questionnaire + child routes
-import QuestionnaireContainer from '../components/QuestionnaireContainer'
-import QuestionnaireStart from '../components/QuestionnaireStart'
-import QuestionnaireThankYou from '../components/QuestionnaireThankYou'
-import QuestionnaireOverview from '../components/QuestionnaireOverview'
-import QuestionnaireChapter from '../components/QuestionnaireChapter'
+import QuestionnaireList from '../pages/QuestionnaireList'
+import QuestionnaireStart from '../pages/QuestionnaireStart'
+import QuestionnaireThankYou from '../pages/QuestionnaireThankYou'
+import QuestionnaireOverview from '../pages/QuestionnaireOverview'
+import QuestionnaireChapter from '../pages/QuestionnaireChapter'
 
 const {baseUrl} = window.QUESTIONNAIRE_STATE || ''
 
@@ -26,34 +23,27 @@ export default new Router({
     {
       path: '/:questionnaireId',
       props: true,
-      component: QuestionnaireContainer,
-      children: [
-        {
-          path: '',
-          props: true,
-          component: QuestionnaireStart
-        },
-        {
-          path: 'chapter/:chapterId',
-          props: (route) => {
-            return {
-              questionnaireId: route.params.questionnaireId,
-              chapterId: parseInt(route.params.chapterId)
-            }
-          },
-          component: QuestionnaireChapter
-        },
-        {
-          path: 'submitted',
-          props: true,
-          component: QuestionnaireThankYou
-        },
-        {
-          path: 'overview',
-          props: true,
-          component: QuestionnaireOverview
+      component: QuestionnaireStart
+    },
+    {
+      path: '/:questionnaireId/chapter/:chapterId',
+      props: (route) => {
+        return {
+          questionnaireId: route.params.questionnaireId,
+          chapterId: parseInt(route.params.chapterId)
         }
-      ]
+      },
+      component: QuestionnaireChapter
+    },
+    {
+      path: '/:questionnaireId/submitted',
+      props: true,
+      component: QuestionnaireThankYou
+    },
+    {
+      path: '/:questionnaireId/overview',
+      props: true,
+      component: QuestionnaireOverview
     }
   ]
 })

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container-fluid">
 
     <template v-if="loading">
       <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
