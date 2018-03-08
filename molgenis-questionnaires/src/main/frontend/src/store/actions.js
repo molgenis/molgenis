@@ -48,6 +48,8 @@ const actions = {
       commit('SET_CHAPTER_FIELDS', chapters)
       commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
       commit('SET_FORM_DATA', form.formData)
+    }, error => {
+      handleError(commit, error)
     })
   },
 
@@ -69,7 +71,7 @@ const actions = {
     })
   },
 
-  'AUTO_SAVE_QUESTIONNAIRE' ({state}, updatedAttribute) {
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}, updatedAttribute) {
     const options = {
       body: JSON.stringify(updatedAttribute.value),
       method: 'PUT'
@@ -78,10 +80,10 @@ const actions = {
     const questionnaireId = state.route.params.questionnaireId
     const uri = '/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute.attribute
 
-    return api.post(uri, options)
+    return api.post(uri, options).then().catch(error => handleError(commit, error))
   },
 
-  'SUBMIT_QUESTIONNAIRE' ({state}, submitDate) {
+  'SUBMIT_QUESTIONNAIRE' ({commit, state}, submitDate) {
     const submitData = Object.assign({}, state.formData)
     submitData.submitDate = submitDate
 
@@ -95,7 +97,7 @@ const actions = {
     }
 
     const questionnaireId = state.route.params.questionnaireId
-    return api.post('/api/v2/' + questionnaireId, options)
+    return api.post('/api/v2/' + questionnaireId, options).then().catch(error => handleError(commit, error))
   }
 }
 
