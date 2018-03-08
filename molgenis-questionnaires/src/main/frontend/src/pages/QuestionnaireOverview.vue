@@ -41,10 +41,10 @@
     props: ['questionnaireId'],
     methods: {
       getQuestionnaireFields () {
-        return this.$store.state.questionnaireOverview.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
+        return this.$store.state.questionnaire.meta.attributes.filter(attribute => attribute.fieldType === 'COMPOUND')
       },
       getQuestionnaireData () {
-        return this.$store.state.questionnaireOverview.items[0]
+        return this.$store.state.questionnaire.items[0]
       }
     },
     computed: {
