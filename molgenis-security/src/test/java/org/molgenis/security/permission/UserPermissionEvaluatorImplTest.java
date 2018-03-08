@@ -3,8 +3,8 @@ package org.molgenis.security.permission;
 import org.mockito.Mock;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -41,33 +41,33 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
-				EntityTypePermission.READ)).thenReturn(true);
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
-				EntityTypePermission.READ));
+				RepositoryPermission.READ)).thenReturn(true);
+		assertTrue(userPermissionEvaluator.hasPermission(new RepositoryIdentity("entityType0"),
+				RepositoryPermission.READ));
 	}
 
 	@WithMockUser(username = "USER")
 	@Test
 	public void hasPermissionOnEntityTypeFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
-				EntityTypePermission.READ));
+		assertFalse(userPermissionEvaluator.hasPermission(new RepositoryIdentity("entityType0"),
+				RepositoryPermission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
 	@Test
 	public void hasPermissionOnEntityTypeSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
-				EntityTypePermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new RepositoryIdentity("entityType0"),
+				RepositoryPermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnEntityTypeSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
-				EntityTypePermission.WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new RepositoryIdentity("entityType0"),
+				RepositoryPermission.WRITE));
 	}
 
 	@WithMockUser(username = "USER")

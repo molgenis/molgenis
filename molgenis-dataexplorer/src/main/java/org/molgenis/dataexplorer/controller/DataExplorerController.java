@@ -10,8 +10,8 @@ import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -169,8 +169,8 @@ public class DataExplorerController extends PluginController
 			StringBuilder message)
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
-		boolean hasEntityPermission = permissionService.hasPermission(new EntityTypeIdentity(selectedEntityName),
-				EntityTypePermission.COUNT);
+		boolean hasEntityPermission = permissionService.hasPermission(new RepositoryIdentity(selectedEntityName),
+				RepositoryPermission.COUNT);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -226,8 +226,8 @@ public class DataExplorerController extends PluginController
 			case MOD_ANNOTATORS:
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
-				if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-						EntityTypePermission.WRITEMETA))
+				if (!permissionService.hasPermission(new RepositoryIdentity(entityTypeId),
+						RepositoryPermission.WRITEMETA))
 				{
 					throw new MolgenisDataAccessException(
 							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
@@ -248,7 +248,7 @@ public class DataExplorerController extends PluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ)
+		return permissionService.hasPermission(new RepositoryIdentity(entityTypeId), RepositoryPermission.READ)
 				&& dataService.getCapabilities(
 				entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
@@ -272,11 +272,11 @@ public class DataExplorerController extends PluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITE))
+		if (permissionService.hasPermission(new RepositoryIdentity(entityTypeId), RepositoryPermission.WRITE))
 			pluginPermission = WRITE;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ))
+		else if (permissionService.hasPermission(new RepositoryIdentity(entityTypeId), RepositoryPermission.READ))
 			pluginPermission = READ;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.COUNT))
+		else if (permissionService.hasPermission(new RepositoryIdentity(entityTypeId), RepositoryPermission.COUNT))
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
