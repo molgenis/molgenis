@@ -30,6 +30,9 @@
 <script>
   export default {
     name: 'QuestionnaireError',
-    props: ['error']
+    props: ['error'],
+    beforeRouteLeave () {
+      this.$store.commit('SET_ERROR', '')
+    }
   }
 </script>
