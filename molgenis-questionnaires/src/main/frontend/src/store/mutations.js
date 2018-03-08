@@ -47,6 +47,15 @@ const mutations = {
     state.questionnaireDescription = ''
     state.questionnaireRowId = ''
     state.submissionText = ''
+    state.loading = true
+  },
+
+  'SET_ERROR' (state, error) {
+    state.error = error
+  },
+
+  'SET_LOADING' (state, loading) {
+    state.loading = loading
   }
 }
 

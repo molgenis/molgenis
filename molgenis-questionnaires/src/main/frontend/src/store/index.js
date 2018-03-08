@@ -52,7 +52,17 @@ const state = {
   /**
    * Option object to be used in the EntityToFormMapper
    */
-  mapperOptions: {}
+  mapperOptions: {},
+
+  /**
+   * Loading boolean used to spinner activity fetch state across the questionnaire
+   */
+  loading: true,
+
+  /**
+   * Error string filled when something goes wrong
+   */
+  error: ''
 }
 
 Vue.use(Vuex)
