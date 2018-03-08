@@ -99,6 +99,13 @@ describe('getters', () => {
       'chapter-4-field-2': undefined,
       'chapter-4-field-4': undefined,
       'chapter-4-field-5': 'value'
+    },
+    questionnaire: {
+      meta: {
+        name: 'test_quest',
+        label: 'label',
+        description: 'description'
+      }
     }
   }
 
@@ -106,7 +113,7 @@ describe('getters', () => {
     it('should return a chapter based on index [1]', () => {
       const getChapterByIndex = getters.getChapterByIndex(state)
       const actual = getChapterByIndex(1)
-      const expected = [state.chapterFields[0]]
+      const expected = state.chapterFields[0]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -114,7 +121,7 @@ describe('getters', () => {
     it('should return a chapter based on index [2]', () => {
       const getChapterByIndex = getters.getChapterByIndex(state)
       const actual = getChapterByIndex(2)
-      const expected = [state.chapterFields[1]]
+      const expected = state.chapterFields[1]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -159,17 +166,44 @@ describe('getters', () => {
     })
   })
 
-  describe('getChapterProgress', () => {
-    it('should return the chapter progress based on data and chapters', () => {
-      const actual = getters.getChapterProgress(state)
+  describe('getVisibleFieldIdsForAllChapters', () => {
+    it('should return the ids of visible fields per chapter', () => {
+      const actual = getters.getVisibleFieldIdsForAllChapters(state)
       const expected = {
-        'chapter-1': 'complete',
-        'chapter-2': 'incomplete',
-        'chapter-3': 'incomplete',
-        'chapter-4': 'complete'
+        'chapter-1': ['chapter-1-field-1', 'chapter-1-field-2'],
+        'chapter-2': ['chapter-2-field-1'],
+        'chapter-3': ['chapter-3-field-2'],
+        'chapter-4': ['chapter-4-field-5']
       }
 
       expect(actual).to.deep.equal(expected)
+    })
+  })
+
+  describe('getQuestionnaireId', () => {
+    it('should return the questionaire ID', () => {
+      const actual = getters.getQuestionnaireId(state)
+      const expected = 'test_quest'
+
+      expect(actual).to.equal(expected)
+    })
+  })
+
+  describe('getQuestionnaireLabel', () => {
+    it('should return the questionaire label', () => {
+      const actual = getters.getQuestionnaireLabel(state)
+      const expected = 'label'
+
+      expect(actual).to.equal(expected)
+    })
+  })
+
+  describe('getQuestionnaireDescription', () => {
+    it('should return the questionaire description', () => {
+      const actual = getters.getQuestionnaireDescription(state)
+      const expected = 'description'
+
+      expect(actual).to.equal(expected)
     })
   })
 })
