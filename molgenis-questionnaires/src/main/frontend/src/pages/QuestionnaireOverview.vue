@@ -24,7 +24,7 @@
 </template>
 
 <script>
-  import QuestionnaireOverviewEntry from './QuestionnaireOverviewEntry'
+  import QuestionnaireOverviewEntry from '../components/QuestionnaireOverviewEntry'
 
   export default {
     name: 'QuestionnaireOverview',

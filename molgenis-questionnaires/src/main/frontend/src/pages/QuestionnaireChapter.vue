@@ -149,7 +149,7 @@
 </template>
 
 <script>
-  import ChapterList from './ChapterList'
+  import ChapterList from '../components/ChapterList'
   import moment from 'moment'
 
   import { FormComponent } from '@molgenis/molgenis-ui-form'
