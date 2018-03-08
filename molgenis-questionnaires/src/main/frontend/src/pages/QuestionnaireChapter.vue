@@ -62,15 +62,6 @@
                   </div>
                 </div>
 
-                <!-- Progress bar container -->
-                <div v-if="showProgressBar" class="progress mt-0 pt-0">
-                  <div class="progress-bar" role="progressbar"
-                       :style="'width:' + progressPercentage + '%;'"
-                       :aria-valuenow="chapterId" aria-valuemin="1"
-                       :aria-valuemax="totalNumberOfChapters">
-                  </div>
-                </div>
-
                 <!-- Error message container -->
                 <div v-if="navigationBlocked" class="error-message-container">
                   <div class="alert alert-warning" role="alert">
@@ -284,17 +275,10 @@
       },
 
       /**
-       * Calculate the percentage of progress based on the
-       * current chapter and total number of chapters
+       * Return the current chapter wrapped in an array to feed it to the form generator
        */
-      progressPercentage () {
-        return (this.chapterId / this.totalNumberOfChapters) * 100
-      },
-      showProgressBar () {
-        return this.totalNumberOfChapters > 1
-      },
       currentChapter () {
-        return this.$store.getters.getChapterByIndex(this.chapterId)
+        return [this.$store.getters.getChapterByIndex(this.chapterId)]
       }
     },
     created () {

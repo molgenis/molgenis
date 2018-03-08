@@ -15,13 +15,19 @@
 
       <a v-for="chapter in chapterNavigationList" class="list-group-item list-group-item-action disabled"
          @click="navigateToChapter(chapter.index)">
-        <span v-if="isChapterCompleted(chapter.id)">
-          <i class="fa fa-check text-success"></i>
-        </span>
 
         <span :class="{'active-chapter-text': chapter.index === currentChapterId}">
           {{ chapter.label }}
         </span>
+
+        <!-- Progress bar container -->
+        <div class="progress">
+          <div class="progress-bar" :class="{'progress-bar bg-success':  progressPerChapter[chapter.id] === 100}" role="progressbar"
+               :style="'width:' + progressPerChapter[chapter.id] + '%;'"
+               :aria-valuenow="numberOfFilledInFieldsPerChapter[chapter.id]" aria-valuemin="1"
+               :aria-valuemax="numberOfVisibleFieldsPerChapter[chapter.id]">
+          </div>
+        </div>
       </a>
     </ul>
   </div>
@@ -53,19 +59,53 @@
     name: 'ChapterList',
     props: ['questionnaireId', 'currentChapterId', 'changesMade', 'saving'],
     methods: {
-      isChapterCompleted (chapterId) {
-        return this.chapterProgress[chapterId] === 'complete'
-      },
       navigateToChapter (index) {
         this.$router.push('/' + this.questionnaireId + '/chapter/' + index)
       }
     },
     computed: {
-      chapterProgress () {
-        return this.$store.getters.getChapterProgress
-      },
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
+      },
+
+      allVisibleFieldIdsInChapters () {
+        return this.$store.getters.getVisibleFieldIdsForAllChapters
+      },
+
+      numberOfVisibleFieldsPerChapter () {
+        const visibleFieldsPerChapter = {}
+
+        Object.keys(this.allVisibleFieldIdsInChapters).forEach(key => {
+          visibleFieldsPerChapter[key] = this.allVisibleFieldIdsInChapters[key].length
+        })
+
+        return visibleFieldsPerChapter
+      },
+
+      numberOfFilledInFieldsPerChapter () {
+        const filledInFieldsPerChapter = {}
+
+        Object.keys(this.allVisibleFieldIdsInChapters).forEach(key => {
+          let numberOfFilledInFields = 0
+          this.allVisibleFieldIdsInChapters[key].forEach(fieldId => {
+            if (this.$store.state.formData[fieldId] !== undefined) {
+              numberOfFilledInFields++
+            }
+          })
+          filledInFieldsPerChapter[key] = numberOfFilledInFields
+        })
+
+        return filledInFieldsPerChapter
+      },
+
+      progressPerChapter () {
+        const progressPerChapter = {}
+
+        this.chapterNavigationList.forEach(chapter => {
+          progressPerChapter[chapter.id] = (this.numberOfFilledInFieldsPerChapter[chapter.id] / this.numberOfVisibleFieldsPerChapter[chapter.id]) * 100
+        })
+
+        return progressPerChapter
       }
     }
   }

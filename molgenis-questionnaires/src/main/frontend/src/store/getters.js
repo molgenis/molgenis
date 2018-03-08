@@ -1,7 +1,8 @@
-const getAllFields = (chapter, data) => {
+const getAllVisibleFieldIds = (chapter, data) => {
   return chapter.children.reduce((accumulator, child) => {
+    // console.log(child.id)
     if (child.type === 'field-group') {
-      return [...accumulator, ...getAllFields(child, data)]
+      return [...accumulator, ...getAllVisibleFieldIds(child, data)]
     }
 
     if (child.visible(data)) {
@@ -11,14 +12,9 @@ const getAllFields = (chapter, data) => {
   }, [])
 }
 
-const doesChapterHaveUndefinedValues = (chapter, data) => {
-  const fields = getAllFields(chapter, data)
-  return fields.some(id => data[id] === undefined || data[id].length === 0)
-}
-
 const getters = {
   getChapterByIndex: (state) => (index) => {
-    return [state.chapterFields[(index - 1)]]
+    return state.chapterFields[index - 1]
   },
 
   getChapterNavigationList: state => {
@@ -29,13 +25,17 @@ const getters = {
     return state.chapterFields.length
   },
 
-  getChapterProgress: state => {
+  getVisibleFieldIdsForAllChapters: state => {
     return state.chapterFields.reduce((accumulator, chapter) => {
-      const progress = doesChapterHaveUndefinedValues(chapter, state.formData)
-      accumulator[chapter.id] = progress ? 'incomplete' : 'complete'
+      const visibleFields = getAllVisibleFieldIds(chapter, state.formData)
+      accumulator[chapter.id] = visibleFields
 
       return accumulator
     }, {})
+  },
+
+  getQuestionnaireId: state => {
+    return state.questionnaire.meta && state.questionnaire.meta.name
   },
 
   getQuestionnaireLabel: state => {
