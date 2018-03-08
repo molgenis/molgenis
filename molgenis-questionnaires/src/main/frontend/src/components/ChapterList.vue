@@ -22,7 +22,8 @@
 
         <!-- Progress bar container -->
         <div class="progress">
-          <div class="progress-bar" :class="{'progress-bar bg-success':  progressPerChapter[chapter.id] === 100}" role="progressbar"
+          <div class="progress-bar" :class="{'progress-bar bg-success':  progressPerChapter[chapter.id] === 100}"
+               role="progressbar"
                :style="'width:' + progressPerChapter[chapter.id] + '%;'"
                :aria-valuenow="numberOfFilledInFieldsPerChapter[chapter.id]" aria-valuemin="1"
                :aria-valuemax="numberOfVisibleFieldsPerChapter[chapter.id]">
@@ -88,8 +89,15 @@
         Object.keys(this.allVisibleFieldIdsInChapters).forEach(key => {
           let numberOfFilledInFields = 0
           this.allVisibleFieldIdsInChapters[key].forEach(fieldId => {
-            if (this.$store.state.formData[fieldId] !== undefined) {
-              numberOfFilledInFields++
+            const value = this.$store.state.formData[fieldId]
+            if (Array.isArray(value)) {
+              if (value.length > 0) {
+                numberOfFilledInFields++
+              }
+            } else {
+              if (value !== undefined) {
+                numberOfFilledInFields++
+              }
             }
           })
           filledInFieldsPerChapter[key] = numberOfFilledInFields
