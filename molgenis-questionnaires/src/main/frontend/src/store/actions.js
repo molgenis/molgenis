@@ -2,19 +2,37 @@ import api from '@molgenis/molgenis-api-client'
 
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
+const handleError = (commit, error) => {
+  commit('SET_ERROR', error)
+  commit('SET_LOADING', false)
+}
+
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}) {
     return api.get('/menu/plugins/questionnaires/list').then(response => {
       commit('SET_QUESTIONNAIRE_LIST', response)
+      commit('SET_LOADING', false)
+    }, error => {
+      handleError(commit, error)
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit, state}, questionnaireId) {
+  'START_QUESTIONNAIRE' ({commit, dispatch, state}, questionnaireId) {
     if (state.questionnaireId !== questionnaireId) {
       commit('CLEAR_STATE')
-    }
 
-    api.get('/menu/plugins/questionnaires/start/' + questionnaireId)
+      return api.get('/menu/plugins/questionnaires/start/' + questionnaireId).then(() => {
+        if (state.chapterFields.length === 0) {
+          dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
+            commit('SET_LOADING', false)
+          }, error => {
+            handleError(commit, error)
+          })
+        }
+      }, error => {
+        handleError(commit, error)
+      })
+    }
   },
 
   'GET_QUESTIONNAIRE' ({state, commit}, questionnaireId) {

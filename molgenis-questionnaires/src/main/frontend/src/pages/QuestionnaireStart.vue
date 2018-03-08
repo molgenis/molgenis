@@ -35,8 +35,8 @@
 </template>
 
 <script>
-  import QuestionnaireError from './QuestionnaireError'
-  import LoadingSpinner from './LoadingSpinner'
+  import QuestionnaireError from '../components/QuestionnaireError'
+  import LoadingSpinner from '../components/LoadingSpinner'
 
   export default {
     name: 'QuestionnaireStart',
