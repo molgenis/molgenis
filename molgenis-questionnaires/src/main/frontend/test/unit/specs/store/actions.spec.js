@@ -3,82 +3,148 @@ import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
-const testAction = (action, payload, state, expectedMutations, done) => {
-  let count = 0
+const getters = {
+  getQuestionnaireId: 'test_quest'
+}
 
-  // mock commit
+const testAction = (action, payload, state, expectedMutations, expectedActions, done) => {
+  let mutationCount = 0
+  let actionCount = 0
+
   const commit = (type, payload) => {
-    const mutation = expectedMutations[count]
+    const mutation = expectedMutations[mutationCount]
 
     try {
       expect(mutation.type).to.equal(type)
       if (payload) {
         expect(mutation.payload).to.deep.equal(payload)
       }
+
+      mutationCount++
+      if (mutationCount >= expectedMutations.length && actionCount >= expectedActions.length) {
+        done()
+      }
     } catch (error) {
       done(error)
     }
+  }
 
-    count++
-    if (count >= expectedMutations.length) {
-      done()
+  const dispatch = (type, payload) => {
+    const action = expectedActions[actionCount]
+
+    try {
+      expect(action.type).to.equal(type)
+      if (payload) {
+        expect(action.payload).to.deep.equal(payload)
+      }
+
+      actionCount++
+      if (actionCount >= expectedActions.length && mutationCount >= expectedMutations.length) {
+        done()
+      }
+    } catch (error) {
+      done(error)
     }
   }
 
-  // call the action with mocked store and arguments
-  action({commit, state}, payload)
+  action({commit, dispatch, getters, state}, payload)
 
-  // check if no mutations should have been dispatched
-  if (expectedMutations.length === 0) {
-    expect(count).to.equal(0)
+  if (expectedMutations.length === 0 && expectedActions.length === 0) {
+    expect(mutationCount).to.equal(0)
+    expect(actionCount).to.equal(0)
     done()
   }
 }
 
-describe('actions', () => {
-  describe('GET_QUESTIONNAIRE_LIST', () => {
-    it('should [GET] a list of questionnaires and commit them to the store', done => {
-      const questionnaireList = ['questionnaire']
+const mockApiGetSuccess = (url, response) => {
+  const get = td.function('api.get')
+  td.when(get(url)).thenResolve(response)
+  td.replace(api, 'get', get)
+}
 
-      const get = td.function('api.get')
-      td.when(get('/menu/plugins/questionnaires/list')).thenResolve(questionnaireList)
-      td.replace(api, 'get', get)
+const mockApiGetError = (url, error) => {
+  const get = td.function('api.get')
+  td.when(get(url)).thenReject(error)
+  td.replace(api, 'get', get)
+}
+
+const mockApiPostSuccess = (uri, options, response) => {
+  const post = td.function('api.post')
+  td.when(post(uri, options)).thenResolve(response)
+  td.replace(api, 'post', post)
+}
+
+const mockApiPostError = (uri, options, error) => {
+  const post = td.function('api.post')
+  td.when(post(uri, options)).thenReject(error)
+  td.replace(api, 'post', post)
+}
+
+describe.only('actions', () => {
+  beforeEach(() => {
+    td.reset()
+  })
+
+  describe('GET_QUESTIONNAIRE_LIST', () => {
+    it('should [GET] a list of questionnaires and commit it to the store', done => {
+      const questionnaireList = ['questionnaire']
+      mockApiGetSuccess('/menu/plugins/questionnaires/list', questionnaireList)
 
       const expectedMutations = [
-        {type: 'SET_QUESTIONNAIRE_LIST', payload: questionnaireList}
+        {type: 'SET_QUESTIONNAIRE_LIST', payload: questionnaireList},
+        {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE_LIST, {}, {}, expectedMutations, done)
+      testAction(actions.GET_QUESTIONNAIRE_LIST, {}, {}, expectedMutations, [], done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const error = 'error'
+      mockApiGetError('/menu/plugins/questionnaires/list', error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE_LIST, {}, {}, expectedMutations, [], done)
     })
   })
 
   describe('START_QUESTIONNAIRE', () => {
-    const questionnaire = 'questionnaire'
-    const questionnaireId = 'test_quest'
+    it('should clear state when current questionnaire is different then the one being called', done => {
+      const questionnaireId = 'other_test_quest'
+      mockApiGetSuccess('/menu/plugins/questionnaires/start/other_test_quest', 'OK')
 
-    const get = td.function('api.get')
-    td.when(get('/menu/plugins/questionnaires/start/' + questionnaireId)).thenResolve(questionnaire)
-    td.replace(api, 'get', get)
-
-    it('should [GET] a questionnaire to start it', done => {
-      const expectedMutations = []
+      const expectedMutations = [{type: 'CLEAR_STATE'}]
       const state = {
-        questionnaireId: questionnaireId
+        chapterFields: ['chapter']
       }
 
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, expectedMutations, done)
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
     })
 
-    it('should clear the state before starting a new questionnaire', done => {
+    it('should dispatch a [GET_QUESTIONNAIRE] action', done => {
+      const questionnaireId = 'test_quest'
+      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', 'OK')
+
+      const expectedActions = [{type: 'GET_QUESTIONNAIRE', payload: questionnaireId}]
+      const state = {chapterFields: []}
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, [], expectedActions, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const questionnaireId = 'test_quest'
+      const error = 'error'
+      mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
+
       const expectedMutations = [
-        {type: 'CLEAR_STATE'}
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
       ]
 
-      const state = {
-        questionnaireId: 'other_quest'
-      }
-
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, expectedMutations, done)
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
     })
   })
 
@@ -94,9 +160,7 @@ describe('actions', () => {
         items: []
       }
 
-      const get = td.function('api.get')
-      td.when(get('/api/v2/' + questionnaireId + '?includeCategories=true')).thenResolve(questionnaire)
-      td.replace(api, 'get', get)
+      mockApiGetSuccess('/api/v2/test_quest?includeCategories=true', questionnaire)
 
       const generatedForm = {
         formFields: [
@@ -144,15 +208,27 @@ describe('actions', () => {
       }]
 
       const expectedMutations = [
-        {type: 'SET_QUESTIONNAIRE_ID', payload: 'test_quest'},
-        {type: 'SET_QUESTIONNAIRE_LABEL', payload: 'Test Questionnaire'},
-        {type: 'SET_QUESTIONNAIRE_DESCRIPTION', payload: 'A questionnaire to test'},
+        {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
         {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: 'id'},
-        {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}}
+        {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
+        {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, done)
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const questionnaireId = 'test_quest'
+      const error = 'error'
+      mockApiGetError('/api/v2/test_quest?includeCategories=true', error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
     })
   })
 
@@ -160,17 +236,27 @@ describe('actions', () => {
     it('should return return a questionnaire', done => {
       const questionnaireId = 'test_quest'
       const questionnaire = 'questionnaire'
+      mockApiGetSuccess('/api/v2/test_quest', questionnaire)
 
-      const get = td.function('api.get')
-      td.when(get('/api/v2/' + questionnaireId)).thenResolve(questionnaire)
-      td.replace(api, 'get', get)
+      const expectedMutations = [
+        {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
+        {type: 'SET_LOADING', payload: false}
+      ]
 
-      const response = actions.GET_QUESTIONNAIRE_OVERVIEW({}, questionnaireId)
-      response.then(actual => {
-        expect(actual).to.equal(questionnaire)
-      })
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, {}, expectedMutations, [], done)
+    })
 
-      done()
+    it('should commit any errors to the store', done => {
+      const questionnaireId = 'test_quest'
+      const error = 'error'
+      mockApiGetError('/api/v2/test_quest', error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, {}, expectedMutations, [], done)
     })
   })
 
@@ -178,44 +264,52 @@ describe('actions', () => {
     it('should commit a piece of text to the state', done => {
       const questionnaireId = 'test_quest'
       const submissionText = 'thanks'
-
-      const get = td.function('api.get')
-      td.when(get('/menu/plugins/questionnaires/submission-text/' + questionnaireId)).thenResolve(submissionText)
-      td.replace(api, 'get', get)
+      mockApiGetSuccess('/menu/plugins/questionnaires/submission-text/test_quest', submissionText)
 
       const expectedMutations = [
-        {type: 'SET_SUBMISSION_TEXT', payload: submissionText}
+        {type: 'SET_SUBMISSION_TEXT', payload: submissionText},
+        {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_SUBMISSION_TEXT, questionnaireId, {}, expectedMutations, done)
+      testAction(actions.GET_SUBMISSION_TEXT, questionnaireId, {}, expectedMutations, [], done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const questionnaireId = 'test_quest'
+      const error = 'error'
+      mockApiGetError('/menu/plugins/questionnaires/submission-text/test_quest', error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_SUBMISSION_TEXT, questionnaireId, {}, expectedMutations, [], done)
     })
   })
 
   describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    it('should post data for a single attribute', done => {
-      const updatedAttribute = {
-        attribute: 'attribute',
-        value: 'value'
-      }
+    const updatedAttribute = {
+      attribute: 'attribute',
+      value: 'value'
+    }
 
-      const state = {
-        questionnaireRowId: 'test_row',
-        route: {
-          params: {
-            questionnaireId: 'test_quest'
-          }
+    const state = {
+      questionnaireRowId: 'test_row',
+      route: {
+        params: {
+          questionnaireId: 'test_quest'
         }
       }
+    }
 
-      const options = {
-        body: JSON.stringify(updatedAttribute.value),
-        method: 'PUT'
-      }
+    const options = {
+      body: JSON.stringify(updatedAttribute.value),
+      method: 'PUT'
+    }
 
-      const post = td.function('api.post')
-      td.when(post('/api/v1/test_quest/test_row/attribute', options)).thenResolve('OK')
-      td.replace(api, 'post', post)
-
+    it('should post data for a single attribute', done => {
+      mockApiPostSuccess('/api/v1/test_quest/test_row/attribute', options, 'OK')
       const result = actions.AUTO_SAVE_QUESTIONNAIRE({state}, updatedAttribute)
 
       result.then(actual => {
@@ -224,38 +318,48 @@ describe('actions', () => {
 
       done()
     })
+
+    it('should commit any errors to the store', done => {
+      const error = 'error'
+      mockApiPostError('/api/v1/test_quest/test_row/attribute', options, error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, updatedAttribute, state, expectedMutations, [], done)
+    })
   })
 
   describe('SUBMIT_QUESTIONNAIRE', () => {
-    it('should submit the questionnaire', done => {
-      const submitData = {
-        field: 'value',
-        submitDate: '2020-01-01'
-      }
+    const submitData = {
+      field: 'value',
+      submitDate: '2020-01-01'
+    }
 
-      const options = {
-        body: JSON.stringify({
-          entities: [
-            submitData
-          ]
-        }),
-        method: 'PUT'
-      }
+    const options = {
+      body: JSON.stringify({
+        entities: [
+          submitData
+        ]
+      }),
+      method: 'PUT'
+    }
 
-      const post = td.function('api.post')
-      td.when(post('/api/v2/test_quest', options)).thenResolve('OK')
-      td.replace(api, 'post', post)
-
-      const state = {
-        formData: {
-          field: 'value'
-        },
-        route: {
-          params: {
-            questionnaireId: 'test_quest'
-          }
+    const state = {
+      formData: {
+        field: 'value'
+      },
+      route: {
+        params: {
+          questionnaireId: 'test_quest'
         }
       }
+    }
+
+    it('should submit the questionnaire', done => {
+      mockApiPostSuccess('/api/v2/test_quest', options, 'OK')
 
       const result = actions.SUBMIT_QUESTIONNAIRE({state}, '2020-01-01')
       result.then(actual => {
@@ -263,6 +367,18 @@ describe('actions', () => {
       })
 
       done()
+    })
+
+    it('should commit any errors to the store', done => {
+      const error = 'error'
+      mockApiPostError('/api/v2/test_quest', options, error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.SUBMIT_QUESTIONNAIRE, '2020-01-01', state, expectedMutations, [], done)
     })
   })
 })

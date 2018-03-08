@@ -17,15 +17,15 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit, dispatch, state}, questionnaireId) {
-    commit('CLEAR_STATE')
+  'START_QUESTIONNAIRE' ({commit, dispatch, getters, state}, questionnaireId) {
+    const currentQuestionnaireId = getters.getQuestionnaireId
+    if (currentQuestionnaireId !== questionnaireId) {
+      commit('CLEAR_STATE')
+    }
+
     return api.get('/menu/plugins/questionnaires/start/' + questionnaireId).then(() => {
       if (state.chapterFields.length === 0) {
-        dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
-          commit('SET_LOADING', false)
-        }, error => {
-          handleError(commit, error)
-        })
+        dispatch('GET_QUESTIONNAIRE', questionnaireId)
       }
     }, error => {
       handleError(commit, error)

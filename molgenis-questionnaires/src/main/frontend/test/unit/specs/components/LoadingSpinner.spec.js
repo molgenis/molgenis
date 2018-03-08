@@ -1,7 +1,6 @@
 import LoadingSpinner from 'src/components/LoadingSpinner'
 import { shallow } from '@vue/test-utils'
 
-
 describe('LoadingSpinner component', () => {
   const propsData = {message: 'loading message'}
 

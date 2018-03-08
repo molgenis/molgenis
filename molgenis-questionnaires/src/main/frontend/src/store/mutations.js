@@ -40,6 +40,8 @@ const mutations = {
     state.questionnaireRowId = ''
     state.submissionText = ''
     state.loading = true
+    state.error = ''
+    state.questionnaire = {}
   },
 
   'SET_ERROR' (state, error) {

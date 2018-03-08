@@ -9,7 +9,10 @@ describe('mutations', () => {
     questionnaireLabel: '',
     questionnaireDescription: '',
     questionnaireRowId: '',
-    submissionText: ''
+    submissionText: '',
+    error: '',
+    loading: true,
+    questionnaire: {}
   }
 
   describe('SET_QUESTIONNAIRE_LIST', () => {
@@ -45,33 +48,6 @@ describe('mutations', () => {
       mutations.UPDATE_FORM_STATUS(state, payload)
 
       expect(state.formData.status).to.deep.equal(payload)
-    })
-  })
-
-  describe('SET_QUESTIONNAIRE_ID', () => {
-    it('should update the questionnaireId in the state with the payload', () => {
-      const payload = 'id'
-      mutations.SET_QUESTIONNAIRE_ID(state, payload)
-
-      expect(state.questionnaireId).to.deep.equal(payload)
-    })
-  })
-
-  describe('SET_QUESTIONNAIRE_LABEL', () => {
-    it('should update the questionnaireLabel in the state with the payload', () => {
-      const payload = 'label'
-      mutations.SET_QUESTIONNAIRE_LABEL(state, payload)
-
-      expect(state.questionnaireLabel).to.deep.equal(payload)
-    })
-  })
-
-  describe('SET_QUESTIONNAIRE_DESCRIPTION', () => {
-    it('should update the questionnaireDescription in the state with the payload', () => {
-      const payload = 'description'
-      mutations.SET_QUESTIONNAIRE_DESCRIPTION(state, payload)
-
-      expect(state.questionnaireDescription).to.deep.equal(payload)
     })
   })
 
@@ -117,6 +93,36 @@ describe('mutations', () => {
       expect(state.questionnaireDescription).to.deep.equal('')
       expect(state.questionnaireRowId).to.deep.equal('')
       expect(state.submissionText).to.deep.equal('')
+      expect(state.loading).to.equal(true)
+      expect(state.error).to.equal('')
+      expect(state.questionnaire).to.deep.equal({})
+    })
+  })
+
+  describe('SET_ERROR', () => {
+    it('should update the error in the state with the payload', () => {
+      const payload = 'error'
+      mutations.SET_ERROR(state, payload)
+
+      expect(state.error).to.equal(payload)
+    })
+  })
+
+  describe('SET_LOADING', () => {
+    it('should update loading status in the state with the payload', () => {
+      const payload = true
+      mutations.SET_LOADING(state, payload)
+
+      expect(state.loading).to.equal(payload)
+    })
+  })
+
+  describe('SET_QUESTIONNAIRE', () => {
+    it('should update the questionnaire in the state with the payload', () => {
+      const payload = 'questionnaire'
+      mutations.SET_QUESTIONNAIRE(state, payload)
+
+      expect(state.questionnaire).to.equal(payload)
     })
   })
 })
