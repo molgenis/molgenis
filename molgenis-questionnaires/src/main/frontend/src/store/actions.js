@@ -37,12 +37,13 @@ const actions = {
       commit('SET_QUESTIONNAIRE', response)
 
       const data = response.items.length > 0 ? response.items[0] : {}
-      const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
-      const chapters = form.formFields.filter(field => field.type === 'field-group')
-
-      commit('SET_CHAPTER_FIELDS', chapters)
       commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
+
+      const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
       commit('SET_FORM_DATA', form.formData)
+
+      const chapters = form.formFields.filter(field => field.type === 'field-group')
+      commit('SET_CHAPTER_FIELDS', chapters)
 
       commit('SET_LOADING', false)
     }, error => {
