@@ -1,6 +1,6 @@
 const mutations = {
-  'SET_QUESTIONNAIRE_OVERVIEW' (state, questionnaireOverview) {
-    state.questionnaireOverview = questionnaireOverview
+  'SET_QUESTIONNAIRE' (state, questionnaire) {
+    state.questionnaire = questionnaire
   },
 
   'SET_QUESTIONNAIRE_LIST' (state, questionnaireList) {
@@ -17,18 +17,6 @@ const mutations = {
 
   'UPDATE_FORM_STATUS' (state, status) {
     state.formData.status = status
-  },
-
-  'SET_QUESTIONNAIRE_ID' (state, questionnaireId) {
-    state.questionnaireId = questionnaireId
-  },
-
-  'SET_QUESTIONNAIRE_LABEL' (state, questionnaireLabel) {
-    state.questionnaireLabel = questionnaireLabel
-  },
-
-  'SET_QUESTIONNAIRE_DESCRIPTION' (state, questionnaireDescription) {
-    state.questionnaireDescription = questionnaireDescription
   },
 
   'SET_QUESTIONNAIRE_ROW_ID' (state, questionnaireRowId) {

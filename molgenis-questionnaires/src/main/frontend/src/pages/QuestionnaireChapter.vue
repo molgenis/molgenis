@@ -1,154 +1,163 @@
 <template>
   <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <!-- Loading spinner -->
+        <template v-if="loading">
+          <loading-spinner :message="$t('questionnaire_overview_loading_text')"></loading-spinner>
+        </template>
 
-    <template v-if="loading">
-      <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center">
-        <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
-        <p>{{ 'questionnaire_loading_chapter_text' | i18n }} {{ chapterId }}...</p>
-      </div>
-    </template>
+        <!-- Error handler -->
+        <template v-else-if="!loading && error">
+          <questionnaire-error :error="error"></questionnaire-error>
+        </template>
 
-    <template v-else>
-      <div class="row">
-        <div class="col-12">
-          <h5 class="display-4">{{ questionnaireLabel }}</h5>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-9">
-
-          <div class="card mb-2">
-            <div class="card-header">
-              <div class="row">
-
-                <!-- Shows previous / back to start button based on chapter progress -->
-                <div class="col-4">
-                  <button
-                    type="button"
-                    v-if="showPreviousButton"
-                    @click="navigateToPreviousChapter"
-                    class="btn btn-outline-secondary float-left">
-                    {{ 'questionnaire_previous_chapter' | i18n }}
-                  </button>
-
-                  <router-link
-                    v-show="!showPreviousButton"
-                    :to="'/' + questionnaireId"
-                    class="btn btn-outline-secondary float-left">
-                    {{ 'questionnaire_back_to_start' | i18n }}
-                  </router-link>
-                </div>
-
-                <!-- Shows current chapter and total number of chapters -->
-                <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
-                  Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
-                </div>
-
-                <!-- Shows next / submit button based on chapter progress -->
-                <div class="col-4">
-                  <button
-                    type="button"
-                    v-if="showNextButton"
-                    @click="navigateToNextChapter"
-                    class="btn btn-primary float-right">
-                    {{ 'questionnaire_next_chapter' | i18n }}
-                  </button>
-
-                  <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
-                    {{ 'questionnaire_submit' | i18n }}
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Progress bar container -->
-            <div v-if="showProgressBar" class="progress mt-0 pt-0">
-              <div class="progress-bar" role="progressbar"
-                   :style="'width:' + progressPercentage + '%;'"
-                   :aria-valuenow="chapterId" aria-valuemin="1"
-                   :aria-valuemax="totalNumberOfChapters">
-              </div>
-            </div>
-
-            <!-- Error message container -->
-            <div v-if="navigationBlocked" class="error-message-container">
-              <div class="alert alert-warning" role="alert">
-                {{ 'questionnaire_chapter_incomplete_message' | i18n }}
-              </div>
-            </div>
-
-            <!-- Form Container -->
-            <div class="card-body">
-              <div v-if="showForm">
-                <form-component
-                  :id="questionnaireId"
-                  :formFields="currentChapter"
-                  :formState="formState"
-                  :initialFormData="formData"
-                  :options="options"
-                  @valueChange="onValueChanged">
-                </form-component>
-              </div>
-
-              <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center"
-                   v-else>
-                <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
-              </div>
-            </div>
-
-            <div class="card-footer">
-              <div class="row">
-
-                <!-- Shows previous button based on chapter progress -->
-                <div class="col-6">
-                  <button
-                    type="button"
-                    v-if="showPreviousButton"
-                    @click="navigateToPreviousChapter"
-                    class="btn btn-outline-secondary float-left">
-                    {{ 'questionnaire_previous_chapter' | i18n }}
-                  </button>
-                </div>
-
-                <!-- Shows next / submit button based on chapter progress -->
-                <div class="col-6">
-                  <button
-                    type="button"
-                    v-if="showNextButton"
-                    @click="navigateToNextChapter"
-                    class="btn btn-primary float-right">
-                    {{ 'questionnaire_next_chapter' | i18n }}
-                  </button>
-
-                  <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
-                    {{ 'questionnaire_submit' | i18n }}
-                  </button>
-                </div>
-
-              </div>
+        <!-- Questionnaire chapters -->
+        <template v-else>
+          <div class="row">
+            <div class="col-12">
+              <h5 class="display-4">{{ questionnaireLabel }}</h5>
             </div>
           </div>
-        </div>
 
-        <!-- Renders chapter navigation list -->
-        <div class="col-3">
-          <chapter-list
-            :questionnaireId="questionnaireId"
-            :currentChapterId="chapterId"
-            :changesMade="changesMade"
-            :saving="saving">
-          </chapter-list>
-        </div>
+          <div class="row">
+            <div class="col-9">
+
+              <div class="card mb-2">
+                <div class="card-header">
+                  <div class="row">
+
+                    <!-- Shows previous / back to start button based on chapter progress -->
+                    <div class="col-4">
+                      <button
+                        type="button"
+                        v-if="showPreviousButton"
+                        @click="navigateToPreviousChapter"
+                        class="btn btn-outline-secondary float-left">
+                        {{ 'questionnaire_previous_chapter' | i18n }}
+                      </button>
+
+                      <router-link
+                        v-show="!showPreviousButton"
+                        :to="'/' + questionnaireId"
+                        class="btn btn-outline-secondary float-left">
+                        {{ 'questionnaire_back_to_start' | i18n }}
+                      </router-link>
+                    </div>
+
+                    <!-- Shows current chapter and total number of chapters -->
+                    <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
+                      Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
+                    </div>
+
+                    <!-- Shows next / submit button based on chapter progress -->
+                    <div class="col-4">
+                      <button
+                        type="button"
+                        v-if="showNextButton"
+                        @click="navigateToNextChapter"
+                        class="btn btn-primary float-right">
+                        {{ 'questionnaire_next_chapter' | i18n }}
+                      </button>
+
+                      <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
+                        {{ 'questionnaire_submit' | i18n }}
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- Progress bar container -->
+                <div v-if="showProgressBar" class="progress mt-0 pt-0">
+                  <div class="progress-bar" role="progressbar"
+                       :style="'width:' + progressPercentage + '%;'"
+                       :aria-valuenow="chapterId" aria-valuemin="1"
+                       :aria-valuemax="totalNumberOfChapters">
+                  </div>
+                </div>
+
+                <!-- Error message container -->
+                <div v-if="navigationBlocked" class="error-message-container">
+                  <div class="alert alert-warning" role="alert">
+                    {{ 'questionnaire_chapter_incomplete_message' | i18n }}
+                  </div>
+                </div>
+
+                <!-- Form Container -->
+                <div class="card-body">
+                  <div v-if="showForm">
+                    <form-component
+                      :id="questionnaireId"
+                      :formFields="currentChapter"
+                      :formState="formState"
+                      :initialFormData="formData"
+                      :options="options"
+                      @valueChange="onValueChanged">
+                    </form-component>
+                  </div>
+
+                  <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center"
+                       v-else>
+                    <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                  <div class="row">
+
+                    <!-- Shows previous button based on chapter progress -->
+                    <div class="col-6">
+                      <button
+                        type="button"
+                        v-if="showPreviousButton"
+                        @click="navigateToPreviousChapter"
+                        class="btn btn-outline-secondary float-left">
+                        {{ 'questionnaire_previous_chapter' | i18n }}
+                      </button>
+                    </div>
+
+                    <!-- Shows next / submit button based on chapter progress -->
+                    <div class="col-6">
+                      <button
+                        type="button"
+                        v-if="showNextButton"
+                        @click="navigateToNextChapter"
+                        class="btn btn-primary float-right">
+                        {{ 'questionnaire_next_chapter' | i18n }}
+                      </button>
+
+                      <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
+                        {{ 'questionnaire_submit' | i18n }}
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Renders chapter navigation list -->
+            <div class="col-3">
+              <chapter-list
+                :questionnaireId="questionnaireId"
+                :currentChapterId="chapterId"
+                :changesMade="changesMade"
+                :saving="saving">
+              </chapter-list>
+            </div>
+
+          </div>
+        </template>
 
       </div>
-    </template>
-
+    </div>
   </div>
 </template>
 
 <script>
+  import LoadingSpinner from '../components/LoadingSpinner'
+  import QuestionnaireError from '../components/QuestionnaireError'
   import ChapterList from '../components/ChapterList'
   import moment from 'moment'
 
@@ -169,7 +178,6 @@
       return {
         changesMade: false,
         formState: {},
-        loading: true,
         navigationBlocked: false,
         options: {
           showEyeButton: false
@@ -254,6 +262,9 @@
       }
     },
     computed: {
+      loading () {
+        return this.$store.state.loading
+      },
       formData () {
         return this.$store.state.formData
       },
@@ -291,26 +302,24 @@
       }
     },
     created () {
-      if (!this.$store.state.mapperOptions.booleanLabels) {
-        const mapperOptions = {
-          booleanLabels: {
-            trueLabel: this.$t('questionnaire_boolean_true'),
-            falseLabel: this.$t('questionnaire_boolean_false'),
-            nillLabel: this.$t('questionnaire_boolean_null')
-          }
-        }
-        this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
-      }
-
       if (this.$store.state.chapterFields.length === 0) {
-        this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId).then(() => {
-          this.loading = false
-        })
-      } else {
-        this.loading = false
+        this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
+
+        if (!this.$store.state.mapperOptions.booleanLabels) {
+          const mapperOptions = {
+            booleanLabels: {
+              trueLabel: this.$t('questionnaire_boolean_true'),
+              falseLabel: this.$t('questionnaire_boolean_false'),
+              nillLabel: this.$t('questionnaire_boolean_null')
+            }
+          }
+          this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
+        }
       }
     },
     components: {
+      LoadingSpinner,
+      QuestionnaireError,
       FormComponent,
       ChapterList
     }

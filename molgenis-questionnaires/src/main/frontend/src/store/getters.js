@@ -36,6 +36,14 @@ const getters = {
 
       return accumulator
     }, {})
+  },
+
+  getQuestionnaireLabel: state => {
+    return state.questionnaire.meta && state.questionnaire.meta.label
+  },
+
+  getQuestionnaireDescription: state => {
+    return state.questionnaire.meta && state.questionnaire.meta.description
   }
 }
 

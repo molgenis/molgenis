@@ -18,28 +18,23 @@ const actions = {
   },
 
   'START_QUESTIONNAIRE' ({commit, dispatch, state}, questionnaireId) {
-    if (state.questionnaireId !== questionnaireId) {
-      commit('CLEAR_STATE')
-
-      return api.get('/menu/plugins/questionnaires/start/' + questionnaireId).then(() => {
-        if (state.chapterFields.length === 0) {
-          dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
-            commit('SET_LOADING', false)
-          }, error => {
-            handleError(commit, error)
-          })
-        }
-      }, error => {
-        handleError(commit, error)
-      })
-    }
+    commit('CLEAR_STATE')
+    return api.get('/menu/plugins/questionnaires/start/' + questionnaireId).then(() => {
+      if (state.chapterFields.length === 0) {
+        dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
+          commit('SET_LOADING', false)
+        }, error => {
+          handleError(commit, error)
+        })
+      }
+    }, error => {
+      handleError(commit, error)
+    })
   },
 
   'GET_QUESTIONNAIRE' ({state, commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId + '?includeCategories=true').then(response => {
-      commit('SET_QUESTIONNAIRE_ID', questionnaireId)
-      commit('SET_QUESTIONNAIRE_LABEL', response.meta.label)
-      commit('SET_QUESTIONNAIRE_DESCRIPTION', response.meta.description)
+      commit('SET_QUESTIONNAIRE', response)
 
       const data = response.items.length > 0 ? response.items[0] : {}
       const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
@@ -55,7 +50,7 @@ const actions = {
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}, questionnaireId) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
-      commit('SET_QUESTIONNAIRE_OVERVIEW', response)
+      commit('SET_QUESTIONNAIRE', response)
       commit('SET_LOADING', false)
     }, error => {
       handleError(commit, error)

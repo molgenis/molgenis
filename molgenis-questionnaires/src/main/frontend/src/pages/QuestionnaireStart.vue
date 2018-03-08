@@ -49,10 +49,10 @@
         return this.$store.state.error
       },
       questionnaireDescription () {
-        return this.$store.state.questionnaireDescription
+        return this.$store.getters.getQuestionnaireDescription
       },
       questionnaireLabel () {
-        return this.$store.state.questionnaireLabel
+        return this.$store.getters.getQuestionnaireLabel
       }
     },
     created () {
