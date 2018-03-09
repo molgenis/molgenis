@@ -59,8 +59,8 @@
         <!-- dependency versions -->
         <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
         <logback.version>1.2.2</logback.version>
-        <spring.version>5.0.3.RELEASE</spring.version>
-        <spring.security.version>5.0.1.RELEASE</spring.security.version>
+        <spring.version>5.0.4.RELEASE</spring.version>
+        <spring.security.version>5.0.3.RELEASE</spring.security.version>
         <hibernate.validator.version>6.0.7.Final</hibernate.validator.version>
         <javax.el.version>3.0.1-b09</javax.el.version>
         <httpclient.version>4.5.3</httpclient.version>
