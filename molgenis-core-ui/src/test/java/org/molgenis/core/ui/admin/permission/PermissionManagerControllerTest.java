@@ -1,18 +1,24 @@
 package org.molgenis.core.ui.admin.permission;
 
+import org.mockito.Mock;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +47,8 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
@@ -54,6 +62,9 @@ import static org.testng.Assert.assertEquals;
 @ContextConfiguration(classes = { Config.class, GsonConfig.class })
 public class PermissionManagerControllerTest extends AbstractTestNGSpringContextTests
 {
+	@Autowired
+	private Config config;
+
 	private MockMvc mockMvc;
 
 	private User user1, user2;
@@ -85,22 +96,54 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Configuration
 	public static class Config extends WebMvcConfigurerAdapter
 	{
-		@Bean
-		public MutableAclService mutableAclService()
+		@Mock
+		DataService dataService;
+		@Mock
+		MutableAclService mutableAclService;
+		@Mock
+		MutableAclClassService mutableAclClassService;
+		@Mock
+		SystemEntityTypeRegistry systemEntityTypeRegistry;
+
+		public Config()
 		{
-			return mock(MutableAclService.class);
+			initMocks(this);
 		}
 
 		@Bean
 		public DataService dataService()
 		{
-			return mock(DataService.class);
+			return dataService;
+		}
+
+		@Bean
+		public MutableAclService mutableAclService()
+		{
+			return mutableAclService;
+		}
+
+		@Bean
+		public MutableAclClassService mutableAclClassService()
+		{
+			return mutableAclClassService;
+		}
+
+		@Bean
+		public SystemEntityTypeRegistry systemEntityTypeRegistry()
+		{
+			return systemEntityTypeRegistry;
 		}
 
 		@Bean
 		public PermissionManagerController permissionManagerController()
 		{
-			return new PermissionManagerController(dataService(), mutableAclService());
+			return new PermissionManagerController(dataService(), mutableAclService(), mutableAclClassService(),
+					systemEntityTypeRegistry());
+		}
+
+		void resetMocks()
+		{
+			reset(dataService, mutableAclService, mutableAclClassService, systemEntityTypeRegistry);
 		}
 	}
 
@@ -116,9 +159,16 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Autowired
 	private MutableAclService mutableAclService;
 
+	@Autowired
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+
+	@Autowired
+	private MutableAclClassService mutableAclClassService;
+
 	@BeforeMethod
 	public void setUp()
 	{
+		config.resetMocks();
 		mockMvc = MockMvcBuilders.standaloneSetup(permissionManagerController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
@@ -142,6 +192,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		entityType1 = when(mock(EntityType.class).getId()).thenReturn("1").getMock();
 		entityType2 = when(mock(EntityType.class).getId()).thenReturn("2").getMock();
 		entityType3 = when(mock(EntityType.class).getId()).thenReturn("3").getMock();
+		when(entityType1.getLabel()).thenReturn("label1");
+		when(entityType2.getLabel()).thenReturn("label2");
+		when(entityType3.getLabel()).thenReturn("label3");
 
 		entityIdentity1 = new EntityTypeIdentity(entityType1);
 		entityIdentity2 = new EntityTypeIdentity(entityType2);
@@ -185,7 +238,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test(expectedExceptions = NullPointerException.class)
 	public void PermissionManagerController()
 	{
-		new PermissionManagerController(null, null);
+		new PermissionManagerController(null, null, null, null);
 	}
 
 	@Test
@@ -691,5 +744,50 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		verify(mutableAclService).updateAcl(acl1);
 		verify(mutableAclService).updateAcl(acl2);
 		verify(mutableAclService).updateAcl(acl3);
+	}
+
+	@Test
+	public void testUpdateEntityClassRlsEnableRls()
+	{
+		String entityTypeId = "entityTypeId";
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+		Attribute idAttribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
+		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
+		Entity entity = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
+		when(entity.getIdValue()).thenReturn("entityId");
+		when(dataService.findAll(entityTypeId)).thenReturn(Stream.of(entity));
+
+		EntityTypeRlsRequest entityTypeRlsRequest = new EntityTypeRlsRequest(entityTypeId, true);
+		permissionManagerController.updateEntityClassRls(entityTypeRlsRequest);
+		verify(mutableAclClassService).createAclClass("entity-entityTypeId", Long.class);
+		verify(mutableAclService).createAcl(new EntityIdentity(entity));
+
+	}
+
+	@Test
+	public void testUpdateEntityClassRlsDisableRls()
+	{
+		String entityTypeId = "entityTypeId";
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+		Attribute idAttribute = when(mock(Attribute.class).getDataType()).thenReturn(LONG).getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
+		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
+		Entity entity = when(mock(Entity.class).getEntityType()).thenReturn(entityType).getMock();
+		when(entity.getIdValue()).thenReturn("entityId");
+		when(dataService.findAll(entityTypeId)).thenReturn(Stream.of(entity));
+		when(mutableAclClassService.hasAclClass("entity-entityTypeId")).thenReturn(true);
+
+		EntityTypeRlsRequest entityTypeRlsRequest = new EntityTypeRlsRequest(entityTypeId, false);
+		permissionManagerController.updateEntityClassRls(entityTypeRlsRequest);
+		verify(mutableAclClassService).deleteAclClass("entity-entityTypeId");
+	}
+
+	@Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Updating system entity type not allowed")
+	public void testUpdateEntityClassRlsSystemEntityType()
+	{
+		when(systemEntityTypeRegistry.hasSystemEntityType("entityTypeId")).thenReturn(true);
+		EntityTypeRlsRequest entityTypeRlsRequest = new EntityTypeRlsRequest("entityTypeId", true);
+		permissionManagerController.updateEntityClassRls(entityTypeRlsRequest);
 	}
 }

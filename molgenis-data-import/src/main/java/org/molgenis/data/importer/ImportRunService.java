@@ -3,7 +3,6 @@ package org.molgenis.data.importer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
@@ -42,7 +41,6 @@ public class ImportRunService
 		this.importRunFactory = requireNonNull(importRunFactory);
 	}
 
-	@RunAsSystem
 	public ImportRun addImportRun(String userName, boolean notify)
 	{
 		ImportRun importRun = importRunFactory.create();
@@ -50,14 +48,12 @@ public class ImportRunService
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setUsername(userName); // required and visible
-		importRun.setOwner(userName); // not required and not visible
 		importRun.setNotify(notify);
 		dataService.add(IMPORT_RUN, importRun);
 
 		return importRun;
 	}
 
-	@RunAsSystem
 	public void finishImportRun(String importRunId, String message, String importedEntities)
 	{
 		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
@@ -116,7 +112,6 @@ public class ImportRunService
 		return "importRun " + importRun.getStatus();
 	}
 
-	@RunAsSystem
 	public void failImportRun(String importRunId, String message)
 	{
 		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);

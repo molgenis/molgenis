@@ -1,14 +1,10 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.security.owned.OwnedEntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Set;
 
-import static java.util.Collections.singleton;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -30,18 +26,14 @@ public class ImportRunMetaData extends SystemEntityType
 	public static final String IMPORTEDENTITIES = "importedEntities";
 	public static final String NOTIFY = "notify";
 
-	private final OwnedEntityType ownedEntityType;
-
-	ImportRunMetaData(OwnedEntityType ownedEntityType)
+	ImportRunMetaData()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
 	public void init()
 	{
-		setExtends(ownedEntityType);
 
 		setLabel("Import");
 		setDescription("Data import reports");
@@ -60,11 +52,7 @@ public class ImportRunMetaData extends SystemEntityType
 		addAttribute(NOTIFY).setDataType(BOOL)
 							.setNillable(true)
 							.setDescription("Boolean to indicate whether or not to send an email on job completion");
-	}
 
-	@Override
-	public Set<SystemEntityType> getDependencies()
-	{
-		return singleton(ownedEntityType);
+		setRowLevelSecured(true);
 	}
 }

@@ -27,6 +27,7 @@ public abstract class SystemEntityType extends EntityType
 	private IdGenerator idGenerator;
 
 	private final String entityTypeId;
+	private boolean rowLevelSecured;
 
 	/**
 	 * Construct entity meta data for an entity with the given name stored in the system package.
@@ -73,6 +74,16 @@ public abstract class SystemEntityType extends EntityType
 	{
 		if (attributeName.equals(ID)) return entityTypeId;
 		return super.getString(attributeName);
+	}
+
+	public void setRowLevelSecured(boolean rowLevelSecured)
+	{
+		this.rowLevelSecured = rowLevelSecured;
+	}
+
+	public boolean isRowLevelSecured()
+	{
+		return this.rowLevelSecured;
 	}
 
 	public void bootstrap(EntityTypeMetadata entityTypeMetadata)
