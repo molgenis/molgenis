@@ -43,10 +43,7 @@ describe('QuestionnaireChapter component', function () {
       SUBMIT_QUESTIONNAIRE: td.function()
     }
 
-    const chapterFields = [{
-      id: 'chapter1'
-    }]
-
+    const chapterFields = {id: 'chapter1'}
     getters = {
       getChapterByIndex: () => () => chapterFields,
       getTotalNumberOfChapters: () => 1
@@ -79,6 +76,8 @@ describe('QuestionnaireChapter component', function () {
 
   it('should dispatch a mutation to set mapperOptions', () => {
     state.mapperOptions = {}
+    state.chapterFields = []
+
     store = new Vuex.Store({actions, getters, mutations, state})
 
     shallow(QuestionnaireChapter, {propsData, mocks, store, stubs, localVue})
@@ -101,11 +100,6 @@ describe('QuestionnaireChapter component', function () {
 
     shallow(QuestionnaireChapter, {propsData, mocks, store, stubs, localVue})
     td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
-  })
-
-  it('should set loading to false when action is done in created function', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.loading).to.equal(false)
   })
 
   it('should load formData from the state', () => {
@@ -153,36 +147,9 @@ describe('QuestionnaireChapter component', function () {
     expect(wrapper.vm.totalNumberOfChapters).to.equal(1)
   })
 
-  it('should compute the progress based on current chapter id and total number of chapters', () => {
-    getters.getTotalNumberOfChapters = () => 10
-    store = new Vuex.Store({actions, getters, mutations, state})
-    propsData.chapterId = 2
-
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.progressPercentage).to.equal(20)
-  })
-
-  it('should not show the progress bar if there is only one chapter', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showProgressBar).to.equal(false)
-  })
-
-  it('should show the progress bar if there is more than one chapter', () => {
-    getters.getTotalNumberOfChapters = () => 2
-    store = new Vuex.Store({actions, getters, mutations, state})
-
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showProgressBar).to.equal(true)
-  })
-
   it('should get the current chapter from the state by index', () => {
     const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
     expect(wrapper.vm.currentChapter).to.deep.equal([{id: 'chapter1'}])
-  })
-
-  it('should get the questionnaire label from the state', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.questionnaireLabel).to.equal('label')
   })
 
   describe('onValueChanged', () => {

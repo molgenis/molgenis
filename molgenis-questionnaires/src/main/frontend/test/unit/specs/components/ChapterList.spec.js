@@ -53,6 +53,7 @@ describe('ChapterList component', () => {
     store = new Vuex.Store({state, getters})
   })
 
+  const stubs = ['router-link', 'router-view']
   const propsData = {
     questionnaireId: 'test_quest',
     chapterId: 1,
@@ -61,31 +62,31 @@ describe('ChapterList component', () => {
   }
 
   it('should return the chapterNavigationList via a getter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const wrapper = shallow(ChapterList, {propsData, store, stubs, localVue})
     expect(wrapper.vm.chapterNavigationList).to.deep.equal(chapterNavigationList)
   })
 
   it('should return the allVisibleFieldIdsInChapters via a getter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const wrapper = shallow(ChapterList, {propsData, store, stubs, localVue})
     expect(wrapper.vm.allVisibleFieldIdsInChapters).to.deep.equal(allVisibleFieldIdsInChapters)
   })
 
   it('should use the allVisibleFieldIdsInChapters to compute the number of visible fields per chapter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const wrapper = shallow(ChapterList, {propsData, store, stubs, localVue})
     const expected = {'chapter1': 2, 'chapter2': 4}
 
     expect(wrapper.vm.numberOfVisibleFieldsPerChapter).to.deep.equal(expected)
   })
 
   it('should use the allVisibleFieldIdsInChapters to compute the number of filled in field per chapter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const wrapper = shallow(ChapterList, {propsData, store, stubs, localVue})
     const expected = {'chapter1': 2, 'chapter2': 2}
 
     expect(wrapper.vm.numberOfFilledInFieldsPerChapter).to.deep.equal(expected)
   })
 
   it('should use the numbe of filled in fields and total visible fields to compute the total progress per chapter', () => {
-    const wrapper = shallow(ChapterList, {propsData, store, localVue})
+    const wrapper = shallow(ChapterList, {propsData, store, stubs, localVue})
     const expected = {'chapter1': 100, 'chapter2': 50}
     expect(wrapper.vm.progressPerChapter).to.deep.equal(expected)
   })
