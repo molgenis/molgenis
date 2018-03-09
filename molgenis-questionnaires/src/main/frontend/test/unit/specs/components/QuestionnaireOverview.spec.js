@@ -2,7 +2,6 @@ import QuestionnaireOverview from 'src/pages/QuestionnaireOverview'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
-import { generateError } from '../../utils'
 
 const $t = (key) => {
   const translations = {
@@ -12,13 +11,11 @@ const $t = (key) => {
   return translations[key]
 }
 
-describe('QuestionnaireOverview component', function () {
-  const spec = this.title
-
+describe('QuestionnaireOverview component', () => {
   let actions
   let localVue
   let store
-  let questionnaire
+  let state
 
   beforeEach(() => {
     localVue = createLocalVue()
@@ -29,90 +26,69 @@ describe('QuestionnaireOverview component', function () {
       GET_QUESTIONNAIRE_OVERVIEW: td.function()
     }
 
-    questionnaire = {
-      meta: {
-        attributes: [
-          {
-            name: 'id',
-            fieldType: 'STRING'
-          },
-          {
-            name: 'compound',
-            fieldType: 'COMPOUND',
-            attributes: [
-              {
-                name: 'field1'
-              },
-              {
-                name: 'field2'
-              }
-            ]
-          }
-        ]
+    state = {
+      questionnaire: {
+        meta: {
+          attributes: [
+            {
+              name: 'id',
+              fieldType: 'STRING'
+            },
+            {
+              name: 'compound',
+              fieldType: 'COMPOUND',
+              attributes: [
+                {
+                  name: 'field1'
+                },
+                {
+                  name: 'field2'
+                }
+              ]
+            }
+          ]
+        },
+        items: [{
+          id: 'id',
+          field1: 'value',
+          field2: 'other value'
+        }]
       },
-      items: [{
-        id: 'id',
-        field1: 'value',
-        field2: 'other value'
-      }]
+      error: 'error',
+      loading: true
     }
 
-    td.when(actions.GET_QUESTIONNAIRE_OVERVIEW(td.matchers.anything(), td.matchers.anything(), td.matchers.anything())).thenResolve(questionnaire)
-    store = new Vuex.Store({actions})
+    store = new Vuex.Store({actions, state})
   })
 
   const stubs = ['router-link', 'router-view']
+  const mocks = {$t: $t}
   const propsData = {questionnaireId: 'test_quest'}
 
-  it('should set a local questionnaire object when created', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.vm.questionnaire).to.deep.equal(questionnaire)
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should return the questionnaire fields from the state', () => {
+    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue, mocks})
+    const expected = [{name: 'compound', fieldType: 'COMPOUND', attributes: [{name: 'field1'}, {name: 'field2'}]}]
+    expect(wrapper.vm.getQuestionnaireFields()).to.deep.equal(expected)
   })
 
-  it('should set loading to false when done setting the local questionnaire', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.vm.loading).to.equal(false)
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should return the questionnaire data from the state', () => {
+    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue, mocks})
+    const expected = {id: 'id', field1: 'value', field2: 'other value'}
+    expect(wrapper.vm.getQuestionnaireData()).to.deep.equal(expected)
   })
 
-  it('should have computed data after being created', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.vm.data).to.deep.equal(questionnaire.items[0])
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should return error from the store', () => {
+    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue, mocks})
+    expect(wrapper.vm.error).to.equal('error')
   })
 
-  it('should have computed attributes after being created', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.vm.attributes).to.deep.equal([questionnaire.meta.attributes[1]])
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should return loading from the store', () => {
+    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue, mocks})
+    expect(wrapper.vm.loading).to.equal(true)
   })
 
-  it('should toggle template based on loading value', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireOverview, {propsData, store, stubs, localVue})
-    expect(wrapper.find('.spinner-container').exists()).to.equal(true)
-
-    wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.find('.spinner-container').exists()).to.equal(false)
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should dispatch the [GET_QUESTIONNAIRE_OVERVIEW] action on create', () => {
+    shallow(QuestionnaireOverview, {propsData, store, stubs, localVue, mocks})
+    td.verify(actions.GET_QUESTIONNAIRE_OVERVIEW(td.matchers.anything(), 'test_quest', undefined))
   })
 })

@@ -56,18 +56,18 @@
       }
     },
     created () {
-      this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId).then(() => {
-        if (!this.$store.state.mapperOptions.booleanLabels) {
-          const mapperOptions = {
-            booleanLabels: {
-              trueLabel: this.$t('questionnaire_boolean_true'),
-              falseLabel: this.$t('questionnaire_boolean_false'),
-              nillLabel: this.$t('questionnaire_boolean_null')
-            }
+      this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId)
+
+      if (!this.$store.state.mapperOptions.booleanLabels) {
+        const mapperOptions = {
+          booleanLabels: {
+            trueLabel: this.$t('questionnaire_boolean_true'),
+            falseLabel: this.$t('questionnaire_boolean_false'),
+            nillLabel: this.$t('questionnaire_boolean_null')
           }
-          this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
         }
-      })
+        this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
+      }
     },
     components: {
       LoadingSpinner,

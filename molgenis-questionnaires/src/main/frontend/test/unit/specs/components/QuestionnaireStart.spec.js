@@ -2,7 +2,6 @@ import QuestionnaireStart from 'src/pages/QuestionnaireStart'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
-import { generateError } from '../../utils'
 
 const $t = (key) => {
   const translations = {
@@ -16,10 +15,9 @@ const $t = (key) => {
   return translations[key]
 }
 
-describe('QuestionnaireStart component', function () {
-  const spec = this.title
-
+describe('QuestionnaireStart component', () => {
   let actions
+  let getters
   let localVue
   let mutations
   let state
@@ -32,85 +30,68 @@ describe('QuestionnaireStart component', function () {
     localVue.use(Vuex)
     localVue.filter('i18n', $t)
 
+    getters = {
+      getQuestionnaireLabel: () => 'label',
+      getQuestionnaireDescription: () => 'description'
+    }
+
     state = {
-      questionnaireDescription: 'description',
-      questionnaireLabel: 'label',
-      chapterFields: [],
-      mapperOptions: {booleanLabels: 'labels'}
+      mapperOptions: {},
+      error: 'error',
+      loading: true
     }
 
     actions = {
-      START_QUESTIONNAIRE: td.function(),
-      GET_QUESTIONNAIRE: td.function()
+      START_QUESTIONNAIRE: td.function()
     }
 
     mutations = {
       SET_MAPPER_OPTIONS: td.function()
     }
 
-    store = new Vuex.Store({state, actions, mutations})
+    store = new Vuex.Store({state, actions, mutations, getters})
   })
 
   const stubs = ['router-link', 'router-view']
   const mocks = {$t: $t}
   const propsData = {questionnaireId: 'test_quest'}
 
-  it('should dispatch action [START_QUESTIONNAIRE] to start a questionnaire when created', () => {
-    shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+  it('should dispatch the [START_QUESTIONNAIRE] action on created', () => {
+    shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
     td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })
 
-  it('should dispatch a mutation to set mapperOptions', function (done) {
-    const test = this.test.title
-
-    state.mapperOptions = {}
-    store = new Vuex.Store({state, actions, mutations})
-
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, mocks, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()))
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
+  it('should dispatch a mutation to set mapperOptions', () => {
+    shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
+    td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()))
   })
 
-  it('should not dispatch a mutation to set mapperOptions if already set', function (done) {
-    const test = this.test.title
+  it('should not dispatch a mutation to set mapperOptions if already set', () => {
+    state.mapperOptions = {booleanLabels: 'labels'}
+    store = new Vuex.Store({state, actions, mutations, getters})
 
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()), {times: 0})
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
-  })
-
-  it('should dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when created and no chapters are present', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      wrapper.vm.$nextTick().then(() => {
-        td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
-        done()
-      }).catch(error => done(generateError(error, spec, test)))
-    })
-  })
-
-  it('should not dispatch action [GET_QUESTIONNAIRE] to fetch a questionnaire when there are chapters present', () => {
-    state.chapterFields = ['chapter1']
-    store = new Vuex.Store({state, actions})
-
-    shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
-    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined), {times: 0})
+    shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
+    td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()), {times: 0})
   })
 
   it('should retrieve the description from the store', () => {
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
     expect(wrapper.vm.questionnaireDescription).to.equal('description')
   })
 
   it('should retrieve the label from the store', () => {
-    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue})
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
     expect(wrapper.vm.questionnaireLabel).to.equal('label')
+  })
+
+  it('should return error from the store', () => {
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
+    expect(wrapper.vm.error).to.equal('error')
+  })
+
+  it('should return loading from the store', () => {
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
+    expect(wrapper.vm.loading).to.equal(true)
   })
 })
 

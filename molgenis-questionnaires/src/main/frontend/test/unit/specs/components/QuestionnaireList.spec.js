@@ -10,7 +10,7 @@ const $t = (key) => {
   return translations[key]
 }
 
-describe.only('QuestionnaireList component', function () {
+describe('QuestionnaireList component', function () {
   let actions
   let localVue
   let state
