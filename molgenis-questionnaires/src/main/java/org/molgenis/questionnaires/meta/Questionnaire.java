@@ -4,9 +4,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.owned.OwnedEntityType.OWNER_USERNAME;
 import static org.molgenis.i18n.LanguageService.getCurrentUserLanguageCode;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.ATTR_STATUS;
+import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 
 public class Questionnaire extends StaticEntity
 {
