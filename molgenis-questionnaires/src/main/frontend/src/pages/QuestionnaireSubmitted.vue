@@ -47,6 +47,10 @@
     created () {
       this.$store.dispatch('GET_SUBMISSION_TEXT', this.questionnaireId)
     },
+    beforeRouteLeave (next) {
+      this.$store.commit('SET_ERROR', '')
+      next()
+    },
     components: {
       LoadingSpinner,
       QuestionnaireError

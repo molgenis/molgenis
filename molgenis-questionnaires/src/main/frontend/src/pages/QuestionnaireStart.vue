@@ -69,6 +69,10 @@
         this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
       }
     },
+    beforeRouteLeave (next) {
+      this.$store.commit('SET_ERROR', '')
+      next()
+    },
     components: {
       LoadingSpinner,
       QuestionnaireError

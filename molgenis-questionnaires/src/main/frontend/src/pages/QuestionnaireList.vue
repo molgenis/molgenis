@@ -40,6 +40,10 @@
     created () {
       this.$store.dispatch('GET_QUESTIONNAIRE_LIST')
     },
+    beforeRouteLeave (next) {
+      this.$store.commit('SET_ERROR', '')
+      next()
+    },
     components: {
       LoadingSpinner,
       QuestionnaireError,

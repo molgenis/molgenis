@@ -6,8 +6,7 @@
           <h4>Something went wrong</h4>
           <pre> {{error}} </pre>
 
-          <router-link class="btn btn-lg btn-outline-secondary mt-2"
-                       to="/">
+          <router-link class="btn btn-outline-secondary mt-2" to="/">
             {{ 'questionnaire_back_to_questionnaire_list' | i18n }}
           </router-link>
         </div>
@@ -30,9 +29,6 @@
 <script>
   export default {
     name: 'QuestionnaireError',
-    props: ['error'],
-    beforeRouteLeave () {
-      this.$store.commit('SET_ERROR', '')
-    }
+    props: ['error']
   }
 </script>
