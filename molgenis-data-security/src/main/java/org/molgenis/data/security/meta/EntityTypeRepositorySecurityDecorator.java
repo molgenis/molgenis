@@ -470,5 +470,13 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 				mutableAclService.updateAcl(acl);
 			}
 		}
+		else
+		{
+			if (acl.getParentAcl() != null)
+			{
+				acl.setParent(null);
+				mutableAclService.updateAcl(acl);
+			}
+		}
 	}
 }
