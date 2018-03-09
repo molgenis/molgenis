@@ -13,15 +13,15 @@
         {{ 'questionnaire_chapters' | i18n }}
       </a>
 
-      <a v-for="chapter in chapterNavigationList" class="list-group-item list-group-item-action disabled"
-         @click="navigateToChapter(chapter.index)">
+      <router-link v-for="chapter in chapterNavigationList" :to="'/' + questionnaireId + '/chapter/' + chapter.index"
+                   class="list-group-item list-group-item-action disabled" :key="chapter.id">
 
-        <span :class="{'active-chapter-text': chapter.index === currentChapterId}">
+        <span>
           {{ chapter.label }}
         </span>
 
         <!-- Progress bar container -->
-        <div class="progress">
+        <div class="progress mt-3" style="height: 5px;">
           <div class="progress-bar" :class="{'progress-bar bg-success':  progressPerChapter[chapter.id] === 100}"
                role="progressbar"
                :style="'width:' + progressPerChapter[chapter.id] + '%;'"
@@ -29,7 +29,7 @@
                :aria-valuemax="numberOfVisibleFieldsPerChapter[chapter.id]">
           </div>
         </div>
-      </a>
+      </router-link>
     </ul>
   </div>
 </template>
@@ -50,8 +50,8 @@
     background-color: #f5f5f5;
   }
 
-  .active-chapter-text {
-    font-weight: bold;
+  .router-link-active {
+    border-left: solid 0.25em darkred;
   }
 </style>
 
@@ -59,11 +59,6 @@
   export default {
     name: 'ChapterList',
     props: ['questionnaireId', 'currentChapterId', 'changesMade', 'saving'],
-    methods: {
-      navigateToChapter (index) {
-        this.$router.push('/' + this.questionnaireId + '/chapter/' + index)
-      }
-    },
     computed: {
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
