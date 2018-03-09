@@ -119,6 +119,11 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		{
 			return;
 		}
+		if (changes.stream().allMatch(impact -> excludedEntities.contains(impact.getEntityTypeId())))
+		{
+			return;
+		}
+
 		IndexActionGroup indexActionGroup = indexActionGroupFactory.create(transactionId);
 		IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
 		Stream<Impact> impactStream = indexingStrategy.determineImpact(changes, dependencyModel)
