@@ -10,7 +10,7 @@ const $t = (key) => {
   return translations[key]
 }
 
-describe('QuestionnaireThankYou component', () => {
+describe('QuestionnaireSubmitted component', () => {
   let actions
   let localVue
   let state
