@@ -78,7 +78,11 @@ const actions = {
     const questionnaireId = state.route.params.questionnaireId
     const uri = '/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute.attribute
 
-    return api.post(uri, options).then().catch(error => handleError(commit, error))
+    return api.post(uri, options).then().catch(() => {
+      // Do not set error because we do not want to kill the app with an error screen
+      // due to auto saving
+      commit('SET_LOADING', false)
+    })
   },
 
   'SUBMIT_QUESTIONNAIRE' ({commit, state}, submitDate) {

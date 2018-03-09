@@ -30,6 +30,7 @@ export default new Router({
       props: (route) => {
         return {
           questionnaireId: route.params.questionnaireId,
+          // Make sure chapterId is of type number
           chapterId: parseInt(route.params.chapterId)
         }
       },

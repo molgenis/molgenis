@@ -324,7 +324,6 @@ describe('actions', () => {
       mockApiPostError('/api/v1/test_quest/test_row/attribute', options, error)
 
       const expectedMutations = [
-        {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
 
