@@ -47,7 +47,7 @@
     created () {
       this.$store.dispatch('GET_SUBMISSION_TEXT', this.questionnaireId)
     },
-    beforeRouteLeave (next) {
+    beforeRouteLeave (to, from, next) {
       this.$store.commit('SET_ERROR', '')
       next()
     },

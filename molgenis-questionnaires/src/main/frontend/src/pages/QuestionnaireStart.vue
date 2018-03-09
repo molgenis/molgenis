@@ -69,7 +69,7 @@
         this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
       }
     },
-    beforeRouteLeave (next) {
+    beforeRouteLeave (to, from, next) {
       this.$store.commit('SET_ERROR', '')
       next()
     },

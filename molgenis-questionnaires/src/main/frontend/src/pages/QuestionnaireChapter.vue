@@ -297,7 +297,7 @@
         }
       }
     },
-    beforeRouteLeave (next) {
+    beforeRouteLeave (to, from, next) {
       this.$store.commit('SET_ERROR', '')
       next()
     },
