@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import com.google.common.collect.Lists;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -17,9 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class EntityTypeUtilsTest
 {
@@ -118,7 +117,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityIfInSystemPackage() {
+	public void isSystemEntityIfInSystemPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -127,7 +127,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityIfInSystemSubPackage() {
+	public void isSystemEntityIfInSystemSubPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -137,7 +138,8 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityNotASystemIfNotInSystemPackage() {
+	public void isSystemEntityNotASystemIfNotInSystemPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
@@ -147,10 +149,70 @@ public class EntityTypeUtilsTest
 	}
 
 	@Test
-	public void isSystemEntityNotASystemEntityIfNotInPackage() {
+	public void isSystemEntityNotASystemEntityIfNotInPackage()
+	{
 		EntityType entity = mock(EntityType.class);
 		when(entity.getPackage()).thenReturn(null);
 		assertFalse(EntityTypeUtils.isSystemEntity(entity));
 	}
 
+	@Test
+	public void testCreateFetchForReindexingIndexingDepth0()
+	{
+		EntityType entityType = createMockEntityType();
+		when(entityType.getIndexingDepth()).thenReturn(0);
+		Fetch expectedFetch = new Fetch().field("MyEntityTypeAttr").field("MyEntityTypeRefAttr");
+		assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+	}
+
+	@Test
+	public void testCreateFetchForReindexingIndexingDepth1()
+	{
+		EntityType entityType = createMockEntityType();
+		when(entityType.getIndexingDepth()).thenReturn(1);
+		Fetch expectedFetch = new Fetch().field("MyEntityTypeAttr")
+										 .field("MyEntityTypeRefAttr", new Fetch().field("MyRefEntityTypeAttr")
+																				  .field("MyRefEntityTypeRefAttr"));
+		assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+	}
+
+	@Test
+	public void testCreateFetchForReindexingIndexingDepth2()
+	{
+		EntityType entityType = createMockEntityType();
+		when(entityType.getIndexingDepth()).thenReturn(2);
+		Fetch expectedFetch = new Fetch().field("MyEntityTypeAttr")
+										 .field("MyEntityTypeRefAttr", new Fetch().field("MyRefEntityTypeAttr")
+																				  .field("MyRefEntityTypeRefAttr",
+																						  new Fetch().field(
+																								  "MyRefRefEntityTypeAttr")
+																									 .field("MyRefRefEntityTypeRefAttr")));
+		assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+	}
+
+	private EntityType createMockEntityType()
+	{
+		EntityType refRefEntityType = mock(EntityType.class);
+		Attribute refRefEntityTypeAttr = when(mock(Attribute.class).getName()).thenReturn("MyRefRefEntityTypeAttr")
+																			  .getMock();
+		Attribute refRefEntityTypeRefAttr = when(mock(Attribute.class).getName()).thenReturn(
+				"MyRefRefEntityTypeRefAttr").getMock();
+		when(refRefEntityTypeRefAttr.getRefEntity()).thenReturn(refRefEntityType);
+		when(refRefEntityType.getAtomicAttributes()).thenReturn(asList(refRefEntityTypeAttr, refRefEntityTypeRefAttr));
+
+		EntityType refEntityType = mock(EntityType.class);
+		Attribute refEntityTypeAttr = when(mock(Attribute.class).getName()).thenReturn("MyRefEntityTypeAttr").getMock();
+		Attribute refEntityTypeRefAttr = when(mock(Attribute.class).getName()).thenReturn("MyRefEntityTypeRefAttr")
+																			  .getMock();
+		when(refEntityTypeRefAttr.getRefEntity()).thenReturn(refRefEntityType);
+		when(refEntityType.getAtomicAttributes()).thenReturn(asList(refEntityTypeAttr, refEntityTypeRefAttr));
+
+		EntityType entityType = mock(EntityType.class);
+		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("MyEntityTypeAttr").getMock();
+		Attribute refAttr = when(mock(Attribute.class).getName()).thenReturn("MyEntityTypeRefAttr").getMock();
+		when(refAttr.getRefEntity()).thenReturn(refEntityType);
+		when(entityType.getAtomicAttributes()).thenReturn(asList(attr, refAttr));
+
+		return entityType;
+	}
 }
