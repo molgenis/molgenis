@@ -5,16 +5,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityKey;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.test.AbstractMockitoTest;
@@ -27,6 +25,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
@@ -107,7 +106,11 @@ public class IndexActionRegisterServiceTest extends AbstractMockitoTest
 
 		when(dataService.findAll(eq(ENTITY_TYPE_META_DATA), any(Query.class), eq(EntityType.class))).thenReturn(
 				Stream.of(entityType));
-
+		Query<Entity> refEntityQuery = mock(Query.class);
+		when(refEntityQuery.count()).thenReturn(0L);
+		when(refEntityQuery.in(AttributeMetadata.REF_ENTITY_TYPE, singleton("entityTypeId"))).thenReturn(
+				refEntityQuery);
+		when(dataService.query(ATTRIBUTE_META_DATA)).thenReturn(refEntityQuery);
 		indexActionRegisterServiceImpl.storeIndexActions("1");
 
 		verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);

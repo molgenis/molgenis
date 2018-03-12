@@ -319,19 +319,20 @@ public class EntityTypeUtils
 		}
 	}
 
-	public static Fetch createFetchForReindexing(EntityType refEntityType)
+	public static Fetch createFetchForReindexing(EntityType entityType)
+	{
+		return createFetchForReindexing(entityType, entityType.getIndexingDepth());
+	}
+
+	private static Fetch createFetchForReindexing(EntityType entityType, int indexingDepth)
 	{
 		Fetch fetch = new Fetch();
-		for (Attribute attr : refEntityType.getAtomicAttributes())
+		for (Attribute attr : entityType.getAtomicAttributes())
 		{
-			if (attr.getRefEntity() != null)
+			EntityType refEntityType = attr.getRefEntity();
+			if (refEntityType != null && indexingDepth > 0)
 			{
-				Fetch attributeFetch = new Fetch();
-				for (Attribute refAttr : attr.getRefEntity().getAtomicAttributes())
-				{
-					attributeFetch.field(refAttr.getName());
-				}
-				fetch.field(attr.getName(), attributeFetch);
+				fetch.field(attr.getName(), createFetchForReindexing(refEntityType, indexingDepth - 1));
 			}
 			else
 			{
@@ -359,6 +360,7 @@ public class EntityTypeUtils
 	public static boolean isSystemEntity(EntityType entityType)
 	{
 		return entityType.getPackage() != null && (entityType.getPackage().getId().equals("sys") || entityType.getId()
-				.startsWith("sys_"));
+																											  .startsWith(
+																													  "sys_"));
 	}
 }
