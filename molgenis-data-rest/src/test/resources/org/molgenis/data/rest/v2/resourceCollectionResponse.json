@@ -186,6 +186,69 @@
             "isAggregatable": false
           },
           {
+            "href": "/api/v2/entity/meta/compound_categorical",
+            "fieldType": "CATEGORICAL",
+            "name": "compound_categorical",
+            "label": "compound_categorical",
+            "attributes": [],
+            "refEntity": {
+              "href": "/api/v2/refEntity",
+              "hrefCollection": "/api/v2/refEntity",
+              "name": "refEntity",
+              "label": "refEntity",
+              "attributes": [
+                {
+                  "href": "/api/v2/refEntity/meta/id",
+                  "fieldType": "STRING",
+                  "name": "id",
+                  "label": "id",
+                  "attributes": [],
+                  "maxLength": 255,
+                  "auto": false,
+                  "nillable": false,
+                  "readOnly": true,
+                  "labelAttribute": false,
+                  "unique": true,
+                  "visible": true,
+                  "lookupAttribute": true,
+                  "isAggregatable": false
+                },
+                {
+                  "href": "/api/v2/refEntity/meta/value",
+                  "fieldType": "STRING",
+                  "name": "value",
+                  "label": "value",
+                  "attributes": [],
+                  "maxLength": 255,
+                  "auto": false,
+                  "nillable": true,
+                  "readOnly": false,
+                  "labelAttribute": true,
+                  "unique": false,
+                  "visible": true,
+                  "lookupAttribute": false,
+                  "isAggregatable": false
+                }
+              ],
+              "labelAttribute": "value",
+              "idAttribute": "id",
+              "lookupAttributes": [
+                "id"
+              ],
+              "isAbstract": false,
+              "writable": false,
+              "languageCode": "en"
+            },
+            "auto": false,
+            "nillable": false,
+            "readOnly": false,
+            "labelAttribute": false,
+            "unique": false,
+            "visible": true,
+            "lookupAttribute": false,
+            "isAggregatable": false
+          },
+          {
             "href": "/api/v2/entity/meta/compound_attr0Optional",
             "fieldType": "STRING",
             "name": "compound_attr0Optional",

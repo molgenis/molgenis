@@ -117,7 +117,7 @@ class AttributeResponseV2
 					subAttrFetch = null;
 				}
 				return new AttributeResponseV2(entityParentName, entityType, attrPart, subAttrFetch, permissionService,
-						dataService);
+						dataService, includeCategories);
 			}).collect(Collectors.toList());
 		}
 		else
