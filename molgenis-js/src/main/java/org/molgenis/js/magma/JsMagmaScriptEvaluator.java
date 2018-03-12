@@ -2,6 +2,7 @@ package org.molgenis.js.magma;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -16,6 +17,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -32,6 +34,13 @@ public class JsMagmaScriptEvaluator
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
 
 	private final NashornScriptEngine jsScriptEngine;
+
+	/**
+	 * Set containing the attribute types that can be used in combination the the 'dot' operator to resolve the reference
+	 * value from the referenced entity.
+	 */
+	private static Set<AttributeType> referenceTypes = Sets.newHashSet(AttributeType.CATEGORICAL,
+			AttributeType.CATEGORICAL_MREF, AttributeType.XREF, AttributeType.MREF);
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
@@ -53,7 +62,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity);
+		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(expression, entity);
 		Object value;
 		try
 		{
@@ -73,16 +82,23 @@ public class JsMagmaScriptEvaluator
 		return value;
 	}
 
-	private static Map<String, Object> toScriptEngineValueMap(Entity entity)
+	private static Map<String, Object> toScriptEngineValueMap(String expression, Entity entity)
 	{
 		Map<String, Object> map = Maps.newHashMap();
 		entity.getEntityType()
 			  .getAtomicAttributes()
-			  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr)));
+			  .forEach(attr -> {
+			  	map.put(attr.getName(), toScriptEngineValue(expression, entity, attr));
+			  });
 		return map;
 	}
 
-	private static Object toScriptEngineValue(Entity entity, Attribute attr)
+	private static boolean isReferenceTypeAttr(AttributeType attrType)
+	{
+		return referenceTypes.contains(attrType);
+	}
+
+	private static Object toScriptEngineValue(String expression, Entity entity, Attribute attr)
 	{
 		Object value = null;
 
@@ -97,15 +113,19 @@ public class JsMagmaScriptEvaluator
 			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
-				value = xrefEntity != null ? toScriptEngineValue(xrefEntity,
-						xrefEntity.getEntityType().getIdAttribute()) : null;
+
+				if(xrefEntity != null) {
+					Attribute idAttribute = xrefEntity.getEntityType().getIdAttribute();
+					value = toScriptEngineValue(expression, xrefEntity, idAttribute);
+				}
+
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
 				value = stream(mrefEntities.spliterator(), false).map(
-						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
+						mrefEntity -> toScriptEngineValue(expression, mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
 																 .collect(toList());
 				break;
 			case DATE:
