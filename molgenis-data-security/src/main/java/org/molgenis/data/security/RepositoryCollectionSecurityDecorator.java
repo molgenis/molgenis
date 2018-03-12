@@ -83,15 +83,8 @@ public class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCol
 		if (package_ != null)
 		{
 			ObjectIdentity objectIdentity = new PackageIdentity(package_);
-			try
-			{
-				Acl parentAcl = mutableAclService.readAclById(objectIdentity);
-				acl.setParent(parentAcl);
-			}
-			catch (NotFoundException e)
-			{
-				LOG.error("FIXME SystemEntityTypePersister.persistMetadataMetadata is called before packages exist");
-			}
+			Acl parentAcl = mutableAclService.readAclById(objectIdentity);
+			acl.setParent(parentAcl);
 		}
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 		acl.insertAce(acl.getEntries().size(), getCumulativePermission(CREATE), sid, true);
