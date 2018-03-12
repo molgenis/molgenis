@@ -2,6 +2,7 @@ package org.molgenis.security.acl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
+import org.springframework.security.acls.model.AclCache;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +25,12 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 	private static final String SQL_SELECT_ACL_CLASS = "select class from acl_class";
 
 	private final JdbcTemplate jdbcTemplate;
+	private final AclCache aclCache;
 
-	MutableAclClassServiceImpl(JdbcTemplate jdbcTemplate)
+	MutableAclClassServiceImpl(JdbcTemplate jdbcTemplate, AclCache aclCache)
 	{
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
+		this.aclCache = requireNonNull(aclCache);
 	}
 
 	@Transactional
@@ -42,6 +45,7 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 	public void deleteAclClass(String type)
 	{
 		jdbcTemplate.update(SQL_DELETE_FROM_ACL_CLASS, type);
+		aclCache.clearCache();
 	}
 
 	@SuppressWarnings("ConstantConditions")

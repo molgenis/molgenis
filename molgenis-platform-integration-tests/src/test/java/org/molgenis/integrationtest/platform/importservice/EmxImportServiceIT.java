@@ -240,12 +240,6 @@ public class EmxImportServiceIT extends ImportServiceIT
 		assertEquals(getIdsAsSet(packageTags), newHashSet("packagetag0", "packagetag1"));
 	}
 
-	/*
-	, roles = { ROLE_READ_PACKAGE, ROLE_COUNT_PACKAGE, ROLE_READ_ENTITY_TYPE,
-			ROLE_COUNT_ENTITY_TYPE, ROLE_READ_ATTRIBUTE, ROLE_COUNT_ATTRIBUTE, ROLE_READ_TAG, ROLE_READ_OWNED,
-			ROLE_READ_FILE_META, ROLE_COUNT_FILE_META, ROLE_COUNT_OWNED, ROLE_COUNT_TAG, ROLE_READ_DECORATOR_CONFIG,
-			ROLE_COUNT_DECORATOR_CONFIG }
-	 */
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME)
 	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)

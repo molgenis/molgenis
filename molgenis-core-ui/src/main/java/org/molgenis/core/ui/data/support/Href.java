@@ -2,10 +2,8 @@ package org.molgenis.core.ui.data.support;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.util.MolgenisRuntimeException;
 import org.springframework.web.util.UriUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,13 +100,6 @@ public class Href
 
 	private static String encodePathSegment(String pathSegment)
 	{
-		try
-		{
-			return UriUtils.encodePathSegment(pathSegment, UTF_8.name());
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			throw new MolgenisRuntimeException(e);
-		}
+		return UriUtils.encodePathSegment(pathSegment, UTF_8.name());
 	}
 }
