@@ -16,8 +16,8 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -385,7 +385,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
-		when(dataService.count(ENTITY_NAME, new QueryImpl<>())).thenReturn(2L);
+		when(dataService.count(ENTITY_NAME, q)).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
 		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
@@ -683,7 +683,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new RepositoryIdentity("entity"), RepositoryPermission.READ)).thenReturn(
 				false);
 
 		String content = "{newEntityName: 'newEntity'}";
@@ -730,7 +730,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new RepositoryIdentity("entity"), RepositoryPermission.READ)).thenReturn(
 				true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);

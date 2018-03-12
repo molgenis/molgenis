@@ -26,7 +26,8 @@ import static org.molgenis.data.security.EntityPermission.READ;
 import static org.molgenis.data.security.EntityPermission.WRITE;
 
 /**
- * RepositoryDecorator that works on EntityTypes that are row-level secured.
+ * Entity decorator that checks whether the current user is allowed to add, update, delete entities. For entity count
+ * and read only include the permitted entities. Limitation: aggregation is only allowed for superusers and the system user.
  */
 public class RowLevelSecurityRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {

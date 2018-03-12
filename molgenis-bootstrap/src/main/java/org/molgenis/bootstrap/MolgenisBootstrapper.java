@@ -76,7 +76,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		LOG.info("Bootstrapping application ...");
-		bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 		LOG.trace("Updating MOLGENIS ...");
 		upgradeBootstrapper.bootstrap();
@@ -97,6 +96,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping system entity meta data ...");
 		systemEntityTypeBootstrapper.bootstrap(event);
 		LOG.debug("Bootstrapped system entity meta data");
+
+		bootstrappingEventPublisher.publishBootstrappingSystemEntitiesFinishedEvent();
 
 		LOG.trace("Populating repositories ...");
 		boolean wasDatabasePopulated = repositoryPopulator.populate(event);
@@ -129,7 +130,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		bootstrapThemePopulator.populate();
 		LOG.debug("Populated bootstrap themes");
 
-		bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
+		bootstrappingEventPublisher.publishBootstrappingSystemEntitiesFinishedEvent();
 		LOG.info("Bootstrapping application completed");
 	}
 

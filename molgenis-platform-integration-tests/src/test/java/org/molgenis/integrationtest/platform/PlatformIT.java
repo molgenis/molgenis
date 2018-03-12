@@ -17,7 +17,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -60,8 +60,8 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static org.molgenis.data.security.RepositoryPermission.READ;
+import static org.molgenis.data.security.RepositoryPermission.WRITE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -1946,7 +1946,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_md_Package", READ);
 		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
 		entityTypePermissionMap.put("sys_md_Attribute", WRITE);
