@@ -7,10 +7,10 @@ import org.testng.annotations.Test;
 import java.util.Iterator;
 
 import static java.util.Arrays.asList;
-import static org.molgenis.data.security.EntityTypePermission.*;
+import static org.molgenis.data.security.RepositoryPermission.*;
 import static org.testng.Assert.assertEquals;
 
-public class EntityTypePermissionUtilsTest
+public class RepositoryPermissionUtilsTest
 {
 	@DataProvider(name = "testGetCumulativePermissionProvider")
 	public static Iterator<Object[]> testGetCumulativePermissionProvider()
@@ -23,10 +23,10 @@ public class EntityTypePermissionUtilsTest
 	}
 
 	@Test(dataProvider = "testGetCumulativePermissionProvider")
-	public void testGetCumulativePermission(EntityTypePermission entityTypePermission,
+	public void testGetCumulativePermission(RepositoryPermission entityTypePermission,
 			CumulativePermission expectedCumulativePermission)
 	{
-		assertEquals(EntityTypePermissionUtils.getCumulativePermission(entityTypePermission),
+		assertEquals(RepositoryPermissionUtils.getCumulativePermission(entityTypePermission),
 				expectedCumulativePermission);
 	}
 }

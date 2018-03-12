@@ -5,8 +5,8 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -320,7 +320,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 	private Stream<Attribute> filterCountPermission(Stream<Attribute> attrs)
 	{
-		return filterPermission(attrs, EntityTypePermission.COUNT);
+		return filterPermission(attrs, RepositoryPermission.COUNT);
 	}
 
 	private Attribute filterReadPermission(Attribute attr)
@@ -328,10 +328,10 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 		return attr != null ? filterCountPermission(Stream.of(attr)).findFirst().orElse(null) : null;
 	}
 
-	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, EntityTypePermission permission)
+	private Stream<Attribute> filterPermission(Stream<Attribute> attrs, RepositoryPermission permission)
 	{
 		return attrs.filter(
-				attr -> permissionService.hasPermission(new EntityTypeIdentity(attr.getEntity().getId()), permission));
+				attr -> permissionService.hasPermission(new RepositoryIdentity(attr.getEntity().getId()), permission));
 	}
 
 	private class FilteredConsumer
@@ -345,7 +345,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
 
 		public void filter(List<Attribute> attrs)
 		{
-			Stream<Attribute> filteredAttrs = filterPermission(attrs.stream(), EntityTypePermission.COUNT);
+			Stream<Attribute> filteredAttrs = filterPermission(attrs.stream(), RepositoryPermission.COUNT);
 			consumer.accept(filteredAttrs.collect(toList()));
 		}
 	}

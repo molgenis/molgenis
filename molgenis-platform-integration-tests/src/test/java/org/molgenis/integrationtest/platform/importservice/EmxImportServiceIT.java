@@ -10,8 +10,8 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryIdentity;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,8 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
+import static org.molgenis.data.security.RepositoryPermission.READ;
+import static org.molgenis.data.security.RepositoryPermissionUtils.getCumulativePermission;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
@@ -888,7 +888,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	{
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_md_Package", READ);
 		entityTypePermissionMap.put("sys_md_EntityType", READ);
 		entityTypePermissionMap.put("sys_md_Attribute", READ);
@@ -898,7 +898,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
+			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(entityTypeId));
 			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
 			mutableAclService.updateAcl(acl);
 		}));

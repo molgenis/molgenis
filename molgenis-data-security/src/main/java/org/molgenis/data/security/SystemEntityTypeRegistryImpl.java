@@ -92,8 +92,8 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	 */
 	private boolean isReadAllowed(SystemEntityType systemEntityType)
 	{
-		return permissionService.hasPermission(new EntityTypeIdentity(systemEntityType.getId()),
-				EntityTypePermission.COUNT);
+		return permissionService.hasPermission(new RepositoryIdentity(systemEntityType.getId()),
+				RepositoryPermission.COUNT);
 	}
 
 	private void validateReadPermission(SystemEntityType systemEntityType)

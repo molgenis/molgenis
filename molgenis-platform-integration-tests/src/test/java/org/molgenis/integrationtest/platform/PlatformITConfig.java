@@ -34,7 +34,6 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
-import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
@@ -101,8 +100,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
-		TestPermissionPopulator.class })
+		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, TestPermissionPopulator.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
@@ -198,7 +196,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 				RunAsSystemAspect.runAsSystem(() ->
 				{
 					LOG.info("Bootstrapping registries ...");
-					bootstrappingEventPublisher.publishBootstrappingStartedEvent();
 
 					LOG.trace("Populating data source with ACL tables ...");
 					dataSourceAclTablesPopulator.populate();
@@ -240,7 +237,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 					event.getApplicationContext().getBean(EntityTypeRegistryPopulator.class).populate();
 					event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
 
-					bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
+					bootstrappingEventPublisher.publishBootstrappingSystemEntitiesFinishedEvent();
 				});
 			}
 			catch (Exception unexpected)

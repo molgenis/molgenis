@@ -88,6 +88,8 @@ public class EntityTypeMetadata extends SystemEntityType
 									.setNillable(false)
 									.setDefaultValue(String.valueOf(1))
 									.setRangeMin(1L);
+
+		setRowLevelSecured(true);
 	}
 
 	/**

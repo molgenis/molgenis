@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
 import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
@@ -42,8 +42,8 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
+import static org.molgenis.data.security.RepositoryPermission.READ;
+import static org.molgenis.data.security.RepositoryPermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -485,13 +485,13 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = getEntityTypePermissionMap();
+		Map<String, RepositoryPermission> entityTypePermissionMap = getEntityTypePermissionMap();
 		testPermissionPopulator.populate(entityTypePermissionMap);
 	}
 
-	private Map<String, EntityTypePermission> getEntityTypePermissionMap()
+	private Map<String, RepositoryPermission> getEntityTypePermissionMap()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<String, RepositoryPermission> entityTypePermissionMap = new HashMap<>();
 
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
