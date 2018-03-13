@@ -84,6 +84,14 @@ module.exports = {
       app.put('/api/v1/*', function (req, res) {
         res.json('OK')
       })
+
+      app.post('/api/v2/*', function (req, res) {
+        res.json('OK')
+      })
+
+      app.get('/menu/plugins/questionnaires/submission-text/*', function (req, res) {
+        res.json('<h1>Thank you</h1>')
+      })
     }
   },
 
