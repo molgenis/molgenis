@@ -1,4 +1,7 @@
-const getAllVisibleFieldIds = (chapter, data) => {
+// @flow
+import type { QuestionnaireState } from 'src/flow.types.js'
+
+const getAllVisibleFieldIds = (chapter: Object, data: Object) => {
   return chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
       return [...accumulator, ...getAllVisibleFieldIds(child, data)]
@@ -12,19 +15,19 @@ const getAllVisibleFieldIds = (chapter, data) => {
 }
 
 const getters = {
-  getChapterByIndex: (state) => (index) => {
+  getChapterByIndex: (state: QuestionnaireState): Function => (index: number) => {
     return state.chapterFields[index - 1]
   },
 
-  getChapterNavigationList: state => {
+  getChapterNavigationList: (state: QuestionnaireState): Array<*> => {
     return state.chapterFields.map((chapter, index) => ({id: chapter.id, label: chapter.label, index: (index + 1)}))
   },
 
-  getTotalNumberOfChapters: state => {
+  getTotalNumberOfChapters: (state: QuestionnaireState): number => {
     return state.chapterFields.length
   },
 
-  getVisibleFieldIdsForAllChapters: state => {
+  getVisibleFieldIdsForAllChapters: (state: QuestionnaireState): Object => {
     return state.chapterFields.reduce((accumulator, chapter) => {
       const visibleFields = getAllVisibleFieldIds(chapter, state.formData)
       accumulator[chapter.id] = visibleFields
@@ -33,15 +36,15 @@ const getters = {
     }, {})
   },
 
-  getQuestionnaireId: state => {
+  getQuestionnaireId: (state: QuestionnaireState): string => {
     return state.questionnaire.meta && state.questionnaire.meta.name
   },
 
-  getQuestionnaireLabel: state => {
+  getQuestionnaireLabel: (state: QuestionnaireState): string => {
     return state.questionnaire.meta && state.questionnaire.meta.label
   },
 
-  getQuestionnaireDescription: state => {
+  getQuestionnaireDescription: (state: QuestionnaireState): string => {
     return state.questionnaire.meta && state.questionnaire.meta.description
   }
 }
