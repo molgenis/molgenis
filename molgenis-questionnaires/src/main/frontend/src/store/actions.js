@@ -1,5 +1,6 @@
+// @flow
 import api from '@molgenis/molgenis-api-client'
-
+import { VuexContext, UpdatedAttribute } from 'src/flow.types.js'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const handleError = (commit, error) => {
@@ -8,7 +9,7 @@ const handleError = (commit, error) => {
 }
 
 const actions = {
-  'GET_QUESTIONNAIRE_LIST' ({commit}) {
+  'GET_QUESTIONNAIRE_LIST' ({commit}: VuexContext) {
     return api.get('/menu/plugins/questionnaires/list').then(response => {
       commit('SET_QUESTIONNAIRE_LIST', response)
       commit('SET_LOADING', false)
@@ -17,7 +18,7 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit, dispatch, getters, state}, questionnaireId) {
+  'START_QUESTIONNAIRE' ({commit, dispatch, getters, state}: VuexContext, questionnaireId: string) {
     const currentQuestionnaireId = getters.getQuestionnaireId
     if (currentQuestionnaireId !== questionnaireId) {
       commit('CLEAR_STATE')
@@ -32,7 +33,7 @@ const actions = {
     })
   },
 
-  'GET_QUESTIONNAIRE' ({state, commit}, questionnaireId) {
+  'GET_QUESTIONNAIRE' ({state, commit}: VuexContext, questionnaireId: string) {
     return api.get('/api/v2/' + questionnaireId + '?includeCategories=true').then(response => {
       commit('SET_QUESTIONNAIRE', response)
 
@@ -51,7 +52,7 @@ const actions = {
     })
   },
 
-  'GET_QUESTIONNAIRE_OVERVIEW' ({commit}, questionnaireId) {
+  'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
     return api.get('/api/v2/' + questionnaireId).then(response => {
       commit('SET_QUESTIONNAIRE', response)
       commit('SET_LOADING', false)
@@ -60,7 +61,7 @@ const actions = {
     })
   },
 
-  'GET_SUBMISSION_TEXT' ({commit}, questionnaireId) {
+  'GET_SUBMISSION_TEXT' ({commit}: VuexContext, questionnaireId: string) {
     return api.get('/menu/plugins/questionnaires/submission-text/' + questionnaireId).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
       commit('SET_LOADING', false)
@@ -69,7 +70,7 @@ const actions = {
     })
   },
 
-  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}, updatedAttribute) {
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, updatedAttribute: UpdatedAttribute) {
     const options = {
       body: JSON.stringify(updatedAttribute.value),
       method: 'PUT'
@@ -85,7 +86,7 @@ const actions = {
     })
   },
 
-  'SUBMIT_QUESTIONNAIRE' ({commit, state}, submitDate) {
+  'SUBMIT_QUESTIONNAIRE' ({commit, state}: VuexContext, submitDate: string) {
     const submitData = Object.assign({}, state.formData)
     submitData.submitDate = submitDate
 
