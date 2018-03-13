@@ -5,7 +5,9 @@ import actions from './actions'
 import getters from './getters'
 import mutations from './mutations'
 
-const state = {
+import type { QuestionnaireState } from '../flow.types'
+
+const state: QuestionnaireState = {
 
   /**
    * A "raw" questionnaire containing an API v2 EntityType with the filled in data
