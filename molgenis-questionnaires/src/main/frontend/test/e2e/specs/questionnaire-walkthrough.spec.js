@@ -102,20 +102,14 @@ module.exports = {
     var chapterOneProgressBar = 'ul > a:nth-child(2) > div > div'
 
     // ======= tests =======
-    browser.setValue(chapterOneNameQuestion, 'Nightwatch test')
-    browser.getElementSize(chapterOneProgressBar, function (result) {
-      // it is 50%, but nightwatch registers px values
-      var width = result.value.width / 2
-      browser.expect.element(chapterOneProgressBar).to.have.css('width').which.equals(width + 'px')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('0')
 
-      browser.setValue(chapterOneAgeQuestion, 20)
-      browser.getElementSize(chapterOneProgressBar, function (result) {
-        // it is 100%, but nightwatch registers px values
-        var width = result.value.width
-        browser.expect.element(chapterOneProgressBar).to.have.css('width').which.equals(width + 'px')
-        browser.expect.element(chapterOneProgressBar).to.have.attribute('class').which.contains('bg-success')
-      })
-    })
+    browser.setValue(chapterOneNameQuestion, 'Nightwatch test')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('1')
+
+    browser.setValue(chapterOneAgeQuestion, 20)
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('2')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('class').which.contains('bg-success')
   },
 
   'should navigate to the second chapter': function (browser) {
