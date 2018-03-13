@@ -73,6 +73,7 @@ module.exports = {
             label: 'Question #1 - Tag your skills',
             description: 'Please check all the skills you have mastered',
             fieldType: 'CATEGORICAL_MREF',
+            visible: true,
             refEntity: {
               name: 'skills',
               label: 'Programming skills',
@@ -134,6 +135,7 @@ module.exports = {
             label: 'Question #2 - What is your favorite website',
             description: 'Please check your favorite website',
             fieldType: 'CATEGORICAL',
+            visible: true,
             refEntity: {
               name: 'fav_website',
               label: 'Favorite Websites',
