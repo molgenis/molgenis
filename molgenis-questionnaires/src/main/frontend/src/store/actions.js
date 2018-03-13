@@ -1,6 +1,6 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
-import type { VuexContext, UpdatedAttribute } from 'src/flow.types.js'
+import type { VuexContext, UpdatedAttribute } from '../flow.types.js'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const handleError = (commit: Function, error: Error) => {

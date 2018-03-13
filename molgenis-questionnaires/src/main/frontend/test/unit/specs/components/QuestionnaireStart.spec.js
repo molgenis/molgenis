@@ -94,4 +94,3 @@ describe('QuestionnaireStart component', () => {
     expect(wrapper.vm.loading).to.equal(true)
   })
 })
-

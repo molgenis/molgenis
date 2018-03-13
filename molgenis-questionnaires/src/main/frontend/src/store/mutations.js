@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState } from 'src/flow.types.js'
+import type { QuestionnaireState } from '../flow.types.js'
 
 const mutations = {
   'SET_QUESTIONNAIRE' (state: QuestionnaireState, questionnaire: Object) {

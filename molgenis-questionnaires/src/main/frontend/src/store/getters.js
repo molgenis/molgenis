@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState } from 'src/flow.types.js'
+import type { QuestionnaireState } from '../flow.types.js'
 
 const getAllVisibleFieldIds = (chapter: Object, data: Object) => {
   return chapter.children.reduce((accumulator, child) => {
