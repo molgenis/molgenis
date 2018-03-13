@@ -54,7 +54,7 @@ module.exports = {
         res.json(questionnaireList)
       })
 
-      app.get('/api/v2/i18n/form/en', function (req, res) {
+      app.get('/api/v2/i18n/questionnaire/en', function (req, res) {
         res.json(localizedMessages)
       })
     }
