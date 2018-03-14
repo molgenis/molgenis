@@ -28,8 +28,15 @@
                         v-if="showPreviousButton"
                         @click="navigateToPreviousChapter"
                         class="btn btn-outline-secondary float-left">
-                        <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
-                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
+
+                        <template v-if="changingChapters">
+                          <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
+                        </template>
+
+                        <template v-else>
+                          <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
+                          <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
+                        </template>
                       </button>
 
                       <router-link
@@ -53,8 +60,15 @@
                         v-if="showNextButton"
                         @click="navigateToNextChapter"
                         class="btn btn-primary float-right">
-                        <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
-                        <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
+
+                        <template v-if="changingChapters">
+                          <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
+                        </template>
+
+                        <template v-else>
+                          <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
+                          <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
+                        </template>
                       </button>
 
                       <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
@@ -68,21 +82,28 @@
 
                 <!-- Error message container -->
                 <div v-if="navigationBlocked" class="error-message-container">
-                  <div class="alert alert-warning" role="alert">
+                  <div class="alert alert-warning mb-0" role="alert">
                     {{ 'questionnaire_chapter_incomplete_message' | i18n }}
                   </div>
                 </div>
 
                 <!-- Form Container -->
                 <div class="card-body">
-                    <form-component
-                      :id="questionnaireId"
-                      :formFields="currentChapter"
-                      :formState="formState"
-                      :initialFormData="formData"
-                      :options="options"
-                      @valueChange="onValueChanged">
-                    </form-component>
+                  <form-component
+                    :id="questionnaireId"
+                    :formFields="currentChapter"
+                    :formState="formState"
+                    :initialFormData="formData"
+                    :options="options"
+                    @valueChange="onValueChanged">
+                  </form-component>
+                </div>
+
+                <!-- Error message container -->
+                <div v-if="navigationBlocked" class="error-message-container">
+                  <div class="alert alert-warning mb-0" role="alert">
+                    {{ 'questionnaire_chapter_incomplete_message' | i18n }}
+                  </div>
                 </div>
 
                 <div class="card-footer">
@@ -95,8 +116,15 @@
                         v-if="showPreviousButton"
                         @click="navigateToPreviousChapter"
                         class="btn btn-outline-secondary float-left">
-                        <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
-                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
+
+                        <template v-if="changingChapters">
+                          <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
+                        </template>
+
+                        <template v-else>
+                          <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
+                          <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
+                        </template>
                       </button>
 
                       <router-link
@@ -120,8 +148,15 @@
                         v-if="showNextButton"
                         @click="navigateToNextChapter"
                         class="btn btn-primary float-right">
-                        <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
-                        <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
+
+                        <template v-if="changingChapters">
+                          <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
+                        </template>
+
+                        <template v-else>
+                          <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
+                          <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
+                        </template>
                       </button>
 
                       <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
@@ -240,6 +275,7 @@
 
       /**
        * Watch changes in formData to run the auto save action with ONLY the updated attribute
+       * Will not trigger auto saves on id attributes, as these are often read-only
        */
       formData (newValue, oldValue) {
         const lastUpdatedAttribute = Object.keys(newValue).find(key => {
@@ -315,7 +351,7 @@
       // This is the case for dynamic urls e.g. /chapter/:chapterId
       this.changingChapters = true
       next()
-      console.log('next finished')
+      this.changingChapters = false
     },
     beforeRouteLeave (to, from, next) {
       this.$store.commit('SET_ERROR', '')
