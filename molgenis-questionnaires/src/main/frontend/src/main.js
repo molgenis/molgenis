@@ -8,6 +8,8 @@ import { sync } from 'vuex-router-sync'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 
+import 'font-awesome/css/font-awesome.min.css'
+
 sync(store, router)
 
 Vue.use(i18n, {
