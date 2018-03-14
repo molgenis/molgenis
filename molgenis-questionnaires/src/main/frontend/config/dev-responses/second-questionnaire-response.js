@@ -58,6 +58,10 @@ module.exports = {
             label: 'Question #2 - What is your age?',
             description: 'Please fill in your age',
             fieldType: 'INT',
+            range: {
+              min: 0,
+              max: 99
+            },
             visible: true
           }
         ]
