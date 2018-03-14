@@ -69,7 +69,7 @@ module.exports = {
     var startQuestionnaireButton = 'a.btn.btn-lg.btn-primary.mt-2.float-right'
     var backToStartButton = 'div.card-header > div > div:nth-child(1) > a'
     var nextChapterButton = 'div.card-header > div > div:nth-child(3) > button'
-    var currentChapterSpan = 'div.card-header > div > div.col-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
+    var currentChapterSpan = 'div.card-header > div > div.col-6.col-sm-4.col-md-4.col-lg-4.col-xl-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
     var chapterNavigationHeader = 'ul > a:nth-child(1)'
     var firstChapterListItem = 'ul > a:nth-child(2)'
     var secondChapterListItem = 'ul > a:nth-child(3)'
@@ -119,7 +119,7 @@ module.exports = {
     // ===== selectors =====
     var nextChapterButton = 'div.card-header > div > div:nth-child(3) > button'
     var previousChapterButton = 'div.card-header > div > div:nth-child(1) > button'
-    var currentChapterSpan = 'div.card-header > div > div.col-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
+    var currentChapterSpan = 'div.card-header > div > div.col-6.col-sm-4.col-md-4.col-lg-4.col-xl-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
     var submitButton = 'div.card-header > div > div:nth-child(3) > button'
 
     // ======= tests =======
