@@ -7,10 +7,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.util.Properties;
 
@@ -34,15 +31,24 @@ import java.util.Properties;
 @Service
 public class MolgenisVersionService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
+
 	public static final int CURRENT_VERSION = 31;
 
-	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
+	private Properties properties;
+
+	private static final String POM_VERSION_KEY = "molgenis.version";
 
 	public MolgenisVersionService(DataSource dataSource)
 	{
-		if (MigrationUtils.getVersion() == null)
+		if (properties == null)
 		{
-			LOG.warn("No {} property found in molgenis-server.properties.", MigrationUtils.VERSION_KEY);
+			populatePomProperties();
+		}
+
+		if (properties.getProperty("version") == null)
+		{
+			LOG.warn("No {} property found in molgenis-server.properties.", POM_VERSION_KEY);
 			if (isPopulatedDatabase(dataSource))
 			{
 				LOG.info("Database is populated. Setting molgenis-server.properties to 0. (Molgenis 1.4.3)");
@@ -52,6 +58,31 @@ public class MolgenisVersionService
 			{
 				LOG.info("Database is empty. Setting molgenis-server.properties to current version. (Clean install)");
 				updateToCurrentVersion();
+			}
+		}
+	}
+
+	private void populatePomProperties()
+	{
+		properties = new Properties();
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream("/molgenis.properties");
+		try
+		{
+			properties.load(in);
+		}
+		catch (Exception e)
+		{
+			LOG.error("No molgenis.properties could be parsed");
+		}
+		finally
+		{
+			try
+			{
+				in.close();
+			}
+			catch (Exception ex)
+			{
+				LOG.error("molgenis.properties could not be closed");
 			}
 		}
 	}
@@ -87,7 +118,18 @@ public class MolgenisVersionService
 	 */
 	public int getMolgenisVersionFromServerProperties()
 	{
-		return Integer.parseInt(MigrationUtils.getVersion());
+		int version = CURRENT_VERSION;
+		if (properties.getProperty(POM_VERSION_KEY).contains("SNAPSHOT"))
+		{
+			LOG.warn("You trying to update to an experimental release: [ {} ]",
+					properties.getProperty(POM_VERSION_KEY));
+		}
+		else
+		{
+			LOG.info("Updating to release: [ {} ]", properties.getProperty(POM_VERSION_KEY));
+			version = Integer.parseInt(properties.getProperty(POM_VERSION_KEY));
+		}
+		return version;
 	}
 
 	public void updateToCurrentVersion()
@@ -97,16 +139,16 @@ public class MolgenisVersionService
 
 	public void updateToVersion(int version)
 	{
-		Properties properties = MigrationUtils.getMolgenisServerProperties();
-		properties.setProperty(MigrationUtils.VERSION_KEY, Integer.toString(version));
-
-		try (OutputStream out = new FileOutputStream(MigrationUtils.getMolgenisServerPropertiesFile()))
-		{
-			properties.store(out, "Molgenis server properties");
-		}
-		catch (IOException e)
-		{
-			throw new UncheckedIOException(e);
-		}
+		//		Properties properties = MigrationUtils.getMolgenisServerProperties();
+		//		properties.setProperty(MigrationUtils.VERSION_KEY, Integer.toString(version));
+		//
+		//		try (OutputStream out = new FileOutputStream(MigrationUtils.getMolgenisServerPropertiesFile()))
+		//		{
+		//			properties.store(out, "Molgenis server properties");
+		//		}
+		//		catch (IOException e)
+		//		{
+		//			throw new UncheckedIOException(e);
+		//		}
 	}
 }
