@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-12">
+      <div class="col-12 my-5">
         <!-- Loading spinner -->
         <template v-if="loading">
           <loading-spinner :message="$t('questionnaire_overview_loading_text')"></loading-spinner>
@@ -15,47 +15,51 @@
         <!-- Questionnaire chapters -->
         <template v-else>
           <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 col-xl-9 mt-5">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
 
               <div class="card mb-2">
                 <div class="card-header">
                   <div class="row">
 
                     <!-- Shows previous / back to start button based on chapter progress -->
-                    <div class="col-4">
+                    <div class="col-3 col-sm-4 col-md-4 col-lg-4 col-xl-4">
                       <button
                         type="button"
                         v-if="showPreviousButton"
                         @click="navigateToPreviousChapter"
                         class="btn btn-outline-secondary float-left">
-                        {{ 'questionnaire_previous_chapter' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
                       </button>
 
                       <router-link
                         v-show="!showPreviousButton"
                         :to="'/' + questionnaireId"
                         class="btn btn-outline-secondary float-left">
-                        {{ 'questionnaire_back_to_start' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_back_to_start' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
                       </router-link>
                     </div>
 
                     <!-- Shows current chapter and total number of chapters -->
-                    <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
+                    <div class="col-6 col-sm-4 col-md-4 col-lg-4 col-xl-4 text-muted d-flex flex-column justify-content-center align-items-center">
                       Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
                     </div>
 
                     <!-- Shows next / submit button based on chapter progress -->
-                    <div class="col-4">
+                    <div class="col-3 col-sm-4 col-md-4 col-lg-4 col-xl-4">
                       <button
                         type="button"
                         v-if="showNextButton"
                         @click="navigateToNextChapter"
                         class="btn btn-primary float-right">
-                        {{ 'questionnaire_next_chapter' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
                       </button>
 
                       <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
-                        {{ 'questionnaire_submit' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_submit' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-check"></i></span>
                       </button>
                     </div>
 
@@ -71,7 +75,6 @@
 
                 <!-- Form Container -->
                 <div class="card-body">
-                  <div v-if="showForm">
                     <form-component
                       :id="questionnaireId"
                       :formFields="currentChapter"
@@ -80,40 +83,50 @@
                       :options="options"
                       @valueChange="onValueChanged">
                     </form-component>
-                  </div>
-
-                  <div class="spinner-container text-muted d-flex flex-column justify-content-center align-items-center"
-                       v-else>
-                    <i class="fa fa-spinner fa-spin fa-3x my-3"></i>
-                  </div>
                 </div>
 
                 <div class="card-footer">
                   <div class="row">
 
-                    <!-- Shows previous button based on chapter progress -->
-                    <div class="col-6">
+                    <!-- Shows previous / back to start button based on chapter progress -->
+                    <div class="col-3 col-sm-4 col-md-4 col-lg-4 col-xl-4">
                       <button
                         type="button"
                         v-if="showPreviousButton"
                         @click="navigateToPreviousChapter"
                         class="btn btn-outline-secondary float-left">
-                        {{ 'questionnaire_previous_chapter' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_previous_chapter' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
                       </button>
+
+                      <router-link
+                        v-show="!showPreviousButton"
+                        :to="'/' + questionnaireId"
+                        class="btn btn-outline-secondary float-left">
+                        <span class="d-none d-md-block">{{ 'questionnaire_back_to_start' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-left"></i></span>
+                      </router-link>
+                    </div>
+
+                    <!-- Shows current chapter and total number of chapters -->
+                    <div class="col-6 col-sm-4 col-md-4 col-lg-4 col-xl-4 text-muted d-flex flex-column justify-content-center align-items-center">
+                      Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
                     </div>
 
                     <!-- Shows next / submit button based on chapter progress -->
-                    <div class="col-6">
+                    <div class="col-3 col-sm-4 col-md-4 col-lg-4 col-xl-4">
                       <button
                         type="button"
                         v-if="showNextButton"
                         @click="navigateToNextChapter"
                         class="btn btn-primary float-right">
-                        {{ 'questionnaire_next_chapter' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
                       </button>
 
                       <button class="btn btn-primary float-right" @click="submitQuestionnaire" v-else>
-                        {{ 'questionnaire_submit' | i18n }}
+                        <span class="d-none d-md-block">{{ 'questionnaire_submit' | i18n }}</span>
+                        <span class="d-md-none"><i class="fa fa-check"></i></span>
                       </button>
                     </div>
 
@@ -123,7 +136,7 @@
             </div>
 
             <!-- Renders chapter navigation list -->
-            <div class="hidden-md-down col-lg-3 col-xl-3 mt-5">
+            <div class="d-none d-lg-block col-3">
               <chapter-list
                 :questionnaireId="questionnaireId"
                 :currentChapterId="chapterId"
@@ -161,14 +174,14 @@
     },
     data () {
       return {
+        changingChapters: false,
         changesMade: false,
         formState: {},
         navigationBlocked: false,
         options: {
           showEyeButton: false
         },
-        saving: false,
-        showForm: true
+        saving: false
       }
     },
     methods: {
@@ -296,6 +309,13 @@
           this.$store.commit('SET_MAPPER_OPTIONS', mapperOptions)
         }
       }
+    },
+    beforeRouteUpdate (to, from, next) {
+      // Triggers when the route changes, but the component is reused
+      // This is the case for dynamic urls e.g. /chapter/:chapterId
+      this.changingChapters = true
+      next()
+      console.log('next finished')
     },
     beforeRouteLeave (to, from, next) {
       this.$store.commit('SET_ERROR', '')
