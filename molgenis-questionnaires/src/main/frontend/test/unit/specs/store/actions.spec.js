@@ -80,7 +80,7 @@ const mockApiPostError = (uri, options, error) => {
   td.replace(api, 'post', post)
 }
 
-describe.only('actions', () => {
+describe('actions', () => {
   beforeEach(() => {
     td.reset()
   })

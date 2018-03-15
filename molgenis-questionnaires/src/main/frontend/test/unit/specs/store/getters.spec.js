@@ -1,27 +1,34 @@
 import getters from 'src/store/getters'
 
-describe('getters', () => {
+describe.only('getters', () => {
   const state = {
     chapterFields: [
       {
         id: 'chapter-1',
         label: 'First chapter',
         type: 'field-group',
+        visible: () => true,
         children: [
           {
             id: 'chapter-1-field-1',
             type: 'text',
-            visible: (data) => true
+            visible: (data) => true,
+            required: () => false,
+            validate: () => true
           },
           {
             id: 'chapter-1-field-2',
             type: 'number',
-            visible: (data) => true
+            visible: (data) => true,
+            required: () => false,
+            validate: () => true
           },
           {
             id: 'chapter-1-field-3',
             type: 'number',
-            visible: (data) => false
+            visible: (data) => false,
+            required: () => false,
+            validate: () => true
           }
         ]
       },
@@ -29,11 +36,14 @@ describe('getters', () => {
         id: 'chapter-2',
         label: 'Second chapter',
         type: 'field-group',
+        visible: () => true,
         children: [
           {
             id: 'chapter-2-field-1',
             type: 'text',
-            visible: (data) => true
+            visible: (data) => true,
+            required: () => true,
+            validate: () => true
           }
         ]
       },
@@ -41,15 +51,19 @@ describe('getters', () => {
         id: 'chapter-3',
         label: 'Third chapter',
         type: 'field-group',
+        visible: () => true,
         children: [
           {
             id: 'chapter-3-field-1',
             type: 'field-group',
+            visible: () => true,
             children: [
               {
                 id: 'chapter-3-field-2',
                 type: 'text',
-                visible: (data) => true
+                visible: (data) => true,
+                required: () => false,
+                validate: () => true
               }
             ]
           }
@@ -59,33 +73,42 @@ describe('getters', () => {
         id: 'chapter-4',
         label: 'Fourth chapter',
         type: 'field-group',
+        visible: () => true,
         children: [
           {
             id: 'chapter-4-field-1',
             type: 'field-group',
+            visible: () => true,
             children: [
               {
                 id: 'chapter-4-field-2',
                 type: 'text',
-                visible: (data) => false
+                visible: (data) => false,
+                required: () => false,
+                validate: () => true
               }
             ]
           },
           {
             id: 'chapter-4-field-3',
             type: 'field-group',
+            visible: () => true,
             children: [
               {
                 id: 'chapter-4-field-4',
                 type: 'text',
-                visible: (data) => false
+                visible: (data) => false,
+                required: () => true,
+                validate: () => true
               }
             ]
           },
           {
             id: 'chapter-4-field-5',
             type: 'text',
-            visible: (data) => data['chapter-1-field-1'] === 'value'
+            visible: (data) => data['chapter-1-field-1'] === 'value',
+            required: () => true,
+            validate: () => true
           }
         ]
       }
@@ -127,6 +150,20 @@ describe('getters', () => {
     })
   })
 
+  describe('getChapterCompletion', () => {
+    it('should map whether a chapter is completed for all chapters', () => {
+      const actual = getters.getChapterCompletion(state)
+      const expected = {
+        'chapter-1': true,
+        'chapter-2': false,
+        'chapter-3': true,
+        'chapter-4': true
+      }
+
+      expect(actual).to.deep.equal(expected)
+    })
+  })
+
   describe('getChapterNavigationList', () => {
     it('should map a list of chapters to a navigation format', () => {
       const actual = getters.getChapterNavigationList(state)
@@ -157,24 +194,25 @@ describe('getters', () => {
     })
   })
 
-  describe('getTotalNumberOfChapters', () => {
-    it('should return the total number of chapters', () => {
-      const actual = getters.getTotalNumberOfChapters(state)
-      const expected = 4
+  describe('getChapterProgress', () => {
+    it('should calculate the percentage of completion for every chapter', () => {
+      const actual = getters.getChapterProgress(state)
+      const expected = {
+        'chapter-1': 100,
+        'chapter-2': 0,
+        'chapter-3': 100,
+        'chapter-4': 100
+      }
+      console.log(actual)
 
       expect(actual).to.deep.equal(expected)
     })
   })
 
-  describe('getVisibleFieldIdsForAllChapters', () => {
-    it('should return the ids of visible fields per chapter', () => {
-      const actual = getters.getVisibleFieldIdsForAllChapters(state)
-      const expected = {
-        'chapter-1': ['chapter-1-field-1', 'chapter-1-field-2'],
-        'chapter-2': ['chapter-2-field-1'],
-        'chapter-3': ['chapter-3-field-2'],
-        'chapter-4': ['chapter-4-field-5']
-      }
+  describe('getTotalNumberOfChapters', () => {
+    it('should return the total number of chapters', () => {
+      const actual = getters.getTotalNumberOfChapters(state)
+      const expected = 4
 
       expect(actual).to.deep.equal(expected)
     })
