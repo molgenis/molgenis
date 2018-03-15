@@ -50,15 +50,6 @@ public class MappingContentBuilderTest
 	}
 
 	@Test
-	public void testCreateMappingTextNGram() throws IOException
-	{
-		Mapping mapping = createMapping(
-				FieldMapping.builder().setName("field").setType(MappingType.TEXT).setAnalyzeNGrams(true).build());
-		XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
-		assertEquals(xContentBuilder.string(), JSON_TEXT_NGRAM);
-	}
-
-	@Test
 	public void testCreateMappingNested() throws IOException
 	{
 		FieldMapping nestedFieldMapping = FieldMapping.builder()
@@ -86,7 +77,5 @@ public class MappingContentBuilderTest
 	private static final String JSON_INTEGER = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"integer\",\"doc_values\":true}}}";
 	private static final String JSON_LONG = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"long\"}}}";
 	private static final String JSON_TEXT = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
-
-	private static final String JSON_TEXT_NGRAM = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true},\"ngram\":{\"type\":\"text\",\"analyzer\":\"ngram_analyzer\"}}}}}";
 	private static final String JSON_NESTED = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"nested\",\"properties\":{\"nestedField\":{\"type\":\"boolean\"}}}}}";
 }

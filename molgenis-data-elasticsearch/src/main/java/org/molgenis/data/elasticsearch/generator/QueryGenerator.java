@@ -23,7 +23,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
-import static org.molgenis.data.elasticsearch.FieldConstants.*;
+import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
 /**
  * Generates Elasticsearch queries from MOLGENIS queries.
@@ -495,7 +496,7 @@ public class QueryGenerator
 			case HYPERLINK:
 			case STRING:
 				return nestedQueryBuilder(attributePath,
-						QueryBuilders.matchQuery(fieldName + '.' + FIELD_NGRAM_ANALYZED, queryValue)
+						QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue).maxExpansions(50).slop(10)
 									 .analyzer(DEFAULT_ANALYZER));
 			case BOOL:
 			case COMPOUND:

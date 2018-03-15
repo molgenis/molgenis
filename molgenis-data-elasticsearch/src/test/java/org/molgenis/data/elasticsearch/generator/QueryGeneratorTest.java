@@ -25,7 +25,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.elasticsearch.FieldConstants.*;
+import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
@@ -34,6 +35,7 @@ import static org.testng.Assert.assertEquals;
 // FIXME add nillable tests
 public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 {
+	private static final String FIELD_NGRAM_ANALYZED = "ngram";
 	private static final String idAttrName = "xid";
 
 	private static final String boolAttrName = "xbool";
@@ -659,7 +661,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		String value = "value";
 		Query<Entity> q = new QueryImpl<>().like(compoundPart0AttrName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = matchQuery(compoundPart0AttrName + '.' + FIELD_NGRAM_ANALYZED, value).analyzer(
+		QueryBuilder expectedQuery = matchPhrasePrefixQuery(compoundPart0AttrName, value).slop(10).analyzer(
 				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
@@ -694,7 +696,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		String value = "e@mail.com";
 		Query<Entity> q = new QueryImpl<>().like(emailAttrName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = matchQuery(emailAttrName + '.' + FIELD_NGRAM_ANALYZED, value).analyzer(
+		QueryBuilder expectedQuery = matchPhrasePrefixQuery(emailAttrName, value).slop(10).analyzer(
 				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
@@ -705,7 +707,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		String value = "enum0";
 		Query<Entity> q = new QueryImpl<>().like(enumAttrName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = matchQuery(enumAttrName + '.' + FIELD_NGRAM_ANALYZED, value).analyzer(
+		QueryBuilder expectedQuery = matchPhrasePrefixQuery(enumAttrName, value).slop(10).analyzer(
 				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
@@ -724,7 +726,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		String value = "http://www.website.com/";
 		Query<Entity> q = new QueryImpl<>().like(hyperlinkAttrName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = matchQuery(hyperlinkAttrName + '.' + FIELD_NGRAM_ANALYZED, value).analyzer(
+		QueryBuilder expectedQuery = matchPhrasePrefixQuery(hyperlinkAttrName, value).slop(10).analyzer(
 				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}
@@ -767,7 +769,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 		String value = "value";
 		Query<Entity> q = new QueryImpl<>().like(stringAttrName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-		QueryBuilder expectedQuery = matchQuery(stringAttrName + '.' + FIELD_NGRAM_ANALYZED, value).analyzer(
+		QueryBuilder expectedQuery = matchPhrasePrefixQuery(stringAttrName, value).slop(10).analyzer(
 				DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}

@@ -186,7 +186,7 @@ public class ClientFacadeTest
 	{
 		Index index = Index.create("indexname");
 		IndexSettings indexSettings = IndexSettings.create(1, 1);
-		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, true, emptyList());
+		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
 		Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
 		Stream<Mapping> mappings = Stream.of(mapping);
 
@@ -205,7 +205,7 @@ public class ClientFacadeTest
 	{
 		Index index = Index.create("indexname");
 		IndexSettings indexSettings = IndexSettings.create(1, 1);
-		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, true, emptyList());
+		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
 		Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
 		Stream<Mapping> mappings = Stream.of(mapping);
 
@@ -224,7 +224,7 @@ public class ClientFacadeTest
 	{
 		Index index = Index.create("indexname");
 		IndexSettings indexSettings = IndexSettings.create(1, 1);
-		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, true, emptyList());
+		FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
 		Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
 		Stream<Mapping> mappings = Stream.of(mapping);
 
