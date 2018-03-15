@@ -1,13 +1,14 @@
 export type QuestionnaireState = {
+  chapterFields: Array<*>,
+  error: string,
+  formData: Object,
+  loading: boolean,
+  mapperOptions: Object,
+  navigationBlocked: boolean,
   questionnaire: Object,
   questionnaireList: Array<*>,
-  chapterFields: Array<*>,
-  formData: Object,
   questionnaireRowId: string,
-  submissionText: string,
-  mapperOptions: Object,
-  loading: boolean,
-  error: string
+  submissionText: string
 }
 
 export type VuexContext = {
@@ -15,9 +16,4 @@ export type VuexContext = {
   commit: Function,
   dispatch: Function,
   getters: Object
-}
-
-export type UpdatedAttribute = {
-  attribute: string,
-  value: string | boolean | number
 }

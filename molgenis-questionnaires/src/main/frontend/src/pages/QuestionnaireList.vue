@@ -2,15 +2,11 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
+        <div v-if="error" class="alert alert-warning" role="alert">{{ error }}</div>
 
         <!-- Loading spinner -->
         <template v-if="loading">
           <loading-spinner :message="$t('questionnaire_loading_list')"></loading-spinner>
-        </template>
-
-        <!-- Error handler -->
-        <template v-else-if="!loading && error">
-          <questionnaire-error :error="error"></questionnaire-error>
         </template>
 
         <!-- Questionnaire table -->
@@ -24,7 +20,6 @@
 
 <script>
   import LoadingSpinner from '../components/LoadingSpinner'
-  import QuestionnaireError from '../components/QuestionnaireError'
   import QuestionnaireTable from '../components/QuestionnaireTable'
 
   export default {
@@ -40,13 +35,8 @@
     created () {
       this.$store.dispatch('GET_QUESTIONNAIRE_LIST')
     },
-    beforeRouteLeave (to, from, next) {
-      this.$store.commit('SET_ERROR', '')
-      next()
-    },
     components: {
       LoadingSpinner,
-      QuestionnaireError,
       QuestionnaireTable
     }
   }

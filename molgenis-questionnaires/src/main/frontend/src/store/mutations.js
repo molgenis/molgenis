@@ -2,6 +2,20 @@
 import type { QuestionnaireState } from '../flow.types.js'
 
 const mutations = {
+  'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
+    state.navigationBlocked = block
+  },
+
+  'CLEAR_STATE' (state: QuestionnaireState) {
+    state.chapterFields = []
+    state.formData = {}
+    state.questionnaireRowId = ''
+    state.submissionText = ''
+    state.loading = true
+    state.error = ''
+    state.questionnaire = {}
+  },
+
   'SET_QUESTIONNAIRE' (state: QuestionnaireState, questionnaire: Object) {
     state.questionnaire = questionnaire
   },
@@ -18,10 +32,6 @@ const mutations = {
     state.formData = formData
   },
 
-  'UPDATE_FORM_STATUS' (state: QuestionnaireState, status: string) {
-    state.formData.status = status
-  },
-
   'SET_QUESTIONNAIRE_ROW_ID' (state: QuestionnaireState, questionnaireRowId: string) {
     state.questionnaireRowId = questionnaireRowId
   },
@@ -34,25 +44,16 @@ const mutations = {
     state.mapperOptions = mapperOptions
   },
 
-  'CLEAR_STATE' (state: QuestionnaireState) {
-    state.questionnaireId = ''
-    state.chapterFields = []
-    state.formData = {}
-    state.questionnaireLabel = ''
-    state.questionnaireDescription = ''
-    state.questionnaireRowId = ''
-    state.submissionText = ''
-    state.loading = true
-    state.error = ''
-    state.questionnaire = {}
-  },
-
   'SET_ERROR' (state: QuestionnaireState, error: string) {
     state.error = error
   },
 
   'SET_LOADING' (state: QuestionnaireState, loading: boolean) {
     state.loading = loading
+  },
+
+  'UPDATE_FORM_STATUS' (state: QuestionnaireState, status: string) {
+    state.formData.status = status
   }
 }
 

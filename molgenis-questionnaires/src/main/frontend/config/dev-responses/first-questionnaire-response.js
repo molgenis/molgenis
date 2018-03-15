@@ -51,7 +51,8 @@ module.exports = {
             label: 'Question #1 - What is your name?',
             description: 'Please fill in your name',
             fieldType: 'STRING',
-            visible: true
+            visible: true,
+            nullableExpression: '$("status").value() !== "SUBMITTED"'
           },
           {
             name: 'ch1_question2',
@@ -62,7 +63,16 @@ module.exports = {
               min: 0,
               max: 99
             },
-            visible: true
+            visible: true,
+            nullableExpression: '$("status").value() !== "SUBMITTED"'
+          },
+          {
+            name: 'ch1_question3',
+            label: 'Question #3 - This is not required until the end',
+            description: 'Verify if we can navigate to next chapter with nullable expressions',
+            fieldType: 'TEXT',
+            visible: true,
+            nullableExpression: '$("status").value() !== "SUBMITTED"'
           }
         ]
       },

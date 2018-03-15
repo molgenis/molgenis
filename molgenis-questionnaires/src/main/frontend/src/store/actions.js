@@ -1,6 +1,6 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
-import type { VuexContext, UpdatedAttribute } from '../flow.types.js'
+import type { VuexContext } from '../flow.types.js'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const handleError = (commit: Function, error: Error) => {
@@ -24,7 +24,7 @@ const actions = {
       commit('CLEAR_STATE')
     }
 
-    return api.get('/menu/plugins/questionnaires/start/' + questionnaireId).then(() => {
+    return api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(() => {
       if (state.chapterFields.length === 0) {
         dispatch('GET_QUESTIONNAIRE', questionnaireId)
       }
@@ -34,7 +34,7 @@ const actions = {
   },
 
   'GET_QUESTIONNAIRE' ({state, commit}: VuexContext, questionnaireId: string) {
-    return api.get('/api/v2/' + questionnaireId + '?includeCategories=true').then(response => {
+    return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
       commit('SET_QUESTIONNAIRE', response)
 
       const data = response.items.length > 0 ? response.items[0] : {}
@@ -53,7 +53,7 @@ const actions = {
   },
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
-    return api.get('/api/v2/' + questionnaireId).then(response => {
+    return api.get(`/api/v2/${questionnaireId}`).then(response => {
       commit('SET_QUESTIONNAIRE', response)
       commit('SET_LOADING', false)
     }, error => {
@@ -62,7 +62,7 @@ const actions = {
   },
 
   'GET_SUBMISSION_TEXT' ({commit}: VuexContext, questionnaireId: string) {
-    return api.get('/menu/plugins/questionnaires/submission-text/' + questionnaireId).then(response => {
+    return api.get(`/menu/plugins/questionnaires/submission-text/${questionnaireId}`).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
       commit('SET_LOADING', false)
     }, error => {
@@ -70,18 +70,19 @@ const actions = {
     })
   },
 
-  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, updatedAttribute: UpdatedAttribute) {
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, formData: Object) {
+    const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
+
     const options = {
-      body: JSON.stringify(updatedAttribute.value),
+      body: JSON.stringify(formData[updatedAttribute]),
       method: 'PUT'
     }
 
-    const questionnaireId = state.route.params.questionnaireId
-    const uri = '/api/v1/' + questionnaireId + '/' + state.questionnaireRowId + '/' + updatedAttribute.attribute
-
-    return api.post(uri, options).then().catch(() => {
-      // Do not set error because we do not want to kill the app with an error screen
-      // due to auto saving
+    return api.post(`/api/v1/${state.questionnaire.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
+      commit('SET_FORM_DATA', formData)
+      commit('SET_LOADING', false)
+    }).catch(() => {
+      // Do not set error because we do not want an error due to auto saving
       commit('SET_LOADING', false)
     })
   },
@@ -99,8 +100,7 @@ const actions = {
       method: 'PUT'
     }
 
-    const questionnaireId = state.route.params.questionnaireId
-    return api.post('/api/v2/' + questionnaireId, options).then().catch(error => handleError(commit, error))
+    return api.post(`/api/v2/${state.questionnaireId}`, options).then().catch(error => handleError(commit, error))
   }
 }
 

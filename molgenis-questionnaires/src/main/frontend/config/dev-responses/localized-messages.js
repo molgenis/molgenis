@@ -28,7 +28,7 @@ module.exports = {
   questionnaire_back_to_start: 'Back to start',
   questionnaire_changes_saved: 'All changes have been saved',
   questionnaire_chapters: 'Chapters',
-  questionnaire_chapter_incomplete_message: 'Please complete this chapter before moving on...',
+  questionnaire_chapter_incomplete_message: 'Missed questions',
   questionnaire_loading_chapter_text: 'Loading chapter',
   questionnaire_next_chapter: 'Next chapter',
   questionnaire_previous_chapter: 'Previous chapter',
@@ -37,5 +37,6 @@ module.exports = {
   questionnaire_submit: 'Submit',
   questionnaires_overview_title: 'Questionnaire overview',
   questionnaire_overview_loading_text: 'Loading Questionnaire overview',
-  questionnaire_back_to_questionnaire_list: 'Back to questionnaires list'
+  questionnaire_back_to_questionnaire_list: 'Back to questionnaires list',
+  questionnaire_forgotten_chapters: 'Incomplete chapters'
 }

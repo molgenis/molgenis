@@ -1,20 +1,43 @@
 // @flow
 import type { QuestionnaireState } from '../flow.types.js'
 
-const getAllVisibleFieldIds = (chapter: Object, data: Object) => {
-  return chapter.children.reduce((accumulator, child) => {
+const isFilledInValue = (value) => {
+  if (value === undefined) return false
+  if (Array.isArray(value) && value.length === 0) return false
+  return value !== ''
+}
+
+const isChapterComplete = (chapter, formData) => {
+  return chapter.children.every(child => {
     if (child.type === 'field-group') {
-      return [...accumulator, ...getAllVisibleFieldIds(child, data)]
+      return isChapterComplete(child, formData)
     }
 
-    if (child.visible(data)) {
-      accumulator.push(child.id)
+    const visible = child.visible(formData)
+    if (!visible) return true
+
+    const value = formData[child.id]
+    const filledInValue = isFilledInValue(value)
+    const required = child.required(formData)
+    const valid = child.validate(formData)
+
+    if (filledInValue) {
+      const inRange = child.range ? value => child.range.min && value <= child.range.max : true
+      return valid && inRange
+    } else {
+      return valid && !required
     }
-    return accumulator
-  }, [])
+  })
 }
 
 const getters = {
+  getChapterCompletion: (state: QuestionnaireState): Object => {
+    return state.chapterFields.reduce((accumulator, chapter) => {
+      accumulator[chapter.id] = isChapterComplete(chapter, state.formData)
+      return accumulator
+    }, {})
+  },
+
   getChapterByIndex: (state: QuestionnaireState): Function => (index: number) => {
     return state.chapterFields[index - 1]
   },
@@ -25,15 +48,6 @@ const getters = {
 
   getTotalNumberOfChapters: (state: QuestionnaireState): number => {
     return state.chapterFields.length
-  },
-
-  getVisibleFieldIdsForAllChapters: (state: QuestionnaireState): Object => {
-    return state.chapterFields.reduce((accumulator, chapter) => {
-      const visibleFields = getAllVisibleFieldIds(chapter, state.formData)
-      accumulator[chapter.id] = visibleFields
-
-      return accumulator
-    }, {})
   },
 
   getQuestionnaireId: (state: QuestionnaireState): string => {

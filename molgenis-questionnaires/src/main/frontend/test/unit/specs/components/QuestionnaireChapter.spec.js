@@ -160,12 +160,12 @@ describe('QuestionnaireChapter component', function () {
     })
   })
 
-  describe('navigateToNextChapter', () => {
+  describe('validateBeforeNavigatingToNextChapter', () => {
     const router = new VueRouter()
 
     it('should commit [UPDATE_FORM_STATUS] with value "SUBMITTED"', () => {
       const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.vm.navigateToNextChapter()
+      wrapper.vm.validateBeforeNavigatingToNextChapter()
       td.verify(mutations.UPDATE_FORM_STATUS(state, 'SUBMITTED'))
     })
 
@@ -174,7 +174,7 @@ describe('QuestionnaireChapter component', function () {
 
       const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
       wrapper.setData({formState: {$valid: false}})
-      wrapper.vm.navigateToNextChapter()
+      wrapper.vm.validateBeforeNavigatingToNextChapter()
 
       wrapper.vm.$nextTick().then(() => {
         expect(wrapper.vm.navigationBlocked).to.equal(true)
@@ -185,7 +185,7 @@ describe('QuestionnaireChapter component', function () {
     it('should commit [UPDATE_FORM_STATUS] with value "OPEN" if form is valid', () => {
       const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, router, localVue})
       wrapper.setData({formState: {$valid: true}})
-      wrapper.vm.navigateToNextChapter()
+      wrapper.vm.validateBeforeNavigatingToNextChapter()
       td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)))
     })
   })
