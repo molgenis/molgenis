@@ -1,13 +1,13 @@
 // @flow
 import type { QuestionnaireState } from '../flow.types.js'
 
-const isFilledInValue = (value) => {
+const isFilledInValue = (value): boolean => {
   if (value === undefined) return false
   if (Array.isArray(value) && value.length === 0) return false
   return value !== ''
 }
 
-const isChapterComplete = (chapter, formData) => {
+const isChapterComplete = (chapter: Object, formData: Object): boolean => {
   return chapter.children.every(child => {
     if (child.type === 'field-group') {
       return isChapterComplete(child, formData)
@@ -30,7 +30,25 @@ const isChapterComplete = (chapter, formData) => {
   })
 }
 
+const getChapterProgress = (chapter: Object, formData: Object): number => {
+  let totalNumberOfFields = 0
+  const numberOfFilledInFields = chapter.children.reduce((accumulator, child) => {
+    if (child.type === 'field-group') {
+      accumulator += getChapterProgress(child, formData)
+    }
+
+    if (isFilledInValue(formData[child.id])) accumulator += 1
+    if (child.visible(formData)) totalNumberOfFields++
+    return accumulator
+  }, 0)
+  return (numberOfFilledInFields / totalNumberOfFields) * 100
+}
+
 const getters = {
+  getChapterByIndex: (state: QuestionnaireState): Function => (index: number) => {
+    return state.chapterFields[index - 1]
+  },
+
   getChapterCompletion: (state: QuestionnaireState): Object => {
     return state.chapterFields.reduce((accumulator, chapter) => {
       accumulator[chapter.id] = isChapterComplete(chapter, state.formData)
@@ -38,16 +56,19 @@ const getters = {
     }, {})
   },
 
-  getChapterByIndex: (state: QuestionnaireState): Function => (index: number) => {
-    return state.chapterFields[index - 1]
-  },
-
   getChapterNavigationList: (state: QuestionnaireState): Array<*> => {
     return state.chapterFields.map((chapter, index) => ({id: chapter.id, label: chapter.label, index: (index + 1)}))
   },
 
-  getTotalNumberOfChapters: (state: QuestionnaireState): number => {
-    return state.chapterFields.length
+  getChapterProgress: (state: QuestionnaireState): Object => {
+    return state.chapterFields.reduce((accumulator, chapter) => {
+      accumulator[chapter.id] = getChapterProgress(chapter, state.formData)
+      return accumulator
+    }, {})
+  },
+
+  getQuestionnaireDescription: (state: QuestionnaireState): string => {
+    return state.questionnaire.meta && state.questionnaire.meta.description
   },
 
   getQuestionnaireId: (state: QuestionnaireState): string => {
@@ -58,8 +79,8 @@ const getters = {
     return state.questionnaire.meta && state.questionnaire.meta.label
   },
 
-  getQuestionnaireDescription: (state: QuestionnaireState): string => {
-    return state.questionnaire.meta && state.questionnaire.meta.description
+  getTotalNumberOfChapters: (state: QuestionnaireState): number => {
+    return state.chapterFields.length
   }
 }
 

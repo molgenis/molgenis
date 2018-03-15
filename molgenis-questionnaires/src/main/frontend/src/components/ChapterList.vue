@@ -9,6 +9,18 @@
         :to="'/' + questionnaireId + '/chapter/' + chapter.index"
         class="list-group-item list-group-item-action disabled">
         <span>{{ chapter.label }}</span>
+
+        <div class="progress" style="height: 5px;">
+          <div class="progress-bar"
+               :class="{'bg-success': chapterProgress[chapter.id] === 100}"
+               role="progressbar"
+               :style="'width: ' + chapterProgress[chapter.id] + '%'"
+               :aria-valuenow="chapterProgress[chapter.id]"
+               aria-valuemin="0"
+               aria-valuemax="100">
+          </div>
+        </div>
+
       </router-link>
     </template>
   </ul>
@@ -32,10 +44,14 @@
 <script>
   export default {
     name: 'ChapterList',
-    props: ['questionnaireId', 'currentChapterId'],
+    props: ['questionnaireId'],
     computed: {
       chapterNavigationList () {
         return this.$store.getters.getChapterNavigationList
+      },
+
+      chapterProgress () {
+        return this.$store.getters.getChapterProgress
       }
     }
   }
