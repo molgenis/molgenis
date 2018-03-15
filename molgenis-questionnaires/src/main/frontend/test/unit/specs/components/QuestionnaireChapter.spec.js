@@ -8,10 +8,7 @@ import { generateError } from '../../utils'
 const $t = (key) => {
   const translations = {
     'questionnaire_loading_chapter_text': 'loading',
-    'questionnaire_previous_chapter': 'previous',
     'questionnaire_back_to_start': 'back to start',
-    'questionnaire_next_chapter': 'next',
-    'questionnaire_submit': 'submit',
     'chapter_incomplete_message': 'you forgot something',
     'questionnaire_boolean_true': 'Yes',
     'questionnaire_boolean_false': 'No',
@@ -105,46 +102,6 @@ describe('QuestionnaireChapter component', function () {
   it('should load formData from the state', () => {
     const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
     expect(wrapper.vm.formData).to.deep.equal(state.formData)
-  })
-
-  it('should use the current chapterId to calculate the next id properly', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.nextChapterNumber).to.equal(2)
-  })
-
-  it('should use the current chapterId to calculate the previous id properly', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.previousChapterNumber).to.equal(0)
-  })
-
-  it('should should not show next if the chapter id is equal to the total number of chapters', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showNextButton).to.equal(false)
-  })
-
-  it('should show the next button if the chapter id is lower than the total number of chapters', () => {
-    getters.getTotalNumberOfChapters = () => 2
-    store = new Vuex.Store({actions, getters, mutations, state})
-
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showNextButton).to.equal(true)
-  })
-
-  it('should not show the previous button if the current chapter is the first chapter', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showPreviousButton).to.equal(false)
-  })
-
-  it('should show the previous button if the current chapter is no longer the first', () => {
-    propsData.chapterId = 2
-
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.showPreviousButton).to.equal(true)
-  })
-
-  it('should return the total number of chapters from the state', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.totalNumberOfChapters).to.equal(1)
   })
 
   it('should get the current chapter from the state by index', () => {

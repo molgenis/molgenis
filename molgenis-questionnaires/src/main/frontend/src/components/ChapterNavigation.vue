@@ -109,6 +109,7 @@
 
         if (this.chapterCompletion[this.currentChapter.id] === true) {
           if (this.allChaptersAreComplete) {
+            this.submitting = true
             this.submitQuestionnaire()
           } else {
             const incompleteChapters = Object.keys(this.chapterCompletion).find(chapter => !this.chapterCompletion[chapter])
@@ -125,6 +126,7 @@
         const submitDate = moment().toISOString()
         this.$store.dispatch('SUBMIT_QUESTIONNAIRE', submitDate).then(() => {
           this.$router.push('/' + this.questionnaireId + '/submitted')
+          this.submitting = false
         })
       }
     }
