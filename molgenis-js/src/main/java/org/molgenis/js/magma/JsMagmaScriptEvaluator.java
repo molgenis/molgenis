@@ -88,7 +88,18 @@ public class JsMagmaScriptEvaluator
 		entity.getEntityType()
 			  .getAtomicAttributes()
 			  .forEach(attr -> {
+
 			  	map.put(attr.getName(), toScriptEngineValue(expression, entity, attr));
+
+				  AttributeType attributeType = attr.getDataType();
+				  if(attributeType == AttributeType.CATEGORICAL || attributeType == AttributeType.XREF) {
+					  Entity refEntity = entity.getEntity(attr.getName());
+					  if(refEntity != null) {
+						  entity.getEntityType().getAtomicAttributes().forEach(refAttr -> {
+							  map.put(attr.getName() + "." + refAttr.getName(), toScriptEngineValue(expression, entity, attr));
+						  });
+					  }
+				  }
 			  });
 		return map;
 	}
