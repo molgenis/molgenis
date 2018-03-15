@@ -92,7 +92,7 @@
           description: {
             label: this.$t('table-col-header-description'),
             sortable: false,
-            'class': 'hidden-sm-down'
+            'class': 'd-none d-md-block d-lg-block d-xl-block'
           }
         },
         filter: null,
