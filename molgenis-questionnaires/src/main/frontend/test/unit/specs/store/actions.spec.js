@@ -80,7 +80,7 @@ const mockApiPostError = (uri, options, error) => {
   td.replace(api, 'post', post)
 }
 
-describe('actions', () => {
+describe.only('actions', () => {
   beforeEach(() => {
     td.reset()
   })
@@ -289,45 +289,35 @@ describe('actions', () => {
   })
 
   describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    const updatedAttribute = {
-      attribute: 'attribute',
-      value: 'value'
+    const formData = {
+      field1: 'updated value'
     }
 
     const state = {
-      questionnaireRowId: 'test_row',
-      route: {
-        params: {
-          questionnaireId: 'test_quest'
-        }
-      }
+      questionnaire: {
+        name: 'test_quest'
+      },
+      formData: {
+        field1: 'value',
+        field2: 'value'
+      },
+      questionnaireRowId: 'test_row'
     }
 
     const options = {
-      body: JSON.stringify(updatedAttribute.value),
+      body: JSON.stringify(formData['field1']),
       method: 'PUT'
     }
 
     it('should post data for a single attribute', done => {
-      mockApiPostSuccess('/api/v1/test_quest/test_row/attribute', options, 'OK')
-      const result = actions.AUTO_SAVE_QUESTIONNAIRE({state}, updatedAttribute)
-
-      result.then(actual => {
-        expect(actual).to.equal('OK')
-      })
-
-      done()
-    })
-
-    it('should commit any errors to the store', done => {
-      const error = 'error'
-      mockApiPostError('/api/v1/test_quest/test_row/attribute', options, error)
+      mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: formData},
         {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, updatedAttribute, state, expectedMutations, [], done)
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
     })
   })
 
@@ -350,10 +340,8 @@ describe('actions', () => {
       formData: {
         field: 'value'
       },
-      route: {
-        params: {
-          questionnaireId: 'test_quest'
-        }
+      questionnaire: {
+        name: 'test_quest'
       }
     }
 

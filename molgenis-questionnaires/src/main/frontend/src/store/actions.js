@@ -100,7 +100,7 @@ const actions = {
       method: 'PUT'
     }
 
-    return api.post(`/api/v2/${state.questionnaireId}`, options).then().catch(error => handleError(commit, error))
+    return api.post(`/api/v2/${state.questionnaire.name}`, options).then().catch(error => handleError(commit, error))
   }
 }
 
