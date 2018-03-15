@@ -8,12 +8,13 @@ const mutations = {
 
   'CLEAR_STATE' (state: QuestionnaireState) {
     state.chapterFields = []
+    state.error = ''
     state.formData = {}
+    state.loading = true
+    state.navigationBlocked = false
+    state.questionnaire = {}
     state.questionnaireRowId = ''
     state.submissionText = ''
-    state.loading = true
-    state.error = ''
-    state.questionnaire = {}
   },
 
   'SET_QUESTIONNAIRE' (state: QuestionnaireState, questionnaire: Object) {

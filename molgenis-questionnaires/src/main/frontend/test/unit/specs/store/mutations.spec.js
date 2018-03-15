@@ -2,18 +2,28 @@ import mutations from 'src/store/mutations'
 
 describe('mutations', () => {
   const state = {
-    questionnaireList: [],
-    questionnaireId: '',
     chapterFields: [],
-    formData: {},
-    questionnaireLabel: '',
-    questionnaireDescription: '',
-    questionnaireRowId: '',
-    submissionText: '',
     error: '',
+    formData: {},
     loading: true,
-    questionnaire: {}
+    navigationBlocked: false,
+    questionnaire: {},
+    questionnaireDescription: '',
+    questionnaireId: '',
+    questionnaireLabel: '',
+    questionnaireList: [],
+    questionnaireRowId: '',
+    submissionText: ''
   }
+
+  describe('BLOCK_NAVIGATION', () => {
+    it('should update the navigationBlocked in the state with the payload', () => {
+      const payload = true
+      mutations.BLOCK_NAVIGATION(state, payload)
+
+      expect(state.navigationBlocked).to.equal(payload)
+    })
+  })
 
   describe('SET_QUESTIONNAIRE_LIST', () => {
     it('should update the questionnaireList in the state with the payload', () => {
