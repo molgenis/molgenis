@@ -472,20 +472,6 @@ public class PermissionManagerController extends PluginController
 		return pluginPermission;
 	}
 
-	private void removeSidEntityTypePermission(EntityType entityType, Sid sid)
-	{
-		ObjectIdentity objectIdentity = new RepositoryIdentity(entityType);
-		removePermissionForSid(sid, objectIdentity);
-	}
-
-	private void createSidEntityTypePermission(EntityType entityType, Sid sid,
-			RepositoryPermission entityTypePermission)
-	{
-		ObjectIdentity objectIdentity = new RepositoryIdentity(entityType);
-		createSidPermission(sid, objectIdentity,
-				RepositoryPermissionUtils.getCumulativePermission(entityTypePermission));
-	}
-
 	private void createSidPackagePermission(Package package_, Sid sid, RepositoryPermission entityTypePermission)
 	{
 		ObjectIdentity objectIdentity = new PackageIdentity(package_);
@@ -508,26 +494,6 @@ public class PermissionManagerController extends PluginController
 		{
 			mutableAclService.updateAcl(acl);
 		}
-	}
-
-	private void updateEntityTypePermissions(WebRequest webRequest, Sid sid)
-	{
-		getEntityTypes().forEach(entityType ->
-		{
-			String param = "radio-" + entityType.getId();
-			String value = webRequest.getParameter(param);
-			if (value != null)
-			{
-				if (!value.equals("none"))
-				{
-					createSidEntityTypePermission(entityType, sid, toRepositoryPermission(value));
-				}
-				else
-				{
-					removeSidEntityTypePermission(entityType, sid);
-				}
-			}
-		});
 	}
 
 	private PermissionTable getRepositoryPermissions(Sid sid)
@@ -588,22 +554,6 @@ public class PermissionManagerController extends PluginController
 				throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
 		}
 		return entityTypePermission;
-	}
-
-	private Permissions toRepositoryPermissions(List<EntityType> entityTypes, Map<ObjectIdentity, Acl> aclMap, Sid sid)
-	{
-		Permissions permissions = new Permissions();
-
-		// set permissions: entity ids
-		Map<String, String> entityTypeMap = entityTypes.stream()
-													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
-													   {
-														   throw new IllegalStateException(
-																   format("Duplicate key %s", u));
-													   }, LinkedHashMap::new));
-		permissions.setEntityIds(entityTypeMap);
-
-		return toRepositoryPermissions(aclMap, sid, permissions);
 	}
 
 	private Permissions toPackagePermissions(List<Package> packages, Map<ObjectIdentity, Acl> aclMap, Sid sid)
