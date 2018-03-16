@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Streams.mapWithIndex;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -37,6 +38,8 @@ import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
@@ -116,14 +119,18 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		{
 			return;
 		}
+		if (changes.stream().allMatch(impact -> excludedEntities.contains(impact.getEntityTypeId())))
+		{
+			return;
+		}
+
 		IndexActionGroup indexActionGroup = indexActionGroupFactory.create(transactionId);
-		IndexDependencyModel dependencyModel = new IndexDependencyModel(getEntityTypes());
+		IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
 		Stream<Impact> impactStream = indexingStrategy.determineImpact(changes, dependencyModel)
 													  .stream()
 													  .filter(key -> !excludedEntities.contains(key.getEntityTypeId()));
 		List<IndexAction> indexActions = mapWithIndex(impactStream,
-				(key, actionOrder) -> createIndexAction(indexActionGroup, key, (int) actionOrder))
-														 .collect(toList());
+				(key, actionOrder) -> createIndexAction(indexActionGroup, key, (int) actionOrder)).collect(toList());
 		if (indexActions.isEmpty())
 		{
 			return;
@@ -132,6 +139,20 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		dataService.add(INDEX_ACTION_GROUP,
 				indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
 		dataService.add(INDEX_ACTION, indexActions.stream());
+	}
+
+	private IndexDependencyModel createIndexDependencyModel(Set<Impact> changes)
+	{
+		Set<String> entityTypeIds = changes.stream().map(Impact::getEntityTypeId).collect(toSet());
+		boolean hasReferences = dataService.query(ATTRIBUTE_META_DATA).in(REF_ENTITY_TYPE, entityTypeIds).count() > 0;
+		if (hasReferences)
+		{
+			return new IndexDependencyModel(getEntityTypes());
+		}
+		else
+		{
+			return new IndexDependencyModel(emptyList());
+		}
 	}
 
 	private IndexAction createIndexAction(IndexActionGroup indexActionGroup, Impact key, int actionOrder)
