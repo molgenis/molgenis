@@ -8,6 +8,8 @@
  * @returns the evaluated script result
  */
 function evalScript (script, entity) {
+  
+  var attr = ''
 
   function attribute (value) {
 
@@ -26,6 +28,10 @@ function evalScript (script, entity) {
        */
       value: function () {
         return this.val
+      },
+
+      ref: function (ref) {
+        return this[attr + '.' + ref]
       },
 
       /**
@@ -413,6 +419,7 @@ function evalScript (script, entity) {
    * @namespace $
    */
   function $ (attr) {
+    attr = attr
     return new attribute(this[attr])
   }
 

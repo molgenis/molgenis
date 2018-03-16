@@ -93,7 +93,9 @@ public class JsMagmaScriptEvaluator
 
 				  AttributeType attributeType = attr.getDataType();
 				  if(attributeType == AttributeType.CATEGORICAL || attributeType == AttributeType.XREF) {
-					  Entity refEntity = entity.getEntity(attr.getName());
+
+				  	Entity refEntity = entity.getEntity(attr.getName());
+
 					  if(refEntity != null) {
 						  refEntity.getEntityType().getAtomicAttributes().forEach(refAttr -> {
 							  map.put(attr.getName() + "." + refAttr.getName(), toScriptEngineValue(expression, refEntity, refAttr));
