@@ -3,7 +3,7 @@ import App from './App'
 import { sync } from 'vuex-router-sync'
 import store from './store'
 import router from './router'
-
+import VueTour from 'vue-tour'
 import BootstrapVue from 'bootstrap-vue'
 
 import 'font-awesome/css/font-awesome.min.css'
@@ -14,6 +14,10 @@ import { INITIAL_STATE } from './store/state'
 sync(store, router)
 
 Vue.use(BootstrapVue)
+
+require('vue-tour/dist/vue-tour.css')
+
+Vue.use(VueTour)
 
 Vue.use(i18n, {
   lng: INITIAL_STATE.lng,

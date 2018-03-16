@@ -1,7 +1,7 @@
 // @flow
 <template>
   <div>
-
+    <navigator-tour :firstPackage="items[0]"></navigator-tour>
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}
@@ -10,7 +10,7 @@
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="input-group col-lg-6">
-        <input v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
+        <input id="navigator-search-input" v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
         <div class="input-group-append">
 
           <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query"
@@ -79,8 +79,11 @@
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
 
+  import NavigatorTour from './NavigatorTour'
+
   export default {
     name: 'Navigator',
+    components: { NavigatorTour },
     data () {
       return {
         fields: {

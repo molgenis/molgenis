@@ -5875,9 +5875,21 @@ vue-template-es2015-compiler@^1.2.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.3.tgz#22787de4e37ebd9339b74223bc467d1adee30545"
 
+vue-tour@^1.0.0-beta.0:
+  version "1.0.0-beta.0"
+  resolved "https://registry.yarnpkg.com/vue-tour/-/vue-tour-1.0.0-beta.0.tgz#d7066a692d14d8beaff82bffef4ee76cff3c6761"
+  dependencies:
+    hash-sum "^1.0.2"
+    popper.js "^1.12.9"
+    vue "^2.5.13"
+
 vue@^2.2.6:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.4.2.tgz#a9855261f191c978cc0dc1150531b8d08149b58c"
+
+vue@^2.5.13:
+  version "2.5.16"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.16.tgz#07edb75e8412aaeed871ebafa99f4672584a0085"
 
 vuex-router-sync@4.1.2:
   version "4.1.2"

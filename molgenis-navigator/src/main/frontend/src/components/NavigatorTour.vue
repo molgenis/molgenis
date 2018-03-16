@@ -1,0 +1,128 @@
+<template>
+  <div>
+    <button class="btn btn-primary" @click="startTour()"><i class="fa fa-info-circle" aria-hidden="true"></i> Start tour
+    </button>
+    <v-tour name="navigatorTour" :steps="steps"></v-tour>
+  </div>
+</template>
+
+<script>
+  import { SET_QUERY } from '../store/mutations'
+  import VueTour from 'vue-tour'
+
+  export default {
+    name: 'navigator-tour',
+    components: {VueTour},
+    props: ['firstPackage'],
+    computed: {
+      steps () {
+        return [
+          {
+            target: '#navigator-search-input',
+            content: `Welcome to the navigator. Enter in this search field a table or folder you are looking for`,
+            params: {
+              placement: 'left'
+            }
+          },
+          {
+            target: '#navigator-search-input',
+            content: `For example "${this.packageLabel}"`,
+            params: {
+              placement: 'left'
+            }
+          },
+          {
+            target: '.text-left.table.b-table.table-bordered',
+            content: `This table contains all matches with your search tems: "${this.packageLabel}"`,
+            params: {
+              placement: 'bottom'
+            }
+          },
+          {
+            target: 'th.sorting.text-nowrap',
+            content: `This column displays the name of the table or folder.`,
+            params: {
+              placement: 'bottom'
+            }
+          },
+          {
+            target: 'td.text-nowrap',
+            content: `Clicking on a folder opens the selected folder in the navigator.`,
+            params: {
+              placement: 'bottom'
+            }
+          },
+          {
+            target: 'td.text-nowrap',
+            content: `Clicking on a table navigates to the selected table.`,
+            params: {
+              placement: 'bottom'
+            }
+          },
+          {
+            target: 'th.hidden-sm-down',
+            content: `This column displays the description provided for the table of package`,
+            params: {
+              placement: 'bottom'
+            }
+          },
+          {
+            target: '.breadcrumb',
+            content: `This breadcrumb path shows where you are in the data structure.`,
+            params: {
+              placement: 'right'
+            }
+          },
+          {
+            target: '.breadcrumb a',
+            content: `This home button navigates you back to the root in your navigator.`,
+            params: {
+              placement: 'right'
+            }
+          }
+        ]
+      },
+      packageLabel () {
+        return this.firstPackage ? this.firstPackage.label : ''
+      },
+      packageId () {
+        return this.firstPackage ? this.firstPackage.id : ''
+      }
+    },
+    methods: {
+      startTour () {
+        this.$tours['navigatorTour'].start()
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+          document.querySelector('#navigator-search-input').value = this.packageLabel
+          this.$store.commit(SET_QUERY, this.packageLabel)
+        }, 3000)
+        setTimeout(() => {
+          document.querySelectorAll('.btn-outline-secondary')[0].click()
+          this.$tours['navigatorTour'].nextStep()
+        }, 6000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 9000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 11000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 13000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 15000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 17000)
+        setTimeout(() => {
+          this.$tours['navigatorTour'].nextStep()
+        }, 19000)
+        setTimeout(() => {
+          document.querySelectorAll('.breadcrumb a')[0].click()
+        }, 21000)
+      }
+    }
+  }
+</script>
