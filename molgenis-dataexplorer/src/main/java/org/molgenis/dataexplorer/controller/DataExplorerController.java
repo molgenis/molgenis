@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.controller;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
@@ -200,7 +199,7 @@ public class DataExplorerController extends PluginController
 			case MOD_DATA:
 				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
-				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
+				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				//if multiple tracks are available we assume chrom and pos attribute are the same
 				if (!entityTracks.isEmpty())
 				{
@@ -216,7 +215,7 @@ public class DataExplorerController extends PluginController
 				//TODO: figure out if we need to know pos and chrom attrs here
 				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
-				model.addAttribute("genomeTracks", getTracksJson(entityTracks));
+				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
 				model.addAttribute("NegotiatorEnabled", directoryController.showDirectoryButton(entityTypeId));
 
@@ -249,8 +248,7 @@ public class DataExplorerController extends PluginController
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
 		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ)
-				&& dataService.getCapabilities(
-				entityTypeId).contains(RepositoryCapability.WRITABLE);
+				&& dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
 	/**
@@ -355,20 +353,6 @@ public class DataExplorerController extends PluginController
 			pack = pack.getParent();
 			getNavigatorLinks(result, pack, navigatorPath);
 		}
-	}
-
-	/**
-	 * Get readable genome entities
-	 */
-	private List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
-	{
-		Map<String, GenomeBrowserTrack> allTracks = new HashMap<>();
-		allTracks.putAll(entityTracks);
-		for (GenomeBrowserTrack track : entityTracks.values())
-		{
-			allTracks.putAll(genomeBrowserService.getReferenceTracks(track));
-		}
-		return allTracks.values().stream().map(track -> track.toTrackJson()).collect(Collectors.toList());
 	}
 
 	@PostMapping("/download")

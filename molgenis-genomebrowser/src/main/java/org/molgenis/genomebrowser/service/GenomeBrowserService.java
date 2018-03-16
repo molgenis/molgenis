@@ -2,24 +2,26 @@ package org.molgenis.genomebrowser.service;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.json.JSONObject;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata.GENOMEBROWSERSETTINGS;
 
 /**
@@ -29,18 +31,39 @@ import static org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata.GENO
 public class GenomeBrowserService
 {
 	private final DataService dataService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 
-	public GenomeBrowserService(DataService dataService)
+	public GenomeBrowserService(DataService dataService, UserPermissionEvaluator userPermissionEvaluator)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	public Map<String, GenomeBrowserTrack> getGenomeBrowserTracks(EntityType entityType)
 	{
-		return getGenomeBrowserTracks(entityType, getDefaultGenomeBrowserAttributes().collect(Collectors.toList()));
+		return hasPermission() ? getGenomeBrowserTracks(entityType,
+				getDefaultGenomeBrowserAttributes().collect(Collectors.toList())) : Collections.emptyMap();
 	}
 
-	public Map<String, GenomeBrowserTrack> getGenomeBrowserTracks(EntityType entityType,
+	/**
+	 * Get readable genome entities
+	 */
+	public List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks)
+	{
+		List<JSONObject> results = new ArrayList<>();
+		if (hasPermission())
+		{
+			Map<String, GenomeBrowserTrack> allTracks = new HashMap<>(entityTracks);
+			for (GenomeBrowserTrack track : entityTracks.values())
+			{
+				allTracks.putAll(getReferenceTracks(track));
+			}
+			results = allTracks.values().stream().map(GenomeBrowserTrack::toTrackJson).collect(Collectors.toList());
+		}
+		return results;
+	}
+
+	private Map<String, GenomeBrowserTrack> getGenomeBrowserTracks(EntityType entityType,
 			List<GenomeBrowserAttributes> defaultGenomeBrowserAttributes)
 	{
 		Map<String, GenomeBrowserTrack> settings = new HashMap<>();
@@ -49,7 +72,6 @@ public class GenomeBrowserService
 						entityType.getIdValue()), GenomeBrowserSettings.class)
 				   .forEach(referenceSettings -> settings.put(referenceSettings.getIdentifier(),
 						   GenomeBrowserTrack.create(referenceSettings)));
-
 		if (settings.isEmpty())
 		{
 			//if not check if attrs match any default config
@@ -69,13 +91,15 @@ public class GenomeBrowserService
 		return settings;
 	}
 
-	public Map<String, GenomeBrowserTrack> getReferenceTracks(GenomeBrowserTrack settings)
+	Map<String, GenomeBrowserTrack> getReferenceTracks(GenomeBrowserTrack settings)
 	{
 		Map<String, GenomeBrowserTrack> result = new HashMap<>();
-		if (settings.getMolgenisReferenceMode() != GenomeBrowserSettings.MolgenisReferenceMode.NONE)
+		if (hasPermission() && settings.getMolgenisReferenceMode() != GenomeBrowserSettings.MolgenisReferenceMode.NONE)
 		{
 			if (settings.getMolgenisReferenceMode() == GenomeBrowserSettings.MolgenisReferenceMode.CONFIGURED)
 			{
+				//Cannot be null due to nullableExpression on MolgenisReferenceTracks in GenomeBrowserSettingsMetadata
+				//noinspection ConstantConditions
 				settings.getMolgenisReferenceTracks()
 						.forEach(referenceTrack -> result.put(referenceTrack.getId(), referenceTrack));
 			}
@@ -99,6 +123,13 @@ public class GenomeBrowserService
 			}
 		}
 		return result;
+	}
+
+	private boolean hasPermission()
+	{
+		return userPermissionEvaluator.hasPermission(new EntityTypeIdentity(GENOMEBROWSERSETTINGS),
+				EntityTypePermission.READ) && userPermissionEvaluator.hasPermission(
+				new EntityTypeIdentity(GENOMEBROWSERATTRIBUTES), EntityTypePermission.READ);
 	}
 
 	private Stream<GenomeBrowserAttributes> getDefaultGenomeBrowserAttributes()
