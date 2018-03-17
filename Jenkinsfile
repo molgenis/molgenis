@@ -27,7 +27,7 @@ pipeline {
         stage('Publish package') {
             steps {
                 echo "Publish MOLGENIS to download-server (https://molgenis26.gcc.rug.nl/)"
-                sh "scp target/molgenis-app-${MOLGENIS_VERSION}.war jenkins@molgenis26.gcc.rug.nl:/releases/molgenis/${MOLGENIS_VERSION}/"
+                sh "scp target/molgenis-app-${MOLGENIS_VERSION}.war molgenis@molgenis26.gcc.rug.nl:/releases/molgenis/${MOLGENIS_VERSION}/"
             }
         }
     }
