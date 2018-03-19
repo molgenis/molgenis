@@ -78,7 +78,7 @@ const actions = {
       method: 'PUT'
     }
 
-    return api.post(`/api/v1/${state.questionnaire.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
+    return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
       commit('SET_FORM_DATA', formData)
       commit('SET_LOADING', false)
     }).catch(() => {

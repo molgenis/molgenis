@@ -295,7 +295,9 @@ describe('actions', () => {
 
     const state = {
       questionnaire: {
-        name: 'test_quest'
+        meta: {
+          name: 'test_quest'
+        }
       },
       formData: {
         field1: 'value',
