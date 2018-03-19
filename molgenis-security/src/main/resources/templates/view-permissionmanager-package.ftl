@@ -26,19 +26,16 @@
                                 <tr>
                                     <th>Package</th>
                                     <th>Edit metadata</th>
+                                    <th>Create</th>
                                     <th>Edit</th>
                                     <th>View</th>
                                     <th>Count</th>
-                                    <th>None</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-default pull-right">Save</button>
                     </div>
                 </form>
             </div>

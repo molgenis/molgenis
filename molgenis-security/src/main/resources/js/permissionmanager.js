@@ -86,7 +86,7 @@
       return items.join('')
     }
 
-      function createPermissionTable(data, nrPermissions, type, sid) {
+      function createPermissionTable(data, nrPermissions) {
           var items = []
           $.each(data.permissions, function (idx, permission) {
               items.push('<tr data-id="' + permission.resource.id + '" data-mask="' + permission.mask + '">')
@@ -112,14 +112,22 @@
       })
     })
     $('#package-group-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/package/group/' + $(this).val(), function (data) {
-        $('#package-group-permission-table tbody').empty().html(createGroupPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
-      })
+        var sid = $(this).val()
+        $.get(molgenis.getContextUrl() + '/package/group/' + sid, function (data) {
+            var tbody = $('#package-group-permission-table tbody')
+            tbody.empty().html(createPermissionTable(data, 5))
+            tbody.data('type', 'group')
+            tbody.data('sid', sid)
+        })
     })
     $('#package-user-select').change(function () {
-      $.get(molgenis.getContextUrl() + '/package/user/' + $(this).val(), function (data) {
-        $('#package-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
-      })
+        var sid = $(this).val()
+        $.get(molgenis.getContextUrl() + '/package/group/' + sid, function (data) {
+            var tbody = $('#package-group-permission-table tbody')
+            tbody.empty().html(createPermissionTable(data, 5))
+            tbody.data('type', 'group')
+            tbody.data('sid', sid)
+        })
     })
     $('#entity-class-group-select').change(function () {
         var sid = $(this).val()
@@ -167,6 +175,22 @@
 
           $.post(molgenis.getContextUrl() + "/repository/" + id + "/" + type + "/" + sid + "/" + mask)
       });
+
+      $('#package-group-permission-table,#package-user-permission-table').on('change', 'input:checkbox', function () {
+          var col = $(this)
+          var row = col.closest('tr')
+          var table = row.closest('tbody')
+
+          var id = row.data('id')
+          var type = table.data('type')
+          var sid = table.data('sid')
+          var mask = row.data('mask') ^ 1 << col.data('index')
+
+          row.data('mask', mask)
+
+          $.post(molgenis.getContextUrl() + "/package/" + id + "/" + type + "/" + sid + "/" + mask)
+      });
+
     $('#plugin-group-permission-form,' +
       '#plugin-user-permission-form,' +
       '#package-group-permission-form,' +
