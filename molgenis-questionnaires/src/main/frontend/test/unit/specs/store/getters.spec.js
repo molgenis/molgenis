@@ -109,6 +109,13 @@ describe.only('getters', () => {
             visible: (data) => data['chapter-1-field-1'] === 'value',
             required: () => true,
             validate: () => true
+          },
+          {
+            id: 'chapter-4-field-6',
+            type: 'text',
+            visible: (data) => true,
+            required: () => true,
+            validate: () => true
           }
         ]
       }
@@ -121,7 +128,8 @@ describe.only('getters', () => {
       'chapter-3-field-2': undefined,
       'chapter-4-field-2': undefined,
       'chapter-4-field-4': undefined,
-      'chapter-4-field-5': 'value'
+      'chapter-4-field-5': 'value',
+      'chapter-4-field-6': 'value'
     },
     questionnaire: {
       meta: {
@@ -200,10 +208,9 @@ describe.only('getters', () => {
       const expected = {
         'chapter-1': 100,
         'chapter-2': 0,
-        'chapter-3': 100,
-        'chapter-4': 100
+        'chapter-3': 0,
+        'chapter-4': 50
       }
-      console.log(actual)
 
       expect(actual).to.deep.equal(expected)
     })
@@ -219,7 +226,7 @@ describe.only('getters', () => {
   })
 
   describe('getQuestionnaireId', () => {
-    it('should return the questionaire ID', () => {
+    it('should return the questionnaire ID', () => {
       const actual = getters.getQuestionnaireId(state)
       const expected = 'test_quest'
 
@@ -228,7 +235,7 @@ describe.only('getters', () => {
   })
 
   describe('getQuestionnaireLabel', () => {
-    it('should return the questionaire label', () => {
+    it('should return the questionnaire label', () => {
       const actual = getters.getQuestionnaireLabel(state)
       const expected = 'label'
 
@@ -237,7 +244,7 @@ describe.only('getters', () => {
   })
 
   describe('getQuestionnaireDescription', () => {
-    it('should return the questionaire description', () => {
+    it('should return the questionnaire description', () => {
       const actual = getters.getQuestionnaireDescription(state)
       const expected = 'description'
 

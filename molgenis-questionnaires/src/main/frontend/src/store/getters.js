@@ -32,15 +32,23 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
 
 const getChapterProgress = (chapter: Object, formData: Object): number => {
   let totalNumberOfFields = 0
+
   const numberOfFilledInFields = chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
-      accumulator += getChapterProgress(child, formData)
+      accumulator + getChapterProgress(child, formData)
     }
 
-    if (isFilledInValue(formData[child.id])) accumulator += 1
-    if (child.visible(formData)) totalNumberOfFields++
+    if (isFilledInValue(formData[child.id])) {
+      accumulator++
+    }
+
+    if (child.visible(formData)) {
+      totalNumberOfFields++
+    }
+
     return accumulator
   }, 0)
+
   return (numberOfFilledInFields / totalNumberOfFields) * 100
 }
 
