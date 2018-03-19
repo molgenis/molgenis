@@ -143,6 +143,7 @@
       this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
       this.$store.commit('SET_ERROR', '')
       this.$store.commit('BLOCK_NAVIGATION', false)
+      this.formState._reset()
       next()
     },
     components: {
