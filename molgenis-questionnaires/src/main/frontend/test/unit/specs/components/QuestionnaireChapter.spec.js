@@ -2,14 +2,12 @@ import QuestionnaireChapter from 'src/pages/QuestionnaireChapter'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
-import VueRouter from 'vue-router'
-import { generateError } from '../../utils'
 
 const $t = (key) => {
   const translations = {
-    'questionnaire_loading_chapter_text': 'loading',
+    'questionnaire_overview_loading_text': 'loading',
     'questionnaire_back_to_start': 'back to start',
-    'chapter_incomplete_message': 'you forgot something',
+    'questionnaire_chapter_incomplete_message': 'you forgot something',
     'questionnaire_boolean_true': 'Yes',
     'questionnaire_boolean_false': 'No',
     'questionnaire_boolean_null': 'No idea'
@@ -17,9 +15,7 @@ const $t = (key) => {
   return translations[key]
 }
 
-describe('QuestionnaireChapter component', function () {
-  const spec = this.title
-
+describe('QuestionnaireChapter component', () => {
   let actions
   let getters
   let localVue
@@ -40,9 +36,8 @@ describe('QuestionnaireChapter component', function () {
       SUBMIT_QUESTIONNAIRE: td.function()
     }
 
-    const chapterFields = {id: 'chapter1'}
     getters = {
-      getChapterByIndex: () => () => chapterFields,
+      getChapterByIndex: () => () => ({id: 'chapter1'}),
       getTotalNumberOfChapters: () => 1
     }
 
@@ -53,10 +48,13 @@ describe('QuestionnaireChapter component', function () {
     }
 
     state = {
-      questionnaireLabel: 'label',
-      chapterFields: chapterFields,
+      chapterFields: [],
+      error: '',
       formData: {field1: 'value'},
-      mapperOptions: {booleanLabels: 'labels'}
+      loading: false,
+      mapperOptions: {},
+      navigationBlocked: false,
+      questionnaireLabel: 'label'
     }
 
     store = new Vuex.Store({actions, getters, mutations, state})
@@ -66,136 +64,51 @@ describe('QuestionnaireChapter component', function () {
   const mocks = {$t: $t}
   const propsData = {chapterId: 1, questionnaireId: 'test_quest'}
 
-  it('should not dispatch action [GET_QUESTIONNAIRE] when chapters are present', () => {
-    shallow(QuestionnaireChapter, {propsData, mocks, store, stubs, localVue})
-    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined), {times: 0})
-  })
-
-  it('should dispatch a mutation to set mapperOptions', () => {
-    state.mapperOptions = {}
-    state.chapterFields = []
-
-    store = new Vuex.Store({actions, getters, mutations, state})
-
-    shallow(QuestionnaireChapter, {propsData, mocks, store, stubs, localVue})
-    td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()))
-  })
-
-  it('should not dispatch a mutation to set mapperOptions if already set', function (done) {
-    const test = this.test.title
-
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    wrapper.vm.$nextTick().then(() => {
-      td.verify(mutations.SET_MAPPER_OPTIONS(state, td.matchers.anything()), {times: 0})
-      done()
-    }).catch(error => done(generateError(error, spec, test)))
-  })
-
-  it('should dispatch action [GET_QUESTIONNAIRE] when no chapters are present', () => {
-    state.chapterFields = []
-    store = new Vuex.Store({actions, getters, mutations, state})
-
-    shallow(QuestionnaireChapter, {propsData, mocks, store, stubs, localVue})
+  it('should dispatch the [GET_QUESTIONNAIRE] action when no chapterFields are present in the state', () => {
+    shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
     td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })
 
-  it('should load formData from the state', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.formData).to.deep.equal(state.formData)
+  it('should commit the [SET_MAPPER_OPTIONS] mutation when no boolean labels are present in the state', () => {
+    shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    const mapperOptions = {
+      booleanLabels: {
+        trueLabel: 'Yes',
+        falseLabel: 'No',
+        nillLabel: 'No idea'
+      }
+    }
+
+    td.verify(mutations.SET_MAPPER_OPTIONS(state, mapperOptions))
   })
 
   it('should get the current chapter from the state by index', () => {
-    const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-    expect(wrapper.vm.currentChapter).to.deep.equal([{id: 'chapter1'}])
+    const wrapper = shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    expect(wrapper.vm.currentChapter).to.deep.equal({id: 'chapter1'})
   })
 
-  describe('onValueChanged', () => {
-    it('should commit the [SET_FORM_DATA] mutation when called', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.vm.onValueChanged({id: '1'})
-      td.verify(mutations.SET_FORM_DATA(state, {id: '1'}))
-    })
+  it('should compute navigation is not blocked', () => {
+    const wrapper = shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    expect(wrapper.vm.navigationBlocked).to.equal(false)
   })
 
-  describe('validateBeforeNavigatingToNextChapter', () => {
-    const router = new VueRouter()
+  it('should compute that navigation is blocked', () => {
+    state.navigationBlocked = true
+    store = new Vuex.Store({actions, getters, mutations, state})
 
-    it('should commit [UPDATE_FORM_STATUS] with value "SUBMITTED"', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.vm.validateBeforeNavigatingToNextChapter()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, 'SUBMITTED'))
-    })
+    const wrapper = shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    wrapper.setData({formState: {$error: {'key': 'value'}}})
 
-    it('should set navigationBlocked to true if form is not valid', function (done) {
-      const test = this.test.title
-
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.setData({formState: {$valid: false}})
-      wrapper.vm.validateBeforeNavigatingToNextChapter()
-
-      wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.navigationBlocked).to.equal(true)
-        done()
-      }).catch(error => done(generateError(error, spec, test)))
-    })
-
-    it('should commit [UPDATE_FORM_STATUS] with value "OPEN" if form is valid', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, router, localVue})
-      wrapper.setData({formState: {$valid: true}})
-      wrapper.vm.validateBeforeNavigatingToNextChapter()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)))
-    })
+    expect(wrapper.vm.navigationBlocked).to.equal(true)
   })
 
-  describe('navigateToPreviousChapter', () => {
-    const router = new VueRouter()
-
-    it('should commit [UPDATE_FORM_STATUS] with value "OPEN" if navigation is blocked', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, router, localVue})
-      wrapper.setData({navigationBlocked: true})
-      wrapper.vm.navigateToPreviousChapter()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)))
-    })
-
-    it('should not commit [UPDATE_FORM_STATUS] when navigation is not blocked', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, router, localVue})
-      wrapper.setData({navigationBlocked: false})
-      wrapper.vm.navigateToPreviousChapter()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, 'OPEN'), {times: 0})
-    })
+  it('should fetch loading status from the state', () => {
+    const wrapper = shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    expect(wrapper.vm.loading).to.equal(false)
   })
 
-  describe('submitQuestionnaire', () => {
-    const router = new VueRouter()
-
-    it('should commit [UPDATE_FORM_STATUS] with value "SUBMITTED"', () => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.vm.submitQuestionnaire()
-      td.verify(mutations.UPDATE_FORM_STATUS(state, td.matchers.isA(String)))
-    })
-
-    it('should set navigationBlocked to true if form is not valid', done => {
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, localVue})
-      wrapper.setData({formState: {$valid: false}})
-      wrapper.vm.submitQuestionnaire()
-
-      wrapper.vm.$nextTick(() => {
-        expect(wrapper.vm.navigationBlocked).to.equal(true)
-        done()
-      })
-    })
-
-    it('should dispatch action [SUBMIT_QUESTIONNAIRE] when form is valid', function (done) {
-      const test = this.test.title
-
-      const wrapper = shallow(QuestionnaireChapter, {propsData, store, stubs, router, localVue})
-      wrapper.setData({formState: {$valid: true}})
-      wrapper.vm.submitQuestionnaire()
-
-      wrapper.vm.$nextTick().then(() => {
-        td.verify(actions.SUBMIT_QUESTIONNAIRE(td.matchers.anything(), td.matchers.isA(String), undefined))
-        done()
-      }).catch(error => done(generateError(error, spec, test)))
-    })
+  it('should fetch error message from the state', () => {
+    const wrapper = shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
+    expect(wrapper.vm.error).to.equal('')
   })
 })

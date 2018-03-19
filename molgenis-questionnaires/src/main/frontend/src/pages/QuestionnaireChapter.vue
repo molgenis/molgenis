@@ -116,7 +116,8 @@
         return this.$store.state.loading
       },
       navigationBlocked () {
-        return this.$store.state.navigationBlocked && Object.keys(this.formState.$error).length > 0
+        const errors = this.formState.$error && Object.keys(this.formState.$error).length > 0
+        return this.$store.state.navigationBlocked && errors
       },
       totalNumberOfChapters () {
         return this.$store.getters.getTotalNumberOfChapters

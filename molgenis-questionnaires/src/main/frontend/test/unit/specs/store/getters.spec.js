@@ -1,6 +1,6 @@
 import getters from 'src/store/getters'
 
-describe.only('getters', () => {
+describe('getters', () => {
   const state = {
     chapterFields: [
       {
