@@ -3,6 +3,7 @@ package org.molgenis.js.magma;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -62,7 +63,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(expression, entity);
+		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity, Maps.newHashMap(), StringUtils.EMPTY);
 		Object value;
 		try
 		{
@@ -82,36 +83,42 @@ public class JsMagmaScriptEvaluator
 		return value;
 	}
 
-	private static Map<String, Object> toScriptEngineValueMap(String expression, Entity entity)
+	/**
+	 * Recursively flatten the entity to a (zero depth) map, for use in javascript code
+	 * Entity is processed depth first and the path though the tree is used as key.
+	 * @param entity The entity to be flattened, should start with non null entity
+	 * @param accumulator The current flattened map, use to accumulate partial results, should start with empty map
+	 * @param path The current path, used to construct the key for the map, should start with empty path ("")
+	 * @return flattened entity as key value map
+	 */
+	private static Map<String, Object> toScriptEngineValueMap(Entity entity, Map<String, Object> accumulator, String path)
 	{
-		Map<String, Object> map = Maps.newHashMap();
-		entity.getEntityType()
-			  .getAtomicAttributes()
-			  .forEach(attr -> {
+		if(entity != null) {
+			entity.getEntityType()
+				  .getAtomicAttributes()
+				  .forEach(attr -> {
 
-			  	map.put(attr.getName(), toScriptEngineValue(expression, entity, attr));
+				  	  String key = path.isEmpty() ?  attr.getName() : path + "." + attr.getName();
+					  Object value = toScriptEngineValue(entity, attr);
+					  accumulator.put(key, value);
 
-				  AttributeType attributeType = attr.getDataType();
-				  if(attributeType == AttributeType.CATEGORICAL || attributeType == AttributeType.XREF) {
-
-				  	Entity refEntity = entity.getEntity(attr.getName());
-
-					  if(refEntity != null) {
-						  refEntity.getEntityType().getAtomicAttributes().forEach(refAttr -> {
-							  map.put(attr.getName() + "." + refAttr.getName(), toScriptEngineValue(expression, refEntity, refAttr));
-						  });
+					  if(isReferenceAttribute(attr.getDataType()))
+					  {
+						  Entity refEntity = entity.getEntity(attr.getName());
+						  toScriptEngineValueMap(refEntity, accumulator, key);
 					  }
-				  }
-			  });
-		return map;
+
+				  });
+		}
+		return accumulator;
 	}
 
-	private static boolean isReferenceTypeAttr(AttributeType attrType)
+	private static boolean isReferenceAttribute(AttributeType attrType)
 	{
 		return referenceTypes.contains(attrType);
 	}
 
-	private static Object toScriptEngineValue(String expression, Entity entity, Attribute attr)
+	private static Object toScriptEngineValue(Entity entity, Attribute attr)
 	{
 		Object value = null;
 
@@ -129,7 +136,7 @@ public class JsMagmaScriptEvaluator
 
 				if(xrefEntity != null) {
 					Attribute idAttribute = xrefEntity.getEntityType().getIdAttribute();
-					value = toScriptEngineValue(expression, xrefEntity, idAttribute);
+					value = toScriptEngineValue(xrefEntity, idAttribute);
 				}
 
 				break;
@@ -138,7 +145,7 @@ public class JsMagmaScriptEvaluator
 			case ONE_TO_MANY:
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
 				value = stream(mrefEntities.spliterator(), false).map(
-						mrefEntity -> toScriptEngineValue(expression, mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
+						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
 																 .collect(toList());
 				break;
 			case DATE:
