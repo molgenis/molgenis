@@ -343,7 +343,9 @@ describe('actions', () => {
         field: 'value'
       },
       questionnaire: {
-        name: 'test_quest'
+        meta: {
+          name: 'test_quest'
+        }
       }
     }
 

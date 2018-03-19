@@ -30,27 +30,32 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
   })
 }
 
-const getChapterProgress = (chapter: Object, formData: Object): number => {
-  let totalNumberOfFields = 0
-
-  const numberOfFilledInFields = chapter.children.reduce((accumulator, child) => {
+const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
+  return chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
-      /* eslint-disable no-unused-expressions */
-      accumulator + getChapterProgress(child, formData)
+      return accumulator + getTotalNumberOfFieldsForChapter(child, formData)
+    }
+
+    if (child.visible(formData)) {
+      accumulator++
+    }
+
+    return accumulator
+  }, 0)
+}
+
+const getNumberOfFilledInFieldsForChapter = (chapter, formData) => {
+  return chapter.children.reduce((accumulator, child) => {
+    if (child.type === 'field-group') {
+      return accumulator + getNumberOfFilledInFieldsForChapter(child, formData)
     }
 
     if (isFilledInValue(formData[child.id])) {
       accumulator++
     }
 
-    if (child.visible(formData)) {
-      totalNumberOfFields++
-    }
-
     return accumulator
   }, 0)
-
-  return (numberOfFilledInFields / totalNumberOfFields) * 100
 }
 
 const getters = {
@@ -71,7 +76,10 @@ const getters = {
 
   getChapterProgress: (state: QuestionnaireState): Object => {
     return state.chapterFields.reduce((accumulator, chapter) => {
-      accumulator[chapter.id] = getChapterProgress(chapter, state.formData)
+      const totalNumberOfFieldsInChapter = getTotalNumberOfFieldsForChapter(chapter, state.formData)
+      const numberOfFilledInFieldsInChapter = getNumberOfFilledInFieldsForChapter(chapter, state.formData)
+
+      accumulator[chapter.id] = (numberOfFilledInFieldsInChapter / totalNumberOfFieldsInChapter) * 100
       return accumulator
     }, {})
   },

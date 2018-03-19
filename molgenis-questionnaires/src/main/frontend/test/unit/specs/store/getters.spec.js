@@ -83,7 +83,7 @@ describe('getters', () => {
               {
                 id: 'chapter-4-field-2',
                 type: 'text',
-                visible: (data) => false,
+                visible: (data) => true,
                 required: () => false,
                 validate: () => true
               }
@@ -97,7 +97,7 @@ describe('getters', () => {
               {
                 id: 'chapter-4-field-4',
                 type: 'text',
-                visible: (data) => false,
+                visible: (data) => true,
                 required: () => true,
                 validate: () => true
               }
@@ -165,7 +165,7 @@ describe('getters', () => {
         'chapter-1': true,
         'chapter-2': false,
         'chapter-3': true,
-        'chapter-4': true
+        'chapter-4': false
       }
 
       expect(actual).to.deep.equal(expected)
