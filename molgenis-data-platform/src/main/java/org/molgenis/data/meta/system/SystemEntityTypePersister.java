@@ -110,7 +110,7 @@ public class SystemEntityTypePersister
 		{
 			if (!metadataRepoCollection.hasRepository(metaEntityType))
 			{
-				//remove package from metadata entities to prevent problems due to missing parent ACL's
+				//remove package from metadata entities otherwise we try to create package ACL's for the metadata packages before they are created
 				//package is added again in the persist() method
 				metaEntityType.setPackage(null);
 				metadataRepoCollection.createRepository(metaEntityType);

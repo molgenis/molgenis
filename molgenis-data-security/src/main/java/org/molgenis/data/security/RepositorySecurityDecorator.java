@@ -203,6 +203,17 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		return delegate().aggregate(aggregateQuery);
 	}
 
+	private String toUserReadablePermission(RepositoryPermission repositoryPermission)
+	{
+		String label = "NONE";
+		if (repositoryPermission.equals(RepositoryPermission.COUNT)) label = "COUNT";
+		else if (repositoryPermission.equals(RepositoryPermission.READ)) label = "READ";
+		else if (repositoryPermission.equals(RepositoryPermission.WRITE)) label = "WRITE";
+		else if (repositoryPermission.equals(RepositoryPermission.CREATE)) label = "CREATE";
+		else if (repositoryPermission.equals(RepositoryPermission.WRITEMETA)) label = "WRITEMETA";
+		return label;
+	}
+
 	private void validatePermission(EntityType entityType, RepositoryPermission permission)
 	{
 		boolean hasPermission = permissionService.hasPermission(new RepositoryIdentity(entityType.getId()), permission);
@@ -210,7 +221,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		{
 
 			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", permission.getPattern(),
+					format("No [%s] permission on entity type [%s] with id [%s]", toUserReadablePermission(permission),
 							entityType.getLabel(), entityType.getId()));
 		}
 	}

@@ -40,7 +40,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	public void hasPermissionOnEntityTypeTrue()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType",
+		when(permissionEvaluator.hasPermission(authentication, "entityType0", "repository",
 				RepositoryPermission.READ)).thenReturn(true);
 		assertTrue(userPermissionEvaluator.hasPermission(new RepositoryIdentity("entityType0"),
 				RepositoryPermission.READ));
