@@ -67,9 +67,9 @@ module.exports = {
 
     // ===== selectors =====
     var startQuestionnaireButton = 'a.btn.btn-lg.btn-primary.mt-2.float-right'
-    var backToStartButton = 'div.card-header > div > div:nth-child(1) > a'
-    var nextChapterButton = 'div.card-header > div > div:nth-child(3) > button'
-    var currentChapterSpan = 'div.card-header > div > div.col-6.col-sm-4.col-md-4.col-lg-4.col-xl-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
+    var backToStartButton = 'body > div > div > div > div:nth-child(1) > div > a'
+    var nextChapterButton = 'div.card-footer > div > div:nth-child(2) > button'
+    var currentChapterSpan = 'body > div > div > div > div:nth-child(2) > div.col-xs-12.col-sm-12.col-md-12.col-lg-9.col-xl-9 > div > div.card-header > div'
     var chapterNavigationHeader = 'ul > a:nth-child(1)'
     var firstChapterListItem = 'ul > a:nth-child(2)'
     var secondChapterListItem = 'ul > a:nth-child(3)'
@@ -99,16 +99,21 @@ module.exports = {
     // ===== selectors =====
     var chapterOneNameQuestion = '#ch1_question1'
     var chapterOneAgeQuestion = '#ch1_question2'
+    var chapterOneRequiredQuestion = '#ch1_question3'
     var chapterOneProgressBar = 'ul > a:nth-child(2) > div > div'
 
     // ======= tests =======
     browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('0')
 
     browser.setValue(chapterOneNameQuestion, 'Nightwatch test')
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('1')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('33.33333333333333')
 
     browser.setValue(chapterOneAgeQuestion, 20)
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('2')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('66.66666666666666')
+
+    browser.setValue(chapterOneRequiredQuestion, 'A nightwatch generated text')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('100')
+
     browser.expect.element(chapterOneProgressBar).to.have.attribute('class').which.contains('bg-success')
   },
 
@@ -117,10 +122,10 @@ module.exports = {
     browser.options.desiredCapabilities.name = 'navigate to the second chapter'
 
     // ===== selectors =====
-    var nextChapterButton = 'div.card-header > div > div:nth-child(3) > button'
-    var previousChapterButton = 'div.card-header > div > div:nth-child(1) > button'
-    var currentChapterSpan = 'div.card-header > div > div.col-6.col-sm-4.col-md-4.col-lg-4.col-xl-4.text-muted.d-flex.flex-column.justify-content-center.align-items-center'
-    var submitButton = 'div.card-header > div > div:nth-child(3) > button'
+    var nextChapterButton = 'div.card-footer > div > div:nth-child(2) > button'
+    var previousChapterButton = 'div.card-footer > div > div:nth-child(1) > button'
+    var currentChapterSpan = 'body > div > div > div > div:nth-child(2) > div.col-xs-12.col-sm-12.col-md-12.col-lg-9.col-xl-9 > div > div.card-header > div'
+    var submitButton = 'div.card-footer > div > div:nth-child(2) > button'
 
     // ======= tests =======
     browser.click(nextChapterButton)
@@ -139,7 +144,7 @@ module.exports = {
     browser.options.desiredCapabilities.name = 'finish questionnaire and submit'
 
     // ===== selectors =====
-    var submitButton = 'div.card-header > div > div:nth-child(3) > button'
+    var submitButton = 'div.card-footer > div > div:nth-child(2) > button'
     var vueCheckbox = '#ch2_question1-0'
     var javascriptCheckbox = '#ch2_question1-3'
     var molgenisWebsiteRadio = '#ch2_question2-0'
