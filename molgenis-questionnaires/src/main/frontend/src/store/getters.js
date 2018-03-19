@@ -35,6 +35,7 @@ const getChapterProgress = (chapter: Object, formData: Object): number => {
 
   const numberOfFilledInFields = chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
+      /* eslint-disable no-unused-expressions */
       accumulator + getChapterProgress(child, formData)
     }
 
