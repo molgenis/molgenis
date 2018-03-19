@@ -3,10 +3,12 @@ package org.molgenis.js.magma;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.util.UnexpectedEnumException;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -102,10 +105,17 @@ public class JsMagmaScriptEvaluator
 					  Object value = toScriptEngineValue(entity, attr);
 					  accumulator.put(key, value);
 
-					  if(isReferenceAttribute(attr.getDataType()))
+					  AttributeType dataType = attr.getDataType();
+					  if(isReferenceAttribute(dataType))
 					  {
-						  Entity refEntity = entity.getEntity(attr.getName());
-						  toScriptEngineValueMap(refEntity, accumulator, key);
+						  String attributeName = attr.getName();
+						  if(dataType.equals(AttributeType.XREF) || dataType.equals(AttributeType.CATEGORICAL)) {
+							  Entity refEntity = entity.getEntity(attributeName);
+							  toScriptEngineValueMap(refEntity, accumulator, key);
+						  } else {
+							  entity.getEntities(attributeName).forEach(refEntity -> toScriptEngineValueMap(refEntity, accumulator, key));
+						  }
+
 					  }
 
 				  });

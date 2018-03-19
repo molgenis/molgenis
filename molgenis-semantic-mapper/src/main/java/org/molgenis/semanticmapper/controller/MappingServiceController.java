@@ -704,11 +704,13 @@ public class MappingServiceController extends PluginController
 			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
 			if (!sourceAttributeNames.isEmpty())
 			{
-				List<Attribute> sourceAttributes = sourceAttributeNames.stream()
-																	   .map(attributeName -> entityMapping.getSourceEntityType()
-																										  .getAttribute(
-																												  attributeName))
-																	   .collect(Collectors.toList());
+				List<Attribute> sourceAttributes = sourceAttributeNames.stream().map(attributeName ->
+				{
+					EntityType sourceEntityType = entityMapping.getSourceEntityType();
+					Attribute attribute = sourceEntityType.getAttribute(attributeName);
+					return attribute;
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
 				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
 		}

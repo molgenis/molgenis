@@ -113,6 +113,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		assertEquals(algorithmService.getSourceAttributeNames("$(id)"), singletonList("id"));
 	}
 
+	@Test
+	public void testDeepReference()
+	{
+		assertEquals(algorithmService.getSourceAttributeNames("$(gender.label)"), singletonList("gender"));
+	}
+
 	@DataProvider(name = "testApplyProvider")
 	public Object[][] testApplyProvider()
 	{
