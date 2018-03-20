@@ -8,10 +8,6 @@
  * @returns the evaluated script result
  */
 function evalScript (script, entity) {
-  
-  var attr = ''
-
-  function attribute (value) {
   function Attribute (value) {
 
     var attribute = {
@@ -41,10 +37,6 @@ function evalScript (script, entity) {
           return this.val['_idValue']
         }
         return this.val
-      },
-
-      ref: function (ref) {
-        return this[attr + '.' + ref]
       },
 
       /**
