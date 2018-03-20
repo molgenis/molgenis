@@ -12,15 +12,7 @@ public class RepositoryPermissionUtils
 	{
 		CumulativePermission cumulativePermission = new CumulativePermission();
 
-		if (repositoryPermission.equals(RepositoryPermission.CREATE))
-		{
-			cumulativePermission.set(RepositoryPermission.CREATE)
-								.set(RepositoryPermission.WRITEMETA)
-								.set(RepositoryPermission.WRITE)
-								.set(RepositoryPermission.READ)
-								.set(RepositoryPermission.COUNT);
-		}
-		else if (repositoryPermission.equals(RepositoryPermission.WRITEMETA))
+		if (repositoryPermission.equals(RepositoryPermission.WRITEMETA))
 		{
 			cumulativePermission.set(RepositoryPermission.WRITEMETA)
 								.set(RepositoryPermission.WRITE)

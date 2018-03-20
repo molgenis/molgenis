@@ -13,7 +13,6 @@ import org.springframework.security.acls.model.*;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.RepositoryPermission.CREATE;
 import static org.molgenis.data.security.RepositoryPermission.WRITEMETA;
 import static org.molgenis.data.security.RepositoryPermissionUtils.getCumulativePermission;
 
@@ -87,7 +86,7 @@ public class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCol
 			acl.setParent(parentAcl);
 		}
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-		acl.insertAce(acl.getEntries().size(), getCumulativePermission(CREATE), sid, true);
+		acl.insertAce(acl.getEntries().size(), getCumulativePermission(WRITEMETA), sid, true);
 		mutableAclService.updateAcl(acl);
 	}
 

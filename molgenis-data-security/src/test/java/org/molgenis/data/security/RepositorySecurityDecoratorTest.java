@@ -22,7 +22,6 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	private static final String MESSAGE_NO_COUNT_PERMISSION = "No \\[COUNT\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
 	private static final String MESSAGE_NO_READ_PERMISSION = "No \\[READ\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
 	private static final String MESSAGE_NO_WRITE_PERMISSION = "No \\[WRITE\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
-	private static final String MESSAGE_NO_CREATE_PERMISSION = "No \\[CREATE\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
 
 	@Mock
 	private Repository<Entity> delegateRepository;
@@ -46,19 +45,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddPermissionGranted()
 	{
-		initPermissionServiceMock(RepositoryPermission.CREATE, true);
-		when(delegateRepository.getName()).thenReturn("test");
+		initPermissionServiceMock(RepositoryPermission.WRITE, true);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.add(entity);
 		verify(delegateRepository).add(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_CREATE_PERMISSION)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
 	public void testAddPermissionDenied()
 	{
-		initPermissionServiceMock(RepositoryPermission.CREATE, false);
+		initPermissionServiceMock(RepositoryPermission.WRITE, false);
 		Entity entity = mock(Entity.class);
-		when(delegateRepository.getName()).thenReturn("test");
 		repositorySecurityDecorator.add(entity);
 		verify(delegateRepository).add(entity);
 	}
@@ -66,18 +63,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddStreamPermissionGranted()
 	{
-		initPermissionServiceMock(RepositoryPermission.CREATE, true);
-		when(delegateRepository.getName()).thenReturn("test");
+		initPermissionServiceMock(RepositoryPermission.WRITE, true);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.add(entityStream);
 		verify(delegateRepository).add(entityStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_CREATE_PERMISSION)
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
 	public void testAddStreamPermissionDenied()
 	{
-		initPermissionServiceMock(RepositoryPermission.CREATE, false);
-		when(delegateRepository.getName()).thenReturn("test");
+		initPermissionServiceMock(RepositoryPermission.WRITE, false);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.add(entityStream);
 		verify(delegateRepository).add(entityStream);

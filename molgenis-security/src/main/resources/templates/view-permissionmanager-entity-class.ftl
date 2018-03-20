@@ -25,16 +25,19 @@
                             <tr>
                                 <th>Entity Class</th>
                                 <th>Edit metadata</th>
-                                <th>Create</th>
                                 <th>Edit</th>
                                 <th>View</th>
                                 <th>Count</th>
+                                <th>None</th>
                             </tr>
                             </thead>
                             <tbody>
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn pull-right">Save</button>
                 </div>
             </form>
         </div>
@@ -59,16 +62,19 @@
                             <tr>
                                 <th>Entity Class</th>
                                 <th>Edit metadata</th>
-                                <th>Create</th>
                                 <th>Edit</th>
                                 <th>View</th>
                                 <th>Count</th>
+                                <th>None</th>
                             </tr>
                             </thead>
                             <tbody>
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn pull-right">Save</button>
                 </div>
             </form>
         </div>

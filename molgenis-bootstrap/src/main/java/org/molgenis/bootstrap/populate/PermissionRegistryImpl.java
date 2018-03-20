@@ -58,9 +58,8 @@ public class PermissionRegistryImpl implements PermissionRegistry
 						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity repositoryIdentity = new RepositoryIdentity(entityType);
-			Permission repositoryPermissions = new CumulativePermission().set(RepositoryPermission.CREATE)
-																		 .set(RepositoryPermissionUtils.getCumulativePermission(
-																				 RepositoryPermission.READ));
+			Permission repositoryPermissions = new CumulativePermission().set(
+					RepositoryPermissionUtils.getCumulativePermission(RepositoryPermission.WRITE));
 			mapBuilder.putAll(repositoryIdentity, new Pair<>(repositoryPermissions, allUsersGroupSid));
 
 			ObjectIdentity entityTypeIdentity = new EntityIdentity(entityType);

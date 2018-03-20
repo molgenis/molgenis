@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 /**
  * Repository decorated that validates that current user has permission to perform an operation for an entity type.
@@ -177,10 +176,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void add(Entity entity)
 	{
 		EntityType entityType = delegate().getEntityType();
-		if (!getName().equals(ENTITY_TYPE_META_DATA))
-		{
-			validatePermission(entityType, RepositoryPermission.CREATE);
-		}
+		validatePermission(entityType, RepositoryPermission.WRITE);
 		delegate().add(entity);
 	}
 
@@ -188,10 +184,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Integer add(Stream<Entity> entities)
 	{
 		EntityType entityType = delegate().getEntityType();
-		if (!getName().equals(ENTITY_TYPE_META_DATA))
-		{
-			validatePermission(entityType, RepositoryPermission.CREATE);
-		}
+		validatePermission(entityType, RepositoryPermission.WRITE);
 		return delegate().add(entities);
 	}
 
@@ -203,17 +196,6 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		return delegate().aggregate(aggregateQuery);
 	}
 
-	private String toUserReadablePermission(RepositoryPermission repositoryPermission)
-	{
-		String label = "NONE";
-		if (repositoryPermission.equals(RepositoryPermission.COUNT)) label = "COUNT";
-		else if (repositoryPermission.equals(RepositoryPermission.READ)) label = "READ";
-		else if (repositoryPermission.equals(RepositoryPermission.WRITE)) label = "WRITE";
-		else if (repositoryPermission.equals(RepositoryPermission.CREATE)) label = "CREATE";
-		else if (repositoryPermission.equals(RepositoryPermission.WRITEMETA)) label = "WRITEMETA";
-		return label;
-	}
-
 	private void validatePermission(EntityType entityType, RepositoryPermission permission)
 	{
 		boolean hasPermission = permissionService.hasPermission(new RepositoryIdentity(entityType.getId()), permission);
@@ -221,8 +203,34 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		{
 
 			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", toUserReadablePermission(permission),
+					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(permission),
 							entityType.getLabel(), entityType.getId()));
 		}
+	}
+
+	private static String toMessagePermission(RepositoryPermission permission)
+	{
+		String permissionStr;
+		if (permission == RepositoryPermission.COUNT)
+		{
+			permissionStr = "COUNT";
+		}
+		else if (permission == RepositoryPermission.READ)
+		{
+			permissionStr = "READ";
+		}
+		else if (permission == RepositoryPermission.WRITE)
+		{
+			permissionStr = "WRITE";
+		}
+		else if (permission == RepositoryPermission.WRITEMETA)
+		{
+			permissionStr = "WRITEMETA";
+		}
+		else
+		{
+			throw new IllegalArgumentException("Illegal entity type permission");
+		}
+		return permissionStr;
 	}
 }
