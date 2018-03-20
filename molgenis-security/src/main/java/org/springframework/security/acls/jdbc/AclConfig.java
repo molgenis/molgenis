@@ -3,6 +3,7 @@ package org.springframework.security.acls.jdbc;
 import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
+import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.cache.Cache;
@@ -30,7 +31,7 @@ import static java.util.Objects.requireNonNull;
  * TODO move to org.molgenis sub-package once we upgraded to a spring-security-acl release with https://github.com/spring-projects/spring-security/issues/4814.
  */
 @Configuration
-@Import(DataSourceConfig.class)
+@Import({ DataSourceConfig.class, MutableAclClassServiceImpl.class })
 public class AclConfig
 {
 	private final DataSource dataSource;
@@ -99,10 +100,10 @@ public class AclConfig
 				"select acl_object_identity.id from acl_object_identity, acl_class where acl_object_identity.object_id_class = acl_class.id and acl_class.class=? and acl_object_identity.object_id_identity = ?::varchar");
 		aclService.setFindChildrenQuery(
 				"select obj.object_id_identity as obj_id, class.class as class, class.class_id_type as class_id_type "
-				+ "from acl_object_identity obj, acl_object_identity parent, acl_class class "
-				+ "where obj.parent_object = parent.id and obj.object_id_class = class.id "
-				+ "and parent.object_id_identity = ?::varchar and parent.object_id_class = ("
-				+ "select id FROM acl_class where acl_class.class = ?)");
+						+ "from acl_object_identity obj, acl_object_identity parent, acl_class class "
+						+ "where obj.parent_object = parent.id and obj.object_id_class = class.id "
+						+ "and parent.object_id_identity = ?::varchar and parent.object_id_class = ("
+						+ "select id FROM acl_class where acl_class.class = ?)");
 		return aclService;
 	}
 
