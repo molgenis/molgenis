@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import javax.script.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -110,7 +112,10 @@ public class NashornScriptEngine
 			ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) nashornValue;
 			if (scriptObjectMirror.isArray())
 			{
-				convertedValue = scriptObjectMirror.values();
+				convertedValue = scriptObjectMirror.values()
+												   .stream()
+												   .map(this::convertNashornValue)
+												   .collect(Collectors.toList());
 			}
 			else
 			{
@@ -120,10 +125,27 @@ public class NashornScriptEngine
 					JsDate jsDate = ((Invocable) scriptEngine).getInterface(scriptObjectMirror, JsDate.class);
 					return jsDate.getTime();
 				}
+				else if (((ScriptObjectMirror) nashornValue).containsKey("_idValue"))
+				{
+					// entity object returned from script
+					return ((ScriptObjectMirror) nashornValue).get("_idValue");
+				}
 				else
 				{
 					throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
 				}
+			}
+		}
+		else if (nashornValue instanceof Map)
+		{
+			Map mapValue = (Map) (nashornValue);
+			if (mapValue.get("_idValue") != null)
+			{
+				convertedValue = mapValue.get("_idValue");
+			}
+			else
+			{
+				convertedValue = nashornValue;
 			}
 		}
 		else
