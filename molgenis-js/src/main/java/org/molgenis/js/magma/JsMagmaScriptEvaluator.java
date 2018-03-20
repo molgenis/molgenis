@@ -2,13 +2,10 @@ package org.molgenis.js.magma;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
-import org.apache.commons.lang3.StringUtils;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.support.AttributeUtils;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.util.UnexpectedEnumException;
@@ -19,15 +16,12 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * JavaScript script evaluator using the Nashorn script engine.
@@ -38,13 +32,6 @@ public class JsMagmaScriptEvaluator
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
 
 	private final NashornScriptEngine jsScriptEngine;
-
-	/**
-	 * Set containing the attribute types that can be used in combination the the 'dot' operator to resolve the reference
-	 * value from the referenced entity.
-	 */
-	private static Set<AttributeType> referenceTypes = Sets.newHashSet(AttributeType.CATEGORICAL,
-			AttributeType.CATEGORICAL_MREF, AttributeType.XREF, AttributeType.MREF);
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
@@ -66,7 +53,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity, Maps.newHashMap(), StringUtils.EMPTY);
+		Object scriptEngineValueMap = toScriptEngineValueMap(entity, 3);
 		Object value;
 		try
 		{
@@ -87,48 +74,38 @@ public class JsMagmaScriptEvaluator
 	}
 
 	/**
-	 * Recursively flatten the entity to a (zero depth) map, for use in javascript code
-	 * Entity is processed depth first and the path though the tree is used as key.
+	 * Convert entity to a JavaScript object.
+	 * Adds "_idValue" as a special key to every level for quick access to the id value of an entity.
+	 *
 	 * @param entity The entity to be flattened, should start with non null entity
-	 * @param accumulator The current flattened map, use to accumulate partial results, should start with empty map
-	 * @param path The current path, used to construct the key for the map, should start with empty path ("")
 	 * @return flattened entity as key value map
 	 */
-	private static Map<String, Object> toScriptEngineValueMap(Entity entity, Map<String, Object> accumulator, String path)
+	private Object toScriptEngineValueMap(Entity entity, int depth)
 	{
-		if(entity != null) {
-			entity.getEntityType()
-				  .getAtomicAttributes()
-				  .forEach(attr -> {
-
-				  	  String key = path.isEmpty() ?  attr.getName() : path + "." + attr.getName();
-					  Object value = toScriptEngineValue(entity, attr);
-					  accumulator.put(key, value);
-
-					  AttributeType dataType = attr.getDataType();
-					  if(isReferenceAttribute(dataType))
-					  {
-						  String attributeName = attr.getName();
-						  if(dataType.equals(AttributeType.XREF) || dataType.equals(AttributeType.CATEGORICAL)) {
-							  Entity refEntity = entity.getEntity(attributeName);
-							  toScriptEngineValueMap(refEntity, accumulator, key);
-						  } else {
-							  entity.getEntities(attributeName).forEach(refEntity -> toScriptEngineValueMap(refEntity, accumulator, key));
-						  }
-
-					  }
-
-				  });
+		if (entity != null)
+		{
+			Object idValue = toScriptEngineValue(entity, entity.getEntityType().getIdAttribute(), 0);
+			if (depth == 0)
+			{
+				return idValue;
+			}
+			else
+			{
+				Map<String, Object> map = Maps.newHashMap();
+				entity.getEntityType()
+					  .getAtomicAttributes()
+					  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr, depth)));
+				map.put("_idValue", idValue);
+				return map;
+			}
 		}
-		return accumulator;
+		else
+		{
+			return null;
+		}
 	}
 
-	private static boolean isReferenceAttribute(AttributeType attrType)
-	{
-		return referenceTypes.contains(attrType);
-	}
-
-	private static Object toScriptEngineValue(Entity entity, Attribute attr)
+	private Object toScriptEngineValue(Entity entity, Attribute attr, int depth)
 	{
 		Object value = null;
 
@@ -143,12 +120,7 @@ public class JsMagmaScriptEvaluator
 			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
-
-				if(xrefEntity != null) {
-					Attribute idAttribute = xrefEntity.getEntityType().getIdAttribute();
-					value = toScriptEngineValue(xrefEntity, idAttribute);
-				}
-
+				value = toScriptEngineValueMap(xrefEntity, depth - 1);
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
