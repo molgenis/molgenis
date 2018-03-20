@@ -415,16 +415,24 @@ function evalScript (script, entity) {
    * Stores the computed attribute value after applying on of the mathematical
    * functions listed below
    *
+   * In case of deep referencing attribute e.g. xref.xref2.label, we loop through these attributes and only return
+   * new Attribute(label)
+   *
    * @version 1.0
    * @namespace $
    */
   function $ (attr) {
-    attr = attr
-    return new attribute(this[attr])
+    var attributes = attr.split('\.')
+    var result = this
+
+    for(var i = 0; i < attributes.length && result !== null; i++) {
+      result = result[attributes[i]]
+    }
+    return new Attribute(result)
   }
 
   function newValue (value) {
-    return new attribute(value)
+    return new Attribute(value)
   }
 
   $ = $.bind(entity)
