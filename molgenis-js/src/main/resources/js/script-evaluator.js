@@ -26,13 +26,11 @@ function evalScript (script, entity) {
        *
        */
       value: function () {
-        if(this.val !== null && typeof this.val === 'object') {
-          if(Array.isArray(this.val)) {
-            var result = []
-            for(var i = 0; i < this.val.length; i++) {
-              result.push(this.val[i]['_idValue'])
-            }
-            return result
+        if (this.val !== null && typeof this.val === 'object') {
+          if (Array.isArray(this.val)) {
+            return this.val.map(function(value) {
+              return newValue(value).value()
+            })
           }
           return this.val['_idValue']
         }
@@ -47,7 +45,7 @@ function evalScript (script, entity) {
         try {
           JSON.parse(this.val)
           this.val = true
-        } catch(e) {
+        } catch (e) {
           this.val = false
         }
         return this
@@ -163,14 +161,18 @@ function evalScript (script, entity) {
        * @method map
        */
       map: function (categoryMapping, defaultValue, nullValue) {
-        this.val = this.value()
-        if (this.val in categoryMapping) {
-          this.val = categoryMapping[this.val]
+        if (typeof categoryMapping === 'function') {
+          this.val = this.val.map(newValue).map(categoryMapping)
         } else {
-          if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
-            this.val = nullValue
+          this.val = this.value()
+          if (this.val in categoryMapping) {
+            this.val = categoryMapping[this.val]
           } else {
-            this.val = defaultValue
+            if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
+              this.val = nullValue
+            } else {
+              this.val = defaultValue
+            }
           }
         }
         return this
@@ -431,7 +433,7 @@ function evalScript (script, entity) {
     var attributes = attr.split('\.')
     var result = this
 
-    for(var i = 0; i < attributes.length && result !== null; i++) {
+    for (var i = 0; i < attributes.length && result !== null; i++) {
       result = result[attributes[i]]
     }
     return new Attribute(result)
