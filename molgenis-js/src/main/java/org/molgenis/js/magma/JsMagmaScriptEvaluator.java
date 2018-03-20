@@ -125,10 +125,20 @@ public class JsMagmaScriptEvaluator
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
-				value = stream(mrefEntities.spliterator(), false).map(
-						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
-																 .collect(toList());
+				ScriptObjectMirror jsArray = null;
+				try
+				{
+					jsArray = (ScriptObjectMirror) jsScriptEngine.eval("var arr = []; arr");
+				} catch (javax.script.ScriptException ex) {
+					// ignore
+				}
+
+				@SuppressWarnings("unchecked")
+				List<Object> mrefValues = jsArray.to(List.class);
+				entity.getEntities(attrName)
+					  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
+
+				value = jsArray;
 				break;
 			case DATE:
 				LocalDate localDate = entity.getLocalDate(attrName);
