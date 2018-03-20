@@ -12,6 +12,7 @@ function evalScript (script, entity) {
   var attr = ''
 
   function attribute (value) {
+  function Attribute (value) {
 
     var attribute = {
       /**
@@ -22,11 +23,23 @@ function evalScript (script, entity) {
        * Example: $('Height').value() returns the values of the height
        * attribute
        *
+       * If the value is an object, return the idValue
+       *
        * @memberof $
        * @method value
        *
        */
       value: function () {
+        if(this.val !== null && typeof this.val === 'object') {
+          if(Array.isArray(this.val)) {
+            var result = []
+            for(var i = 0; i < this.val.length; i++) {
+              result.push(this.val[i]['_idValue'])
+            }
+            return result
+          }
+          return this.val['_idValue']
+        }
         return this.val
       },
 
@@ -158,6 +171,7 @@ function evalScript (script, entity) {
        * @method map
        */
       map: function (categoryMapping, defaultValue, nullValue) {
+        this.val = this.value()
         if (this.val in categoryMapping) {
           this.val = categoryMapping[this.val]
         } else {
@@ -243,7 +257,7 @@ function evalScript (script, entity) {
         } else if (_isNull(this.val) && !_isNull(other)) {
           this.val = false
         } else {
-          this.val = (this.val === other)
+          this.val = (this.value() === other)
         }
         return this
       },
@@ -322,7 +336,7 @@ function evalScript (script, entity) {
        * @method gt
        */
       gt: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val > value)
+        this.val = _isNull(this.val) ? false : (this.value() > value)
         return this
       },
       /**
@@ -337,7 +351,7 @@ function evalScript (script, entity) {
        * @method lt
        */
       lt: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val < value)
+        this.val = _isNull(this.val) ? false : (this.value() < value)
         return this
       },
       /**
@@ -353,7 +367,7 @@ function evalScript (script, entity) {
        * @method ge
        */
       ge: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val >= value)
+        this.val = _isNull(this.val) ? false : (this.value() >= value)
         return this
       },
       /**
@@ -368,7 +382,7 @@ function evalScript (script, entity) {
        * @method le
        */
       le: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val <= value)
+        this.val = _isNull(this.val) ? false : (this.value() <= value)
         return this
       },
       /**
