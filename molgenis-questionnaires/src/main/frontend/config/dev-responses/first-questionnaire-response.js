@@ -73,6 +73,14 @@ module.exports = {
             fieldType: 'TEXT',
             visible: true,
             nullableExpression: '$("status").value() !== "SUBMITTED"'
+          },
+          {
+            name: 'ch1_question4',
+            label: 'Question #4 - What is your favorite boolean value ?',
+            description: 'Please share',
+            fieldType: 'BOOL',
+            visible: true,
+            nillable: true
           }
         ]
       },
