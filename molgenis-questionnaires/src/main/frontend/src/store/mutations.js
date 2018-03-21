@@ -42,7 +42,7 @@ const mutations = {
   },
 
   'SET_MAPPER_OPTIONS' (state: QuestionnaireState, mapperOptions: Object) {
-    state.mapperOptions = mapperOptions
+    state.mapperOptions = {...state.mapperOptions, ...mapperOptions}
   },
 
   'SET_ERROR' (state: QuestionnaireState, error: string) {

@@ -32,7 +32,9 @@ const state: QuestionnaireState = {
   /**
    * Option object to be used in the EntityToFormMapper
    */
-  mapperOptions: {},
+  mapperOptions: {
+    showNillableBooleanOption: false
+  },
 
   /**
    * Boolean to block navigation and show reminders
