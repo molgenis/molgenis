@@ -16,6 +16,7 @@ env:
 services:
   - postgresql
 addons:
+  sauce_connect: true
   postgresql: '9.6'
 # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
 sudo: true
