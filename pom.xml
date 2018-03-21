@@ -43,8 +43,13 @@
         <!-- molgenis specific properties -->
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 
-        <!-- code quality monitoring properties -->
+        <!-- artifact publish properties -->
         <sonatype.id>sonatype-nexus-staging</sonatype.id>
+
+        <!-- code quality monitoring properties -->
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>molgenis</sonar.organization>
+        <sonar.github.repository>molgenis/molgenis</sonar.github.repository>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
         <!-- plugin versions -->
