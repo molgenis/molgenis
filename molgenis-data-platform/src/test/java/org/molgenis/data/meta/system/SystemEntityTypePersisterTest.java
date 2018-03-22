@@ -11,9 +11,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemPackage;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -69,8 +67,9 @@ public class SystemEntityTypePersisterTest extends AbstractMockitoTest
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
+		Package meta = mock(MetaPackage.class);
 		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry,
-				entityTypeDependencyResolver, systemPackageRegistry, mutableAclClassService);
+				entityTypeDependencyResolver, systemPackageRegistry, mutableAclClassService, meta);
 	}
 
 	@Test

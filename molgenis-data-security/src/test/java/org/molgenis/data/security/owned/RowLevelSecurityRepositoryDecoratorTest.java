@@ -216,7 +216,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteAll()
 	{
 		Entity entity = getEntityMock();
-		when(delegateRepository.findAll(new QueryImpl<>())).thenAnswer(invocation -> Stream.of(entity));
+		when(delegateRepository.findAll(new QueryImpl<>().pageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.deleteAll();
 
@@ -230,7 +231,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteAllPermissionDenied()
 	{
 		Entity entity = getEntityMock();
-		when(delegateRepository.findAll(new QueryImpl<>())).thenAnswer(invocation -> Stream.of(entity));
+		when(delegateRepository.findAll(new QueryImpl<>().pageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		rowLevelSecurityRepositoryDecorator.deleteAll();
 
 		@SuppressWarnings("unchecked")
@@ -345,7 +347,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testFindAllQuery()
 	{
 		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
+		Query<Entity> query = new QueryImpl<>().pageSize(Integer.MAX_VALUE);
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(query)).thenAnswer(invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
@@ -356,7 +358,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testFindAllQueryPermissionDenied()
 	{
 		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
+		Query<Entity> query = new QueryImpl<>().pageSize(Integer.MAX_VALUE);
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(query)).thenAnswer(invocation -> Stream.of(entity));
 		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(query).collect(toList()), emptyList());
@@ -409,7 +411,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testCount()
 	{
 		Entity entity = getEntityMock();
-		when(delegateRepository.findAll(new QueryImpl<>())).thenAnswer(invocation -> Stream.of(entity));
+		when(delegateRepository.findAll(new QueryImpl<>().pageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), COUNT)).thenReturn(true);
 		assertEquals(rowLevelSecurityRepositoryDecorator.count(), 1L);
 	}
@@ -418,7 +421,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testCountPermissionDenied()
 	{
 		Entity entity = getEntityMock();
-		when(delegateRepository.findAll(new QueryImpl<>())).thenAnswer(invocation -> Stream.of(entity));
+		when(delegateRepository.findAll(new QueryImpl<>().pageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		assertEquals(rowLevelSecurityRepositoryDecorator.count(), 0L);
 	}
 
@@ -426,7 +430,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testCountQuery()
 	{
 		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
+		Query<Entity> query = new QueryImpl<>().pageSize(Integer.MAX_VALUE);
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(query)).thenAnswer(invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), COUNT)).thenReturn(true);
@@ -437,7 +441,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testCountQueryPermissionDenied()
 	{
 		@SuppressWarnings("unchecked")
-		Query<Entity> query = mock(Query.class);
+		Query<Entity> query = new QueryImpl<>().pageSize(Integer.MAX_VALUE);
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(query)).thenAnswer(invocation -> Stream.of(entity));
 		assertEquals(rowLevelSecurityRepositoryDecorator.count(query), 0L);

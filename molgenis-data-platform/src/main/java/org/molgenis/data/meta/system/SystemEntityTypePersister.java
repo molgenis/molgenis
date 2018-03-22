@@ -36,16 +36,18 @@ public class SystemEntityTypePersister
 	private final SystemPackageRegistry systemPackageRegistry;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final MutableAclClassService mutableAclClassService;
+	private final Package metaPackage;
 
 	SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry,
 			EntityTypeDependencyResolver entityTypeDependencyResolver, SystemPackageRegistry systemPackageRegistry,
-			MutableAclClassService mutableAclClassService)
+			MutableAclClassService mutableAclClassService, Package metaPackage)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
+		this.metaPackage = requireNonNull(metaPackage);
 	}
 
 	public void persist()
@@ -78,9 +80,20 @@ public class SystemEntityTypePersister
 		});
 		dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
 
+		//move metadata entities to the correct package
+		systemEntityTypeRegistry.getSystemEntityTypes()
+								.filter(MetaDataService::isMetaEntityType)
+								.forEach(this::setMetadataPackage);
+
 		// remove non-existing metadata
 		removeNonExistingSystemEntityTypes();
 		removeNonExistingSystemPackages();
+	}
+
+	private void setMetadataPackage(EntityType entityType)
+	{
+		entityType.setPackage(metaPackage);
+		dataService.getMeta().updateEntityType(entityType);
 	}
 
 	private void persistMetadataMetadata()
@@ -97,11 +110,13 @@ public class SystemEntityTypePersister
 		{
 			if (!metadataRepoCollection.hasRepository(metaEntityType))
 			{
+				//remove package from metadata entities otherwise we try to create package ACL's for the metadata packages before they are created
+				//package is added again in the persist() method
+				metaEntityType.setPackage(null);
 				metadataRepoCollection.createRepository(metaEntityType);
 			}
 		});
 	}
-
 	/**
 	 * Package-private for testability
 	 */

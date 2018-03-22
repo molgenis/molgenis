@@ -63,7 +63,7 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 		when(mutableAclService.readAclById(new PackageIdentity(entityTypePackage))).thenReturn(parentAcl);
 		repositoryCollectionSecurityDecorator.createRepository(entityType);
 
-		verify(acl).insertAce(0, new CumulativePermission().set(CREATE).set(WRITEMETA).set(WRITE).set(READ).set(COUNT),
+		verify(acl).insertAce(0, new CumulativePermission().set(WRITEMETA).set(WRITE).set(READ).set(COUNT),
 				new PrincipalSid(USERNAME), true);
 		verify(acl).setParent(parentAcl);
 		verify(mutableAclService).updateAcl(acl);
@@ -79,7 +79,7 @@ public class RepositoryCollectionSecurityDecoratorTest extends AbstractMockitoTe
 		when(mutableAclService.createAcl(new RepositoryIdentity(entityType))).thenReturn(acl);
 		repositoryCollectionSecurityDecorator.createRepository(entityType);
 
-		verify(acl).insertAce(0, new CumulativePermission().set(CREATE).set(WRITEMETA).set(WRITE).set(READ).set(COUNT),
+		verify(acl).insertAce(0, new CumulativePermission().set(WRITEMETA).set(WRITE).set(READ).set(COUNT),
 				new PrincipalSid(USERNAME), true);
 		verify(mutableAclService).updateAcl(acl);
 		verify(delegateRepositoryCollection).createRepository(entityType);

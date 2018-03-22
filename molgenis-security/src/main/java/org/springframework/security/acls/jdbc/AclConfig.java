@@ -6,6 +6,7 @@ import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.acl.AclCacheTransactionListener;
 import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
+import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.cache.Cache;
@@ -33,7 +34,7 @@ import static java.util.Objects.requireNonNull;
  * TODO move to org.molgenis sub-package once we upgraded to a spring-security-acl release with https://github.com/spring-projects/spring-security/issues/4814.
  */
 @Configuration
-@Import(DataSourceConfig.class)
+@Import({ DataSourceConfig.class, MutableAclClassServiceImpl.class })
 public class AclConfig
 {
 	private final DataSource dataSource;

@@ -13,7 +13,6 @@ import org.springframework.security.acls.model.*;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.RepositoryPermission.CREATE;
 import static org.molgenis.data.security.RepositoryPermission.WRITEMETA;
 import static org.molgenis.data.security.RepositoryPermissionUtils.getCumulativePermission;
 
@@ -83,18 +82,11 @@ public class RepositoryCollectionSecurityDecorator extends AbstractRepositoryCol
 		if (package_ != null)
 		{
 			ObjectIdentity objectIdentity = new PackageIdentity(package_);
-			try
-			{
-				Acl parentAcl = mutableAclService.readAclById(objectIdentity);
-				acl.setParent(parentAcl);
-			}
-			catch (NotFoundException e)
-			{
-				LOG.error("FIXME SystemEntityTypePersister.persistMetadataMetadata is called before packages exist");
-			}
+			Acl parentAcl = mutableAclService.readAclById(objectIdentity);
+			acl.setParent(parentAcl);
 		}
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
-		acl.insertAce(acl.getEntries().size(), getCumulativePermission(CREATE), sid, true);
+		acl.insertAce(acl.getEntries().size(), getCumulativePermission(WRITEMETA), sid, true);
 		mutableAclService.updateAcl(acl);
 	}
 

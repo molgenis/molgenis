@@ -1,5 +1,8 @@
 package org.molgenis.integrationtest.platform;
 
+import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityPermission;
 import org.molgenis.data.security.RepositoryIdentity;
 import org.molgenis.data.security.RepositoryPermission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -38,6 +41,12 @@ public class TestPermissionPopulator
 			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new RepositoryIdentity(entityTypeId));
 			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
 			mutableAclService.updateAcl(acl);
+
+			//RLS permission on entityType
+			MutableAcl rlsAcl = (MutableAcl) mutableAclService.readAclById(
+					new EntityIdentity(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityTypeId));
+			rlsAcl.insertAce(rlsAcl.getEntries().size(), EntityPermission.READ, sid, true);
+			mutableAclService.updateAcl(rlsAcl);
 		}));
 	}
 }
