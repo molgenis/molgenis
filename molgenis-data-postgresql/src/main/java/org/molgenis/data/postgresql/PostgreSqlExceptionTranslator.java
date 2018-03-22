@@ -101,6 +101,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	{
 		switch (pSqlException.getSQLState())
 		{
+			case "22001":
+				return translateValueTooLongViolation();
 			case "22007": // invalid_datetime_format
 			case "22P02": // not an integer exception
 				return translateInvalidIntegerException(pSqlException);
@@ -121,6 +123,17 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			default:
 				return null;
 		}
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @return translated validation exception
+	 */
+	MolgenisValidationException translateValueTooLongViolation()
+	{
+		ConstraintViolation constraintViolation = new ConstraintViolation("One of the values being added is too long.");
+		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
 	/**
