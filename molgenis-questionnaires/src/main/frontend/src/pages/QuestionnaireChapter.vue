@@ -39,6 +39,12 @@
                   </chapter-form>
                 </div>
 
+                <!-- ================ ERROR BLOCK ================ -->
+                <div v-if="navigationBlocked" class="alert alert-warning mb-0" role="alert">
+                  {{ 'questionnaire_chapter_incomplete_message' | i18n }}
+                  <a v-for="(value, key) in formState.$error" :href="'#' + key">{{ key }} </a>
+                </div>
+
                 <!-- ================ CARD FOOTER ================ -->
                 <div class="card-footer">
                   <chapter-navigation
@@ -62,17 +68,6 @@
                 <div v-if="error" class="alert alert-warning mt-2" role="alert">
                   {{ error }}
                 </div>
-
-                <div v-if="navigationBlocked" class="alert alert-warning mt-2" role="alert">
-                  {{ 'questionnaire_chapter_incomplete_message' | i18n }}
-
-                  <ul class="list-unstyled">
-                    <li v-for="(value, key) in formState.$error">
-                      <a :href="'#' + key">{{ key }}</a>
-                    </li>
-                  </ul>
-                </div>
-
               </div>
             </div>
           </div>
@@ -141,9 +136,6 @@
     },
     beforeRouteUpdate (to, from, next) {
       this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
-      this.$store.commit('SET_ERROR', '')
-      this.$store.commit('BLOCK_NAVIGATION', false)
-      this.formState._reset()
       next()
     },
     components: {

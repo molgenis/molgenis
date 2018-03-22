@@ -80,12 +80,20 @@
       }
     },
     methods: {
+      clearStateAfterSuccessfulNavigation () {
+        this.$store.commit('BLOCK_NAVIGATION', false)
+        this.$store.commit('SET_ERROR', '')
+        this.formState._reset()
+      },
+
       navigateToNextChapter () {
         this.$router.push('/' + this.questionnaireId + '/chapter/' + this.nextChapterNumber)
+        this.clearStateAfterSuccessfulNavigation()
       },
 
       navigateToPreviousChapter () {
         this.$router.push('/' + this.questionnaireId + '/chapter/' + this.previousChapterNumber)
+        this.clearStateAfterSuccessfulNavigation()
       },
 
       /**
