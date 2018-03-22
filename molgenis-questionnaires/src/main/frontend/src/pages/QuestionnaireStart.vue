@@ -19,10 +19,10 @@
 
           <h5 class="display-4">{{ questionnaireLabel }}</h5>
           <p v-html="questionnaireDescription"></p>
-          <router-link class="btn btn-lg btn-primary mt-2 float-right"
-                       :to="'/' + questionnaireId + '/chapter/1'">
+
+          <button class="btn btn-lg btn-primary mt-2 float-right" @click="startQuestionnaire">
             {{ 'questionnaire_start' | i18n }}
-          </router-link>
+          </button>
         </template>
 
       </div>
@@ -36,6 +36,12 @@
   export default {
     name: 'QuestionnaireStart',
     props: ['questionnaireId'],
+    methods: {
+      startQuestionnaire () {
+        this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId)
+        this.$router.push('/' + this.questionnaireId + '/chapter/1')
+      }
+    },
     computed: {
       loading () {
         return this.$store.state.loading
@@ -51,8 +57,7 @@
       }
     },
     created () {
-      this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId)
-
+      this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
       if (!this.$store.state.mapperOptions.booleanLabels) {
         const mapperOptions = {
           booleanLabels: {
