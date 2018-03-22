@@ -40,9 +40,6 @@
                     <div class="form-group">
                         <button type="submit" class="btn btn-default pull-right">Save</button>
                     </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-default pull-right">Save</button>
-                    </div>
                 </form>
             </div>
             <div class="tab-pane" id="package-user-permission-manager">
