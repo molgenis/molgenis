@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_QuestionnaireResponse.class)
+@SuppressWarnings("squid:S1610")
 public abstract class QuestionnaireResponse
 {
 	public abstract String getId();
