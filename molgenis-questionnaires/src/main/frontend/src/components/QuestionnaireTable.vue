@@ -39,7 +39,7 @@
             <router-link v-if="questionnaire.status === 'SUBMITTED'" target="_blank"
                          :to="'/' + questionnaire.id + '/overview'"
                          class="btn btn-primary">
-              {{ 'questionnaires_view_questionnaire' | i18n }}
+              {{ 'questionnaires_view_overview' | i18n }}
             </router-link>
 
             <router-link v-else :to="'/' + questionnaire.id" class="btn btn-primary">
