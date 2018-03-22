@@ -398,6 +398,9 @@ public class PermissionManagerController extends PluginController
 	{
 		ObjectIdentity objectIdentity = new RepositoryIdentity(entityType);
 		removePermissionForSid(sid, objectIdentity);
+
+		//RLS permission on entityType
+		removePermissionForSid(sid, new EntityIdentity(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId()));
 	}
 
 	private void createSidEntityTypePermission(EntityType entityType, Sid sid,
@@ -406,6 +409,10 @@ public class PermissionManagerController extends PluginController
 		ObjectIdentity objectIdentity = new RepositoryIdentity(entityType);
 		createSidPermission(sid, objectIdentity,
 				RepositoryPermissionUtils.getCumulativePermission(entityTypePermission));
+
+		//RLS permission on entityType
+		createSidPermission(sid, new EntityIdentity(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId()),
+				RepositoryPermissionUtils.getRlsEntityTypePermission(entityTypePermission));
 	}
 
 	private void createSidPackagePermission(Package package_, Sid sid, RepositoryPermission entityTypePermission)

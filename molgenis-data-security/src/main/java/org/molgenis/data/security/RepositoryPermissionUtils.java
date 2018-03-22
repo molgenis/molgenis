@@ -1,6 +1,7 @@
 package org.molgenis.data.security;
 
 import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.Permission;
 
 public class RepositoryPermissionUtils
 {
@@ -35,5 +36,19 @@ public class RepositoryPermissionUtils
 		}
 
 		return cumulativePermission;
+	}
+
+	public static Permission getRlsEntityTypePermission(RepositoryPermission permission)
+	{
+		RepositoryPermission rlsPermission;
+		if (permission.equals(RepositoryPermission.WRITEMETA))
+		{
+			rlsPermission = RepositoryPermission.WRITE;
+		}
+		else
+		{
+			rlsPermission = RepositoryPermission.READ;
+		}
+		return rlsPermission;
 	}
 }
