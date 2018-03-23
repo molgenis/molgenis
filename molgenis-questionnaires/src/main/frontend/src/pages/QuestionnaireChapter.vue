@@ -45,6 +45,10 @@
                   <a v-for="(value, key) in formState.$error" :href="'#' + key">{{ key }} </a>
                 </div>
 
+                <div v-if="error" class="alert alert-warning mb-0" role="alert">
+                  {{ error }}
+                </div>
+
                 <!-- ================ CARD FOOTER ================ -->
                 <div class="card-footer">
                   <chapter-navigation
@@ -72,10 +76,6 @@
                 <span v-else-if="!saving && !formState.$pristine" class="text-muted">
                   {{ 'questionnaire_changes_saved' | i18n }}
                 </span>
-
-                <div v-if="error" class="alert alert-warning mt-2" role="alert">
-                  {{ error }}
-                </div>
               </div>
             </div>
           </div>
@@ -144,6 +144,7 @@
     },
     beforeRouteUpdate (to, from, next) {
       this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
+      this.$store.commit('SET_ERROR', '')
       next()
     },
     components: {

@@ -8,9 +8,14 @@ const handleError = (commit: Function, error: Error) => {
   commit('SET_LOADING', false)
 }
 
+const cleanScreen = (commit: Function) => {
+  commit('SET_ERROR', '')
+  commit('SET_LOADING', true)
+}
+
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}: VuexContext) {
-    commit('SET_LOADING', true)
+    cleanScreen(commit)
     return api.get('/menu/plugins/questionnaires/list').then(response => {
       commit('SET_QUESTIONNAIRE_LIST', response)
       commit('SET_LOADING', false)
@@ -26,10 +31,10 @@ const actions = {
   },
 
   'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string) {
+    cleanScreen(commit)
+
     const currentQuestionnaireId = getters.getQuestionnaireId
     if (currentQuestionnaireId !== questionnaireId) {
-      commit('SET_LOADING', true)
-
       return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
         commit('SET_QUESTIONNAIRE', response)
 
@@ -47,10 +52,11 @@ const actions = {
         handleError(commit, error)
       })
     }
+    commit('SET_LOADING', false)
   },
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
-    commit('SET_LOADING', true)
+    cleanScreen(commit)
     return api.get(`/api/v2/${questionnaireId}`).then(response => {
       commit('SET_QUESTIONNAIRE', response)
       commit('SET_LOADING', false)
@@ -60,7 +66,7 @@ const actions = {
   },
 
   'GET_SUBMISSION_TEXT' ({commit}: VuexContext, questionnaireId: string) {
-    commit('SET_LOADING', true)
+    cleanScreen(commit)
     return api.get(`/menu/plugins/questionnaires/submission-text/${questionnaireId}`).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
       commit('SET_LOADING', false)
