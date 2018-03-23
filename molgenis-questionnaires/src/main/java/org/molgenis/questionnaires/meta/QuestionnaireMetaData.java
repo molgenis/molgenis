@@ -32,7 +32,7 @@ public class QuestionnaireMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Questionnaire");
+		setLabel(SIMPLE_NAME);
 		setAbstract(true);
 
 		List<String> enumOptions = new ArrayList<>();
