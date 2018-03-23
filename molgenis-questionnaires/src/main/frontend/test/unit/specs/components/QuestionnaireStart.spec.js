@@ -2,6 +2,7 @@ import QuestionnaireStart from 'src/pages/QuestionnaireStart'
 import { createLocalVue, shallow } from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
+import VueRouter from 'vue-router'
 
 const $t = (key) => {
   const translations = {
@@ -42,6 +43,7 @@ describe('QuestionnaireStart component', () => {
     }
 
     actions = {
+      GET_QUESTIONNAIRE: td.function(),
       START_QUESTIONNAIRE: td.function()
     }
 
@@ -56,9 +58,9 @@ describe('QuestionnaireStart component', () => {
   const mocks = {$t: $t}
   const propsData = {questionnaireId: 'test_quest'}
 
-  it('should dispatch the [START_QUESTIONNAIRE] action on created', () => {
+  it('should dispatch the [GET_QUESTIONNAIRE] action on created', () => {
     shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
-    td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
+    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })
 
   it('should dispatch a mutation to set mapperOptions', () => {
@@ -92,5 +94,13 @@ describe('QuestionnaireStart component', () => {
   it('should return loading from the store', () => {
     const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
     expect(wrapper.vm.loading).to.equal(true)
+  })
+
+  it('should dispatch the [START_QESTIONNAIRE] action when startQuestionnaire method is called', () => {
+    const router = new VueRouter()
+
+    const wrapper = shallow(QuestionnaireStart, {propsData, store, stubs, router, localVue, mocks})
+    wrapper.vm.startQuestionnaire()
+    td.verify(actions.START_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })
 })

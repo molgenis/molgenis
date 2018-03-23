@@ -42,7 +42,7 @@ module.exports = {
     // ===== selectors =====
     var firstRowViewButton = 'table > tbody > tr:nth-child(1) > td:nth-child(3) > a'
     var backToQuestionnairesListButton = 'a.btn.btn-sm.btn-outline-secondary.mt-2.router-link-active'
-    var startQuestionnaireButton = 'a.btn.btn-lg.btn-primary.mt-2.float-right'
+    var startQuestionnaireButton = 'body > div > div > div > button'
     var questionnaireLabelElement = 'h5'
     var questionnaireDescriptionElement = 'p'
 
@@ -66,7 +66,7 @@ module.exports = {
     browser.options.desiredCapabilities.name = 'load the first chapter when the start questionnaire button is clicked'
 
     // ===== selectors =====
-    var startQuestionnaireButton = 'a.btn.btn-lg.btn-primary.mt-2.float-right'
+    var startQuestionnaireButton = 'body > div > div > div > button'
     var backToStartButton = 'body > div > div > div > div:nth-child(1) > div > a'
     var nextChapterButton = 'div.card-footer > div > div:nth-child(2) > button'
     var currentChapterSpan = 'body > div > div > div > div:nth-child(2) > div.col-xs-12.col-sm-12.col-md-12.col-lg-9.col-xl-9 > div > div.card-header > div'

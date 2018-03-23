@@ -31,9 +31,7 @@ describe('QuestionnaireChapter component', () => {
     localVue.filter('i18n', $t)
 
     actions = {
-      AUTO_SAVE_QUESTIONNAIRE: td.function(),
-      GET_QUESTIONNAIRE: td.function(),
-      SUBMIT_QUESTIONNAIRE: td.function()
+      GET_QUESTIONNAIRE: td.function()
     }
 
     getters = {
@@ -64,7 +62,7 @@ describe('QuestionnaireChapter component', () => {
   const mocks = {$t: $t}
   const propsData = {chapterId: 1, questionnaireId: 'test_quest'}
 
-  it('should dispatch the [GET_QUESTIONNAIRE] action when no chapterFields are present in the state', () => {
+  it('should dispatch the [GET_QUESTIONNAIRE] when created', () => {
     shallow(QuestionnaireChapter, {propsData, store, mocks, stubs, localVue})
     td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
   })

@@ -112,26 +112,15 @@ describe('actions', () => {
   })
 
   describe('START_QUESTIONNAIRE', () => {
-    it('should clear state when current questionnaire is different then the one being called', done => {
-      const questionnaireId = 'other_test_quest'
-      mockApiGetSuccess('/menu/plugins/questionnaires/start/other_test_quest', 'OK')
-
-      const expectedMutations = [{type: 'CLEAR_STATE'}]
-      const state = {
-        chapterFields: ['chapter']
-      }
-
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
-    })
-
-    it('should dispatch a [GET_QUESTIONNAIRE] action', done => {
+    it('should call the start questionnaire uri', done => {
       const questionnaireId = 'test_quest'
       mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', 'OK')
+      const response = actions.START_QUESTIONNAIRE({}, questionnaireId)
 
-      const expectedActions = [{type: 'GET_QUESTIONNAIRE', payload: questionnaireId}]
-      const state = {chapterFields: []}
-
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, [], expectedActions, done)
+      response.then(actual => {
+        expect(actual).to.equal('OK')
+        done()
+      })
     })
 
     it('should commit any errors to the store', done => {
@@ -150,7 +139,7 @@ describe('actions', () => {
 
   describe('GET_QUESTIONNAIRE', () => {
     it('should [GET] a questionnaire and store data in the state', done => {
-      const questionnaireId = 'test_quest'
+      const questionnaireId = 'other_test_quest'
       const questionnaire = {
         meta: {
           label: 'Test Questionnaire',
@@ -160,7 +149,7 @@ describe('actions', () => {
         items: []
       }
 
-      mockApiGetSuccess('/api/v2/test_quest?includeCategories=true', questionnaire)
+      mockApiGetSuccess('/api/v2/other_test_quest?includeCategories=true', questionnaire)
 
       const generatedForm = {
         formFields: [
@@ -219,9 +208,9 @@ describe('actions', () => {
     })
 
     it('should commit any errors to the store', done => {
-      const questionnaireId = 'test_quest'
+      const questionnaireId = 'other_test_quest'
       const error = 'error'
-      mockApiGetError('/api/v2/test_quest?includeCategories=true', error)
+      mockApiGetError('/api/v2/other_test_quest?includeCategories=true', error)
 
       const expectedMutations = [
         {type: 'SET_ERROR', payload: error},

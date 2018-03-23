@@ -63,7 +63,7 @@ describe('ChapterNavigation component', () => {
   const propsData = {
     chapterId: 3,
     currentChapter: {id: 'chapter1'},
-    formState: {_submit: () => true},
+    formState: {_submit: () => true, _reset: () => true},
     questionnaireId: 'test_quest'
   }
 
