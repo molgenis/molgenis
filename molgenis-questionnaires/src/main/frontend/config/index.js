@@ -3,7 +3,6 @@
 // see http://vuejs-templates.github.io/webpack for documentation.
 
 const path = require('path')
-const sleep = require('sleep')
 const questionnaireList = require('./dev-responses/questionnaire-list.js')
 const localizedMessages = require('./dev-responses/localized-messages.js')
 const firstQuestionnaireResponse = require('./dev-responses/first-questionnaire-response.js')
@@ -83,7 +82,6 @@ module.exports = {
       })
 
       app.put('/api/v1/*', function (req, res) {
-        sleep.msleep(3000);
         res.json('OK')
       })
 
