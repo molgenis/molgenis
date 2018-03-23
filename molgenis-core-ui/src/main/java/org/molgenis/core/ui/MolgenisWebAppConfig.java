@@ -256,7 +256,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	public FileStore fileStore()
 	{
 		// get molgenis home directory
-		String molgenisHomeDir = System.getProperty(MOLGENIS_HOME);
+		String molgenisHomeDir = System.getenv(MOLGENIS_HOME);
 		if (molgenisHomeDir == null)
 		{
 			throw new IllegalArgumentException(
