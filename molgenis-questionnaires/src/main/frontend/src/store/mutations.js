@@ -17,6 +17,10 @@ const mutations = {
     state.submissionText = ''
   },
 
+  'SAVING_INPUT' (state: QuestionnaireState, saving: boolean) {
+    state.saving = saving
+  },
+
   'SET_QUESTIONNAIRE' (state: QuestionnaireState, questionnaire: Object) {
     state.questionnaire = questionnaire
   },

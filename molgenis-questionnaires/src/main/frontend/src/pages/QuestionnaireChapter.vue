@@ -65,6 +65,14 @@
                   :questionnaireId="questionnaireId">
                 </chapter-list>
 
+                <span v-if="saving && !formState.$pristine" class="text-muted">
+                  {{ 'questionnaire_saving_changes' | i18n }} <i class="fa fa-spinner fa-spin"></i>
+                </span>
+
+                <span v-else-if="!saving && !formState.$pristine" class="text-muted">
+                  {{ 'questionnaire_changes_saved' | i18n }}
+                </span>
+
                 <div v-if="error" class="alert alert-warning mt-2" role="alert">
                   {{ error }}
                 </div>
@@ -109,6 +117,9 @@
       },
       loading () {
         return this.$store.state.loading
+      },
+      saving () {
+        return this.$store.state.saving
       },
       navigationBlocked () {
         const errors = this.formState.$error && Object.keys(this.formState.$error).length > 0

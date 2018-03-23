@@ -56,6 +56,11 @@ const state: QuestionnaireState = {
   questionnaireRowId: '',
 
   /**
+   * Auto save indicator
+   */
+  saving: false,
+
+  /**
    * Submission text shown after completing a questionnaire
    */
   submissionText: ''
