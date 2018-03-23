@@ -13,82 +13,57 @@ You can perform the following steps to get your app in the App store.
 
 ## Create a project
 You can create a javascript project in a language you like. 
-We develop our own apps in VUE so most documentation will point out the VUE-configuration.
+We develop our own apps in VueJS so most documentation will point to the VueJS-configuration.
 
 ## Update your build configuration
-You must update build configuration to build a zip-file which you can upload in MOLGENIS. 
-At the moment we only describe how to do this in webpack.
+You must update your build configuration to build a zip-file which you can upload in MOLGENIS. 
 
 ### webpack
-In your config/index.js
+In your webpack production build configuration
 
-```
- assetsRoot: path.resolve(__dirname, '../dist/static'),
- assetsSubDirectory: '',
- assetsPublicPath: '/apps/${app.id}',
- 
- /**
-  * Source Maps
-  */
- 
- productionSourceMap: true,
- // https://webpack.js.org/configuration/devtool/#production
- devtool: '#eval-source-map',
+```js
+  ...
+  assetsRoot: path.resolve(__dirname, '../dist/static'),
+  assetsSubDirectory: '',
+  assetsPublicPath: '/apps/${app.id}',
+  ...
 ```
 
 ## Update your language specific configuration
-You have to update some  configuration in your app to make it work in MOLGENIS. 
-We now only describe how to do this in VUE.
+You have to update some configuration in your app to make it work in MOLGENIS. 
 
-### VUE
+### VueJS
 
 - Add the following code-snippet in src/main.js
 
-```
+```js
+...
 if (window.__webpack_public_path__) {
   /* eslint-disable no-undef, camelcase */
   __webpack_public_path__ = window.__webpack_public_path__
   /* eslint-enable */
 }
+...
 ```
 
 - Add the following code-snippet in src/router/index.js
 
-```
+```js
 ...
 const {baseUrl} = window.__INITIAL_STATE__ || {}
 
 export default new Router({
   mode: 'history',
   base: baseUrl,
-  routes: [
-    {
-      path: '/lifecycle',
-      component: LifeCycleCatalogue
-    },
 ...
 ```     
-     
-```
-...
-  {
-    path: '/',
-    redirect: '/lifecycle'
-  }
-...
-```
 
 ## Create a freemarker-template
-```
+```html
 <!DOCTYPE html><html>
   <head>
     <meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-    <script src=https://code.jquery.com/jquery-3.2.1.slim.min.js integrity=#hash# crossorigin=anonymous></script>
-    <script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js integrity=#hash# crossorigin=anonymous></script>
-    <script src=https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js integrity=#hash# crossorigin=anonymous></script>
-    <link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css integrity=#hash# crossorigin=anonymous>
-    <link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css>
-    <title>molgenis-app-lifecycle</title>
+    <title>#molgenis-app#</title>
     <link href=/apps/${app.id}/css/app.#hash#.css rel=stylesheet>
   </head>
   <body>
@@ -120,11 +95,12 @@ You can now upload your app in MOLGENIS.
 - Upload the zip-file
 - Add the freemarker-template to the app
 
-## Active the app
+## Activate the app
 When you uploaded the app you can activate it in the App store. It can now be used in the menu for exmaple.
 
 - Go to Plugins --> App store
 - Click on activate on the uploaded app
 - Go to Admin --> Menu manager
-- Select the app and put it into the menu
+- Create redirect plugin with an URL to the app
+- Select the plugin and put it into the menu
 
