@@ -150,15 +150,15 @@ public class EntityTypeValidator
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not part of the entity attributes", entityType.getId(),
-								ownIdAttr.getName())));
+						format("EntityType [%s] ID attribute [%s] is not part of the entity attributes",
+								entityType.getId(), ownIdAttr.getName())));
 			}
 
 			// Validate that ID attribute data type is allowed
 			if (!AttributeUtils.isIdAttributeTypeAllowed(ownIdAttr))
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] type [%s] is not allowed", entityType.getId(),
+						format("EntityType [%s] ID attribute [%s] type [%s] is not allowed", entityType.getId(),
 								ownIdAttr.getName(), ownIdAttr.getDataType().toString())));
 			}
 
@@ -166,7 +166,7 @@ public class EntityTypeValidator
 			if (!ownIdAttr.isUnique())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a unique attribute", entityType.getId(),
+						format("EntityType [%s] ID attribute [%s] is not a unique attribute", entityType.getId(),
 								ownIdAttr.getName())));
 			}
 
@@ -174,8 +174,16 @@ public class EntityTypeValidator
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Entity [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
+						format("EntityType [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
 								ownIdAttr.getName())));
+			}
+
+			// Validate that there is a label if the ID attribute is hidden
+			if (!ownIdAttr.isVisible() && entityType.getLabelAttribute() == null)
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("The ID attribute of EntityType [%s] can not be hidden because there is no label attribute specified",
+								entityType.getId())));
 			}
 		}
 		else

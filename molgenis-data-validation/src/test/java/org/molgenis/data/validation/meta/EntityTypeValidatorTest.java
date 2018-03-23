@@ -217,6 +217,14 @@ public class EntityTypeValidatorTest
 		entityTypeValidator.validate(entityType);
 	}
 
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "The ID attribute of EntityType \\[package_name\\] can not be hidden because there is no label attribute specified")
+	public void testValidateOwnIdAttributeHiddenNoLabel()
+	{
+		when(entityType.getLabel()).thenReturn(null);
+		when(idAttr.isVisible()).thenReturn(false);
+		entityTypeValidator.validate(entityType);
+	}
+
 	@Test
 	public void testValidateOwnIdAttributeNullIdAttributeNullAbstract()
 	{

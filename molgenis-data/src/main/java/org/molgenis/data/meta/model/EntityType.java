@@ -303,7 +303,7 @@ public class EntityType extends StaticEntity implements Labeled
 	}
 
 	/**
-	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
+	 * Attribute that is used as unique label. If no label exist, returns null.
 	 *
 	 * @return label attribute
 	 */
