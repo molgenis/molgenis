@@ -91,6 +91,7 @@ describe('actions', () => {
       mockApiGetSuccess('/menu/plugins/questionnaires/list', questionnaireList)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE_LIST', payload: questionnaireList},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -103,6 +104,7 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/list', error)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -197,6 +199,7 @@ describe('actions', () => {
       }]
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
         {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: 'id'},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
@@ -213,6 +216,7 @@ describe('actions', () => {
       mockApiGetError('/api/v2/other_test_quest?includeCategories=true', error)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -228,6 +232,7 @@ describe('actions', () => {
       mockApiGetSuccess('/api/v2/test_quest', questionnaire)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -241,6 +246,7 @@ describe('actions', () => {
       mockApiGetError('/api/v2/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -256,6 +262,7 @@ describe('actions', () => {
       mockApiGetSuccess('/menu/plugins/questionnaires/submission-text/test_quest', submissionText)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_SUBMISSION_TEXT', payload: submissionText},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -269,6 +276,7 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/submission-text/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
