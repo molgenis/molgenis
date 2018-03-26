@@ -34,6 +34,7 @@
         - [RSQL operators](developer_documentation/ref-RSQL.md)
         - [Swagger specification](developer_documentation/ref-swagger.md)
     - [FAIR](developer_documentation/guide-fair.md)
+    - [App development](developer_documentation/app-development.md)
     - [Frontend development](developer_documentation/frontend-development.md)
     - [R api](developer_documentation/ref-R.md)
     - [Python api](developer_documentation/ref-python.md)

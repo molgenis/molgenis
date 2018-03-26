@@ -26,7 +26,7 @@ public class EntityIdentityUtils
 	/**
 	 * Returns the domain object type for the given entity type identifier.
 	 */
-	static String toType(String entityTypeId)
+	public static String toType(String entityTypeId)
 	{
 		return TYPE_PREFIX + '-' + entityTypeId;
 	}

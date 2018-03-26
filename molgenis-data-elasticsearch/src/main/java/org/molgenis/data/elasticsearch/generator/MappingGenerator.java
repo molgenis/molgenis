@@ -48,44 +48,10 @@ class MappingGenerator
 	{
 		String fieldName = documentIdGenerator.generateId(attribute);
 		MappingType mappingType = toMappingType(attribute, depth, maxDepth);
-		boolean analyzeNGrams = isAnalyzeNGrams(attribute);
 		List<FieldMapping> nestedFieldMappings =
 				mappingType == MappingType.NESTED ? createFieldMappings(attribute.getRefEntity(), depth + 1,
 						maxDepth) : null;
-		return FieldMapping.create(fieldName, mappingType, analyzeNGrams, nestedFieldMappings);
-	}
-
-	private boolean isAnalyzeNGrams(Attribute attribute)
-	{
-		AttributeType attributeType = attribute.getDataType();
-		switch (attributeType)
-		{
-			case BOOL:
-			case CATEGORICAL:
-			case CATEGORICAL_MREF:
-			case DATE:
-			case DATE_TIME:
-			case DECIMAL:
-			case FILE:
-			case HTML:
-			case HYPERLINK:
-			case INT:
-			case LONG:
-			case MREF:
-			case ONE_TO_MANY:
-			case SCRIPT:
-			case XREF:
-				return false;
-			case EMAIL:
-			case ENUM:
-			case STRING:
-			case TEXT:
-				return true;
-			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type '%s'", attributeType));
-			default:
-				throw new UnexpectedEnumException(attributeType);
-		}
+		return FieldMapping.create(fieldName, mappingType, nestedFieldMappings);
 	}
 
 	private MappingType toMappingType(Attribute attribute, int depth, int maxDepth)

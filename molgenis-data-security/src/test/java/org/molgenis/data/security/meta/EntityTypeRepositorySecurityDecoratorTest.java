@@ -10,6 +10,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.model.MutableAclService;
@@ -45,14 +46,15 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private UserPermissionEvaluator permissionService;
 	@Mock
 	private MutableAclService mutableAclService;
-
+	@Mock
+	private MutableAclClassService mutableAclClassService;
 	private EntityTypeRepositorySecurityDecorator repo;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
-				permissionService, mutableAclService);
+				permissionService, mutableAclService, mutableAclClassService);
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -536,6 +538,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType.getId()).thenReturn("entityTypeId").getMock();
 		repo.delete(entityType);
 		verify(mutableAclService).deleteAcl(new EntityTypeIdentity(entityTypeId), true);
+		verify(mutableAclClassService).deleteAclClass("entity-" + entityTypeId);
 		verify(delegateRepository).delete(entityType);
 	}
 

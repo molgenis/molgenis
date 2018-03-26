@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 public interface FieldConstants
 {
 	String FIELD_NOT_ANALYZED = "raw";
-	String FIELD_NGRAM_ANALYZED = "ngram";
 	String DEFAULT_ANALYZER = "default";
 	String NGRAM_ANALYZER = "ngram_analyzer";
 	String AGGREGATION_MISSING_POSTFIX = "_missing";

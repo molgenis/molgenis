@@ -90,22 +90,6 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		return dataItems.iterator();
 	}
 
-	@Test(dataProvider = "createMappingProviderAnalyzeNGrams")
-	public void testCreateMappingAnalyzeNGrams(AttributeType attributeType)
-	{
-		String attrIdentifier = "attr";
-		EntityType entityType = createEntityType(attrIdentifier, attributeType);
-		Mapping mapping = mappingGenerator.createMapping(entityType);
-
-		FieldMapping fieldMapping = FieldMapping.builder()
-												.setName(attrIdentifier)
-												.setType(MappingType.TEXT)
-												.setAnalyzeNGrams(true)
-												.build();
-		Mapping expectedMapping = createMapping(fieldMapping);
-		assertEquals(mapping, expectedMapping);
-	}
-
 	@DataProvider(name = "createMappingProviderNested")
 	public static Iterator<Object[]> createMappingProviderNested()
 	{

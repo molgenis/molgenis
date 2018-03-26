@@ -6,10 +6,12 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
+import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
@@ -40,15 +42,17 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final UserPermissionEvaluator permissionService;
 	private final MutableAclService mutableAclService;
+	private final MutableAclClassService mutableAclClassService;
 
 	public EntityTypeRepositorySecurityDecorator(Repository<EntityType> delegateRepository,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
-			MutableAclService mutableAclService)
+			MutableAclService mutableAclService, MutableAclClassService mutableAclClassService)
 	{
 		super(delegateRepository);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
 		this.mutableAclService = requireNonNull(mutableAclService);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	@Override
@@ -306,6 +310,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRepositoryDec
 	private void deleteEntityPermissions(String entityTypeId)
 	{
 		mutableAclService.deleteAcl(new EntityTypeIdentity(entityTypeId), true);
+		mutableAclClassService.deleteAclClass(EntityIdentityUtils.toType(entityTypeId));
 	}
 
 	@Override

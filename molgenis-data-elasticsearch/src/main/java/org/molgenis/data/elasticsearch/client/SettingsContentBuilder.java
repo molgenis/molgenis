@@ -16,7 +16,6 @@ import static java.util.Objects.requireNonNull;
  */
 class SettingsContentBuilder
 {
-	private static final String NGRAM_TOKENIZER = "ngram_tokenizer";
 	private static final String DEFAULT_TOKENIZER = "default_tokenizer";
 	private static final String DEFAULT_STEMMER = "default_stemmer";
 
@@ -108,7 +107,6 @@ class SettingsContentBuilder
 	{
 		contentBuilder.startObject("analyzer");
 		createDefaultAnalyzerSettings(contentBuilder);
-		createNGramAnalyzerSettings(contentBuilder);
 		contentBuilder.endObject();
 	}
 
@@ -116,18 +114,9 @@ class SettingsContentBuilder
 	{
 		contentBuilder.startObject(FieldConstants.DEFAULT_ANALYZER);
 		contentBuilder.field("type", "custom");
-		contentBuilder.array("filter", "lowercase", DEFAULT_STEMMER);
+		contentBuilder.array("filter", "word_delimiter", "lowercase", "asciifolding", DEFAULT_STEMMER);
 		contentBuilder.field("tokenizer", DEFAULT_TOKENIZER);
 		contentBuilder.field("char_filter", "html_strip");
-		contentBuilder.endObject();
-	}
-
-	private void createNGramAnalyzerSettings(XContentBuilder contentBuilder) throws IOException
-	{
-		contentBuilder.startObject(FieldConstants.NGRAM_ANALYZER);
-		contentBuilder.field("type", "custom");
-		contentBuilder.array("filter", "lowercase");
-		contentBuilder.field("tokenizer", NGRAM_TOKENIZER);
 		contentBuilder.endObject();
 	}
 
@@ -135,24 +124,13 @@ class SettingsContentBuilder
 	{
 		contentBuilder.startObject("tokenizer");
 		createDefaultTokenizerSettings(contentBuilder);
-		createNGramTokenizerSettings(contentBuilder);
 		contentBuilder.endObject();
 	}
 
 	private void createDefaultTokenizerSettings(XContentBuilder contentBuilder) throws IOException
 	{
 		contentBuilder.startObject(DEFAULT_TOKENIZER);
-		contentBuilder.field("type", "pattern");
-		contentBuilder.field("pattern", "([^a-zA-Z0-9]+)");
-		contentBuilder.endObject();
-	}
-
-	private void createNGramTokenizerSettings(XContentBuilder contentBuilder) throws IOException
-	{
-		contentBuilder.startObject(NGRAM_TOKENIZER);
-		contentBuilder.field("type", "nGram");
-		contentBuilder.field("min_gram", 1);
-		contentBuilder.field("max_gram", 10);
+		contentBuilder.field("type", "whitespace");
 		contentBuilder.endObject();
 	}
 }
