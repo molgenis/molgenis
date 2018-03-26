@@ -5,6 +5,7 @@ import QuestionnaireStart from '../pages/QuestionnaireStart'
 import QuestionnaireSubmitted from '../pages/QuestionnaireSubmitted'
 import QuestionnaireOverview from '../pages/QuestionnaireOverview'
 import QuestionnaireChapter from '../pages/QuestionnaireChapter'
+import ChangePage from '../pages/ChangePage'
 
 const {baseUrl} = window.QUESTIONNAIRE_STATE || ''
 
@@ -35,6 +36,16 @@ export default new Router({
         }
       },
       component: QuestionnaireChapter
+    },
+    {
+      path: '/:questionnaireId/change/:chapterId',
+      props: (route) => {
+        return {
+          questionnaireId: route.params.questionnaireId,
+          chapterId: parseInt(route.params.chapterId)
+        }
+      },
+      component: ChangePage
     },
     {
       path: '/:questionnaireId/submitted',

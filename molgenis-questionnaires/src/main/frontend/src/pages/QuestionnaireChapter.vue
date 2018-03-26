@@ -4,7 +4,7 @@
       <div class="col-12">
 
         <template v-if="loading">
-          <loading-spinner :message="$t('questionnaire_overview_loading_text')"></loading-spinner>
+          <loading-spinner :message="$t('questionnaire_loading_chapter_text')"></loading-spinner>
         </template>
 
         <template v-else>

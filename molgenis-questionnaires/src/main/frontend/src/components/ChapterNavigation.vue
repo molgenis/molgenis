@@ -87,12 +87,12 @@
       },
 
       navigateToNextChapter () {
-        this.$router.push('/' + this.questionnaireId + '/chapter/' + this.nextChapterNumber)
+        this.$router.push('/' + this.questionnaireId + '/change/' + this.nextChapterNumber)
         this.clearStateAfterSuccessfulNavigation()
       },
 
       navigateToPreviousChapter () {
-        this.$router.push('/' + this.questionnaireId + '/chapter/' + this.previousChapterNumber)
+        this.$router.push('/' + this.questionnaireId + '/change/' + this.previousChapterNumber)
         this.clearStateAfterSuccessfulNavigation()
       },
 
