@@ -38,19 +38,26 @@ public class JsMagmaScriptEvaluatorTest
 	@BeforeClass
 	protected static void beforeClass()
 	{
+		Attribute idAttribute = mock(Attribute.class);
+		when(idAttribute.getName()).thenReturn("id");
+		when(idAttribute.getDataType()).thenReturn(STRING);
+
 		Attribute weightAttr = when(mock(Attribute.class).getName()).thenReturn("weight").getMock();
 		when(weightAttr.getDataType()).thenReturn(INT);
 		personWeightEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personWeightEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(personWeightEntityType.getAttribute("weight")).thenReturn(weightAttr);
 		when(personWeightEntityType.getAtomicAttributes()).thenReturn(singletonList(weightAttr));
 
 		Attribute heightAttr = when(mock(Attribute.class).getName()).thenReturn("height").getMock();
 		when(heightAttr.getDataType()).thenReturn(INT);
 		personHeightEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personHeightEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(personHeightEntityType.getAttribute("height")).thenReturn(heightAttr);
 		when(personHeightEntityType.getAtomicAttributes()).thenReturn(singletonList(heightAttr));
 
 		personWeightAndHeightEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personWeightAndHeightEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(personWeightAndHeightEntityType.getAttribute("weight")).thenReturn(weightAttr);
 		when(personWeightAndHeightEntityType.getAttribute("height")).thenReturn(heightAttr);
 		when(personWeightAndHeightEntityType.getAtomicAttributes()).thenReturn(asList(weightAttr, heightAttr));
@@ -58,18 +65,21 @@ public class JsMagmaScriptEvaluatorTest
 		Attribute birthDateAttr = when(mock(Attribute.class).getName()).thenReturn("birthdate").getMock();
 		when(birthDateAttr.getDataType()).thenReturn(DATE);
 		personBirthDateMeta = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personBirthDateMeta.getIdAttribute()).thenReturn(idAttribute);
 		when(personBirthDateMeta.getAttribute("birthdate")).thenReturn(birthDateAttr);
 		when(personBirthDateMeta.getAtomicAttributes()).thenReturn(singletonList(birthDateAttr));
 
 		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
 		when(ageAttr.getDataType()).thenReturn(INT);
 		personAgeEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personAgeEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(personAgeEntityType.getAttribute("age")).thenReturn(ageAttr);
 		when(personAgeEntityType.getAtomicAttributes()).thenReturn(singletonList(ageAttr));
 
 		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		genderEntityType = when(mock(EntityType.class).getId()).thenReturn("gender").getMock();
+		when(genderEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(genderEntityType.getIdAttribute()).thenReturn(idAttr);
 		when(genderEntityType.getAttribute("id")).thenReturn(idAttr);
 		when(genderEntityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
@@ -77,6 +87,7 @@ public class JsMagmaScriptEvaluatorTest
 		Attribute genderAttr = when(mock(Attribute.class).getName()).thenReturn("gender").getMock();
 		when(genderAttr.getDataType()).thenReturn(CATEGORICAL);
 		personGenderEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personGenderEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(personGenderEntityType.getAttribute("gender")).thenReturn(genderAttr);
 		when(personGenderEntityType.getAtomicAttributes()).thenReturn(singletonList(genderAttr));
 
@@ -140,11 +151,17 @@ public class JsMagmaScriptEvaluatorTest
 	@Test
 	public void testAverageValueOfMultipleNumericAttributes()
 	{
+		Attribute idAttribute = mock(Attribute.class);
+		when(idAttribute.getName()).thenReturn("id");
+		when(idAttribute.getDataType()).thenReturn(STRING);
+
 		Attribute sbp1Attr = when(mock(Attribute.class).getName()).thenReturn("SBP_1").getMock();
 		when(sbp1Attr.getDataType()).thenReturn(DECIMAL);
 		Attribute sbp2Attr = when(mock(Attribute.class).getName()).thenReturn("SBP_2").getMock();
 		when(sbp2Attr.getDataType()).thenReturn(DECIMAL);
+
 		EntityType sbpPersonEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(sbpPersonEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(sbpPersonEntityType.getAttribute("SBP_1")).thenReturn(sbp1Attr);
 		when(sbpPersonEntityType.getAttribute("SBP_2")).thenReturn(sbp2Attr);
 		when(sbpPersonEntityType.getAtomicAttributes()).thenReturn(asList(sbp1Attr, sbp2Attr));
@@ -261,11 +278,16 @@ public class JsMagmaScriptEvaluatorTest
 	@Test
 	public void combinePlusGroupMapFunctions()
 	{
+		Attribute idAttribute = mock(Attribute.class);
+		when(idAttribute.getName()).thenReturn("id");
+		when(idAttribute.getDataType()).thenReturn(STRING);
+
 		Attribute food59Attr = when(mock(Attribute.class).getName()).thenReturn("FOOD59A1").getMock();
 		when(food59Attr.getDataType()).thenReturn(INT);
 		Attribute food60Attr = when(mock(Attribute.class).getName()).thenReturn("FOOD60A1").getMock();
 		when(food60Attr.getDataType()).thenReturn(INT);
 		EntityType foodPersonEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(foodPersonEntityType.getIdAttribute()).thenReturn(idAttribute);
 		when(foodPersonEntityType.getAttribute("FOOD59A1")).thenReturn(food59Attr);
 		when(foodPersonEntityType.getAttribute("FOOD60A1")).thenReturn(food60Attr);
 		when(foodPersonEntityType.getAtomicAttributes()).thenReturn(asList(food59Attr, food60Attr));
@@ -350,9 +372,14 @@ public class JsMagmaScriptEvaluatorTest
 	@Test
 	public void testGlucose()
 	{
+		Attribute idAttribute = mock(Attribute.class);
+		when(idAttribute.getName()).thenReturn("id");
+		when(idAttribute.getDataType()).thenReturn(STRING);
+
 		Attribute gluc1Attr = when(mock(Attribute.class).getName()).thenReturn("GLUC_1").getMock();
 		when(gluc1Attr.getDataType()).thenReturn(DECIMAL);
 		EntityType personGlucoseMeta = when(mock(EntityType.class).getId()).thenReturn("glucose").getMock();
+		when(personGlucoseMeta.getIdAttribute()).thenReturn(idAttribute);
 		when(personGlucoseMeta.getAttribute("GLUC_1")).thenReturn(gluc1Attr);
 		when(personGlucoseMeta.getAtomicAttributes()).thenReturn(singletonList(gluc1Attr));
 
