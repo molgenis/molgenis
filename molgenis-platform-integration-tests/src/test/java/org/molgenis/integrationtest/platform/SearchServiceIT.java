@@ -413,7 +413,7 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorLike")
 	private static Object[][] findQueryOperatorLike()
 	{
-		return new Object[][] { { "ring", asList("0", "1") }, { "Ring", asList("0", "1") },
+		return new Object[][] { { "stri", asList("0", "1") }, { "Stri", asList("0", "1") },
 				{ "nomatch", emptyList() } };
 	}
 

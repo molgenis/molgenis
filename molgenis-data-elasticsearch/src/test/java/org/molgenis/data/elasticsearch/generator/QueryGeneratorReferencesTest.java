@@ -24,7 +24,8 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.elasticsearch.FieldConstants.*;
+import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
@@ -36,6 +37,8 @@ import static org.testng.Assert.assertEquals;
 // FIXME add nillable tests
 public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 {
+	private static final String FIELD_NGRAM_ANALYZED = "ngram";
+
 	private EntityType entityType;
 
 	private final String refBoolAttributeName = "xbool";
@@ -251,7 +254,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>().like(PREFIX + refCompoundPart0AttributeName, value);
 		QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
 		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT,
-				QueryBuilders.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + FIELD_NGRAM_ANALYZED, value)
+				QueryBuilders.matchPhrasePrefixQuery(PREFIX + refCompoundPart0AttributeName, value).slop(10)
 							 .analyzer(DEFAULT_ANALYZER), ScoreMode.Avg);
 		assertQueryBuilderEquals(query, expectedQuery);
 	}

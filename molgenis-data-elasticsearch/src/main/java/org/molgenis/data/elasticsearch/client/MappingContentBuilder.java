@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch.client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.molgenis.data.elasticsearch.FieldConstants;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.util.UnexpectedEnumException;
@@ -13,7 +12,6 @@ import java.io.UncheckedIOException;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NGRAM_ANALYZED;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
 /**
@@ -99,7 +97,7 @@ class MappingContentBuilder
 				createFieldMappingNested(fieldMapping.getNestedFieldMappings(), contentBuilder);
 				break;
 			case TEXT:
-				createFieldMappingText(fieldMapping.isAnalyzeNGrams(), contentBuilder);
+				createFieldMappingText(contentBuilder);
 				break;
 			default:
 				throw new UnexpectedEnumException(fieldMapping.getType());
@@ -139,7 +137,7 @@ class MappingContentBuilder
 		createFieldMappings(nestedFieldMappings, contentBuilder);
 	}
 
-	private void createFieldMappingText(boolean analyzeNGrams, XContentBuilder contentBuilder) throws IOException
+	private void createFieldMappingText(XContentBuilder contentBuilder) throws IOException
 	{
 		// enable/disable norms based on given value
 		contentBuilder.field("type", "text");
@@ -151,14 +149,6 @@ class MappingContentBuilder
 													 .field("type", "keyword")
 													 .field("index", true)
 													 .endObject();
-		if (analyzeNGrams)
-		{
-			// add ngram analyzer (not applied to nested documents)
-			fieldsObject.startObject(FIELD_NGRAM_ANALYZED)
-						.field("type", "text")
-						.field("analyzer", FieldConstants.NGRAM_ANALYZER)
-						.endObject();
-		}
 		fieldsObject.endObject();
 	}
 }
