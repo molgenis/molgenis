@@ -88,14 +88,14 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.9.11":
-  version "0.9.11"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.11.tgz#1203fe1666ecc401b0fcc7cd0cf939adf8098e1e"
+"@molgenis/molgenis-ui-form@^0.9.12":
+  version "0.9.12"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.12.tgz#7ed117300e1b71deb7353804e8c3b4d0ff515d80"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     moment "^2.20.1"
     vue-code "^1.2.3"
-    vue-flatpickr-component "^6.1.0"
+    vue-flatpickr-component "^7.0.0"
     vue-form "^4.7.0"
     vue-select "^2.4.0"
 
@@ -3171,9 +3171,9 @@ flatpickr@^2.3.0-3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-2.6.3.tgz#457357532deb135f3da64b425bf4435737961564"
 
-flatpickr@^4.2.4:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.3.2.tgz#6a477043c075ef36c3ff54fadb49b936a64d635f"
+flatpickr@^4.3.2:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.4.1.tgz#894255e33c2bed93f48171f8eb5980a79b76ab1d"
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -7720,11 +7720,11 @@ vue-eslint-parser@^2.0.3:
     esquery "^1.0.0"
     lodash "^4.17.4"
 
-vue-flatpickr-component@^6.1.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-6.2.0.tgz#911b70672de9dfe16adbe78e1ed83adc718133cb"
+vue-flatpickr-component@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.0.tgz#ad7f9490db0048ce2c721f34ad0e5085a004e9ac"
   dependencies:
-    flatpickr "^4.2.4"
+    flatpickr "^4.3.2"
 
 vue-flatpickr@^2.3.0:
   version "2.3.0"
