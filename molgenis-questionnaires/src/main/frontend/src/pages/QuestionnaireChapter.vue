@@ -11,6 +11,7 @@
           <div class="row">
             <div class="col-12">
               <router-link
+                id="back-to-start-btn"
                 :to="'/' + questionnaireId"
                 class="btn btn-outline-secondary">
                 {{ 'questionnaire_back_to_start' | i18n }}
@@ -25,7 +26,7 @@
 
                 <!-- ================ CARD HEADER ================ -->
                 <div class="card-header">
-                  <div class="col-12 text-muted d-flex flex-column justify-content-center align-items-center">
+                  <div id="current-chapter-label" class="col-12 text-muted d-flex flex-column justify-content-center align-items-center">
                     Chapter {{ chapterId }} of {{ totalNumberOfChapters }}
                   </div>
                 </div>
@@ -42,7 +43,7 @@
                 <!-- ================ ERROR BLOCK ================ -->
                 <div v-if="navigationBlocked" class="alert alert-warning mb-0" role="alert">
                   {{ 'questionnaire_chapter_incomplete_message' | i18n }}
-                  <a v-for="(value, key) in formState.$error" :href="'#' + key">{{ key }} </a>
+                  <span v-for="(value, key) in formState.$error" >{{ key }} </span>
                 </div>
 
                 <div v-if="error" class="alert alert-warning mb-0" role="alert">
@@ -69,7 +70,7 @@
                   :questionnaireId="questionnaireId">
                 </chapter-list>
 
-                <span v-if="saving && !formState.$pristine" class="text-muted">
+                <span v-if="saving" class="text-muted">
                   {{ 'questionnaire_saving_changes' | i18n }} <i class="fa fa-spinner fa-spin"></i>
                 </span>
 
@@ -130,6 +131,8 @@
       }
     },
     created () {
+      this.$store.commit('BLOCK_NAVIGATION', false)
+      this.$store.commit('SET_ERROR', '')
       this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
       if (!this.$store.state.mapperOptions.booleanLabels) {
         const mapperOptions = {
