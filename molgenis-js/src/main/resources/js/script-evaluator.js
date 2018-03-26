@@ -27,12 +27,15 @@ function evalScript (script, entity) {
        */
       value: function () {
         if (this.val !== null && typeof this.val === 'object') {
-          if (Array.isArray(this.val)) {
-            return this.val.map(function(value) {
-              return newValue(value).value()
-            })
+          if (this.val['_idValue']) {
+            // Map a list of entities to a list of ID's
+            if (Array.isArray(this.val)) {
+              return this.val.map(function(value) {
+                return newValue(value).value()
+              })
+            }
+            return this.val['_idValue']
           }
-          return this.val['_idValue']
         }
         return this.val
       },

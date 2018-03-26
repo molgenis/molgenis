@@ -166,7 +166,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				result = findMatchesForPattern(algorithmScript, "\\$\\(([^\\$\\(\\)]+)\\)");
 			}
-
 		}
 		return result;
 	}
