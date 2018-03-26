@@ -1,8 +1,10 @@
 <template>
   <div class="row">
-    <div class="col-6">
+    <div class="col-4">
       <button
+        id="prev-chapter-btn"
         type="button"
+        :disabled="saving"
         v-if="showPreviousButton"
         @click="navigateToPreviousChapter"
         class="btn btn-outline-secondary float-left">
@@ -11,17 +13,29 @@
       </button>
     </div>
 
-    <div class="col-6">
+    <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
+      <span v-if="saving">
+        {{ 'questionnaire_saving_changes' | i18n }} <i class="fa fa-spinner fa-spin"></i>
+      </span>
+    </div>
+
+    <div class="col-4">
       <button
+        id="next-chapter-btn"
         type="button"
         v-if="showNextButton"
+        :disabled="saving"
         @click="validateBeforeNavigatingToNextChapter"
         class="btn btn-primary float-right">
         <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
         <span class="d-md-none"><i class="fa fa-chevron-right"></i></span>
       </button>
 
-      <button class="btn btn-primary float-right" @click="validateBeforeSubmit" :disabled="submitting" v-else>
+      <button
+        id="submit-questionnaire-btn"
+        class="btn btn-primary float-right"
+        @click="validateBeforeSubmit"
+        :disabled="saving || submitting" v-else>
         <template v-if="submitting">
           <i class="fa fa-spinner fa-spin"></i>
         </template>
@@ -77,6 +91,9 @@
 
       totalNumberOfChapters () {
         return this.$store.getters.getTotalNumberOfChapters
+      },
+      saving () {
+        return this.$store.state.saving
       }
     },
     methods: {

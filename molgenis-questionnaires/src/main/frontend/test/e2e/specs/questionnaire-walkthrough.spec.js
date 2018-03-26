@@ -3,6 +3,12 @@
  * test but will continue from where the previous test ended
  *
  */
+const backToStartButton = '#back-to-start-btn'
+const nextChapterButton = '#next-chapter-btn'
+const previousChapterButton = '#prev-chapter-btn'
+const currentChapterSpan = '#current-chapter-label'
+const submitButton = '#submit-questionnaire-btn'
+
 module.exports = {
   before: function (browser) {
     browser.url(browser.globals.devServerURL)
@@ -67,9 +73,6 @@ module.exports = {
 
     // ===== selectors =====
     var startQuestionnaireButton = 'body > div > div > div > button'
-    var backToStartButton = 'body > div > div > div > div:nth-child(1) > div > a'
-    var nextChapterButton = 'div.card-footer > div > div:nth-child(2) > button'
-    var currentChapterSpan = 'body > div > div > div > div:nth-child(2) > div.col-xs-12.col-sm-12.col-md-12.col-lg-9.col-xl-9 > div > div.card-header > div'
     var chapterNavigationHeader = 'ul > a:nth-child(1)'
     var firstChapterListItem = 'ul > a:nth-child(2)'
     var secondChapterListItem = 'ul > a:nth-child(3)'
@@ -126,10 +129,7 @@ module.exports = {
     browser.options.desiredCapabilities.name = 'navigate to the second chapter'
 
     // ===== selectors =====
-    var nextChapterButton = 'div.card-footer > div > div:nth-child(2) > button'
-    var previousChapterButton = 'div.card-footer > div > div:nth-child(1) > button'
     var currentChapterSpan = 'body > div > div > div > div:nth-child(2) > div.col-xs-12.col-sm-12.col-md-12.col-lg-9.col-xl-9 > div > div.card-header > div'
-    var submitButton = 'div.card-footer > div > div:nth-child(2) > button'
 
     // ======= tests =======
     browser.click(nextChapterButton)
@@ -148,7 +148,6 @@ module.exports = {
     browser.options.desiredCapabilities.name = 'finish questionnaire and submit'
 
     // ===== selectors =====
-    var submitButton = 'div.card-footer > div > div:nth-child(2) > button'
     var vueCheckbox = '#ch2_question1-0'
     var javascriptCheckbox = '#ch2_question1-3'
     var molgenisWebsiteRadio = '#ch2_question2-0'

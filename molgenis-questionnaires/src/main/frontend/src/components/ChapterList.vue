@@ -7,7 +7,7 @@
     <template v-for="chapter in chapterNavigationList">
       <router-link
         :to="'/' + questionnaireId + '/change/' + chapter.index"
-        class="list-group-item list-group-item-action disabled">
+        class="list-group-item list-group-item-action">
         <span>{{ chapter.label }}</span>
 
         <div class="progress" style="height: 5px;">
