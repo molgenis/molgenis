@@ -57,7 +57,8 @@
 
         <!-- skip stuff -->
         <skip.js>false</skip.js>
-        <skipTests>false</skipTests>
+        <maven.test.skip>false</maven.test.skip>
+        <skipTests>${maven.test.skip}</skipTests>
         <skipITs>${skipTests}</skipITs>
         <skipUTs>${skipTests}</skipUTs>
 
@@ -706,7 +707,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipTests}</skip>
+                            <skip>${skipUTs}</skip>
                         </configuration>
                     </execution>
                     <execution>
@@ -715,7 +716,7 @@
                             <goal>prepare-agent-integration</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipTests}</skip>
+                            <skip>${skipITs}</skip>
                         </configuration>
                     </execution>
                     <execution>
