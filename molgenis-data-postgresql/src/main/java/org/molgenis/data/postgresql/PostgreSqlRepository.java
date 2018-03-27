@@ -41,6 +41,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.postgresql.PostgreSqlExceptionTranslator.VALUE_TOO_LONG_MSG;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.getJunctionTableOrderColumnName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
@@ -481,8 +482,8 @@ class PostgreSqlRepository extends AbstractRepository
 				if (!attr.isNillable() && Iterables.isEmpty(refEntities))
 				{
 					throw new MolgenisValidationException(new ConstraintViolation(
-							String.format("The attribute [%s] of entity [%s] with id [%s] can not be null.",
-									attr.getName(), attr.getEntity().getId(), entity.getIdValue().toString())));
+							format("The attribute [%s] of entity [%s] with id [%s] can not be null.", attr.getName(),
+									attr.getEntity().getId(), entity.getIdValue().toString())));
 				}
 
 				mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
@@ -591,7 +592,23 @@ class PostgreSqlRepository extends AbstractRepository
 				LOG.trace("SQL: {}", insertMrefSql);
 			}
 		}
-		jdbcTemplate.batchUpdate(insertMrefSql, new BatchJunctionTableAddPreparedStatementSetter(mrefs, attr, idAttr));
+
+		try
+		{
+			jdbcTemplate.batchUpdate(insertMrefSql,
+					new BatchJunctionTableAddPreparedStatementSetter(mrefs, attr, idAttr));
+
+		}
+		catch (MolgenisValidationException mve)
+		{
+			if (mve.getMessage().equals(VALUE_TOO_LONG_MSG))
+			{
+				mve = new MolgenisValidationException(new ConstraintViolation(
+						format("One of the mref values in entity type [%s] attribute [%s] is too long.",
+								getEntityType().getId(), attr.getName())));
+			}
+			throw mve;
+		}
 	}
 
 	private void removeMrefs(final List<Object> ids, final Attribute attr)
