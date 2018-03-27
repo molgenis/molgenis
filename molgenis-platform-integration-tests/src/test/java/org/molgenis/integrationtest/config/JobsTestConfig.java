@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.jobs;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.jobs.JobExecutionConfig;
 import org.molgenis.jobs.JobExecutionUpdaterImpl;

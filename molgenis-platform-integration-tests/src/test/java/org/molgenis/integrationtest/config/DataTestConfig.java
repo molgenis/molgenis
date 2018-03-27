@@ -1,14 +1,6 @@
-package org.molgenis.integrationtest.data;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.platform.config.PlatformConfig;
-import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
-import org.molgenis.integrationtest.data.cache.CacheTestConfig;
-import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchTestConfig;
-import org.molgenis.integrationtest.data.i18n.LanguageTestConfig;
-import org.molgenis.integrationtest.data.meta.MetaTestConfig;
-import org.molgenis.integrationtest.data.transaction.TransactionTestConfig;
-import org.molgenis.integrationtest.data.validation.ValidationTestConfig;
-import org.molgenis.integrationtest.jobs.JobsTestConfig;
 import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

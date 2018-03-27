@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.postgresql;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.springframework.context.annotation.ComponentScan;

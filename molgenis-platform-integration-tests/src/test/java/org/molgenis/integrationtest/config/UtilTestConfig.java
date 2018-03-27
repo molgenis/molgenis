@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.util;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.util.GenericDependencyResolver;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.script;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.script.core.ScriptPackage;
 import org.molgenis.script.core.ScriptTypeMetaData;

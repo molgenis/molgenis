@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.i18n;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.i18n.model.L10nStringFactory;

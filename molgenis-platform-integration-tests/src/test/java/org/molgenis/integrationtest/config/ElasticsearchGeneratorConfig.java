@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.elasticsearch;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.elasticsearch.generator.ContentGenerators;
 import org.molgenis.data.elasticsearch.generator.DocumentIdGenerator;

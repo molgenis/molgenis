@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.meta;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistrar;

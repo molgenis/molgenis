@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.settings;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.core.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.core.ui.settings.AppDbSettings;

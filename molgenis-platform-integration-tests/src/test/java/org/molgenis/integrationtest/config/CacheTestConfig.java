@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.cache;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l2.L2Cache;

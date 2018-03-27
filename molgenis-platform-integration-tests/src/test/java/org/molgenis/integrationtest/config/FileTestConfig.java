@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.file;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;

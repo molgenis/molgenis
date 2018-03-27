@@ -1,9 +1,7 @@
-package org.molgenis.integrationtest.utils.config;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.core.ui.MolgenisWebAppConfig;
 import org.molgenis.core.ui.util.GsonConfig;
-import org.molgenis.integrationtest.data.settings.SettingsTestConfig;
-import org.molgenis.integrationtest.ui.ViewTestConfig;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

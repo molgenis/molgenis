@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.transaction;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;

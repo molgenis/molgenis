@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.aggregation;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.security.aggregation.AggregateAnonymizerImpl;
 import org.springframework.context.annotation.Configuration;

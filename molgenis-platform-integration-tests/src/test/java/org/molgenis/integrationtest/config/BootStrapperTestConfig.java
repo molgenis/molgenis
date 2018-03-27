@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.platform;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.TestPackage;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;

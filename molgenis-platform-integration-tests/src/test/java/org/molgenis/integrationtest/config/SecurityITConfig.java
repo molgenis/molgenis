@@ -1,8 +1,7 @@
-package org.molgenis.integrationtest.utils.config;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.user.UserServiceImpl;
-import org.molgenis.integrationtest.data.aggregation.AggregationTestConfig;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.*;
 import org.molgenis.security.settings.AuthenticationSettingsImpl;

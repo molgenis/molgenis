@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.validation;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;

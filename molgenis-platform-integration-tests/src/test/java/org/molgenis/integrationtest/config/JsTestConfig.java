@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.js;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.js.nashorn.NashornScriptEngine;

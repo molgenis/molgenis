@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.ui;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.core.ui.menu.MenuReaderService;

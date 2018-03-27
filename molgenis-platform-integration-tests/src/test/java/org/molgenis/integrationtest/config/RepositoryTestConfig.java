@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data;
+package org.molgenis.integrationtest.config;
 
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.RepositoryCollectionRegistry;
