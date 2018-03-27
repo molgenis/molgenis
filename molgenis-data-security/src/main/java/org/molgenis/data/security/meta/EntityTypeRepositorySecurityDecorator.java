@@ -79,7 +79,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 
 	private static EntityTypePermission getPermissionForOperation(Action action)
 	{
-		EntityTypePermission permission = null;
+		EntityTypePermission permission;
 		switch (action)
 		{
 			case COUNT:
