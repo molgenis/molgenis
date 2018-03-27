@@ -41,7 +41,6 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -87,7 +86,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	public void tearDownAfterClass()
 	{
 		runAsSystem(this::depopulate);
-
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -733,10 +731,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	{
 		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
 		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
-		entityTypePermissionMap.put("sys_md_Attribute", WRITE);
-		entityTypePermissionMap.put("sys_Language", WRITE);
-		entityTypePermissionMap.put("sys_L10nString", WRITE);
+		entityTypePermissionMap.put("sys_md_EntityType", READ);
+		entityTypePermissionMap.put("sys_md_Attribute", READ);
 		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
 		entityTypePermissionMap.put(entityTypeDynamic.getId(), READ);
 		entityTypePermissionMap.put(refEntityTypeDynamic.getId(), READ);
