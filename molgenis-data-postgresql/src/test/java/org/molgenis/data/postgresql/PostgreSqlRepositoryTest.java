@@ -12,6 +12,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -26,17 +27,20 @@ import org.testng.annotations.Test;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.mockito.quality.Strictness.STRICT_STUBS;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlExceptionTranslator.VALUE_TOO_LONG_MSG;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlRepositoryTest
@@ -239,6 +243,27 @@ public class PostgreSqlRepositoryTest
 		return new Object[][] { { STRING, STRING, stringRow, ImmutableMap.of("idValue", ImmutableList.of("refValue")) },
 				{ INT, INT, intRow, ImmutableMap.of(1, ImmutableList.of(2)) },
 				{ LONG, LONG, longRow, ImmutableMap.of(1L, ImmutableList.of(2L)) } };
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "One of the mref values in entity type \\[test_entity\\] attribute \\[mref_attr\\] is too long.")
+	public void testMrefValueTooLong()
+	{
+		Attribute attr = mock(Attribute.class);
+		when(attr.getName()).thenReturn("mref_attr");
+
+		Attribute idAttr = mock(Attribute.class);
+		when(idAttr.getName()).thenReturn("id");
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getId()).thenReturn("test_entity");
+
+		MolgenisValidationException mve = new MolgenisValidationException(new ConstraintViolation(VALUE_TOO_LONG_MSG));
+
+		when(jdbcTemplate.batchUpdate(any(), any(BatchPreparedStatementSetter.class))).thenThrow(mve);
+
+		HashMap<String, Object> value = newHashMap();
+		value.put("mref_attr", "TOOLONG");
+
+		postgreSqlRepo.addMrefs(newArrayList(value), attr);
 	}
 
 	@Test(dataProvider = "provideValidMrefIds")

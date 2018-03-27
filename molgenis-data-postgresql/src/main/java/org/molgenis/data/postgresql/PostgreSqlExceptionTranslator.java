@@ -39,6 +39,8 @@ import static org.molgenis.data.meta.AttributeType.*;
 @Component
 class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator implements TransactionExceptionTranslator
 {
+	static final String VALUE_TOO_LONG_MSG = "One of the values being added is too long.";
+
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlExceptionTranslator.class);
 	private final EntityTypeRegistry entityTypeRegistry;
 
@@ -132,7 +134,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	 */
 	MolgenisValidationException translateValueTooLongViolation()
 	{
-		ConstraintViolation constraintViolation = new ConstraintViolation("One of the values being added is too long.");
+		ConstraintViolation constraintViolation = new ConstraintViolation(VALUE_TOO_LONG_MSG);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
