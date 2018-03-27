@@ -2,11 +2,7 @@ package org.molgenis.integrationtest.utils;
 
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.postgresql.DatabaseConfig;
-import org.molgenis.integrationtest.data.platform.BootStrapperTestConfig;
-import org.molgenis.integrationtest.data.postgresql.PostgreSqlTestConfig;
-import org.molgenis.integrationtest.file.FileTestConfig;
-import org.molgenis.integrationtest.utils.config.SecurityITConfig;
-import org.molgenis.integrationtest.utils.config.WebAppITConfig;
+import org.molgenis.integrationtest.config.*;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +25,8 @@ import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.integrationtest.utils.config.SecurityITConfig.SUPERUSER_NAME;
-import static org.molgenis.integrationtest.utils.config.SecurityITConfig.TOKEN_DESCRIPTION;
+import static org.molgenis.integrationtest.config.SecurityITConfig.SUPERUSER_NAME;
+import static org.molgenis.integrationtest.config.SecurityITConfig.TOKEN_DESCRIPTION;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
