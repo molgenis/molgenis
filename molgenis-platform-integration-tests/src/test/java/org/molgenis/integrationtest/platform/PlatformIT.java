@@ -181,7 +181,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@AfterClass
-	public void tearDown()
+	public void tearDown() throws InterruptedException
 	{
 		runAsSystem(() ->
 		{
@@ -190,6 +190,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			selfXrefEntityType = dataService.getEntityType(selfXrefEntityType.getId());
 			metaDataService.deleteEntityType(asList(refEntityTypeDynamic, entityTypeDynamic, selfXrefEntityType));
 		});
+		indexService.waitForAllIndicesStable();
 	}
 
 	@AfterMethod
