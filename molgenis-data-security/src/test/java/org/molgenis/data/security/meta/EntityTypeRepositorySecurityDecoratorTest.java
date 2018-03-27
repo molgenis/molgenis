@@ -39,7 +39,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private static final String USERNAME = "user";
 
 	@Mock
-	private Repository<EntityType> delegateRepository;
+	private Repository delegateRepository;
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
@@ -65,7 +65,8 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		when(delegateRepository.spliterator()).thenReturn(asList(entityType0, entityType1).spliterator());
+		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenReturn(
+				asList(entityType0, entityType1).stream());
 		doReturn(false).when(permissionService)
 					   .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.COUNT);
 		doReturn(true).when(permissionService)
@@ -99,9 +100,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		Query<EntityType> q = new QueryImpl<>();
+		Query q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
 		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
 		doReturn(false).when(permissionService)
 					   .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.COUNT);
@@ -112,49 +113,12 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
 	}
 
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void countQuerySu()
-	{
-		countQuerySuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void countQuerySystem()
-	{
-		countQuerySuOrSystem();
-	}
-
-	private void countQuerySuOrSystem()
-	{
-		long count = 123L;
-		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
-		when(delegateRepository.count(q)).thenReturn(count);
-		assertEquals(repo.count(q), 123L);
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void findAllQuerySu()
-	{
-		findAllQuerySuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SYSTEM")
-	@Test
-	public void findAllQuerySystem()
-	{
-		findAllQuerySuOrSystem();
-	}
-
 	private void findAllQuerySuOrSystem()
 	{
 		EntityType entityType0 = mock(EntityType.class);
 		EntityType entityType1 = mock(EntityType.class);
 		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
+		Query q = mock(Query.class);
 		when(delegateRepository.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
 		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType1));
 	}
@@ -170,9 +134,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
+		Query q = mock(Query.class);
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
 		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(
 				Stream.of(entityType0, entityType1, entityType2));
 		doReturn(true).when(permissionService)
@@ -198,7 +162,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
+		Query q = mock(Query.class);
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
 		@SuppressWarnings("unchecked")
@@ -217,28 +181,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
 	}
 
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void iteratorSu()
-	{
-		iteratorSuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SYSTEM")
-	@Test
-	public void iteratorSystem()
-	{
-		iteratorSuOrSystem();
-	}
-
-	private void iteratorSuOrSystem()
-	{
-		EntityType entityType0 = mock(EntityType.class);
-		EntityType entityType1 = mock(EntityType.class);
-		when(delegateRepository.iterator()).thenReturn(asList(entityType0, entityType1).iterator());
-		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType1));
-	}
-
 	@WithMockUser(username = USERNAME)
 	@Test
 	public void iteratorUser()
@@ -249,7 +191,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
-		when(delegateRepository.spliterator()).thenReturn(asList(entityType0, entityType1, entityType2).spliterator());
+		when(delegateRepository.iterator()).thenReturn(asList(entityType0, entityType1, entityType2).iterator());
 		doReturn(true).when(permissionService)
 					  .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.COUNT);
 		doReturn(false).when(permissionService)
@@ -261,34 +203,12 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 	@WithMockUser(username = USERNAME)
 	@Test
-	public void findOneQuerySu()
-	{
-		findOneQuerySuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findOneQuerySystem()
-	{
-		findOneQuerySuOrSystem();
-	}
-
-	private void findOneQuerySuOrSystem()
-	{
-		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
-		repo.findOne(q);
-		verify(delegateRepository).findOne(q);
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
 	public void findOneQueryUserPermissionAllowed()
 	{
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
+		Query q = mock(Query.class);
 		when(delegateRepository.findOne(q)).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(true);
@@ -302,25 +222,11 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query<EntityType> q = mock(Query.class);
+		Query q = mock(Query.class);
 		when(delegateRepository.findOne(q)).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(false);
 		assertNull(repo.findOne(q));
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findOneByIdSu()
-	{
-		findOneByIdSuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findOneByIdSystem()
-	{
-		findOneByIdSuOrSystem();
 	}
 
 	private void findOneByIdSuOrSystem()
@@ -335,12 +241,11 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	public void findOneByIdUserPermissionAllowed()
 	{
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
-		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
+		EntityType entityType0 = mock(EntityType.class);
+		when(delegateRepository.findOneById("entity0")).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(true);
-		assertEquals(repo.findOneById(id), entityType0);
+		assertEquals(repo.findOneById("entity0"), entityType0);
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -348,34 +253,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	public void findOneByIdUserPermissionDenied()
 	{
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
-		Object id = "0";
-		when(delegateRepository.findOneById(id)).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(false);
-		assertNull(repo.findOneById(id));
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findOneByIdFetchSu()
-	{
-		findOneByIdFetchSuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findOneByIdFetchSystem()
-	{
-		findOneByIdFetchSuOrSystem();
-	}
-
-	private void findOneByIdFetchSuOrSystem()
-	{
-		Object id = "0";
-		Fetch fetch = mock(Fetch.class);
-		repo.findOneById(id, fetch);
-		verify(delegateRepository).findOneById(id, fetch);
+		assertNull(repo.findOneById(entityType0Name));
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -383,13 +263,12 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	public void findOneByIdFetchUserPermissionAllowed()
 	{
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
-		Object id = "0";
+		EntityType entityType0 = mock(EntityType.class);
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entityType0);
+		when(delegateRepository.findOneById(entityType0Name, fetch)).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(true);
-		assertEquals(repo.findOneById(id, fetch), entityType0);
+		assertEquals(repo.findOneById(entityType0Name, fetch), entityType0);
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -397,81 +276,10 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	public void findOneByIdFetchUserPermissionDenied()
 	{
 		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
-		Object id = "0";
 		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findOneById(id, fetch)).thenReturn(entityType0);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(false);
-		assertNull(repo.findOneById(id, fetch));
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void findAllIdsSu()
-	{
-		findAllIdsSuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SYSTEM")
-	@Test
-	public void findAllIdsSystem()
-	{
-		findAllIdsSuOrSystem();
-	}
-
-	private void findAllIdsSuOrSystem()
-	{
-		EntityType entityType0 = mock(EntityType.class);
-		EntityType entityType1 = mock(EntityType.class);
-		Stream<Object> ids = Stream.of("0", "1");
-		when(delegateRepository.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1));
-		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType1));
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void findAllIdsUser()
-	{
-		String entityType0Name = "entity0";
-		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
-		String entityType1Name = "entity1";
-		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		String entityType2Name = "entity2";
-		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
-		Stream<Object> ids = Stream.of("0", "1");
-		when(delegateRepository.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
-		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.COUNT);
-		doReturn(false).when(permissionService)
-					   .hasPermission(new EntityTypeIdentity(entityType1Name), EntityTypePermission.COUNT);
-		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(entityType2Name), EntityTypePermission.COUNT);
-		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType2));
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SU")
-	@Test
-	public void findAllIdsFetchSu()
-	{
-		findAllIdsFetchSuOrSystem();
-	}
-
-	@WithMockUser(username = USERNAME, authorities = "ROLE_SYSTEM")
-	@Test
-	public void findAllIdsFetchSystem()
-	{
-		findAllIdsFetchSuOrSystem();
-	}
-
-	private void findAllIdsFetchSuOrSystem()
-	{
-		EntityType entityType0 = mock(EntityType.class);
-		EntityType entityType1 = mock(EntityType.class);
-		Stream<Object> ids = Stream.of("0", "1");
-		Fetch fetch = mock(Fetch.class);
-		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1));
-		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType1));
+		assertNull(repo.findOneById(entityType0Name, fetch));
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -484,7 +292,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
-		Stream<Object> ids = Stream.of("0", "1");
+		Stream<Object> ids = Stream.of("entity0", "entity1");
 		Fetch fetch = mock(Fetch.class);
 		when(delegateRepository.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
 		doReturn(true).when(permissionService)
@@ -519,7 +327,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void aggregateUser()
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
@@ -552,12 +360,14 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("entityTypeId").getMock();
+		when(entityType.getIdValue()).thenReturn("entityTypeId");
 		when(entityType.getLabel()).thenReturn("Entity type").getMock();
+		when(entityType.getEntityType()).thenReturn(entityType);
 		repo.delete(entityType);
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity meta data \\[entityTypeId\\] is not allowed")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on EntityType \\[entityTypeId\\]")
 	public void deleteSystemEntityType()
 	{
 		String entityTypeId = "entityTypeId";
@@ -594,12 +404,14 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId).getMock();
+		when(entityType.getIdValue()).thenReturn(entityTypeId).getMock();
 		when(entityType.getLabel()).thenReturn("Entity type").getMock();
+		when(entityType.getEntityType()).thenReturn(entityType);
 		repo.update(entityType);
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating system entity meta data \\[Entity type\\] is not allowed")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on EntityType \\[entityTypeId\\]")
 	public void updateSystemEntityType()
 	{
 		String entityTypeId = "entityTypeId";
@@ -609,7 +421,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(entityTypeId).getMock();
-		when(entityType.getLabel()).thenReturn("Entity type").getMock();
 		repo.update(entityType);
 	}
 
