@@ -26,14 +26,17 @@ pipeline {
         }
         stage('Publish package') {
             steps {
-                echo "Publish MOLGENIS to download-server (https://molgenis26.gcc.rug.nl/)"
-                sh "scp target/molgenis-app-${MOLGENIS_VERSION}.war molgenis@molgenis26.gcc.rug.nl:/var/www/html/releases/molgenis/${MOLGENIS_VERSION}/."
+                sshagent(credentials: ['molgenis-releases']) {
+                    echo "Publish MOLGENIS to download-server (https://molgenis26.gcc.rug.nl/)"
+                    sh "scp -o StrictHostKeyChecking=no molgenis-app/target/molgenis-app-${MOLGENIS_VERSION}.war molgenis@molgenis26.gcc.rug.nl:/var/www/html/releases/molgenis/${MOLGENIS_VERSION}/."
+                }
             }
         }
     }
     post {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
+            build: 'molgenis-ops-docker'
             notifySuccess()
         }
         failure {
