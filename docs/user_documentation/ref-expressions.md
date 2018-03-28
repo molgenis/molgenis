@@ -65,7 +65,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 | value    | -          | $('Height').value() | JavaScript value |
 
 # Special case: reference types
-If an attribute is a refereence type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use dot notation, to access the values of different columns in the row being referenced. E.g. `$('cookie.name').value()` gives you the value of the name column inside the table being referenced by the person column. See below for a more detailed example.
+If an attribute is a reference type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use dot notation, to access the values of different columns in the row being referenced. E.g. `$('cookie.name').value()` gives you the value of the name column inside the table being referenced by the cookie column. See below for a more detailed example.
 
 Imagine __table A__ referencing __table B__. 
 

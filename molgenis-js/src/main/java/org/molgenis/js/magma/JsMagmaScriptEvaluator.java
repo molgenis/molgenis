@@ -30,6 +30,7 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 public class JsMagmaScriptEvaluator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
+	private static final int ENTITY_REFERENCE_FETCHING_DEPTH = 3;
 
 	private final NashornScriptEngine jsScriptEngine;
 
@@ -53,7 +54,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Object scriptEngineValueMap = toScriptEngineValueMap(entity, 3);
+		Object scriptEngineValueMap = toScriptEngineValueMap(entity, ENTITY_REFERENCE_FETCHING_DEPTH);
 		Object value;
 		try
 		{
@@ -78,7 +79,8 @@ public class JsMagmaScriptEvaluator
 	 * Adds "_idValue" as a special key to every level for quick access to the id value of an entity.
 	 *
 	 * @param entity The entity to be flattened, should start with non null entity
-	 * @return flattened entity as key value map
+	 * @param depth  Represents the number of reference levels being added to the JavaScript object
+	 * @return A JavaScript object in Tree form, containing entities and there references
 	 */
 	private Object toScriptEngineValueMap(Entity entity, int depth)
 	{
@@ -136,7 +138,8 @@ public class JsMagmaScriptEvaluator
 				}
 				catch (javax.script.ScriptException ex)
 				{
-					// ignore
+					// Do not catch this error to allow
+					// the mapping service to collect errors to show in the UI
 				}
 				value = jsArray;
 				break;
