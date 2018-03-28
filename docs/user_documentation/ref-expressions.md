@@ -70,7 +70,7 @@ If an attribute is a refereence type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF)
 Imagine __table A__ referencing __table B__. 
 
 __Table A__ has 2 columns: id, cookie.
-__Table B__ has 3 columns: id, cookie, tastiness.
+__Table B__ has 3 columns: id, name, tastiness.
 
 The _cookie_ column in __table A__ references __table B__.  
 
