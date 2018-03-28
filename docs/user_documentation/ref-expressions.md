@@ -65,7 +65,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 | value    | -          | $('Height').value() | JavaScript value |
 
 # Special case: reference types
-If an attribute is a reference type, e.g. an MREF or an XREF, a `value()` will result in the entire row that is being referenced.
+If an attribute is a reference type, e.g. an MREF or an XREF, you can use dot notation, e.g. `person.gender`, to access all the data in the row being referenced. Using the default `.value()` will return id values.
 
 Imagine __table A__ referencing __table B__. 
 
