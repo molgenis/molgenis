@@ -334,18 +334,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = USERNAME)
 	@Test(singleThreaded = true)
-	public void testCount()
-	{
-		populateUserPermissions();
-
-		List<Entity> entities = createDynamicAndAdd(2);
-		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>()), 2);
-		assertEquals(searchService.count(entityTypeDynamic), 2);
-		assertPresent(entityTypeDynamic, entities);
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test(singleThreaded = true)
 	public void testDelete()
 	{
 		populateUserPermissions();

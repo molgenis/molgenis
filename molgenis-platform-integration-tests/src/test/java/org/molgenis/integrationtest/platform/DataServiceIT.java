@@ -168,6 +168,20 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = USERNAME)
 	@Test
+	public void testCount()
+	{
+		assertEquals(dataService.count(entityTypeDynamic.getId()), dynamicEntities.size());
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test
+	public void testCountQuery()
+	{
+		assertEquals(dataService.count(entityTypeDynamic.getId(), new QueryImpl<>().gt(ATTR_INT, 10)), 2);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test
 	public void testFindOne()
 	{
 		Entity entity = dynamicEntities.get(0);
