@@ -73,15 +73,15 @@
       }
     },
     methods: {
-      onValueChanged (formData) {
-        this.formData = formData
+      onValueChanged (updatedFormData) {
+        this.formData = updatedFormData
       },
       onSubmit () {
         this.isSaving = true
         const options = {
           body: JSON.stringify(this.formData)
         }
-        const uri = '/api/v1/' + this.selectedSetting + '/' + this.formData.id + '?_method=PUT'
+        const uri = '/api/v1/' + this.dataTableId + '/' + this.dataRowId + '?_method=PUT'
         api.post(uri, options).then(this.handleSuccess, this.handleError)
       },
       clearAlert () {
@@ -101,10 +101,8 @@
         }
         this.isSaving = false
       },
-      initializeSettingsOptions (response) {
-        this.settingsOptions = response.items
-      },
       initializeForm (response) {
+        // noinspection JSUnusedLocalSymbols
         const { _meta, _href, ...rowData } = response
         this.dataTableLabel = _meta.label
         const mappedData = EntityToFormMapper.generateForm(_meta, rowData)
