@@ -129,15 +129,15 @@ public class JsMagmaScriptEvaluator
 				try
 				{
 					jsArray = (ScriptObjectMirror) jsScriptEngine.eval("var arr = []; arr");
-				} catch (javax.script.ScriptException ex) {
+					@SuppressWarnings("unchecked")
+					List<Object> mrefValues = jsArray.to(List.class);
+					entity.getEntities(attrName)
+						  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
+				}
+				catch (javax.script.ScriptException ex)
+				{
 					// ignore
 				}
-
-				@SuppressWarnings("unchecked")
-				List<Object> mrefValues = jsArray.to(List.class);
-				entity.getEntities(attrName)
-					  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
-
 				value = jsArray;
 				break;
 			case DATE:

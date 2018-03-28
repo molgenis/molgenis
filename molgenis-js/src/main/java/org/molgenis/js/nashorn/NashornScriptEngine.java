@@ -107,6 +107,7 @@ public class NashornScriptEngine
 		}
 
 		Object convertedValue;
+		String idValueKey = "_idValue";
 		if (nashornValue instanceof ScriptObjectMirror)
 		{
 			ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) nashornValue;
@@ -125,10 +126,10 @@ public class NashornScriptEngine
 					JsDate jsDate = ((Invocable) scriptEngine).getInterface(scriptObjectMirror, JsDate.class);
 					return jsDate.getTime();
 				}
-				else if (((ScriptObjectMirror) nashornValue).containsKey("_idValue"))
+				else if (((ScriptObjectMirror) nashornValue).containsKey(idValueKey))
 				{
 					// entity object returned from script
-					return ((ScriptObjectMirror) nashornValue).get("_idValue");
+					return ((ScriptObjectMirror) nashornValue).get(idValueKey);
 				}
 				else
 				{
@@ -139,9 +140,9 @@ public class NashornScriptEngine
 		else if (nashornValue instanceof Map)
 		{
 			Map mapValue = (Map) (nashornValue);
-			if (mapValue.get("_idValue") != null)
+			if (mapValue.get(idValueKey) != null)
 			{
-				convertedValue = mapValue.get("_idValue");
+				convertedValue = mapValue.get(idValueKey);
 			}
 			else
 			{
