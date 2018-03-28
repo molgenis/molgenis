@@ -9,16 +9,16 @@ cache:
     - '$HOME/.sonar/cache'
     - '$HOME/Library/Caches/Yarn'
 env:
-  - MAVEN_TESTS="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
-  - MAVEN_TESTS="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
+  # This configures the three separate jobs to run
+  - COV_FLAG="unit"        SONAR="true"  SCRIPT="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+  - COV_FLAG="api"         SONAR="false" SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
   # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
-  - MAVEN_TESTS="travis_wait 50 ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
+  - COV_FLAG="integration" SONAR="false" SCRIPT="travis_wait 50 ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
 services:
   - postgresql
 addons:
   sauce_connect: true
   postgresql: '9.6'
-# Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
 sudo: true
 before_install:
   # Use wrapper script to install fixed maven version
@@ -26,9 +26,10 @@ before_install:
 install:
   - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:
+  # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144
 script:
-  - $MAVEN_TESTS
+  - $SCRIPT
 notifications:
   slack:
     rooms:
@@ -36,4 +37,4 @@ notifications:
       secure: blnxfapt6aAdRDjNvy2Ykp3yPxhRqo0srfz9MI2obKGXFOO2ee+AF0TNosmz9aZG0J3u4e3YI+z9BvjcNMvTzzPCjiLiC3MSbtB9w0SHwhg6q7s1ehVoYKqB22++8S6GEYy5FgBpBLQ+jXEnwiglHfKLowJjvQS8s2NBMhAwEqY=
 after_success:
   - .travis/sonar.sh
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -c -F "${COV_FLAG}"
