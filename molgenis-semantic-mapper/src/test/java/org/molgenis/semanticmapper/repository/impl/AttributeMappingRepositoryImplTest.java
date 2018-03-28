@@ -39,6 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
 import static org.testng.Assert.assertEquals;
@@ -169,6 +170,28 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 
 		assertEquals(attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
 				sourceAttributes);
+	}
+
+	@Test
+	public void testRetrieveAttributesFromAlgorithmWithDotNotation()
+	{
+		String algorithm = "$('person.name').value()";
+
+		Attribute id = attrMetaFactory.create().setName("id");
+		Attribute name = attrMetaFactory.create().setName("name");
+		EntityType referenceEntityType = entityTypeFactory.create("reference");
+		referenceEntityType.addAttribute(id);
+		referenceEntityType.addAttribute(name);
+
+		Attribute person = attrMetaFactory.create().setName("person").setDataType(XREF).setRefEntity(referenceEntityType);
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType.addAttribute(person);
+
+		List<Attribute> expectedSourceAttributes = newArrayList();
+		expectedSourceAttributes.add(person);
+
+		assertEquals(attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
+				expectedSourceAttributes);
 	}
 
 	@Configuration
