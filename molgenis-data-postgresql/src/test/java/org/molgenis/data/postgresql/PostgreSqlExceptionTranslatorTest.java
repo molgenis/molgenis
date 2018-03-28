@@ -49,6 +49,16 @@ public class PostgreSqlExceptionTranslatorTest
 	}
 
 	@Test
+	public void translateValueTooLongViolation()
+	{
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("ERROR: value too long for type character varying(255)");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator.translateValueTooLongViolation();
+		assertEquals(e.getMessage(), "One of the values being added is too long.");
+	}
+
+	@Test
 	public void translateReadonlyViolation()
 	{
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);

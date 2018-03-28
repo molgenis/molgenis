@@ -28,7 +28,10 @@
       ],
       "plugins": [
         "transform-vue-jsx",
-        "istanbul"
+        ["istanbul", {
+          "include": ["src/**"],
+          "exclude": ["src/main.js", "src/QuestionnaireApp.vue", "src/store/index.js"]
+        }]
       ]
     }
   }

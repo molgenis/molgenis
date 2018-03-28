@@ -32,7 +32,16 @@ public class TestPermissionPopulator
 	@Transactional
 	public void populate(Map<String, EntityTypePermission> entityTypePermissionMap)
 	{
-		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		populate(entityTypePermissionMap, SecurityUtils.getCurrentUsername());
+	}
+
+	/**
+	 * Populate entity type permissions for the current user.
+	 */
+	@Transactional
+	public void populate(Map<String, EntityTypePermission> entityTypePermissionMap, String username)
+	{
+		Sid sid = new PrincipalSid(username);
 		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
 		{
 			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));

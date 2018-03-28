@@ -4,17 +4,25 @@ import org.springframework.security.acls.domain.AbstractPermission;
 
 public class EntityPermission extends AbstractPermission
 {
-	public static final EntityPermission COUNT = new EntityPermission(1 << 0, 'C'); // 1
-	public static final EntityPermission READ = new EntityPermission(1 << 1, 'R'); // 2
-	public static final EntityPermission WRITE = new EntityPermission(1 << 2, 'W'); // 4
+	private final String name;
+	public static final EntityPermission COUNT = new EntityPermission("COUNT", 1 << 0, 'C'); // 1
+	public static final EntityPermission READ = new EntityPermission("READ", 1 << 1, 'R'); // 2
+	public static final EntityPermission WRITE = new EntityPermission("WRITE", 1 << 2, 'W'); // 4
 
-	protected EntityPermission(int mask)
+	protected EntityPermission(String name, int mask)
 	{
 		super(mask);
+		this.name = name;
 	}
 
-	protected EntityPermission(int mask, char code)
+	protected EntityPermission(String name, int mask, char code)
 	{
 		super(mask, code);
+		this.name = name;
+	}
+
+	public String getName()
+	{
+		return name;
 	}
 }
