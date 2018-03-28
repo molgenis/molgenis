@@ -65,7 +65,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 | value    | -          | $('Height').value() | JavaScript value |
 
 # Special case: reference types
-If an attribute is a reference type, e.g. an MREF or an XREF, you can use dot notation, e.g. `person.gender`, to access all the data in the row being referenced. Using the default `.value()` will return id values.
+If an attribute is a refereence type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use dot notation, to access the values of different columns in the row being referenced. E.g. `$('cookie.name').value()` gives you the value of the name column inside the table being referenced by the person column. See below for a more detailed example.
 
 Imagine __table A__ referencing __table B__. 
 
@@ -82,7 +82,7 @@ __Table A__
 
 __Table B__
 
-| id | cookie | tastiness |
+| id | name | tastiness |
 |----|--------|-----------|
 | 1  | Chocolate chip | 9/10 |
 
@@ -93,7 +93,7 @@ Expressions allow you to do the following
 
 $('cookie').value() // results in '1'
 $('cookie.id').value() // results in '1'
-$('cookie.cookie').value() // results in 'Chocolate chip'
+$('cookie.name').value() // results in 'Chocolate chip'
 $('cookie.tastiness').value() // results in '9/10'
 ```
 
@@ -107,7 +107,7 @@ __Table A__
 
 __Table B__
 
-| id | cookie | tastiness |
+| id | name | tastiness |
 |----|--------|-----------|
 | 1  | Chocolate chip | 9/10 |
 | 2  | Strawberry cookie | 10/10 |
@@ -121,7 +121,7 @@ $('cookies').map(function (cookie) {
     // You should use one of the following
     cookies.push(cookie.value()) // results in ['1', '2', '3']
     cookies.push(cookie.val.id) // results in ['1', '2', '3']
-    cookies.push(cookie.val.cookie) // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
+    cookies.push(cookie.val.name) // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
     cookies.push(cookie.val.tastiness) // results in ['9/10', '10/10', '7/10']
 });
 cookies
