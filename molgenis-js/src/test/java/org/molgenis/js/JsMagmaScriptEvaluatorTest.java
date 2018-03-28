@@ -14,6 +14,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.Locale;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
@@ -30,8 +31,12 @@ public class JsMagmaScriptEvaluatorTest
 	private static EntityType personWeightAndHeightEntityType;
 	private static EntityType personBirthDateMeta;
 	private static EntityType personAgeEntityType;
-	private static EntityType genderEntityType;
 	private static EntityType personGenderEntityType;
+	private static EntityType personTraitEntityType;
+
+	// Reference tables
+	private static EntityType genderEntityType;
+	private static EntityType traitEntityType;
 
 	private static JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
@@ -76,14 +81,6 @@ public class JsMagmaScriptEvaluatorTest
 		when(personAgeEntityType.getAttribute("age")).thenReturn(ageAttr);
 		when(personAgeEntityType.getAtomicAttributes()).thenReturn(singletonList(ageAttr));
 
-		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
-		when(idAttr.getDataType()).thenReturn(STRING);
-		genderEntityType = when(mock(EntityType.class).getId()).thenReturn("gender").getMock();
-		when(genderEntityType.getIdAttribute()).thenReturn(idAttribute);
-		when(genderEntityType.getIdAttribute()).thenReturn(idAttr);
-		when(genderEntityType.getAttribute("id")).thenReturn(idAttr);
-		when(genderEntityType.getAtomicAttributes()).thenReturn(singletonList(idAttr));
-
 		Attribute genderAttr = when(mock(Attribute.class).getName()).thenReturn("gender").getMock();
 		when(genderAttr.getDataType()).thenReturn(CATEGORICAL);
 		personGenderEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
@@ -91,7 +88,76 @@ public class JsMagmaScriptEvaluatorTest
 		when(personGenderEntityType.getAttribute("gender")).thenReturn(genderAttr);
 		when(personGenderEntityType.getAtomicAttributes()).thenReturn(singletonList(genderAttr));
 
+		Attribute labelAttr = when(mock(Attribute.class).getName()).thenReturn("label").getMock();
+		when(labelAttr.getDataType()).thenReturn(STRING);
+		genderEntityType = when(mock(EntityType.class).getId()).thenReturn("gender").getMock();
+		when(genderEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(genderEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(genderEntityType.getAttribute("label")).thenReturn(labelAttr);
+		when(genderEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, labelAttr));
+
+		Attribute traitAttr = when(mock(Attribute.class).getName()).thenReturn("trait").getMock();
+		when(traitAttr.getDataType()).thenReturn(MREF);
+		personTraitEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personTraitEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personTraitEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personTraitEntityType.getAttribute("trait")).thenReturn(traitAttr);
+		when(personTraitEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, traitAttr));
+
+		Attribute nameAttr = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
+		when(nameAttr.getDataType()).thenReturn(STRING);
+		traitEntityType = when(mock(EntityType.class).getId()).thenReturn("trait").getMock();
+		when(traitEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(traitEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(traitEntityType.getAttribute("name")).thenReturn(nameAttr);
+		when(traitEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, nameAttr));
+
 		jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new NashornScriptEngine());
+	}
+
+	@Test
+	public void testValueForXref()
+	{
+		Entity gender = new DynamicEntity(genderEntityType);
+		gender.set("id", "1");
+		gender.set("label", "male");
+
+		Entity person = new DynamicEntity(personGenderEntityType);
+		person.set("gender", gender);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person);
+		assertEquals(result.toString(), "male");
+	}
+
+	@Test
+	public void testValueForMref()
+	{
+		Entity trait = new DynamicEntity(traitEntityType);
+		trait.set("id", "1");
+		trait.set("name", "Hello");
+
+		Entity person = new DynamicEntity(personTraitEntityType);
+		person.set("id", "1");
+		person.set("trait", singletonList(trait));
+
+		Object result = jsMagmaScriptEvaluator.eval("$('trait').value()", person);
+		assertEquals(result.toString(), "[1]");
+	}
+
+	@Test
+	public void testValueForMrefWithComplexAlgorithm()
+	{
+		Entity trait = new DynamicEntity(traitEntityType);
+		trait.set("id", "1");
+		trait.set("name", "Hello");
+
+		Entity person = new DynamicEntity(personTraitEntityType);
+		person.set("id", "1");
+		person.set("trait", singletonList(trait));
+
+		Object result = jsMagmaScriptEvaluator.eval(
+				"var result = [];$('trait').map(function (entity) {result.push(entity.val.name)});result", person);
+		assertEquals(result.toString(), "[Hello]");
 	}
 
 	@Test
