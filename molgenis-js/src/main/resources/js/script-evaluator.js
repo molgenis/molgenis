@@ -27,7 +27,7 @@ function evalScript (script, entity) {
        */
       value: function () {
         if (this.val !== null && typeof this.val === 'object') {
-          if (this.val['_idValue'] === undefined) {
+          if (this.val['_idValue'] !== undefined) {
 
             // Map a list of entities to a list of ID's
             if (Array.isArray(this.val)) {

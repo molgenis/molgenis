@@ -184,26 +184,28 @@ public class JsMagmaScriptEvaluatorTest
 	public void mapSimple()
 	{
 		Entity gender = new DynamicEntity(genderEntityType);
-		gender.set("id", "B");
+		gender.set("id", "m");
+		gender.set("label", "Male");
 
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", person);
-		assertEquals(result.toString(), "B2");
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'m':'Male'}).value()", person);
+		assertEquals(result.toString(), "Male");
 	}
 
 	@Test
 	public void mapDefault()
 	{
 		Entity gender = new DynamicEntity(genderEntityType);
-		gender.set("id", "B");
+		gender.set("id", "f");
+		gender.set("label", "Female");
 
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2').value()", person);
-		assertEquals(result.toString(), "B2");
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'m':'Male'}, 'Female').value()", person);
+		assertEquals(result.toString(), "Female");
 	}
 
 	@Test
