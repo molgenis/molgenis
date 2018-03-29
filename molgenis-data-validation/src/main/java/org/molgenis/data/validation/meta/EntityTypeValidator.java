@@ -130,6 +130,15 @@ public class EntityTypeValidator
 						format("Label attribute [%s] is not part of the entity attributes", ownLabelAttr.getName())));
 			}
 		}
+		else
+		{
+			if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible())
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("EntityType [%s] must define a label attribute because the identifier is hidden",
+								entityType.getId())));
+			}
+		}
 	}
 
 	/**
@@ -176,14 +185,6 @@ public class EntityTypeValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("EntityType [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
 								ownIdAttr.getName())));
-			}
-
-			// Validate that there is a label if the ID attribute is hidden
-			if (!ownIdAttr.isVisible() && entityType.getLabelAttribute() == null)
-			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("The ID attribute of EntityType [%s] can not be hidden because there is no label attribute specified",
-								entityType.getId())));
 			}
 		}
 		else
