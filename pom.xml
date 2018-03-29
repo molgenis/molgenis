@@ -602,7 +602,7 @@
                             <phase>test</phase>
                             <configuration>
                                 <skip>${skip.js}</skip>
-                                <arguments>test</arguments>
+                                <arguments>unit</arguments>
                                 <failOnError>true</failOnError>
                             </configuration>
                         </execution>
