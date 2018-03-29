@@ -831,7 +831,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		baseEntityTypePermissionMap.put("sys_md_EntityType", READ);
 		baseEntityTypePermissionMap.put("sys_md_Attribute", READ);
 		baseEntityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-
 		baseEntityTypePermissionMap.put(entityTypeStatic.getId(), READ);
 		baseEntityTypePermissionMap.put(refEntityTypeStatic.getId(), READ);
 
