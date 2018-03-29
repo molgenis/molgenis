@@ -106,6 +106,13 @@ public class EntityTypeValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Lookup attribute [%s] is not part of the entity attributes", ownLookupAttr.getName())));
 			}
+
+			// Validate that the lookup attribute is visible
+			if (!ownLookupAttr.isVisible())
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Lookup attribute [%s] must be visible", ownLookupAttr.getName())));
+			}
 		});
 	}
 

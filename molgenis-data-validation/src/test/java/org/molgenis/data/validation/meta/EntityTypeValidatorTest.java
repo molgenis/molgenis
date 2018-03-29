@@ -64,6 +64,7 @@ public class EntityTypeValidatorTest
 		labelAttr = when(mock(Attribute.class).getName()).thenReturn("labelAttr").getMock();
 		when(labelAttr.getIdentifier()).thenReturn("#labelAttr");
 		when(labelAttr.getDataType()).thenReturn(STRING);
+		when(labelAttr.isVisible()).thenReturn(true);
 
 		entityQ = mock(Query.class);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(entityQ);
@@ -267,6 +268,13 @@ public class EntityTypeValidatorTest
 	{
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnLabelAttribute()).thenReturn(null);
+		entityTypeValidator.validate(entityType);
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Lookup attribute \\[labelAttr\\] must be visible")
+	public void testValidateLookupAttributeHidden()
+	{
+		when(labelAttr.isVisible()).thenReturn(false);
 		entityTypeValidator.validate(entityType);
 	}
 
