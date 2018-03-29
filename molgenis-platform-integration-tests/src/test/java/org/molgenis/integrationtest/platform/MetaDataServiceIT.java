@@ -6,6 +6,8 @@ import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.DynamicEntity;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.time.ZoneId.systemDefault;
 import static java.util.Arrays.asList;
@@ -35,9 +38,12 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITEMETA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -47,8 +53,8 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 {
 	private static final String USERNAME = "metaDataService-user";
 
-	private static EntityType entityType;
-	private static EntityType refEntityType;
+	private static final String ENTITY_TYPE_ID = "metaDataServiceEntityType";
+	private static final String REF_ENTITY_TYPE_ID = "metaDataServiceRefEntityType";
 	private static List<Entity> refEntities;
 
 	@Autowired
@@ -61,6 +67,8 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	private MetaDataService metaDataService;
 	@Autowired
 	private DataService dataService;
+	@Autowired
+	private AttributeFactory attributeFactory;
 
 	@BeforeClass
 	public void setUpBeforeClass() throws InterruptedException
@@ -81,7 +89,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntityType()
 	{
-		EntityType updatedEntityType = metaDataService.getEntityType(entityType.getId());
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
 		updatedEntityType.getAttribute(ATTR_STRING).setDataType(ENUM).setEnumOptions(asList("string0", "string1"));
 		updatedEntityType.getAttribute(ATTR_BOOL).setDataType(STRING);
 		updatedEntityType.getAttribute(ATTR_CATEGORICAL).setDataType(LONG).setRefEntity(null);
@@ -122,7 +130,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		expectedEntity.set(ATTR_ENUM, "option1");
 		expectedEntity = new EntityWithComputedAttributes(expectedEntity);
 
-		assertTrue(EntityUtils.equals(dataService.findOneById(entityType.getId(), "0"), expectedEntity));
+		assertTrue(EntityUtils.equals(dataService.findOneById(ENTITY_TYPE_ID, "0"), expectedEntity));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -130,9 +138,48 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[INT\\] to \\[DATE_TIME\\] not allowed, allowed types are \\[BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF\\]")
 	public void testUpdateEntityTypeNotAllowed()
 	{
-		EntityType updatedEntityType = metaDataService.getEntityType(entityType.getId());
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
 		updatedEntityType.getAttribute(ATTR_COMPOUND_CHILD_INT).setDataType(DATE_TIME);
 		metaDataService.updateEntityType(updatedEntityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(dependsOnMethods = { "testUpdateEntityType", "testUpdateEntityTypeNotAllowed" })
+	public void testAddAttribute()
+	{
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		Attribute attribute = attributeFactory.create().setName("newAttribute");
+		attribute.setEntity(entityType);
+		metaDataService.addAttribute(attribute);
+
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(dependsOnMethods = { "testAddAttribute" })
+	public void testUpdateAttribute()
+	{
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		Attribute attribute = entityType.getAttribute("newAttribute");
+		attribute.setLabel("updated-label");
+		attribute.setEntity(entityType);
+		dataService.update(ATTRIBUTE_META_DATA, attribute);
+
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(dependsOnMethods = { "testUpdateAttribute" })
+	public void testDeleteAttribute()
+	{
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		String attributeId = entityType.getAttribute("newAttribute").getIdentifier();
+		metaDataService.deleteAttributeById(attributeId);
+
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		assertNull(updatedEntityType.getAttribute("newAttribute"));
 	}
 
 	private void populate()
@@ -152,12 +199,13 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	private void populateData()
 	{
-		refEntityType = entityTestHarness.createDynamicRefEntityType();
+		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType("metaDataServiceRefEntityType");
 		metaDataService.createRepository(refEntityType);
 		refEntities = entityTestHarness.createTestRefEntities(refEntityType, 3);
 		dataService.add(refEntityType.getId(), refEntities.stream());
 
-		entityType = entityTestHarness.createDynamicTestEntityType(refEntityType);
+		EntityType entityType = entityTestHarness.createDynamicTestEntityType(refEntityType,
+				"metaDataServiceEntityType");
 		metaDataService.createRepository(entityType);
 		List<Entity> entities = entityTestHarness.createTestEntities(entityType, 1, refEntities).collect(toList());
 		dataService.add(entityType.getId(), entities.stream());
@@ -170,14 +218,16 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		entityTypePermissionMap.put("sys_md_EntityType", WRITEMETA);
 		entityTypePermissionMap.put("sys_md_Attribute", WRITEMETA);
 		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		entityTypePermissionMap.put(entityType.getId(), WRITEMETA);
-		entityTypePermissionMap.put(refEntityType.getId(), READ);
+		entityTypePermissionMap.put(ENTITY_TYPE_ID, WRITEMETA);
+		entityTypePermissionMap.put(REF_ENTITY_TYPE_ID, READ);
 		testPermissionPopulator.populate(entityTypePermissionMap, USERNAME);
 	}
 
 	private void depopulate()
 	{
-		dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
+		List<EntityType> entityTypes = dataService.findAll(ENTITY_TYPE_META_DATA,
+				Stream.of(ENTITY_TYPE_ID, REF_ENTITY_TYPE_ID), EntityType.class).collect(toList());
+		dataService.getMeta().deleteEntityType(entityTypes);
 
 		try
 		{

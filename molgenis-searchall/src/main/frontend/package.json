@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",
-    "test": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
-    "test:watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --watch",
-    "test:debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js -i --watch",
+    "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
+    "unit:watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --watch",
+    "unit:debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js -i --watch",
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "lint:fix": "eslint --fix --ext .js,.vue src test/unit/specs"
   },
