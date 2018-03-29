@@ -27,9 +27,16 @@
 
     <div class="row">
           <div class="col-md-12">
+            <a
+              id="cancel-btn"
+              v-bind:href="dataExplorerBaseUrl"
+              class="btn btn-secondary">
+              Cancel
+            </a>
+
             <button
               v-if="!isSaving"
-              id="save-btn-top"
+              id="save-btn"
               class="btn btn-primary"
               type="submit"
               @click.prevent="onSubmit"
@@ -61,6 +68,7 @@
     name: 'DataRowEdit',
     data () {
       return {
+        dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl,
         dataTableLabel: '',
         dataTableId: 'sys_Language',
         dataRowId: 'en',

@@ -2,6 +2,7 @@ package org.molgenis.data.row.edit.controller;
 
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
@@ -33,6 +34,7 @@ public class DataRowEditController extends VuePluginController
 	public String init(Model model)
 	{
 		super.init(model, ID);
+		model.addAttribute("dataExplorerBaseUrl", getBaseUrl(DataExplorerController.ID));
 		return VIEW_TEMPLATE;
 	}
 }
