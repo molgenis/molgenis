@@ -1020,9 +1020,10 @@ var EntityEditBtn = React.createClass({
         }) : null;
     },
     _handleEdit: function () {
-        this.setState({
-            form: true
-        });
+        // this.setState({
+        //     form: true
+        // });
+        window.location.href = window.location.origin + '/menu/main/data-row-edit/' + this.props.name + '/' + this.props.id;
     },
     _handleEditCancel: function () {
         this.setState({
