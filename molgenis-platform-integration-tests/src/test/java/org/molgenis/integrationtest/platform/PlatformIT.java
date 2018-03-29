@@ -22,7 +22,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -314,35 +313,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 			assertPresent(entityTypeDynamic, entities);
 		}
-	}
-
-	@WithMockUser(username = USERNAME)
-	@Test(singleThreaded = true)
-	public void testDeleteMrefReference()
-	{
-		populateUserPermissions();
-
-		Entity entity = createDynamicAndAdd(1).get(0);
-		Entity refEntity = dataService.findOneById(refEntityTypeDynamic.getId(), "2");
-		assertPresent(entityTypeDynamic, entity);
-		entity.set(ATTR_MREF, singletonList(refEntity));
-
-		try
-		{
-			runAsSystem(() ->
-			{
-				dataService.update(entityTypeDynamic.getId(), entity);
-				dataService.deleteById(refEntityTypeDynamic.getId(), refEntity.getIdValue());
-			});
-			fail("Should throw exception!");
-		}
-		catch (MolgenisValidationException expected)
-		{
-			assertEquals(expected.getMessage(),
-					"Value '2' for attribute 'ref_id_attr' is referenced by entity 'TypeTestDynamic'.");
-		}
-
-		waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
 	}
 
 	@WithMockUser(username = USERNAME)
