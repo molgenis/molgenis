@@ -232,8 +232,19 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testValidateOwnLabelAttributeNull()
+	public void testValidateOwnLabelAttributeNullIdAttributeVisible()
 	{
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(idAttr.isVisible()).thenReturn(true);
+		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] must define a label attribute because the identifier is hidden")
+	public void testValidateOwnLabelAttributeNullIdAttributeInvisible()
+	{
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(idAttr.isVisible()).thenReturn(false);
+		when(entityType.getId()).thenReturn("entity");
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
 	}
 
@@ -364,9 +375,14 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		when(idAttr.getIdentifier()).thenReturn("abcde");
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(idAttr.isUnique()).thenReturn(true);
+		when(idAttr.isVisible()).thenReturn(true);
 		when(entityType.getAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
 		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(entityType.getBackend()).thenReturn("PostgreSQL");
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.hasBackend("PostgreSQL")).thenReturn(true);
 		entityTypeValidator.validate(entityType);
 	}
 }
