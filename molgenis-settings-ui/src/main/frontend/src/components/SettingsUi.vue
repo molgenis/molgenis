@@ -30,6 +30,7 @@
             type="submit"
             @click.prevent="onSubmit"
             :disabled="formState.$pristine || formState.$invalid">
+            Save changes
           </button>
 
           <button
