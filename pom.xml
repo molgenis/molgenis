@@ -606,6 +606,18 @@
                                 <failOnError>true</failOnError>
                             </configuration>
                         </execution>
+                        <execution>
+                            <id>yarn e2e ci</id>
+                            <goals>
+                                <goal>yarn</goal>
+                            </goals>
+                            <phase>test</phase>
+                            <configuration>
+                                <skip>${isPullRequest}</skip>
+                                <arguments>e2e --env ci_chrome,ci_safari,ci_ie11,ci_firefox</arguments>
+                                <failOnError>true</failOnError>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
             </plugins>
