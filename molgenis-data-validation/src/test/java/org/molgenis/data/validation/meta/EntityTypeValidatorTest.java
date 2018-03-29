@@ -232,6 +232,14 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 	}
 
 	@Test
+	public void testValidateOwnIdAttributeParentHasIdAttribute()
+	{
+		when(entityType.getOwnIdAttribute()).thenReturn(null);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		EntityTypeValidator.validateOwnIdAttribute(entityType, emptyMap());
+	}
+
+	@Test
 	public void testValidateOwnLabelAttributeNullIdAttributeVisible()
 	{
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
