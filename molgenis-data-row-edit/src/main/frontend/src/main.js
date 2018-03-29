@@ -16,6 +16,12 @@ const dataRowEditRouter = new Router({
     {
       path: '/:dataTableId/:rowId',
       component: DataRowEdit
+    },
+    {
+      path: '/',
+      redirect: to => {
+        window.location.href = window.location.origin + window.__INITIAL_STATE__.dataExplorerBaseUrl
+      }
     }
   ]
 })

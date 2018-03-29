@@ -16,7 +16,7 @@
     <div v-if="showForm">
       <h2>{{dataTableLabel}}</h2>
       <form-component
-        id="settings-form"
+        id="data-row-edit-form"
         :formFields="formFields"
         :initialFormData="formData"
         :formState="formState"
@@ -104,7 +104,7 @@
       handleSuccess () {
         this.formState._reset()
         this.alert = {
-          message: 'Settings saved',
+          message: 'changes saved',
           type: 'success'
         }
         this.isSaving = false
@@ -120,6 +120,7 @@
       }
     },
     created: function () {
+      console.log('created data row edit component')
       this.dataTableId = this.$route.params.dataTableId
       this.dataRowId = this.$route.params.rowId
       api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then(this.initializeForm, this.handleError)

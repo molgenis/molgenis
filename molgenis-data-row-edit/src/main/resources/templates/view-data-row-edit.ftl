@@ -16,7 +16,7 @@
         lng: '${lng}',
         fallbackLng: '${fallbackLng}',
         isSuperUser: ${isSuperUser?c},
-        dataExplorerBaseUrl: '${dataExplorerBaseUrl}'</#if>
+        dataExplorerBaseUrl: '${dataExplorerBaseUrl}'
     }
 </script>
 
