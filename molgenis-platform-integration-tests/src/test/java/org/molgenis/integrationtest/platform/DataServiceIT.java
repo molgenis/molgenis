@@ -161,7 +161,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		Repository repo = dataService.getRepository(entityType.getId());
 
 		// Repository equals not implemented: repository from dataService and dataService.getRepository are not the same
-		assertTrue(StreamSupport.stream(dataService.spliterator(), false).anyMatch(e -> repo.getName().equals(e.getName())));
+		assertTrue(StreamSupport.stream(dataService.spliterator(), false)
+								.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -254,14 +255,17 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 				{ ATTR_DATETIME, parseInstant("1985-08-12T11:12:13+0500"), asList(0, 1, 2) },
 				{ ATTR_DECIMAL, 1.123, singletonList(1) },
 				{ ATTR_HTML, "<html>where is my head and where is my body</html>", singletonList(1) },
-				{ ATTR_HYPERLINK, "http://www.molgenis.org", asList(0, 1, 2) }, { ATTR_LONG, 1000000L, singletonList(1) }, { ATTR_INT, 11, singletonList(1) },
+				{ ATTR_HYPERLINK, "http://www.molgenis.org", asList(0, 1, 2) },
+				{ ATTR_LONG, 1000000L, singletonList(1) }, { ATTR_INT, 11, singletonList(1) },
 				{ ATTR_SCRIPT, "/bin/blaat/script.sh", asList(0, 1, 2) },
 				{ ATTR_EMAIL, "this.is@mail.address", asList(0, 1, 2) },
 				// null checks
 				{ ATTR_ID, null, emptyList() }, { ATTR_STRING, null, emptyList() }, { ATTR_BOOL, null, emptyList() },
 				{ ATTR_CATEGORICAL, null, emptyList() }, { ATTR_CATEGORICAL_MREF, null, emptyList() },
-				{ ATTR_DATE, null, emptyList() }, { ATTR_DATETIME, null, emptyList() }, { ATTR_DECIMAL, null, emptyList() }, { ATTR_HTML, null, asList(0, 2) },
-				{ ATTR_HYPERLINK, null, emptyList() }, { ATTR_LONG, null, emptyList() }, { ATTR_INT, 11, singletonList(1) }, { ATTR_SCRIPT, null, emptyList() },
+				{ ATTR_DATE, null, emptyList() }, { ATTR_DATETIME, null, emptyList() },
+				{ ATTR_DECIMAL, null, emptyList() }, { ATTR_HTML, null, asList(0, 2) },
+				{ ATTR_HYPERLINK, null, emptyList() }, { ATTR_LONG, null, emptyList() },
+				{ ATTR_INT, 11, singletonList(1) }, { ATTR_SCRIPT, null, emptyList() },
 				{ ATTR_EMAIL, null, emptyList() }, { ATTR_XREF, null, emptyList() }, { ATTR_MREF, null, emptyList() } };
 	}
 
@@ -282,7 +286,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorGreater")
 	private static Object[][] findQueryOperatorGreater()
 	{
-		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, singletonList(2) }, { 12, emptyList() } };
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, singletonList(2) },
+				{ 12, emptyList() } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -341,14 +346,18 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorNot")
 	private static Object[][] findQueryOperatorNot()
 	{
-		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) }, { 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) },
+				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorNot")
 	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).not().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .not()
+														  .eq(ATTR_INT, value)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -416,7 +425,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorNested")
-	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value, List<Integer> expectedEntityIndices)
+	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
+			List<Integer> expectedEntityIndices)
 	{
 		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
 														  .eq(ATTR_BOOL, boolValue)
@@ -458,7 +468,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorLessEqual")
 	private static Object[][] findQueryOperatorLessEqual()
 	{
-		return new Object[][] { { 9, emptyList() }, { 10, singletonList(0) }, { 11, asList(0, 1) }, { 12, asList(0, 1, 2) } };
+		return new Object[][] { { 9, emptyList() }, { 10, singletonList(0) }, { 11, asList(0, 1) },
+				{ 12, asList(0, 1, 2) } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -484,7 +495,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorLike")
 	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).like(ATTR_STRING, likeStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .like(ATTR_STRING, likeStr)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -516,14 +529,17 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorSearch")
 	private static Object[][] findQueryOperatorSearch()
 	{
-		return new Object[][] { { "body", singletonList(1) }, { "head", singletonList(1) }, { "unknownString", emptyList() } };
+		return new Object[][] { { "body", singletonList(1) }, { "head", singletonList(1) },
+				{ "unknownString", emptyList() } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorSearch")
 	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).search(ATTR_HTML, searchStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .search(ATTR_HTML, searchStr)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -606,7 +622,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 																.attrX(entityType.getAttribute(ATTR_BOOL));
 		AggregateResult result = dataService.aggregate(entityType.getId(), aggregateQuery);
 
-		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(2L)), asList(0L, 1L), emptyList());
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(2L)),
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
@@ -619,7 +636,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 																.attrDistinct(entityType.getAttribute(ATTR_ENUM));
 		AggregateResult result = dataService.aggregate(entityType.getId(), aggregateQuery);
 
-		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)), asList(0L, 1L), emptyList());
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)),
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
