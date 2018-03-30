@@ -8,8 +8,7 @@
  * @returns the evaluated script result
  */
 function evalScript (script, entity) {
-
-  function attribute (value) {
+  function Attribute (value) {
 
     var attribute = {
       /**
@@ -20,11 +19,25 @@ function evalScript (script, entity) {
        * Example: $('Height').value() returns the values of the height
        * attribute
        *
+       * If the value is an object, return the idValue
+       *
        * @memberof $
        * @method value
        *
        */
       value: function () {
+        if (this.val !== null && typeof this.val === 'object') {
+          if (this.val['_idValue'] !== undefined) {
+
+            // Map a list of entities to a list of ID's
+            if (Array.isArray(this.val)) {
+              return this.val.map(function(value) {
+                return newValue(value).value()
+              })
+            }
+            return this.val['_idValue']
+          }
+        }
         return this.val
       },
 
@@ -36,7 +49,7 @@ function evalScript (script, entity) {
         try {
           JSON.parse(this.val)
           this.val = true
-        } catch(e) {
+        } catch (e) {
           this.val = false
         }
         return this
@@ -152,13 +165,18 @@ function evalScript (script, entity) {
        * @method map
        */
       map: function (categoryMapping, defaultValue, nullValue) {
-        if (this.val in categoryMapping) {
-          this.val = categoryMapping[this.val]
+        if (typeof categoryMapping === 'function') {
+          this.val = this.val.map(newValue).map(categoryMapping)
         } else {
-          if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
-            this.val = nullValue
+          this.val = this.value()
+          if (this.val in categoryMapping) {
+            this.val = categoryMapping[this.val]
           } else {
-            this.val = defaultValue
+            if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
+              this.val = nullValue
+            } else {
+              this.val = defaultValue
+            }
           }
         }
         return this
@@ -237,7 +255,7 @@ function evalScript (script, entity) {
         } else if (_isNull(this.val) && !_isNull(other)) {
           this.val = false
         } else {
-          this.val = (this.val === other)
+          this.val = (this.value() === other)
         }
         return this
       },
@@ -316,7 +334,7 @@ function evalScript (script, entity) {
        * @method gt
        */
       gt: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val > value)
+        this.val = _isNull(this.val) ? false : (this.value() > value)
         return this
       },
       /**
@@ -331,7 +349,7 @@ function evalScript (script, entity) {
        * @method lt
        */
       lt: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val < value)
+        this.val = _isNull(this.val) ? false : (this.value() < value)
         return this
       },
       /**
@@ -347,7 +365,7 @@ function evalScript (script, entity) {
        * @method ge
        */
       ge: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val >= value)
+        this.val = _isNull(this.val) ? false : (this.value() >= value)
         return this
       },
       /**
@@ -362,7 +380,7 @@ function evalScript (script, entity) {
        * @method le
        */
       le: function (value) {
-        this.val = _isNull(this.val) ? false : (this.val <= value)
+        this.val = _isNull(this.val) ? false : (this.value() <= value)
         return this
       },
       /**
@@ -409,15 +427,24 @@ function evalScript (script, entity) {
    * Stores the computed attribute value after applying on of the mathematical
    * functions listed below
    *
+   * In case of deep referencing attribute e.g. xref.xref2.label, we loop through these attributes and only return
+   * new Attribute(label)
+   *
    * @version 1.0
    * @namespace $
    */
   function $ (attr) {
-    return new attribute(this[attr])
+    var attributes = attr.split('\.')
+    var result = this
+
+    for (var i = 0; i < attributes.length && result !== null; i++) {
+      result = result[attributes[i]]
+    }
+    return new Attribute(result)
   }
 
   function newValue (value) {
-    return new attribute(value)
+    return new Attribute(value)
   }
 
   $ = $.bind(entity)

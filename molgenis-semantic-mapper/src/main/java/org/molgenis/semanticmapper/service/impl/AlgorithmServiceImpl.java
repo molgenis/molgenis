@@ -176,7 +176,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Matcher matcher = Pattern.compile(patternString).matcher(algorithmScript);
 		while (matcher.find())
 		{
-			result.add(matcher.group(1));
+			result.add(matcher.group(1).split("\\.")[0]);
 		}
 		return result;
 	}
