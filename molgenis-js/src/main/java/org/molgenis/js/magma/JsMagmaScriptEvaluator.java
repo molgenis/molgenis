@@ -30,13 +30,18 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 public class JsMagmaScriptEvaluator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
-	private static final int ENTITY_REFERENCE_FETCHING_DEPTH = 3;
+	private static final int ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH = 1;
 
 	private final NashornScriptEngine jsScriptEngine;
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
 		this.jsScriptEngine = requireNonNull(jsScriptEngine);
+	}
+
+	public Object eval(String expression, Entity entity)
+	{
+		return eval(expression, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
 	}
 
 	/**
@@ -46,7 +51,7 @@ public class JsMagmaScriptEvaluator
 	 * @param entity     entity
 	 * @return evaluated expression result, return type depends on the expression.
 	 */
-	public Object eval(String expression, Entity entity)
+	public Object eval(String expression, Entity entity, int depth)
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
@@ -54,7 +59,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Object scriptEngineValueMap = toScriptEngineValueMap(entity, ENTITY_REFERENCE_FETCHING_DEPTH);
+		Object scriptEngineValueMap = toScriptEngineValueMap(entity, depth);
 		Object value;
 		try
 		{
