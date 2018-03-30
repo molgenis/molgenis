@@ -2,7 +2,6 @@ package org.molgenis.ontology.importer;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.ontology.core.importer.OntologyImportService;
@@ -27,11 +26,6 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 
 	private OntologyImportService ontologyImportService;
 
-	public OntologyImportServiceTest()
-	{
-		super(Strictness.WARN);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -40,7 +34,7 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDoImport() throws Exception
+	public void testDoImport()
 	{
 		String entityTypeId0 = "entityTypeId0";
 		String entityTypeId1 = "entityTypeId1";
@@ -52,15 +46,15 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 		when(sourceRepository1.spliterator()).thenReturn(singletonList(entity1).spliterator());
 		RepositoryCollection repositoryCollection = mock(RepositoryCollection.class);
 		when(repositoryCollection.getEntityTypeIds()).thenReturn(asList(entityTypeId0, entityTypeId1));
-		when(repositoryCollection.getRepository(entityTypeId0)).thenReturn(sourceRepository0);
-		when(repositoryCollection.getRepository(entityTypeId1)).thenReturn(sourceRepository1);
+		doReturn(sourceRepository0).when(repositoryCollection).getRepository(entityTypeId0);
+		doReturn(sourceRepository1).when(repositoryCollection).getRepository(entityTypeId1);
 
 		Repository<Entity> targetRepository0 = mock(Repository.class);
 		when(targetRepository0.add(any(Stream.class))).thenReturn(1);
 		Repository<Entity> targetRepository1 = mock(Repository.class);
 		when(targetRepository1.add(any(Stream.class))).thenReturn(1);
-		when(dataService.getRepository(entityTypeId0)).thenReturn(targetRepository0);
-		when(dataService.getRepository(entityTypeId1)).thenReturn(targetRepository1);
+		doReturn(targetRepository0).when(dataService).getRepository(entityTypeId0);
+		doReturn(targetRepository1).when(dataService).getRepository(entityTypeId1);
 
 		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection, DatabaseAction.ADD,
 				null);
