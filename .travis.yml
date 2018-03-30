@@ -4,13 +4,13 @@ jdk: oraclejdk8
 dist: trusty
 # Caches downloaded libraries between builds
 cache:
+  yarn: true
   directories:
     - '$HOME/.m2/repository'
     - '$HOME/.sonar/cache'
-    - '$HOME/Library/Caches/Yarn'
 env:
   # This configures the three separate jobs to run
-  - COV_FLAG="unit"        SONAR="true"  SCRIPT="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+  - COV_FLAG="unit"        SONAR="true"  SCRIPT="./mvnw verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dskip.js.build=true -DskipITs"
   - COV_FLAG="api"         SONAR="false" SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
   # Travis aborts a job if it doesn't write to console for more than 10 minutes, use travis_wait to prevent this
   - COV_FLAG="integration" SONAR="false" SCRIPT="travis_wait 50 ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"

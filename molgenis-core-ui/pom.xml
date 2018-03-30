@@ -19,6 +19,7 @@
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>${frontend-maven-plugin.version}</version>
+                <configuration combine.self="override"/>
                 <executions>
                     <execution>
                         <id>install node and npm</id>
@@ -80,6 +81,68 @@
                         <configuration>
                             <skip>${webpack.production}</skip>
                             <arguments>run-script build</arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- skip parent executions -->
+                    <execution>
+                        <id>install node and yarn</id>
+                        <goals>
+                            <goal>install-node-and-yarn</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration combine.self="override">
+                            <skip>true</skip>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarn.version}</yarnVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>yarn install</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>yarn</goal>
+                        </goals>
+                        <configuration combine.self="override">
+                            <skip>true</skip>
+                            <arguments>--mutex network --frozen-lockfile</arguments>
+                            <failOnError>true</failOnError>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>yarn build</id>
+                        <goals>
+                            <goal>yarn</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration combine.self="override">
+                            <skip>true</skip>
+                            <arguments>run build</arguments>
+                            <failOnError>true</failOnError>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>yarn test</id>
+                        <goals>
+                            <goal>yarn</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration combine.self="override">
+                            <skip>true</skip>
+                            <arguments>unit</arguments>
+                            <failOnError>true</failOnError>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>yarn e2e ci</id>
+                        <goals>
+                            <goal>yarn</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration combine.self="override">
+                            <skip>true</skip>
+                            <arguments>e2e --env ci_chrome,ci_safari,ci_ie11,ci_firefox</arguments>
+                            <failOnError>true</failOnError>
                         </configuration>
                     </execution>
                 </executions>

@@ -25,6 +25,8 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Application bootstrapper
+ *
+ * TODO code duplication with org.molgenis.integrationtest.platform.PlatformBootstrapper
  */
 @SuppressWarnings("unused")
 @Component
