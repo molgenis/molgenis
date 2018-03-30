@@ -27,12 +27,12 @@
 
     <div class="row">
           <div class="col-md-12">
-            <a
+            <button
               id="cancel-btn"
-              v-bind:href="dataExplorerBaseUrl"
+              @click.prevent="goBackToPluginCaller"
               class="btn btn-secondary">
               Cancel
-            </a>
+            </button>
 
             <button
               v-if="!isSaving"
@@ -90,7 +90,10 @@
           body: JSON.stringify(this.formData)
         }
         const uri = '/api/v1/' + this.dataTableId + '/' + this.dataRowId + '?_method=PUT'
-        api.post(uri, options).then(this.handleSuccess, this.handleError)
+        api.post(uri, options).then(this.goBackToPluginCaller, this.handleError)
+      },
+      goBackToPluginCaller () {
+        window.history.go(-1)
       },
       clearAlert () {
         this.alert = null
@@ -100,14 +103,6 @@
           message: typeof message !== 'string' ? 'An error has occurred.' : message,
           type: 'danger'
         }
-      },
-      handleSuccess () {
-        this.formState._reset()
-        this.alert = {
-          message: 'changes saved',
-          type: 'success'
-        }
-        this.isSaving = false
       },
       initializeForm (response) {
         // noinspection JSUnusedLocalSymbols
