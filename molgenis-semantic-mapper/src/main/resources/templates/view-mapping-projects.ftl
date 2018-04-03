@@ -33,7 +33,6 @@
             <tr>
                 <th></th>
                 <th>Mapping name</th>
-                <th>Owner</th>
                 <th>Target entities</th>
                 <th>Mapped sources</th>
             </tr>
@@ -52,26 +51,23 @@
                     <#if broken == false>
                     <tr>
                         <td>
-                            <#if user == project.owner.username || admin>
-                                <form method="post" action="${context_url}/removeMappingProject"
-                                      class="pull-left verify">
-                                    <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-                                    <button type="submit" class="btn btn-danger btn-xs"><span
-                                            class="glyphicon glyphicon-trash"></span></button>
-                                </form>
-                                <form method="post" action="${context_url}/mappingproject/clone" class="pull-left">
-                                    <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
-                                    <button type="submit" class="btn btn-default btn-xs clone-btn"><span
-                                            class="glyphicon glyphicon-duplicate"></span></button>
-                                </form>
-                            </#if>
+                            <form method="post" action="${context_url}/removeMappingProject"
+                                  class="pull-left verify">
+                                <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+                                <button type="submit" class="btn btn-danger btn-xs"><span
+                                        class="glyphicon glyphicon-trash"></span></button>
+                            </form>
+                            <form method="post" action="${context_url}/mappingproject/clone" class="pull-left">
+                                <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                                <button type="submit" class="btn btn-default btn-xs clone-btn"><span
+                                        class="glyphicon glyphicon-duplicate"></span></button>
+                            </form>
                         </td>
                         <td>
                             <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
-                        <td>${project.owner.username?html}</td>
                         <td>
                             <#list project.mappingTargets as target>
-                            ${target.name?html}<#if target_has_next>, </#if>
+                                ${target.name?html}<#if target_has_next>, </#if>
                             </#list>
                         </td>
                         <td>
@@ -83,19 +79,14 @@
                     <#else>
                     <tr class="danger">
                         <td>
-                            <#if user==project.owner.username || admin>
-                                <form method="post" action="${context_url}/removeMappingProject"
-                                      class="pull-left verify">
-                                    <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-                                    <button type="submit" class="btn btn-danger btn-xs"><span
-                                            class="glyphicon glyphicon-trash"></span></button>
-                                </form>
-                            </#if>
+                            <form method="post" action="${context_url}/removeMappingProject"
+                                  class="pull-left verify">
+                                <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
+                                <button type="submit" class="btn btn-danger btn-xs"><span
+                                        class="glyphicon glyphicon-trash"></span></button>
+                            </form>
                         </td>
-                        <td>
-                        ${project.name?html}
-                        </td>
-                        <td>${project.owner.username?html}</td>
+                        <td>${project.name?html}</td>
                         <td colspan="2"><b>Broken project: some entities are missing</b></td>
                     </tr>
                     </#if>

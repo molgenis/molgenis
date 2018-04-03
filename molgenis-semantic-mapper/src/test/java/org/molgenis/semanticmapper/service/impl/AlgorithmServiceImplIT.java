@@ -13,8 +13,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.DynamicEntity;
@@ -79,9 +77,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	private AlgorithmService algorithmService;
 
 	@Autowired
-	private DataService dataService;
-
-	@Autowired
 	private EntityManager entityManager;
 
 	@Autowired
@@ -92,9 +87,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AlgorithmTemplateService algorithmTemplateService;
-
-	@Autowired
-	private UserFactory userFactory;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -400,16 +392,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("height");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -443,16 +426,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("weight");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -484,16 +458,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		sourceEntityType.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);

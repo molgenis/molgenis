@@ -98,12 +98,11 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	{
 		String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
-		User owner = mappingProjectEntity.getEntity(MappingProjectMetaData.OWNER, User.class);
 		List<Entity> mappingTargetEntities = Lists.newArrayList(
 				mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepo.toMappingTargets(mappingTargetEntities);
 
-		return new MappingProject(identifier, name, owner, mappingTargets);
+		return new MappingProject(identifier, name, mappingTargets);
 	}
 
 	/**
@@ -121,7 +120,6 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 			mappingProject.setIdentifier(idGenerator.generateId());
 		}
 		result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
-		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
 		List<Entity> mappingTargetEntities = mappingTargetRepo.upsert(mappingProject.getMappingTargets());
 		result.set(MappingProjectMetaData.MAPPING_TARGETS, mappingTargetEntities);
