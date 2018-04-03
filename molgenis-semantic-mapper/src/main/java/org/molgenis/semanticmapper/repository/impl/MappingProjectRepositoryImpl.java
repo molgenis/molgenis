@@ -6,7 +6,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
