@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -107,6 +108,21 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		CsvIterator it = new CsvIterator(zipFile, "testDataWithBom", null, null, entityType);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
 		assertEquals(Iterators.size(it), 5);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Duplicate column header 'col1' not allowed")
+	public void testCsvIteratorDuplicateColumnHeader() throws IOException
+	{
+		File tmpFile = createTmpFileForResource("duplicate-sheet-header.csv");
+		try
+		{
+			new CsvIterator(tmpFile, "duplicate-sheet-header", null, ',', entityType);
+		}
+		finally
+		{
+			//noinspection ResultOfMethodCallIgnored
+			tmpFile.delete();
+		}
 	}
 
 	private File createTmpFileForResource(String fileName) throws IOException
