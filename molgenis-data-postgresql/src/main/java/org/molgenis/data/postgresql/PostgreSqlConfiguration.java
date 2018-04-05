@@ -49,6 +49,6 @@ public class PostgreSqlConfiguration
 	{
 		return new PostgreSqlRepositoryCollectionDecorator(
 				new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService),
-				entityTypeRegistry, entityTypeCopier, attributeCopier);
+				entityTypeRegistry);
 	}
 }
