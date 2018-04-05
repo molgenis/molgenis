@@ -331,7 +331,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Entity entity = getEntityMock();
-		when(delegateRepository.findOne(query)).thenReturn(entity);
+		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
 		assertEquals(entity, rowLevelSecurityRepositoryDecorator.findOne(query));
 	}
@@ -342,7 +343,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Entity entity = getEntityMock();
-		when(delegateRepository.findOne(query)).thenReturn(entity);
+		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		assertNull(rowLevelSecurityRepositoryDecorator.findOne(query));
 	}
 
