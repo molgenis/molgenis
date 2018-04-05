@@ -275,9 +275,9 @@
                 Use the script editor to determine how the values of selected attributes are processed.
                 See the <a id="js-function-modal-btn" href="#">list of available functions</a> for more information.
             </p>
-            <textarea id="ace-editor-text-area" name="algorithm" rows="15"
-                      <#if !hasWritePermission>data-readonly="true"</#if>
-                      style="width:100%;">${(attributeMapping.algorithm!"")?html}</textarea>
+            <textarea id="ace-editor-text-area" name="algorithm" rows="15" style="width:100%;">
+                ${(attributeMapping.algorithm!"")?html}
+            </textarea>
         </div>
     </div>
 </div>
