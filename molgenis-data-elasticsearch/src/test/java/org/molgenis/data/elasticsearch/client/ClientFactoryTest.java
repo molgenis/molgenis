@@ -5,10 +5,8 @@ import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.retry.support.RetryTemplate;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.InetSocketAddress;
@@ -31,24 +29,10 @@ public class ClientFactoryTest extends AbstractMockitoTest
 	private DiscoveryNode node;
 	private RetryTemplate retryTemplate = new RetryTemplate();
 
-	public ClientFactoryTest()
-	{
-		super(Strictness.WARN);
-	}
-
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		when(connectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(connectedClient);
-		when(unConnectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(unConnectedClient);
-
-		when(connectedClient.connectedNodes()).thenReturn(singletonList(node));
-		when(unConnectedClient.connectedNodes()).thenReturn(emptyList());
-	}
-
 	@Test
 	public void testCreateClient() throws Exception
 	{
+		initMockClient();
 		int port = 8032;
 		String clusterName = "testCluster";
 
@@ -65,14 +49,23 @@ public class ClientFactoryTest extends AbstractMockitoTest
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
-	public void testCreateClientNullAddresses() throws Exception
+	public void testCreateClientNullAddresses()
 	{
 		new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void testCreateClientEmptyAddresses() throws Exception
+	public void testCreateClientEmptyAddresses()
 	{
 		new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory);
+	}
+
+	private void initMockClient()
+	{
+		when(connectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(connectedClient);
+		when(unConnectedClient.addTransportAddresses(any(TransportAddress.class))).thenReturn(unConnectedClient);
+
+		when(connectedClient.connectedNodes()).thenReturn(singletonList(node));
+		when(unConnectedClient.connectedNodes()).thenReturn(emptyList());
 	}
 }
