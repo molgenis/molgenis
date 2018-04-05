@@ -2,6 +2,7 @@ package org.molgenis.js.magma;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -15,13 +16,12 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * JavaScript script evaluator using the Nashorn script engine.
@@ -30,12 +30,18 @@ import static java.util.stream.StreamSupport.stream;
 public class JsMagmaScriptEvaluator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
+	private static final int ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH = 1;
 
 	private final NashornScriptEngine jsScriptEngine;
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
 	{
 		this.jsScriptEngine = requireNonNull(jsScriptEngine);
+	}
+
+	public Object eval(String expression, Entity entity)
+	{
+		return eval(expression, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
 	}
 
 	/**
@@ -45,7 +51,7 @@ public class JsMagmaScriptEvaluator
 	 * @param entity     entity
 	 * @return evaluated expression result, return type depends on the expression.
 	 */
-	public Object eval(String expression, Entity entity)
+	public Object eval(String expression, Entity entity, int depth)
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
@@ -53,7 +59,7 @@ public class JsMagmaScriptEvaluator
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Map<String, Object> scriptEngineValueMap = toScriptEngineValueMap(entity);
+		Object scriptEngineValueMap = toScriptEngineValueMap(entity, depth);
 		Object value;
 		try
 		{
@@ -73,16 +79,40 @@ public class JsMagmaScriptEvaluator
 		return value;
 	}
 
-	private static Map<String, Object> toScriptEngineValueMap(Entity entity)
+	/**
+	 * Convert entity to a JavaScript object.
+	 * Adds "_idValue" as a special key to every level for quick access to the id value of an entity.
+	 *
+	 * @param entity The entity to be flattened, should start with non null entity
+	 * @param depth  Represents the number of reference levels being added to the JavaScript object
+	 * @return A JavaScript object in Tree form, containing entities and there references
+	 */
+	private Object toScriptEngineValueMap(Entity entity, int depth)
 	{
-		Map<String, Object> map = Maps.newHashMap();
-		entity.getEntityType()
-			  .getAtomicAttributes()
-			  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr)));
-		return map;
+		if (entity != null)
+		{
+			Object idValue = toScriptEngineValue(entity, entity.getEntityType().getIdAttribute(), 0);
+			if (depth == 0)
+			{
+				return idValue;
+			}
+			else
+			{
+				Map<String, Object> map = Maps.newHashMap();
+				entity.getEntityType()
+					  .getAtomicAttributes()
+					  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr, depth)));
+				map.put("_idValue", idValue);
+				return map;
+			}
+		}
+		else
+		{
+			return null;
+		}
 	}
 
-	private static Object toScriptEngineValue(Entity entity, Attribute attr)
+	private Object toScriptEngineValue(Entity entity, Attribute attr, int depth)
 	{
 		Object value = null;
 
@@ -97,16 +127,26 @@ public class JsMagmaScriptEvaluator
 			case FILE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(attrName);
-				value = xrefEntity != null ? toScriptEngineValue(xrefEntity,
-						xrefEntity.getEntityType().getIdAttribute()) : null;
+				value = toScriptEngineValueMap(xrefEntity, depth - 1);
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
-				value = stream(mrefEntities.spliterator(), false).map(
-						mrefEntity -> toScriptEngineValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))
-																 .collect(toList());
+				ScriptObjectMirror jsArray = null;
+				try
+				{
+					jsArray = (ScriptObjectMirror) jsScriptEngine.eval("var arr = []; arr");
+					@SuppressWarnings("unchecked")
+					List<Object> mrefValues = jsArray.to(List.class);
+					entity.getEntities(attrName)
+						  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
+				}
+				catch (javax.script.ScriptException ex)
+				{
+					// Do not catch this error to allow
+					// the mapping service to collect errors to show in the UI
+				}
+				value = jsArray;
 				break;
 			case DATE:
 				LocalDate localDate = entity.getLocalDate(attrName);

@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -13,10 +14,7 @@ import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;
@@ -52,6 +50,48 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		Entity entity = it.next();
 		assertEquals(entity.get("col1"), "val1");
 		assertEquals(entity.get("col2"), "val2");
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Number of values \\(1\\) doesn't match the number of headers \\(2\\): \\[val1\\]")
+	public void testIteratorValueHeaderMismatchOneNonEmptyValue() throws IOException
+	{
+		File csvFile = File.createTempFile("testdata", ".csv");
+		try
+		{
+			try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(csvFile)))
+			{
+				outputStreamWriter.write("col1,col2\n");
+				outputStreamWriter.write("val1\n");
+			}
+			new CsvIterator(csvFile, "testdata", null, ',', entityType).next();
+		}
+		finally
+		{
+			//noinspection ResultOfMethodCallIgnored
+			csvFile.delete();
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Number of values \\(2\\) doesn't match the number of headers \\(3\\): \\[val1,val2\\]")
+	public void testIteratorValueHeaderMismatch() throws IOException
+	{
+		File csvFile = File.createTempFile("testdata", ".csv");
+		try
+		{
+			try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(csvFile)))
+			{
+				outputStreamWriter.write("col1,col2,col3\n");
+				outputStreamWriter.write("val1,val2\n");
+			}
+			new CsvIterator(csvFile, "testdata", null, ',', entityType).next();
+		}
+		finally
+		{
+			//noinspection ResultOfMethodCallIgnored
+			csvFile.delete();
+		}
 	}
 
 	@Test

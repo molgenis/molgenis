@@ -1,12 +1,10 @@
 package org.molgenis.semanticmapper.meta;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.security.auth.UserMetaData;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.semanticmapper.meta.MapperPackage.PACKAGE_MAPPER;
@@ -19,19 +17,15 @@ public class MappingProjectMetaData extends SystemEntityType
 
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
-	public static final String OWNER = "owner";
 	public static final String MAPPING_TARGETS = "mappingtargets";
 
 	private final MapperPackage mapperPackage;
-	private final UserMetaData userMetaData;
 	private final MappingTargetMetaData mappingTargetMetaData;
 
-	public MappingProjectMetaData(MapperPackage mapperPackage, UserMetaData userMetaData,
-			MappingTargetMetaData mappingTargetMetaData)
+	public MappingProjectMetaData(MapperPackage mapperPackage, MappingTargetMetaData mappingTargetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);
 		this.mapperPackage = requireNonNull(mapperPackage);
-		this.userMetaData = requireNonNull(userMetaData);
 		this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
 	}
 
@@ -43,7 +37,6 @@ public class MappingProjectMetaData extends SystemEntityType
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
-		addAttribute(OWNER).setDataType(XREF).setRefEntity(userMetaData);
 		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData).setCascadeDelete(true);
 	}
 }

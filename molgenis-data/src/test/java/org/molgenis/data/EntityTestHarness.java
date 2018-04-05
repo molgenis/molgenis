@@ -99,8 +99,12 @@ public class EntityTestHarness
 
 	public EntityType createDynamicRefEntityType()
 	{
-		EntityType refEntityType = entityTypeFactory.create("TypeTestRefDynamic")
-													.setLabel("TypeTestRefDynamic")
+		return createDynamicRefEntityType("TypeTestRefDynamic");
+	}
+
+	public EntityType createDynamicRefEntityType(String id)
+	{
+		EntityType refEntityType = entityTypeFactory.create(id).setLabel(id)
 													.setBackend("PostgreSQL");
 		return createDynamicRefEntityType(refEntityType);
 	}
@@ -120,9 +124,12 @@ public class EntityTestHarness
 
 	public EntityType createDynamicTestEntityType(EntityType refEntityType)
 	{
-		EntityType entityType = entityTypeFactory.create("TypeTestDynamic")
-												 .setLabel("TypeTestDynamic")
-												 .setBackend("PostgreSQL");
+		return createDynamicTestEntityType(refEntityType, "TypeTestDynamic");
+	}
+
+	public EntityType createDynamicTestEntityType(EntityType refEntityType, String id)
+	{
+		EntityType entityType = entityTypeFactory.create(id).setLabel(id).setBackend("PostgreSQL");
 		return createDynamicTestEntityType(entityType, refEntityType);
 	}
 
@@ -198,7 +205,7 @@ public class EntityTestHarness
 		return refEntity;
 	}
 
-	private Entity createEntity(EntityType entityType, int id, Entity refEntity)
+	public Entity createEntity(EntityType entityType, int id, Entity refEntity)
 	{
 		Entity entity = new DynamicEntity(entityType);
 		entity.set(ATTR_ID, "" + id);

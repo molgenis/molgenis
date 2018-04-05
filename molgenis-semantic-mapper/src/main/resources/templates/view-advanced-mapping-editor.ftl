@@ -14,7 +14,7 @@
             <div class="form-group">
                 <div class="col-md-2">
                     <label>Default value </label>
-                    <select id="default-value" class="form-control" <#if !hasWritePermission>disabled</#if>>
+                    <select id="default-value" class="form-control">
                         <#if targetAttribute.nillable>
                             <option <#if !categoryMapping.defaultValue?? >selected </#if> value="use-null-value"><em>None</em>
                             </option>
@@ -50,7 +50,7 @@
                     <td>${sourceEntity.get(sourceAttributeLabelAttribute)?html}</td>
                     <td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
                     <td>
-                        <select class="form-control" <#if !hasWritePermission>disabled</#if>>
+                        <select class="form-control">
                             <#if showDefault>
                                 <option value="use-default-option"
                                     <#if !categoryMapping.map?keys?seq_contains(id) > selected </#if>>use default
@@ -78,7 +78,7 @@
                     <td><em>None</em></td>
                     <td><#if aggregates??>${aggregates[count]!'0'}<#else>NA</#if></td>
                     <td>
-                        <select class="form-control" <#if !hasWritePermission>disabled</#if>>
+                        <select class="form-control">
                             <#if showDefault>
                                 <option<#if categoryMapping.nullValueUndefined> selected </#if>
                                                                                 value="use-default-option">use default

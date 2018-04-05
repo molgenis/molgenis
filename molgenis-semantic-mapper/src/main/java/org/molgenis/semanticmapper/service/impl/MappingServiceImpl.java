@@ -6,7 +6,6 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
@@ -69,9 +68,9 @@ public class MappingServiceImpl implements MappingService
 	@Override
 	@RunAsSystem
 	@Transactional
-	public MappingProject addMappingProject(String projectName, User owner, String target)
+	public MappingProject addMappingProject(String projectName, String target)
 	{
-		MappingProject mappingProject = new MappingProject(projectName, owner);
+		MappingProject mappingProject = new MappingProject(projectName);
 		mappingProject.addTarget(dataService.getEntityType(target));
 		mappingProjectRepository.add(mappingProject);
 		return mappingProject;

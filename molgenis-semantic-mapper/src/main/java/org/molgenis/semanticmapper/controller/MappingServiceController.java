@@ -10,8 +10,6 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -36,7 +34,6 @@ import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -80,42 +77,33 @@ public class MappingServiceController extends PluginController
 	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-advanced-mapping-editor";
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
-	@Autowired
-	private UserService userService;
+	private final MappingService mappingService;
+	private final AlgorithmService algorithmService;
+	private final DataService dataService;
+	private final OntologyTagService ontologyTagService;
+	private final SemanticSearchService semanticSearchService;
+	private final MenuReaderService menuReaderService;
+	private final MappingJobExecutionFactory mappingJobExecutionFactory;
+	private final UserAccountService userAccountService;
+	private final JobExecutor jobExecutor;
+	private final JobsController jobsController;
 
-	@Autowired
-	private MappingService mappingService;
-
-	@Autowired
-	private AlgorithmService algorithmService;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private OntologyTagService ontologyTagService;
-
-	@Autowired
-	private SemanticSearchService semanticSearchService;
-
-	@Autowired
-	private MenuReaderService menuReaderService;
-
-	@Autowired
-	private MappingJobExecutionFactory mappingJobExecutionFactory;
-
-	@Autowired
-	private UserAccountService userAccountService;
-
-	@Autowired
-	private JobExecutor jobExecutor;
-
-	@Autowired
-	private JobsController jobsController;
-
-	public MappingServiceController()
+	public MappingServiceController(AlgorithmService algorithmService, MappingService mappingService,
+			DataService dataService, OntologyTagService ontologyTagService, SemanticSearchService semanticSearchService,
+			MenuReaderService menuReaderService, MappingJobExecutionFactory mappingJobExecutionFactory,
+			UserAccountService userAccountService, JobExecutor jobExecutor, JobsController jobsController)
 	{
 		super(URI);
+		this.algorithmService = algorithmService;
+		this.mappingService = mappingService;
+		this.dataService = dataService;
+		this.ontologyTagService = ontologyTagService;
+		this.semanticSearchService = semanticSearchService;
+		this.menuReaderService = menuReaderService;
+		this.mappingJobExecutionFactory = mappingJobExecutionFactory;
+		this.userAccountService = userAccountService;
+		this.jobExecutor = jobExecutor;
+		this.jobsController = jobsController;
 	}
 
 	/**
@@ -146,7 +134,7 @@ public class MappingServiceController extends PluginController
 	public String addMappingProject(@RequestParam("mapping-project-name") String name,
 			@RequestParam("target-entity") String targetEntity)
 	{
-		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
+		MappingProject newMappingProject = mappingService.addMappingProject(name, targetEntity);
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + newMappingProject.getIdentifier();
 	}
 
@@ -160,11 +148,8 @@ public class MappingServiceController extends PluginController
 	public String deleteMappingProject(@RequestParam() String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(project))
-		{
-			LOG.info("Deleting mappingProject " + project.getName());
-			mappingService.deleteMappingProject(mappingProjectId);
-		}
+		LOG.info("Deleting mappingProject " + project.getName());
+		mappingService.deleteMappingProject(mappingProjectId);
 		return "redirect:" + getMappingServiceMenuUrl();
 	}
 
@@ -181,11 +166,8 @@ public class MappingServiceController extends PluginController
 			@RequestParam() String source, @RequestParam() String attribute)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(project))
-		{
-			project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
-			mappingService.updateMappingProject(project);
-		}
+		project.getMappingTarget(target).getMappingForSource(source).deleteAttributeMapping(attribute);
+		mappingService.updateMappingProject(project);
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + project.getIdentifier();
 	}
 
@@ -206,13 +188,9 @@ public class MappingServiceController extends PluginController
 		Iterable<Attribute> attributes = targetEntityType.getAtomicAttributes();
 
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-
-		if (hasWritePermission(project))
-		{
-			EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityType);
-			mappingService.updateMappingProject(project);
-			autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, attributes, project);
-		}
+		EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityType);
+		mappingService.updateMappingProject(project);
+		autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, attributes, project);
 
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
 	}
@@ -229,11 +207,8 @@ public class MappingServiceController extends PluginController
 	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(project))
-		{
-			project.getMappingTarget(target).removeSource(source);
-			mappingService.updateMappingProject(project);
-		}
+		project.getMappingTarget(target).removeSource(source);
+		mappingService.updateMappingProject(project);
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
 	}
 
@@ -337,26 +312,23 @@ public class MappingServiceController extends PluginController
 			@RequestParam() AlgorithmState algorithmState)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(mappingProject))
+		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+		EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+		if (algorithm.isEmpty())
 		{
-			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
-			if (algorithm.isEmpty())
-			{
-				mappingForSource.deleteAttributeMapping(targetAttribute);
-			}
-			else
-			{
-				AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
-				if (attributeMapping == null)
-				{
-					attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
-				}
-				attributeMapping.setAlgorithm(algorithm);
-				attributeMapping.setAlgorithmState(algorithmState);
-			}
-			mappingService.updateMappingProject(mappingProject);
+			mappingForSource.deleteAttributeMapping(targetAttribute);
 		}
+		else
+		{
+			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+			if (attributeMapping == null)
+			{
+				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
+			}
+			attributeMapping.setAlgorithm(algorithm);
+			attributeMapping.setAlgorithmState(algorithmState);
+		}
+		mappingService.updateMappingProject(mappingProject);
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProject.getIdentifier();
 	}
 
@@ -375,41 +347,38 @@ public class MappingServiceController extends PluginController
 			@RequestParam(value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates, Model model)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(mappingProject))
+		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+		List<String> sourceNames = mappingTarget.getEntityMappings()
+												.stream()
+												.map(i -> i.getSourceEntityType().getId())
+												.collect(Collectors.toList());
+
+		EntityType targetEntityMeta = mappingTarget.getTarget();
+		for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
 		{
-			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-			List<String> sourceNames = mappingTarget.getEntityMappings()
-													.stream()
-													.map(i -> i.getSourceEntityType().getId())
-													.collect(Collectors.toList());
-
-			EntityType targetEntityMeta = mappingTarget.getTarget();
-			for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
+			if (attribute.equals(targetEntityMeta.getIdAttribute()))
 			{
-				if (attribute.equals(targetEntityMeta.getIdAttribute()))
-				{
-					continue;
-				}
+				continue;
+			}
 
-				for (String source : sourceNames)
-				{
-					EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
-					AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute.getName());
+			for (String source : sourceNames)
+			{
+				EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+				AttributeMapping attributeMapping = entityMapping.getAttributeMapping(attribute.getName());
 
-					if (null != attributeMapping)
+				if (null != attributeMapping)
+				{
+					AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
+					if (null != skipAlgorithmStates)
 					{
-						AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
-						if (null != skipAlgorithmStates)
+						if (skipAlgorithmStates.contains(algorithmState))
 						{
-							if (skipAlgorithmStates.contains(algorithmState))
-							{
-								continue;
-							}
+							continue;
 						}
 					}
-
-					return FirstAttributeMappingInfo.create(mappingProjectId, target, source, attribute.getName());
 				}
+
+				return FirstAttributeMappingInfo.create(mappingProjectId, target, source, attribute.getName());
 			}
 		}
 
@@ -434,7 +403,6 @@ public class MappingServiceController extends PluginController
 				mappingService.getCompatibleEntityTypes(mappingTarget.getTarget()).collect(toList()));
 		model.addAttribute("selectedTarget", target);
 		model.addAttribute("mappingProject", project);
-		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 		model.addAttribute("attributeTagMap", getTagsForAttribute(target, project));
 		model.addAttribute("packages",
 				dataService.getMeta().getPackages().stream().filter(p -> !isSystemPackage(p)).collect(toList()));
@@ -445,7 +413,7 @@ public class MappingServiceController extends PluginController
 	public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId)
 	{
 		mappingService.cloneMappingProject(mappingProjectId);
-		return "forward:" + URI;
+		return "redirect:" + getMappingServiceMenuUrl();
 	}
 
 	/**
@@ -671,7 +639,6 @@ public class MappingServiceController extends PluginController
 				Iterables.size(entityMapping.getSourceEntityType().getAtomicAttributes()));
 		model.addAttribute("attributeMapping", attributeMapping);
 		model.addAttribute("attributes", newArrayList(dataService.getEntityType(source).getAtomicAttributes()));
-		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
@@ -704,11 +671,12 @@ public class MappingServiceController extends PluginController
 			Collection<String> sourceAttributeNames = algorithmService.getSourceAttributeNames(algorithm);
 			if (!sourceAttributeNames.isEmpty())
 			{
-				List<Attribute> sourceAttributes = sourceAttributeNames.stream()
-																	   .map(attributeName -> entityMapping.getSourceEntityType()
-																										  .getAttribute(
-																												  attributeName))
-																	   .collect(Collectors.toList());
+				List<Attribute> sourceAttributes = sourceAttributeNames.stream().map(attributeName ->
+				{
+					EntityType sourceEntityType = entityMapping.getSourceEntityType();
+					return sourceEntityType.getAttribute(attributeName);
+				}).filter(Objects::nonNull).collect(Collectors.toList());
+
 				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
 		}
@@ -858,7 +826,6 @@ public class MappingServiceController extends PluginController
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityType(target).getAttribute(targetAttribute));
 		model.addAttribute("sourceAttribute", dataService.getEntityType(source).getAttribute(sourceAttribute));
-		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
 		CategoryMapping<String, String> categoryMapping = null;
 		if (algorithm == null)
@@ -888,19 +855,16 @@ public class MappingServiceController extends PluginController
 			@RequestParam() String source, @RequestParam() String targetAttribute, @RequestParam() String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
-		if (hasWritePermission(mappingProject))
+		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
+		EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
+		AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
+		if (attributeMapping == null)
 		{
-			MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
-			EntityMapping mappingForSource = mappingTarget.getMappingForSource(source);
-			AttributeMapping attributeMapping = mappingForSource.getAttributeMapping(targetAttribute);
-			if (attributeMapping == null)
-			{
-				attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
-			}
-			attributeMapping.setAlgorithm(algorithm);
-			attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
-			mappingService.updateMappingProject(mappingProject);
+			attributeMapping = mappingForSource.addAttributeMapping(targetAttribute);
 		}
+		attributeMapping.setAlgorithm(algorithm);
+		attributeMapping.setAlgorithmState(AlgorithmState.CURATED);
+		mappingService.updateMappingProject(mappingProject);
 	}
 
 	/**
@@ -969,28 +933,6 @@ public class MappingServiceController extends PluginController
 							   .filter(emd -> dataService.getCapabilities(emd.getId())
 														 .contains(RepositoryCapability.WRITABLE))
 							   .collect(Collectors.toList());
-	}
-
-	private boolean hasWritePermission(MappingProject project)
-	{
-		return hasWritePermission(project, true);
-	}
-
-	private boolean hasWritePermission(MappingProject project, boolean logInfractions)
-	{
-		boolean result = currentUserIsSu() || project.getOwner().getUsername().equals(getCurrentUsername());
-
-		if (logInfractions && !result)
-		{
-			LOG.warn("User " + getCurrentUsername() + " illegally tried to modify mapping project with id "
-					+ project.getIdentifier() + " owned by " + project.getOwner().getUsername());
-		}
-		return result;
-	}
-
-	private User getCurrentUser()
-	{
-		return userService.getUser(getCurrentUsername());
 	}
 
 	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)

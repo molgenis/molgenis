@@ -1,7 +1,8 @@
 package org.molgenis.data.vcf.importer;
 
-import org.mockito.*;
-import org.mockito.quality.Strictness;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
@@ -27,7 +28,6 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.*;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.*;
 
 public class VcfImporterServiceTest extends AbstractMockitoTest
@@ -35,6 +35,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	private VcfImporterService vcfImporterService;
 	@Mock
 	private DataService dataService;
+	@SuppressWarnings("deprecation")
 	@Mock
 	private PermissionSystemService permissionSystemService;
 	@Mock
@@ -46,39 +47,30 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	@Mock
 	private RepositoryCollection repositoryCollection;
 
-	@Captor
-	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
-
-	public VcfImporterServiceTest()
-	{
-		super(Strictness.WARN);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService,
 				defaultPackage);
-		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
-		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
-		when(repositoryCollection.getName()).thenReturn("default");
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void doImportVcfWithoutSamples()
 	{
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
+		when(repositoryCollection.getName()).thenReturn("default");
+
 		// Test with multiple input repositories not possible due to
 		// https://github.com/molgenis/molgenis/issues/4544
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		EntityType entityType0 = mock(EntityType.class);
 		when(entityType0.getId()).thenReturn(entityTypeId0);
-		when(entityType0.getOwnAttributes()).thenReturn(emptyList());
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		List<Entity> entities = Arrays.asList(entity0, entity1);
@@ -148,30 +140,28 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	@Test
 	public void doImportVcfWithSamples()
 	{
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
+		when(repositoryCollection.getName()).thenReturn("default");
+
 		// Test with multiple input repositories not possible due to
 		// https://github.com/molgenis/molgenis/issues/4544
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
 		when(sampleEntityType0.getId()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
-		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Repository<Entity> outSampleRepo0 = mock(Repository.class);
 		when(outSampleRepo0.getName()).thenReturn(sampleEntityName0);
-		when(metaDataService.createRepository(argThat(eqName(sampleEntityType0)))).thenReturn(outSampleRepo0);
+		doReturn(outSampleRepo0).when(metaDataService).createRepository(argThat(eqName(sampleEntityType0)));
 
 		Attribute sampleAttr = mock(Attribute.class);
-		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
-		when(sampleAttr.getDataType()).thenReturn(MREF);
 		EntityType entityType0 = mock(EntityType.class);
 		when(entityType0.getId()).thenReturn(entityTypeId0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
-		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Entity entity0Sample0 = mock(Entity.class);
 		Entity entity0Sample1 = mock(Entity.class);
 		Entity entity1Sample0 = mock(Entity.class);
@@ -220,7 +210,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		});
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
-		when(metaDataService.createRepository(argThat(eqName(entityType0)))).thenReturn(outRepo0);
+		doReturn(outRepo0).when(metaDataService).createRepository(argThat(eqName(entityType0)));
 		when(outRepo0.add(any(Stream.class))).thenAnswer(invocation ->
 		{
 			Stream<Entity> entities1 = (Stream<Entity>) invocation.getArguments()[0];
@@ -247,11 +237,12 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		verify(permissionSystemService).giveUserWriteMetaPermissions(sampleEntityType0);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void doImportAlreadyExists()
 	{
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
@@ -297,21 +288,17 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		File file = mock(File.class);
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		String attrName0 = "attr0";
 		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
-		when(entityType0.getId()).thenReturn(entityTypeId0);
-		when(entityType0.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
-		when(repo0.getName()).thenReturn(entityTypeId0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
@@ -338,21 +325,17 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		File file = mock(File.class);
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		String attrName0 = "attr0";
 		Attribute attr0 = mock(Attribute.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
 		EntityType entityType0 = mock(EntityType.class);
-		when(entityType0.getId()).thenReturn(entityTypeId0);
-		when(entityType0.getOwnAttributes()).thenReturn(singletonList(attr0));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(attr0));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
-		when(repo0.getName()).thenReturn(entityTypeId0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
@@ -380,11 +363,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		File file = mock(File.class);
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
-
-		String attrName0 = "attr0";
-		Attribute attr0 = mock(Attribute.class);
-		when(attr0.getName()).thenReturn(attrName0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		String sampleAttrName0 = "sampleAttr0";
 		Attribute sampleAttr0 = mock(Attribute.class);
@@ -393,25 +372,18 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
 		when(sampleEntityType0.getId()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
-		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		Attribute sampleAttr = mock(Attribute.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
-		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityType entityType0 = mock(EntityType.class);
-		when(entityType0.getId()).thenReturn(entityTypeId0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
-		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
-		when(repo0.getName()).thenReturn(entityTypeId0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
@@ -443,11 +415,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		File file = mock(File.class);
 
 		String entityTypeId0 = "entity0";
-		List<String> entityTypeIds = Arrays.asList(entityTypeId0);
-
-		String attrName0 = "attr0";
-		Attribute attr0 = mock(Attribute.class);
-		when(attr0.getName()).thenReturn(attrName0);
+		List<String> entityTypeIds = singletonList(entityTypeId0);
 
 		String sampleAttrName0 = "sampleAttr0";
 		Attribute sampleAttr0 = mock(Attribute.class);
@@ -456,32 +424,25 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		String sampleEntityName0 = "entity0sample";
 		EntityType sampleEntityType0 = mock(EntityType.class);
 		when(sampleEntityType0.getId()).thenReturn(sampleEntityName0);
-		when(sampleEntityType0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityType0.getAtomicAttributes()).thenReturn(singleton(sampleAttr0));
-		when(sampleEntityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		Attribute sampleAttr = mock(Attribute.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityType0);
-		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityType entityType0 = mock(EntityType.class);
-		when(entityType0.getId()).thenReturn(entityTypeId0);
 		when(entityType0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
-		when(entityType0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityType0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
-		when(entityType0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		@SuppressWarnings("unchecked")
 		Repository<Entity> repo0 = mock(Repository.class);
-		when(repo0.getName()).thenReturn(entityTypeId0);
 		when(repo0.getEntityType()).thenReturn(entityType0);
 
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
-		when(dataService.hasRepository(entityTypeId0)).thenReturn(true);
-		when(dataService.hasRepository(sampleEntityName0)).thenReturn(true);
+		doReturn(true).when(dataService).hasRepository(entityTypeId0);
+		doReturn(true).when(dataService).hasRepository(sampleEntityName0);
 		EntitiesValidationReport entitiesValidationReport = vcfImporterService.validateImport(file, source);
 		assertFalse(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());

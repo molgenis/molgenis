@@ -13,8 +13,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.DynamicEntity;
@@ -53,6 +51,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.time.ZoneId.systemDefault;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.*;
@@ -78,9 +77,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	private AlgorithmService algorithmService;
 
 	@Autowired
-	private DataService dataService;
-
-	@Autowired
 	private EntityManager entityManager;
 
 	@Autowired
@@ -91,9 +87,6 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 	@Autowired
 	private AlgorithmTemplateService algorithmTemplateService;
-
-	@Autowired
-	private UserFactory userFactory;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -111,6 +104,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 	public void testGetSourceAttributeNamesNoQuotes()
 	{
 		assertEquals(algorithmService.getSourceAttributeNames("$(id)"), singletonList("id"));
+	}
+
+	@Test
+	public void testDeepReference()
+	{
+		assertEquals(algorithmService.getSourceAttributeNames("$(gender.label)"), singletonList("gender"));
 	}
 
 	@DataProvider(name = "testApplyProvider")
@@ -220,11 +219,72 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		Attribute targetAttribute = attrMetaFactory.create().setName("field1");
 		targetAttribute.setDataType(XREF);
 		targetAttribute.setRefEntity(entityTypeXref);
+
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
+
 		when(entityManager.getReference(entityTypeXref, 1)).thenReturn(xref1a);
+
 		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
+	}
+
+	@Test
+	public void testDotAnnotationWithXref() throws ParseException
+	{
+		EntityType referenceEntityType = entityTypeFactory.create("reference");
+		referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
+
+		Entity referenceEntity = new DynamicEntity(referenceEntityType);
+		referenceEntity.set("id", "1");
+		referenceEntity.set("label", "label 1");
+
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		sourceEntityType.addAttribute(attrMetaFactory.create().setName("source_xref").setDataType(XREF));
+
+		Entity sourceEntity = new DynamicEntity(sourceEntityType);
+		sourceEntity.set("id", "1");
+		sourceEntity.set("source_xref", referenceEntity);
+
+		Attribute targetAttribute = attrMetaFactory.create().setName("target_label");
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
+		attributeMapping.setAlgorithm("$('source_xref.label').value()");
+
+		Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType);
+		assertEquals(result, "label 1");
+	}
+
+	@Test
+	public void testDotAnnotationWithMref() throws ParseException
+	{
+		EntityType referenceEntityType = entityTypeFactory.create("reference");
+		referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
+
+		Entity referenceEntity1 = new DynamicEntity(referenceEntityType);
+		referenceEntity1.set("id", "1");
+		referenceEntity1.set("label", "label 1");
+
+		Entity referenceEntity2 = new DynamicEntity(referenceEntityType);
+		referenceEntity2.set("id", "2");
+		referenceEntity2.set("label", "label 2");
+
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		sourceEntityType.addAttribute(attrMetaFactory.create().setName("source_mref").setDataType(MREF));
+
+		Entity sourceEntity = new DynamicEntity(sourceEntityType);
+		sourceEntity.set("id", "1");
+		sourceEntity.set("source_mref", newArrayList(referenceEntity1, referenceEntity2));
+
+		Attribute targetAttribute = attrMetaFactory.create().setName("target_label");
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
+		attributeMapping.setAlgorithm("var result = [];$('source_mref').map(function(mref){result.push(mref.val.label)});result");
+
+		Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType);
+		assertEquals(result, "[label 1, label 2]");
 	}
 
 	@Test
@@ -332,16 +392,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("height");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -375,16 +426,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("weight");
 		sourceEntityType.addAttribute(sourceAttribute);
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -416,16 +458,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		sourceEntityType.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
-		User owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
-		MappingProject project = new MappingProject("project", owner);
+		MappingProject project = new MappingProject("project");
 		project.addTarget(targetEntityType);
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);

@@ -7,8 +7,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
@@ -51,9 +49,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	private MappingProjectRepositoryImpl mappingProjectRepositoryImpl;
 
 	@Autowired
-	private UserFactory userFactory;
-
-	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -68,36 +63,21 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private MappingTargetMetaData mappingTargetMeta;
 
-	private User owner;
-
 	private MappingTarget mappingTarget1;
-
 	private MappingTarget mappingTarget2;
-
 	private List<Entity> mappingTargetEntities;
-
 	private MappingProject mappingProject;
-
 	private Entity mappingProjectEntity;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		owner = userFactory.create();
-		owner.setUsername("flup");
-		owner.setPassword("geheim");
-		owner.setId("12345");
-		owner.setActive(true);
-		owner.setEmail("flup@blah.com");
-		owner.setFirstName("Flup");
-		owner.setLastName("de Flap");
-
 		EntityType target1 = entityTypeFactory.create("target1");
 		target1.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 		EntityType target2 = entityTypeFactory.create("target2");
 		target2.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 
-		mappingProject = new MappingProject("My first mapping project", owner);
+		mappingProject = new MappingProject("My first mapping project");
 		mappingTarget1 = mappingProject.addTarget(target1);
 		mappingTarget2 = mappingProject.addTarget(target2);
 
@@ -112,7 +92,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 		mappingProjectEntity = new DynamicEntity(mappingProjectMeta);
 		mappingProjectEntity.set(IDENTIFIER, "mappingProjectID");
 		mappingProjectEntity.set(MAPPING_TARGETS, mappingTargetEntities);
-		mappingProjectEntity.set(OWNER, owner);
 		mappingProjectEntity.set(NAME, "My first mapping project");
 	}
 
@@ -134,7 +113,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAddWithIdentifier()
 	{
-		MappingProject mappingProject = new MappingProject("My first mapping project", owner);
+		MappingProject mappingProject = new MappingProject("My first mapping project");
 		mappingProject.setIdentifier("mappingProjectID");
 		try
 		{
@@ -157,7 +136,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	public void testQuery()
 	{
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(OWNER, "flup");
 		when(dataService.findAll(MAPPING_PROJECT, q)).thenReturn(Stream.of(mappingProjectEntity));
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));
@@ -169,8 +147,6 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAll()
 	{
-		Query<Entity> q = new QueryImpl<>();
-		q.eq(OWNER, "flup");
 		when(dataService.findAll(MAPPING_PROJECT)).thenReturn(Stream.of(mappingProjectEntity));
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));
