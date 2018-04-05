@@ -7,11 +7,11 @@ import 'font-awesome/css/font-awesome.min.css'
 
 Vue.use(Router)
 
-const {lng, fallbackLng} = window.__INITIAL_STATE__
+const {lng, fallbackLng, baseUrl, dataExplorerBaseUrl} = window.__INITIAL_STATE__
 
 const dataRowEditRouter = new Router({
   mode: 'history',
-  base: window.__INITIAL_STATE__.baseUrl,
+  base: baseUrl,
   routes: [
     {
       path: '/:dataTableId/:rowId',
@@ -20,7 +20,7 @@ const dataRowEditRouter = new Router({
     {
       path: '/',
       redirect: to => {
-        window.location.href = window.location.origin + window.__INITIAL_STATE__.dataExplorerBaseUrl
+        window.location.href = window.location.origin + dataExplorerBaseUrl
       }
     }
   ]

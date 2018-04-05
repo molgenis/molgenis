@@ -13,8 +13,17 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-md-12">
+        <h2 class="text-muted">{{ 'data-row-edit-plugin-title' | i18n }}</h2>
+        <hr/>
+      </div>
+    </div>
+
     <div v-if="showForm">
-      <h2>{{dataTableLabel}}</h2>
+
+      <h5>{{dataTableLabel}}</h5>
+
       <form-component
         id="data-row-edit-form"
         :formFields="formFields"
@@ -22,38 +31,39 @@
         :formState="formState"
         @valueChange="onValueChanged">
       </form-component>
+
+      <div class="row">
+        <div class="col-md-12">
+          <button
+            id="cancel-btn"
+            @click.prevent="goBackToPluginCaller"
+            class="btn btn-secondary">
+            {{ 'data-row-edit-cancel-button-label' | i18n }}
+          </button>
+
+          <button
+            v-if="!isSaving"
+            id="save-btn"
+            class="btn btn-primary"
+            type="submit"
+            @click.prevent="onSubmit"
+            :disabled="formState.$pristine || formState.$invalid">
+            {{ 'data-row-edit-save-button-label' | i18n }}
+          </button>
+
+          <button
+            v-else
+            id="save-btn-saving"
+            class="btn btn-primary"
+            type="button"
+            disabled="disabled">
+            {{ 'data-row-edit-save-busy-state-label' | i18n }} <i class="fa fa-spinner fa-spin "></i>
+          </button>
+        </div>
+      </div>
+
     </div>
     <div v-else class=""><i class="fa fa-spinner fa-spin fa-3x"></i></div>
-
-    <div class="row">
-          <div class="col-md-12">
-            <button
-              id="cancel-btn"
-              @click.prevent="goBackToPluginCaller"
-              class="btn btn-secondary">
-              Cancel
-            </button>
-
-            <button
-              v-if="!isSaving"
-              id="save-btn"
-              class="btn btn-primary"
-              type="submit"
-              @click.prevent="onSubmit"
-              :disabled="formState.$pristine || formState.$invalid">
-              Save
-            </button>
-
-            <button
-              v-else
-              id="save-btn-saving"
-              class="btn btn-primary"
-              type="button"
-              disabled="disabled">
-              Saving.... <i class="fa fa-spinner fa-spin "></i>
-            </button>
-          </div>
-        </div>
 
   </div>
 
@@ -70,8 +80,8 @@
       return {
         dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl,
         dataTableLabel: '',
-        dataTableId: 'sys_Language',
-        dataRowId: 'en',
+        dataTableId: '',
+        dataRowId: '',
         formFields: [],
         formData: {},
         formState: {},
@@ -100,7 +110,7 @@
       },
       handleError (message) {
         this.alert = {
-          message: typeof message !== 'string' ? 'An error has occurred.' : message,
+          message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message') : message,
           type: 'danger'
         }
       },
@@ -115,7 +125,6 @@
       }
     },
     created: function () {
-      console.log('created data row edit component')
       this.dataTableId = this.$route.params.dataTableId
       this.dataRowId = this.$route.params.rowId
       api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then(this.initializeForm, this.handleError)

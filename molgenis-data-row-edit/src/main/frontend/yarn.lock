@@ -7274,9 +7274,9 @@ test-exclude@^4.1.1:
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
 
-testdouble@^3.3.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.6.0.tgz#790aa09d97bb00d5c2fb5a81850cb2a9f4a45d12"
+testdouble@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.7.0.tgz#8547a07c472e250265919ab9745107a042429d15"
   dependencies:
     es6-map "^0.1.5"
     lodash "^4.17.4"

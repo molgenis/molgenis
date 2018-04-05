@@ -3,7 +3,6 @@ package org.molgenis.data.row.edit.controller;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.data.row.edit.controller.DataRowEditController;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -41,7 +40,6 @@ public class DataRowEditControllerTest
 		initMocks(this);
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(DataRowEditController.ID)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(appSettings.getLanguageCode()).thenReturn("DDEEFF");
 		User user = mock(User.class);
@@ -59,10 +57,9 @@ public class DataRowEditControllerTest
 		mockMvc.perform(get(DataRowEditController.URI))
 			   .andExpect(status().isOk())
 			   .andExpect(view().name(DataRowEditController.VIEW_TEMPLATE))
-			   .andExpect(model().attribute("baseUrl", "/test/path"))
+			   .andExpect(model().attribute("baseUrl", "/plugin/data-row-edit"))
 			   .andExpect(model().attribute("lng", "en"))
-			   .andExpect(model().attribute("fallbackLng", "DDEEFF"))
-			   .andExpect(model().attribute("isSuperUser", false));
+			   .andExpect(model().attribute("fallbackLng", "DDEEFF"));
 	}
 
 }
