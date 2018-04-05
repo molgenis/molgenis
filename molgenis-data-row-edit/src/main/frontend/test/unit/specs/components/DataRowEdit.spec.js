@@ -81,12 +81,7 @@ describe('DataRowEdit component', () => {
     td.replace(api, 'get', get)
     td.replace(EntityToFormMapper, 'generateForm', rowForm)
 
-    // let pushedRoute = {}
-    const $router = {
-      push: function (pushed) {
-        this.pushedRoute = pushed
-      }
-    }
+    const $router = {}
     const $route = {
       params: {
         dataTableId: tableId,
