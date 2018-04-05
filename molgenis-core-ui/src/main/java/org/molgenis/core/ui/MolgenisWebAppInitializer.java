@@ -1,7 +1,6 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.core.ui.browserdetection.BrowserDetectionFilter;
-import org.molgenis.security.CorsFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -68,10 +67,6 @@ public class MolgenisWebAppInitializer
 
 		Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
 		etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
-
-		Dynamic corsFilter = servletContext.addFilter("corsFilter", CorsFilter.class);
-		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/api/*");
-		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/fdp/*");
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
