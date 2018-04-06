@@ -22,6 +22,7 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 
 /**
@@ -56,15 +57,28 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 	@Override
 	public boolean isOperationPermitted(EntityType entityType, Action action)
 	{
-		return isOperationPermitted(entityType.getId(), action);
+		boolean packagePermission = true;
+		if (action == Action.CREATE || action == Action.UPDATE)
+		{
+			packagePermission = checkPackagePermission(entityType, action, packagePermission);
+		}
+		return packagePermission && checkEntityTypePermission(entityType.getId(), action);
 	}
 
 	@Override
 	public boolean isOperationPermitted(Object id, Action action)
 	{
+		if (action == Action.CREATE || action == Action.UPDATE)
+		{
+			throw new UnexpectedEnumException(action);
+		}
+		return checkEntityTypePermission(id, action);
+	}
+
+	private boolean checkEntityTypePermission(Object id, Action action)
+	{
 		AbstractPermission permission = getPermissionForOperation(action);
-		boolean hasPermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(id.toString()),
-				permission);
+		boolean hasPermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(id.toString()), permission);
 		if (hasPermission && !permission.equals(EntityTypePermission.COUNT))
 		{
 			boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(id.toString());
@@ -75,6 +89,33 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			}
 		}
 		return hasPermission;
+	}
+
+	private boolean checkPackagePermission(EntityType newEntityType, Action action, boolean packagePermission)
+	{
+		Package pack = newEntityType.getPackage();
+		if (pack != null)
+		{
+			boolean checkPackage =
+					action == Action.CREATE || (action == Action.UPDATE && isPackageUpdated(newEntityType));
+			if (checkPackage)
+			{
+				packagePermission = userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId().toString()),
+						EntityTypePermission.WRITEMETA);
+			}
+		}
+		else
+		{
+			packagePermission = currentUserIsSuOrSystem();
+		}
+		return packagePermission;
+	}
+
+	private boolean isPackageUpdated(EntityType newEntityType)
+	{
+		EntityType currentEntityType = findOneById(newEntityType.getId());
+		return currentEntityType.getPackage() == null || !newEntityType.getPackage()
+																	   .equals(currentEntityType.getPackage());
 	}
 
 	private static EntityTypePermission getPermissionForOperation(Action action)
