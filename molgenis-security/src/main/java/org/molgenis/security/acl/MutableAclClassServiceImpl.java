@@ -1,5 +1,7 @@
 package org.molgenis.security.acl;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.model.AclCache;
@@ -26,11 +28,13 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 
 	private final JdbcTemplate jdbcTemplate;
 	private final AclCache aclCache;
+	private final Cache<String, Integer> aclClassCache;
 
 	MutableAclClassServiceImpl(JdbcTemplate jdbcTemplate, AclCache aclCache)
 	{
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.aclCache = requireNonNull(aclCache);
+		this.aclClassCache = Caffeine.newBuilder().maximumSize(1000).build();
 	}
 
 	@Transactional
@@ -45,18 +49,18 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 	public void deleteAclClass(String type)
 	{
 		jdbcTemplate.update(SQL_DELETE_FROM_ACL_CLASS, type);
+		aclClassCache.invalidate(type);
 		aclCache.clearCache();
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	@Transactional(readOnly = true)
 	@Override
 	public boolean hasAclClass(String type)
 	{
-		return jdbcTemplate.queryForObject(SQL_COUNT_ACL_CLASS, new Object[] { type }, Integer.class) > 0;
+		return aclClassCache.get(type,
+				t -> jdbcTemplate.queryForObject(SQL_COUNT_ACL_CLASS, new Object[] { t }, Integer.class)) > 0;
 	}
 
-	@Transactional(readOnly = true)
 	@Override
 	public Collection<String> getAclClassTypes()
 	{
