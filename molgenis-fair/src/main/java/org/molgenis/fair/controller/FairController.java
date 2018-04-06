@@ -29,7 +29,7 @@ public class FairController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(FairController.class);
 
-	static final String BASE_URI = "/fdp";
+	static final String BASE_URI = "/api/fdp";
 
 	private final DataService dataService;
 	private final EntityModelWriter entityModelWriter;
