@@ -309,8 +309,5 @@ public class RestControllerV2IT
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
-
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 }

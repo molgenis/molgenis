@@ -193,9 +193,6 @@ public class OneClickImporterControllerAPIIT
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
-
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 
 	private String pollJobForStatus(String jobUrl)
