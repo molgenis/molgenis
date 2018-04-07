@@ -1,4 +1,4 @@
-package org.molgenis.apps.model;
+package org.molgenis.app.manager.meta;
 
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.Entity;
@@ -8,7 +8,7 @@ import org.molgenis.data.support.StaticEntity;
 
 import javax.annotation.Nullable;
 
-import static org.molgenis.apps.model.AppMetaData.*;
+import static org.molgenis.app.manager.meta.AppMetadata.*;
 
 public class App extends StaticEntity
 {
@@ -22,10 +22,10 @@ public class App extends StaticEntity
 		super(entityType);
 	}
 
-	public App(String name, EntityType entityType)
+	public App(String label, EntityType entityType)
 	{
 		super(entityType);
-		setName(name);
+		setLabel(label);
 	}
 
 	public String getId()
@@ -38,14 +38,14 @@ public class App extends StaticEntity
 		set(ID, id);
 	}
 
-	public String getName()
+	public String getLabel()
 	{
-		return getString(NAME);
+		return getString(LABEL);
 	}
 
-	public void setName(String name)
+	public void setLabel(String label)
 	{
-		set(NAME, name);
+		set(LABEL, label);
 	}
 
 	@Nullable
@@ -78,17 +78,6 @@ public class App extends StaticEntity
 	public void setActive(boolean isActive)
 	{
 		set(IS_ACTIVE, isActive);
-	}
-
-	@Nullable
-	public String getIconHref()
-	{
-		return getString(ICON_HREF);
-	}
-
-	public void setIconHref(String iconHref)
-	{
-		set(ICON_HREF, iconHref);
 	}
 
 	public Boolean getUseFreemarkerTemplate()

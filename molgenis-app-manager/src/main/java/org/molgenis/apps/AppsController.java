@@ -1,7 +1,7 @@
 package org.molgenis.apps;
 
-import org.molgenis.apps.model.App;
-import org.molgenis.apps.model.AppMetaData;
+import org.molgenis.app.manager.meta.App;
+import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -12,26 +12,21 @@ import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static org.molgenis.apps.AppsController.URI;
-import static org.molgenis.apps.model.AppMetaData.APP;
+import static org.molgenis.app.manager.meta.AppMetadata.APP;
 import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.springframework.http.HttpStatus.*;
 
-@Controller
-@RequestMapping(URI)
 public class AppsController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AppsController.class);
@@ -63,7 +58,7 @@ public class AppsController extends PluginController
 	private Stream<App> getApps()
 	{
 		Query<App> query = dataService.query(APP, App.class);
-		query.sort().on(AppMetaData.NAME);
+		query.sort().on(AppMetadata.LABEL);
 		Stream<App> apps = query.findAll();
 		if (!permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.WRITE))
 		{
@@ -84,7 +79,7 @@ public class AppsController extends PluginController
 		}
 		if (!app.isActive())
 		{
-			model.addAttribute("errorMessage", format("App '%s' is deactivated", app.getName()));
+			model.addAttribute("errorMessage", format("App '%s' is deactivated", app.getLabel()));
 			response.setStatus(SC_BAD_REQUEST);
 			return "forward:" + URI;
 		}
@@ -113,7 +108,7 @@ public class AppsController extends PluginController
 		}
 		if (app.isActive())
 		{
-			throw new AppsException(format("App '%s' already activated", app.getName()));
+			throw new AppsException(format("App '%s' already activated", app.getLabel()));
 		}
 
 		app.setActive(true);
@@ -131,7 +126,7 @@ public class AppsController extends PluginController
 		}
 		if (!app.isActive())
 		{
-			throw new AppsException(format("App '%s' already deactivated", app.getName()));
+			throw new AppsException(format("App '%s' already deactivated", app.getLabel()));
 		}
 
 		app.setActive(false);
@@ -140,31 +135,11 @@ public class AppsController extends PluginController
 
 	private AppInfoDto toAppInfoDto(App app)
 	{
-		java.net.URI iconHref;
-		String iconHrefStr = app.getIconHref();
-		if (iconHrefStr != null)
-		{
-			try
-			{
-				iconHref = new java.net.URI(app.getIconHref());
-			}
-			catch (URISyntaxException e)
-			{
-				LOG.error("App icon href '{}' is not a valid URI", iconHrefStr);
-				throw new RuntimeException("An error occurred while retrieving app");
-			}
-		}
-		else
-		{
-			iconHref = null;
-		}
-
 		return AppInfoDto.builder()
 						 .setId(app.getId())
-						 .setName(app.getName())
+						 .setName(app.getLabel())
 						 .setDescription(app.getDescription())
 						 .setActive(app.isActive())
-						 .setIconHref(iconHref)
 						 .build();
 	}
 

@@ -1,4 +1,4 @@
-package org.molgenis.apps.model;
+package org.molgenis.app.manager.meta;
 
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData;
 import org.molgenis.data.file.model.FileMetaMetaData;
@@ -12,24 +12,24 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class AppMetaData extends SystemEntityType
+public class AppMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "App";
 	public static final String APP = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
-	public static final String NAME = "name";
+	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
-	public static final String ICON_HREF = "iconHref";
 	public static final String IS_ACTIVE = "isActive";
 	public static final String LANDING_PAGE_HTML_TEMPLATE = "landingPageHtmlTemplate";
 	public static final String RESOURCE_ZIP = "resourceZip";
 	public static final String USE_FREEMARKER_TEMPLATE = "useFreemarkerTemplate";
+	public static final String INCLUDE_MENU_AND_FOOTER = "includeMenuAndFooter";
 
 	private final FileMetaMetaData fileMetaMetaData;
 	private final FreemarkerTemplateMetaData freemarkerTemplateMetaData;
 
-	public AppMetaData(FileMetaMetaData fileMetaMetaData, FreemarkerTemplateMetaData freemarkerTemplateMetaData)
+	public AppMetadata(FileMetaMetaData fileMetaMetaData, FreemarkerTemplateMetaData freemarkerTemplateMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 		this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
@@ -40,13 +40,9 @@ public class AppMetaData extends SystemEntityType
 	protected void init()
 	{
 		setLabel("App");
-		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Id");
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
+		addAttribute(ID, ROLE_ID).setLabel("Identifier").setDescription("Identifier used to create the URL of your app. URL will be /app/{identifier}");
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setDataType(TEXT).setNillable(true).setLabel("Description");
-		addAttribute(ICON_HREF).setDataType(HYPERLINK)
-							   .setNillable(true)
-							   .setLabel("Icon URL")
-							   .setDescription("Absolute or relative URL of the app icon");
 		addAttribute(RESOURCE_ZIP).setDataType(FILE)
 								  .setRefEntity(fileMetaMetaData)
 								  .setNillable(true)
@@ -75,5 +71,7 @@ public class AppMetaData extends SystemEntityType
 														"$('" + LANDING_PAGE_HTML_TEMPLATE + "').value() != null || $('"
 																+ USE_FREEMARKER_TEMPLATE + "').eq(false).value()")
 												.setDescription("Landing page HTML FreeMarker template");
+		addAttribute(INCLUDE_MENU_AND_FOOTER).setDataType(BOOL)
+											 .setLabel("Include a menu above your app and a footer below");
 	}
 }

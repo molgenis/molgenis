@@ -8,17 +8,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>molgenis-apps</artifactId>
+    <artifactId>molgenis-app-manager</artifactId>
     <description>Plugin module that allows for runtime installing and executing apps.</description>
 
-    <name>apps</name>
+    <name>app-manager</name>
 
     <build>
         <plugins>
-            <!-- minify css/js -->
             <plugin>
-                <groupId>com.samaxes.maven</groupId>
-                <artifactId>minify-maven-plugin</artifactId>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

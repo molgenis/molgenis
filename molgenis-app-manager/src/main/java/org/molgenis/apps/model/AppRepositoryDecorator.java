@@ -3,6 +3,7 @@ package org.molgenis.apps.model;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
+import org.molgenis.app.manager.meta.App;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.FileStore;
@@ -189,7 +190,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			if (fileStoreFile == null)
 			{
 				LOG.error("Source archive '{}' for app '{}' missing in file store", appSourceArchive.getId(),
-						app.getName());
+						app.getLabel());
 				throw new RuntimeException("An error occurred trying to activate app");
 			}
 
@@ -203,10 +204,10 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 					{
 						LOG.error(
 								"Missing index.html in {} while option Use freemarker template as index.html was set 'No'",
-								app.getName());
+								app.getLabel());
 						throw new RuntimeException(
 								format("Missing index.html in %s while option 'Use freemarker template as index.html' was set 'No'",
-										app.getName()));
+										app.getLabel()));
 					}
 				}
 				//noinspection StringConcatenationMissingWhitespace
@@ -217,7 +218,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			catch (ZipException e)
 			{
 				LOG.error("", e);
-				throw new RuntimeException(format("An error occurred activating app '%s'", app.getName()));
+				throw new RuntimeException(format("An error occurred activating app '%s'", app.getLabel()));
 			}
 		}
 	}
@@ -232,7 +233,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 		catch (IOException e)
 		{
 			LOG.error("", e);
-			throw new RuntimeException(format("An error occurred deactivating app '%s'", app.getName()));
+			throw new RuntimeException(format("An error occurred deactivating app '%s'", app.getLabel()));
 		}
 	}
 
@@ -244,7 +245,7 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 			File fileStoreFile = fileStore.getFile(appZipMeta.getId());
 			if (fileStoreFile == null)
 			{
-				LOG.error("Resource zip '{}' for app '{}' missing in file store", appZipMeta.getId(), app.getName());
+				LOG.error("Resource zip '{}' for app '{}' missing in file store", appZipMeta.getId(), app.getLabel());
 				throw new RuntimeException("An error occurred trying to create or update app");
 			}
 

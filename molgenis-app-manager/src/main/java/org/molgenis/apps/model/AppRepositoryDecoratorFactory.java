@@ -1,20 +1,20 @@
 package org.molgenis.apps.model;
 
+import org.molgenis.app.manager.meta.App;
+import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.FileStore;
-import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 
-@Component
-public class AppRepositoryDecoratorFactory extends AbstractSystemRepositoryDecoratorFactory<App, AppMetaData>
+public class AppRepositoryDecoratorFactory extends AbstractSystemRepositoryDecoratorFactory<App, AppMetadata>
 {
 	private final FileStore fileStore;
 
-	public AppRepositoryDecoratorFactory(AppMetaData appMetaData, FileStore fileStore)
+	public AppRepositoryDecoratorFactory(AppMetadata appMetadata, FileStore fileStore)
 	{
-		super(appMetaData);
+		super(appMetadata);
 		this.fileStore = requireNonNull(fileStore);
 	}
 
