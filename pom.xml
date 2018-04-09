@@ -5,6 +5,11 @@
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
     <version>7.0.0-SNAPSHOT</version>
+    <parent>
+        <groupId>io.spring.platform</groupId>
+        <artifactId>platform-bom</artifactId>
+        <version>Cairo-RELEASE</version>
+    </parent>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -65,44 +70,27 @@
         <skipITs>${skipTests}</skipITs>
         <skipUTs>${skipTests}</skipUTs>
 
-        <!-- dependency versions -->
-        <slf4j.version>1.7.25</slf4j.version><!-- must match version in logback-parent pom -->
-        <logback.version>1.2.2</logback.version>
-        <spring.version>5.0.4.RELEASE</spring.version>
-        <spring.security.version>5.0.3.RELEASE</spring.security.version>
-        <hibernate.validator.version>6.0.7.Final</hibernate.validator.version>
-        <javax.el.version>3.0.1-b09</javax.el.version>
-        <httpclient.version>4.5.3</httpclient.version>
-        <google.auto-value.version>1.4.1</google.auto-value.version>
-        <caffeine.version>2.3.5</caffeine.version>
-        <google.guava.version>21.0</google.guava.version>
-        <google.gson.version>2.2.4</google.gson.version>
-        <apache.commons.lang.version>3.1</apache.commons.lang.version>
-        <apache.commons.io.version>2.4</apache.commons.io.version>
-        <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
-        <jsr305.version>3.0.1</jsr305.version>
+        <!-- override dependency versions managed by parent pom -->
         <elasticsearch.version>5.5.1</elasticsearch.version>
-        <postgres.version>9.4.1211</postgres.version>
+        <postgresql.version>9.4.1211</postgresql.version>
+        <testng.version>6.8</testng.version>
+        <guava.version>21.0</guava.version>
+
+        <!-- dependency versions not managed by parent pom -->
+        <google.auto-value.version>1.4.1</google.auto-value.version>
+        <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
         <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
-        <snakeyaml.version>1.15</snakeyaml.version>
-        <jackson-annotations.version>2.9.3</jackson-annotations.version>
-        <jackson-core.version>2.9.3</jackson-core.version>
-        <jackson-databind.version>2.9.3</jackson-databind.version>
-        <javax-servlet-api.version>3.1.0</javax-servlet-api.version>
-        <freemarker.version>2.3.27-incubating</freemarker.version>
         <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
-        <!-- test-dependency versions -->
+        <!-- test-dependency versions not managed by parent pom -->
         <jsonpath.version>2.4.0</jsonpath.version>
-        <testng.version>6.8</testng.version>
         <mockito.version>2.7.22</mockito.version>
         <hamcrest-all.version>1.3</hamcrest-all.version>
         <awaitility.version>3.0.0</awaitility.version>
 
         <!-- Integration test properties -->
         <cargo-plugin.version>1.6.6</cargo-plugin.version>
-        <tomcat.version>8.5.27</tomcat.version>
         <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
         <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
         <!-- if profiles are inactive, set these props to use local infrastructure -->
@@ -427,7 +415,7 @@
                         <dependency>
                             <groupId>org.postgresql</groupId>
                             <artifactId>postgresql</artifactId>
-                            <version>${postgres.version}</version>
+                            <version>${postgresql.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>
@@ -752,89 +740,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.freemarker</groupId>
-                <artifactId>freemarker</artifactId>
-                <version>${freemarker.version}</version>
-            </dependency>
-            <!-- see http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#maven-bom -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-bom</artifactId>
-                <version>${spring.security.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${google.guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>${caffeine.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>guava</artifactId>
                 <version>${caffeine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${apache.commons.io.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${apache.commons.lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.validator</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate.validator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.el</artifactId>
-                <version>${javax.el.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.auto.value</groupId>
@@ -843,59 +751,13 @@
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>${jsr305.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
                 <artifactId>findbugs-annotations</artifactId>
                 <version>${findbugs-annotations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>transport</artifactId>
-                <version>${elasticsearch.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgres.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${javax-servlet-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jayway.jsonpath</groupId>
-                <artifactId>json-path</artifactId>
-                <version>${jsonpath.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hamcrest</groupId>
-                        <artifactId>hamcrest-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
-                <version>${hamcrest-all.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>

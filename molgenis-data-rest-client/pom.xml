@@ -44,7 +44,6 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>${google.gson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
