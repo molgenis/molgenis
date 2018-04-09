@@ -11,10 +11,6 @@
     <name>data-excel</name>
     <description>XLSX/XSL data reading/writing.</description>
 
-    <properties>
-        <apache.poi.version>3.17</apache.poi.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -34,7 +30,6 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>${apache.poi.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -43,7 +38,6 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>${apache.poi.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>stax-api</artifactId>
