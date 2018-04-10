@@ -16,7 +16,6 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -283,8 +282,7 @@ public class SnpEffRunner
 	{
 		if (snpEffAnnotatorSettings != null)
 		{
-			snpEffPath = RunAsSystemAspect.runAsSystem(
-					() -> snpEffAnnotatorSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));
+			snpEffPath = snpEffAnnotatorSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION);
 
 			if (snpEffPath != null)
 			{
