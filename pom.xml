@@ -80,6 +80,21 @@
         <google.auto-value.version>1.4.1</google.auto-value.version>
         <apache.rdf4j.version>2.0.2</apache.rdf4j.version>
         <findbugs-annotations.version>3.0.1</findbugs-annotations.version>
+        <google-api-client.version>1.21.0</google-api-client.version>
+        <aerogear-otp-java.version>1.0.0</aerogear-otp-java.version>
+        <aws-java-sdk-s3.version>1.11.86</aws-java-sdk-s3.version>
+        <swagger-annotations.version>1.5.16</swagger-annotations.version>
+        <org.everit.json.schema.version>1.5.1</org.everit.json.schema.version>
+        <picard.version>1.102.0</picard.version>
+        <json.version>20141113</json.version>
+        <Genotype-IO.version>1.0.3</Genotype-IO.version>
+        <rsql-parser.version>2.0.0</rsql-parser.version>
+        <UserAgentUtils.version>1.17</UserAgentUtils.version>
+        <freemarker-java8.version>1.1.2</freemarker-java8.version>
+        <mapdb.version>1.0.6</mapdb.version>
+        <simplecaptcha.version>1.2.1</simplecaptcha.version>
+        <zip4j.version>1.3.2</zip4j.version>
+
         <node.version>v8.9.0</node.version>
         <yarn.version>v1.1.0</yarn.version>
 
@@ -88,6 +103,20 @@
         <mockito.version>2.7.22</mockito.version>
         <hamcrest-all.version>1.3</hamcrest-all.version>
         <awaitility.version>3.0.0</awaitility.version>
+        <greenmail-webapp.version>1.5.5</greenmail-webapp.version>
+
+        <!-- plugin versions not managed by parent pom -->
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <swagger-maven-plugin.version>3.1.5</swagger-maven-plugin.version>
+        <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
+        <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.1</jacoco-maven-plugin.version>
+        <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
+        <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
+        <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
+        <jsdoc3-maven-plugin.version>1.1.0</jsdoc3-maven-plugin.version>
+        <jetty-maven-plugin.version>9.4.8.v20171121</jetty-maven-plugin.version>
 
         <!-- Integration test properties -->
         <cargo-plugin.version>1.6.6</cargo-plugin.version>
@@ -121,13 +150,7 @@
                     <plugins>
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-source-plugin</artifactId>
-                            <version>3.0.1</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.10.4</version>
                             <configuration>
                                 <additionalparam>-Xdoclint:none --allow-script-in-comments</additionalparam>
                             </configuration>
@@ -135,12 +158,12 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-gpg-plugin</artifactId>
-                            <version>1.6</version>
+                            <version>${maven-gpg-plugin.version}</version>
                         </plugin>
                         <plugin>
                             <groupId>org.sonatype.plugins</groupId>
                             <artifactId>nexus-staging-maven-plugin</artifactId>
-                            <version>1.6.8</version>
+                            <version>${nexus-staging-maven-plugin.version}</version>
                             <extensions>true</extensions>
                             <configuration>
                                 <serverId>${sonatype.id}</serverId>
@@ -227,7 +250,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.7.0</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -236,17 +258,9 @@
                         </compilerArgs>
                     </configuration>
                 </plugin>
-                <!-- specify plugin version -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>3.2.0</version>
-                </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -260,11 +274,9 @@
                         </excludes>
                     </configuration>
                 </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.2</version>
                     <executions>
                         <!-- copy generated resources to target folder -->
                         <execution>
@@ -288,25 +300,21 @@
                 <plugin>
                     <groupId>com.github.kongchen</groupId>
                     <artifactId>swagger-maven-plugin</artifactId>
-                    <version>3.1.5</version>
+                    <version>${swagger-maven-plugin.version}</version>
                 </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>${jaxb2-maven-plugin.version}</version>
                 </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jvnet.jax-ws-commons</groupId>
                     <artifactId>jaxws-maven-plugin</artifactId>
-                    <version>2.1</version>
+                    <version>${jaxws-maven-plugin.version}</version>
                 </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19.1</version>
                     <configuration>
                         <skip>${skipUTs}</skip>
                     </configuration>
@@ -314,7 +322,6 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.0.0</version>
                     <executions>
                         <execution>
                             <id>reserve-network-port</id>
@@ -361,33 +368,18 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.1</version>
-                </plugin>
-                <!-- specify plugin version -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.3</version>
-                </plugin>
-                <!-- specify plugin version -->
-                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.0-alpha-2</version>
+                    <version>${properties-maven-plugin.version}</version>
                 </plugin>
-                <!-- specify plugin version -->
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.1</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
-                <!--  integration test plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.8.1</version>
                     <configuration>
                         <argLine>${failsafe.argLine}</argLine>
                     </configuration>
@@ -498,7 +490,7 @@
                 <plugin>
                     <groupId>com.samaxes.maven</groupId>
                     <artifactId>minify-maven-plugin</artifactId>
-                    <version>1.7.4</version>
+                    <version>${minify-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>default-minify</id>
@@ -616,7 +608,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>
@@ -647,7 +638,7 @@
                     <dependency>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>extra-enforcer-rules</artifactId>
-                        <version>1.0-beta-6</version>
+                        <version>${extra-enforcer-rules.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -755,9 +746,15 @@
                 <version>${findbugs-annotations.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>transport</artifactId>
+                <version>${elasticsearch.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.awaitility</groupId>
@@ -767,20 +764,154 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>1.5.16</version>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.api-client</groupId>
+                <artifactId>google-api-client</artifactId>
+                <version>${google-api-client.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava-jdk5</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.aerogear</groupId>
+                <artifactId>aerogear-otp-java</artifactId>
+                <version>${aerogear-otp-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>${aws-java-sdk-s3.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.everit.json</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${org.everit.json.schema.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.utgenome.thirdparty</groupId>
+                <artifactId>picard</artifactId>
+                <version>${picard.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.systemsgenetics</groupId>
+                <artifactId>Genotype-IO</artifactId>
+                <version>${Genotype-IO.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>mockito-all</artifactId>
+                        <groupId>org.mockito</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>log4j</artifactId>
+                        <groupId>log4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>trove4j</artifactId>
+                        <groupId>net.sf.trove4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>commons-cli</artifactId>
+                        <groupId>org.apache.commons</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
+                        <groupId>com.kenai.nbpwr</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.icegreen</groupId>
+                <artifactId>greenmail-webapp</artifactId>
+                <version>${greenmail-webapp.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-turtle</artifactId>
+                <version>${apache.rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.api.freemarker</groupId>
+                <artifactId>freemarker-java8</artifactId>
+                <version>${freemarker-java8.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cz.jirutka.rsql</groupId>
+                <artifactId>rsql-parser</artifactId>
+                <version>${rsql-parser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.bitwalker</groupId>
+                <artifactId>UserAgentUtils</artifactId>
+                <version>${UserAgentUtils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapdb</groupId>
+                <artifactId>mapdb</artifactId>
+                <version>${mapdb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.captcha</groupId>
+                <artifactId>simplecaptcha</artifactId>
+                <version>${simplecaptcha.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.lingala.zip4j</groupId>
+                <artifactId>zip4j</artifactId>
+                <version>${zip4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <!-- needed for genotype IO, it is compiled against log4j 1.x api -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 

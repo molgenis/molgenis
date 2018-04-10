@@ -42,7 +42,7 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.8.v20171121</version>
+                <version>${jetty-maven-plugin.version}</version>
                 <configuration>
                     <stopPort>8079</stopPort>
                     <stopKey>jetty-stop</stopKey>

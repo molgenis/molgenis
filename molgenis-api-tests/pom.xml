@@ -163,7 +163,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.2</version>
                 <configuration>
                     <skip>${skipITs}</skip>
                 </configuration>
@@ -367,12 +366,6 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -388,7 +381,6 @@
         <dependency>
             <groupId>com.icegreen</groupId>
             <artifactId>greenmail-webapp</artifactId>
-            <version>1.5.5</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
