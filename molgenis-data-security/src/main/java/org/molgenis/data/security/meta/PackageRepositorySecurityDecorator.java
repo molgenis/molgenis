@@ -199,26 +199,24 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 
 	private void checkParentPermission(Package newPackage, AbstractRowLevelSecurityRepositoryDecorator.Action action)
 	{
-		boolean packagePermission = true;
 		Package parent = newPackage.getParent();
 		if (parent != null)
 		{
 			boolean checkPackage = action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE || (
 					action == AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE && isParentUpdated(newPackage));
-			if (checkPackage)
+			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
+					PackagePermission.WRITEMETA))
 			{
-				if (!userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-						PackagePermission.WRITEMETA))
-				{
-					throw new MolgenisDataException("No permission");//FIXME: informative message
-				}
+				throw new MolgenisDataException(
+						String.format("No [%s] permission on package '%s'", toMessagePermission(action),
+								parent.getLabel()));
 			}
 		}
 		else
 		{
 			if (!currentUserIsSuOrSystem())
 			{
-				throw new MolgenisDataException("No permission for anyone but SU/System");//FIXME: informative message
+				throw new MolgenisDataException("Only superusers are allowed to create packages without a parent.");
 			}
 		}
 	}
@@ -244,5 +242,4 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 		return permission;
 	}
-
 }

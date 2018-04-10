@@ -185,20 +185,19 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			boolean checkPackage = action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE || (
 					action == AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE && isPackageUpdated(
 							newEntityType));
-			if (checkPackage)
+			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
+					PackagePermission.WRITEMETA))
 			{
-				if (!userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
-						PackagePermission.WRITEMETA))
-				{
-					throw new MolgenisDataException("No permission");//FIXME: informative message
-				}
+				throw new MolgenisDataException(
+						String.format("No [%s] permission on package '%s'", toMessagePermission(action),
+								pack.getLabel()));
 			}
 		}
 		else
 		{
 			if (!currentUserIsSuOrSystem())
 			{
-				throw new MolgenisDataException("No permission for anyone but SU/System");//FIXME: informative message
+				throw new MolgenisDataException("Only superusers are allowed to create EntityTypes without a package.");
 			}
 		}
 	}
