@@ -58,18 +58,15 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		runAsSystem(() ->
-		{
-			importTags(job.parsedMetaData);
-			importPackages(job.parsedMetaData);
-		});
+		importTags(job.parsedMetaData);
+		importPackages(job.parsedMetaData);
 
 		GroupedEntityTypes groupedEntityTypes = groupEntityTypes(job.parsedMetaData.getEntities());
 
 		validateEntityTypePermissions(groupedEntityTypes.getUpdatedEntityTypes());
 
-		PersistResult persistResult = runAsSystem(
-				() -> dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT, toDataMode(job.dbAction)));
+		PersistResult persistResult = dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT,
+				toDataMode(job.dbAction));
 		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
 
 		persistResult.getNrPersistedEntitiesMap()
