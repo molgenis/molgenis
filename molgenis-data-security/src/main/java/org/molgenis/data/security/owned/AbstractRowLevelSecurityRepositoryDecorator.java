@@ -211,7 +211,6 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 			createAcl(entity);
 			delegate().add(entity);
 		}
-		else throw new RuntimeException("");//TODO
 	}
 
 	@Override

@@ -2,9 +2,11 @@ package org.molgenis.data.security.meta;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -31,13 +33,18 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 	private Repository<Package> delegateRepository;
 	@Mock
 	private MutableAclService mutableAclService;
+	@Mock
+	private UserPermissionEvaluator userPermissionEvaluator;
+	@Mock
+	private DataService dataService;
 
 	private PackageRepositorySecurityDecorator repo;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		repo = new PackageRepositorySecurityDecorator(delegateRepository, mutableAclService);
+		repo = new PackageRepositorySecurityDecorator(delegateRepository, mutableAclService, userPermissionEvaluator,
+				dataService);
 	}
 
 	@Test

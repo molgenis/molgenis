@@ -48,13 +48,16 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private MutableAclService mutableAclService;
 	@Mock
 	private MutableAclClassService mutableAclClassService;
+	@Mock
 	private EntityTypeRepositorySecurityDecorator repo;
+	@Mock
+	private DataService dataService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		repo = new EntityTypeRepositorySecurityDecorator(delegateRepository, systemEntityTypeRegistry,
-				permissionService, mutableAclService, mutableAclClassService);
+				permissionService, mutableAclService, mutableAclClassService, dataService);
 	}
 
 	@WithMockUser(username = USERNAME)
