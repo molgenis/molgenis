@@ -2,7 +2,8 @@ package org.molgenis.app.manager.service.impl;
 
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
-import org.molgenis.app.manager.model.AppRequest;
+import org.molgenis.app.manager.model.AppCreateRequest;
+import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
@@ -12,9 +13,9 @@ import org.molgenis.data.plugin.model.PluginMetadata;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class AppManagerServiceImpl implements AppManagerService
@@ -29,16 +30,14 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Override
 	public List<AppResponse> getApps()
 	{
-		return dataService.findAll(AppMetadata.APP, App.class)
-						  .map(this::appToAppResponseMapper)
-						  .collect(Collectors.toList());
+		return dataService.findAll(AppMetadata.APP, App.class).map(AppResponse::create).collect(toList());
 	}
 
 	@Override
 	public AppResponse getAppById(String id)
 	{
 		App app = findAppById(id);
-		return appToAppResponseMapper(app);
+		return AppResponse.create(app);
 	}
 
 	@Override
@@ -50,11 +49,12 @@ public class AppManagerServiceImpl implements AppManagerService
 		app.setActive(true);
 		// TODO unpack resources
 		//noinspection StringConcatenationMissingWhitespace
-//		ZipFile zipFile = new ZipFile(fileStoreFile);
-//		zipFile.extractAll(
-//				fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar
-//						+ app.getId() + separatorChar);
+		//		ZipFile zipFile = new ZipFile(fileStoreFile);
+		//		zipFile.extractAll(
+		//				fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar
+		//						+ app.getId() + separatorChar);
 		// TODO fill in templateContent
+		app.setTemplateContent("<h1>Hello World, this is a test app!!!!</h1><script src=\"/js/hello-world.js\"></script>");
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
@@ -82,15 +82,15 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
-	public void createApp(AppRequest appRequest)
+	public void createApp(AppCreateRequest appCreateRequest)
 	{
 		// Do create stuff
 	}
 
 	@Override
-	public void editApp(AppRequest appRequest)
+	public void editApp(AppEditRequest appEditRequest)
 	{
-		App app = findAppById(appRequest.getId());
+		App app = findAppById(appEditRequest.getId());
 		// Do edit stuff
 	}
 
@@ -108,10 +108,5 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new MolgenisDataException("App with id [" + id + "] does not exist.");
 		}
 		return app;
-	}
-
-	private AppResponse appToAppResponseMapper(App app)
-	{
-		return AppResponse.create(app.getId(), app.getLabel(), app.getDescription(), app.isActive());
 	}
 }

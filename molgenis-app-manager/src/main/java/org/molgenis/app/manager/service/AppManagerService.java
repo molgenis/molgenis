@@ -1,6 +1,7 @@
 package org.molgenis.app.manager.service;
 
-import org.molgenis.app.manager.model.AppRequest;
+import org.molgenis.app.manager.model.AppCreateRequest;
+import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 
 import java.util.List;
@@ -37,16 +38,16 @@ public interface AppManagerService
 	/**
 	 * Create an App
 	 *
-	 * @param appRequest An {@link AppRequest} used to create an app
+	 * @param appCreateRequest An {@link AppCreateRequest} used to create an app
 	 */
-	void createApp(AppRequest appRequest);
+	void createApp(AppCreateRequest appCreateRequest);
 
 	/**
 	 * Edit an existing App
 	 *
-	 * @param appRequest An {@link AppRequest} used to update an existing app
+	 * @param appEditRequest An {@link AppEditRequest} used to update an existing app
 	 */
-	void editApp(AppRequest appRequest);
+	void editApp(AppEditRequest appEditRequest);
 
 	/**
 	 * Delete an existing App

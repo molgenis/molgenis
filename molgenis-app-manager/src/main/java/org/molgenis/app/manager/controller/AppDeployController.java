@@ -4,8 +4,8 @@ import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppDeployController.URI;
@@ -32,9 +32,11 @@ public class AppDeployController extends PluginController
 	}
 
 	@RequestMapping("/{id}")
-	public String deployApp(@RequestParam(value = "id") String id, Model model)
+	public String deployApp(@PathVariable(value = "id") String id, Model model)
 	{
 		model.addAttribute("app", appManagerService.getAppById(id));
+		System.out.println("id = " + id);
+		System.out.println("model = " + model);
 		return "view-app";
 	}
 }

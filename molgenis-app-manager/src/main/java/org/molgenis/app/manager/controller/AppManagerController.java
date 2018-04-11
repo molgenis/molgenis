@@ -1,12 +1,14 @@
 package org.molgenis.app.manager.controller;
 
-import org.molgenis.app.manager.model.AppRequest;
+import org.molgenis.app.manager.model.AppCreateRequest;
+import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,22 +46,36 @@ public class AppManagerController extends PluginController
 		return appManagerService.getApps();
 	}
 
-	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping("/activate/{id}")
+	public void activateApp(@PathVariable(value = "id") String id)
+	{
+		appManagerService.activateApp(id);
+	}
+
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping("/deactivate/{id}")
+	public void deactivateApp(@PathVariable(value = "id") String id)
+	{
+		appManagerService.deactivateApp(id);
+	}
+
+	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping("/create")
-	public void createApp(AppRequest appRequest)
+	public void createApp(AppCreateRequest appCreateRequest)
 	{
-		appManagerService.createApp(appRequest);
+		appManagerService.createApp(appCreateRequest);
 	}
 
+	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping("/edit")
-	@ResponseStatus(HttpStatus.OK)
-	public void editApp(AppRequest appRequest)
+	public void editApp(AppEditRequest appEditRequest)
 	{
-		appManagerService.editApp(appRequest);
+		appManagerService.editApp(appEditRequest);
 	}
 
-	@RequestMapping("/delete")
 	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping("/delete")
 	public void deleteApp(String id)
 	{
 		appManagerService.deleteApp(id);

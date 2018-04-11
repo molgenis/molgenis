@@ -78,5 +78,25 @@ public class App extends StaticEntity
 	{
 		set(IS_ACTIVE, isActive);
 	}
+
+	public boolean includeMenuAndFooter()
+	{
+		return getBoolean(INCLUDE_MENU_AND_FOOTER);
+	}
+
+	public void setIncludeMenuAndFooter(boolean includeMenuAndFooter)
+	{
+		set(INCLUDE_MENU_AND_FOOTER, includeMenuAndFooter);
+	}
+
+	public String getTemplateContent()
+	{
+		return getString(TEMPLATE_CONTENT);
+	}
+
+	public void setTemplateContent(String templateContent)
+	{
+		set(TEMPLATE_CONTENT, templateContent);
+	}
 }
 

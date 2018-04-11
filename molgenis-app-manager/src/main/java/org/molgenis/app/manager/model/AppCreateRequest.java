@@ -4,8 +4,8 @@ import com.google.auto.value.AutoValue;
 import org.molgenis.core.gson.AutoGson;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_AppRequest.class)
-public abstract class AppRequest
+@AutoGson(autoValueClass = AutoValue_AppCreateRequest.class)
+public abstract class AppCreateRequest
 {
 	public abstract String getId();
 
@@ -17,9 +17,9 @@ public abstract class AppRequest
 
 	public abstract boolean getIncludeMenuAndFooter();
 
-	public static AppRequest create(String id, String label, String description, boolean isActive,
+	public static AppCreateRequest create(String id, String label, String description, boolean isActive,
 			boolean includeMenuAndFooter)
 	{
-		return new AutoValue_AppRequest(id, label, description, isActive, includeMenuAndFooter);
+		return new AutoValue_AppCreateRequest(id, label, description, isActive, includeMenuAndFooter);
 	}
 }

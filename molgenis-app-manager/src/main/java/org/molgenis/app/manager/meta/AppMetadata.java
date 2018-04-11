@@ -21,6 +21,7 @@ public class AppMetadata extends SystemEntityType
 	public static final String DESCRIPTION = "description";
 	public static final String IS_ACTIVE = "isActive";
 	public static final String RESOURCE_ZIP = "resourceZip";
+	public static final String TEMPLATE_CONTENT = "templateContent";
 	public static final String APP_CONFIG = "appConfig";
 	public static final String INCLUDE_MENU_AND_FOOTER = "includeMenuAndFooter";
 
@@ -52,9 +53,10 @@ public class AppMetadata extends SystemEntityType
 		// App resources
 		addAttribute(RESOURCE_ZIP).setDataType(FILE)
 								  .setRefEntity(fileMetaMetaData)
-								  .setNillable(true)
+								  .setNillable(false)
 								  .setLabel("Resource ZIP file")
 								  .setDescription("ZIP file with JavaScript, CSS and image files required by the app");
+		addAttribute(TEMPLATE_CONTENT).setDataType(HTML).setNillable(false).setLabel("Template content");
 
 		// App configuration
 		addAttribute(APP_CONFIG).setDataType(TEXT).setNillable(true).setLabel("Application config");
