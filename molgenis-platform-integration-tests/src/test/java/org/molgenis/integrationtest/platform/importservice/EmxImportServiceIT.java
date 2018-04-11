@@ -465,7 +465,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 				entityValidationMethod };
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute name is already in use: \\[type\\] on line \\[4\\]")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Duplicate attribute name [type] for entity type [it_emx_duplicateAttr]")
 	public void testDuplicateAttributeErrorMessage()
 	{
 		File file = getFile("/xls/" + "it_emx_duplicateAttr.xlsx");

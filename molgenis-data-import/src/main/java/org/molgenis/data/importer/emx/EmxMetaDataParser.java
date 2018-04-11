@@ -778,7 +778,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (entitiesMap.containsKey(attributeName))
 			{
 				throw new MolgenisDataException(
-						format("Attribute name is already in use: [%s] on line [%d]", attributeName, rowIndex));
+						format("Duplicate attribute name [%s] for entity type [%s]", attributeName, entityTypeId));
 			}
 
 			entitiesMap.put(attributeName, new EmxAttribute(attribute));
