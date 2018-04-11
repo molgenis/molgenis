@@ -49,6 +49,11 @@ public class AppManagerServiceImpl implements AppManagerService
 		// Set app to active and unpack resources
 		app.setActive(true);
 		// TODO unpack resources
+		//noinspection StringConcatenationMissingWhitespace
+//		ZipFile zipFile = new ZipFile(fileStoreFile);
+//		zipFile.extractAll(
+//				fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar
+//						+ app.getId() + separatorChar);
 		// TODO fill in templateContent
 		dataService.update(AppMetadata.APP, app);
 

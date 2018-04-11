@@ -1,6 +1,5 @@
 package org.molgenis.app.manager.meta;
 
-import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
@@ -78,27 +77,6 @@ public class App extends StaticEntity
 	public void setActive(boolean isActive)
 	{
 		set(IS_ACTIVE, isActive);
-	}
-
-	public Boolean getUseFreemarkerTemplate()
-	{
-		return getBoolean(USE_FREEMARKER_TEMPLATE);
-	}
-
-	public void setUseFreemarkerTemplate(boolean useFreemarkerTemplate)
-	{
-		set(USE_FREEMARKER_TEMPLATE, useFreemarkerTemplate);
-	}
-
-	@Nullable
-	public FreemarkerTemplate getHtmlTemplate()
-	{
-		return getEntity(LANDING_PAGE_HTML_TEMPLATE, FreemarkerTemplate.class);
-	}
-
-	public void setHtmlTemplate(FreemarkerTemplate htmlTemplate)
-	{
-		set(LANDING_PAGE_HTML_TEMPLATE, htmlTemplate);
 	}
 }
 

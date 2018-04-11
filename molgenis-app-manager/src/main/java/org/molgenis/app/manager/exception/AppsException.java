@@ -1,4 +1,4 @@
-package org.molgenis.apps;
+package org.molgenis.app.manager.exception;
 
 /**
  * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}

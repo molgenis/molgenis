@@ -34,7 +34,7 @@ public class AppDeployController extends PluginController
 	@RequestMapping("/{id}")
 	public String deployApp(@RequestParam(value = "id") String id, Model model)
 	{
-		model.addAttribute(appManagerService.getAppById(id));
+		model.addAttribute("app", appManagerService.getAppById(id));
 		return "view-app";
 	}
 }

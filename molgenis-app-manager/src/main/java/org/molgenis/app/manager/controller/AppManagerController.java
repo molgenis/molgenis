@@ -4,10 +4,12 @@ import org.molgenis.app.manager.model.AppRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
@@ -35,27 +37,29 @@ public class AppManagerController extends PluginController
 		return "view-app-manager";
 	}
 
-	@RequestMapping("/apps")
 	@ResponseBody
+	@RequestMapping("/apps")
 	public List<AppResponse> getApps()
 	{
 		return appManagerService.getApps();
 	}
 
-	@RequestMapping("/create")
 	@ResponseBody
+	@RequestMapping("/create")
 	public void createApp(AppRequest appRequest)
 	{
 		appManagerService.createApp(appRequest);
 	}
 
 	@RequestMapping("/edit")
+	@ResponseStatus(HttpStatus.OK)
 	public void editApp(AppRequest appRequest)
 	{
 		appManagerService.editApp(appRequest);
 	}
 
 	@RequestMapping("/delete")
+	@ResponseStatus(HttpStatus.OK)
 	public void deleteApp(String id)
 	{
 		appManagerService.deleteApp(id);
