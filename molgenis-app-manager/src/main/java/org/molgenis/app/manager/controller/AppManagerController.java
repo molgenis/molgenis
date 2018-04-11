@@ -1,7 +1,7 @@
 package org.molgenis.app.manager.controller;
 
-import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppRequest;
+import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
@@ -37,7 +37,7 @@ public class AppManagerController extends PluginController
 
 	@RequestMapping("/apps")
 	@ResponseBody
-	public List<App> getApps()
+	public List<AppResponse> getApps()
 	{
 		return appManagerService.getApps();
 	}

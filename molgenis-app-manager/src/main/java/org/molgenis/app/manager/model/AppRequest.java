@@ -11,10 +11,15 @@ public abstract class AppRequest
 
 	public abstract String getLabel();
 
+	public abstract String getDescription();
+
+	public abstract boolean getIsActive();
+
 	public abstract boolean getIncludeMenuAndFooter();
 
-	public static AppRequest create(String id, String label, boolean includeMenuAndFooter)
+	public static AppRequest create(String id, String label, String description, boolean isActive,
+			boolean includeMenuAndFooter)
 	{
-		return new AutoValue_AppRequest(id, label, includeMenuAndFooter);
+		return new AutoValue_AppRequest(id, label, description, isActive, includeMenuAndFooter);
 	}
 }

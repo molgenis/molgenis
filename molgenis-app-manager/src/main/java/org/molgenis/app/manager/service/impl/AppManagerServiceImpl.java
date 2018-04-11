@@ -3,6 +3,7 @@ package org.molgenis.app.manager.service.impl;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppRequest;
+import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -26,15 +27,18 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
-	public List<App> getApps()
+	public List<AppResponse> getApps()
 	{
-		return dataService.findAll(AppMetadata.APP, App.class).collect(Collectors.toList());
+		return dataService.findAll(AppMetadata.APP, App.class)
+						  .map(this::appToAppResponseMapper)
+						  .collect(Collectors.toList());
 	}
 
 	@Override
-	public App getAppById(String id)
+	public AppResponse getAppById(String id)
 	{
-		return findAppById(id);
+		App app = findAppById(id);
+		return appToAppResponseMapper(app);
 	}
 
 	@Override
@@ -66,7 +70,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.update(AppMetadata.APP, app);
 
 		// Remove plugin from plugin table
-		dataService.deleteById(PluginMetadata.PLUGIN, "app/"+ id);
+		dataService.deleteById(PluginMetadata.PLUGIN, "app/" + id);
 
 		// TODO remove permissions?
 		// TODO remove from menu JSON?
@@ -99,5 +103,10 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new MolgenisDataException("App with id [" + id + "] does not exist.");
 		}
 		return app;
+	}
+
+	private AppResponse appToAppResponseMapper(App app)
+	{
+		return AppResponse.create(app.getId(), app.getLabel(), app.getDescription(), app.isActive());
 	}
 }
