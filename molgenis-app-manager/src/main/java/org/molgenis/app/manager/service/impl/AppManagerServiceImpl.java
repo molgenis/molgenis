@@ -1,5 +1,6 @@
 package org.molgenis.app.manager.service.impl;
 
+import org.molgenis.app.manager.exception.AppManagerException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppCreateRequest;
@@ -7,7 +8,6 @@ import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginMetadata;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,8 @@ public class AppManagerServiceImpl implements AppManagerService
 		//				fileStore.getStorageDir() + separatorChar + FILE_STORE_PLUGIN_APPS_PATH + separatorChar
 		//						+ app.getId() + separatorChar);
 		// TODO fill in templateContent
-		app.setTemplateContent("<h1>Hello World, this is a test app!!!!</h1><script src=\"/js/hello-world.js\"></script>");
+		app.setTemplateContent(
+				"<h1>Hello World, this is a test app!!!!</h1><script src=\"/js/hello-world.js\"></script>");
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
@@ -105,7 +106,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = dataService.findOneById(AppMetadata.APP, id, App.class);
 		if (app == null)
 		{
-			throw new MolgenisDataException("App with id [" + id + "] does not exist.");
+			throw new AppManagerException("App with id [" + id + "] does not exist.");
 		}
 		return app;
 	}

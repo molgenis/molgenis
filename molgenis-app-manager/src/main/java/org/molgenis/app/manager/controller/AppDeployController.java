@@ -1,5 +1,7 @@
 package org.molgenis.app.manager.controller;
 
+import org.molgenis.app.manager.exception.AppManagerException;
+import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.stereotype.Controller;
@@ -34,9 +36,13 @@ public class AppDeployController extends PluginController
 	@RequestMapping("/{id}")
 	public String deployApp(@PathVariable(value = "id") String id, Model model)
 	{
-		model.addAttribute("app", appManagerService.getAppById(id));
-		System.out.println("id = " + id);
-		System.out.println("model = " + model);
+		AppResponse appResponse = appManagerService.getAppById(id);
+		if (!appResponse.getIsActive())
+		{
+			throw new AppManagerException("Access denied for inactive app [" + id + "]");
+		}
+
+		model.addAttribute("app", appResponse);
 		return "view-app";
 	}
 }
