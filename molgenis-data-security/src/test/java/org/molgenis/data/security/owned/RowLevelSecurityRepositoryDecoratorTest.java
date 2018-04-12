@@ -118,7 +118,6 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStream()
 	{
 		Entity entity = getEntityMock();
-		EntityType entityType = entity.getEntityType();
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 

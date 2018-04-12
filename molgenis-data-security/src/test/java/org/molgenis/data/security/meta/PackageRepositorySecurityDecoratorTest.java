@@ -3,6 +3,7 @@ package org.molgenis.data.security.meta;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -80,6 +81,53 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		repo.update(pack);
 
 		verify(mutableAclService).updateAcl(acl);
+		verify(delegateRepository).update(pack);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	public void testUpdateNoParentPermission()
+	{
+		Package pack = mock(Package.class);
+		Package parent = mock(Package.class);
+		Package oldPack = mock(Package.class);
+		Package oldParent = mock(Package.class);
+
+		when(pack.getId()).thenReturn("1");
+		when(parent.getId()).thenReturn("2");
+		when(parent.getLabel()).thenReturn("test");
+		when(pack.getParent()).thenReturn(parent);
+		when(oldPack.getParent()).thenReturn(oldParent);
+
+		MutableAcl acl = mock(MutableAcl.class);
+
+		when(dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class)).thenReturn(oldPack);
+
+		repo.update(pack);
+
+		verify(mutableAclService).updateAcl(acl);
+		verify(delegateRepository).update(pack);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create packages without a parent.")
+	public void testUpdateToNullPackage()
+	{
+		Package pack = mock(Package.class);
+		Package parent = mock(Package.class);
+		Package oldPack = mock(Package.class);
+		when(pack.getParent()).thenReturn(null);
+		MutableAcl acl = mock(MutableAcl.class);
+
+		when(pack.getId()).thenReturn("1");
+		when(pack.getParent()).thenReturn(null);
+		when(oldPack.getParent()).thenReturn(parent);
+
+		when(dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class)).thenReturn(oldPack);
+
+		MutableAcl acl1 = mock(MutableAcl.class);
+
+		repo.update(pack);
+
+		verify(mutableAclService).updateAcl(acl1);
 		verify(delegateRepository).update(pack);
 	}
 
@@ -205,6 +253,30 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(mutableAclService).createAcl(new PackageIdentity("1"));
 		verify(mutableAclService).updateAcl(acl);
 		verify(delegateRepository).add(pack);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	public void testAddNoPermissionOnParent()
+	{
+		Package pack = mock(Package.class);
+		Package parent = mock(Package.class);
+
+		when(parent.getId()).thenReturn("2");
+		when(parent.getLabel()).thenReturn("test");
+		when(pack.getParent()).thenReturn(parent);
+
+		when(userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
+				PackagePermission.WRITEMETA)).thenReturn(false);
+
+		repo.add(pack);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create packages without a parent.")
+	public void testAddNullParent()
+	{
+		Package pack = mock(Package.class);
+		when(pack.getParent()).thenReturn(null);
+		repo.add(pack);
 	}
 
 	@Test

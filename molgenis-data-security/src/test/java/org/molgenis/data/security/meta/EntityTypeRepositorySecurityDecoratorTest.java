@@ -94,7 +94,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		Acl acl = mock(Acl.class);
 
 		when(pack.getId()).thenReturn("test");
-		when(entityType.getId()).thenReturn(entityTypeId).getMock();
+		when(entityType.getId()).thenReturn(entityTypeId);
 		when(entityType.getPackage()).thenReturn(pack);
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity("test"),
 				PackagePermission.WRITEMETA)).thenReturn(true);
@@ -105,6 +105,32 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 		verify(delegateRepository).add(entityType);
 		verify(mutableAclService).createAcl(new EntityTypeIdentity(entityTypeId));
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	public void addNoPermissionOnPack()
+	{
+		EntityType entityType = mock(EntityType.class);
+		Package pack = mock(Package.class);
+
+		when(pack.getId()).thenReturn("test");
+		when(pack.getLabel()).thenReturn("test");
+		when(entityType.getPackage()).thenReturn(pack);
+		when(userPermissionEvaluator.hasPermission(new PackageIdentity("test"),
+				PackagePermission.WRITEMETA)).thenReturn(false);
+
+		repo.add(entityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create EntityTypes without a package.")
+	public void addNullPackage()
+	{
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getPackage()).thenReturn(null);
+
+		repo.add(entityType);
 	}
 
 	@Test
@@ -132,16 +158,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		assertEquals(repo.count(q), 1L);
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
-	}
-
-	private void findAllQuerySuOrSystem()
-	{
-		EntityType entityType0 = mock(EntityType.class);
-		EntityType entityType1 = mock(EntityType.class);
-		@SuppressWarnings("unchecked")
-		Query q = mock(Query.class);
-		when(delegateRepository.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
-		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType1));
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -248,13 +264,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.COUNT)).thenReturn(false);
 		assertNull(repo.findOne(q));
-	}
-
-	private void findOneByIdSuOrSystem()
-	{
-		Object id = "0";
-		repo.findOneById(id);
-		verify(delegateRepository).findOneById(id);
 	}
 
 	@WithMockUser(username = USERNAME)
@@ -422,6 +431,72 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 				EntityType.class)).thenReturn(entityType);
 
 		when(acl.getParentAcl()).thenReturn(packageAcl);
+
+		doReturn(true).when(userPermissionEvaluator)
+					  .hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITEMETA);
+
+		repo.update(entityType);
+		verify(delegateRepository).update(entityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	public void updateNoPermissionOnPack()
+	{
+		String entityTypeId = "entityTypeId";
+
+		EntityType entityType = mock(EntityType.class);
+		Package pack = mock(Package.class);
+		EntityType oldEntityType = mock(EntityType.class);
+
+		when(pack.getId()).thenReturn("test");
+		when(pack.getLabel()).thenReturn("test");
+		when(entityType.getId()).thenReturn(entityTypeId).getMock();
+		when(entityType.getPackage()).thenReturn(pack);
+
+		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(),
+				EntityType.class)).thenReturn(oldEntityType);
+
+		doReturn(false).when(userPermissionEvaluator)
+					   .hasPermission(new PackageIdentity("test"), PackagePermission.WRITEMETA);
+
+		repo.update(entityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create EntityTypes without a package.")
+	public void updateToNullPackage()
+	{
+		String entityTypeId = "entityTypeId";
+
+		EntityType entityType = mock(EntityType.class);
+		Package pack = mock(Package.class);
+		EntityType oldEntityType = mock(EntityType.class);
+
+		when(entityType.getId()).thenReturn(entityTypeId).getMock();
+		when(oldEntityType.getPackage()).thenReturn(pack);
+
+		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(),
+				EntityType.class)).thenReturn(oldEntityType);
+
+		repo.update(entityType);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test
+	public void updateFromNullToNullPackage()
+	{
+		String entityTypeId = "entityTypeId";
+
+		EntityType entityType = mock(EntityType.class);
+		EntityType oldEntityType = mock(EntityType.class);
+		MutableAcl acl = mock(MutableAcl.class);
+
+		when(entityType.getId()).thenReturn(entityTypeId).getMock();
+		doReturn(acl).when(mutableAclService).readAclById(new EntityTypeIdentity(entityTypeId));
+
+		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(),
+				EntityType.class)).thenReturn(oldEntityType);
 
 		doReturn(true).when(userPermissionEvaluator)
 					  .hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITEMETA);
