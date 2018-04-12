@@ -314,7 +314,7 @@ public class PermissionManagerController extends PluginController
 			{
 				if (!value.equals("none"))
 				{
-					createSidPackagePermission(package_, sid, toEntityTypePermission(value));
+					createSidPackagePermission(package_, sid, toPackagePermission(value));
 				}
 				else
 				{
@@ -409,11 +409,10 @@ public class PermissionManagerController extends PluginController
 				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
 	}
 
-	private void createSidPackagePermission(Package package_, Sid sid, EntityTypePermission entityTypePermission)
+	private void createSidPackagePermission(Package package_, Sid sid, PackagePermission entityTypePermission)
 	{
 		ObjectIdentity objectIdentity = new PackageIdentity(package_);
-		createSidPermission(sid, objectIdentity,
-				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
+		createSidPermission(sid, objectIdentity, PackagePermissionUtils.getCumulativePermission(entityTypePermission));
 	}
 
 	private void removeSidPackagePermission(Package package_, Sid sid)
