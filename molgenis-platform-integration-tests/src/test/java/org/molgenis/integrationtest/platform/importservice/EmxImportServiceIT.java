@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
@@ -242,7 +243,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME)
-	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
+	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
 		populateUserPermissions();
 		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
@@ -461,6 +463,15 @@ public class EmxImportServiceIT extends ImportServiceIT
 																   .collect(toSet());
 		return new Object[] { addFile, updateFile, entityTypeCountMap, entityTypeFullyQualifiedNames,
 				entityValidationMethod };
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Duplicate attribute name \\[type\\] for entity type \\[it_emx_duplicateAttr\\]")
+	public void testDuplicateAttributeErrorMessage()
+	{
+		File file = getFile("/xls/" + "it_emx_duplicateAttr.xlsx");
+		testDoImportAddEmx(file, null, null, () ->
+		{
+		});
 	}
 
 	private static Map<String, Object> patientsFirstRow = newHashMap();
