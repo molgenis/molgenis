@@ -1,0 +1,48 @@
+{
+  "name": "molgenis-app-manager",
+  "version": "1.0.0",
+  "private": false,
+  "contributors": [
+    "Mark <markdehaan90@gmail.com>"
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve --open",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@molgenis/molgenis-api-client": "^2.1.3",
+    "vue": "^2.5.16",
+    "vue-form-wizard": "^0.8.4",
+    "vue-js-toggle-button": "^1.2.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.0-beta.6",
+    "@vue/cli-plugin-eslint": "^3.0.0-beta.6",
+    "@vue/cli-service": "^3.0.0-beta.6",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "vue-template-compiler": "^2.5.13"
+  },
+  "babel": {
+    "presets": [
+      "@vue/app"
+    ]
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ]
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
