@@ -56,9 +56,9 @@ const state: QuestionnaireState = {
   questionnaireRowId: '',
 
   /**
-   * Auto save indicator
+   * Auto save outstading calls counter
    */
-  saving: false,
+  numberOfOutstandingCalls: 0,
 
   /**
    * Submission text shown after completing a questionnaire

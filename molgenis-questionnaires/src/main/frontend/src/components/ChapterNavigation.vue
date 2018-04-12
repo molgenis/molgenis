@@ -93,7 +93,7 @@
         return this.$store.getters.getTotalNumberOfChapters
       },
       saving () {
-        return this.$store.state.saving
+        return this.$store.getters.isSaving
       }
     },
     methods: {

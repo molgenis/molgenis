@@ -76,7 +76,7 @@ const actions = {
   },
 
   'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, formData: Object) {
-    commit('SAVING_INPUT', true)
+    commit('INCREMENT_SAVING_QUEUE')
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
 
     const options = {
@@ -86,10 +86,8 @@ const actions = {
 
     return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
       commit('SET_FORM_DATA', formData)
-      commit('SAVING_INPUT', false)
-      commit('SET_LOADING', false)
-    }).catch(() => {
-      // Do not set error because we do not want an error due to auto saving
+    }).then(() => {
+      commit('DECREMENT_SAVING_QUEUE')
       commit('SET_LOADING', false)
     })
   },
