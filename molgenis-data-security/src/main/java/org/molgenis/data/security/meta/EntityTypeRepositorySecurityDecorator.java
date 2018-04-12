@@ -182,9 +182,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		Package pack = newEntityType.getPackage();
 		if (pack != null)
 		{
-			boolean checkPackage = action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE || (
-					action == AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE && isPackageUpdated(
-							newEntityType));
+			boolean checkPackage = isPackageUpdated(action, newEntityType);
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
 					PackagePermission.WRITEMETA))
 			{
@@ -195,18 +193,33 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		}
 		else
 		{
-			if (!currentUserIsSuOrSystem())
+			if (!currentUserIsSuOrSystem() && isPackageUpdated(action, newEntityType))
 			{
 				throw new MolgenisDataException("Only superusers are allowed to create EntityTypes without a package.");
 			}
 		}
 	}
 
-	private boolean isPackageUpdated(EntityType newEntityType)
+	private boolean isPackageUpdated(Action action, EntityType newEntityType)
 	{
-		EntityType currentEntityType = dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
-				newEntityType.getId(), EntityType.class);
-		return currentEntityType.getPackage() == null || !currentEntityType.getPackage()
-																		   .equals(newEntityType.getPackage());
+		boolean updated;
+		if (action == Action.CREATE)
+		{
+			updated = true;
+		}
+		else
+		{
+			EntityType currentEntityType = dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+					newEntityType.getId(), EntityType.class);
+			if (currentEntityType.getPackage() == null)
+			{
+				updated = newEntityType.getPackage() != null;
+			}
+			else
+			{
+				updated = !currentEntityType.getPackage().equals(newEntityType.getPackage());
+			}
+		}
+		return updated;
 	}
 }

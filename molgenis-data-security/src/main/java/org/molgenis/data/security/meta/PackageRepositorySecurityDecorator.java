@@ -202,8 +202,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		Package parent = newPackage.getParent();
 		if (parent != null)
 		{
-			boolean checkPackage = action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE || (
-					action == AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE && isParentUpdated(newPackage));
+			boolean checkPackage = isParentUpdated(action, newPackage);
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
 					PackagePermission.WRITEMETA))
 			{
@@ -214,17 +213,33 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 		else
 		{
-			if (!currentUserIsSuOrSystem())
+			if (!currentUserIsSuOrSystem() && isParentUpdated(action, newPackage))
 			{
 				throw new MolgenisDataException("Only superusers are allowed to create packages without a parent.");
 			}
 		}
 	}
 
-	private boolean isParentUpdated(Package pack)
+	private boolean isParentUpdated(AbstractRowLevelSecurityRepositoryDecorator.Action action, Package pack)
 	{
-		Package currentPack = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
-		return currentPack.getParent() == null || !currentPack.getParent().equals(pack.getParent());
+		boolean updated;
+		if (action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE)
+		{
+			updated = true;
+		}
+		else
+		{
+			Package currentpackage = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
+			if (currentpackage.getParent() == null)
+			{
+				updated = pack.getParent() != null;
+			}
+			else
+			{
+				updated = !currentpackage.getParent().equals(pack.getParent());
+			}
+		}
+		return updated;
 	}
 
 	private static AbstractPermission getPermissionForOperation(
