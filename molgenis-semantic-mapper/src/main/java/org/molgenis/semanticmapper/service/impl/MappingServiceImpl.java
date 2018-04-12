@@ -9,7 +9,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
@@ -35,7 +34,6 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 
 public class MappingServiceImpl implements MappingService
@@ -66,7 +64,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
 	@Transactional
 	public MappingProject addMappingProject(String projectName, String target)
 	{
@@ -77,7 +74,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
 	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
@@ -142,14 +138,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
 	@Override
-	@RunAsSystem
 	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
@@ -157,7 +151,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
 	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
@@ -228,7 +221,7 @@ public class MappingServiceImpl implements MappingService
 
 	private Repository<Entity> addTargetEntityType(EntityType targetMetadata)
 	{
-		Repository<Entity> targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetadata));
+		Repository<Entity> targetRepo = dataService.getMeta().createRepository(targetMetadata);
 		permissionSystemService.giveUserWriteMetaPermissions(targetMetadata);
 		return targetRepo;
 	}
