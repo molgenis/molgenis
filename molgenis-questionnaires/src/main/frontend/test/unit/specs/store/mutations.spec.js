@@ -13,7 +13,8 @@ describe('mutations', () => {
     questionnaireLabel: '',
     questionnaireList: [],
     questionnaireRowId: '',
-    submissionText: ''
+    submissionText: '',
+    numberOfOutstandingCalls: 0
   }
 
   describe('BLOCK_NAVIGATION', () => {
@@ -133,6 +134,24 @@ describe('mutations', () => {
       mutations.SET_QUESTIONNAIRE(state, payload)
 
       expect(state.questionnaire).to.equal(payload)
+    })
+  })
+
+  describe('INCREMENT_SAVING_QUEUE', () => {
+    it('should increment the number of outstanding calls queue', () => {
+      state.numberOfOutstandingCalls = 0
+      mutations.INCREMENT_SAVING_QUEUE(state)
+
+      expect(state.numberOfOutstandingCalls).to.equal(1)
+    })
+  })
+
+  describe('DECREMENT_SAVING_QUEUE', () => {
+    it('should decrement the number of outstanding calls queue', () => {
+      state.numberOfOutstandingCalls = 3
+      mutations.DECREMENT_SAVING_QUEUE(state)
+
+      expect(state.numberOfOutstandingCalls).to.equal(2)
     })
   })
 })

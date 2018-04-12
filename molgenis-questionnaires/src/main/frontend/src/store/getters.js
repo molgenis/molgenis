@@ -98,6 +98,10 @@ const getters = {
 
   getTotalNumberOfChapters: (state: QuestionnaireState): number => {
     return state.chapterFields.length
+  },
+
+  isSaving: (state: QuestionnaireState): boolean => {
+    return state.numberOfOutstandingCalls > 0
   }
 }
 

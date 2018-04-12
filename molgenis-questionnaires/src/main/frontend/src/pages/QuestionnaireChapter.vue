@@ -120,7 +120,7 @@
         return this.$store.state.loading
       },
       saving () {
-        return this.$store.state.saving
+        return this.$store.getters.isSaving
       },
       navigationBlocked () {
         const errors = this.formState.$error && Object.keys(this.formState.$error).length > 0

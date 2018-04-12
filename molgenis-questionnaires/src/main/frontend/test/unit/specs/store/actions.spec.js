@@ -320,9 +320,9 @@ describe('actions', () => {
       mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
-        {type: 'SAVING_INPUT', payload: true},
+        {type: 'INCREMENT_SAVING_QUEUE'},
         {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'SAVING_INPUT', payload: false},
+        {type: 'DECREMENT_SAVING_QUEUE'},
         {type: 'SET_LOADING', payload: false}
       ]
 
