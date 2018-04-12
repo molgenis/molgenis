@@ -166,7 +166,7 @@ Used to set range in case of int or long attributes
 true/false, default false
 
 Indicates if this attribute should appear in the xref/mref search dropdown in the dataexplorer.
-
+A lookupAttribute must be visible.
 An entity inherits the lookupAttributes from the entity it extends.
 
 If an entity has no lookupAttributes, the labelAttribute is used in the dropdown.
@@ -181,7 +181,8 @@ label for specified language (can be multiple languages, example: label-nl)
 true/false to indicate if the user can use this atrribute in an aggregate query
 
 ### labelAttribute 
-true/false to indicate that the value of this attribute should be used as label for the entity (in the dataexplorer when used in xref/mref). Default: false
+true/false to indicate that the value of this attribute should be used as label for the entity (in the dataexplorer when used in xref/mref). Default: false.
+A labelAttribute must be visible. If an entity's idAttribute is not visible, it should have a labelAttribute.
 
 ### readOnly
 true/false to indicate a readOnly attribute

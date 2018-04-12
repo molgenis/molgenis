@@ -149,6 +149,21 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		assertEquals(Iterators.size(it), 5);
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Duplicate column header 'col1' not allowed")
+	public void testCsvIteratorDuplicateColumnHeader() throws IOException
+	{
+		File tmpFile = createTmpFileForResource("duplicate-sheet-header.csv");
+		try
+		{
+			new CsvIterator(tmpFile, "duplicate-sheet-header", null, ',', entityType);
+		}
+		finally
+		{
+			//noinspection ResultOfMethodCallIgnored
+			tmpFile.delete();
+		}
+	}
+
 	private File createTmpFileForResource(String fileName) throws IOException
 	{
 		InputStream in = getClass().getResourceAsStream("/" + fileName);

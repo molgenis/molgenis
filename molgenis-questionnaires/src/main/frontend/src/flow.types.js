@@ -8,7 +8,7 @@ export type QuestionnaireState = {
   questionnaire: Object,
   questionnaireList: Array<*>,
   questionnaireRowId: string,
-  saving: boolean,
+  numberOfOutstandingCalls: number,
   submissionText: string
 }
 

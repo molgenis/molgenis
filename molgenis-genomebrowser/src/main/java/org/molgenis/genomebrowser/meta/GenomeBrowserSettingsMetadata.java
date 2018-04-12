@@ -98,6 +98,9 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType
 											   .setVisibleExpression(
 													   "$('" + MOLGENIS_REFERENCES_MODE + "').eq('" + CONFIGURED
 															   + "').value()")
+											   .setNullableExpression(
+													   "!($('" + MOLGENIS_REFERENCES_MODE + "').eq('" + CONFIGURED
+															   + "')).value()")
 											   .setDescription(
 													   "the genome browser settings that should be shown as reference tracks");
 		addAttribute(ACTIONS).setLabel("Actions")

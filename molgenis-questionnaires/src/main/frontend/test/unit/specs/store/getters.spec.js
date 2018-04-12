@@ -251,4 +251,16 @@ describe('getters', () => {
       expect(actual).to.equal(expected)
     })
   })
+
+  describe('isSaving', () => {
+    it('should return false if the numberOfOutstandingCalls is zero', () => {
+      state.numberOfOutstandingCalls = 0
+      expect(getters.isSaving(state)).to.equal(false)
+    })
+
+    it('should return true if the numberOfOutstandingCalls is bigger then zero', () => {
+      state.numberOfOutstandingCalls = 2
+      expect(getters.isSaving(state)).to.equal(true)
+    })
+  })
 })

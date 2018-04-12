@@ -189,6 +189,20 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 		it.next(); // does not exist
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Duplicate column header 'entity' in sheet 'attributes' not allowed")
+	public void iteratorDuplicateSheetHeader() throws IOException, InvalidFormatException
+	{
+		String fileName = "/duplicate-sheet-header.xlsx";
+		try (InputStream inputStream = getClass().getResourceAsStream(fileName))
+		{
+			Workbook workbook = WorkbookFactory.create(inputStream);
+			ExcelRepository excelRepository = new ExcelRepository(fileName, workbook.getSheet("attributes"),
+					entityTypeFactory, attrMetaFactory);
+			excelRepository.iterator();
+		}
+	}
+
 	@Test
 	public void attributesAndIterator() throws IOException
 	{

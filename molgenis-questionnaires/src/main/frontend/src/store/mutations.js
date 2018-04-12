@@ -17,8 +17,12 @@ const mutations = {
     state.submissionText = ''
   },
 
-  'SAVING_INPUT' (state: QuestionnaireState, saving: boolean) {
-    state.saving = saving
+  'INCREMENT_SAVING_QUEUE' (state: QuestionnaireState) {
+    state.numberOfOutstandingCalls += 1
+  },
+
+  'DECREMENT_SAVING_QUEUE' (state: QuestionnaireState) {
+    state.numberOfOutstandingCalls -= 1
   },
 
   'SET_QUESTIONNAIRE' (state: QuestionnaireState, questionnaire: Object) {

@@ -90,6 +90,26 @@ public class RestControllerV2IT
 	}
 
 	@Test
+	public void testApiCorsPreflightRequest()
+	{
+		given().log()
+			   .all()
+			   .header("Access-Control-Request-Method", "DELETE ")
+			   .header("Access-Control-Request-Headers", "x-molgenis-token")
+			   .header("Origin", "https://foo.bar.org")
+			   .when()
+			   .options(API_V2 + "version")
+			   .then()
+			   .statusCode(OKE)
+			   .log()
+			   .all()
+			   .header("Access-Control-Allow-Origin", "*")
+			   .header("Access-Control-Allow-Methods", "DELETE")
+			   .header("Access-Control-Allow-Headers", "x-molgenis-token")
+			   .header("Access-Control-Max-Age", "1800");
+	}
+
+	@Test
 	public void batchCreate()
 	{
 		JSONObject jsonObject = new JSONObject();

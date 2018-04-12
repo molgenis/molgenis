@@ -29,7 +29,7 @@ public class SettingsEntityType extends SystemEntityType
 		setLabel("Settings");
 		setAbstract(true);
 		setPackage(settingsPackage);
-		addAttribute(ID, ROLE_ID).setLabel("Id").setVisible(false);
+		addAttribute(ID, ROLE_ID).setLabel("Id").setVisible(true);
 	}
 
 	@Autowired
