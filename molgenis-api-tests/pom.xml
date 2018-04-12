@@ -57,7 +57,7 @@
                 <!-- override the cluster name for the test run -->
                 <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
                 <elasticsearch.cluster.name>apitest${maven.build.timestamp}</elasticsearch.cluster.name>
-                <elasticsearch.transport.addresses>localhost:${elasticsearch.tcp.port}
+                <elasticsearch.transport.addresses>localhost:@elasticsearch.tcp.port@
                 </elasticsearch.transport.addresses>
             </properties>
             <build>
@@ -163,7 +163,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.2</version>
                 <configuration>
                     <skip>${skipITs}</skip>
                 </configuration>
@@ -268,7 +267,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20.1</version>
                 <configuration>
                     <systemPropertyVariables>
                         <REST_TEST_HOST>http://localhost:${cargo.servlet.port}</REST_TEST_HOST>
@@ -309,13 +307,11 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.el</artifactId>
-            <version>${javax.el.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -352,7 +348,6 @@
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
-            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -371,19 +366,11 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>3.0.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>2.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -394,7 +381,6 @@
         <dependency>
             <groupId>com.icegreen</groupId>
             <artifactId>greenmail-webapp</artifactId>
-            <version>1.5.5</version>
             <type>war</type>
             <scope>test</scope>
         </dependency>
