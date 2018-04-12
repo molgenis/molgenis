@@ -13,8 +13,6 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.*;
-import org.molgenis.data.meta.util.AttributeCopierImpl;
-import org.molgenis.data.meta.util.EntityTypeCopierImpl;
 import org.molgenis.data.platform.decorators.SystemRepositoryDecoratorRegistryImpl;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.support.DataServiceImpl;
@@ -34,8 +32,7 @@ import javax.annotation.PostConstruct;
 		AttributeFactory.class, SystemEntityTypeRegistryImpl.class, EntityTypeDependencyResolver.class,
 		SystemPackageRegistry.class, PackagePersister.class, SystemEntityTypePersister.class,
 		SystemEntityTypeRegistrar.class, SystemPackageRegistrar.class, EntityFactoryRegistrar.class,
-		SystemEntityTypeInitializer.class, SystemEntityTypeI18nInitializer.class, DefaultPackage.class,
-		EntityTypeCopierImpl.class, AttributeCopierImpl.class })
+		SystemEntityTypeInitializer.class, SystemEntityTypeI18nInitializer.class, DefaultPackage.class })
 @ComponentScan("org.molgenis.data.meta.model")
 public class MetaTestConfig
 {
