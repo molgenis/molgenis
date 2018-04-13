@@ -191,7 +191,16 @@ public class ExcelRepository extends AbstractRepository
 			try
 			{
 				String header = AbstractCellProcessor.processCell(ExcelUtils.toValue(it.next()), true, cellProcessors);
-				if (null != header) columnIdx.put(header, i++);
+				if (header != null)
+				{
+					if (columnIdx.containsKey(header))
+					{
+						throw new MolgenisDataException(
+								format("Duplicate column header '%s' in sheet '%s' not allowed", header,
+										headerRow.getSheet().getSheetName()));
+					}
+					columnIdx.put(header, i++);
+				}
 			}
 			catch (final IllegalStateException ex)
 			{

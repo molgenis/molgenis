@@ -19,13 +19,16 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -810,18 +813,25 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
-		entityTypePermissionMap.put("sys_md_Attribute", WRITE);
-		entityTypePermissionMap.put("sys_Language", WRITE);
-		entityTypePermissionMap.put("sys_L10nString", WRITE);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		entityTypePermissionMap.put(refEntityTypeStatic.getId(), WRITE);
-		entityTypePermissionMap.put(entityTypeStatic.getId(), WRITE);
-		entityTypePermissionMap.put(entityTypeDynamic.getId(), WRITE);
-		entityTypePermissionMap.put(refEntityTypeDynamic.getId(), READ);
-		entityTypePermissionMap.put(selfXrefEntityType.getId(), WRITE);
+		// define cumulative permissions
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
+				EntityTypePermission.READ);
+		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
+		CumulativePermission readEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.READ);
+		CumulativePermission writeEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE);
+
+		Map<ObjectIdentity, Permission> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_Language"), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_L10nString"), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeStatic), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeStatic), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeDynamic), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), writeEntityType);
+		entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), writeEntityType);
 
 		testPermissionPopulator.populate(entityTypePermissionMap);
 	}

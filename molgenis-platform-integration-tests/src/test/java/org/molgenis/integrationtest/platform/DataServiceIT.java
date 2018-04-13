@@ -3,9 +3,11 @@ package org.molgenis.integrationtest.platform;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
@@ -14,6 +16,10 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,7 +49,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
@@ -76,9 +82,15 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private TestPermissionPopulator permissionPopulator;
 	@Autowired
 	private DataService dataService;
+	@Autowired
+	private FileMetaFactory fileMetaFactory;
+	private FileMeta file1;
+
+	@Autowired
+	private MutableAclService mutableAclService;
 
 	@BeforeClass
 	public void setUpBeforeClass() throws InterruptedException
@@ -102,6 +114,13 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityType.getId());
 		assertNotNull(capabilities);
 		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE, VALIDATE_REFERENCE_CONSTRAINT)));
+	}
+
+	@WithMockUser(username = USERNAME_READ)
+	@Test(groups = "readtest")
+	public void testReadRowLevelSecured()
+	{
+		assertNotNull(dataService.findOneById(FILE_META, file1.getId()));
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -161,7 +180,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		Repository repo = dataService.getRepository(entityType.getId());
 
 		// Repository equals not implemented: repository from dataService and dataService.getRepository are not the same
-		assertTrue(StreamSupport.stream(dataService.spliterator(), false).anyMatch(e -> repo.getName().equals(e.getName())));
+		assertTrue(StreamSupport.stream(dataService.spliterator(), false)
+								.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -254,14 +274,17 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 				{ ATTR_DATETIME, parseInstant("1985-08-12T11:12:13+0500"), asList(0, 1, 2) },
 				{ ATTR_DECIMAL, 1.123, singletonList(1) },
 				{ ATTR_HTML, "<html>where is my head and where is my body</html>", singletonList(1) },
-				{ ATTR_HYPERLINK, "http://www.molgenis.org", asList(0, 1, 2) }, { ATTR_LONG, 1000000L, singletonList(1) }, { ATTR_INT, 11, singletonList(1) },
+				{ ATTR_HYPERLINK, "http://www.molgenis.org", asList(0, 1, 2) },
+				{ ATTR_LONG, 1000000L, singletonList(1) }, { ATTR_INT, 11, singletonList(1) },
 				{ ATTR_SCRIPT, "/bin/blaat/script.sh", asList(0, 1, 2) },
 				{ ATTR_EMAIL, "this.is@mail.address", asList(0, 1, 2) },
 				// null checks
 				{ ATTR_ID, null, emptyList() }, { ATTR_STRING, null, emptyList() }, { ATTR_BOOL, null, emptyList() },
 				{ ATTR_CATEGORICAL, null, emptyList() }, { ATTR_CATEGORICAL_MREF, null, emptyList() },
-				{ ATTR_DATE, null, emptyList() }, { ATTR_DATETIME, null, emptyList() }, { ATTR_DECIMAL, null, emptyList() }, { ATTR_HTML, null, asList(0, 2) },
-				{ ATTR_HYPERLINK, null, emptyList() }, { ATTR_LONG, null, emptyList() }, { ATTR_INT, 11, singletonList(1) }, { ATTR_SCRIPT, null, emptyList() },
+				{ ATTR_DATE, null, emptyList() }, { ATTR_DATETIME, null, emptyList() },
+				{ ATTR_DECIMAL, null, emptyList() }, { ATTR_HTML, null, asList(0, 2) },
+				{ ATTR_HYPERLINK, null, emptyList() }, { ATTR_LONG, null, emptyList() },
+				{ ATTR_INT, 11, singletonList(1) }, { ATTR_SCRIPT, null, emptyList() },
 				{ ATTR_EMAIL, null, emptyList() }, { ATTR_XREF, null, emptyList() }, { ATTR_MREF, null, emptyList() } };
 	}
 
@@ -282,7 +305,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorGreater")
 	private static Object[][] findQueryOperatorGreater()
 	{
-		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, singletonList(2) }, { 12, emptyList() } };
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, singletonList(2) },
+				{ 12, emptyList() } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -341,14 +365,18 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorNot")
 	private static Object[][] findQueryOperatorNot()
 	{
-		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) }, { 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) },
+				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorNot")
 	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).not().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .not()
+														  .eq(ATTR_INT, value)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -416,7 +444,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorNested")
-	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value, List<Integer> expectedEntityIndices)
+	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
+			List<Integer> expectedEntityIndices)
 	{
 		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
 														  .eq(ATTR_BOOL, boolValue)
@@ -458,7 +487,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorLessEqual")
 	private static Object[][] findQueryOperatorLessEqual()
 	{
-		return new Object[][] { { 9, emptyList() }, { 10, singletonList(0) }, { 11, asList(0, 1) }, { 12, asList(0, 1, 2) } };
+		return new Object[][] { { 9, emptyList() }, { 10, singletonList(0) }, { 11, asList(0, 1) },
+				{ 12, asList(0, 1, 2) } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -484,7 +514,9 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorLike")
 	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).like(ATTR_STRING, likeStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .like(ATTR_STRING, likeStr)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -516,14 +548,17 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorSearch")
 	private static Object[][] findQueryOperatorSearch()
 	{
-		return new Object[][] { { "body", singletonList(1) }, { "head", singletonList(1) }, { "unknownString", emptyList() } };
+		return new Object[][] { { "body", singletonList(1) }, { "head", singletonList(1) },
+				{ "unknownString", emptyList() } };
 	}
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest", dataProvider = "findQueryOperatorSearch")
 	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
 	{
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId()).search(ATTR_HTML, searchStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityType.getId())
+														  .search(ATTR_HTML, searchStr)
+														  .findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -606,7 +641,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 																.attrX(entityType.getAttribute(ATTR_BOOL));
 		AggregateResult result = dataService.aggregate(entityType.getId(), aggregateQuery);
 
-		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(2L)), asList(0L, 1L), emptyList());
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(2L)),
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
@@ -619,7 +655,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 																.attrDistinct(entityType.getAttribute(ATTR_ENUM));
 		AggregateResult result = dataService.aggregate(entityType.getId(), aggregateQuery);
 
-		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)), asList(0L, 1L), emptyList());
+		AggregateResult expectedResult = new AggregateResult(asList(singletonList(1L), singletonList(1L)),
+				asList(0L, 1L), emptyList());
 		assertEquals(result, expectedResult);
 	}
 
@@ -822,27 +859,45 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		dataService.add(refEntityTypeStatic.getId(), staticRefEntities.stream());
 		staticEntities = entityTestHarness.createTestEntities(entityTypeStatic, 3, staticRefEntities).collect(toList());
 		dataService.add(entityTypeStatic.getId(), staticEntities.stream());
+
+		// Add row-level secured entity row
+		file1 = fileMetaFactory.create();
+		file1.setContentType("image/jpeg");
+		file1.setFilename("henk.jpg");
+		file1.setSize(12345L);
+		file1.setUrl("http://localhost:8080/files/henk.jpg");
+		dataService.add(FILE_META, file1);
 	}
 
 	private void populateDataPermissions()
 	{
-		Map<String, EntityTypePermission> baseEntityTypePermissionMap = new HashMap<>();
-		baseEntityTypePermissionMap.put("sys_md_Package", READ);
-		baseEntityTypePermissionMap.put("sys_md_EntityType", READ);
-		baseEntityTypePermissionMap.put("sys_md_Attribute", READ);
-		baseEntityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		baseEntityTypePermissionMap.put(entityTypeStatic.getId(), READ);
-		baseEntityTypePermissionMap.put(refEntityTypeStatic.getId(), READ);
+		// define cumulative permissions
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
+				EntityTypePermission.READ);
+		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
+		CumulativePermission readEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.READ);
+		CumulativePermission writeEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE);
 
-		Map<String, EntityTypePermission> readEntityTypePermissionMap = new HashMap<>(baseEntityTypePermissionMap);
-		readEntityTypePermissionMap.put(entityType.getId(), READ);
-		readEntityTypePermissionMap.put(refEntityType.getId(), READ);
-		testPermissionPopulator.populate(readEntityTypePermissionMap, USERNAME_READ);
+		Map<ObjectIdentity, Permission> basePermissions = new HashMap<>();
+		basePermissions.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_md_EntityType"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_md_Attribute"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity(entityTypeStatic), readEntityType);
+		basePermissions.put(new EntityTypeIdentity(refEntityTypeStatic), readEntityType);
+		basePermissions.put(new EntityTypeIdentity(FILE_META), readEntityType);
 
-		Map<String, EntityTypePermission> writeEntityTypePermissionMap = new HashMap<>(baseEntityTypePermissionMap);
-		writeEntityTypePermissionMap.put(entityType.getId(), WRITE);
-		writeEntityTypePermissionMap.put(refEntityType.getId(), WRITE);
-		testPermissionPopulator.populate(writeEntityTypePermissionMap, USERNAME_WRITE);
+		Map<ObjectIdentity, Permission> readerPermissions = new HashMap<>(basePermissions);
+		readerPermissions.put(new EntityTypeIdentity(entityType), readEntityType);
+		readerPermissions.put(new EntityTypeIdentity(refEntityType), readEntityType);
+		readerPermissions.put(new EntityIdentity(file1), readEntity);
+		permissionPopulator.populate(readerPermissions, USERNAME_READ);
+
+		Map<ObjectIdentity, Permission> editorPermissions = new HashMap<>(basePermissions);
+		editorPermissions.put(new EntityTypeIdentity(entityType), writeEntityType);
+		editorPermissions.put(new EntityTypeIdentity(refEntityType), writeEntityType);
+		editorPermissions.put(new EntityIdentity(file1), writeEntity);
+		permissionPopulator.populate(editorPermissions, USERNAME_WRITE);
 	}
 
 	private void depopulate()
@@ -850,6 +905,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
 		dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
 		dataService.delete(refEntityTypeStatic.getId(), staticRefEntities.stream());
+		dataService.delete(FILE_META, file1);
 		try
 		{
 			indexJobScheduler.waitForAllIndicesStable();
@@ -858,5 +914,6 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		{
 			throw new RuntimeException(e);
 		}
+		dataService.delete(FILE_META, file1);
 	}
 }
