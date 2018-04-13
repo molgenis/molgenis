@@ -2,11 +2,12 @@ package org.molgenis.integrationtest.platform;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.sun.corba.se.spi.ior.ObjectId;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
 import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
@@ -16,6 +17,9 @@ import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -485,24 +489,27 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = getEntityTypePermissionMap();
-		testPermissionPopulator.populate(entityTypePermissionMap);
+		testPermissionPopulator.populate(getPermissionMap());
 	}
 
-	private Map<String, EntityTypePermission> getEntityTypePermissionMap()
+	private Map<ObjectIdentity, Permission> getPermissionMap()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		// define cumulative permissions
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(READ);
+		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
+
+		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
 
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Author" + i, WRITE);
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Book" + i, WRITE);
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Person" + i, WRITE);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Author" + i), writeEntityType);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Book" + i), writeEntityType);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Person" + i), writeEntityType);
 		}
-		entityTypePermissionMap.put(PACKAGE, READ);
-		entityTypePermissionMap.put(ENTITY_TYPE_META_DATA, READ);
-		entityTypePermissionMap.put(ATTRIBUTE_META_DATA, READ);
-		entityTypePermissionMap.put(DECORATOR_CONFIGURATION, READ);
-		return entityTypePermissionMap;
+		permissionMap.put(new EntityTypeIdentity(PACKAGE), readEntityType);
+		permissionMap.put(new EntityTypeIdentity(ENTITY_TYPE_META_DATA), readEntityType);
+		permissionMap.put(new EntityTypeIdentity(ATTRIBUTE_META_DATA), readEntityType);
+		permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), readEntityType);
+		return permissionMap;
 	}
 }
