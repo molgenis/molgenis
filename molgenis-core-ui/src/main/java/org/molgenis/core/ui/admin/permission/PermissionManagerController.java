@@ -306,19 +306,19 @@ public class PermissionManagerController extends PluginController
 
 	private void updatePackagePermissions(WebRequest webRequest, Sid sid)
 	{
-		for (Package package_ : getPackages())
+		for (Package pack : getPackages())
 		{
-			String param = "radio-" + package_.getId();
+			String param = "radio-" + pack.getId();
 			String value = webRequest.getParameter(param);
 			if (value != null)
 			{
 				if (!value.equals("none"))
 				{
-					createSidPackagePermission(package_, sid, toPackagePermission(value));
+					createSidPackagePermission(pack, sid, toPackagePermission(value));
 				}
 				else
 				{
-					removeSidPackagePermission(package_, sid);
+					removeSidPackagePermission(pack, sid);
 				}
 			}
 		}
@@ -409,15 +409,15 @@ public class PermissionManagerController extends PluginController
 				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
 	}
 
-	private void createSidPackagePermission(Package package_, Sid sid, PackagePermission entityTypePermission)
+	private void createSidPackagePermission(Package pack, Sid sid, PackagePermission packagePermission)
 	{
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
-		createSidPermission(sid, objectIdentity, PackagePermissionUtils.getCumulativePermission(entityTypePermission));
+		ObjectIdentity objectIdentity = new PackageIdentity(pack);
+		createSidPermission(sid, objectIdentity, PackagePermissionUtils.getCumulativePermission(packagePermission));
 	}
 
-	private void removeSidPackagePermission(Package package_, Sid sid)
+	private void removeSidPackagePermission(Package pack, Sid sid)
 	{
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
+		ObjectIdentity objectIdentity = new PackageIdentity(pack);
 		removePermissionForSid(sid, objectIdentity);
 	}
 
