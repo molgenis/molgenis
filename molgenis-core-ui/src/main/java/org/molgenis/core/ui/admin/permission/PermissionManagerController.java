@@ -562,17 +562,16 @@ public class PermissionManagerController extends PluginController
 				if (ace.getSid().equals(sid))
 				{
 					org.molgenis.security.permission.Permission permission;
-					if (objectIdentity instanceof EntityTypeIdentity)
+					switch (objectIdentity.getType())
 					{
-						permission = toEntityTypePermission(ace);
-					}
-					else if (objectIdentity instanceof PackageIdentity)
-					{
-						permission = toPackagePermission(ace);
-					}
-					else
-					{
-						throw new MolgenisDataException("Unexpected permission type");
+						case EntityTypeIdentity.TYPE:
+							permission = toEntityTypePermission(ace);
+							break;
+						case PackageIdentity.TYPE:
+							permission = toPackagePermission(ace);
+							break;
+						default:
+							throw new MolgenisDataException("Unexpected permission type");
 					}
 					if (isUser)
 					{
@@ -621,7 +620,6 @@ public class PermissionManagerController extends PluginController
 				throw new IllegalArgumentException(format("Unknown entity type permission '%s'", paramValue));
 		}
 	}
-
 
 	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity, Permission permission)
 	{
