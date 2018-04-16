@@ -43,6 +43,12 @@ public class NashornScriptEngine
 		return convertNashornValue(returnValue);
 	}
 
+	public ScriptObjectMirror newJSArray()
+	{
+		Bindings bindings = bindingsThreadLocal.get();
+		return (ScriptObjectMirror) ((JSObject) bindings.get("Array")).newObject();
+	}
+
 	public Object eval(String script) throws ScriptException
 	{
 		Bindings bindings = bindingsThreadLocal.get();

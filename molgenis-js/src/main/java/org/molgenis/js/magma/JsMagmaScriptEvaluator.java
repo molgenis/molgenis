@@ -132,20 +132,11 @@ public class JsMagmaScriptEvaluator
 			case CATEGORICAL_MREF:
 			case MREF:
 			case ONE_TO_MANY:
-				ScriptObjectMirror jsArray = null;
-				try
-				{
-					jsArray = (ScriptObjectMirror) jsScriptEngine.eval("var arr = []; arr");
-					@SuppressWarnings("unchecked")
-					List<Object> mrefValues = jsArray.to(List.class);
-					entity.getEntities(attrName)
-						  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
-				}
-				catch (javax.script.ScriptException ex)
-				{
-					// Do not catch this error to allow
-					// the mapping service to collect errors to show in the UI
-				}
+				ScriptObjectMirror jsArray = jsScriptEngine.newJSArray();
+				@SuppressWarnings("unchecked")
+				List<Object> mrefValues = jsArray.to(List.class);
+				entity.getEntities(attrName)
+					  .forEach(mrefEntity -> mrefValues.add(toScriptEngineValueMap(mrefEntity, depth - 1)));
 				value = jsArray;
 				break;
 			case DATE:
