@@ -15,6 +15,7 @@ public class PackageFactory extends AbstractSystemEntityFactory<Package, Package
 	public Package create(String id, String description)
 	{
 		Package package_ = create(id);
+		package_.setLabel(id);
 		package_.setDescription(description);
 		return package_;
 	}
@@ -22,6 +23,7 @@ public class PackageFactory extends AbstractSystemEntityFactory<Package, Package
 	public Package create(String id, String description, Package parentPackage)
 	{
 		Package package_ = create(id);
+		package_.setLabel(id);
 		package_.setDescription(description);
 		package_.setParent(parentPackage);
 		return package_;
