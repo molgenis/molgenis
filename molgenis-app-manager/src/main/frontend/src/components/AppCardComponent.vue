@@ -11,7 +11,7 @@
 
         <div class="card-body">
             <p class="lead"> {{ app.description }} </p>
-            <p><a :href="'/menu/plugins/app/' + app.id">Go to app</a></p>
+            <p><a :href="'/menu/plugins/app/' + app.uri">Go to app</a></p>
         </div>
     </div>
 </template>

@@ -9,14 +9,14 @@ public abstract class AppEditRequest
 {
 	public abstract String getId();
 
+	public abstract String getUri();
+
 	public abstract String getLabel();
 
 	public abstract String getDescription();
 
-	public abstract boolean getIsActive();
-
-	public static AppEditRequest create(String id, String label, String description, boolean isActive)
+	public static AppEditRequest create(String id, String uri, String label, String description)
 	{
-		return new AutoValue_AppEditRequest(id, label, description, isActive);
+		return new AutoValue_AppEditRequest(id, uri, label, description);
 	}
 }

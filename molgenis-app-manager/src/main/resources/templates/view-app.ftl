@@ -13,6 +13,9 @@
     <div class="row">
         <div class="col-12">
             ${app.templateContent}
+            <script>
+                window.__INITIAL_STATE__ = ${app.appConfig}
+            </script>
         </div>
     </div>
 </div>

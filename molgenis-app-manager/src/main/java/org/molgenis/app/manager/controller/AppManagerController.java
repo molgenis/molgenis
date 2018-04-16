@@ -1,18 +1,16 @@
 package org.molgenis.app.manager.controller;
 
-import org.molgenis.app.manager.model.AppCreateRequest;
+import net.lingala.zip4j.exception.ZipException;
 import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -32,52 +30,51 @@ public class AppManagerController extends PluginController
 		this.appManagerService = requireNonNull(appManagerService);
 	}
 
-	@RequestMapping
-	public String init(Model model)
+	@GetMapping
+	public String init()
 	{
-		model.addAttribute("apps", appManagerService.getApps());
 		return "view-app-manager";
 	}
 
 	@ResponseBody
-	@RequestMapping("/apps")
+	@GetMapping("/apps")
 	public List<AppResponse> getApps()
 	{
 		return appManagerService.getApps();
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/activate/{id}")
+	@GetMapping("/activate/{id}")
 	public void activateApp(@PathVariable(value = "id") String id)
 	{
 		appManagerService.activateApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/deactivate/{id}")
+	@GetMapping("/deactivate/{id}")
 	public void deactivateApp(@PathVariable(value = "id") String id)
 	{
 		appManagerService.deactivateApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/create")
-	public void createApp(AppCreateRequest appCreateRequest)
-	{
-		appManagerService.createApp(appCreateRequest);
-	}
-
-	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/edit")
+	@GetMapping("/edit")
 	public void editApp(AppEditRequest appEditRequest)
 	{
 		appManagerService.editApp(appEditRequest);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/delete")
-	public void deleteApp(String id)
+	@GetMapping("/delete/{id}")
+	public void deleteApp(@PathVariable("id") String id)
 	{
 		appManagerService.deleteApp(id);
+	}
+
+	@ResponseStatus(HttpStatus.OK)
+	@PostMapping("/upload")
+	public void uploadApp(@RequestParam("file") MultipartFile multipartFile) throws IOException, ZipException
+	{
+		appManagerService.uploadApp(multipartFile);
 	}
 }

@@ -1,7 +1,6 @@
 package org.molgenis.app.manager.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
@@ -37,6 +36,16 @@ public class App extends StaticEntity
 		set(ID, id);
 	}
 
+	public String getUri()
+	{
+		return getString(URI);
+	}
+
+	public void setUri(String uri)
+	{
+		set(URI, uri);
+	}
+
 	public String getLabel()
 	{
 		return getString(LABEL);
@@ -56,17 +65,6 @@ public class App extends StaticEntity
 	public void setDescription(String description)
 	{
 		set(DESCRIPTION, description);
-	}
-
-	@Nullable
-	public FileMeta getSourceFiles()
-	{
-		return getEntity(RESOURCE_ZIP, FileMeta.class);
-	}
-
-	public void setSourceFiles(String sourcesDirectory)
-	{
-		set(RESOURCE_ZIP, sourcesDirectory);
 	}
 
 	public boolean isActive()
@@ -97,6 +95,36 @@ public class App extends StaticEntity
 	public void setTemplateContent(String templateContent)
 	{
 		set(TEMPLATE_CONTENT, templateContent);
+	}
+
+	public String getAppVersion()
+	{
+		return getString(APP_VERSION);
+	}
+
+	public void setAppVersion(String appVersion)
+	{
+		set(APP_VERSION, appVersion);
+	}
+
+	public String getApiDependency()
+	{
+		return getString(API_DEPENDENCY);
+	}
+
+	public void setApiDependency(String apiDependency)
+	{
+		set(API_DEPENDENCY, apiDependency);
+	}
+
+	public String getAppConfig()
+	{
+		return getString(APP_CONFIG);
+	}
+
+	public void setAppConfig(String appConfig)
+	{
+		set(APP_CONFIG, appConfig);
 	}
 }
 

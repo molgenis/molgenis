@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppDeployController.URI;
@@ -20,11 +21,13 @@ public class AppDeployController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private AppManagerService appManagerService;
+	private AbstractUrlHandlerMapping abstractUrlHandlerMapping;
 
-	public AppDeployController(AppManagerService appManagerService)
+	public AppDeployController(AppManagerService appManagerService, AbstractUrlHandlerMapping abstractUrlHandlerMapping)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
+		this.abstractUrlHandlerMapping = requireNonNull(abstractUrlHandlerMapping);
 	}
 
 	@RequestMapping
@@ -33,13 +36,26 @@ public class AppDeployController extends PluginController
 		return "redirect: " + AppManagerController.URI;
 	}
 
-	@RequestMapping("/{id}")
-	public String deployApp(@PathVariable(value = "id") String id, Model model)
+	@RequestMapping("/{uri}")
+	public String deployApp(@PathVariable String uri, Model model)
 	{
-		AppResponse appResponse = appManagerService.getAppById(id);
+		AppResponse appResponse = appManagerService.getAppByUri(uri);
 		if (!appResponse.getIsActive())
 		{
-			throw new AppManagerException("Access denied for inactive app [" + id + "]");
+			throw new AppManagerException("Access denied for inactive app at location [/app/" + uri + "]");
+		}
+
+		model.addAttribute("app", appResponse);
+		return "view-app";
+	}
+
+	@RequestMapping("/{uri}/{version}")
+	public String deployAppWithSpecificVersion(@PathVariable String uri, @PathVariable String version, Model model)
+	{
+		AppResponse appResponse = appManagerService.getAppByUriAndVersion(uri, version);
+		if (!appResponse.getIsActive())
+		{
+			throw new AppManagerException("Access denied for inactive app at location [/app/" + uri + "/" + version + "]");
 		}
 
 		model.addAttribute("app", appResponse);

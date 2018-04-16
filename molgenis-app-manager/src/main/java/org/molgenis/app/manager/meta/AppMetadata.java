@@ -20,8 +20,12 @@ public class AppMetadata extends SystemEntityType
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String IS_ACTIVE = "isActive";
-	public static final String RESOURCE_ZIP = "resourceZip";
+
+	public static final String APP_VERSION = "appVersion";
+	public static final String API_DEPENDENCY = "apiDependency";
 	public static final String TEMPLATE_CONTENT = "templateContent";
+
+	public static final String URI = "uri";
 	public static final String APP_CONFIG = "appConfig";
 	public static final String INCLUDE_MENU_AND_FOOTER = "includeMenuAndFooter";
 
@@ -39,28 +43,28 @@ public class AppMetadata extends SystemEntityType
 		setLabel("App");
 
 		// App info
-		addAttribute(ID, ROLE_ID).setLabel("Identifier")
-								 .setDescription(
-										 "Identifier used to create the URL of your app. URL will be /app/{identifier}");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setDataType(TEXT).setNillable(true).setLabel("Description");
 		addAttribute(IS_ACTIVE).setDataType(BOOL)
 							   .setLabel("Active")
 							   .setNillable(false)
-							   .setVisible(false)
 							   .setDefaultValue(Boolean.FALSE.toString());
 
 		// App resources
-		addAttribute(RESOURCE_ZIP).setDataType(FILE)
-								  .setRefEntity(fileMetaMetaData)
-								  .setNillable(false)
-								  .setLabel("Resource ZIP file")
-								  .setDescription("ZIP file with JavaScript, CSS and image files required by the app");
+		addAttribute(APP_VERSION).setNillable(true).setLabel("App version");
+		addAttribute(API_DEPENDENCY).setNillable(true).setLabel("API dependency version");
 		addAttribute(TEMPLATE_CONTENT).setDataType(HTML).setNillable(false).setLabel("Template content");
 
 		// App configuration
-		addAttribute(APP_CONFIG).setDataType(TEXT).setNillable(true).setLabel("Application config");
+		addAttribute(URI, ROLE_LOOKUP).setLabel("URI")
+									  .setDescription("The URI used to point at this app. I.e. /app/{uri}")
+									  .setNillable(false)
+									  .setUnique(true);
+		addAttribute(APP_CONFIG).setDataType(TEXT).setNillable(true).setLabel("Runtime Application configuration");
 		addAttribute(INCLUDE_MENU_AND_FOOTER).setDataType(BOOL)
-											 .setLabel("Include a menu above your app and a footer below");
+											 .setLabel("Include a menu above your app and a footer below")
+											 .setNillable(false)
+											 .setDefaultValue(Boolean.FALSE.toString());
 	}
 }

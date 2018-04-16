@@ -1,105 +1,156 @@
 <template>
     <div class="app-manager-container mt-2">
+        <!-- Hidden file upload -->
+        <input id="app-upload-input-field" @change="handleAppUpload" type="file" v-show="false" types=".gz, .zip"/>
+
         <div class="container">
-            <div class="row mb-3">
-                <div class="col-6">
+            <div class="row mb-3 text-center">
+                <div class="col-12">
                     <h1>App manager</h1>
+
+                    <template v-if="error">
+                        <div class="alert alert-warning" role="alert">
+                            {{ error }}
+                        </div>
+                    </template>
+
+                    <hr>
                 </div>
             </div>
 
-            <div class="row" v-if="creating">
-                <div class="col-12">
-                    <create-new-app-component
-                            @save="saveCreatedApp">
-                    </create-new-app-component>
+            <template v-if="loading">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="loading-spinner-container d-flex flex-column justify-content-center align-items-center">
+                            <i class="fa fa-spinner fa-spin fa-5x my-3"></i>
+                            <p class="text-muted">Fetching apps...</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </template>
 
-            <div class="row" v-else-if="editing">
-                <div class="col-12">
-                    <edit-existing-app-component
-                            :selectedApp="selectedApp"
-                            @save="saveEditedApp">
-                    </edit-existing-app-component>
+            <template v-else-if="editing">
+                <div class="row">
+                    <div class="col-12">
+                        <edit-existing-app-component :selectedApp="selectedApp" @save="saveEditedApp"/>
+                    </div>
                 </div>
-            </div>
+            </template>
 
-            <div class="row" v-else>
-                <div class="col-6">
-                    <button class="btn btn-dark float-right mb-2" @click="createNewApp">
-                        Add a new app
-                    </button>
-                    <table class="table table-bordered table-hover">
-                        <tbody>
-                        <tr v-for="app in apps" :key="app.id" @click="showDetailedAppView(app)">
-                            <td>
-                                <button class="btn btn-sm btn-dark" :disabled="app.isActive" @click="editExistingApp">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                            </td>
-                            <td>{{app.label}}</td>
-                            <td>
-                                <toggle-button
-                                        v-model="app.isActive"
-                                        :sync="true"
-                                        :labels="{checked: 'Active', unchecked: 'Inactive'}"
-                                        :width="75"
-                                        @change="toggleAppActiveState(app)">
-                                </toggle-button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+            <template v-else>
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <button @click="handleNewAppBtnClick" class="btn btn-success float-right">
+                            <i class="fa fa-plus-circle"></i> Add new app
+                        </button>
+                    </div>
                 </div>
 
-                <div class="col-6" v-if="selectedApp">
-                    <app-card-component :app="selectedApp"></app-card-component>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="app-card-container">
+                            <template v-if="apps.length == 0">
+                                No apps were found
+                            </template>
+
+                            <template v-else>
+                                <swiper :options="swiperOptions" ref="app-swiper">
+                                    <swiper-slide v-for="app in apps" :key="app.id" @click="showAppDetailView(app)">
+                                        <app-card-component :app="app"></app-card-component>
+                                    </swiper-slide>
+
+                                    <div class="swiper-button-prev" slot="button-prev"></div>
+                                    <div class="swiper-button-next" slot="button-next"></div>
+                                    <div class="swiper-pagination" slot="pagination"></div>
+                                </swiper>
+                            </template>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>
 
+<style>
+    .loading-spinner-container {
+        height: 30vh;
+    }
+</style>
+
 <script>
   import Vue from 'vue'
+
   import ToggleButton from 'vue-js-toggle-button'
+  import VueAwesomeSwiper from 'vue-awesome-swiper'
+  import 'swiper/dist/css/swiper.css'
 
   import AppCardComponent from '../components/AppCardComponent.vue'
-  import CreateNewAppComponent from '../components/CreateNewAppComponent.vue'
   import EditExistingAppComponent from '../components/EditExistingAppComponent.vue'
 
   import api from '@molgenis/molgenis-api-client'
 
   Vue.use(ToggleButton)
+  Vue.use(VueAwesomeSwiper)
 
   export default {
     name: 'AppManagerContainer',
     data () {
       return {
         apps: [],
+        selectedFile: null,
         creating: false,
         editing: false,
-        selectedApp: null
+        loading: true,
+        error: '',
+        selectedApp: null,
+        swiperOptions: {
+          slidesPerView: 3,
+          centeredSlides: true,
+          effect: 'coverflow',
+          spaceBetween: 5,
+          loop: true,
+          watchOverflow: true,
+          pagination: {
+            el: '.swiper-pagination',
+            type: 'bullets'
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+          }
+        }
       }
     },
     methods: {
-      createNewApp () {
-        this.creating = true
-      },
-
-      editExistingApp () {
-        this.editing = true
+      deleteApp (app) {
+        api.get('/plugin/appmanager/delete/' + app.id).then(() => {
+          this.fetchApps()
+        }, error => {
+          this.error = error
+        })
       },
 
       fetchApps () {
         api.get('/plugin/appmanager/apps').then(response => {
           this.apps = response
+          this.loading = false
+        }, () => {
+          this.error = 'no permission to see apps, please login before continuing'
         })
       },
 
-      saveCreatedApp (app) {
-        console.log('created', app)
-        this.creating = false
+      handleNewAppBtnClick () {
+        document.getElementById('app-upload-input-field').click()
+      },
+
+      handleAppUpload (event) {
+        const file = event.target.files[0]
+        api.postFile('/plugin/appmanager/upload', file).then(() => {
+          this.fetchApps()
+        }, error => {
+          this.error = error
+        })
       },
 
       saveEditedApp (app) {
@@ -107,7 +158,7 @@
         this.editing = false
       },
 
-      showDetailedAppView (app) {
+      showAppDetailView (app) {
         this.selectedApp = app
       },
 
@@ -115,20 +166,24 @@
         if (app.isActive) {
           api.get('/plugin/appmanager/activate/' + app.id).then(response => {
             console.log(response)
+          }, error => {
+            this.error = error
           })
         } else {
           api.get('/plugin/appmanager/deactivate/' + app.id).then(response => {
             console.log(response)
+          }, error => {
+            this.error = error
           })
         }
       }
     },
     created () {
       this.fetchApps()
-    },
+    }
+    ,
     components: {
       AppCardComponent,
-      CreateNewAppComponent,
       EditExistingAppComponent
     }
   }
