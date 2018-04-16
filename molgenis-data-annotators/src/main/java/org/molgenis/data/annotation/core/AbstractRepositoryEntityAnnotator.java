@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.core;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.exception.AnnotationException;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.util.List;
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {
 	@Override
-	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{ // default update mode is false
 		return annotate(sourceIterable, false);
@@ -20,7 +18,6 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 
 	@Override
 	@Transactional
-	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable, boolean updateMode)
 	{
 		Iterator<Entity> source = sourceIterable.iterator();

@@ -79,6 +79,9 @@ public class EntityServiceImplTest
 				Column.create("super power", 1, superPowers));
 		DataCollection dataCollection = DataCollection.create(tableName, columns);
 
+		//mock parent package
+		Package upload = mock(Package.class);
+
 		// mock auto id
 		String generatedId = "id_0";
 		when(idGenerator.generateId()).thenReturn(generatedId);
@@ -132,7 +135,7 @@ public class EntityServiceImplTest
 
 		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
 				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				oneClickImporterNamingService, packageFactory, permissionSystemService);
+				oneClickImporterNamingService, packageFactory, permissionSystemService, upload);
 
 		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);
