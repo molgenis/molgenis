@@ -19,7 +19,7 @@
     var restApi = new molgenis.RestClient();
 
     function getInexactQueryOperator(fieldType) {
-        var operator = 'LIKE';
+        var operator = 'SEARCH';
         switch (fieldType) {
             case 'INT':
             case 'LONG':
@@ -28,9 +28,6 @@
             case 'DATE_TIME':
             case 'DECIMAL':
                 operator = 'EQUALS';
-                break;
-            case 'TEXT':
-                operator = 'SEARCH';
                 break;
         }
         return operator;

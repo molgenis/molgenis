@@ -774,6 +774,13 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			Map<String, EmxAttribute> entitiesMap = attributesMap.computeIfAbsent(entityTypeId,
 					k -> newLinkedHashMap());
+
+			if (entitiesMap.containsKey(attributeName))
+			{
+				throw new MolgenisDataException(
+						format("Duplicate attribute name [%s] for entity type [%s]", attributeName, entityTypeId));
+			}
+
 			entitiesMap.put(attributeName, new EmxAttribute(attribute));
 		}
 
