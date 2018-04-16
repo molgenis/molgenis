@@ -12,6 +12,15 @@ In this section we introduce and explain, terminology of MOLGENIS
 * Entity: We also use the term entity for the actual data that is collected based on the template from an entity (Term above), like a row in a database. In the future we will change this term to "instance" to avoid complexity and double use of the same term
 * Attribute: An attribute describes the charcteristics of a data item in an entity, Like a column in a database
 
+# Permissions
+User need the following permissions to us the upload plugin:
+
+* WRITE on sys_md_EntityType, sys_md_Attribute
+* WRITE on sys_md_Tag and sys_md_Package if those are uploaded
+* WRITEMETA on the packages the uploaded entities are in and parentpackages of imported packages
+* WRITE on sys_ImportRun
+* VIEW on the upload plugin
+
 # Formats
 The MOLGENIS upload module supports the following file formats and data:
 	

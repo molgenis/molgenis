@@ -10,6 +10,7 @@ There are some assumptions we make with regards file types and file contents.
 
 - __Empty files can not be imported__
 - __Files containing only a header can not be uploaded__
+- __To use the importer WRITEMETA permissions on the "base/upload" package are required__
 
 Metadata guessing
 -----------------
@@ -30,9 +31,9 @@ Data placement
 Data is imported into the MOLGENIS database as a single _data table_
 _Data tables_ are grouped within packages
 
-1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name.
-2. In the case of a CSV, the file is used as the _package_ and the _data table_ name.
-3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _data tables_
+1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name. Packages will be created as children of the "base/upload" package.
+2. In the case of a CSV, the file is used as the _package_ and the _data table_ name. The package will be created as children of the "base/upload" package.
+3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _data tables_. The package will be created as children of the "base/upload" package.
 
 How to use
 ----------
