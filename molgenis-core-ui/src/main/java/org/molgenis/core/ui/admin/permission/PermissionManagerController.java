@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.admin.permission;
 
 import com.google.common.collect.Lists;
+import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
@@ -390,7 +391,7 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+			throw new UnexpectedPermissionException(ace.getPermission());
 		}
 		return pluginPermission;
 	}
@@ -487,7 +488,7 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+			throw new UnexpectedPermissionException(ace.getPermission());
 		}
 		return entityTypePermission;
 	}
@@ -513,7 +514,7 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+			throw new UnexpectedPermissionException(ace.getPermission());
 		}
 		return entityTypePermission;
 	}
