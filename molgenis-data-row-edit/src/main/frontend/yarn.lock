@@ -78,7 +78,16 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@molgenis/molgenis-api-client@^2.1.2", "@molgenis/molgenis-api-client@^2.1.3":
+"@molgenis/molgenis-api-client@^2.1.2":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.1.4.tgz#3baa4be2c46f0394f8102173d235e18f5cb244ef"
+  dependencies:
+    babel-runtime "^6.11.6"
+    form-data "^2.3.1"
+    isomorphic-fetch "^2.2.1"
+    lodash "^4.17.4"
+
+"@molgenis/molgenis-api-client@^2.1.3":
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.1.3.tgz#9332bae3e343c78c58582687bf1c1b157e4c396f"
   dependencies:
@@ -87,17 +96,17 @@
     isomorphic-fetch "^2.2.1"
     lodash "^4.17.4"
 
-"@molgenis/molgenis-i18n-js@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-i18n-js/-/molgenis-i18n-js-0.0.5.tgz#addb86b5292edf68cc5d536724582f84ec4882db"
+"@molgenis/molgenis-i18n-js@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-i18n-js/-/molgenis-i18n-js-0.1.1.tgz#6d6350aa2a221ac0537a7b58c564cc407e1da7ed"
   dependencies:
     i18next "^7.1.3"
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.9.7":
-  version "0.9.12"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.12.tgz#7ed117300e1b71deb7353804e8c3b4d0ff515d80"
+"@molgenis/molgenis-ui-form@^0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.10.1.tgz#7b5588f5962a9fd66f147f915dedce90572f82b1"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     moment "^2.20.1"
@@ -3196,9 +3205,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flatpickr@^4.3.2:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.4.3.tgz#53ba7b06523f73ee69175b3ed808c7fc0f245c4f"
+flatpickr@^4.4.3:
+  version "4.4.4"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.4.4.tgz#fdeb083ca3d580eecb822a4080f67b06f0294fc7"
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -5042,8 +5051,8 @@ mocha@^3.2.0:
     supports-color "3.1.2"
 
 moment@^2.18.1, moment@^2.20.1:
-  version "2.21.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
+  version "2.22.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.1.tgz#529a2e9bf973f259c9643d237fda84de3a26e8ad"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -7666,10 +7675,10 @@ vue-code@^1.2.3:
     codemirror "5.x"
 
 vue-flatpickr-component@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.0.tgz#ad7f9490db0048ce2c721f34ad0e5085a004e9ac"
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.1.tgz#5af4ab8acc6e3d509e581db85429eb396a435fa8"
   dependencies:
-    flatpickr "^4.3.2"
+    flatpickr "^4.4.3"
 
 vue-form@^4.7.0:
   version "4.8.1"

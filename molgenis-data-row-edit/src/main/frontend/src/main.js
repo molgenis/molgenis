@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import App from './App'
 import DataRowEdit from './components/DataRowEdit'
-import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
+import i18n from '@molgenis/molgenis-i18n-js'
 import 'font-awesome/css/font-awesome.min.css'
 
 Vue.use(Router)
@@ -30,7 +30,7 @@ const dataRowEditRouter = new Router({
 Vue.use(i18n, {
   lng: lng,
   fallbackLng: fallbackLng,
-  namespace: 'data-row-edit',
+  namespace: ['data-row-edit', 'ui-form'],
   callback () {
     /* eslint-disable no-new */
     new Vue({
