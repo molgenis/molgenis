@@ -21,4 +21,6 @@ public interface MutableAclClassService extends AclClassService
 	 * @param type domain object type
 	 */
 	void deleteAclClass(String type);
+
+	void clearCache();
 }

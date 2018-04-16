@@ -2,10 +2,11 @@ package org.molgenis.security.acl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.model.AclCache;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -15,7 +16,6 @@ import static java.util.Objects.requireNonNull;
 /**
  * @see JdbcMutableAclService
  */
-@Component
 public class MutableAclClassServiceImpl implements MutableAclClassService
 {
 	/**
@@ -29,8 +29,9 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 	private final JdbcTemplate jdbcTemplate;
 	private final AclCache aclCache;
 	private final Cache<String, Integer> aclClassCache;
+	private static final Logger LOGGER = LoggerFactory.getLogger(MutableAclClassServiceImpl.class);
 
-	MutableAclClassServiceImpl(JdbcTemplate jdbcTemplate, AclCache aclCache)
+	public MutableAclClassServiceImpl(JdbcTemplate jdbcTemplate, AclCache aclCache)
 	{
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.aclCache = requireNonNull(aclCache);
@@ -41,24 +42,36 @@ public class MutableAclClassServiceImpl implements MutableAclClassService
 	@Override
 	public void createAclClass(String type, Class<?> idType)
 	{
+		LOGGER.debug("Create AclClass for type {}.", type);
 		jdbcTemplate.update(SQL_INSERT_INTO_ACL_CLASS, type, idType.getCanonicalName());
+		aclClassCache.invalidate(type);
 	}
 
 	@Transactional
 	@Override
 	public void deleteAclClass(String type)
 	{
+		LOGGER.debug("Delete AclClass for type {}.", type);
 		jdbcTemplate.update(SQL_DELETE_FROM_ACL_CLASS, type);
 		aclClassCache.invalidate(type);
 		aclCache.clearCache();
+	}
+
+	@Override
+	public void clearCache()
+	{
+		LOGGER.debug("Invalidate cache.");
+		aclClassCache.invalidateAll();
 	}
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
 	public boolean hasAclClass(String type)
 	{
-		return aclClassCache.get(type,
+		boolean result = aclClassCache.get(type,
 				t -> jdbcTemplate.queryForObject(SQL_COUNT_ACL_CLASS, new Object[] { t }, Integer.class)) > 0;
+		LOGGER.trace("hasAclClass({}): {}", type, result);
+		return result;
 	}
 
 	@Override
