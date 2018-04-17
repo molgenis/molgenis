@@ -70,7 +70,6 @@ public class AppDeployController extends PluginController
 	public void loadJavascriptResources(@PathVariable String uri, @PathVariable String fileName,
 			HttpServletResponse response) throws IOException
 	{
-		System.out.println("fileName = " + fileName);
 		appDeployService.loadJavascriptResources(uri, fileName, response);
 	}
 
@@ -78,7 +77,6 @@ public class AppDeployController extends PluginController
 	public void loadCSSResources(@PathVariable String uri, @PathVariable String fileName, HttpServletResponse response)
 			throws IOException
 	{
-		System.out.println("fileName = " + fileName);
 		appDeployService.loadCSSResources(uri, fileName, response);
 	}
 
