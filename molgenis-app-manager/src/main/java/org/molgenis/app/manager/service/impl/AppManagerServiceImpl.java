@@ -159,7 +159,8 @@ public class AppManagerServiceImpl implements AppManagerService
 					"The config file you provided has some problems. Please ensure it is a valid JSON file.");
 		}
 
-		AppConfig appConfig = new Gson().fromJson(fileToString(configFile), AppConfig.class);
+		Gson gson = new Gson();
+		AppConfig appConfig = gson.fromJson(fileToString(configFile), AppConfig.class);
 		App newApp = appFactory.create();
 
 		newApp.setLabel(appConfig.getLabel());
@@ -169,7 +170,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setTemplateContent(fileToString(indexFile));
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(true);
-		newApp.setAppConfig(appConfig.getRuntimeOptions().toString());
+		newApp.setAppConfig(gson.toJson(appConfig.getRuntimeOptions()));
 		newApp.setResourceFolder(appDirectoryName);
 
 		// If there is already an existing app with the same uri, add version number to the path
