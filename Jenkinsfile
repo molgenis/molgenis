@@ -45,14 +45,14 @@ pipeline {
 //                        })
             }
         }
-        stage('Publish package') {
-            steps {
-                configFileProvider(
-                        [configFile(fileId: 'maven-sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn deploy"
-                }
-            }
-        }
+//        stage('Publish package') {
+//            steps {
+//                configFileProvider(
+//                        [configFile(fileId: 'maven-sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
+//                    sh "mvn deploy"
+//                }
+//            }
+//        }
     }
     post {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
