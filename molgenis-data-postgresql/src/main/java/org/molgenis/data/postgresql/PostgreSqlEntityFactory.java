@@ -192,15 +192,15 @@ class PostgreSqlEntityFactory
 		{
 			EntityType entityType = attr.getRefEntity();
 			Object value;
-			String[] postgreSqlMrefIds = (String[]) arrayValue.getArray();
+			Object[] postgreSqlMrefIds = (Object[]) arrayValue.getArray();
 			if (postgreSqlMrefIds.length > 0 && postgreSqlMrefIds[0] != null)
 			{
 				Attribute idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[postgreSqlMrefIds.length];
 				for (int i = 0; i < postgreSqlMrefIds.length; ++i)
 				{
-					String mrefIdStr = postgreSqlMrefIds[i];
-					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
+					Object mrefIdRaw = postgreSqlMrefIds[i];
+					Object mrefId = mrefIdRaw != null ? convertMrefIdValue(mrefIdRaw.toString(), idAttr) : null;
 					mrefIds[i] = mrefId;
 				}
 
