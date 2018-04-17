@@ -21,5 +21,5 @@
 </div>
 
 <#if app.includeMenuAndFooter>
-    <@footer/>
+    <@footer version/>
 </#if>
