@@ -60,9 +60,6 @@ pipeline {
 //            notifySuccess()
             build: 'molgenis-dev-docker'
         }
-        failure {
-//            notifyFailed()
-        }
     }
 }
 
