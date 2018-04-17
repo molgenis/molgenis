@@ -23,10 +23,7 @@ pipeline {
         }
         stage('Build package') {
             steps {
-                echo "Build MOLGENIS"
-                echo "JAVE_HOME = ${JAVA_HOME}"
-                echo "PATH = ${PATH}"
-                sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
+                sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V"
             }
         }
         stage('Test package') {
