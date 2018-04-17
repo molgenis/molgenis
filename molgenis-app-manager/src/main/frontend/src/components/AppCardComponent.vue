@@ -57,10 +57,8 @@
 
       toggleAppActiveState (app) {
         if (app.isActive) {
-          console.log('deactivate')
           this.$store.dispatch('DEACTIVATE_APP', app.id)
         } else {
-          console.log('activate')
           this.$store.dispatch('ACTIVATE_APP', app.id)
         }
       }

@@ -14,7 +14,7 @@
         <div class="col-12">
             ${app.templateContent}
             <script>
-                window.__INITIAL_STATE__ = ${app.appConfig}
+                window.__INITIAL_STATE__ = JSON.parse('${app.appConfig}')
             </script>
         </div>
     </div>

@@ -87,14 +87,11 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
+		// TODO make sure it ends with '/'
 		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri(), dataService.getEntityType(PluginMetadata.PLUGIN));
 		plugin.setLabel(app.getLabel());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
-
-		// Add resources from file store to classpath
-		File appDirectory = fileStore.getFile(app.getResourceFolder());
-
 	}
 
 	@Override
