@@ -8,7 +8,8 @@ pipeline {
     }
 
     environment {
-        MOLGENIS_VERSION = "7.0.0-SNAPSHOT"
+        JAVA_HOME = "${tool 'jdk-8u162'}"
+        PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
     stages {
@@ -55,7 +56,7 @@ pipeline {
 //        }
     }
 //    post {
-    // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
+// [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
 //        success {
 ///           notifySuccess()
 //            build: 'molgenis-dev-docker'
