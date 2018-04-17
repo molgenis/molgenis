@@ -1,7 +1,8 @@
 <template>
     <div class="app-manager-container mt-2">
         <!-- Hidden file upload -->
-        <input id="app-upload-input-field" @change="handleAppUpload" type="file" v-show="false" types=".gz, .zip"/>
+        <input id="app-upload-input-field" @change="handleAppUpload" ref="app-upload-field" type="file" v-show="false"
+               accept=".gz, .zip"/>
 
         <div class="container">
             <div class="row mb-3 text-center">
@@ -97,10 +98,6 @@
       }
     },
     methods: {
-      fetchApps () {
-        this.$store.dispatch('FETCH_APPS')
-      },
-
       handleNewAppBtnClick () {
         document.getElementById('app-upload-input-field').click()
       },
@@ -108,17 +105,8 @@
       handleAppUpload (event) {
         const file = event.target.files[0]
         this.$store.dispatch('UPLOAD_APP', file)
-      },
-
-      saveEditedApp (app) {
-        console.log('edited', app)
-        this.editing = false
-      },
-
-      showAppDetailView (app) {
-        console.log(app)
-//        this.selectedApp = app
-      },
+        this.$refs['app-upload-field'].value = ''
+      }
     },
     created () {
       this.$store.dispatch('FETCH_APPS')
