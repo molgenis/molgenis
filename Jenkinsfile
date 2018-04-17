@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        JAVA_HOME = "${tool 'jdk-8u162'}"
+        JAVA_HOME = "${tool 'jdk-8u162'}/jdk1.8.0_162"
         PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
