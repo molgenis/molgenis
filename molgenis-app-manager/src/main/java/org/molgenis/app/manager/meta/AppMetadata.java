@@ -24,6 +24,7 @@ public class AppMetadata extends SystemEntityType
 	public static final String APP_VERSION = "appVersion";
 	public static final String API_DEPENDENCY = "apiDependency";
 	public static final String TEMPLATE_CONTENT = "templateContent";
+	public static final String RESOURCE_FOLDER = "resourceFolder";
 
 	public static final String URI = "uri";
 	public static final String APP_CONFIG = "appConfig";
@@ -55,6 +56,7 @@ public class AppMetadata extends SystemEntityType
 		addAttribute(APP_VERSION).setNillable(true).setLabel("App version");
 		addAttribute(API_DEPENDENCY).setNillable(true).setLabel("API dependency version");
 		addAttribute(TEMPLATE_CONTENT).setDataType(HTML).setNillable(false).setLabel("Template content");
+		addAttribute(RESOURCE_FOLDER).setNillable(false).setLabel("Resource folder");
 
 		// App configuration
 		addAttribute(URI, ROLE_LOOKUP).setLabel("URI")

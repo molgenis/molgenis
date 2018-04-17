@@ -86,9 +86,9 @@
 <script>
   export default {
     name: 'EditExistingAppComponent',
+    props: ['app'],
     data () {
       return {
-        app: {},
         section: 'general-info'
       }
     },

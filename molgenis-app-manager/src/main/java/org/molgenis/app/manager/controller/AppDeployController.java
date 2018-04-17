@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppDeployController.URI;
@@ -21,13 +20,11 @@ public class AppDeployController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private AppManagerService appManagerService;
-	private AbstractUrlHandlerMapping abstractUrlHandlerMapping;
 
-	public AppDeployController(AppManagerService appManagerService, AbstractUrlHandlerMapping abstractUrlHandlerMapping)
+	public AppDeployController(AppManagerService appManagerService)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
-		this.abstractUrlHandlerMapping = requireNonNull(abstractUrlHandlerMapping);
 	}
 
 	@RequestMapping

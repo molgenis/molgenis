@@ -126,5 +126,15 @@ public class App extends StaticEntity
 	{
 		set(APP_CONFIG, appConfig);
 	}
+
+	public String getResourceFolder()
+	{
+		return getString(RESOURCE_FOLDER);
+	}
+
+	public void setResourceFolder(String resourceFolder)
+	{
+		set(RESOURCE_FOLDER, resourceFolder);
+	}
 }
 

@@ -81,16 +81,20 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Override
 	public void activateApp(String id)
 	{
+		// Set app to active
 		App app = findAppById(id);
 		app.setActive(true);
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
-		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + id, dataService.getEntityType(PluginMetadata.PLUGIN));
+		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri(), dataService.getEntityType(PluginMetadata.PLUGIN));
 		plugin.setLabel(app.getLabel());
 		plugin.setDescription(app.getDescription());
-
 		dataService.add(PluginMetadata.PLUGIN, plugin);
+
+		// Add resources from file store to classpath
+		File appDirectory = fileStore.getFile(app.getResourceFolder());
+
 	}
 
 	@Override
@@ -99,7 +103,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = findAppById(id);
 		app.setActive(false);
 		dataService.update(AppMetadata.APP, app);
-		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + id);
+		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + app.getUri());
 
 		// TODO remove permissions?
 		// TODO remove from menu JSON?
@@ -136,11 +140,11 @@ public class AppManagerServiceImpl implements AppManagerService
 
 		String appDirectoryName = fileStore.getStorageDir() + File.separator + multipartFile.getOriginalFilename();
 		appZipFile.extractAll(appDirectoryName);
+		fileStore.delete(appZipFileName);
 
 		List<String> missingFromZipFile = checkForMissingFilesInAppZip(appDirectoryName);
 		if (missingFromZipFile.size() > 0)
 		{
-			fileStore.delete(appZipFileName);
 			fileStore.deleteDirectory(appDirectoryName);
 			throw new AppManagerException("There were some missing files in your zip package " + missingFromZipFile
 					+ ". Please add these and upload again.");
@@ -150,7 +154,6 @@ public class AppManagerServiceImpl implements AppManagerService
 		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
 		if (!isConfigContentValidJson(configFile))
 		{
-			fileStore.delete(appZipFileName);
 			fileStore.deleteDirectory(appDirectoryName);
 			throw new AppManagerException(
 					"The config file you provided has some problems. Please ensure it is a valid JSON file.");
@@ -167,6 +170,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(true);
 		newApp.setAppConfig(appConfig.getRuntimeOptions().toString());
+		newApp.setResourceFolder(appDirectoryName);
 
 		// If there is already an existing app with the same uri, add version number to the path
 		if (findAppByUri(appConfig.getUri()) != null)
