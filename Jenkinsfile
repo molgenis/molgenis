@@ -24,6 +24,7 @@ pipeline {
         stage('Build package') {
             steps {
                 echo "Build MOLGENIS"
+                echo "${JAVA_HOME}"
                 sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
             }
         }
