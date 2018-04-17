@@ -66,18 +66,26 @@ public class AppDeployController extends PluginController
 		return "view-app";
 	}
 
-	@RequestMapping("/{uri}/js/{fileName}")
+	@RequestMapping("/{uri}/js/{fileName:.+}")
 	public void loadJavascriptResources(@PathVariable String uri, @PathVariable String fileName,
 			HttpServletResponse response) throws IOException
 	{
-		appDeployService.loadJavascriptResources(uri, fileName + ".js", response);
+		System.out.println("fileName = " + fileName);
+		appDeployService.loadJavascriptResources(uri, fileName, response);
 	}
 
-	@RequestMapping("/{uri}/css/{fileName}")
+	@RequestMapping("/{uri}/css/{fileName:.+}")
 	public void loadCSSResources(@PathVariable String uri, @PathVariable String fileName, HttpServletResponse response)
 			throws IOException
 	{
-		appDeployService.loadCSSResources(uri, fileName + ".css", response);
+		System.out.println("fileName = " + fileName);
+		appDeployService.loadCSSResources(uri, fileName, response);
 	}
+
+	@RequestMapping("/{uri}/img/{fileName:.+}")
+	public void loadImageResources(@PathVariable String uri, @PathVariable String fileName,
+			HttpServletResponse response) throws IOException
+	{
+		appDeployService.loadImageResources(uri, fileName, response);
 	}
 }

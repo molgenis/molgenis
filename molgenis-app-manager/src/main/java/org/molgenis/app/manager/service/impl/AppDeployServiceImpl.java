@@ -15,7 +15,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import static java.nio.file.Files.probeContentType;
 import static java.util.Objects.requireNonNull;
 
 @Service
@@ -23,6 +26,7 @@ public class AppDeployServiceImpl implements AppDeployService
 {
 	private static final String JS_FOLDER = "js";
 	private static final String CSS_FOLDER = "css";
+	private static final String IMG_FOLDER = "img";
 
 	private DataService dataService;
 
@@ -60,6 +64,25 @@ public class AppDeployServiceImpl implements AppDeployService
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName.replace(" ", "_"));
 
 		try (InputStream is = new FileInputStream(requestedCSSFile))
+		{
+			FileCopyUtils.copy(is, response.getOutputStream());
+		}
+	}
+
+	@Override
+	public void loadImageResources(String uri, String fileName, HttpServletResponse response) throws IOException
+	{
+		App app = findAppByUri(uri);
+		File requestedImageFile = new File(
+				app.getResourceFolder() + File.separator + IMG_FOLDER + File.separator + fileName);
+
+		Path source = Paths.get(requestedImageFile.getPath());
+		String contentType = probeContentType(source);
+		response.setContentType(contentType);
+		response.setContentLength((int) requestedImageFile.length());
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileName.replace(" ", "_"));
+
+		try (InputStream is = new FileInputStream(requestedImageFile))
 		{
 			FileCopyUtils.copy(is, response.getOutputStream());
 		}

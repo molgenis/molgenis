@@ -22,4 +22,12 @@ public interface AppDeployService
 	 * @param response a {@link HttpServletResponse} used to attach any found css files
 	 */
 	void loadCSSResources(String uri, String fileName, HttpServletResponse response) throws IOException;
+
+	/**
+	 * Load images from the file store
+	 * @param uri      An uri belonging to an app
+	 * @param fileName File name of the requested image file
+	 * @param response a {@link HttpServletResponse} used to attach any found image files
+	 */
+	void loadImageResources(String uri, String fileName, HttpServletResponse response) throws IOException;
 }
