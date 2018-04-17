@@ -3,6 +3,8 @@ pipeline {
     tools {
         // Has to be configured on the host with this name : [ mvn-3.5.3 ]
         maven 'mvn-3.5.3'
+        // Has to be configured on the host with this name : [ jdk-8u162 ]
+        jdk 'jdk-8u162'
     }
 
     environment {
@@ -18,17 +20,36 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build package without tests') {
+        stage('Build package') {
             steps {
                 echo "Build MOLGENIS"
-                sh "mvn clean package -DskipTests"
+                sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
+            }
+        }
+        stage('Test package') {
+            steps {
+                parallel(
+                        unit: {
+                            sh "mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dskip.js.build=true -DskipITs"
+                            sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
+                            sh ".travis / sonar.sh"
+                        })
+//                        api: {
+//                            sh "sysctl -w vm.max_map_count=262144"
+//                            sh "mvn verify -pl molgenis -api - tests-- batch -mode-- quiet -Dmaven.test.redirectTestOutputToFile = true - Dit_db_user = postgres - Dit_db_password "
+//                            sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
+//                        },
+//                        integration: {
+//                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
+//                            sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
+//                        })
             }
         }
         stage('Publish package') {
             steps {
-                sshagent(credentials: ['molgenis-releases']) {
-                    echo "Publish MOLGENIS to download-server (https://molgenis26.gcc.rug.nl/)"
-                    sh "scp -o StrictHostKeyChecking=no molgenis-app/target/molgenis-app-${MOLGENIS_VERSION}.war molgenis@molgenis26.gcc.rug.nl:/var/www/html/releases/molgenis/${MOLGENIS_VERSION}/."
+                configFileProvider(
+                        [configFile(fileId: 'maven-sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
+                    sh "mvn deploy"
                 }
             }
         }
@@ -36,11 +57,11 @@ pipeline {
     post {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
-            build: 'molgenis-ops-docker'
-            notifySuccess()
+//            notifySuccess()
+            build: 'molgenis-dev-docker'
         }
         failure {
-            notifyFailed()
+//            notifyFailed()
         }
     }
 }
