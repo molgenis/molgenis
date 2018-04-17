@@ -1,7 +1,7 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
-import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, RESET_STATE, QUERY_ENTITIES } from 'src/store/actions'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from 'src/store/mutations'
+import actions, {GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE} from 'src/store/actions'
+import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from 'src/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
 
 describe('actions', () => {
@@ -165,7 +165,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==1')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==1')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -182,7 +182,7 @@ describe('actions', () => {
       const error = 'failed to get'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==1')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==1')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
