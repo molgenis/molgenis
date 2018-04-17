@@ -66,7 +66,7 @@ public class AppManagerController extends PluginController
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping("/delete/{id}")
-	public void deleteApp(@PathVariable("id") String id)
+	public void deleteApp(@PathVariable("id") String id) throws IOException
 	{
 		appManagerService.deleteApp(id);
 	}

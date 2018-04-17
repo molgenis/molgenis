@@ -30,6 +30,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 @Service
 public class AppManagerServiceImpl implements AppManagerService
@@ -87,8 +88,8 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
-		// TODO make sure it ends with '/'
-		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri(), dataService.getEntityType(PluginMetadata.PLUGIN));
+		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri() + "/",
+				dataService.getEntityType(PluginMetadata.PLUGIN));
 		plugin.setLabel(app.getLabel());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
@@ -100,7 +101,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = findAppById(id);
 		app.setActive(false);
 		dataService.update(AppMetadata.APP, app);
-		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + app.getUri());
+		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + app.getUri() + "/");
 
 		// TODO remove permissions?
 		// TODO remove from menu JSON?
@@ -117,8 +118,10 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
-	public void deleteApp(String id)
+	public void deleteApp(String id) throws IOException
 	{
+		App app = findAppById(id);
+		deleteDirectory(new File(app.getResourceFolder()));
 		dataService.deleteById(AppMetadata.APP, id);
 	}
 

@@ -6,7 +6,6 @@ import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.service.AppDeployService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.file.FileStore;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
@@ -16,20 +15,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class AppDeployServiceImpl implements AppDeployService
 {
 	private static final String JS_FOLDER = "js";
+	private static final String CSS_FOLDER = "css";
 
 	private DataService dataService;
-	private FileStore fileStore;
 
-	public AppDeployServiceImpl(DataService dataService, FileStore fileStore)
+	public AppDeployServiceImpl(DataService dataService)
 	{
-		this.dataService = Objects.requireNonNull(dataService);
-		this.fileStore = Objects.requireNonNull(fileStore);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -39,9 +38,7 @@ public class AppDeployServiceImpl implements AppDeployService
 		File requestedJsFile = new File(
 				app.getResourceFolder() + File.separator + JS_FOLDER + File.separator + fileName);
 
-		System.out.println("requestedJsFile = " + requestedJsFile.getAbsolutePath());
-
-		response.setContentType("application/javascript;charset=UTF-8");
+		response.setContentType("application/javascript; charset=UTF-8");
 		response.setContentLength((int) requestedJsFile.length());
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName.replace(" ", "_"));
 
@@ -52,9 +49,20 @@ public class AppDeployServiceImpl implements AppDeployService
 	}
 
 	@Override
-	public void loadCSSResources(String uri, HttpServletResponse response) throws IOException
+	public void loadCSSResources(String uri, String fileName, HttpServletResponse response) throws IOException
 	{
+		App app = findAppByUri(uri);
+		File requestedCSSFile = new File(
+				app.getResourceFolder() + File.separator + CSS_FOLDER + File.separator + fileName);
 
+		response.setContentType("text/css; charset=utf-8");
+		response.setContentLength((int) requestedCSSFile.length());
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileName.replace(" ", "_"));
+
+		try (InputStream is = new FileInputStream(requestedCSSFile))
+		{
+			FileCopyUtils.copy(is, response.getOutputStream());
+		}
 	}
 
 	private App findAppByUri(String uri)

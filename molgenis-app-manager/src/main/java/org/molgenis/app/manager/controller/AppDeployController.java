@@ -73,9 +73,11 @@ public class AppDeployController extends PluginController
 		appDeployService.loadJavascriptResources(uri, fileName + ".js", response);
 	}
 
-	@RequestMapping("/{uri}/css/**")
-	public void loadCSSResources(@PathVariable String uri, HttpServletResponse response) throws IOException
+	@RequestMapping("/{uri}/css/{fileName}")
+	public void loadCSSResources(@PathVariable String uri, @PathVariable String fileName, HttpServletResponse response)
+			throws IOException
 	{
-		appDeployService.loadCSSResources(uri, response);
+		appDeployService.loadCSSResources(uri, fileName + ".css", response);
+	}
 	}
 }

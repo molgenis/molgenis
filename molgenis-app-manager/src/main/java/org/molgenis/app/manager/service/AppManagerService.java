@@ -59,7 +59,7 @@ public interface AppManagerService
 	 *
 	 * @param id The id of an App
 	 */
-	void deleteApp(String id);
+	void deleteApp(String id) throws IOException;
 
 	/**
 	 * Upload an app

@@ -18,7 +18,8 @@ public interface AppDeployService
 	 * Load css files from the file store
 	 *
 	 * @param uri      An uri belonging to an app
+	 * @param fileName File name of the requested css file
 	 * @param response a {@link HttpServletResponse} used to attach any found css files
 	 */
-	void loadCSSResources(String uri, HttpServletResponse response) throws IOException;
+	void loadCSSResources(String uri, String fileName, HttpServletResponse response) throws IOException;
 }
