@@ -7,10 +7,10 @@ pipeline {
         jdk 'jdk-8u162'
     }
 
-    environment {
-        JAVA_HOME = "${tool 'jdk-8u162'}/jdk1.8.0_162"
-        PATH = "${JAVA_HOME}/bin:${PATH}"
-    }
+//    environment {
+//        JAVA_HOME = "${tool 'jdk-8u162'}/jdk1.8.0_162"
+//        PATH = "${JAVA_HOME}/bin:${PATH}"
+//    }
 
     stages {
         stage('Preparation') {
@@ -24,7 +24,8 @@ pipeline {
         stage('Build package') {
             steps {
                 echo "Build MOLGENIS"
-                echo "${JAVA_HOME}"
+                echo "JAVE_HOME = ${JAVA_HOME}"
+                echo "PATH = ${PATH}"
                 sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
             }
         }
