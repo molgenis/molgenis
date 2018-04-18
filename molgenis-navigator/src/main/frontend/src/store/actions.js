@@ -1,9 +1,9 @@
 // @flow
-import type { Package, Entity } from '../flow.types'
-import { INITIAL_STATE } from './state'
+import type {Entity, Package} from '../flow.types'
+import {INITIAL_STATE} from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from './mutations'
+import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from './mutations'
 
 export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
 export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
@@ -145,7 +145,7 @@ export default {
     }
   },
   [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package.id==' + packageId).then(response => {
+    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
       const entities = response.items.map(toEntity)
       commit(SET_ENTITIES, entities)
     }, error => {
