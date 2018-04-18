@@ -69,7 +69,7 @@
             }
             if (useDateEditRowPlugin) {
                 tableProperties.onEditClick = function (tableId, tableRowId) {
-                    window.location.replace(window.location.origin + '/plugin/data-row-edit/' + tableId + '/' + tableRowId);
+                    window.location.assign(window.location.origin + '/plugin/data-row-edit/' + tableId + '/' + tableRowId);
                 }
             }
             Table = React.render(molgenis.ui.Table(tableProperties), $('#data-table-container')[0]);
