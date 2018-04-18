@@ -25,15 +25,6 @@ public interface AppManagerService
 	AppResponse getAppByUri(String uri);
 
 	/**
-	 * Retrieve an {@link AppResponse} based on a unique URI in combination with a version number
-	 * Throws an {@link org.molgenis.app.manager.exception.AppManagerException} when there is no app with the requested URI
-	 *
-	 * @param uri     The URI of an App
-	 * @param version The version of an App
-	 */
-	AppResponse getAppByUriAndVersion(String uri, String version);
-
-	/**
 	 * Activate an App by App id
 	 *
 	 * @param id The id of an App

@@ -1,5 +1,6 @@
 package org.molgenis.app.manager.service.impl;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -26,6 +27,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -61,17 +63,6 @@ public class AppManagerServiceImpl implements AppManagerService
 	public AppResponse getAppByUri(String uri)
 	{
 		App app = findAppByUri(uri);
-		if (app == null)
-		{
-			throw new AppManagerException("App with uri [" + uri + "] does not exist.");
-		}
-		return AppResponse.create(app);
-	}
-
-	@Override
-	public AppResponse getAppByUriAndVersion(String uri, String version)
-	{
-		App app = findAppByUriAndVersion(uri, version);
 		if (app == null)
 		{
 			throw new AppManagerException("App with uri [" + uri + "] does not exist.");
@@ -170,8 +161,12 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setTemplateContent(fileToString(indexFile));
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(true);
-		newApp.setAppConfig(gson.toJson(appConfig.getRuntimeOptions()));
 		newApp.setResourceFolder(appDirectoryName);
+
+		// If provided config does not include runtimeOptions, set an empty map
+		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();
+		if (runtimeOptions == null) runtimeOptions = Maps.newHashMap();
+		newApp.setAppConfig(gson.toJson(runtimeOptions));
 
 		// If there is already an existing app with the same uri, add version number to the path
 		if (findAppByUri(appConfig.getUri()) != null)
@@ -218,12 +213,6 @@ public class AppManagerServiceImpl implements AppManagerService
 	private App findAppByUri(String uri)
 	{
 		Query<App> query = QueryImpl.EQ(AppMetadata.URI, uri);
-		return dataService.findOne(AppMetadata.APP, query, App.class);
-	}
-
-	private App findAppByUriAndVersion(String uri, String version)
-	{
-		Query<App> query = QueryImpl.<App>EQ(AppMetadata.URI, uri).and().eq(AppMetadata.APP_VERSION, version);
 		return dataService.findOne(AppMetadata.APP, query, App.class);
 	}
 

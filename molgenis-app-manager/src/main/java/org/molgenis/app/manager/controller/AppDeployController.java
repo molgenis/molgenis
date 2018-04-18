@@ -4,7 +4,10 @@ import org.molgenis.app.manager.exception.AppManagerException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppDeployService;
 import org.molgenis.app.manager.service.AppManagerService;
+import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,12 +28,17 @@ public class AppDeployController extends PluginController
 
 	private AppDeployService appDeployService;
 	private AppManagerService appManagerService;
+	private AppSettings appSettings;
+	private MenuReaderService menuReaderService;
 
-	public AppDeployController(AppDeployService appDeployService, AppManagerService appManagerService)
+	public AppDeployController(AppDeployService appDeployService, AppManagerService appManagerService, AppSettings appSettings,
+			MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.appDeployService = requireNonNull(appDeployService);
 		this.appManagerService = requireNonNull(appManagerService);
+		this.appSettings = requireNonNull(appSettings);
+		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
 	@RequestMapping
@@ -47,22 +55,14 @@ public class AppDeployController extends PluginController
 		{
 			throw new AppManagerException("Access denied for inactive app at location [/app/" + uri + "]");
 		}
-
 		model.addAttribute("app", appResponse);
-		return "view-app";
-	}
 
-	@RequestMapping("/{uri}/{version}")
-	public String deployAppWithSpecificVersion(@PathVariable String uri, @PathVariable String version, Model model)
-	{
-		AppResponse appResponse = appManagerService.getAppByUriAndVersion(uri, version);
-		if (!appResponse.getIsActive())
-		{
-			throw new AppManagerException(
-					"Access denied for inactive app at location [/app/" + uri + "/" + version + "]");
-		}
+		// baseUrl provided for apps using a router.
+		// E.g. /plugin/app/example/
+		model.addAttribute("baseUrl", menuReaderService.getMenu().findMenuItemPath("app/" + uri + "/"));
+		model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
+		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
 
-		model.addAttribute("app", appResponse);
 		return "view-app";
 	}
 

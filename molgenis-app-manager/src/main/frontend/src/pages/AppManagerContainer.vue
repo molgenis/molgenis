@@ -99,12 +99,15 @@
     },
     methods: {
       handleNewAppBtnClick () {
+        // Trigger file upload by clicking the hidden input
         document.getElementById('app-upload-input-field').click()
       },
 
       handleAppUpload (event) {
         const file = event.target.files[0]
         this.$store.dispatch('UPLOAD_APP', file)
+
+        // Clear the existing value to make it possible to upload the same file again
         this.$refs['app-upload-field'].value = ''
       }
     },
