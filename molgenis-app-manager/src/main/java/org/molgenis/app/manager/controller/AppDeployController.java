@@ -8,6 +8,7 @@ import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +32,8 @@ public class AppDeployController extends PluginController
 	private AppSettings appSettings;
 	private MenuReaderService menuReaderService;
 
-	public AppDeployController(AppDeployService appDeployService, AppManagerService appManagerService, AppSettings appSettings,
-			MenuReaderService menuReaderService)
+	public AppDeployController(AppDeployService appDeployService, AppManagerService appManagerService,
+			AppSettings appSettings, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.appDeployService = requireNonNull(appDeployService);
@@ -47,7 +48,8 @@ public class AppDeployController extends PluginController
 		return "redirect: " + AppManagerController.URI;
 	}
 
-	@RequestMapping("/{uri}")
+	@Order // Set to lowest order to prevent resource requests being handled by this mapping
+	@RequestMapping("/{uri}/**")
 	public String deployApp(@PathVariable String uri, Model model)
 	{
 		AppResponse appResponse = appManagerService.getAppByUri(uri);
@@ -57,8 +59,6 @@ public class AppDeployController extends PluginController
 		}
 		model.addAttribute("app", appResponse);
 
-		// baseUrl provided for apps using a router.
-		// E.g. /plugin/app/example/
 		model.addAttribute("baseUrl", menuReaderService.getMenu().findMenuItemPath("app/" + uri + "/"));
 		model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
