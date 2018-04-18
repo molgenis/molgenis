@@ -22,7 +22,7 @@
     "font-awesome": "^4.7.0",
     "v-toaster": "^1.0.2",
     "vue": "^2.2.6",
-    "vue-multiselect": "next",
+    "vue-multiselect": "^2.1.0",
     "vue-router": "^2.3.1",
     "vue-sweetalert": "^0.1.17",
     "vuedraggable": "^2.14.1",
