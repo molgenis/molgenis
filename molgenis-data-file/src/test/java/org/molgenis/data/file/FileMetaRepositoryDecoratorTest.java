@@ -2,7 +2,6 @@ package org.molgenis.data.file;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
@@ -29,17 +28,9 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 
 	private FileMetaRepositoryDecorator fileMetaRepositoryDecorator;
 
-	public FileMetaRepositoryDecoratorTest()
-	{
-		super(Strictness.WARN);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		EntityType entityType = when(mock(EntityType.class).getLabel()).thenReturn("file metadata").getMock();
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		when(fileStore.delete(anyString())).thenReturn(true);
 		fileMetaRepositoryDecorator = new FileMetaRepositoryDecorator(delegateRepository, fileStore);
 	}
 
@@ -50,7 +41,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testDelete() throws Exception
+	public void testDelete()
 	{
 		FileMeta fileMeta = getMockFileMeta("id");
 		fileMetaRepositoryDecorator.delete(fileMeta);
@@ -59,7 +50,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testDeleteStream() throws Exception
+	public void testDeleteStream()
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
@@ -73,7 +64,7 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testDeleteById() throws Exception
+	public void testDeleteById()
 	{
 		FileMeta fileMeta = getMockFileMeta("id");
 		when(delegateRepository.findOneById("id")).thenReturn(fileMeta);
@@ -82,17 +73,19 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(fileStore).delete("id");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "Unknown \\[file metadata] with id \\[id]")
-	public void testDeleteByIdUnknownId() throws Exception
+	public void testDeleteByIdUnknownId()
 	{
-		FileMeta fileMeta = getMockFileMeta("id");
+		EntityType entityType = when(mock(EntityType.class).getLabel()).thenReturn("file metadata").getMock();
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(delegateRepository.findOneById("id")).thenReturn(null);
 		fileMetaRepositoryDecorator.deleteById("id");
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteAll() throws Exception
+	public void testDeleteAll()
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
@@ -104,12 +97,12 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testDeleteAllStream() throws Exception
+	public void testDeleteAllStream()
 	{
 		FileMeta fileMeta0 = getMockFileMeta("id0");
 		FileMeta fileMeta1 = getMockFileMeta("id1");
-		when(delegateRepository.findOneById("id0")).thenReturn(fileMeta0);
-		when(delegateRepository.findOneById("id1")).thenReturn(fileMeta1);
+		doReturn(fileMeta0).when(delegateRepository).findOneById("id0");
+		doReturn(fileMeta1).when(delegateRepository).findOneById("id1");
 		fileMetaRepositoryDecorator.deleteAll(Stream.of("id0", "id1"));
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);

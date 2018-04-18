@@ -26,7 +26,6 @@ import LanguageSelectBox from "./LanguageSelectBox";
 import Modal from "./Modal";
 import Pager from "./Pager";
 import Popover from "./Popover";
-import Questionnaire from "./Questionnaire";
 import RadioGroup from "./RadioGroup";
 import RangeSlider from "./RangeSlider";
 import SelectBox from "./SelectBox";
@@ -65,7 +64,6 @@ export default {
     'Modal': Modal,
     'Pager': Pager,
     'Popover': Popover,
-    'Questionnaire': Questionnaire,
     'RadioGroup': RadioGroup,
     'RangeSlider': RangeSlider,
     'SelectBox': SelectBox,

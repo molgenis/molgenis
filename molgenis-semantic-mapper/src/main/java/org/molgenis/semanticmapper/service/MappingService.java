@@ -1,7 +1,6 @@
 package org.molgenis.semanticmapper.service;
 
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.Progress;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
@@ -18,7 +17,7 @@ public interface MappingService
 	 *
 	 * @param target name of the first target entity
 	 */
-	MappingProject addMappingProject(String name, User owner, String target);
+	MappingProject addMappingProject(String name, String target);
 
 	/**
 	 * Retrieves all {@link MappingProject}s.

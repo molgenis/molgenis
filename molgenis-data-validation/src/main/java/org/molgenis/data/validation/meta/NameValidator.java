@@ -11,7 +11,7 @@ import java.util.Set;
 public class NameValidator
 {
 	// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
-	public static final Set<String> KEYWORDS = ImmutableSet.of("login", "logout", "csv", "base", "exist", "meta");
+	public static final Set<String> KEYWORDS = ImmutableSet.of("login", "logout", "csv", "base", "exist", "meta", "_idValue");
 
 	/**
 	 * Checks if a name is a reserved keyword.

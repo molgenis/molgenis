@@ -92,7 +92,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		String algorithm = "algorithm";
 		Entity entity = mock(Entity.class);
 
-		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenThrow(new NullPointerException());
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity, 3)).thenThrow(new NullPointerException());
 
 		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
 				Lists.newArrayList(entity));
@@ -109,7 +109,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		String algorithm = "algorithm";
 		Entity entity = mock(Entity.class);
 
-		when(jsMagmaScriptEvaluator.eval(algorithm, entity)).thenReturn(
+		when(jsMagmaScriptEvaluator.eval(algorithm, entity, 3)).thenReturn(
 				new ScriptException("algorithm is not defined"));
 		Iterable<AlgorithmEvaluation> result = algorithmServiceImpl.applyAlgorithm(attribute, algorithm,
 				Lists.newArrayList(entity));
@@ -125,7 +125,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		when(attributeMapping.getAlgorithm()).thenReturn(algorithm);
 
 		Entity sourceEntity = mock(Entity.class);
-		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(
+		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3)).thenReturn(
 				new ScriptException("algorithm is not defined"));
 		algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
 	}
@@ -139,7 +139,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 		when(attributeMapping.getTargetAttribute()).thenReturn(targetAttribute);
 
 		Entity sourceEntity = mock(Entity.class);
-		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity)).thenReturn(algorithmResult);
+		when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3)).thenReturn(algorithmResult);
 
 		algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
 	}

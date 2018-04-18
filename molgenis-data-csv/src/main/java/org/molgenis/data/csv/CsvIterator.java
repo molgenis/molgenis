@@ -21,6 +21,8 @@ import java.util.zip.ZipFile;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.csv.CsvRepositoryCollection.MAC_ZIP;
 
 public class CsvIterator implements CloseableIterator<Entity>
@@ -130,7 +132,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 			{
 				String[] values = csvReader.readNext();
 
-				if ((values != null) && (values.length >= colNamesMap.size()))
+				if (values != null && values.length == colNamesMap.size())
 				{
 					List<String> valueList = Arrays.asList(values);
 					for (int i = 0; i < values.length; ++i)
@@ -148,6 +150,13 @@ public class CsvIterator implements CloseableIterator<Entity>
 					{
 						next.set(name, valueList.get(colNamesMap.get(name)));
 					}
+				}
+				else if (values != null && (values.length > 1 || (values.length == 1 && values[0].length() > 0))
+						&& values.length < colNamesMap.size())
+				{
+					throw new MolgenisDataException(
+							format("Number of values (%d) doesn't match the number of headers (%d): [%s]",
+									values.length, colNamesMap.size(), stream(values).collect(joining(","))));
 				}
 				else
 				{
@@ -219,6 +228,10 @@ public class CsvIterator implements CloseableIterator<Entity>
 		for (int i = 0; i < headers.length; ++i)
 		{
 			String header = processCell(headers[i], true);
+			if (columnIdx.containsKey(header))
+			{
+				throw new MolgenisDataException(format("Duplicate column header '%s' not allowed", header));
+			}
 			columnIdx.put(header, i);
 		}
 

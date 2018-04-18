@@ -49,7 +49,7 @@ molgenis.login <- local(function(username, password) {
 ####################################################################
 molgenis.logout <- local(function() {
     url <- paste0(molgenis.api.url, 'logout')
-    getURL(url, httpheader = list('x-molgenis-token' = molgenis.token))
+    POST(url, add_headers('x-molgenis-token' = molgenis.token))
     cat("Logout success")
 }, molgenis.env)
 

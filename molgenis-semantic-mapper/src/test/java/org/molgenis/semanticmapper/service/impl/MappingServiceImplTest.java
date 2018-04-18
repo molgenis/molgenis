@@ -9,8 +9,6 @@ import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
@@ -59,7 +57,6 @@ import static org.testng.Assert.assertEquals;
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
-	private static final String USERNAME = "admin";
 	private static final String SOURCE_GENE_ENTITY = "Gene";
 	private static final String SOURCE_EXON_ENTITY = "Exon";
 
@@ -85,9 +82,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private MappingServiceImpl mappingService;
 
 	@Autowired
-	private UserFactory userFactory;
-
-	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
@@ -110,7 +104,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MetaDataService metaDataService;
 
-	private User user;
 	private EntityType hopMetaData;
 	private EntityType geneMetaData;
 
@@ -133,9 +126,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Mockito.reset(exonRepo);
 		Mockito.reset(progress);
 
-		user = userFactory.create();
-		user.setUsername(USERNAME);
-
 		package_ = packageFactory.create("package");
 
 		hopMetaData = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
@@ -153,8 +143,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = Mockito.mock(MetaDataService.class);
-		when(metaDataService.createRepository(
-				argThat(obj -> obj != null && obj.getId().equals(hopMetaData.getId())))).thenReturn(hopRepo);
 		when(metaDataService.createRepository(
 				argThat(obj -> obj != null && obj.getId().equals(geneMetaData.getId())))).thenReturn(geneRepo);
 		when(metaDataService.createRepository(
@@ -200,10 +188,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	public void testAddMappingProject()
 	{
 		String projectName = "test_project";
-		MappingProject mappingProject = mappingService.addMappingProject(projectName, user, hopMetaData.getId());
+		MappingProject mappingProject = mappingService.addMappingProject(projectName, hopMetaData.getId());
 		Mockito.verify(mappingProjectRepo, Mockito.times(1)).add(mappingProject);
 		assertEquals(mappingProject.getName(), projectName);
-		assertEquals(mappingProject.getOwner(), user);
 		List<MappingTarget> mappingTargets = mappingProject.getMappingTargets();
 		assertEquals(mappingTargets.size(), 1);
 		assertEquals(mappingTargets.get(0).getTarget(), hopMetaData);
@@ -214,8 +201,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String projectName = "test_project";
 
-		MappingProject actualAddedMappingProject = mappingService.addMappingProject(projectName, user,
-				hopMetaData.getId());
+		MappingProject actualAddedMappingProject = mappingService.addMappingProject(projectName, hopMetaData.getId());
 
 		String mappingTargetIdentifier = actualAddedMappingProject.getMappingTarget(hopMetaData.getId())
 																  .getIdentifier();
@@ -235,7 +221,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		Entity mappingProjectEntity = Mockito.mock(Entity.class);
 		when(mappingProjectEntity.get(IDENTIFIER)).thenReturn(mappingProjectIdentifier);
 		when(mappingProjectEntity.get(NAME)).thenReturn(projectName);
-		when(mappingProjectEntity.get(OWNER)).thenReturn(user);
 		when(mappingProjectEntity.getEntities(MAPPING_TARGETS)).thenReturn(singletonList(mappingTargetEntity));
 		when(mappingProjectEntity.get(MAPPING_TARGETS)).thenReturn(singletonList(expectedMappingTarget));
 
@@ -279,7 +264,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test(expectedExceptions = IllegalStateException.class)
 	public void testAddExistingTarget()
 	{
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, hopMetaData.getId());
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", hopMetaData.getId());
 		mappingProject.addTarget(hopMetaData);
 	}
 
@@ -726,7 +711,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MappingProject createMappingProjectWithMappings()
 	{
-		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, hopMetaData.getId());
+		MappingProject mappingProject = mappingService.addMappingProject("TestRun", hopMetaData.getId());
 		MappingTarget target = mappingProject.getMappingTarget(hopMetaData.getId());
 
 		when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
@@ -748,7 +733,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MappingProject getManualMappingProject(String identifier, String projectName, MappingTarget mappingTarget)
 	{
-		return new MappingProject(identifier, projectName, user, newArrayList(mappingTarget));
+		return new MappingProject(identifier, projectName, newArrayList(mappingTarget));
 	}
 
 	@Configuration

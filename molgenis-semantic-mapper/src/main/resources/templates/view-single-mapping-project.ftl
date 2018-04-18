@@ -55,17 +55,15 @@
                 <th>Target model: ${selectedTarget?html}</th>
             <#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
                 <th>Source: ${source.name?html}
-                    <#if hasWritePermission>
-                        <div class="pull-right">
-                            <form method="post" action="${context_url}/removeEntityMapping" class="verify">
-                                <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-                                <input type="hidden" name="target" value="${selectedTarget}"/>
-                                <input type="hidden" name="source" value="${source.name}"/>
-                                <button type="submit" class="btn btn-danger btn-xs pull-right"><span
-                                        class="glyphicon glyphicon-trash"></span></button>
-                            </form>
-                        </div>
-                    </#if>
+                    <div class="pull-right">
+                        <form method="post" action="${context_url}/removeEntityMapping" class="verify">
+                            <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+                            <input type="hidden" name="target" value="${selectedTarget}"/>
+                            <input type="hidden" name="source" value="${source.name}"/>
+                            <button type="submit" class="btn btn-danger btn-xs pull-right"><span
+                                    class="glyphicon glyphicon-trash"></span></button>
+                        </form>
+                    </div>
                 </th>
             </#list>
             </tr>
@@ -112,7 +110,7 @@
                                 <input type="hidden" name="source" value="${source.name}"/>
                                 <input type="hidden" name="targetAttribute" value="${attribute.name}"/>
                             </form>
-                            <#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
+                            <#if source.getAttributeMapping(attribute.name)??>
                                 <form method="post" action="${context_url}/removeAttributeMapping"
                                       class="pull-right verify">
                                     <button type="submit" class="btn btn-default btn-xs">
@@ -146,7 +144,7 @@
                     <td><b>${missing}</b> <span class="label label-danger">missing</span></td>
                     <#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
                         <td style="overflow-y:auto;max-width:50px;">
-                            <#if hasWritePermission && source.getAttributeMapping(missing)??>
+                            <#if source.getAttributeMapping(missing)??>
                                 <form method="post" action="${context_url}/removeAttributeMapping"
                                       class="pull-right verify">
                                     <button type="submit" class="btn btn-default btn-xs">
@@ -171,7 +169,7 @@
             </tbody>
         </table>
     </div>
-<#if entityTypes?has_content && hasWritePermission>
+<#if entityTypes?has_content>
     <div class="col-md-2">
         <a id="add-new-attr-mapping-btn" href="#" class="btn btn-primary btn-xs" data-toggle="modal"
            data-target="#create-new-source-column-modal"><span class="glyphicon glyphicon-plus"></span>Add source</a>

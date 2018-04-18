@@ -119,10 +119,16 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.sessionManagement().invalidSessionStrategy(invalidSessionStrategy());
 
 		// add default header options but use custom cache control header writer
-		http.headers().contentTypeOptions().and().xssProtection()
-			//			.and()
-			//			.httpStrictTransportSecurity()
-			.and().frameOptions().and().addHeaderWriter(cacheControlHeaderWriter);
+		http.cors().and().headers()
+			.contentTypeOptions()
+			.and()
+			.xssProtection()
+			.and()
+			.httpStrictTransportSecurity()
+			.and()
+			.frameOptions()
+			.and()
+			.addHeaderWriter(cacheControlHeaderWriter);
 
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 
@@ -242,10 +248,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.failureUrl(MolgenisLoginController.URI + "?error")
 				.and()
 
-				.logout()
-				.deleteCookies("JSESSIONID")
-				.addLogoutHandler((req, res, auth) ->
-				{
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
 					if (req.getSession(false) != null
 							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
 					{

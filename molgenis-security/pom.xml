@@ -67,7 +67,6 @@
         <dependency>
             <groupId>nl.captcha</groupId>
             <artifactId>simplecaptcha</artifactId>
-            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -88,24 +87,11 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>1.21.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava-jdk5</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- Google 2 factor authentication -->
         <dependency>
             <groupId>org.jboss.aerogear</groupId>
             <artifactId>aerogear-otp-java</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
@@ -123,7 +109,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>${spring.security.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

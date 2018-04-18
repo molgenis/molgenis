@@ -29,6 +29,9 @@ Abbreviations:
 * VCF: Variant Call Format
 * EMX: Entity Model eXtensible
 
+## CSV
+The number of values on a row must match the number of column headers on the first row. Empty lines at the end of the file are ignored.
+ 
 # Overview
 The upload module is the place in MOLGENIS where you can upload your data into the MOLGENIS application. If you have the permissions, you will see the upload menu item.
 
@@ -156,9 +159,8 @@ The href can be used to poll the status of the import by checking the status fie
 ### importByURL Example:
 
     https://molgenis01.gcc.rug.nl/plugin/importwizard/importByUrl
-    notify=false&entityTypeId=demo&url=https://raw.githubusercontent.com/bartcharbon/molgenis/feature/importService/
-    molgenis-app/src/test/resources/vcf/test.vcf
-
+    notify=false&entityTypeId=demo&url=https://raw.githubusercontent.com/molgenis/molgenis/master/molgenis-data-vcf/src/test/resources/testFile.vcf
+    
 #####Response:
 
     201 CREATED

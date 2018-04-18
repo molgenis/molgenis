@@ -11,6 +11,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.meta.EntityTypeRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
@@ -30,11 +31,12 @@ public class EntityTypeRepositoryDecoratorFactory
 	private final EntityTypeValidator entityTypeValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final MutableAclService mutableAclService;
+	private final MutableAclClassService mutableAclClassService;
 
 	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
 			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
 			EntityTypeValidator entityTypeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			MutableAclService mutableAclService)
+			MutableAclService mutableAclService, MutableAclClassService mutableAclClassService)
 	{
 		super(entityTypeMetadata);
 		this.dataService = requireNonNull(dataService);
@@ -43,6 +45,7 @@ public class EntityTypeRepositoryDecoratorFactory
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
 		this.mutableAclService = requireNonNull(mutableAclService);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	@Override
@@ -51,6 +54,6 @@ public class EntityTypeRepositoryDecoratorFactory
 		repository = new EntityTypeRepositoryDecorator(repository, dataService, entityTypeDependencyResolver);
 		repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
 		return new EntityTypeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService,
-				mutableAclService);
+				mutableAclService, mutableAclClassService);
 	}
 }

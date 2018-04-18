@@ -51,6 +51,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
+	private static final int ENTITY_REFERENCE_FETCHING_DEPTH = 3;
+
 	private final OntologyTagService ontologyTagService;
 	private final SemanticSearchService semanticSearchService;
 	private final AlgorithmGeneratorService algorithmGeneratorService;
@@ -111,7 +113,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 			try
 			{
-				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity);
+				Object result = jsMagmaScriptEvaluator.eval(algorithm, entity, ENTITY_REFERENCE_FETCHING_DEPTH);
 
 				// jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
 				// so check instance of result object here
@@ -143,7 +145,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		Object result = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity);
+		Object result = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, ENTITY_REFERENCE_FETCHING_DEPTH);
 
 		// jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
 		// so check instance of result object here
@@ -176,7 +178,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Matcher matcher = Pattern.compile(patternString).matcher(algorithmScript);
 		while (matcher.find())
 		{
-			result.add(matcher.group(1));
+			result.add(matcher.group(1).split("\\.")[0]);
 		}
 		return result;
 	}

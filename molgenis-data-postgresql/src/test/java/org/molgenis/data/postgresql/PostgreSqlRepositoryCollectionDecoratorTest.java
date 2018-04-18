@@ -1,90 +1,81 @@
 package org.molgenis.data.postgresql;
 
+import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.util.AttributeCopier;
-import org.molgenis.data.meta.util.EntityTypeCopier;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistry;
+import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
 
-public class PostgreSqlRepositoryCollectionDecoratorTest
+public class PostgreSqlRepositoryCollectionDecoratorTest extends AbstractMockitoTest
 {
+	@Mock
 	private EntityType entityType;
-	private EntityType updatedEntityType;
+	@Mock
+	private Attribute attr;
+	@Mock
+	private Attribute updatedAttr;
+	@Mock
 	private RepositoryCollection repoCollection;
+	@Mock
 	private EntityTypeRegistry entityTypeRegistry;
 	private PostgreSqlRepositoryCollectionDecorator repoCollectionDecorator;
-	private AttributeCopier attributeCopier;
+	private InOrder inOrder;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		String entityTypeId = "entityTypeId";
-		entityType = mock(EntityType.class);
-		when(entityType.getEntityType()).thenReturn(mock(EntityType.class));
-		when(entityType.getId()).thenReturn(entityTypeId);
-		updatedEntityType = mock(EntityType.class);
-		repoCollection = mock(RepositoryCollection.class);
-		entityTypeRegistry = mock(EntityTypeRegistry.class);
-		EntityTypeCopier entityTypeCopier = mock(EntityTypeCopier.class);
-		when(entityTypeCopier.copy(entityType)).thenReturn(updatedEntityType);
-		attributeCopier = mock(AttributeCopier.class);
-		repoCollectionDecorator = new PostgreSqlRepositoryCollectionDecorator(repoCollection, entityTypeRegistry,
-				entityTypeCopier, attributeCopier);
+		repoCollectionDecorator = new PostgreSqlRepositoryCollectionDecorator(repoCollection, entityTypeRegistry);
+		inOrder = inOrder(repoCollection, entityTypeRegistry);
 	}
 
 	@Test
 	public void testCreateRepository()
 	{
 		repoCollectionDecorator.createRepository(entityType);
-		verify(repoCollection).createRepository(entityType);
-		verify(entityTypeRegistry).registerEntityType(entityType);
+
+		inOrder.verify(repoCollection).createRepository(entityType);
+		inOrder.verify(entityTypeRegistry).registerEntityType(entityType);
 	}
 
 	@Test
 	public void testDeleteRepository()
 	{
 		repoCollectionDecorator.deleteRepository(entityType);
-		verify(repoCollection).deleteRepository(entityType);
-		verify(entityTypeRegistry).unregisterEntityType(entityType);
+
+		inOrder.verify(repoCollection).deleteRepository(entityType);
+		inOrder.verify(entityTypeRegistry).unregisterEntityType(entityType);
 	}
 
 	@Test
 	public void testAddAttribute()
 	{
-		Attribute attr = mock(Attribute.class);
-		when(attributeCopier.copy(attr)).thenReturn(attr);
 		repoCollectionDecorator.addAttribute(entityType, attr);
-		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
-		verify(repoCollection).addAttribute(entityType, attr);
+
+		inOrder.verify(entityTypeRegistry).addAttribute(entityType, attr);
+		inOrder.verify(repoCollection).addAttribute(entityType, attr);
 	}
 
 	@Test
 	public void testUpdateAttribute()
 	{
-		String entityTypeId = "entityTypeId";
-		when(entityType.getId()).thenReturn(entityTypeId);
-		Attribute attr = mock(Attribute.class);
-
-		Attribute updatedAttr = mock(Attribute.class);
 		repoCollectionDecorator.updateAttribute(entityType, attr, updatedAttr);
-		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
-		verify(repoCollection).updateAttribute(entityType, attr, updatedAttr);
+
+		inOrder.verify(entityTypeRegistry).updateAttribute(entityType, attr, updatedAttr);
+		inOrder.verify(repoCollection).updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Test
 	public void testDeleteAttribute()
 	{
-		String entityTypeId = "entityTypeId";
-		when(entityType.getId()).thenReturn(entityTypeId);
-		Attribute attr = mock(Attribute.class);
-
 		repoCollectionDecorator.deleteAttribute(entityType, attr);
-		verify(repoCollection).deleteAttribute(entityType, attr);
-		verify(entityTypeRegistry).registerEntityType(updatedEntityType);
+
+		inOrder.verify(entityTypeRegistry).deleteAttribute(entityType, attr);
+		inOrder.verify(repoCollection).deleteAttribute(entityType, attr);
 	}
 }

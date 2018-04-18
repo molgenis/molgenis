@@ -20,7 +20,6 @@ import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.i18n.PropertiesMessageSource;
-import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
@@ -53,7 +52,6 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
@@ -98,6 +96,12 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry)
+	{
+		registry.addMapping("/api/**").allowedMethods("*");
+	}
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -172,17 +176,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	{
 		// Fix for https://github.com/molgenis/molgenis/issues/6575
 		configurer.favorPathExtension(false);
-	}
-
-	@Bean
-	public MappedInterceptor mappedCorsInterceptor()
-	{
-		/*
-		 * This way, the cors interceptor is added to the resource handlers as well, if the patterns overlap.
-		 *
-		 * See https://jira.spring.io/browse/SPR-10655
-		 */
-		return new MappedInterceptor(new String[] { "/api/**", "/fdp/**" }, corsInterceptor());
 	}
 
 	@Override
@@ -352,12 +345,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	{
 		Ui molgenisUi = new MenuMolgenisUi(menuReaderService());
 		return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
-	}
-
-	@Bean
-	public CorsInterceptor corsInterceptor()
-	{
-		return new CorsInterceptor();
 	}
 
 	@Bean

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Context>
     <!-- Override the greenmail context parameter values configured in mail.war web.xml -->
-    <Parameter name="greenmail.smtp.port" value="${greenmail.smtp.port}" override="false"/>
-    <Parameter name="greenmail.pop3.port" value="${greenmail.pop3.port}" override="false"/>
+    <Parameter name="greenmail.smtp.port" value="@greenmail.smtp.port@" override="false"/>
+    <Parameter name="greenmail.pop3.port" value="@greenmail.pop3.port@" override="false"/>
 </Context>

@@ -19,8 +19,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 public class MappingGeneratorTest extends AbstractMockitoTest
@@ -38,10 +37,6 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(documentIdGenerator.generateId(any(EntityType.class))).thenAnswer(
-				invocation -> invocation.<EntityType>getArgument(0).getId());
-		when(documentIdGenerator.generateId(any(Attribute.class))).thenAnswer(
-				invocation -> invocation.<Attribute>getArgument(0).getIdentifier());
 		mappingGenerator = new MappingGenerator(documentIdGenerator);
 	}
 
@@ -70,6 +65,7 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@Test(dataProvider = "createMappingProvider")
 	public void testCreateMapping(AttributeType attributeType, MappingType mappingType)
 	{
+		initDocumentIdGeneratorMock();
 		String attrIdentifier = "attr";
 		EntityType entityType = createEntityType(attrIdentifier, attributeType);
 		Mapping mapping = mappingGenerator.createMapping(entityType);
@@ -90,22 +86,6 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		return dataItems.iterator();
 	}
 
-	@Test(dataProvider = "createMappingProviderAnalyzeNGrams")
-	public void testCreateMappingAnalyzeNGrams(AttributeType attributeType)
-	{
-		String attrIdentifier = "attr";
-		EntityType entityType = createEntityType(attrIdentifier, attributeType);
-		Mapping mapping = mappingGenerator.createMapping(entityType);
-
-		FieldMapping fieldMapping = FieldMapping.builder()
-												.setName(attrIdentifier)
-												.setType(MappingType.TEXT)
-												.setAnalyzeNGrams(true)
-												.build();
-		Mapping expectedMapping = createMapping(fieldMapping);
-		assertEquals(mapping, expectedMapping);
-	}
-
 	@DataProvider(name = "createMappingProviderNested")
 	public static Iterator<Object[]> createMappingProviderNested()
 	{
@@ -122,6 +102,7 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@Test(dataProvider = "createMappingProviderNested")
 	public void testCreateMappingProviderNested(AttributeType attributeType)
 	{
+		initDocumentIdGeneratorMock();
 		String refAttrIdentifier = "refAttr";
 		EntityType refEntityType = createEntityType(refAttrIdentifier, AttributeType.LONG);
 		String attrIdentifier = "attr";
@@ -201,6 +182,7 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	@Test(dataProvider = "createMappingProviderDepth")
 	public void testCreateMappingProviderDepth(EntityType entityType, FieldMapping fieldMapping)
 	{
+		initDocumentIdGeneratorMock();
 		Mapping mapping = mappingGenerator.createMapping(entityType);
 		Mapping expectedMapping = createMapping(fieldMapping);
 		assertEquals(mapping, expectedMapping);
@@ -222,7 +204,10 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getIdentifier()).thenReturn(attrIdentifier);
 		when(attribute.getDataType()).thenReturn(type);
-		when(attribute.getRefEntity()).thenReturn(refEntityType);
+		if (refEntityType != null)
+		{
+			when(attribute.getRefEntity()).thenReturn(refEntityType);
+		}
 
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn("id");
@@ -235,5 +220,13 @@ public class MappingGeneratorTest extends AbstractMockitoTest
 	private static Mapping createMapping(FieldMapping fieldMapping)
 	{
 		return Mapping.builder().setType("id").setFieldMappings(singletonList(fieldMapping)).build();
+	}
+
+	private void initDocumentIdGeneratorMock()
+	{
+		doAnswer(invocation -> invocation.<EntityType>getArgument(0).getId()).when(documentIdGenerator)
+																			 .generateId(any(EntityType.class));
+		doAnswer(invocation -> invocation.<Attribute>getArgument(0).getIdentifier()).when(documentIdGenerator)
+																					.generateId(any(Attribute.class));
 	}
 }

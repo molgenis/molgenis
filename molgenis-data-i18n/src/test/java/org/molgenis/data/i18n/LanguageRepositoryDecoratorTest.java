@@ -1,7 +1,6 @@
 package org.molgenis.data.i18n;
 
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
@@ -26,15 +25,9 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 
-	public LanguageRepositoryDecoratorTest()
-	{
-		super(Strictness.WARN);
-	}
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(delegateRepository.getName()).thenReturn("Language");
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(delegateRepository);
 	}
 
@@ -46,6 +39,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
 	public void testAddUnknownLanguage()
 	{
@@ -64,6 +58,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(language1);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
 	public void testAddStreamUnknownLanguage()
 	{
@@ -72,24 +67,27 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest
 		languageRepositoryDecorator.add(Stream.of(language));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
 	public void testDelete()
 	{
-		languageRepositoryDecorator.delete(getMockLanguage(LANGUAGE_CODE_NL));
+		languageRepositoryDecorator.delete(mock(Language.class));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
 	public void testDeleteById()
 	{
-		Language language = getMockLanguage(LANGUAGE_CODE_NL);
+		Language language = mock(Language.class);
 		when(delegateRepository.findOneById(LANGUAGE_CODE_NL)).thenReturn(language);
 		languageRepositoryDecorator.deleteById(LANGUAGE_CODE_NL);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
 	public void testDeleteStream()
 	{
-		languageRepositoryDecorator.delete(Stream.of(getMockLanguage(LANGUAGE_CODE_NL)));
+		languageRepositoryDecorator.delete(Stream.of(mock(Language.class)));
 	}
 
 	private Language getMockLanguage(String languageCode)

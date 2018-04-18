@@ -2,10 +2,7 @@ package org.molgenis.data.security.owned;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
@@ -107,10 +104,12 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).update(entity);
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[test\\] with id \\[entityId\\]")
 	public void testUpdatePermissionDenied()
 	{
 		Entity entity = getEntityMock();
+		EntityType entityType = entity.getEntityType();
+		when(entityType.getLabel()).thenReturn("test");
 		rowLevelSecurityRepositoryDecorator.update(entity);
 		verify(delegateRepository, times(0)).update(entity);
 	}
@@ -119,6 +118,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStream()
 	{
 		Entity entity = getEntityMock();
+		EntityType entityType = entity.getEntityType();
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 
@@ -132,6 +133,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStreamPermissionDenied()
 	{
 		Entity entity = getEntityMock();
+		EntityType entityType = entity.getEntityType();
+		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 
 		@SuppressWarnings("unchecked")
@@ -150,10 +153,12 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(mutableAclService).deleteAcl(new EntityIdentity(entity), true);
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[test\\] with id \\[entityId\\]")
 	public void testDeletePermissionDenied()
 	{
 		Entity entity = getEntityMock();
+		EntityType entityType = entity.getEntityType();
+		when(entityType.getLabel()).thenReturn("test");
 		rowLevelSecurityRepositoryDecorator.delete(entity);
 		verify(delegateRepository, times(0)).delete(entity);
 	}
@@ -326,7 +331,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Entity entity = getEntityMock();
-		when(delegateRepository.findOne(query)).thenReturn(entity);
+		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
 		assertEquals(entity, rowLevelSecurityRepositoryDecorator.findOne(query));
 	}
@@ -337,7 +343,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		Entity entity = getEntityMock();
-		when(delegateRepository.findOne(query)).thenReturn(entity);
+		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
+				invocation -> Stream.of(entity));
 		assertNull(rowLevelSecurityRepositoryDecorator.findOne(query));
 	}
 
