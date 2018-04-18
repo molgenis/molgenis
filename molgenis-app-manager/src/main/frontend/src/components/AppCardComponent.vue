@@ -13,17 +13,17 @@
             <h3>{{ app.label }}</h3>
             <span>
                 Status:
-                <span v-if="app.isActive" style="color:green">Active</span>
-                <span v-else style="color:red">Disabled</span>
+                <span v-if="app.isActive" style="color:#75c791">Active</span>
+                <span v-else style="color:#dc3545">Disabled</span>
             </span>
         </div>
 
         <div class="card-body app-card-body">
             <p class="lead"> {{ app.description }} </p>
-            <p><a :href="'/menu/plugins/app/' + app.uri">Go to app</a></p>
         </div>
 
         <div class="card-footer">
+            <a :href="'/menu/plugins/app/' + app.uri">Go to app</a>
             <div class="float-right">
                 <toggle-button :value="app.isActive" @change="toggleAppActiveState(app)" :sync="true"></toggle-button>
             </div>
