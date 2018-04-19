@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.oneclickimporter.meta.UploadPackage;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.impl.EntityServiceImpl;
@@ -70,7 +71,7 @@ public class EntityServiceImplTest
 	}
 
 	@Test
-	public void testCreateEntity() throws Exception
+	public void testCreateEntity()
 	{
 		String tableName = "super-powers";
 		List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
@@ -80,7 +81,7 @@ public class EntityServiceImplTest
 		DataCollection dataCollection = DataCollection.create(tableName, columns);
 
 		//mock parent package
-		Package upload = mock(Package.class);
+		UploadPackage upload = mock(UploadPackage.class);
 
 		// mock auto id
 		String generatedId = "id_0";

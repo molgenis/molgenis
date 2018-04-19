@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.permission.PermissionSystemService;
+import org.molgenis.oneclickimporter.meta.UploadPackage;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.AttributeTypeService;
@@ -48,7 +49,7 @@ public class EntityServiceImpl implements EntityService
 			EntityManager entityManager, AttributeTypeService attributeTypeService,
 			OneClickImporterService oneClickImporterService,
 			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory,
-			PermissionSystemService permissionSystemService, Package uploadPackage)
+			PermissionSystemService permissionSystemService, UploadPackage uploadPackage)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
