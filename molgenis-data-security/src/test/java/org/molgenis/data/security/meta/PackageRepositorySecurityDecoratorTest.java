@@ -3,12 +3,12 @@ package org.molgenis.data.security.meta;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -108,7 +108,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).update(pack);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create packages without a parent.")
+	@Test(expectedExceptions = NullParentPackageNotSuException.class)
 	public void testUpdateToNullPackage()
 	{
 		Package pack = mock(Package.class);
@@ -270,7 +270,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		repo.add(pack);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create packages without a parent.")
+	@Test(expectedExceptions = NullParentPackageNotSuException.class)
 	public void testAddNullParent()
 	{
 		Package pack = mock(Package.class);

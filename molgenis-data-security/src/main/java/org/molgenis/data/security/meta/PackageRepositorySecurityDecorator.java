@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -214,7 +215,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		{
 			if (!currentUserIsSuOrSystem() && isParentUpdated(action, newPackage))
 			{
-				throw new MolgenisDataException("Only superusers are allowed to create packages without a parent.");
+				throw new NullParentPackageNotSuException();
 			}
 		}
 	}

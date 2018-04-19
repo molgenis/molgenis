@@ -9,6 +9,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
@@ -177,7 +178,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	@SuppressWarnings("deprecation")
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create EntityTypes without a package.")
+	@Test(expectedExceptions = NullPackageNotSuException.class)
 	public void testCreateNullPermission()
 	{
 		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_2).setLabel("label").setBackend("PostgreSQL");

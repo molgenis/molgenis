@@ -8,6 +8,7 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
@@ -194,7 +195,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		{
 			if (!currentUserIsSuOrSystem() && isPackageUpdated(action, newEntityType))
 			{
-				throw new MolgenisDataException("Only superusers are allowed to create EntityTypes without a package.");
+				throw new NullPackageNotSuException();
 			}
 		}
 	}

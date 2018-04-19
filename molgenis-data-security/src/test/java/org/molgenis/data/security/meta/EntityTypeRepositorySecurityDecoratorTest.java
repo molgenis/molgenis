@@ -13,6 +13,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
@@ -124,7 +125,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create EntityTypes without a package.")
+	@Test(expectedExceptions = NullPackageNotSuException.class)
 	public void addNullPackage()
 	{
 		EntityType entityType = mock(EntityType.class);
@@ -463,7 +464,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Only superusers are allowed to create EntityTypes without a package.")
+	@Test(expectedExceptions = NullPackageNotSuException.class)
 	public void updateToNullPackage()
 	{
 		String entityTypeId = "entityTypeId";
