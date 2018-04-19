@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -76,8 +75,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	@BeforeClass
 	public void setUp()
 	{
-		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "DynamicDecoratorITEntityType");
 
 		runAsSystem(() ->
 		{
