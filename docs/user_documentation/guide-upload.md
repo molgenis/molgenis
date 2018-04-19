@@ -13,7 +13,7 @@ In this section we introduce and explain, terminology of MOLGENIS
 * Attribute: An attribute describes the charcteristics of a data item in an entity, Like a column in a database
 
 # Permissions
-User need the following permissions to us the upload plugin:
+User need the following permissions to use the upload plugin:
 
 * WRITE on sys_md_EntityType, sys_md_Attribute
 * WRITE on sys_md_Tag and sys_md_Package if those are uploaded
