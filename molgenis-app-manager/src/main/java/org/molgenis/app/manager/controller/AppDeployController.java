@@ -43,16 +43,16 @@ public class AppDeployController extends PluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
-	@RequestMapping("/{uri}/{version}/**")
-	public String deployApp(@PathVariable String uri, @PathVariable String version, Model model)
+	@RequestMapping("/{uri}/**")
+	public String deployApp(@PathVariable String uri, Model model)
 	{
-		AppResponse appResponse = appManagerService.getAppByUri(uri + "/" + version);
+		AppResponse appResponse = appManagerService.getAppByUri(uri);
 		if (!appResponse.getIsActive())
 		{
 			throw new AppManagerException("Access denied for inactive app at location [/app/" + uri + "]");
 		}
 
-		String baseUrl = menuReaderService.getMenu().findMenuItemPath("app/" + uri + "/" + version + "/");
+		String baseUrl = menuReaderService.getMenu().findMenuItemPath("app/" + uri + "/");
 		model.addAttribute("baseUrl", baseUrl);
 
 		String template = appDeployService.configureTemplateResourceReferencing(appResponse.getTemplateContent(),
@@ -66,26 +66,26 @@ public class AppDeployController extends PluginController
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/{version}/js/{fileName:.+}")
-	public void loadJavascriptResources(@PathVariable String uri, @PathVariable String version,
-			@PathVariable String fileName, HttpServletResponse response) throws IOException
-	{
-		appDeployService.loadJavascriptResources(uri + "/" + version, fileName, response);
-	}
-
-	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/{version}/css/{fileName:.+}")
-	public void loadCSSResources(@PathVariable String uri, @PathVariable String version, @PathVariable String fileName,
+	@RequestMapping("/{uri}/js/{fileName:.+}")
+	public void loadJavascriptResources(@PathVariable String uri, @PathVariable String fileName,
 			HttpServletResponse response) throws IOException
 	{
-		appDeployService.loadCSSResources(uri + "/" + version, fileName, response);
+		appDeployService.loadJavascriptResources(uri, fileName, response);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/{version}/img/{fileName:.+}")
-	public void loadImageResources(@PathVariable String uri, @PathVariable String version,
-			@PathVariable String fileName, HttpServletResponse response) throws IOException
+	@RequestMapping("/{uri}/css/{fileName:.+}")
+	public void loadCSSResources(@PathVariable String uri, @PathVariable String fileName, HttpServletResponse response)
+			throws IOException
 	{
-		appDeployService.loadImageResources(uri + "/" + version, fileName, response);
+		appDeployService.loadCSSResources(uri, fileName, response);
+	}
+
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping("/{uri}/img/{fileName:.+}")
+	public void loadImageResources(@PathVariable String uri, @PathVariable String fileName,
+			HttpServletResponse response) throws IOException
+	{
+		appDeployService.loadImageResources(uri, fileName, response);
 	}
 }
