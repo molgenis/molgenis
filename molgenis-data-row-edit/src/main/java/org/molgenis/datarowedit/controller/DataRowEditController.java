@@ -1,4 +1,4 @@
-package org.molgenis.data.row.edit.controller;
+package org.molgenis.datarowedit.controller;
 
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.molgenis.data.row.edit.controller.DataRowEditController.URI;
+import static org.molgenis.datarowedit.controller.DataRowEditController.URI;
 
 @Controller
 @RequestMapping(URI)

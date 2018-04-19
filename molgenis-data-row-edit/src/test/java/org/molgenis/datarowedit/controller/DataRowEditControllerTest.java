@@ -1,4 +1,4 @@
-package org.molgenis.data.row.edit.controller;
+package org.molgenis.datarowedit.controller;
 
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;

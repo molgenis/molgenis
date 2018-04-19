@@ -1,4 +1,4 @@
-package org.molgenis.data.row.edit.controller;
+package org.molgenis.datarowedit.controller;
 
 import org.molgenis.i18n.PropertiesMessageSource;
 import org.springframework.context.annotation.Bean;
