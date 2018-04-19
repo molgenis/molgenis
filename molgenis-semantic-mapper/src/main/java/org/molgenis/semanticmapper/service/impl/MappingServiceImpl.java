@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
@@ -64,6 +65,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	@RunAsSystem
 	@Transactional
 	public MappingProject addMappingProject(String projectName, String target)
 	{
@@ -74,6 +76,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	@RunAsSystem
 	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
@@ -138,12 +141,14 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	@RunAsSystem
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
 	@Override
+	@RunAsSystem
 	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
@@ -151,6 +156,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	@RunAsSystem
 	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
