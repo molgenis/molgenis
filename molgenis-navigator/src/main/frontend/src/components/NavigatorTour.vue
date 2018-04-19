@@ -29,21 +29,21 @@
         return [
           {
             target: '#navigator-search-input',
-            content: `Welcome to the navigator. Enter in this search field a table or folder you are looking for`,
+            content: `Welcome to the navigator. Enter in this search field a table or folder you are looking for.`,
             params: {
               placement: 'bottom'
             }
           },
           {
             target: '#navigator-search-input',
-            content: `For example "${this.packageLabel}"`,
+            content: `For example "${this.packageLabel}".`,
             params: {
               placement: 'bottom'
             }
           },
           {
             target: '.text-left.table.b-table.table-bordered',
-            content: `This table contains all matches with your search terms: "${this.packageLabel}"`,
+            content: `This table contains all matches with your search terms: "${this.packageLabel}".`,
             params: {
               placement: 'bottom'
             }
@@ -71,7 +71,7 @@
           },
           {
             target: 'th.d-none.d-md-table-cell',
-            content: `This column displays the description provided for the table of package`,
+            content: `This column displays the description provided for the table of package.`,
             params: {
               placement: 'bottom'
             }
@@ -102,15 +102,17 @@
     methods: {
       myCustomPreviousStepCallback (currentStep) {
         if (currentStep === 1) {
-          this.addSearchValue()
+          this.reset()
         } else if (currentStep === 2) {
+          this.addSearchValue()
           this.search()
         }
       },
       myCustomNextStepCallback (currentStep) {
         if (currentStep === 0) {
-          this.addSearchValue()
+          this.reset()
         } else if (currentStep === 1) {
+          this.addSearchValue()
           this.search()
         }
       },
@@ -130,7 +132,7 @@
 <style>
   #navigator-tour {
     position: absolute;
-    z-index: 10;
+    z-index: 1;
   }
 
   .v-step {
