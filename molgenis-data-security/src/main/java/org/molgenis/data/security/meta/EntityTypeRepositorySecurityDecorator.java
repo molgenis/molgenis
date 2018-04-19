@@ -216,7 +216,14 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			}
 			else
 			{
-				updated = !currentEntityType.getPackage().getId().equals(newEntityType.getPackage().getId());
+				if (newEntityType.getPackage() == null)
+				{
+					updated = true;
+				}
+				else
+				{
+					updated = !currentEntityType.getPackage().getId().equals(newEntityType.getPackage().getId());
+				}
 			}
 		}
 		return updated;

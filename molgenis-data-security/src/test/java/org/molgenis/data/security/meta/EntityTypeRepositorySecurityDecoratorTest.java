@@ -13,6 +13,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -108,14 +109,13 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	@Test(expectedExceptions = PackagePermissionException.class)
 	public void addNoPermissionOnPack()
 	{
 		EntityType entityType = mock(EntityType.class);
 		Package pack = mock(Package.class);
 
 		when(pack.getId()).thenReturn("test");
-		when(pack.getLabel()).thenReturn("test");
 		when(entityType.getPackage()).thenReturn(pack);
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity("test"),
 				PackagePermission.WRITEMETA)).thenReturn(false);
@@ -440,7 +440,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	@Test(expectedExceptions = PackagePermissionException.class)
 	public void updateNoPermissionOnPack()
 	{
 		String entityTypeId = "entityTypeId";
@@ -450,7 +450,6 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType oldEntityType = mock(EntityType.class);
 
 		when(pack.getId()).thenReturn("test");
-		when(pack.getLabel()).thenReturn("test");
 		when(entityType.getId()).thenReturn(entityTypeId).getMock();
 		when(entityType.getPackage()).thenReturn(pack);
 
@@ -521,6 +520,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		when(entityType.getLabel()).thenReturn("Entity type").getMock();
 		when(entityType.getEntityType()).thenReturn(entityType);
 		when(entityType.getPackage()).thenReturn(pack);
+		when(pack.getId()).thenReturn("id");
 
 		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId(),
 				EntityType.class)).thenReturn(entityType);
@@ -539,6 +539,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 
 		EntityType entityType = mock(EntityType.class);
 		Package pack = mock(Package.class);
+		when(pack.getId()).thenReturn("test");
 
 		when(entityType.getId()).thenReturn(entityTypeId).getMock();
 		when(entityType.getPackage()).thenReturn(pack);
