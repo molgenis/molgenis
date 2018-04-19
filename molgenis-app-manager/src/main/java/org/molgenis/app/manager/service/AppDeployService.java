@@ -6,6 +6,15 @@ import java.io.IOException;
 public interface AppDeployService
 {
 	/**
+	 * Transforms any js or css links to be served from the baseUrl
+	 *
+	 * @param template The html template provided by the user
+	 * @param baseUrl  The base URL of the app currently being loaded
+	 * @return A transformed template with correct resource references
+	 */
+	String configureTemplateResourceReferencing(String template, String baseUrl);
+
+	/**
 	 * Load javascript files from the file store
 	 *
 	 * @param uri      An uri belonging to an app
@@ -25,6 +34,7 @@ public interface AppDeployService
 
 	/**
 	 * Load images from the file store
+	 *
 	 * @param uri      An uri belonging to an app
 	 * @param fileName File name of the requested image file
 	 * @param response a {@link HttpServletResponse} used to attach any found image files

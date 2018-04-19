@@ -71,6 +71,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
+	@Transactional
 	public void activateApp(String id)
 	{
 		// Set app to active
@@ -79,6 +80,8 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.update(AppMetadata.APP, app);
 
 		// Add plugin to plugin table to enable permissions
+		// TODO check if there is already a '/' at the end app.getUri()
+		// TODO use a constant for '/'
 		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri() + "/",
 				dataService.getEntityType(PluginMetadata.PLUGIN));
 		plugin.setLabel(app.getLabel());
@@ -87,11 +90,14 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
+	@Transactional
 	public void deactivateApp(String id)
 	{
 		App app = findAppById(id);
 		app.setActive(false);
 		dataService.update(AppMetadata.APP, app);
+		// TODO check if there is already a '/' at the end of app.getUri()
+		// TODO use a constant for '/'
 		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + app.getUri() + "/");
 
 		// TODO remove permissions?
@@ -109,6 +115,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
+	@Transactional
 	public void deleteApp(String id) throws IOException
 	{
 		App app = findAppById(id);
@@ -158,8 +165,12 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setDescription(appConfig.getDescription());
 		newApp.setAppVersion(appConfig.getVersion());
 		newApp.setApiDependency(appConfig.getApiDependency());
+
+		// TODO What to do with index.html?
 		newApp.setTemplateContent(fileToString(indexFile));
 		newApp.setActive(false);
+
+		// TODO make includeMenuAndFooter configurable?
 		newApp.setIncludeMenuAndFooter(true);
 		newApp.setResourceFolder(appDirectoryName);
 
@@ -168,15 +179,8 @@ public class AppManagerServiceImpl implements AppManagerService
 		if (runtimeOptions == null) runtimeOptions = Maps.newHashMap();
 		newApp.setAppConfig(gson.toJson(runtimeOptions));
 
-		// If there is already an existing app with the same uri, add version number to the path
-		if (findAppByUri(appConfig.getUri()) != null)
-		{
-			newApp.setUri(appConfig.getUri() + "/" + appConfig.getVersion());
-		}
-		else
-		{
-			newApp.setUri(appConfig.getUri());
-		}
+		// Generate a URI based on supplied uri and version
+		newApp.setUri(appConfig.getUri() + "/" + appConfig.getVersion());
 
 		dataService.add(AppMetadata.APP, newApp);
 	}
@@ -222,6 +226,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 		try
 		{
+			// TODO Check for version and URI in config, throw exception if not present
 			new Gson().fromJson(fileContents, AppConfig.class);
 		}
 		catch (Exception e)

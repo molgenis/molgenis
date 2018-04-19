@@ -36,6 +36,15 @@ public class AppDeployServiceImpl implements AppDeployService
 	}
 
 	@Override
+	public String configureTemplateResourceReferencing(String template, String baseUrl)
+	{
+		template = template.replaceAll("src=js/", "src=" + baseUrl + "js/");
+		template = template.replaceAll("href=css/", "href=" + baseUrl + "css/");
+		template = template.replaceAll("src=img/", "src=" + baseUrl + "img/");
+		return template;
+	}
+
+	@Override
 	public void loadJavascriptResources(String uri, String fileName, HttpServletResponse response) throws IOException
 	{
 		App app = findAppByUri(uri);
