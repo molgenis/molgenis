@@ -44,8 +44,13 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-4 d-flex justify-content-center">
-                            <input v-model="searchQuery" class="form-control search-box" type="search"
-                                   placeholder="Search apps" aria-label="Search apps">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="search-icon"><i class="fa fa-search"></i></span>
+                                </div>
+                                <input v-model="searchQuery" class="form-control search-box" type="search"
+                                       placeholder="Search apps" aria-label="Search apps" aria-describedby="search-icon">
+                            </div>
                         </div>
                     </div>
                 </div>
