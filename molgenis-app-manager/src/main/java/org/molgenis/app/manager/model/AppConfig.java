@@ -9,6 +9,7 @@ public class AppConfig
 	private String version;
 	private String apiDependency;
 	private String uri;
+	private boolean includeMenuAndFooter;
 	private Map<String, Object> runtimeOptions;
 
 	public String getLabel()
@@ -34,6 +35,11 @@ public class AppConfig
 	public String getUri()
 	{
 		return uri;
+	}
+
+	public boolean getIncludeMenuAndFooter()
+	{
+		return includeMenuAndFooter;
 	}
 
 	public Map<String, Object> getRuntimeOptions()
@@ -66,6 +72,11 @@ public class AppConfig
 		this.uri = uri;
 	}
 
+	public void setIncludeMenuAndFooter(boolean includeMenuAndFooter)
+	{
+		this.includeMenuAndFooter = includeMenuAndFooter;
+	}
+
 	public void setRuntimeOptions(Map<String, Object> runtimeOptions)
 	{
 		this.runtimeOptions = runtimeOptions;
@@ -74,7 +85,7 @@ public class AppConfig
 	public String toString()
 	{
 		return "AppConfig{" + "label=" + label + ", " + "description=" + description + ", " + "version=" + version
-				+ ", " + "apiDependency=" + apiDependency + ", " + "uri=" + uri + ", " + "runtimeOptions="
-				+ runtimeOptions + "}";
+				+ ", " + "apiDependency=" + apiDependency + ", " + "uri=" + uri + ", " + "includeMenuAndFooter="
+				+ includeMenuAndFooter + ", " + "runtimeOptions=" + runtimeOptions + "}";
 	}
 }

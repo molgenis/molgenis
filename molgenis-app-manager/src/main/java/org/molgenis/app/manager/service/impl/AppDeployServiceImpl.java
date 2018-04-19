@@ -28,7 +28,7 @@ public class AppDeployServiceImpl implements AppDeployService
 	private static final String CSS_FOLDER = "css";
 	private static final String IMG_FOLDER = "img";
 
-	private DataService dataService;
+	private final DataService dataService;
 
 	public AppDeployServiceImpl(DataService dataService)
 	{

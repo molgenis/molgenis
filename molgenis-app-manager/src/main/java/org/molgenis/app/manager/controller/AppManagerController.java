@@ -22,7 +22,7 @@ public class AppManagerController extends PluginController
 	public static final String ID = "appmanager";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private AppManagerService appManagerService;
+	private final AppManagerService appManagerService;
 
 	public AppManagerController(AppManagerService appManagerService)
 	{

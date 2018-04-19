@@ -28,10 +28,10 @@ public class AppDeployController extends PluginController
 	public static final String ID = "app";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	private AppDeployService appDeployService;
-	private AppManagerService appManagerService;
-	private AppSettings appSettings;
-	private MenuReaderService menuReaderService;
+	private final AppDeployService appDeployService;
+	private final AppManagerService appManagerService;
+	private final AppSettings appSettings;
+	private final MenuReaderService menuReaderService;
 
 	public AppDeployController(AppDeployService appDeployService, AppManagerService appManagerService,
 			AppSettings appSettings, MenuReaderService menuReaderService)

@@ -45,12 +45,14 @@ public class AppManagerServiceImpl implements AppManagerService
 	private final AppFactory appFactory;
 	private final DataService dataService;
 	private final FileStore fileStore;
+	private final Gson gson;
 
-	public AppManagerServiceImpl(AppFactory appFactory, DataService dataService, FileStore fileStore)
+	public AppManagerServiceImpl(AppFactory appFactory, DataService dataService, FileStore fileStore, Gson gson)
 	{
 		this.appFactory = requireNonNull(appFactory);
 		this.dataService = requireNonNull(dataService);
 		this.fileStore = requireNonNull(fileStore);
+		this.gson = requireNonNull(gson);
 	}
 
 	@Override
@@ -62,12 +64,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Override
 	public AppResponse getAppByUri(String uri)
 	{
-		App app = findAppByUri(uri);
-		if (app == null)
-		{
-			throw new AppManagerException("App with uri [" + uri + "] does not exist.");
-		}
-		return AppResponse.create(app);
+		return AppResponse.create(findAppByUri(uri));
 	}
 
 	@Override
@@ -79,11 +76,9 @@ public class AppManagerServiceImpl implements AppManagerService
 		app.setActive(true);
 		dataService.update(AppMetadata.APP, app);
 
-		// Add plugin to plugin table to enable permissions
-		// TODO check if there is already a '/' at the end app.getUri()
-		// TODO use a constant for '/'
-		Plugin plugin = new Plugin(APP_PLUGIN_ROOT + app.getUri() + "/",
-				dataService.getEntityType(PluginMetadata.PLUGIN));
+		// Add plugin to plugin table to enable permissions and menu management
+		String pluginId = generatePluginId(app);
+		Plugin plugin = new Plugin(pluginId, dataService.getEntityType(PluginMetadata.PLUGIN));
 		plugin.setLabel(app.getLabel());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
@@ -96,9 +91,9 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = findAppById(id);
 		app.setActive(false);
 		dataService.update(AppMetadata.APP, app);
-		// TODO check if there is already a '/' at the end of app.getUri()
-		// TODO use a constant for '/'
-		dataService.deleteById(PluginMetadata.PLUGIN, APP_PLUGIN_ROOT + app.getUri() + "/");
+
+		String pluginId = generatePluginId(app);
+		dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
 
 		// TODO remove permissions?
 		// TODO remove from menu JSON?
@@ -140,13 +135,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		appZipFile.extractAll(appDirectoryName);
 		fileStore.delete(appZipFileName);
 
-		List<String> missingFromZipFile = checkForMissingFilesInAppZip(appDirectoryName);
-		if (missingFromZipFile.size() > 0)
-		{
-			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppManagerException("There were some missing files in your zip package " + missingFromZipFile
-					+ ". Please add these and upload again.");
-		}
+		checkForMissingFilesInAppZip(appDirectoryName);
 
 		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
 		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
@@ -157,10 +146,10 @@ public class AppManagerServiceImpl implements AppManagerService
 					"The config file you provided has some problems. Please ensure it is a valid JSON file.");
 		}
 
-		Gson gson = new Gson();
 		AppConfig appConfig = gson.fromJson(fileToString(configFile), AppConfig.class);
-		App newApp = appFactory.create();
+		checkForMissingParametersInAppConfig(appConfig, appDirectoryName);
 
+		App newApp = appFactory.create();
 		newApp.setLabel(appConfig.getLabel());
 		newApp.setDescription(appConfig.getDescription());
 		newApp.setAppVersion(appConfig.getVersion());
@@ -185,23 +174,15 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.add(AppMetadata.APP, newApp);
 	}
 
-	private List<String> checkForMissingFilesInAppZip(String appDirectoryName)
+	// TODO use a constant for '/'
+	private String generatePluginId(App app)
 	{
-		List<String> missingFromZipFile = newArrayList();
-
-		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
-		if (!indexFile.exists())
+		String pluginId = APP_PLUGIN_ROOT + app.getUri();
+		if (!pluginId.endsWith("/"))
 		{
-			missingFromZipFile.add(ZIP_INDEX_FILE);
+			pluginId = pluginId + "/";
 		}
-
-		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
-		if (!configFile.exists())
-		{
-			missingFromZipFile.add(ZIP_CONFIG_FILE);
-		}
-
-		return missingFromZipFile;
+		return pluginId;
 	}
 
 	private App findAppById(String id)
@@ -217,17 +198,20 @@ public class AppManagerServiceImpl implements AppManagerService
 	private App findAppByUri(String uri)
 	{
 		Query<App> query = QueryImpl.EQ(AppMetadata.URI, uri);
-		return dataService.findOne(AppMetadata.APP, query, App.class);
+		App app = dataService.findOne(AppMetadata.APP, query, App.class);
+		if (app == null)
+		{
+			throw new AppManagerException("App with uri [" + uri + "] does not exist.");
+		}
+		return app;
 	}
 
 	private boolean isConfigContentValidJson(File configFile) throws IOException
 	{
 		String fileContents = fileToString(configFile);
-
 		try
 		{
-			// TODO Check for version and URI in config, throw exception if not present
-			new Gson().fromJson(fileContents, AppConfig.class);
+			gson.fromJson(fileContents, AppConfig.class);
 		}
 		catch (Exception e)
 		{
@@ -245,5 +229,52 @@ public class AppManagerServiceImpl implements AppManagerService
 		bufferedReader.lines().forEach(line -> fileContents.append(line).append(System.getProperty("line.separator")));
 
 		return fileContents.toString();
+	}
+
+	private void checkForMissingFilesInAppZip(String appDirectoryName) throws IOException
+	{
+		List<String> missingFromZipFile = newArrayList();
+
+		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
+		if (!indexFile.exists())
+		{
+			missingFromZipFile.add(ZIP_INDEX_FILE);
+		}
+
+		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
+		if (!configFile.exists())
+		{
+			missingFromZipFile.add(ZIP_CONFIG_FILE);
+		}
+
+		if (missingFromZipFile.size() > 0)
+		{
+			fileStore.deleteDirectory(appDirectoryName);
+			throw new AppManagerException("There were some missing files in your zip package " + missingFromZipFile
+					+ ". Please add these and upload again.");
+		}
+	}
+
+	// TODO add more required parameters???
+	private void checkForMissingParametersInAppConfig(AppConfig appConfig, String appDirectoryName) throws IOException
+	{
+		List<String> missingConfigParameters = newArrayList();
+		if (appConfig.getUri() == null)
+		{
+			missingConfigParameters.add("uri");
+		}
+
+		if (appConfig.getVersion() == null)
+		{
+			missingConfigParameters.add("version");
+		}
+
+		if (missingConfigParameters.size() > 0)
+		{
+			fileStore.deleteDirectory(appDirectoryName);
+			throw new AppManagerException(
+					"There were some missing parameters in your config file " + missingConfigParameters
+							+ ". Please add these and upload again.");
+		}
 	}
 }
