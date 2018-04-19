@@ -1,11 +1,11 @@
 <template>
     <div class="app-manager-container mt-2">
         <!-- Hidden file upload -->
-        <input id="app-upload-input-field" @change="handleAppUpload" ref="app-upload-field" type="file" v-show="false"
+        <input id="app-upload-input-field" @change="handleFileUpload" ref="app-upload-field" type="file" v-show="false"
                accept=".gz, .zip"/>
 
         <div class="container">
-            <div class="row mb-3 text-center">
+            <div class="row text-center">
                 <div class="col-12">
                     <h1>App manager</h1>
 
@@ -30,20 +30,21 @@
                 </div>
             </template>
 
-            <template v-else-if="editing">
+            <template v-else>
                 <div class="row">
                     <div class="col-12">
-                        <edit-existing-app-component :selectedApp="selectedApp" @save="saveEditedApp"/>
-                    </div>
-                </div>
-            </template>
-
-            <template v-else>
-                <div class="row mb-5">
-                    <div class="col-12">
-                        <button @click="handleNewAppBtnClick" class="btn btn-success float-right">
+                        <button @click="triggerFileBrowser" class="btn btn-success float-right mb-3">
                             <i class="fa fa-plus-circle"></i> Add new app
                         </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="search-box-container mb-4 d-flex justify-content-center">
+                            <input v-model="searchQuery" class="form-control search-box" type="search"
+                                   placeholder="Search apps" aria-label="Search apps">
+                        </div>
                     </div>
                 </div>
 
@@ -55,7 +56,7 @@
                             </template>
 
                             <template v-else>
-                                <app-card-carousel :apps="apps"></app-card-carousel>
+                                <app-card-gallery :apps="apps"></app-card-gallery>
                             </template>
                         </div>
                     </div>
@@ -66,27 +67,30 @@
 </template>
 
 <style>
+    .search-box {
+        border-radius: 10px;
+    }
+
     .loading-spinner-container {
         height: 30vh;
     }
 </style>
 
 <script>
-  import AppCardCarousel from '../components/AppCardCarousel.vue'
+  import AppCardGallery from '../components/AppCardGallery.vue'
 
   export default {
     name: 'AppManagerContainer',
     data () {
       return {
-        selectedFile: null,
-        creating: false,
-        editing: false,
-        selectedApp: null,
+        searchQuery: ''
       }
     },
     computed: {
       apps () {
-        return this.$store.state.apps
+        const apps = this.$store.state.apps
+        const query = this.searchQuery
+        return query ? apps.filter(app => app.label.indexOf(query) >= 0 || app.description.indexOf(query) >= 0) : apps
       },
 
       error () {
@@ -98,12 +102,12 @@
       }
     },
     methods: {
-      handleNewAppBtnClick () {
+      triggerFileBrowser () {
         // Trigger file upload by clicking the hidden input
         document.getElementById('app-upload-input-field').click()
       },
 
-      handleAppUpload (event) {
+      handleFileUpload (event) {
         const file = event.target.files[0]
         this.$store.dispatch('UPLOAD_APP', file)
 
@@ -115,7 +119,7 @@
       this.$store.dispatch('FETCH_APPS')
     },
     components: {
-      AppCardCarousel
+      AppCardGallery
     }
   }
 </script>

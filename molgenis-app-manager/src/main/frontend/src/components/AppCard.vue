@@ -1,16 +1,22 @@
 <template>
     <div class="card app-card-component mb-5">
         <div class="card-header">
+            <button :disabled="app.isActive" class="btn btn-info btn-sm mx-1 float-right" @click="upgradeApp(app)"
+                    title="upgrade">
+                <i class="fa fa-arrow-circle-o-up"></i>
+            </button>
 
-            <button :disabled="app.isActive" class="btn btn-danger btn-sm mx-1 float-right" @click="deleteApp(app)">
+            <button :disabled="app.isActive" class="btn btn-danger btn-sm mx-1 float-right" @click="deleteApp(app)"
+                    title="delete">
                 <i class="fa fa-trash"></i>
             </button>
 
-            <button :disabled="app.isActive" class="btn btn-secondary btn-sm mx-1 float-right" @click="openEditMode(app)">
+            <button :disabled="app.isActive" class="btn btn-secondary btn-sm mx-1 float-right"
+                    @click="openEditMode(app)" title="edit">
                 <i class="fa fa-pencil"></i>
             </button>
 
-            <h3>{{ app.label }}</h3>
+            <h5>{{ app.label }}</h5>
             <span>
                 Status:
                 <span v-if="app.isActive" style="color:#75c791">Active</span>
@@ -24,7 +30,7 @@
 
         <div class="card-footer">
             <a :href="'/menu/plugins/app/' + app.uri">Go to app</a>
-            <div class="float-right">
+            <div class="float-right" title="toggle active status">
                 <toggle-button :value="app.isActive" @change="toggleAppActiveState(app)" :sync="true"></toggle-button>
             </div>
         </div>
@@ -44,7 +50,7 @@
   Vue.use(ToggleButton)
 
   export default {
-    name: 'AppCardComponent',
+    name: 'AppCard',
     props: ['app'],
     methods: {
       deleteApp (app) {
@@ -61,6 +67,10 @@
         } else {
           this.$store.dispatch('ACTIVATE_APP', app.id)
         }
+      },
+
+      upgradeApp (app) {
+        console.log(app)
       }
     }
   }

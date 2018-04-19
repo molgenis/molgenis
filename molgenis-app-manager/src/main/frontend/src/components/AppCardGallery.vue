@@ -6,18 +6,18 @@
 
         <div class="app-card-container row" v-else>
             <div v-for="app in apps" :key="app.id" class="col-4">
-                <app-card-component :app="app" @openEditMode="openEditMode"></app-card-component>
+                <app-card :app="app" @openEditMode="openEditMode"></app-card>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-  import AppCardComponent from './AppCardComponent.vue'
+  import AppCard from './AppCard.vue'
   import EditAppComponent from './EditAppComponent.vue'
 
   export default {
-    name: 'AppCardCarousel',
+    name: 'AppCardGallery',
     props: ['apps'],
     data () {
       return {
@@ -30,7 +30,7 @@
       }
     },
     components: {
-      AppCardComponent,
+      AppCard,
       EditAppComponent
     }
   }
