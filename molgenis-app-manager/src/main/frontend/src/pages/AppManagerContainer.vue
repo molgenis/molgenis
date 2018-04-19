@@ -33,9 +33,10 @@
             <template v-else>
                 <div class="row">
                     <div class="col-12">
-                        <button @click="triggerFileBrowser" class="btn btn-success float-right mb-3">
-                            <i class="fa fa-plus-circle"></i> Add new app
-                        </button>
+                        <div class="app-upload-btn-container jumbotron d-flex justify-content-center p-4"
+                             @click="triggerFileBrowser">
+                            <i class="fa fa-cloud-upload fa-5x"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -67,6 +68,11 @@
 </template>
 
 <style>
+    .app-upload-btn-container:hover {
+        background-color: #dce0e4;
+        cursor: pointer;
+    }
+
     .search-box {
         border-radius: 10px;
     }

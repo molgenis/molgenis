@@ -1,11 +1,6 @@
 <template>
     <div class="card app-card-component mb-5">
         <div class="card-header">
-            <button :disabled="app.isActive" class="btn btn-info btn-sm mx-1 float-right" @click="upgradeApp(app)"
-                    title="upgrade">
-                <i class="fa fa-arrow-circle-o-up"></i>
-            </button>
-
             <button :disabled="app.isActive" class="btn btn-danger btn-sm mx-1 float-right" @click="deleteApp(app)"
                     title="delete">
                 <i class="fa fa-trash"></i>
