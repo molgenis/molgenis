@@ -49,23 +49,30 @@ public class MutableAclClassServiceImplTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testHasAclClassTrue()
+	public void testHasAclClassTrueWithAclClassCacheInvalidation()
 	{
 		String type = "MyType";
 		when(jdbcTemplate.queryForObject("select count(*) from acl_class WHERE class = ?", new Object[] { type },
 				Integer.class)).thenReturn(1);
 		assertTrue(mutableAclClassService.hasAclClass(type));
+		mutableAclClassService.clearCache();
+		assertTrue(mutableAclClassService.hasAclClass(type));
 		verifyZeroInteractions(aclCache);
+		verify(jdbcTemplate, times(2)).queryForObject("select count(*) from acl_class WHERE class = ?",
+				new Object[] { type }, Integer.class);
 	}
 
 	@Test
-	public void testHasAclClassFalse()
+	public void testHasAclClassFalseCached()
 	{
 		String type = "MyType";
 		when(jdbcTemplate.queryForObject("select count(*) from acl_class WHERE class = ?", new Object[] { type },
 				Integer.class)).thenReturn(0);
 		assertFalse(mutableAclClassService.hasAclClass(type));
+		assertFalse(mutableAclClassService.hasAclClass(type));
 		verifyZeroInteractions(aclCache);
+		verify(jdbcTemplate, times(1)).queryForObject("select count(*) from acl_class WHERE class = ?",
+				new Object[] { type }, Integer.class);
 	}
 
 	@Test
