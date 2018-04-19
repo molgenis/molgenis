@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div id="navigator-tour">
     <button class="btn btn-primary" @click="startTour()"><i class="fa fa-info-circle" aria-hidden="true"></i> Start tour
     </button>
-    <v-tour name="navigatorTour" :steps="steps"></v-tour>
+    <v-tour name="navigatorTour" :steps="steps" :callbacks="callbacks"></v-tour>
   </div>
 </template>
 
@@ -13,7 +13,17 @@
   export default {
     name: 'navigator-tour',
     components: {VueTour},
-    props: ['firstPackage'],
+    props: ['firstPackage', 'homeUrl', 'search'],
+    data () {
+      return {
+        callbacks: {
+          onPreviousStep: this.myCustomPreviousStepCallback,
+          onNextStep: this.myCustomNextStepCallback,
+          onStop: this.backToHome,
+          onStart: this.clearSearchInput
+        }
+      }
+    },
     computed: {
       steps () {
         return [
@@ -21,19 +31,19 @@
             target: '#navigator-search-input',
             content: `Welcome to the navigator. Enter in this search field a table or folder you are looking for`,
             params: {
-              placement: 'left'
+              placement: 'bottom'
             }
           },
           {
             target: '#navigator-search-input',
             content: `For example "${this.packageLabel}"`,
             params: {
-              placement: 'left'
+              placement: 'bottom'
             }
           },
           {
             target: '.text-left.table.b-table.table-bordered',
-            content: `This table contains all matches with your search tems: "${this.packageLabel}"`,
+            content: `This table contains all matches with your search terms: "${this.packageLabel}"`,
             params: {
               placement: 'bottom'
             }
@@ -60,7 +70,7 @@
             }
           },
           {
-            target: 'th.hidden-sm-down',
+            target: 'th.d-none.d-md-table-cell',
             content: `This column displays the description provided for the table of package`,
             params: {
               placement: 'bottom'
@@ -90,39 +100,48 @@
       }
     },
     methods: {
+      myCustomPreviousStepCallback (currentStep) {
+        if (currentStep === 1) {
+          this.addSearchValue()
+        } else if (currentStep === 2) {
+          this.search()
+        }
+      },
+      myCustomNextStepCallback (currentStep) {
+        if (currentStep === 0) {
+          this.addSearchValue()
+        } else if (currentStep === 1) {
+          this.search()
+        }
+      },
+      addSearchValue () {
+        document.querySelector('#navigator-search-input').value = this.packageLabel
+        this.$store.commit(SET_QUERY, this.packageLabel)
+      },
+      backToHome () {
+        window.location.replace(this.homeUrl)
+      },
+      clearSearchInput () {
+        if (document.querySelector('#navigator-search-input').value !== '') {
+          document.querySelectorAll('.btn-outline-secondary')[1].click(function (event) {
+            event.preventDefault()
+            event.stopPropagation()
+          })
+        }
+      },
       startTour () {
         this.$tours['navigatorTour'].start()
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-          document.querySelector('#navigator-search-input').value = this.packageLabel
-          this.$store.commit(SET_QUERY, this.packageLabel)
-        }, 3000)
-        setTimeout(() => {
-          document.querySelectorAll('.btn-outline-secondary')[0].click()
-          this.$tours['navigatorTour'].nextStep()
-        }, 6000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 9000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 11000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 13000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 15000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 17000)
-        setTimeout(() => {
-          this.$tours['navigatorTour'].nextStep()
-        }, 19000)
-        setTimeout(() => {
-          document.querySelectorAll('.breadcrumb a')[0].click()
-        }, 21000)
       }
     }
   }
 </script>
+<style>
+  #navigator-tour {
+    position: absolute;
+    z-index: 10;
+  }
+
+  .v-step {
+    width: 20em;
+  }
+</style>

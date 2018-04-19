@@ -1,7 +1,7 @@
 // @flow
 <template>
   <div>
-    <navigator-tour :firstPackage="items[0]"></navigator-tour>
+    <my-tour :firstPackage="items[0]" :homeUrl="homeUrl" :search="submitQuery"></my-tour>
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}
@@ -29,7 +29,7 @@
       <div class="col input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a :href="homeUrl" v-on:click="reset">
+            <a :href="homeUrl" @click="reset">
               <i class="fa fa-home" aria-hidden="true"></i>
             </a>
           </li>
@@ -79,11 +79,11 @@
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
 
-  import NavigatorTour from './NavigatorTour'
+  import MyTour from './NavigatorTour'
 
   export default {
     name: 'Navigator',
-    components: { NavigatorTour },
+    components: { MyTour },
     data () {
       return {
         fields: {

@@ -5875,9 +5875,9 @@ vue-template-es2015-compiler@^1.2.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.5.3.tgz#22787de4e37ebd9339b74223bc467d1adee30545"
 
-vue-tour@^1.0.0-beta.0:
-  version "1.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/vue-tour/-/vue-tour-1.0.0-beta.0.tgz#d7066a692d14d8beaff82bffef4ee76cff3c6761"
+vue-tour@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vue-tour/-/vue-tour-1.0.1.tgz#70062f265db8391fc25f44da8ffcf80dd72169e6"
   dependencies:
     hash-sum "^1.0.2"
     popper.js "^1.12.9"
