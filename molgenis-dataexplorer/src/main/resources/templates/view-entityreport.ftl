@@ -33,7 +33,7 @@
 <script>
     var entityIdForURL = '${entityId}'
     var entityTypeIdForURL = '${entityTypeId}'
-    var standaloneReportURL = window.location.origin + molgenis.getContextUrl() + '/details/' + entityTypeIdForURL + '/' + entityIdForURL
+    var standaloneReportURL = window.location.origin + molgenis.getContextUrl() + '/details/' + encodeURIComponent(entityTypeIdForURL) + '/' + encodeURIComponent(entityIdForURL)
 
     $('#standalone-report-url').val(standaloneReportURL)
     //Add copy functionality
