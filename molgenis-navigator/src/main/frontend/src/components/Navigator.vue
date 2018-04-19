@@ -1,7 +1,7 @@
 // @flow
 <template>
   <div>
-    <my-tour :firstPackage="items[0]" :homeUrl="homeUrl" :search="submitQuery"></my-tour>
+    <my-tour :firstPackage="items[0]" :homeUrl="homeUrl" :search="submitQuery" :reset="reset"></my-tour>
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}

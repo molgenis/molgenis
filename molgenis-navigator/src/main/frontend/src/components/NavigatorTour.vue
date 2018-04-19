@@ -13,14 +13,14 @@
   export default {
     name: 'navigator-tour',
     components: {VueTour},
-    props: ['firstPackage', 'homeUrl', 'search'],
+    props: ['firstPackage', 'homeUrl', 'search', 'reset'],
     data () {
       return {
         callbacks: {
           onPreviousStep: this.myCustomPreviousStepCallback,
           onNextStep: this.myCustomNextStepCallback,
           onStop: this.backToHome,
-          onStart: this.clearSearchInput
+          onStart: this.reset
         }
       }
     },
@@ -120,14 +120,6 @@
       },
       backToHome () {
         window.location.replace(this.homeUrl)
-      },
-      clearSearchInput () {
-        if (document.querySelector('#navigator-search-input').value !== '') {
-          document.querySelectorAll('.btn-outline-secondary')[1].click(function (event) {
-            event.preventDefault()
-            event.stopPropagation()
-          })
-        }
       },
       startTour () {
         this.$tours['navigatorTour'].start()
