@@ -10,7 +10,7 @@ import static org.testng.Assert.assertEquals;
 public class UnexpectedPermissionExceptionTest
 {
 	@Test
-	public void UnexpectedEnumException()
+	public void testUnexpectedPermissionException()
 	{
 		Permission permission = mock(Permission.class);
 		when(permission.toString()).thenReturn("test");
