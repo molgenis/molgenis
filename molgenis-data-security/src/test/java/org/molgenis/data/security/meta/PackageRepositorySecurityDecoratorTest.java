@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.model.MutableAcl;
@@ -84,7 +85,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).update(pack);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	@Test(expectedExceptions = PackagePermissionException.class)
 	public void testUpdateNoParentPermission()
 	{
 		Package pack = mock(Package.class);
@@ -94,7 +95,6 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 
 		when(pack.getId()).thenReturn("1");
 		when(parent.getId()).thenReturn("2");
-		when(parent.getLabel()).thenReturn("test");
 		when(pack.getParent()).thenReturn(parent);
 		when(oldPack.getParent()).thenReturn(oldParent);
 
@@ -255,14 +255,13 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).add(pack);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'test'")
+	@Test(expectedExceptions = PackagePermissionException.class)
 	public void testAddNoPermissionOnParent()
 	{
 		Package pack = mock(Package.class);
 		Package parent = mock(Package.class);
 
 		when(parent.getId()).thenReturn("2");
-		when(parent.getLabel()).thenReturn("test");
 		when(pack.getParent()).thenReturn(parent);
 
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),

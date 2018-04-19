@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.domain.AbstractPermission;
@@ -206,9 +207,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
 					PackagePermission.WRITEMETA))
 			{
-				throw new MolgenisDataException(
-						String.format("No [%s] permission on package '%s'", toMessagePermission(action),
-								parent.getLabel()));
+				throw new PackagePermissionException(PackagePermission.WRITEMETA, parent);
 			}
 		}
 		else

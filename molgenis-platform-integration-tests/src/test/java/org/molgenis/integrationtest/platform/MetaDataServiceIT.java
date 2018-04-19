@@ -9,6 +9,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
@@ -158,7 +159,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	@SuppressWarnings("deprecation")
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on package 'packageNoWriteMeta'")
+	@Test(expectedExceptions = PackagePermissionException.class)
 	public void testCreateNoPackagePermission()
 	{
 		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_1)
