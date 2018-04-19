@@ -11,7 +11,7 @@ public class PackagePermissionException extends CodedRuntimeException
 
 	private static final String ERROR_CODE = "P01";
 	private final PackagePermission permission;
-	private final Package pack;
+	private final transient Package pack;
 
 	public PackagePermissionException(PackagePermission permission, Package pack)
 	{
