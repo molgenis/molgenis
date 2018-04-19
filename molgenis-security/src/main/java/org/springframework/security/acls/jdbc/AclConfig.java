@@ -1,14 +1,12 @@
 package org.springframework.security.acls.jdbc;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.NoOpAuditLogger;
 import org.molgenis.security.acl.*;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.NoOpCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -71,8 +69,9 @@ public class AclConfig
 	@Bean
 	public AclCache aclCache()
 	{
-		Cache cache = new CaffeineCache("aclCache", Caffeine.newBuilder().maximumSize(10000).build());
-		return new SpringCacheBasedAclCache(cache, permissionGrantingStrategy(), aclAuthorizationStrategy());
+		//TODO: replace with properly transactional cache
+		return new SpringCacheBasedAclCache(new NoOpCache("aclCache"), permissionGrantingStrategy(),
+				aclAuthorizationStrategy());
 	}
 
 	@Bean
