@@ -40,7 +40,7 @@ const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
     try {
       visible = child.visible(formData)
     } catch (e) {
-      console.log('Something went wrong evaluating expression:\n', e)
+      console.warn('Something went wrong evaluating expression:\n The default value of visible is set to [ false ]\n\n', e)
     }
 
     if (visible) {
