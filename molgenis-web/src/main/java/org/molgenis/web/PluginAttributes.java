@@ -19,6 +19,8 @@ public class PluginAttributes
 	public static final String KEY_APP_SETTINGS = "app_settings";
 	public static final String KEY_AUTHENTICATION_SETTINGS = "authentication_settings";
 	public static final String KEY_PLUGIN_SETTINGS = "plugin_settings";
+	public static final String KEY_OAUTH2_CLIENT_REGISTRATIONS_ATTRIBUTE = "oauth2Clients";
+	public static final String KEY_AUTHENTICATION = "authentication";
 	/**
 	 * Whether or not the current user can edit settings for the requested plugin
 	 */

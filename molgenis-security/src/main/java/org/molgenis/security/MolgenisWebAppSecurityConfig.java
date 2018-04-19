@@ -1,10 +1,5 @@
 package org.molgenis.security;
 
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.GroupMemberFactory;
 import org.molgenis.data.security.auth.TokenFactory;
@@ -14,7 +9,6 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.DataServiceTokenService;
@@ -69,7 +63,6 @@ import javax.servlet.Filter;
 
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.*;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
-import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
@@ -140,8 +133,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterBefore(tokenAuthenticationFilter(), AnonymousAuthenticationFilter.class);
 
-		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
-
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
 		http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
@@ -158,9 +149,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.permitAll()
 
 				.antMatchers(TwoFactorAuthenticationController.URI + "/**")
-				.permitAll()
-
-				.antMatchers(GOOGLE_AUTHENTICATION_URL)
 				.permitAll()
 
 				.antMatchers("/beacon/**")
@@ -248,6 +236,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.failureUrl(MolgenisLoginController.URI + "?error")
 				.and()
 
+				.oauth2Login().loginPage(MolgenisLoginController.URI).failureUrl(MolgenisLoginController.URI).and()
+
 				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
 		{
 					if (req.getSession(false) != null
@@ -327,24 +317,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter tokenAuthenticationFilter()
 	{
 		return new TokenAuthenticationFilter(tokenAuthenticationProvider());
-	}
-
-	@Bean
-	public GooglePublicKeysManager googlePublicKeysManager()
-	{
-		HttpTransport transport = new NetHttpTransport();
-		JsonFactory jsonFactory = new JacksonFactory();
-		return new GooglePublicKeysManager(transport, jsonFactory);
-	}
-
-	@Bean
-	public Filter googleAuthenticationProcessingFilter() throws Exception
-	{
-		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
-				googlePublicKeysManager(), dataService, (UserDetailsService) userDetailsService(),
-				authenticationSettings, userFactory, groupMemberFactory);
-		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
-		return googleAuthenticationProcessingFilter;
 	}
 
 	@Bean
