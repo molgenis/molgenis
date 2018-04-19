@@ -11,7 +11,7 @@
 
 <script>
     // Add user provided app configuration to initial state
-    window.__INITIAL_STATE__ = JSON.parse('${app.appConfig}')
+    window.__INITIAL_STATE__ = JSON.parse('${app.appConfig?js_string}')
 
     // Add system information like current language to initial state
     window.__INITIAL_STATE__.baseUrl = '${baseUrl}'
