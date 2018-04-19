@@ -218,12 +218,10 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		return delegate().add(entities.filter(entity ->
 		{
-			boolean permitted = isOperationPermitted(entity, Action.CREATE);
-			if (permitted)
-			{
-				createAcl(entity);
-			}
-			return permitted;
+			//throws exception if no permission on the containing package
+			isOperationPermitted(entity, Action.CREATE);
+			createAcl(entity);
+			return true;
 		}));
 	}
 

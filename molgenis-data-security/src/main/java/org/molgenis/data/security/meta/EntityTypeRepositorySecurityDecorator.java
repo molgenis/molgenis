@@ -8,10 +8,10 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.security.acls.domain.AbstractPermission;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
@@ -88,7 +88,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 	{
 		if (action == Action.CREATE || action == Action.UPDATE)
 		{
-			throw new UnexpectedEnumException(action);
+			throw new IllegalStateException(
+					"CREATE and UPDATE permission checks should use 'isOperationPermitted(EntityType entityType, Action action)'");
 		}
 		return checkEntityTypePermission(id, action);
 	}
@@ -186,9 +187,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
 					PackagePermission.WRITEMETA))
 			{
-				throw new MolgenisDataException(
-						String.format("No [%s] permission on package '%s'", toMessagePermission(action),
-								pack.getLabel()));
+				throw new PackagePermissionException(PackagePermission.WRITEMETA, pack);
 			}
 		}
 		else
@@ -217,7 +216,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			}
 			else
 			{
-				updated = !currentEntityType.getPackage().equals(newEntityType.getPackage());
+				updated = !currentEntityType.getPackage().getId().equals(newEntityType.getPackage().getId());
 			}
 		}
 		return updated;
