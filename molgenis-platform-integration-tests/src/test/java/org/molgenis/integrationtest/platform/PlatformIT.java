@@ -54,7 +54,6 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
@@ -142,8 +141,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		refEntityTypeStatic = testHarness.createStaticRefTestEntityType();
 		entityTypeStatic = testHarness.createStaticTestEntityType();
-		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("PlatformITRefEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "PlatformITEntityType");
 
 		// Create a self refer entity
 		selfXrefEntityType = entitySelfXrefTestHarness.createDynamicEntityType();
