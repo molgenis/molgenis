@@ -33,16 +33,17 @@
             <template v-else>
                 <div class="row">
                     <div class="col-12">
-                        <div class="app-upload-btn-container jumbotron d-flex justify-content-center p-4"
-                             @click="triggerFileBrowser">
-                            <i class="fa fa-cloud-upload fa-5x"></i>
+                        <div class="d-flex justify-content-center p-4">
+                            <button class="app-upload-btn btn btn-lg btn-success" @click="triggerFileBrowser">
+                                <i class="fa fa-cloud-upload"></i> Upload new app
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="search-box-container mb-4 d-flex justify-content-center">
+                        <div class="mb-4 d-flex justify-content-center">
                             <input v-model="searchQuery" class="form-control search-box" type="search"
                                    placeholder="Search apps" aria-label="Search apps">
                         </div>
@@ -68,11 +69,6 @@
 </template>
 
 <style>
-    .app-upload-btn-container:hover {
-        background-color: #dce0e4;
-        cursor: pointer;
-    }
-
     .search-box {
         border-radius: 10px;
     }

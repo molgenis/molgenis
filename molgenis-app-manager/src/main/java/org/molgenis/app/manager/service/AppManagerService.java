@@ -1,7 +1,6 @@
 package org.molgenis.app.manager.service;
 
 import net.lingala.zip4j.exception.ZipException;
-import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,13 +36,6 @@ public interface AppManagerService
 	 * @param id The id of an App
 	 */
 	void deactivateApp(String id);
-
-	/**
-	 * Edit an existing App
-	 *
-	 * @param appEditRequest An {@link AppEditRequest} used to update an existing app
-	 */
-	void editApp(AppEditRequest appEditRequest);
 
 	/**
 	 * Delete an existing App

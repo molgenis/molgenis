@@ -1,7 +1,6 @@
 package org.molgenis.app.manager.controller;
 
 import net.lingala.zip4j.exception.ZipException;
-import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
@@ -55,13 +54,6 @@ public class AppManagerController extends PluginController
 	public void deactivateApp(@PathVariable(value = "id") String id)
 	{
 		appManagerService.deactivateApp(id);
-	}
-
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping("/edit")
-	public void editApp(AppEditRequest appEditRequest)
-	{
-		appManagerService.editApp(appEditRequest);
 	}
 
 	@ResponseStatus(HttpStatus.OK)

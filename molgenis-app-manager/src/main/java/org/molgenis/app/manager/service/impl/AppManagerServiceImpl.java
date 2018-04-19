@@ -9,7 +9,6 @@ import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppFactory;
 import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
-import org.molgenis.app.manager.model.AppEditRequest;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
@@ -95,18 +94,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		String pluginId = generatePluginId(app);
 		dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
 
-		// TODO remove permissions?
 		// TODO remove from menu JSON?
-	}
-
-	@Override
-	@Transactional
-	public void editApp(AppEditRequest appEditRequest)
-	{
-		App app = findAppById(appEditRequest.getId());
-		app.setLabel(appEditRequest.getLabel());
-		app.setDescription(appEditRequest.getDescription());
-		dataService.update(AppMetadata.APP, app);
 	}
 
 	@Override
@@ -168,9 +156,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		if (runtimeOptions == null) runtimeOptions = Maps.newHashMap();
 		newApp.setAppConfig(gson.toJson(runtimeOptions));
 
-		// Generate a URI based on supplied uri and version
-		newApp.setUri(appConfig.getUri() + "/" + appConfig.getVersion());
-
+		newApp.setUri(appConfig.getUri());
 		dataService.add(AppMetadata.APP, newApp);
 	}
 
