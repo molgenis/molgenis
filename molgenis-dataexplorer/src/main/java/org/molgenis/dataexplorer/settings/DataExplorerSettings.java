@@ -264,7 +264,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModAggregates()
 	{
-		return isTruefy(getBoolean(Meta.MOD_AGGREGATES));
+		return isTruthy(getBoolean(Meta.MOD_AGGREGATES));
 	}
 
 	public void setModAggregates(boolean modAggregates)
@@ -274,7 +274,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModAnnotators()
 	{
-		return isTruefy(getBoolean(Meta.MOD_ANNOTATORS));
+		return isTruthy(getBoolean(Meta.MOD_ANNOTATORS));
 	}
 
 	public void setModAnnotators(boolean modAnnotators)
@@ -284,7 +284,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModData()
 	{
-		return isTruefy(getBoolean(Meta.MOD_DATA));
+		return isTruthy(getBoolean(Meta.MOD_DATA));
 	}
 
 	public void setModData(boolean modData)
@@ -294,12 +294,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModReports()
 	{
-		return isTruefy(getBoolean(Meta.MOD_REPORTS));
+		return isTruthy(getBoolean(Meta.MOD_REPORTS));
 	}
 
 	public boolean getModStandaloneReports()
 	{
-		return isTruefy(getBoolean(Meta.MOD_STANDALONE_REPORTS));
+		return isTruthy(getBoolean(Meta.MOD_STANDALONE_REPORTS));
 	}
 
 	public void setModReports(boolean modReports)
@@ -328,7 +328,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getSearchbox()
 	{
-		return isTruefy(getBoolean(Meta.GENERAL_SEARCHBOX));
+		return isTruthy(getBoolean(Meta.GENERAL_SEARCHBOX));
 	}
 
 	public void setSearchbox(boolean searchbox)
@@ -338,7 +338,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getItemSelection()
 	{
-		return isTruefy(getBoolean(Meta.GENERAL_ITEM_SELECT_PANEL));
+		return isTruthy(getBoolean(Meta.GENERAL_ITEM_SELECT_PANEL));
 	}
 
 	public void setItemSelection(boolean itemSelection)
@@ -348,7 +348,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getLaunchWizard()
 	{
-		return isTruefy(getBoolean(Meta.GENERAL_LAUNCH_WIZARD));
+		return isTruthy(getBoolean(Meta.GENERAL_LAUNCH_WIZARD));
 	}
 
 	public void setLaunchWizard(boolean launchWizard)
@@ -369,7 +369,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowser()
 	{
-		return isTruefy(getBoolean(Meta.DATA_GENOME_BROWSER));
+		return isTruthy(getBoolean(Meta.DATA_GENOME_BROWSER));
 	}
 
 	public void setGenomeBrowser(boolean genomeBrowser)
@@ -420,7 +420,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowserHighlightRegion()
 	{
-		return isTruefy(getBoolean(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION));
+		return isTruthy(getBoolean(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION));
 	}
 
 	public void setGenomeBrowserHighlightRegion(boolean genomeBrowserHighlightRegion)
@@ -430,7 +430,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getAggregatesDistinctSelect()
 	{
-		return isTruefy(getBoolean(Meta.AGGREGATES_DISTINCT_SELECT));
+		return isTruthy(getBoolean(Meta.AGGREGATES_DISTINCT_SELECT));
 	}
 
 	public void setAggregatesDistinctSelect(boolean aggregatesDistinctSelect)
@@ -480,7 +480,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	@Nullable
 	public boolean isShowNavigatorLink()
 	{
-		return isTruefy(getBoolean(Meta.GENERAL_NAVIGATOR_LINK));
+		return isTruthy(getBoolean(Meta.GENERAL_NAVIGATOR_LINK));
 	}
 
 	@Nullable
@@ -491,14 +491,14 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean isUseVueDataRowEdit()
 	{
-		return isTruefy(getBoolean(Meta.GENERAL_USE_VUE_DATA_ROW_EDIT));
+		return isTruthy(getBoolean(Meta.GENERAL_USE_VUE_DATA_ROW_EDIT));
 	}
 
 	/**
 	 * @param input nullable boolean
 	 * @return boolean indicating if input is true of false, is input is null false is returned
 	 */
-	private boolean isTruefy(@Nullable Boolean input)
+	private boolean isTruthy(@Nullable Boolean input)
 	{
 		return input != null && input;
 	}
