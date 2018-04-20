@@ -144,17 +144,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest
 	{
 		when(entityType0.getLabel()).thenReturn("Entity type #0");
 		when(entityType0.isAbstract()).thenReturn(true);
-		PersistResult persistResult = dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
-		assertEquals(persistResult,
-				PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
-
-		InOrder inOrder = inOrder(metaDataService, dataService);
-		// stream consumed, cannot verify content
-		inOrder.verify(dataService).add(eq(entityType1.getId()), any(Stream.class));
-		// stream consumed, cannot verify content
-		inOrder.verify(dataService).add(eq(entityType0.getId()), any(Stream.class));
-
-		verifyNoMoreInteractions(metaDataService, dataService);
+		dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
 	}
 
 	@SuppressWarnings("unchecked")
