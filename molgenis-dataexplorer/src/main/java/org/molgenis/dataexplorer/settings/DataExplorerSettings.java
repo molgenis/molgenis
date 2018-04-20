@@ -496,7 +496,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	/**
 	 * @param input nullable boolean
-	 * @return boolean indicating if input is true of false, is input is null false is returned
+	 * @return boolean Indicates if input is truthy; Returns false when input is null, else it returns the input value
 	 */
 	private boolean isTruthy(@Nullable Boolean input)
 	{
