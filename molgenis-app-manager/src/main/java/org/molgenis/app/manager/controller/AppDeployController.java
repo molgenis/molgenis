@@ -11,6 +11,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -43,7 +44,7 @@ public class AppDeployController extends PluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
-	@RequestMapping("/{uri}/**")
+	@GetMapping("/{uri}/**")
 	public String deployApp(@PathVariable String uri, Model model)
 	{
 		AppResponse appResponse = appManagerService.getAppByUri(uri);
@@ -66,7 +67,7 @@ public class AppDeployController extends PluginController
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/js/{fileName:.+}")
+	@GetMapping("/{uri}/js/{fileName:.+}")
 	public void loadJavascriptResources(@PathVariable String uri, @PathVariable String fileName,
 			HttpServletResponse response) throws IOException
 	{
@@ -74,7 +75,7 @@ public class AppDeployController extends PluginController
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/css/{fileName:.+}")
+	@GetMapping("/{uri}/css/{fileName:.+}")
 	public void loadCSSResources(@PathVariable String uri, @PathVariable String fileName, HttpServletResponse response)
 			throws IOException
 	{
@@ -82,7 +83,7 @@ public class AppDeployController extends PluginController
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping("/{uri}/img/{fileName:.+}")
+	@GetMapping("/{uri}/img/{fileName:.+}")
 	public void loadImageResources(@PathVariable String uri, @PathVariable String fileName,
 			HttpServletResponse response) throws IOException
 	{

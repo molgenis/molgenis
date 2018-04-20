@@ -64,6 +64,7 @@ public class AppDeployControllerTest
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.isActive()).thenReturn(true);
+		when(app.getAppVersion()).thenReturn("v1.0.0");
 		when(app.includeMenuAndFooter()).thenReturn(true);
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
@@ -78,7 +79,7 @@ public class AppDeployControllerTest
 	@Test
 	public void testDeployApp() throws Exception
 	{
-		mockMvc.perform(get("/plugin/app/uri/"))
+		mockMvc.perform(get(AppDeployController.URI + "/uri/"))
 			   .andExpect(status().isOk())
 			   .andExpect(model().attribute("app", appResponse))
 			   .andExpect(model().attribute("baseUrl", "/test/path"))
@@ -88,21 +89,27 @@ public class AppDeployControllerTest
 	@Test
 	public void testLoadJavascriptResources() throws Exception
 	{
-		MvcResult mvcResult = mockMvc.perform(get("/plugin/app/uri/js/test.js")).andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
+									 .andExpect(status().isOk())
+									 .andReturn();
 		verify(appDeployService).loadJavascriptResources("uri", "test.js", mvcResult.getResponse());
 	}
 
 	@Test
 	public void testLoadCSSResources() throws Exception
 	{
-		MvcResult mvcResult = mockMvc.perform(get("/plugin/app/uri/css/test.css")).andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/css/test.css"))
+									 .andExpect(status().isOk())
+									 .andReturn();
 		verify(appDeployService).loadCSSResources("uri", "test.css", mvcResult.getResponse());
 	}
 
 	@Test
 	public void testLoadImageResources() throws Exception
 	{
-		MvcResult mvcResult = mockMvc.perform(get("/plugin/app/uri/img/test.png")).andExpect(status().isOk()).andReturn();
+		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/img/test.png"))
+									 .andExpect(status().isOk())
+									 .andReturn();
 		verify(appDeployService).loadImageResources("uri", "test.png", mvcResult.getResponse());
 	}
 }
