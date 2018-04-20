@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.importer.DataPersister.DataMode;
 import org.molgenis.data.importer.DataPersister.MetadataMode;
@@ -124,6 +125,25 @@ public class DataPersisterImplTest extends AbstractMockitoTest
 	@Test
 	public void testPersistMetaNoneDataAdd()
 	{
+		PersistResult persistResult = dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
+		assertEquals(persistResult,
+				PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+
+		InOrder inOrder = inOrder(metaDataService, dataService);
+		// stream consumed, cannot verify content
+		inOrder.verify(dataService).add(eq(entityType1.getId()), any(Stream.class));
+		// stream consumed, cannot verify content
+		inOrder.verify(dataService).add(eq(entityType0.getId()), any(Stream.class));
+
+		verifyNoMoreInteractions(metaDataService, dataService);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Abstract entity type 'Entity type #0' with id 'entityTypeId0' cannot contain entities")
+	public void testPersistMetaNoneDataAddAbstractEntityType()
+	{
+		when(entityType0.getLabel()).thenReturn("Entity type #0");
+		when(entityType0.isAbstract()).thenReturn(true);
 		PersistResult persistResult = dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.ADD);
 		assertEquals(persistResult,
 				PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
