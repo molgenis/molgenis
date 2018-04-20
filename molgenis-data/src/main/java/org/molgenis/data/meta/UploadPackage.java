@@ -1,7 +1,5 @@
-package org.molgenis.oneclickimporter.meta;
+package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.DefaultPackage;
-import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +25,6 @@ public class UploadPackage extends SystemPackage
 	{
 		setParent(defaultPackage);
 		setLabel("Upload");
-		setDescription("Root package for one click importer entities");
+		setDescription("Package to upload to for VCF and the one click importer");
 	}
 }

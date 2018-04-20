@@ -6,8 +6,8 @@ import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -37,16 +37,16 @@ public class VcfImporterService implements ImportService
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
-	private final DefaultPackage defaultPackage;
+	private final UploadPackage uploadPackage;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
-			MetaDataService metaDataService, DefaultPackage defaultPackage)
+			MetaDataService metaDataService, UploadPackage uploadPackage)
 
 	{
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.defaultPackage = requireNonNull(defaultPackage);
+		this.uploadPackage = requireNonNull(uploadPackage);
 	}
 
 	@Transactional
@@ -150,13 +150,12 @@ public class VcfImporterService implements ImportService
 
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
+		entityType.setPackage(uploadPackage);
 
-		Package targetPackage = determineTargetPackage(packageId, entityType);
-
-		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType, targetPackage);
+		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType);
 
 		Iterator<Entity> inIterator = inRepository.iterator();
-		try (Repository<Entity> outRepository = runAsSystem(() -> dataService.getMeta().createRepository(entityType)))
+		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
 		{
 			permissionSystemService.giveUserWriteMetaPermissions(entityType);
 
@@ -174,11 +173,11 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			runAsSystem(() -> outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
+			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
 			{
 				vcfEntityCount.incrementAndGet();
 				return true;
-			})));
+			}));
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityTypeId, vcfEntityCount.get());
@@ -218,14 +217,13 @@ public class VcfImporterService implements ImportService
 
 		if (!batch.isEmpty())
 		{
-			runAsSystem(() -> sampleRepository.add(batch.stream()));
+			sampleRepository.add(batch.stream());
 			sampleEntityCount += batch.size();
 		}
 		return sampleEntityCount;
 	}
 
-	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType,
-			Package targetPackage)
+	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType)
 	{
 		Repository<Entity> sampleRepository;
 		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
@@ -233,8 +231,8 @@ public class VcfImporterService implements ImportService
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
-			samplesEntityType.setPackage(targetPackage);
-			sampleRepository = runAsSystem(() -> dataService.getMeta().createRepository(samplesEntityType));
+			samplesEntityType.setPackage(uploadPackage);
+			sampleRepository = dataService.getMeta().createRepository(samplesEntityType);
 			permissionSystemService.giveUserWriteMetaPermissions(samplesEntityType);
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
@@ -257,7 +255,7 @@ public class VcfImporterService implements ImportService
 		}
 		else
 		{
-			targetPackage = defaultPackage;
+			targetPackage = uploadPackage;
 		}
 		return targetPackage;
 	}
