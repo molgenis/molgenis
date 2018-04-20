@@ -12,18 +12,20 @@ public class AclCacheTransactionListenerTest extends AbstractMockitoTest
 {
 	@Mock
 	private AclCache aclCache;
+	@Mock
+	private MutableAclClassService mutableAclClassService;
 	private AclCacheTransactionListener aclCacheTransactionListener;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		aclCacheTransactionListener = new AclCacheTransactionListener(aclCache);
+		aclCacheTransactionListener = new AclCacheTransactionListener(aclCache, mutableAclClassService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testAclCacheTransactionListener()
 	{
-		new AclCacheTransactionListener(null);
+		new AclCacheTransactionListener(null, mutableAclClassService);
 	}
 
 	@Test
@@ -31,5 +33,6 @@ public class AclCacheTransactionListenerTest extends AbstractMockitoTest
 	{
 		aclCacheTransactionListener.rollbackTransaction("transactionId");
 		verify(aclCache).clearCache();
+		verify(mutableAclClassService).clearCache();
 	}
 }
