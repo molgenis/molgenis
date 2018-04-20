@@ -10,7 +10,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.vcf.VcfFileExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -63,7 +62,7 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = importVcf(repo, addedEntities, packageId);
+				report = importVcf(repo, addedEntities);
 			}
 			catch (IOException e)
 			{
@@ -135,8 +134,8 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities,
-			String packageId) throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities)
+			throws IOException
 	{
 
 		EntityImportReport report = new EntityImportReport();
@@ -241,23 +240,6 @@ public class VcfImporterService implements ImportService
 			sampleRepository = null;
 		}
 		return sampleRepository;
-	}
-
-	private Package determineTargetPackage(String packageId, EntityType entityType)
-	{
-		Package targetPackage;
-		if (packageId != null)
-		{
-			targetPackage = dataService.getMeta().getPackage(packageId);
-			if (targetPackage == null)
-				throw new MolgenisDataException(String.format("Unknown package [%s]", packageId));
-			entityType.setPackage(targetPackage);
-		}
-		else
-		{
-			targetPackage = uploadPackage;
-		}
-		return targetPackage;
 	}
 
 	@Override
