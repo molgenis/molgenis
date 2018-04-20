@@ -86,7 +86,8 @@
             plugins: [
                 SwaggerUIBundle.plugins.DownloadUrl
             ],
-            layout: "StandaloneLayout"
+            layout: "StandaloneLayout",
+            validatorUrl: null // Fix for https://github.com/molgenis/molgenis/issues/7117
         })
         <#if token??>
           ui.authActions.authorize({
