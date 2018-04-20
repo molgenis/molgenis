@@ -76,12 +76,20 @@
 
   export default {
     name: 'DataRowEdit',
+    props: {
+      dataTableId: {
+        type: String,
+        required: true
+      },
+      dataRowId: {
+        type: String,
+        required: true
+      }
+    },
     data () {
       return {
         dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl,
         dataTableLabel: '',
-        dataTableId: '',
-        dataRowId: '',
         formFields: [],
         formData: {},
         formState: {},
@@ -125,8 +133,6 @@
       }
     },
     created: function () {
-      this.dataTableId = this.$route.params.dataTableId
-      this.dataRowId = this.$route.params.rowId
       api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then(this.initializeForm, this.handleError)
     },
     components: {

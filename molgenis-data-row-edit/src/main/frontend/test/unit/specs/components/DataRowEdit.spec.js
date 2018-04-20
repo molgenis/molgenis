@@ -24,14 +24,6 @@ describe('DataRowEdit component', () => {
       expect(data.dataTableLabel).to.equal('')
     })
 
-    it('dataTableId as empty string.', () => {
-      expect(data.dataTableId).to.equal('')
-    })
-
-    it('dataRowId as empty string.', () => {
-      expect(data.dataRowId).to.equal('')
-    })
-
     it('formState as a empty object.', () => {
       expect(data.formState).to.deep.equal({})
     })
@@ -81,17 +73,10 @@ describe('DataRowEdit component', () => {
     td.replace(api, 'get', get)
     td.replace(EntityToFormMapper, 'generateForm', rowForm)
 
-    const $router = {}
-    const $route = {
-      params: {
-        dataTableId: tableId,
-        rowId: rowId
-      }
-    }
     const wrapper = shallow(DataRowEdit, {
-      mocks: {
-        $router,
-        $route
+      propsData: {
+        dataTableId: tableId,
+        dataRowId: rowId
       }
     })
 

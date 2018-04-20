@@ -14,7 +14,8 @@ const dataRowEditRouter = new Router({
   base: baseUrl,
   routes: [
     {
-      path: '/:dataTableId/:rowId',
+      path: '/:dataTableId/:dataRowId',
+      props: true,
       component: DataRowEdit
     },
     {
