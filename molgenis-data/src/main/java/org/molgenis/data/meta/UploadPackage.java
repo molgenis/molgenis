@@ -7,6 +7,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 @Component
+@SuppressWarnings("squid:S2160")
 public class UploadPackage extends SystemPackage
 {
 	private static final String SIMPLE_NAME = "upload";
