@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.4",
+    "font-awesome": "^4.7.0",
     "vue": "^2.5.16",
     "vue-form-wizard": "^0.8.4",
     "vue-js-toggle-button": "^1.2.2",
