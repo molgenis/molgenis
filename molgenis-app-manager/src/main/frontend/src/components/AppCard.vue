@@ -21,7 +21,7 @@
         </div>
 
         <div class="card-footer">
-            <a :href="'/menu/plugins/app/' + app.uri">Go to app</a>
+            <a :href="appUrl">Go to app</a>
         </div>
     </div>
 </template>
@@ -35,12 +35,18 @@
 <script>
   import Vue from 'vue'
   import ToggleButton from 'vue-js-toggle-button'
-
   Vue.use(ToggleButton)
+
+  const {baseUrl} = window.__INITIAL_STATE__ || {}
 
   export default {
     name: 'AppCard',
     props: ['app'],
+    data () {
+      return {
+        appUrl: baseUrl
+      }
+    },
     methods: {
       deleteApp (app) {
         this.$store.dispatch('DELETE_APP', app.id)
