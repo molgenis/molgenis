@@ -40,7 +40,12 @@ const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
     try {
       visible = child.visible(formData)
     } catch (e) {
-      console.warn('Something went wrong evaluating expression:\n The default value of visible is set to [ false ]\n\n', e)
+      console.error(`Error in getters.getTotalNumberOfFieldsForChapter, during evaluation of function 'visible' for field ${child.id}.
+      Where visible expression is: 
+        '${child.visible.toString()}'
+      And formData is: 
+        '${JSON.stringify(formData)}'
+      The default value of visible is set to false`, e)
     }
 
     if (visible) {

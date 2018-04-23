@@ -37,7 +37,7 @@ public class JavaMailPropertyType extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Mail sender properties.");
+		setLabel("Mail sender properties");
 		setDescription(
 				"See https://javamail.java.net/nonav/docs/api/ for a description of the properties you can use.");
 		setPackage(mailPackage);
