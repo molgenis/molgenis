@@ -49,8 +49,8 @@ public class SearchServiceIT extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		searchService.refreshIndex();
-		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("SearchServiceITRefEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "SearchServiceITEntityType");
 
 		searchService.createIndex(refEntityTypeDynamic);
 		searchService.createIndex(entityTypeDynamic);

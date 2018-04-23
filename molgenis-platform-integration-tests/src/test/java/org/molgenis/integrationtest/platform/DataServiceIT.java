@@ -3,9 +3,11 @@ package org.molgenis.integrationtest.platform;
 import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
@@ -14,6 +16,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,7 +48,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.security.EntityTypePermission.READ;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
@@ -76,9 +81,13 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private TestPermissionPopulator permissionPopulator;
 	@Autowired
 	private DataService dataService;
+	@Autowired
+	private FileMetaFactory fileMetaFactory;
+	private FileMeta secretFile;
+	private FileMeta publicFile;
 
 	@BeforeClass
 	public void setUpBeforeClass() throws InterruptedException
@@ -106,11 +115,25 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 
 	@WithMockUser(username = USERNAME_READ)
 	@Test(groups = "readtest")
-	public void testGetEntityType()
+	public void testReadSecretFile()
 	{
-		EntityType entityType = dataService.getEntityType(DataServiceIT.entityType.getId());
-		assertNotNull(entityType);
-		assertTrue(EntityUtils.equals(entityType, DataServiceIT.entityType));
+		assertNull(dataService.findOneById(FILE_META, secretFile.getId()));
+	}
+
+	@WithMockUser(username = USERNAME_READ)
+	@Test(groups = "readtest", expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[File metadata\\] with id \\[sys_FileMeta\\]")
+	public void testWritePublicFile()
+	{
+		FileMeta updated = fileMetaFactory.create(publicFile);
+		updated.setUrl("http://example.org/updated.png");
+		dataService.update(FILE_META, updated);
+	}
+
+	@WithMockUser(username = USERNAME_READ)
+	@Test(groups = "readtest")
+	public void testReadPublicFile()
+	{
+		assertNotNull(dataService.findOneById(FILE_META, publicFile.getId()));
 	}
 
 	@WithMockUser(username = USERNAME_READ)
@@ -840,27 +863,49 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		dataService.add(refEntityTypeStatic.getId(), staticRefEntities.stream());
 		staticEntities = entityTestHarness.createTestEntities(entityTypeStatic, 3, staticRefEntities).collect(toList());
 		dataService.add(entityTypeStatic.getId(), staticEntities.stream());
+
+		// Add row-level secured entity rows
+		secretFile = fileMetaFactory.create();
+		secretFile.setContentType("image/jpeg");
+		secretFile.setFilename("secret.jpg");
+		secretFile.setSize(12345L);
+		secretFile.setUrl("http://example.org/files/secret.jpg");
+		publicFile = fileMetaFactory.create();
+		publicFile.setContentType("image/jpeg");
+		publicFile.setFilename("public.jpg");
+		publicFile.setSize(54321L);
+		publicFile.setUrl("http://example.org/files/public.jpg");
+
+		dataService.add(FILE_META, Stream.of(secretFile, publicFile));
 	}
 
 	private void populateDataPermissions()
 	{
-		Map<String, EntityTypePermission> baseEntityTypePermissionMap = new HashMap<>();
-		baseEntityTypePermissionMap.put("sys_md_Package", READ);
-		baseEntityTypePermissionMap.put("sys_md_EntityType", READ);
-		baseEntityTypePermissionMap.put("sys_md_Attribute", READ);
-		baseEntityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		baseEntityTypePermissionMap.put(entityTypeStatic.getId(), READ);
-		baseEntityTypePermissionMap.put(refEntityTypeStatic.getId(), READ);
+		// define cumulative permissions
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
+				EntityTypePermission.READ);
+		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
+		CumulativePermission writeEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE);
 
-		Map<String, EntityTypePermission> readEntityTypePermissionMap = new HashMap<>(baseEntityTypePermissionMap);
-		readEntityTypePermissionMap.put(entityType.getId(), READ);
-		readEntityTypePermissionMap.put(refEntityType.getId(), READ);
-		testPermissionPopulator.populate(readEntityTypePermissionMap, USERNAME_READ);
+		Map<ObjectIdentity, Permission> basePermissions = new HashMap<>();
+		basePermissions.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_md_EntityType"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_md_Attribute"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
+		basePermissions.put(new EntityTypeIdentity(entityTypeStatic), readEntityType);
+		basePermissions.put(new EntityTypeIdentity(refEntityTypeStatic), readEntityType);
 
-		Map<String, EntityTypePermission> writeEntityTypePermissionMap = new HashMap<>(baseEntityTypePermissionMap);
-		writeEntityTypePermissionMap.put(entityType.getId(), WRITE);
-		writeEntityTypePermissionMap.put(refEntityType.getId(), WRITE);
-		testPermissionPopulator.populate(writeEntityTypePermissionMap, USERNAME_WRITE);
+		Map<ObjectIdentity, Permission> readerPermissions = new HashMap<>(basePermissions);
+		readerPermissions.put(new EntityTypeIdentity(entityType), readEntityType);
+		readerPermissions.put(new EntityTypeIdentity(refEntityType), readEntityType);
+		readerPermissions.put(new EntityTypeIdentity(FILE_META), readEntityType);
+		readerPermissions.put(new EntityIdentity(publicFile), writeEntity);
+		permissionPopulator.populate(readerPermissions, USERNAME_READ);
+
+		Map<ObjectIdentity, Permission> editorPermissions = new HashMap<>(basePermissions);
+		editorPermissions.put(new EntityTypeIdentity(entityType), writeEntityType);
+		editorPermissions.put(new EntityTypeIdentity(refEntityType), writeEntityType);
+		permissionPopulator.populate(editorPermissions, USERNAME_WRITE);
 	}
 
 	private void depopulate()
@@ -868,6 +913,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		dataService.getMeta().deleteEntityType(asList(entityType, refEntityType));
 		dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
 		dataService.delete(refEntityTypeStatic.getId(), staticRefEntities.stream());
+		dataService.delete(FILE_META, publicFile);
+		dataService.delete(FILE_META, secretFile);
 		try
 		{
 			indexJobScheduler.waitForAllIndicesStable();

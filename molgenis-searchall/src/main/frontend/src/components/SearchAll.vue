@@ -71,7 +71,7 @@
     },
     methods: {
       highlight: function (text) {
-        if (text !== null) {
+        if (text !== null && text !== undefined) {
           var iQuery = new RegExp(this.$store.state.query, 'ig')
           return text.toString().replace(iQuery, function (matchedTxt, a, b) {
             return ('<b class=\'search-result\'>' + matchedTxt + '</b>')

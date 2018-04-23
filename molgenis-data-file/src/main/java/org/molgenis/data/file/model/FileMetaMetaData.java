@@ -29,7 +29,7 @@ public class FileMetaMetaData extends SystemEntityType
 	public void init()
 	{
 		setLabel("File metadata");
-		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id");
+		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id").setAuto(true);
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
 		addAttribute(SIZE).setDataType(LONG).setLabel("Size").setDescription("File size in bytes");
