@@ -10,6 +10,7 @@ import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.script.Bindings;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class JsMagmaScriptEvaluatorTest
 {
@@ -142,7 +144,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("gender", gender);
 
 		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person);
-		assertEquals(result.toString(), "undefined");
+		assertNull(result);
 	}
 
 	@Test
@@ -157,7 +159,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"org.molgenis.script.core.ScriptException: <eval>:502 TypeError: Cannot read property \"label\" from undefined");
+				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 510");
 	}
 
 	@Test
@@ -507,15 +509,25 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
-		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 3);
+		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person, 3);
+
+		Object result = jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 		assertEquals(result, 0d);
 
 		Stopwatch sw = Stopwatch.createStarted();
 		for (int i = 0; i < 10000; i++)
 		{
-			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 1);
+			jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 		}
-		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed");
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed new");
+
+		sw.reset().start();
+
+		for (int i = 0; i < 10000; i++)
+		{
+			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 3);
+		}
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed old");
 	}
 
 	@Test

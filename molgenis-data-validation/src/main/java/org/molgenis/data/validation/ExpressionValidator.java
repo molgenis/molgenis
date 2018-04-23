@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.script.Bindings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,10 +58,12 @@ public class ExpressionValidator
 			return Collections.emptyList();
 		}
 
+		Bindings bindings = jsMagmaScriptEvaluator.createBindings(entity);
+
 		List<Boolean> validationResults = new ArrayList<>(expressions.size());
 		for (String expression : expressions)
 		{
-			Object value = jsMagmaScriptEvaluator.eval(expression, entity);
+			Object value = jsMagmaScriptEvaluator.eval(bindings, expression);
 			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
 		}
 		return validationResults;

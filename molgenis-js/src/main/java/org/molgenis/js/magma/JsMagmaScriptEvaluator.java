@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.script.Bindings;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -53,17 +54,32 @@ public class JsMagmaScriptEvaluator
 	 */
 	public Object eval(String expression, Entity entity, int depth)
 	{
+		return eval(createBindings(entity, depth), expression);
+	}
+
+	/**
+	 * Evaluates an expression with the given bindings.
+	 *
+	 * @param bindings Bindings to use as engine scope
+	 * @param expression  JavaScript expression to evaluate
+	 * @return evaluated expression result, return type depends on the expression.
+	 */
+	public Object eval(Bindings bindings, String expression)
+	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
 		{
 			stopwatch = Stopwatch.createStarted();
 		}
 
-		Object scriptEngineValueMap = toScriptEngineValueMap(entity, depth);
 		Object value;
 		try
 		{
-			value = jsScriptEngine.invokeFunction("evalScript", expression, scriptEngineValueMap);
+			value = jsScriptEngine.eval(bindings, expression);
+		}
+		catch (javax.script.ScriptException t)
+		{
+			return t;
 		}
 		catch (Throwable t)
 		{
@@ -77,6 +93,29 @@ public class JsMagmaScriptEvaluator
 		}
 
 		return value;
+	}
+
+	/**
+	 * Creates magmascript bindings for a given Entity with default depth.
+	 *
+	 * @param entity the entity to bind to the magmascript $ function
+	 * @return Bindings with $ function bound to the entity
+	 */
+	public Bindings createBindings(Entity entity)
+	{
+		return createBindings(entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
+	}
+
+	/**
+	 * Creates magmascript bindings for a given Entity.
+	 *
+	 * @param entity the entity to bind to the magmascript $ function
+	 * @param depth  maximum depth to follow references when creating the entity value map
+	 * @return Bindings with $ function bound to the entity
+	 */
+	public Bindings createBindings(Entity entity, int depth)
+	{
+		return jsScriptEngine.createBindings(toScriptEngineValueMap(entity, depth));
 	}
 
 	/**
