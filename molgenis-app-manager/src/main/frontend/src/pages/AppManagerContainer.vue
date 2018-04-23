@@ -7,15 +7,11 @@
         <div class="container">
             <div class="row text-center">
                 <div class="col-12">
-                    <h1>App manager</h1>
-
                     <template v-if="error">
                         <div class="alert alert-warning" role="alert">
                             {{ error }}
                         </div>
                     </template>
-
-                    <hr>
                 </div>
             </div>
 
