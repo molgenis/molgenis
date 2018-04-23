@@ -35,7 +35,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
 		public static final String GENERAL_NAVIGATOR_LINK = "show_navigator_link";
-		public static final String GENERAL_USE_VUE_DATA_ROW_EDIT = "use_vue_data_row_edit";
+		public static final String DATA_USE_VUE_ROW_EDIT = "use_vue_data_row_edit";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
 		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
@@ -131,12 +131,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 												.setDefaultValue(String.valueOf(DEFAULT_SHOW_NAVIGATOR_LINK))
 												.setLabel(
 														"Show a link to the navigator for the package of the selected entity");
-			addAttribute(GENERAL_USE_VUE_DATA_ROW_EDIT).setParent(generalAttr)
-												.setDataType(BOOL)
-												.setNillable(false)
-												.setDefaultValue(String.valueOf(DEFAULT_USE_VUE_DATA_ROW_EDIT))
-												.setLabel(
-														"Edit the data row using the forms edit plugin.");
 		}
 
 		private void addModulesSettings()
@@ -223,6 +217,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 											 .setNillable(false)
 											 .setDefaultValue(String.valueOf(DEFAULT_DATA_GENOME_BROWSER))
 											 .setLabel("Genome Browser");
+
+			addAttribute(DATA_USE_VUE_ROW_EDIT).setParent(modAttr)
+											   .setDataType(BOOL)
+											   .setNillable(false)
+											   .setDefaultValue(String.valueOf(DEFAULT_USE_VUE_DATA_ROW_EDIT))
+											   .setLabel("Edit the data row using the forms edit plugin.");
 		}
 
 		private void createModAggregatesSettings(Attribute modAttr)
@@ -491,7 +491,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean isUseVueDataRowEdit()
 	{
-		return isTruthy(getBoolean(Meta.GENERAL_USE_VUE_DATA_ROW_EDIT));
+		return isTruthy(getBoolean(Meta.DATA_USE_VUE_ROW_EDIT));
 	}
 
 	/**
