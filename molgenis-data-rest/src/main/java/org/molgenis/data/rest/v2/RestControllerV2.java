@@ -8,7 +8,6 @@ import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -57,7 +56,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
@@ -369,7 +367,7 @@ public class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
 
 		// Copy
-		Repository<Entity> repository = this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
+		Repository<Entity> repository = repoCopier.copyRepository(repositoryToCopyFrom, request.getNewEntityName(),
 				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
@@ -379,12 +377,6 @@ public class RestControllerV2
 		response.setStatus(HttpServletResponse.SC_CREATED);
 
 		return repository.getName();
-	}
-
-	private Repository<Entity> copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String entityTypeId,
-			Package pack, String label)
-	{
-		return runAsSystem(() -> repoCopier.copyRepository(repositoryToCopyFrom, entityTypeId, pack, label));
 	}
 
 	/**

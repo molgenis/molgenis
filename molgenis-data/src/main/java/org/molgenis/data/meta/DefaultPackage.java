@@ -17,6 +17,6 @@ public class DefaultPackage extends SystemPackage
 	protected void init()
 	{
 		setLabel("Default");
-		setDescription("Default packages for new entities");
+		setDescription("Default package for new entities");
 	}
 }

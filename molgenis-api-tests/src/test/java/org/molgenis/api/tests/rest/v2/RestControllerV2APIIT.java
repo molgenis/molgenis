@@ -99,6 +99,9 @@ public class RestControllerV2APIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 
+		setGrantedPackagePermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
+
 		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 

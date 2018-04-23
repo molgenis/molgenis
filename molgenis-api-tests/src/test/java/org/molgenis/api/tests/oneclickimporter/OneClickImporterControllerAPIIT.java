@@ -32,8 +32,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
-import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.assertTrue;
 
@@ -88,6 +87,8 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_job_JobExecution", READ)
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
+		setGrantedPackagePermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("base_upload", WRITEMETA).build());
 		setGrantedPluginPermissions(adminToken, testUserId, "one-click-importer");
 
 		testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);

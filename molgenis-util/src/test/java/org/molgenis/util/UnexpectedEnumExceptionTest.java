@@ -13,7 +13,7 @@ public class UnexpectedEnumExceptionTest
 	}
 
 	@Test
-	public void UnexpectedEnumException()
+	public void testUnexpectedEnumException()
 	{
 		assertEquals(new UnexpectedEnumException(MY_ENUM_CONSTANT).getMessage(),
 				"Unexpected enum constant 'MY_ENUM_CONSTANT' for type 'MyEnum'");

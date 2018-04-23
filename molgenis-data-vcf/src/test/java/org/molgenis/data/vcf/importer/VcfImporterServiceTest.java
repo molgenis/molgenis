@@ -6,11 +6,10 @@ import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -41,7 +40,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	@Mock
 	private MetaDataService metaDataService;
 	@Mock
-	private DefaultPackage defaultPackage;
+	private UploadPackage uploadPackage;
 	@Mock
 	private SecurityContext securityContext;
 	@Mock
@@ -51,7 +50,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService,
-				defaultPackage);
+				uploadPackage);
 		SecurityContextHolder.setContext(securityContext);
 	}
 
@@ -124,8 +123,6 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String defaultPackage = "package";
-		Package pack = mock(Package.class);
-		when(metaDataService.getPackage(defaultPackage)).thenReturn(pack);
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addEntityCount(entityTypeId0, entities.size());
@@ -221,8 +218,6 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getEntityTypeIds()).thenReturn(entityTypeIds);
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String defaultPackage = "package";
-		Package pack = mock(Package.class);
-		when(metaDataService.getPackage(defaultPackage)).thenReturn(pack);
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD, defaultPackage);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addNewEntity(sampleEntityName0);
