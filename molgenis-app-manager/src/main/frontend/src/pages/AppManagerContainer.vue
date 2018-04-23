@@ -49,7 +49,8 @@
                                     <span class="input-group-text" id="search-icon"><i class="fa fa-search"></i></span>
                                 </div>
                                 <input v-model="searchQuery" class="form-control search-box" type="search"
-                                       placeholder="Search apps" aria-label="Search apps" aria-describedby="search-icon">
+                                       placeholder="Search apps" aria-label="Search apps"
+                                       aria-describedby="search-icon">
                             </div>
                         </div>
                     </div>
@@ -85,6 +86,7 @@
 
 <script>
   import AppCardGallery from '../components/AppCardGallery.vue'
+  import filterArray from '../utils/filter-array'
 
   export default {
     name: 'AppManagerContainer',
@@ -95,9 +97,7 @@
     },
     computed: {
       apps () {
-        const apps = this.$store.state.apps
-        const query = this.searchQuery
-        return query ? apps.filter(app => app.label.indexOf(query) >= 0 || app.description.indexOf(query) >= 0) : apps
+        return filterArray(this.$store.state.apps, this.searchQuery)
       },
 
       error () {
