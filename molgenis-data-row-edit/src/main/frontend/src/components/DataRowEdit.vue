@@ -109,7 +109,7 @@
           body: JSON.stringify(this.formData)
         }
         const postDetails = this.dataRowId !== null ? this.dataTableId + '/' + this.dataRowId : this.dataTableId
-        const uri =  '/api/v1/' + postDetails +  '?_method=PUT'
+        const uri = '/api/v1/' + postDetails + '?_method=PUT'
         api.post(uri, options).then(this.goBackToPluginCaller, this.handleError)
       },
       goBackToPluginCaller () {
@@ -130,13 +130,13 @@
         this.formData = mappedData.formData
         this.showForm = true
       },
-      parseEditResponse(response) {
-          // noinspection JSUnusedLocalSymbols
-          const { _meta, _href, ...rowData } = response
-          this.dataTableLabel = _meta.label
-          return {_meta, rowData}
+      parseEditResponse (response) {
+        // noinspection JSUnusedLocalSymbols
+        const { _meta, _href, ...rowData } = response
+        this.dataTableLabel = _meta.label
+        return {_meta, rowData}
       },
-      parseAddResponse(response) {
+      parseAddResponse (response) {
         let meta = response.meta
         meta.attributes = meta.attributes.map(attribute => {
           attribute.readOnly = false
@@ -148,7 +148,7 @@
     created: function () {
       if (this.dataRowId !== null) {
         api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
-          const {_meta, rowData } = this.parseEditResponse(response)
+          const { _meta, rowData } = this.parseEditResponse(response)
           this.initializeForm(_meta, rowData)
         }, this.handleError)
       } else {

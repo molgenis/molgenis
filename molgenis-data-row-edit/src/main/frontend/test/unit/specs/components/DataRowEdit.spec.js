@@ -13,8 +13,8 @@ describe('DataRowEdit component', () => {
   const rowId = 'testRowId'
   const rowForm = function () {
     return {
-      formFields: [],
-      formData: {}
+      formFields: ['a'],
+      formData: {b: 'c'}
     }
   }
 
@@ -67,6 +67,7 @@ describe('DataRowEdit component', () => {
       foo: 'bar',
       flub: 'blaf'
     }
+    // eslint-disable-next-line
     const formUpdate = {"foo": "bar"}
 
     let wrapper
@@ -81,11 +82,10 @@ describe('DataRowEdit component', () => {
       const post = td.function('api.post')
       const okeStatus = {status: 'OKE'}
       // update post
-      td.when(post('/api/v1/' + tableId + '/' + rowId + '?_method=PUT', {body: '{"id":"test_id","a":"a"}'})).thenResolve(okeStatus)
+      td.when(post('/api/v1/' + tableId + '/' + rowId + '?_method=PUT', {body: '{"id":"update","a":"a"}'})).thenResolve(okeStatus)
       // add post
-      // td.when(post('/api/v1/' + tableId + '?_method=PUT', mockBody)).thenResolve(okeStatus)
+      td.when(post('/api/v1/' + tableId + '?_method=PUT', {body: '{"id":"create","b":"b"}'})).thenResolve(okeStatus)
       td.replace(api, 'post', post)
-
       td.replace(EntityToFormMapper, 'generateForm', rowForm)
 
       wrapper = shallow(DataRowEdit, {
@@ -103,148 +103,174 @@ describe('DataRowEdit component', () => {
     })
 
     it('onSubmit should post the form data formData', (done) => {
-      wrapper.setData({formData: {id: 'test_id', a: 'a'}})
+      wrapper.setData({formData: {id: 'update', a: 'a'}})
+      wrapper.vm.onSubmit()
+      done()
+    })
+
+    it('onSubmit when no rowId is set should trigger the create call', (done) => {
+      wrapper.setData({dataRowId: null})
+      wrapper.setData({formData: {id: 'create', b: 'b'}})
       wrapper.vm.onSubmit()
       done()
     })
 
     it('goBackToPluginCaller should call the history.go method', (done) => {
-      td.replace(window.history, 'go', function () {done()})
+      td.replace(window.history, 'go', () => done())
       wrapper.vm.goBackToPluginCaller()
+    })
+
+    it('clearAlter should clear the alert value', () => {
+      wrapper.setData({ alert: { message: 'alert', type: 'danger' } })
+      wrapper.vm.clearAlert()
+      expect(wrapper.vm.alert).to.equal(null)
+    })
+
+    it('handle error, sets the alert', () => {
+      wrapper.vm.handleError('test-error')
+      expect(wrapper.vm.alert).to.deep.equal({
+        message: 'test-error',
+        type: 'danger'
+      })
+    })
+
+    it('handle error with not passing a string sets the alert the default alert', () => {
+      wrapper.vm.$t = () => 'alter !'
+
+      wrapper.vm.handleError({foo: 'bar'})
+      expect(wrapper.vm.alert).to.deep.equal({
+        message: 'alter !',
+        type: 'danger'
+      })
+    })
+
+    it('initializeForm should setup the form and set showForm to true', () => {
+      wrapper.vm.initializeForm('a', 'b')
+      expect(wrapper.vm.formFields).to.deep.equal(['a'])
+      expect(wrapper.vm.formData).to.deep.equal({b: 'c'})
+      expect(wrapper.vm.showForm).to.equal(true)
+    })
+
+    it('parseEditResponse should transform the editResponse to an object usable by the form component', () => {
+      const mockEditResponse = {
+        _meta: {
+          label: 'label',
+          foo: 'bar'
+        },
+        _href: 'http://foo.bar.com',
+        a: 'a',
+        b: 'b'
+      }
+      const result = wrapper.vm.parseEditResponse(mockEditResponse)
+      const expected = {
+        _meta: mockEditResponse._meta,
+        rowData: {
+          a: 'a',
+          b: 'b'
+        }
+      }
+      expect(result).to.deep.equal(expected)
+    })
+
+    it('parseAddResponse should transform the addResponse and set readOnly fields to false', () => {
+      const mockEditResponse = {
+        meta: {
+          label: 'label',
+          foo: 'bar',
+          attributes: [
+            { readOnly: true },
+            { readOnly: false },
+            {}
+          ]
+        },
+        href: 'http://foo.bar.com'
+      }
+      const result = wrapper.vm.parseAddResponse(mockEditResponse)
+      const expected = {
+        label: 'label',
+        foo: 'bar',
+        attributes: [
+          { readOnly: false },
+          { readOnly: false },
+          { readOnly: false }
+        ]
+      }
+      expect(result).to.deep.equal(expected)
+    })
+  })
+
+  describe('created', () => {
+    it('should when rowId is set fetch the data to be edited, parse the response and initialize the form', (done) => {
+      const getRowDataResponse = {
+        _href: 'some-href',
+        _meta: {
+          label: 'my-row-data'
+        },
+        foo: 'bar',
+        flub: 'blaf'
+      }
+
+      td.reset()
+      const get = td.function('api.get')
+      td.when(get('/api/v2/' + tableId + '/' + rowId)).thenResolve(getRowDataResponse)
+      td.replace(api, 'get', get)
+      td.replace(EntityToFormMapper, 'generateForm', rowForm)
+
+      const wrapper = shallow(DataRowEdit, {
+        propsData: {
+          dataTableId: tableId,
+          dataRowId: rowId
+        }
+      })
+
+      wrapper.vm.$nextTick(() => { // resolve then
+        wrapper.vm.$nextTick(() => { // update the model
+          expect(wrapper.vm.formFields).to.deep.equal(['a'])
+          expect(wrapper.vm.formData).to.deep.equal({b: 'c'})
+          expect(wrapper.vm.showForm).to.equal(true)
+          done()
+        })
+      })
+    })
+
+    it('when rowId is not set fetch the data structure, parse the response and initialize the form', (done) => {
+      const createMock = function () {
+        return {
+          formFields: ['a'],
+          formData: {}
+        }
+      }
+      td.replace(EntityToFormMapper, 'generateForm', createMock)
+      td.reset()
+      const get = td.function('api.get')
+      const response = {
+        meta: {
+          label: 'label',
+          foo: 'bar',
+          attributes: [
+            { readOnly: true },
+            { readOnly: false },
+            {}
+          ]
+        },
+        href: 'http://foo.bar.com'
+      }
+      td.when(get('/api/v2/' + tableId + '?num=0')).thenResolve(response)
+      td.replace(api, 'get', get)
+      td.replace(EntityToFormMapper, 'generateForm', rowForm)
+      const wrapper = shallow(DataRowEdit, {
+        propsData: {
+          dataTableId: tableId
+        }
+      })
+
+      wrapper.vm.$nextTick(() => { // resolve then
+        wrapper.vm.$nextTick(() => { // update the model
+          expect(wrapper.vm.formFields[0]).to.deep.equal('a')
+          expect(wrapper.vm.showForm).to.equal(true)
+          done()
+        })
+      })
     })
   })
 })
-
-// describe('On created with row id', () => {
-//   const getRowDataResponse = {
-//     _href: 'some-href',
-//     _meta: {
-//       label: 'my-row-data'
-//     },
-//     foo: 'bar',
-//     flub: 'blaf'
-//   }
-//
-//   let wrapper
-//
-//   before(() => {
-//     td.reset()
-//     const get = td.function('api.get')
-//     td.when(get('/api/v2/' + tableId + '/' + rowId)).thenResolve(getRowDataResponse)
-//     td.replace(api, 'get', get)
-//     td.replace(EntityToFormMapper, 'generateForm', rowForm)
-//
-//     wrapper = shallow(DataRowEdit, {
-//       propsData: {
-//         dataTableId: tableId,
-//         dataRowId: rowId
-//       }
-//     })
-//   })
-//
-//   it('Should make the route tableId the dataTableId.', () => {
-//     expect(wrapper.vm.dataTableId).to.equal(tableId)
-//   })
-//
-//   it('Should make the route rowId the dataRowId.', () => {
-//     expect(wrapper.vm.dataRowId).to.equal(rowId)
-//   })
-// })
-
-// describe('On created without row id', () => {
-//   const getRowMetaResponse = {
-//     href: 'some-href',
-//     meta: {
-//       label: 'my-row-data'
-//     }
-//   }
-//
-//   let wrapper
-//
-//   before(() => {
-//     td.reset()
-//     const get = td.function('api.get')
-//     td.when(get('/api/v2/' + tableId + '?num=0')).thenResolve(getRowMetaResponse)
-//     td.replace(api, 'get', get)
-//     td.replace(EntityToFormMapper, 'generateForm', rowForm)
-//
-//     wrapper = shallow(DataRowEdit, {
-//       propsData: {
-//         dataTableId: tableId
-//       }
-//     })
-//   })
-//
-//   it('Should make the route tableId the dataTableId.', () => {
-//     expect(wrapper.vm.dataTableId).to.equal(tableId)
-//   })
-//
-// })
-
-// describe('After creating', () => {
-//
-//   const mockErrorMessage = 'An error has occurred.'
-//   let wrapper
-//   const getRowDataResponse = {
-//     _href: 'some-href',
-//     _meta: {
-//       label: 'my-row-data'
-//     },
-//     foo: 'bar',
-//     flub: 'blaf'
-//   }
-//
-//   before(() => {
-//     wrapper = shallow(DataRowEdit, {
-//       propsData: {
-//         dataTableId: tableId,
-//         dataRowId: rowId
-//       }
-//     })
-//
-//     wrapper.vm.$t = function () {
-//       return mockErrorMessage
-//     }
-//
-//     td.reset()
-//     const post = td.function('api.post')
-//     td.when(post('/api/v1/' + tableId + '/' + rowId + '?_method=PUT', {body: '{"id":"test_id","a":"a"}'}))
-//       .thenResolve({status: 'OKE'})
-//     td.replace(api, 'post', post)
-//     const get = td.function('api.get')
-//     td.when(get('/api/v2/' + tableId + '/' + rowId)).thenResolve(getRowDataResponse)
-//     td.replace(api, 'get', get)
-//     td.replace(EntityToFormMapper, 'generateForm', rowForm)
-//   })
-//
-//   it('Calling clear alert, clear the alert', () => {
-//     wrapper.vm.clearAlert()
-//     expect(wrapper.vm.alert).to.equal(null)
-//   })
-//
-//   it('Calling onValueChanged should pass state of the form to formData', () => {
-//     wrapper.vm.onValueChanged({foo: 'bar'})
-//     expect(wrapper.vm.formData).to.deep.equal({foo: 'bar'})
-//   })
-//
-//   it('Calling handle error, sets the alert', () => {
-//     wrapper.vm.handleError('test-error')
-//     expect(wrapper.vm.alert).to.deep.equal({
-//       message: 'test-error',
-//       type: 'danger'
-//     })
-//   })
-//
-//   it('Calling handle error with not passing a string sets the alert the default alert', () => {
-//     wrapper.vm.handleError({foo: 'bar'})
-//     expect(wrapper.vm.alert).to.deep.equal({
-//       message: mockErrorMessage,
-//       type: 'danger'
-//     })
-//   })
-//
-//   it('Submitting the form triggers post', () => {
-//     wrapper.setData({formData: {id: 'test_id', a: 'a'}})
-//     wrapper.vm.onSubmit()
-//   })
-// })
