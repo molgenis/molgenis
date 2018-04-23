@@ -1,5 +1,5 @@
 <template>
-    <app-manager-container></app-manager-container>
+  <app-manager-container></app-manager-container>
 </template>
 
 <script>
