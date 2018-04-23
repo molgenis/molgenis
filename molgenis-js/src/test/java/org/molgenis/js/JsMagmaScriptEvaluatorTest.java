@@ -1,5 +1,6 @@
 package org.molgenis.js;
 
+import com.google.common.base.Stopwatch;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -13,6 +14,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
@@ -507,6 +509,13 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 3);
 		assertEquals(result, 0d);
+
+		Stopwatch sw = Stopwatch.createStarted();
+		for (int i = 0; i < 10000; i++)
+		{
+			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 1);
+		}
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed");
 	}
 
 	@Test
