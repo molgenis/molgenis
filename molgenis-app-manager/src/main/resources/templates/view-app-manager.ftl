@@ -8,11 +8,6 @@
 <@header css js version/>
 
 <div id="app-manager"></div>
-<script>
-    window.__INITIAL_STATE__ = {
-      apps: ${apps}
-    }
-</script>
 
 <script type=text/javascript src="<@resource_href "/js/app-manager/manifest.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/app-manager/vendor.js"/>"></script>
