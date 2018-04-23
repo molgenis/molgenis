@@ -83,7 +83,8 @@
       },
       dataRowId: {
         type: String,
-        required: true
+        required: false,
+        default: null
       }
     },
     data () {
@@ -107,7 +108,8 @@
         const options = {
           body: JSON.stringify(this.formData)
         }
-        const uri = '/api/v1/' + this.dataTableId + '/' + this.dataRowId + '?_method=PUT'
+        const postDetails = this.dataRowId !== null ? this.dataTableId + '/' + this.dataRowId : this.dataTableId
+        const uri =  '/api/v1/' + postDetails +  '?_method=PUT'
         api.post(uri, options).then(this.goBackToPluginCaller, this.handleError)
       },
       goBackToPluginCaller () {
@@ -122,18 +124,39 @@
           type: 'danger'
         }
       },
-      initializeForm (response) {
-        // noinspection JSUnusedLocalSymbols
-        const { _meta, _href, ...rowData } = response
-        this.dataTableLabel = _meta.label
-        const mappedData = EntityToFormMapper.generateForm(_meta, rowData)
+      initializeForm (formFields, formData) {
+        const mappedData = EntityToFormMapper.generateForm(formFields, formData)
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
         this.showForm = true
+      },
+      parseEditResponse(response) {
+          // noinspection JSUnusedLocalSymbols
+          const { _meta, _href, ...rowData } = response
+          this.dataTableLabel = _meta.label
+          return {_meta, rowData}
+      },
+      parseAddResponse(response) {
+        let meta = response.meta
+        meta.attributes = meta.attributes.map(attribute => {
+          attribute.readOnly = false
+          return attribute
+        })
+        return meta
       }
     },
     created: function () {
-      api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then(this.initializeForm, this.handleError)
+      if (this.dataRowId !== null) {
+        api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
+          const {_meta, rowData } = this.parseEditResponse(response)
+          this.initializeForm(_meta, rowData)
+        }, this.handleError)
+      } else {
+        api.get('/api/v2/' + this.dataTableId + '?num=0').then((response) => {
+          const meta = this.parseAddResponse(response)
+          this.initializeForm(meta, {})
+        }, this.handleError)
+      }
     },
     components: {
       FormComponent
