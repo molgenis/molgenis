@@ -87,6 +87,12 @@
     isomorphic-fetch "^2.2.1"
     lodash "^4.17.4"
 
+"@molgenis/molgenis-vue-test-utils@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-vue-test-utils/-/molgenis-vue-test-utils-1.1.0.tgz#d3fac7884b60da899c30064050ea56a36ca29d40"
+  dependencies:
+    babel-runtime "^6.11.6"
+
 "@sinonjs/formatio@^2.0.0":
   version "2.0.0"
   resolved "http://registry.npmjs.org/@sinonjs/formatio/-/formatio-2.0.0.tgz#84db7e9eb5531df18a8c5e0bfb6e449e55e654b2"
@@ -2478,7 +2484,7 @@ es6-iterator@^2.0.1, es6-iterator@~2.0.1, es6-iterator@~2.0.3:
     es5-ext "^0.10.35"
     es6-symbol "^3.1.1"
 
-es6-map@^0.1.3:
+es6-map@^0.1.3, es6-map@^0.1.5:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/es6-map/-/es6-map-0.1.5.tgz#9136e0503dcc06a301690f0bb14ff4e364e949f0"
   dependencies:
@@ -4001,6 +4007,10 @@ is-regex@^1.0.4:
   resolved "https://registry.yarnpkg.com/is-regex/-/is-regex-1.0.4.tgz#5517489b547091b0930e095654ced25ee97e9491"
   dependencies:
     has "^1.0.1"
+
+is-regexp@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-regexp/-/is-regexp-1.0.0.tgz#fd2d883545c46bac5a633e7b9a09e87fa2cb5069"
 
 is-resolvable@^1.0.0:
   version "1.1.0"
@@ -5988,6 +5998,13 @@ querystringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.0.0.tgz#fa3ed6e68eb15159457c89b37bc6472833195755"
 
+quibble@^0.5.1:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/quibble/-/quibble-0.5.3.tgz#3dfd53206fc6873f61c96f3bece63b69747b4d0c"
+  dependencies:
+    lodash "^4.17.2"
+    resolve "^1.5.0"
+
 randomatic@^1.1.3:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/randomatic/-/randomatic-1.1.7.tgz#c7abe9cc8b87c0baa876b19fde83fd464797e38c"
@@ -6891,6 +6908,13 @@ string_decoder@~0.10.x:
   version "0.10.31"
   resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-0.10.31.tgz#62e203bc41766c6c28c9fc84301dab1c5310fa94"
 
+stringify-object-es5@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/stringify-object-es5/-/stringify-object-es5-2.5.0.tgz#057c3c9a90a127339bb9d1704a290bb7bd0a1ec5"
+  dependencies:
+    is-plain-obj "^1.0.0"
+    is-regexp "^1.0.0"
+
 stringstream@~0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/stringstream/-/stringstream-0.0.5.tgz#4e484cd4de5a0bbbee18e46307710a8a81621878"
@@ -7007,6 +7031,15 @@ test-exclude@^4.2.1:
     object-assign "^4.1.0"
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
+
+testdouble@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.7.0.tgz#8547a07c472e250265919ab9745107a042429d15"
+  dependencies:
+    es6-map "^0.1.5"
+    lodash "^4.17.4"
+    quibble "^0.5.1"
+    stringify-object-es5 "^2.5.0"
 
 text-encoding@^0.6.4:
   version "0.6.4"
