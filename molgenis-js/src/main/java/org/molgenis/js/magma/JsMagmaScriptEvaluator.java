@@ -2,6 +2,7 @@ package org.molgenis.js.magma;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
+import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
@@ -115,7 +116,15 @@ public class JsMagmaScriptEvaluator
 	 */
 	public Bindings createBindings(Entity entity, int depth)
 	{
-		return jsScriptEngine.createBindings(toScriptEngineValueMap(entity, depth));
+		Bindings bindings = jsScriptEngine.copyEngineBindings();
+		JSObject magmaScript = (JSObject) bindings.get("MagmaScript");
+		JSObject dollarFunction = (JSObject) magmaScript.getMember("$");
+		JSObject bindFunction = (JSObject) dollarFunction.getMember("bind");
+		Object boundDollar = bindFunction.call(dollarFunction, toScriptEngineValueMap(entity, depth));
+		bindings.put("$", boundDollar);
+		bindings.put("newValue", magmaScript.getMember("newValue"));
+		bindings.put("_isNull", magmaScript.getMember("_isNull"));
+		return bindings;
 	}
 
 	/**

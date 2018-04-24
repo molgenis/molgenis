@@ -46,26 +46,7 @@ public class NashornScriptEngine
 		return convertNashornValue(scriptEngine.eval(script, copyEngineBindings()));
 	}
 
-	/**
-	 * Binds magmascript $ function to an entity value map.
-	 *
-	 * @param entityValueMap the map to bind the $ functions to
-	 * @return Bindings object where the $ function is bound to the entity value map
-	 */
-	public Bindings createBindings(Object entityValueMap)
-	{
-		Bindings bindings = copyEngineBindings();
-		JSObject magmaScript = (JSObject) bindings.get("MagmaScript");
-		JSObject dollarFunction = (JSObject) magmaScript.getMember("$");
-		JSObject bindFunction = (JSObject) dollarFunction.getMember("bind");
-		Object boundDollar = bindFunction.call(dollarFunction, entityValueMap);
-		bindings.put("$", boundDollar);
-		bindings.put("newValue", magmaScript.getMember("newValue"));
-		bindings.put("_isNull", magmaScript.getMember("_isNull"));
-		return bindings;
-	}
-
-	private Bindings copyEngineBindings()
+	public Bindings copyEngineBindings()
 	{
 		Bindings bindings = new SimpleBindings();
 		bindings.putAll(scriptEngine.getBindings(ENGINE_SCOPE));
