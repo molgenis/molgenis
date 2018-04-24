@@ -18,7 +18,8 @@
                         </div>
                     </div>
                     <span>Package permissions determine the permission on entity types within the package and its child packages.<br/>
-                    They do <b>not</b> effect permissions on the package metadata itself.</span>
+                    Additionally WRITEMETA permission on a package means that the user can create packages and Entity Types in this package and its children.</span>
+                    They do <b>not</b> effect permissions on the package metadata itself.<br/>
                     <div class="form-group">
                         <div class="permission-table-container">
                             <table class="table table-condensed table-borderless" id="package-group-permission-table">

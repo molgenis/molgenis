@@ -11,7 +11,9 @@ import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.EntityTypePermissionUtils;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.slf4j.Logger;
@@ -160,8 +162,6 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
 				EntityTypePermission.READ);
 		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
-		CumulativePermission readEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.READ);
-		CumulativePermission writeEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE);
 
 		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
 		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);

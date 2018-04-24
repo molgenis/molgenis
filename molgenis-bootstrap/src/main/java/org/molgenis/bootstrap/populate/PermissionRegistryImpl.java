@@ -3,7 +3,13 @@ package org.molgenis.bootstrap.populate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.EntityTypePermissionUtils;
@@ -61,6 +67,13 @@ public class PermissionRegistryImpl implements PermissionRegistry
 			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
 					EntityTypePermission.READ);
 			mapBuilder.putAll(entityTypeIdentity, new Pair<>(entityTypePermissions, allUsersGroupSid));
+		});
+
+		dataService.findAll(PackageMetadata.PACKAGE, Stream.of(UploadPackage.UPLOAD), Package.class).forEach(pack ->
+		{
+			ObjectIdentity packageIdentity = new PackageIdentity(pack);
+			Permission packagePermissions = PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITEMETA);
+			mapBuilder.putAll(packageIdentity, new Pair<>(packagePermissions, allUsersGroupSid));
 		});
 
 		return mapBuilder.build();

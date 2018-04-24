@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.meta.PackageRepositorySecurityDecorator;
 import org.molgenis.data.validation.meta.PackageRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.PackageValidator;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
@@ -24,21 +25,25 @@ public class PackageRepositoryDecoratorFactory
 	private final DataService dataService;
 	private final PackageValidator packageValidator;
 	private final MutableAclService mutableAclService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 
 	public PackageRepositoryDecoratorFactory(PackageMetadata packageMetadata, DataService dataService,
-			PackageValidator packageValidator, MutableAclService mutableAclService)
+			PackageValidator packageValidator, MutableAclService mutableAclService,
+			UserPermissionEvaluator userPermissionEvaluator)
 	{
 		super(packageMetadata);
 		this.dataService = requireNonNull(dataService);
 		this.packageValidator = requireNonNull(packageValidator);
 		this.mutableAclService = requireNonNull(mutableAclService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	@Override
 	public Repository<Package> createDecoratedRepository(Repository<Package> repository)
 	{
 		repository = new PackageRepositoryDecorator(repository, dataService);
-		repository = new PackageRepositorySecurityDecorator(repository, mutableAclService);
+		repository = new PackageRepositorySecurityDecorator(repository, mutableAclService, userPermissionEvaluator,
+				dataService);
 		return new PackageRepositoryValidationDecorator(repository, packageValidator);
 	}
 }

@@ -242,18 +242,16 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 	@Test
 	public void testValidateOwnLabelAttributeNullIdAttributeVisible()
 	{
-		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		when(idAttr.isVisible()).thenReturn(true);
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] must define a label attribute because the identifier is hidden")
-	public void testValidateOwnLabelAttributeNullIdAttributeInvisible()
+	public void testValidateLabelAttributeNullIdAttributeInvisible()
 	{
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
 		when(idAttr.isVisible()).thenReturn(false);
 		when(entityType.getId()).thenReturn("entity");
-		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
+		EntityTypeValidator.validateLabelAttribute(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] is not is not one of the attributes of entity \\[entity\\]")
@@ -275,19 +273,18 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[package_name\\] must define a label attribute because the identifier is hidden")
-	public void testValidateOwnLabelAttributeIdHidden()
+	public void testValidateLabelAttributeIdHidden()
 	{
-		when(entityType.getOwnLabelAttribute()).thenReturn(null);
+		when(entityType.getLabelAttribute()).thenReturn(null);
 		when(entityType.getId()).thenReturn("package_name");
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
-		EntityTypeValidator.validateOwnLabelAttribute(entityType, newHashMap());
+		EntityTypeValidator.validateLabelAttribute(entityType);
 	}
 
 	@Test
 	public void testValidateOwnLabelAttributeAbstractEntity()
 	{
 		when(entityType.getOwnLabelAttribute()).thenReturn(null);
-		when(entityType.isAbstract()).thenReturn(true);
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, newHashMap());
 	}
 

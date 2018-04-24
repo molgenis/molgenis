@@ -118,8 +118,6 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStream()
 	{
 		Entity entity = getEntityMock();
-		EntityType entityType = entity.getEntityType();
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 
@@ -133,8 +131,6 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStreamPermissionDenied()
 	{
 		Entity entity = getEntityMock();
-		EntityType entityType = entity.getEntityType();
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 
 		@SuppressWarnings("unchecked")
