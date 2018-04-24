@@ -2,6 +2,7 @@ package org.molgenis.js.nashorn;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Weigher;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -19,7 +20,7 @@ import static org.molgenis.js.magma.JsMagmaScriptEvaluator.KEY_ID_VALUE;
 public class NashornScriptEngine
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NashornScriptEngine.class);
-	private static final int MAX_COMPILED_EXPRESSIONS_CACHE = 10000;
+	private static final int MAX_COMPILED_EXPRESSIONS_SCRIPTS_LENGTH = 500_000;
 	private ScriptEngine scriptEngine;
 	private LoadingCache<String, CompiledScript> expressions;
 
@@ -58,10 +59,10 @@ public class NashornScriptEngine
 		LOG.debug("Initializing Nashorn script engine ...");
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
 		scriptEngine = factory.getScriptEngine(s -> false); // create engine with class filter exposing no classes
-
-
-		expressions = Caffeine.newBuilder().maximumSize(MAX_COMPILED_EXPRESSIONS_CACHE).build(((Compilable) this.scriptEngine)::compile);
-
+		expressions = Caffeine.newBuilder()
+							  .maximumWeight(MAX_COMPILED_EXPRESSIONS_SCRIPTS_LENGTH)
+							  .weigher((Weigher<String, CompiledScript>) (key, value) -> key.length())
+							  .build(((Compilable) this.scriptEngine)::compile);
 		LOG.debug("Initialized Nashorn script engine");
 	}
 
