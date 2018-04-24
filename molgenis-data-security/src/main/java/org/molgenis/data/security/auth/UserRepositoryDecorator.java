@@ -2,29 +2,24 @@ package org.molgenis.data.security.auth;
 
 import com.google.common.collect.Iterators;
 import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 
 public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 {
-	private static final int BATCH_SIZE = 1000;
+	static final String DELETE_USER_MSG = "Users can't be deleted. Disable them instead.";
 
-	private final DataService dataService;
+	private static final int BATCH_SIZE = 1000;
 	private final PasswordEncoder passwordEncoder;
 
-	public UserRepositoryDecorator(Repository<User> delegateRepository, DataService dataService,
-			PasswordEncoder passwordEncoder)
+	UserRepositoryDecorator(Repository<User> delegateRepository, PasswordEncoder passwordEncoder)
 	{
 		super(delegateRepository);
-		this.dataService = requireNonNull(dataService);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
 
@@ -91,49 +86,30 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User>
 	@Override
 	public void delete(User entity)
 	{
-		deleteGroupMemberships(entity);
-		delegate().delete(entity);
+		throw new UnsupportedOperationException(DELETE_USER_MSG);
 	}
 
 	@Override
 	public void delete(Stream<User> entities)
 	{
-		entities = entities.map(entity ->
-		{
-			deleteGroupMemberships(entity);
-			return entity;
-		});
-		delegate().delete(entities);
+		throw new UnsupportedOperationException(DELETE_USER_MSG);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		deleteGroupMemberships(findOneById(id));
-		delegate().deleteById(id);
+		throw new UnsupportedOperationException(DELETE_USER_MSG);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		ids = ids.map(id ->
-		{
-			deleteGroupMemberships(findOneById(id));
-			return id;
-		});
-		delegate().deleteAll(ids);
+		throw new UnsupportedOperationException(DELETE_USER_MSG);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		throw new UnsupportedOperationException("Deleting all users is not supported.");
-	}
-
-	private void deleteGroupMemberships(User user)
-	{
-		Stream<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class);
-		dataService.delete(GROUP_MEMBER, groupMembers);
+		throw new UnsupportedOperationException(DELETE_USER_MSG);
 	}
 }

@@ -515,15 +515,4 @@ public class RestTestUtils
 			given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
 		}
 	}
-
-	/**
-	 * Remove the test user by deleting the row from the User table
-	 */
-	public static void cleanupUser(String adminToken, String testUserId)
-	{
-		if (adminToken != null && testUserId != null)
-		{
-			given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
-		}
-	}
 }
