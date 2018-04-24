@@ -55,10 +55,13 @@ public class NashornScriptEngine
 	public Bindings createBindings(Object entityValueMap)
 	{
 		Bindings bindings = copyEngineBindings();
-		JSObject dollarFunction = (JSObject) bindings.get("$");
+		JSObject magmaScript = (JSObject) bindings.get("MagmaScript");
+		JSObject dollarFunction = (JSObject) magmaScript.getMember("$");
 		JSObject bindFunction = (JSObject) dollarFunction.getMember("bind");
 		Object boundDollar = bindFunction.call(dollarFunction, entityValueMap);
 		bindings.put("$", boundDollar);
+		bindings.put("newValue", magmaScript.getMember("newValue"));
+		bindings.put("_isNull", magmaScript.getMember("_isNull"));
 		return bindings;
 	}
 
@@ -106,10 +109,23 @@ public class NashornScriptEngine
 		{
 			throw new IllegalStateException("Failed to load default resources.", e);
 		}
+		copyMagmaScriptFunctions();
 
 		expressions = Caffeine.newBuilder().maximumSize(MAX_COMPILED_EXPRESSIONS_CACHE).build(((Compilable) this.scriptEngine)::compile);
 
 		LOG.debug("Initialized Nashorn script engine");
+	}
+
+	/**
+	 * Copies static MagmaScript functions to engine scope
+	 */
+	private void copyMagmaScriptFunctions()
+	{
+		// make MagmaScript functions available on global scope
+		JSObject magmaScript = (JSObject) scriptEngine.get("MagmaScript");
+		scriptEngine.put("$", magmaScript.getMember("$"));
+		scriptEngine.put("newValue", magmaScript.getMember("newValue"));
+		scriptEngine.put("_isNull", magmaScript.getMember("_isNull"));
 	}
 
 	private String loadScript(String resourceName)

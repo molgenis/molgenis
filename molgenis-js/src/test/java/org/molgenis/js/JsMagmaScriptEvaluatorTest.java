@@ -159,7 +159,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 510");
+				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 492");
 	}
 
 	@Test
@@ -509,7 +509,7 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
-		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person, 3);
+		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person);
 
 		Object result = jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 		assertEquals(result, 0d);
@@ -525,7 +525,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		for (int i = 0; i < 10000; i++)
 		{
-			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 3);
+			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 		}
 		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed old");
 	}
