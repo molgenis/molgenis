@@ -2,11 +2,8 @@ package org.molgenis.bootstrap.populate;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.EntityTypePermissionUtils;
@@ -51,8 +48,10 @@ public class PermissionRegistryImpl implements PermissionRegistry
 		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
 		Sid allUsersGroupSid = createSid(allUsersGroup);
 
-		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
+		//FIXME: reimplement with the ACTIONS instead of PERMISSIONS
+				/*ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
 		mapBuilder.putAll(pluginIdentity, new Pair<>(PluginPermission.READ, allUsersGroupSid));
+		*/
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,

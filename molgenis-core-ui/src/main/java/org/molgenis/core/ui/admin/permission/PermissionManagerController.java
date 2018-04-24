@@ -9,12 +9,12 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
+import org.molgenis.security.core.GeneralPermission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -205,7 +205,7 @@ public class PermissionManagerController extends PluginController
 		removePermissionForSid(sid, objectIdentity);
 	}
 
-	private void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
+	private void createSidPluginPermission(Plugin plugin, Sid sid, Permission pluginPermission)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
 		createSidPermission(sid, objectIdentity, pluginPermission);
@@ -272,12 +272,12 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	private static PluginPermission toPluginPermission(String paramValue)
+	private static GeneralPermission toPluginPermission(String paramValue)
 	{
 		switch (paramValue.toUpperCase())
 		{
 			case "READ":
-				return PluginPermission.READ;
+				return GeneralPermission.READ;
 			default:
 				throw new IllegalArgumentException(format("Unknown plugin permission '%s'", paramValue));
 		}
@@ -383,7 +383,7 @@ public class PermissionManagerController extends PluginController
 	private org.molgenis.security.permission.Permission toPluginPermission(AccessControlEntry ace)
 	{
 		org.molgenis.security.permission.Permission pluginPermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission().equals(PluginPermission.READ))
+		if (ace.getPermission().equals(GeneralPermission.READ))
 		{
 			pluginPermission.setType("read");
 		}

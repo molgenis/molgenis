@@ -4,9 +4,9 @@ import freemarker.core.Environment;
 import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.GeneralPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Permission;
 
@@ -80,7 +80,7 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		switch (permission)
 		{
 			case "READ":
-				return PluginPermission.READ;
+				return GeneralPermission.READ;
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));
