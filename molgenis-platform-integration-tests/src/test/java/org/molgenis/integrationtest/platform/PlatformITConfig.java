@@ -126,6 +126,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails adminUserDetails = mock(UserDetails.class);
+		when(adminUserDetails.isEnabled()).thenReturn(true);
 		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
 		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
 		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);
