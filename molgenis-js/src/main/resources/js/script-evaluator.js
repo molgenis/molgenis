@@ -67,7 +67,7 @@ MagmaScript.prototype.isValidJson = function () {
  * @param value: the number you want to add to the current value
  */
 MagmaScript.prototype.plus = function (value) {
-    if (!_isNull(value)) {
+    if (!MagmaScript._isNull(value)) {
         if (typeof value === 'object' || typeof value === 'function') {
             this.val = this.val + value.value()
         } else {

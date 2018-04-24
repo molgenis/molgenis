@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
+import javax.script.SimpleBindings;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -22,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static org.molgenis.util.ResourceUtils.getString;
 
 /**
  * JavaScript script evaluator using the Nashorn script engine.
@@ -33,12 +37,36 @@ public class JsMagmaScriptEvaluator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JsMagmaScriptEvaluator.class);
 	private static final int ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH = 1;
+	private static final String KEY_IS_NULL = "_isNull";
+	private static final String KEY_NEW_VALUE = "newValue";
+	private static final String KEY_DOLLAR = "$";
+	private static final String KEY_MAGMA_SCRIPT = "MagmaScript";
+	private static final String BIND = "bind";
+	public static final String KEY_ID_VALUE = "_idValue";
 
 	private final NashornScriptEngine jsScriptEngine;
+	private final Bindings magmaBindings = new SimpleBindings();
 
-	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine)
+	private static final List<String> RESOURCE_NAMES;
+
+	static
+	{
+		RESOURCE_NAMES = asList("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js");
+	}
+
+	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine) throws javax.script.ScriptException, IOException
 	{
 		this.jsScriptEngine = requireNonNull(jsScriptEngine);
+		for (String resourceName : RESOURCE_NAMES)
+		{
+			loadScript(resourceName);
+		}
+	}
+
+	private void loadScript(String resourceName) throws javax.script.ScriptException, IOException
+	{
+		String string = getString(getClass(), resourceName);
+		jsScriptEngine.eval(magmaBindings, string);
 	}
 
 	public Object eval(String expression, Entity entity)
@@ -116,14 +144,15 @@ public class JsMagmaScriptEvaluator
 	 */
 	public Bindings createBindings(Entity entity, int depth)
 	{
-		Bindings bindings = jsScriptEngine.copyEngineBindings();
-		JSObject magmaScript = (JSObject) bindings.get("MagmaScript");
-		JSObject dollarFunction = (JSObject) magmaScript.getMember("$");
-		JSObject bindFunction = (JSObject) dollarFunction.getMember("bind");
+		Bindings bindings = new SimpleBindings();
+		JSObject global = (JSObject) magmaBindings.get("nashorn.global");
+		JSObject magmaScript = (JSObject) global.getMember(KEY_MAGMA_SCRIPT);
+		JSObject dollarFunction = (JSObject) magmaScript.getMember(KEY_DOLLAR);
+		JSObject bindFunction = (JSObject) dollarFunction.getMember(BIND);
 		Object boundDollar = bindFunction.call(dollarFunction, toScriptEngineValueMap(entity, depth));
-		bindings.put("$", boundDollar);
-		bindings.put("newValue", magmaScript.getMember("newValue"));
-		bindings.put("_isNull", magmaScript.getMember("_isNull"));
+		bindings.put(KEY_DOLLAR, boundDollar);
+		bindings.put(KEY_NEW_VALUE, magmaScript.getMember(KEY_NEW_VALUE));
+		bindings.put(KEY_IS_NULL, magmaScript.getMember(KEY_IS_NULL));
 		return bindings;
 	}
 
@@ -150,7 +179,7 @@ public class JsMagmaScriptEvaluator
 				entity.getEntityType()
 					  .getAtomicAttributes()
 					  .forEach(attr -> map.put(attr.getName(), toScriptEngineValue(entity, attr, depth)));
-				map.put("_idValue", idValue);
+				map.put(KEY_ID_VALUE, idValue);
 				return map;
 			}
 		}

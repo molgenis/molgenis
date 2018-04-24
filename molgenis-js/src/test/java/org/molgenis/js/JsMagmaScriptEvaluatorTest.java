@@ -11,6 +11,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.script.Bindings;
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
@@ -45,7 +47,7 @@ public class JsMagmaScriptEvaluatorTest
 	private static JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@BeforeClass
-	protected static void beforeClass()
+	protected static void beforeClass() throws ScriptException, IOException
 	{
 		Attribute idAttribute = mock(Attribute.class);
 		when(idAttribute.getName()).thenReturn("id");
@@ -159,7 +161,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 492");
+				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 431");
 	}
 
 	@Test

@@ -5,34 +5,21 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.script.*;
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-import static javax.script.ScriptContext.ENGINE_SCOPE;
+import static org.molgenis.js.magma.JsMagmaScriptEvaluator.KEY_ID_VALUE;
 
 @Component
 public class NashornScriptEngine
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NashornScriptEngine.class);
-
-	private static final List<String> RESOURCE_NAMES;
 	private static final int MAX_COMPILED_EXPRESSIONS_CACHE = 10000;
-
-	static
-	{
-		RESOURCE_NAMES = asList("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js");
-	}
-
 	private ScriptEngine scriptEngine;
 	private LoadingCache<String, CompiledScript> expressions;
 
@@ -43,18 +30,11 @@ public class NashornScriptEngine
 
 	public Object eval(String script) throws ScriptException
 	{
-		return convertNashornValue(scriptEngine.eval(script, copyEngineBindings()));
-	}
-
-	public Bindings copyEngineBindings()
-	{
-		Bindings bindings = new SimpleBindings();
-		bindings.putAll(scriptEngine.getBindings(ENGINE_SCOPE));
-		return bindings;
+		return convertNashornValue(scriptEngine.eval(script, new SimpleBindings()));
 	}
 
 	/**
-	 * Evaluates an expression using given bindings.
+	 * Evaluates an expression using the given bindings.
 	 *
 	 * @param bindings   the Bindings to use as ENGINE_SCOPE
 	 * @param expression the expression to evaluate
@@ -79,46 +59,10 @@ public class NashornScriptEngine
 		NashornScriptEngineFactory factory = new NashornScriptEngineFactory();
 		scriptEngine = factory.getScriptEngine(s -> false); // create engine with class filter exposing no classes
 
-		// construct common JavaScript content string from defined resources
-		String commonJs = RESOURCE_NAMES.stream().map(this::loadScript).collect(joining("\n"));
-
-		try
-		{
-			scriptEngine.eval(commonJs);
-		}
-		catch (ScriptException e)
-		{
-			throw new IllegalStateException("Failed to load default resources.", e);
-		}
-		copyMagmaScriptFunctions();
 
 		expressions = Caffeine.newBuilder().maximumSize(MAX_COMPILED_EXPRESSIONS_CACHE).build(((Compilable) this.scriptEngine)::compile);
 
 		LOG.debug("Initialized Nashorn script engine");
-	}
-
-	/**
-	 * Copies static MagmaScript functions to engine scope
-	 */
-	private void copyMagmaScriptFunctions()
-	{
-		// make MagmaScript functions available on global scope
-		JSObject magmaScript = (JSObject) scriptEngine.get("MagmaScript");
-		scriptEngine.put("$", magmaScript.getMember("$"));
-		scriptEngine.put("newValue", magmaScript.getMember("newValue"));
-		scriptEngine.put("_isNull", magmaScript.getMember("_isNull"));
-	}
-
-	private String loadScript(String resourceName)
-	{
-		try
-		{
-			return ResourceUtils.getString(getClass(), resourceName);
-		}
-		catch (IOException e)
-		{
-			throw new IllegalStateException("Failed to load resource file: " + resourceName);
-		}
 	}
 
 	private Object convertNashornValue(Object nashornValue)
@@ -129,7 +73,6 @@ public class NashornScriptEngine
 		}
 
 		Object convertedValue;
-		String idValueKey = "_idValue";
 		if (nashornValue instanceof ScriptObjectMirror)
 		{
 			ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) nashornValue;
@@ -148,23 +91,15 @@ public class NashornScriptEngine
 					JsDate jsDate = ((Invocable) scriptEngine).getInterface(scriptObjectMirror, JsDate.class);
 					return jsDate.getTime();
 				}
-				else if (((ScriptObjectMirror) nashornValue).containsKey(idValueKey))
-				{
-					// entity object returned from script
-					return ((ScriptObjectMirror) nashornValue).get(idValueKey);
-				}
-				else
-				{
-					throw new RuntimeException("Unable to convert [ScriptObjectMirror]");
-				}
+				else return ((ScriptObjectMirror) nashornValue).getOrDefault(KEY_ID_VALUE, null);
 			}
 		}
 		else if (nashornValue instanceof Map)
 		{
 			Map mapValue = (Map) (nashornValue);
-			if (mapValue.get(idValueKey) != null)
+			if (mapValue.get(KEY_ID_VALUE) != null)
 			{
-				convertedValue = mapValue.get(idValueKey);
+				convertedValue = mapValue.get(KEY_ID_VALUE);
 			}
 			else
 			{
