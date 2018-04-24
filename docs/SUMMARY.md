@@ -33,6 +33,7 @@
         - [REST api V2](developer_documentation/ref-rest2.md)
         - [RSQL operators](developer_documentation/ref-RSQL.md)
         - [Swagger specification](developer_documentation/ref-swagger.md)
+    - [API Guidelines](developer_documentation/api-guidelines.md)
     - [FAIR](developer_documentation/guide-fair.md)
     - [App development](developer_documentation/app-development.md)
     - [Frontend development](developer_documentation/frontend-development.md)
