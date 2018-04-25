@@ -1,7 +1,7 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.core.ui.menu.MenuItemToMolgenisUiMenuItemAdapter;
-import org.molgenis.data.plugin.model.PluginActions;
+import org.molgenis.data.plugin.model.PluginAction;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
@@ -55,7 +55,7 @@ public class XmlMolgenisUiPlugin implements UiMenuItem
 	@Override
 	public boolean isAuthorized()
 	{
-		return permissionService.hasPermission(new PluginIdentity(getId()), PluginActions.VIEW_PLUGIN);
+		return permissionService.hasPermission(new PluginIdentity(getId()), PluginAction.VIEW_PLUGIN);
 	}
 
 	@Override
