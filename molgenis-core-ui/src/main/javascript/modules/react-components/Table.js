@@ -128,7 +128,7 @@ var Table = React.createClass({
             onCollapse: this._handleCollapse,
             onCreate: this._handleCreate,
             onExecute: this.props.onExecute,
-            onAddClick: this.props.onEditClick
+            onAddClick: this.props.onAddClick
         });
 
         var TableBody = TableBodyFactory({

@@ -13,13 +13,6 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        <h2 class="text-muted">{{ 'data-row-edit-plugin-title' | i18n }}</h2>
-        <hr/>
-      </div>
-    </div>
-
     <div v-if="showForm">
 
       <h5>{{dataTableLabel}}</h5>
