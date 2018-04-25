@@ -225,6 +225,12 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	}
 
 	@Bean
+	public PropertiesMessageSource uiFormMessageSource()
+	{
+		return new PropertiesMessageSource("ui-form");
+	}
+
+	@Bean
 	public PluginInterceptor molgenisPluginInterceptor()
 	{
 		return new PluginInterceptor(molgenisUi(), permissionService);
