@@ -36,7 +36,19 @@ const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
       return accumulator + getTotalNumberOfFieldsForChapter(child, formData)
     }
 
-    if (child.visible(formData)) {
+    let visible = false
+    try {
+      visible = child.visible(formData)
+    } catch (e) {
+      console.error(`Error in getters.getTotalNumberOfFieldsForChapter, during evaluation of function 'visible' for field ${child.id}.
+      Where visible expression is: 
+        '${child.visible.toString()}'
+      And formData is: 
+        '${JSON.stringify(formData)}'
+      The default value of visible is set to false`, e)
+    }
+
+    if (visible) {
       accumulator++
     }
 
