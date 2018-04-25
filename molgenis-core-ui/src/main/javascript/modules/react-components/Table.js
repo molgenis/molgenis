@@ -127,7 +127,8 @@ var Table = React.createClass({
             onExpand: this._handleExpand,
             onCollapse: this._handleCollapse,
             onCreate: this._handleCreate,
-            onExecute: this.props.onExecute
+            onExecute: this.props.onExecute,
+            onAddClick: this.props.onEditClick
         });
 
         var TableBody = TableBodyFactory({
@@ -305,7 +306,8 @@ var TableHeader = React.createClass({
         enableEdit: React.PropTypes.bool,
         enableDelete: React.PropTypes.bool,
         enableInspect: React.PropTypes.bool,
-        enableExecute: React.PropTypes.bool
+        enableExecute: React.PropTypes.bool,
+        onAddClick: React.PropTypes.func
     },
     render: function () {
         return thead(null,
@@ -319,7 +321,8 @@ var TableHeader = React.createClass({
         if (this.props.enableAdd === true) {
             Headers.push(th({className: 'compact', key: 'add'}, EntityCreateBtnFactory({
                 entity: this.props.entity,
-                onCreate: this.props.onCreate
+                onCreate: this.props.onCreate,
+                onClick: this.props.onAddClick
             })));
         }
         if (this.props.enableAdd === false && this.props.enableEdit === true) {
@@ -928,7 +931,8 @@ var EntityCreateBtn = React.createClass({
     displayName: 'EntityCreateBtn',
     propTypes: {
         entity: React.PropTypes.object.isRequired,
-        onCreate: React.PropTypes.func
+        onCreate: React.PropTypes.func,
+        onClick: React.PropTypes.func
     },
     getInitialState: function () {
         return {
@@ -942,13 +946,24 @@ var EntityCreateBtn = React.createClass({
         };
     },
     render: function () {
-        return Button({
+        var btnProps = {
             icon: 'plus',
             title: 'Add row',
             style: 'success',
-            size: 'xsmall',
-            onClick: this._handleCreate
-        });
+            size: 'xsmall'
+        }
+        if (this.props.onClick != null) {
+            // Wrap supplied click handler in closure binding props of handler context
+            var clickHandler = this.props.onClick
+            var tableId = this.props.entity.name
+            btnProps.onClick = function () {
+                clickHandler(tableId, null)
+            }
+        } else {
+            // Use default handler if no handler was passed in
+            btnProps.onClick = this._handleCreate
+        }
+        return Button(btnProps)
     },
     renderLayer: function () {
         return this.state.form ? Form({
