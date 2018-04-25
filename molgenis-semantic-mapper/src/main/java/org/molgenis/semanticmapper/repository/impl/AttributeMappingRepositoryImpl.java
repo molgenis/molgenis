@@ -84,7 +84,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 		while (matcher.find())
 		{
-			Attribute attribute = sourceEntityType.getAttribute(matcher.group(1));
+			String sourceAttribute = matcher.group(1).split("\\.")[0];
+			Attribute attribute = sourceEntityType.getAttribute(sourceAttribute);
 			if (!sourceAttributes.contains(attribute))
 			{
 				sourceAttributes.add(attribute);
