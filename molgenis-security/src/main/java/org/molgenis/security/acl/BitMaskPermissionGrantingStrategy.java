@@ -103,6 +103,6 @@ public class BitMaskPermissionGrantingStrategy implements PermissionGrantingStra
 	 */
 	static boolean containsPermission(int mask, int permission)
 	{
-		return (mask & permission) == permission;
+		return (mask & permission) != 0;
 	}
 }
