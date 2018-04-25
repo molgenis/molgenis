@@ -3,14 +3,13 @@ package org.molgenis.security.permission;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Action;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.meta.ActionPermissionMapping;
 import org.molgenis.security.meta.ActionPermissionMappingMetadata;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,8 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 	}
 
 	@Override
-	public boolean hasPermission(ObjectIdentity objectIdentity, Permission permission)
+	public boolean hasPermission(ObjectIdentity objectIdentity,
+			org.springframework.security.acls.model.Permission permission)
 	{
 		if (SecurityUtils.currentUserIsSuOrSystem())
 		{
@@ -57,13 +57,13 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 		{
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			//FIXME: deal with no result and with multiple results
-			GeneralPermission permission = getPermission(action).get(0);
+			Permission permission = getPermission(action).get(0);
 			return authentication != null && permissionEvaluator.hasPermission(authentication,
 					objectIdentity.getIdentifier(), objectIdentity.getType(), permission);
 		}
 	}
 
-	private List<GeneralPermission> getPermission(Action action)
+	private List<Permission> getPermission(Action action)
 	{
 		ActionPermissionMapping actionPermissionMapping = dataService.findOne(
 				ActionPermissionMappingMetadata.ACTION_PERMISSION_MAPPING,
@@ -71,10 +71,10 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 				ActionPermissionMapping.class);
 		Iterable<org.molgenis.security.meta.Permission> permissions = actionPermissionMapping.getEntities(
 				ActionPermissionMappingMetadata.PERMISSIONS, org.molgenis.security.meta.Permission.class);
-		List<GeneralPermission> generalPermissions = newArrayList();
+		List<Permission> generalPermissions = newArrayList();
 		for (org.molgenis.security.meta.Permission permission : permissions)
 		{
-			generalPermissions.add(new GeneralPermission(permission.getMask(), permission.getCode().charAt(0)));
+			generalPermissions.add(new Permission(permission.getMask(), permission.getCode().charAt(0)));
 		}
 		return generalPermissions;
 	}

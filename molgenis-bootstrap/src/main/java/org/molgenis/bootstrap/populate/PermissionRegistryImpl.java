@@ -11,10 +11,9 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.Group;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
@@ -45,15 +44,15 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	}
 
 	@Override
-	public Multimap<ObjectIdentity, Pair<Permission, Sid>> getPermissions()
+	public Multimap<ObjectIdentity, Pair<org.springframework.security.acls.model.Permission, Sid>> getPermissions()
 	{
-		ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
+		ImmutableMultimap.Builder<ObjectIdentity, Pair<org.springframework.security.acls.model.Permission, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
 		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
 		Sid allUsersGroupSid = createSid(allUsersGroup);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
-		mapBuilder.putAll(pluginIdentity, new Pair<>(GeneralPermission.READ, allUsersGroupSid));
+		mapBuilder.putAll(pluginIdentity, new Pair<>(Permission.READ, allUsersGroupSid));
 
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
@@ -61,7 +60,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
-			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
+			org.springframework.security.acls.model.Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
 					EntityTypePermission.READ);
 			mapBuilder.putAll(entityTypeIdentity, new Pair<>(entityTypePermissions, allUsersGroupSid));
 		});
@@ -69,7 +68,8 @@ public class PermissionRegistryImpl implements PermissionRegistry
 		dataService.findAll(PackageMetadata.PACKAGE, Stream.of(UploadPackage.UPLOAD), Package.class).forEach(pack ->
 		{
 			ObjectIdentity packageIdentity = new PackageIdentity(pack);
-			Permission packagePermissions = PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITEMETA);
+			org.springframework.security.acls.model.Permission packagePermissions = PackagePermissionUtils.getCumulativePermission(
+					PackagePermission.WRITEMETA);
 			mapBuilder.putAll(packageIdentity, new Pair<>(packagePermissions, allUsersGroupSid));
 		});
 

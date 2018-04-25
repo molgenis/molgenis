@@ -7,5 +7,5 @@ public abstract class ActionPermissionMapping
 {
 	public abstract Action getAction();
 
-	public abstract GeneralPermission getPermission();
+	public abstract Permission getPermission();
 }

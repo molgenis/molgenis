@@ -4,7 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -75,30 +75,30 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	public void hasPermissionOnPluginTrue()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", GeneralPermission.READ)).thenReturn(
+		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", Permission.READ)).thenReturn(
 				true);
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), GeneralPermission.READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), Permission.READ));
 	}
 
 	@WithMockUser(username = "USER")
 	@Test
 	public void hasPermissionOnPluginFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), GeneralPermission.READ));
+		assertFalse(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), Permission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
 	@Test
 	public void hasPermissionOnPluginSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), GeneralPermission.READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), Permission.READ));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
 	@Test
 	public void hasPermissionOnPluginSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), GeneralPermission.READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), Permission.READ));
 	}
 
 	static class Config
