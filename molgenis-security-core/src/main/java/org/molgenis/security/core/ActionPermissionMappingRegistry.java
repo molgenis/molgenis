@@ -1,6 +1,7 @@
 package org.molgenis.security.core;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -8,7 +9,7 @@ import java.util.Set;
 @Component
 public class ActionPermissionMappingRegistry
 {
-	private HashMultimap<Action, Permission> mapping = HashMultimap.create();
+	private SetMultimap<Action, Permission> mapping = HashMultimap.create();
 
 	public void addMapping(Action action, Permission permission)
 	{
