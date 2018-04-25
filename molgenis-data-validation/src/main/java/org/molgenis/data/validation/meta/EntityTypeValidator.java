@@ -66,7 +66,19 @@ public class EntityTypeValidator
 		validateOwnIdAttribute(entityType, ownAllAttrMap);
 		validateOwnLabelAttribute(entityType, ownAllAttrMap);
 		validateOwnLookupAttributes(entityType, ownAllAttrMap);
+		validateLabelAttribute(entityType);
 		validateBackend(entityType);
+	}
+
+	static void validateLabelAttribute(EntityType entityType)
+	{
+		if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible()
+				&& entityType.getLabelAttribute() == null)
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("EntityType [%s] must define a label attribute because the identifier is hidden",
+							entityType.getId())));
+		}
 	}
 
 	/**
@@ -136,15 +148,6 @@ public class EntityTypeValidator
 				throw new MolgenisValidationException(new ConstraintViolation(
 						format("Label attribute [%s] is not is not one of the attributes of entity [%s]",
 								ownLabelAttr.getName(), entityType.getId())));
-			}
-		}
-		else
-		{
-			if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible())
-			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("EntityType [%s] must define a label attribute because the identifier is hidden",
-								entityType.getId())));
 			}
 		}
 	}

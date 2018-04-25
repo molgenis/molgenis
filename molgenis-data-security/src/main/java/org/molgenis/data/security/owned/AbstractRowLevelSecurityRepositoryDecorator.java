@@ -143,7 +143,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		delegate().update(entities.filter((E entity) ->
 		{
-			boolean result = isOperationPermitted(entity.getIdValue(), Action.UPDATE);
+			boolean result = isOperationPermitted(entity, Action.UPDATE);
 			if (result)
 			{
 				updateAcl(entity);
@@ -206,8 +206,11 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void add(E entity)
 	{
-		createAcl(entity);
-		delegate().add(entity);
+		if (isOperationPermitted(entity, Action.CREATE))
+		{
+			createAcl(entity);
+			delegate().add(entity);
+		}
 	}
 
 	@Override
@@ -215,6 +218,8 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		return delegate().add(entities.filter(entity ->
 		{
+			//throws exception if no permission on the containing package
+			isOperationPermitted(entity, Action.CREATE);
 			createAcl(entity);
 			return true;
 		}));

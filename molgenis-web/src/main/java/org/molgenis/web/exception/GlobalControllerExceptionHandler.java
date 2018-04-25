@@ -1,6 +1,7 @@
 package org.molgenis.web.exception;
 
 import org.molgenis.data.UnknownDataException;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,13 @@ public class GlobalControllerExceptionHandler
 
 	@ExceptionHandler(UnknownDataException.class)
 	public Object handleException(UnknownDataException e, HandlerMethod handlerMethod)
+	{
+		LOG.info("", e);
+		return ExceptionHandlerUtils.handleException(e, handlerMethod, NOT_FOUND, e.getErrorCode(), environment);
+	}
+
+	@ExceptionHandler(CodedRuntimeException.class)
+	public Object handleException(CodedRuntimeException e, HandlerMethod handlerMethod)
 	{
 		LOG.info("", e);
 		return ExceptionHandlerUtils.handleException(e, handlerMethod, NOT_FOUND, e.getErrorCode(), environment);

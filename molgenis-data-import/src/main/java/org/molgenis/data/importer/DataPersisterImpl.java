@@ -2,10 +2,7 @@ package org.molgenis.data.importer;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl.EntityTypeWithoutMappedByAttributes;
@@ -83,6 +80,12 @@ public class DataPersisterImpl implements DataPersister
 			EntityType persistedEntityType = persistEntityTypeFirstPass(entityType, metadataMode);
 			if (dataProvider.hasEntities(entityType))
 			{
+				if (entityType.isAbstract())
+				{
+					throw new MolgenisDataException(
+							format("Abstract entity type '%s' with id '%s' cannot contain entities",
+									entityType.getLabel(), entityType.getId()));
+				}
 				Stream<Entity> entities = dataProvider.getEntities(entityType);
 				long nrPersistedEntities = persistEntitiesFirstPass(persistedEntityType, entities, dataMode);
 				persistResultBuilder.put(entityType.getId(), nrPersistedEntities);

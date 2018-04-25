@@ -2,10 +2,8 @@ package org.molgenis.data.security.auth;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testng.Assert;
@@ -18,14 +16,12 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.UserRepositoryDecorator.DELETE_USER_MSG;
 
 public class UserRepositoryDecoratorTest extends AbstractMockitoTest
 {
 	@Mock
 	private Repository<User> delegateRepository;
-	@Mock
-	private DataService dataService;
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
@@ -34,13 +30,13 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUp()
 	{
-		userRepositoryDecorator = new UserRepositoryDecorator(delegateRepository, dataService, passwordEncoder);
+		userRepositoryDecorator = new UserRepositoryDecorator(delegateRepository, passwordEncoder);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testUserRepositoryDecorator()
 	{
-		new UserRepositoryDecorator(null, null, null);
+		new UserRepositoryDecorator(null, null);
 	}
 
 	@Test
@@ -74,79 +70,35 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(passwordEncoder, times(2)).encode(password);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = DELETE_USER_MSG)
 	public void delete()
 	{
 		User user = mock(User.class);
-
-		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class)).thenReturn(groupMembers);
-
 		userRepositoryDecorator.delete(user);
-
-		verify(delegateRepository, times(1)).delete(user);
-		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = DELETE_USER_MSG)
 	public void deleteStream()
 	{
 		User user = mock(User.class);
-
 		Stream<User> entities = Stream.of(user);
-		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class)).thenReturn(groupMembers);
-
-		ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
 		userRepositoryDecorator.delete(entities);
-
-		verify(delegateRepository, times(1)).delete(captor.capture());
-		captor.getValue().forEach(u ->
-		{
-		});
-		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = DELETE_USER_MSG)
 	public void deleteById()
 	{
 		User user = mock(User.class);
-
-		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class)).thenReturn(groupMembers);
-
 		userRepositoryDecorator.delete(user);
-
-		verify(delegateRepository, times(1)).delete(user);
-		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = DELETE_USER_MSG)
 	public void deleteAllStream()
 	{
-		User user = mock(User.class);
-		when(userRepositoryDecorator.findOneById("1")).thenReturn(user);
-
-		Stream<GroupMember> groupMembers = Stream.of(mock(GroupMember.class));
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user),
-				GroupMember.class)).thenReturn(groupMembers);
-
-		ArgumentCaptor<Stream> captor = ArgumentCaptor.forClass(Stream.class);
 		userRepositoryDecorator.deleteAll(Stream.of("1"));
-
-		verify(delegateRepository, times(1)).deleteAll(captor.capture());
-		captor.getValue().forEach(u ->
-		{
-		});
-		verify(dataService, times(1)).delete(GROUP_MEMBER, groupMembers);
 	}
 
-	@Test(expectedExceptions = UnsupportedOperationException.class)
+	@Test(expectedExceptions = UnsupportedOperationException.class, expectedExceptionsMessageRegExp = DELETE_USER_MSG)
 	public void deleteAll()
 	{
 		userRepositoryDecorator.deleteAll();

@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -24,7 +25,7 @@ public class TokenAuthenticationProviderTest
 	public void beforeMethod()
 	{
 		tokenService = mock(TokenService.class);
-		tokenAuthenticationProvider = new TokenAuthenticationProvider(tokenService);
+		tokenAuthenticationProvider = new TokenAuthenticationProvider(tokenService, mock(UserDetailsChecker.class));
 	}
 
 	@Test

@@ -101,8 +101,7 @@ public class RestControllerIT
 			   .when()
 			   .delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
 			   .then()
-			   .log()
-			   .all().statusCode(NO_CONTENT);
+			   .log().all().statusCode(NO_CONTENT);
 	}
 
 	@Test
@@ -124,16 +123,7 @@ public class RestControllerIT
 	@Test
 	public void logoutWithoutTokenFails()
 	{
-		given().log()
-			   .uri()
-			   .log()
-			   .method()
-			   .when()
-			   .post(PATH + "logout")
-			   .then()
-			   .statusCode(BAD_REQUEST)
-			   .log()
-			   .all();
+		given().log().uri().log().method().when().post(PATH + "logout").then().statusCode(BAD_REQUEST).log().all();
 	}
 
 	@Test
@@ -248,9 +238,6 @@ public class RestControllerIT
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
-
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 
 }

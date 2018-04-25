@@ -110,9 +110,6 @@ public class TwoFactorAuthenticationAPIIT
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
 
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
-
 		// Disable two factor authentication
 		toggle2fa(this.adminToken, TwoFactorAuthenticationSetting.DISABLED);
 	}

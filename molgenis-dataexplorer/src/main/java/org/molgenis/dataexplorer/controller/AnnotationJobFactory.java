@@ -13,6 +13,7 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.jobs.JobExecutionUpdater;
 import org.molgenis.jobs.ProgressImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -58,6 +59,9 @@ public class AnnotationJobFactory
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 
+	@Autowired
+	private RunAsUserTokenFactory runAsUserTokenFactory;
+
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
@@ -67,8 +71,8 @@ public class AnnotationJobFactory
 		String username = metaData.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
-				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+		RunAsUserToken runAsAuthentication = runAsUserTokenFactory.create("Job Execution",
+				userDetailsService.loadUserByUsername(username), null);
 
 		Repository<Entity> repository = dataService.getRepository(targetName);
 		List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators()

@@ -407,6 +407,38 @@ public class RestTestUtils
 		}
 	}
 
+	/**
+	 * Sets user permissions on repositories. Existing repository permissions will be removed.
+	 *
+	 * @param adminToken  the token to use for authentication
+	 * @param userId      the id of the user to grant the permissions to
+	 * @param permissions Map mapping entity type ID to permission to grant
+	 */
+	public static void setGrantedPackagePermissions(String adminToken, String userId,
+			Map<String, Permission> permissions)
+	{
+		if (adminToken != null)
+		{
+			Map<String, String> params = permissions.entrySet()
+													.stream()
+													.collect(toMap(entry -> "radio-" + entry.getKey(),
+															entry -> entry.getValue().name().toLowerCase()));
+
+			given().header(X_MOLGENIS_TOKEN, adminToken)
+				   .contentType(X_WWW_FORM_URLENCODED)
+				   .params(params)
+				   .param("userId", userId)
+				   .when()
+				   .log()
+				   .all()
+				   .post(PermissionManagerController.URI + "/update/package/user")
+				   .then()
+				   .log()
+				   .all()
+				   .statusCode(OKE);
+		}
+	}
+
 	public static void removePackages(String adminToken, List<String> packageNames)
 	{
 		packageNames.forEach(packageName -> removePackage(adminToken, packageName));
@@ -481,17 +513,6 @@ public class RestTestUtils
 		if (testUserToken != null)
 		{
 			given().header(X_MOLGENIS_TOKEN, testUserToken).when().post("api/v1/logout");
-		}
-	}
-
-	/**
-	 * Remove the test user by deleting the row from the User table
-	 */
-	public static void cleanupUser(String adminToken, String testUserId)
-	{
-		if (adminToken != null && testUserId != null)
-		{
-			given().header(X_MOLGENIS_TOKEN, adminToken).when().delete("api/v1/sys_sec_User/" + testUserId);
 		}
 	}
 }

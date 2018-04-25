@@ -23,7 +23,6 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DatabaseAction.UPDATE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.annotation.core.utils.AnnotatorUtils.addAnnotatorMetaDataToRepositories;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -66,7 +65,7 @@ public class CrudRepositoryAnnotator
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
 					permissionSystemService.giveUserWriteMetaPermissions(targetMetaData);
-					runAsSystem(() -> dataService.getMeta().updateEntityType(externalRepository.getEntityType()));
+					dataService.getMeta().updateEntityType(externalRepository.getEntityType());
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
@@ -78,10 +77,9 @@ public class CrudRepositoryAnnotator
 			}
 			else
 			{
-				runAsSystem(() -> dataService.getMeta()
-											 .updateEntityType(
-													 addAnnotatorMetaDataToRepositories(entityType, attributeFactory,
-															 annotator)));
+				dataService.getMeta()
+						   .updateEntityType(
+								   addAnnotatorMetaDataToRepositories(entityType, attributeFactory, annotator));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
@@ -104,11 +102,8 @@ public class CrudRepositoryAnnotator
 		{
 			if (annotator instanceof EffectCreatingAnnotator && targetMetaData != null)
 			{
-				runAsSystem(() ->
-				{
-					dataService.deleteAll(targetMetaData.getId());
-					dataService.getMeta().deleteEntityType(targetMetaData.getId());
-				});
+				dataService.deleteAll(targetMetaData.getId());
+				dataService.getMeta().deleteEntityType(targetMetaData.getId());
 			}
 		}
 		catch (Exception ex)

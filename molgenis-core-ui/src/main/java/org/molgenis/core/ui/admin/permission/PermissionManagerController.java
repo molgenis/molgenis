@@ -1,7 +1,9 @@
 package org.molgenis.core.ui.admin.permission;
 
 import com.google.common.collect.Lists;
+import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -305,19 +307,19 @@ public class PermissionManagerController extends PluginController
 
 	private void updatePackagePermissions(WebRequest webRequest, Sid sid)
 	{
-		for (Package package_ : getPackages())
+		for (Package pack : getPackages())
 		{
-			String param = "radio-" + package_.getId();
+			String param = "radio-" + pack.getId();
 			String value = webRequest.getParameter(param);
 			if (value != null)
 			{
 				if (!value.equals("none"))
 				{
-					createSidPackagePermission(package_, sid, toEntityTypePermission(value));
+					createSidPackagePermission(pack, sid, toPackagePermission(value));
 				}
 				else
 				{
-					removeSidPackagePermission(package_, sid);
+					removeSidPackagePermission(pack, sid);
 				}
 			}
 		}
@@ -389,7 +391,7 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+			throw new UnexpectedPermissionException(ace.getPermission());
 		}
 		return pluginPermission;
 	}
@@ -408,16 +410,15 @@ public class PermissionManagerController extends PluginController
 				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
 	}
 
-	private void createSidPackagePermission(Package package_, Sid sid, EntityTypePermission entityTypePermission)
+	private void createSidPackagePermission(Package pack, Sid sid, PackagePermission packagePermission)
 	{
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
-		createSidPermission(sid, objectIdentity,
-				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
+		ObjectIdentity objectIdentity = new PackageIdentity(pack);
+		createSidPermission(sid, objectIdentity, PackagePermissionUtils.getCumulativePermission(packagePermission));
 	}
 
-	private void removeSidPackagePermission(Package package_, Sid sid)
+	private void removeSidPackagePermission(Package pack, Sid sid)
 	{
-		ObjectIdentity objectIdentity = new PackageIdentity(package_);
+		ObjectIdentity objectIdentity = new PackageIdentity(pack);
 		removePermissionForSid(sid, objectIdentity);
 	}
 
@@ -487,7 +488,33 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			throw new IllegalArgumentException(format("Illegal permission '%s'", ace.getPermission()));
+			throw new UnexpectedPermissionException(ace.getPermission());
+		}
+		return entityTypePermission;
+	}
+
+	private org.molgenis.security.permission.Permission toPackagePermission(AccessControlEntry ace)
+	{
+		org.molgenis.security.permission.Permission entityTypePermission = new org.molgenis.security.permission.Permission();
+		if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITEMETA)))
+		{
+			entityTypePermission.setType("writemeta");
+		}
+		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITE)))
+		{
+			entityTypePermission.setType("write");
+		}
+		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.READ)))
+		{
+			entityTypePermission.setType("read");
+		}
+		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.COUNT)))
+		{
+			entityTypePermission.setType("count");
+		}
+		else
+		{
+			throw new UnexpectedPermissionException(ace.getPermission());
 		}
 		return entityTypePermission;
 	}
@@ -505,7 +532,7 @@ public class PermissionManagerController extends PluginController
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
-		return toEntityTypePermissions(aclMap, sid, permissions);
+		return toPermissions(aclMap, sid, permissions);
 	}
 
 	private Permissions toPackagePermissions(List<Package> packages, Map<ObjectIdentity, Acl> aclMap, Sid sid)
@@ -520,29 +547,40 @@ public class PermissionManagerController extends PluginController
 
 		permissions.setEntityIds(entityTypeMap);
 
-		return toEntityTypePermissions(aclMap, sid, permissions);
+		return toPermissions(aclMap, sid, permissions);
 	}
 
-	private Permissions toEntityTypePermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions)
+	private Permissions toPermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions)
 	{
 		boolean isUser = setUserOrGroup(sid, permissions);
 
 		// set permissions: permissions
 		aclMap.forEach((objectIdentity, acl) ->
 		{
-			String entityTypeId = objectIdentity.getIdentifier().toString();
+			String id = objectIdentity.getIdentifier().toString();
 			acl.getEntries().forEach(ace ->
 			{
 				if (ace.getSid().equals(sid))
 				{
-					org.molgenis.security.permission.Permission entityTypePermission = toEntityTypePermission(ace);
+					org.molgenis.security.permission.Permission permission;
+					switch (objectIdentity.getType())
+					{
+						case EntityTypeIdentity.TYPE:
+							permission = toEntityTypePermission(ace);
+							break;
+						case PackageIdentity.TYPE:
+							permission = toPackagePermission(ace);
+							break;
+						default:
+							throw new MolgenisDataException("Unexpected permission type");
+					}
 					if (isUser)
 					{
-						permissions.addUserPermission(entityTypeId, entityTypePermission);
+						permissions.addUserPermission(id, permission);
 					}
 					else
 					{
-						permissions.addGroupPermission(entityTypeId, entityTypePermission);
+						permissions.addGroupPermission(id, permission);
 					}
 				}
 			});
@@ -562,6 +600,23 @@ public class PermissionManagerController extends PluginController
 				return EntityTypePermission.COUNT;
 			case "WRITEMETA":
 				return EntityTypePermission.WRITEMETA;
+			default:
+				throw new IllegalArgumentException(format("Unknown entity type permission '%s'", paramValue));
+		}
+	}
+
+	private static PackagePermission toPackagePermission(String paramValue)
+	{
+		switch (paramValue.toUpperCase())
+		{
+			case "READ":
+				return PackagePermission.READ;
+			case "WRITE":
+				return PackagePermission.WRITE;
+			case "COUNT":
+				return PackagePermission.COUNT;
+			case "WRITEMETA":
+				return PackagePermission.WRITEMETA;
 			default:
 				throw new IllegalArgumentException(format("Unknown entity type permission '%s'", paramValue));
 		}

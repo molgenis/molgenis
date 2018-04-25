@@ -11,6 +11,7 @@ import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.jobs.JobFactoryRegistry;
 import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -69,6 +70,9 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 		@Mock
 		private UserDetails userDetails;
 
+		@Mock
+		private RunAsUserTokenFactory runAsUserTokenFactory;
+
 		@Autowired
 		JobFactoryRegistrar jobFactoryRegistrar;
 
@@ -90,6 +94,12 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 		public MailSender mailSender()
 		{
 			return mailSender;
+		}
+
+		@Bean
+		public RunAsUserTokenFactory runAsUserTokenFactory()
+		{
+			return runAsUserTokenFactory;
 		}
 
 		@Bean

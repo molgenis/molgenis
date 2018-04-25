@@ -5,7 +5,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.oneclickimporter.model.Column;
@@ -40,13 +42,14 @@ public class EntityServiceImpl implements EntityService
 	private final OneClickImporterNamingService oneClickImporterNamingService;
 	private final PackageFactory packageFactory;
 	private final PermissionSystemService permissionSystemService;
+	private final Package uploadPackage;
 
 	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
 			EntityManager entityManager, AttributeTypeService attributeTypeService,
 			OneClickImporterService oneClickImporterService,
 			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory,
-			PermissionSystemService permissionSystemService)
+			PermissionSystemService permissionSystemService, UploadPackage uploadPackage)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
@@ -59,6 +62,7 @@ public class EntityServiceImpl implements EntityService
 		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.uploadPackage = requireNonNull(uploadPackage);
 	}
 
 	@Override
@@ -74,6 +78,7 @@ public class EntityServiceImpl implements EntityService
 		{
 			package_ = packageFactory.create(packageName);
 			package_.setLabel(packageName);
+			package_.setParent(uploadPackage);
 			metaDataService.addPackage(package_);
 		}
 

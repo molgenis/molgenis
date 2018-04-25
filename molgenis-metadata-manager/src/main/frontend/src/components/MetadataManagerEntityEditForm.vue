@@ -81,9 +81,15 @@
         <div class="form-group row">
           <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-lookup-attributes-label' | i18n }}</label>
           <div class="col">
-            <multiselect v-model="lookupAttributes" :options="attributes" label="label"
-                         selectLabel="" deselectLabel=""
-                         :placeholder="$t('entity-edit-form-lookup-attributes-placeholder')" multiple></multiselect>
+            <multiselect
+              v-model="lookupAttributes"
+              :options="attributes"
+              label="label"
+              selectLabel=""
+              deselectLabel=""
+              track-by="id"
+              :placeholder="$t('entity-edit-form-lookup-attributes-placeholder')" multiple>
+            </multiselect>
           </div>
         </div>
       </div>
