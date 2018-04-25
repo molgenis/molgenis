@@ -5,6 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -70,7 +71,7 @@ public class EntityServiceImplTest
 	}
 
 	@Test
-	public void testCreateEntity() throws Exception
+	public void testCreateEntity()
 	{
 		String tableName = "super-powers";
 		List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
@@ -78,6 +79,9 @@ public class EntityServiceImplTest
 		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
 				Column.create("super power", 1, superPowers));
 		DataCollection dataCollection = DataCollection.create(tableName, columns);
+
+		//mock parent package
+		UploadPackage upload = mock(UploadPackage.class);
 
 		// mock auto id
 		String generatedId = "id_0";
@@ -132,7 +136,7 @@ public class EntityServiceImplTest
 
 		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
 				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				oneClickImporterNamingService, packageFactory, permissionSystemService);
+				oneClickImporterNamingService, packageFactory, permissionSystemService, upload);
 
 		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);

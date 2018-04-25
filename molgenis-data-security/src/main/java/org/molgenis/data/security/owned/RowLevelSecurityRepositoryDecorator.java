@@ -48,6 +48,10 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRowLevelSecurit
 
 	private boolean isOperationPermitted(EntityIdentity entityIdentity, Action action)
 	{
+		if (action == Action.CREATE)
+		{
+			return true;
+		}
 		AbstractPermission permission = getPermissionForOperation(action);
 		return userPermissionEvaluator.hasPermission(entityIdentity, permission);
 	}

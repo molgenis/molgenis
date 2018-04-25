@@ -5,16 +5,14 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.integrationtest.platform.TestPermissionPopulator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.Sid;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
@@ -25,9 +23,8 @@ import java.util.Map;
 import static java.util.Collections.singleton;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.data.meta.UploadPackage.UPLOAD;
+import static org.molgenis.data.security.EntityTypePermission.WRITE;
 
 public class VcfImportServiceIT extends ImportServiceIT
 {
@@ -65,7 +62,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, UPLOAD);
 		validateImportReport(importReport, ImmutableMap.of(entityTypeId, 10), ImmutableSet.of(entityTypeId));
 
 		assertVariants(entityTypeId, false);
@@ -122,7 +119,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, UPLOAD);
 		validateImportReport(importReport,
 				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
 				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
@@ -220,23 +217,24 @@ public class VcfImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private MutableAclService mutableAclService;
+	private TestPermissionPopulator testPermissionPopulator;
 
 	private void populateUserPermissions()
 	{
-		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
+				EntityTypePermission.READ);
+		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
+		CumulativePermission writeMetaPackage = PackagePermissionUtils.getCumulativePermission(
+				PackagePermission.WRITEMETA);
 
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", READ);
-		entityTypePermissionMap.put("sys_md_Attribute", READ);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+		Map<ObjectIdentity, org.springframework.security.acls.model.Permission> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), writeEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
+		permissionMap.put(new PackageIdentity(UPLOAD), writeMetaPackage);
 
-		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
-		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
-			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
-			mutableAclService.updateAcl(acl);
-		}));
+		testPermissionPopulator.populate(permissionMap, SecurityUtils.getCurrentUsername());
+
 	}
 }

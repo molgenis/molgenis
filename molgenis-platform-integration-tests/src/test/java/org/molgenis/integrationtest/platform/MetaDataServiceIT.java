@@ -6,15 +6,19 @@ import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.NullPackageNotSuException;
+import org.molgenis.data.security.exception.PackagePermissionException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.CumulativePermission;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,7 +44,6 @@ import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.security.EntityTypePermission.READ;
 import static org.molgenis.data.security.EntityTypePermission.WRITEMETA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertNull;
@@ -55,6 +58,11 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	private static final String ENTITY_TYPE_ID = "metaDataServiceEntityType";
 	private static final String REF_ENTITY_TYPE_ID = "metaDataServiceRefEntityType";
+	private static final String PACK_NO_WRITEMETA_PERMISSION = "packageNoWriteMeta";
+	private static final String PACK_PERMISSION = "packageWriteMeta";
+	public static final String ENTITY_TYPE_3 = "entityType3";
+	public static final String ENTITY_TYPE_2 = "entityType2";
+	public static final String ENTITY_TYPE_1 = "entityType1";
 	private static List<Entity> refEntities;
 
 	@Autowired
@@ -69,6 +77,13 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 	@Autowired
 	private AttributeFactory attributeFactory;
+	@Autowired
+	private EntityTypeFactory entityTypeFactory;
+	@Autowired
+	private PackageFactory packageFactory;
+
+	private Package packNoPermission;
+	private Package packPermission;
 
 	@BeforeClass
 	public void setUpBeforeClass() throws InterruptedException
@@ -143,6 +158,58 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		metaDataService.updateEntityType(updatedEntityType);
 	}
 
+	@SuppressWarnings("deprecation")
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = PackagePermissionException.class)
+	public void testCreateNoPackagePermission()
+	{
+		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_1)
+												 .setLabel("label")
+												 .setBackend("PostgreSQL")
+												 .setPackage(packNoPermission);
+		entityType.addAttribute(attributeFactory.create()
+												.setIdentifier(ATTR_REF_ID)
+												.setName("attr")
+												.setDataType(STRING)
+												.setIdAttribute(true)
+												.setNillable(false));
+		metaDataService.createRepository(entityType);
+	}
+
+	@SuppressWarnings("deprecation")
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = NullPackageNotSuException.class)
+	public void testCreateNullPermission()
+	{
+		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_2).setLabel("label").setBackend("PostgreSQL");
+		entityType.addAttribute(attributeFactory.create()
+												.setIdentifier(ATTR_REF_ID)
+												.setName("attr")
+												.setDataType(STRING)
+												.setIdAttribute(true)
+												.setNillable(false));
+		metaDataService.createRepository(entityType);
+	}
+
+	@SuppressWarnings("deprecation")
+	@WithMockUser(username = USERNAME)
+	@Test
+	public void testCreatePermission()
+	{
+		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_3)
+												 .setLabel("label")
+												 .setBackend("PostgreSQL")
+												 .setPackage(packPermission);
+		entityType.addAttribute(attributeFactory.create()
+												.setIdentifier(ATTR_REF_ID)
+												.setName("attr")
+												.setDataType(STRING)
+												.setIdAttribute(true)
+												.setNillable(false));
+		metaDataService.createRepository(entityType);
+		assertTrue(dataService.hasRepository(ENTITY_TYPE_3));
+	}
+
 	@WithMockUser(username = USERNAME)
 	@Test(dependsOnMethods = { "testUpdateEntityType", "testUpdateEntityTypeNotAllowed" })
 	public void testAddAttribute()
@@ -209,25 +276,43 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		metaDataService.createRepository(entityType);
 		List<Entity> entities = entityTestHarness.createTestEntities(entityType, 1, refEntities).collect(toList());
 		dataService.add(entityType.getId(), entities.stream());
+
+		packNoPermission = packageFactory.create(PACK_NO_WRITEMETA_PERMISSION);
+		packPermission = packageFactory.create(PACK_PERMISSION);
+
+		metaDataService.addPackage(packNoPermission);
+		metaDataService.addPackage(packPermission);
 	}
 
 	private void populateDataPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", WRITEMETA);
-		entityTypePermissionMap.put("sys_md_Attribute", WRITEMETA);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		entityTypePermissionMap.put(ENTITY_TYPE_ID, WRITEMETA);
-		entityTypePermissionMap.put(REF_ENTITY_TYPE_ID, READ);
-		testPermissionPopulator.populate(entityTypePermissionMap, USERNAME);
+		// define cumulative permissions
+		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
+				EntityTypePermission.READ);
+		CumulativePermission writeMetaEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITEMETA);
+		CumulativePermission writeMetaPackage = PackagePermissionUtils.getCumulativePermission(
+				PackagePermission.WRITEMETA);
+		CumulativePermission writePackage = PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITE);
+
+		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeMetaEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeMetaEntityType);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
+		permissionMap.put(new EntityTypeIdentity(ENTITY_TYPE_ID), writeMetaEntityType);
+		permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), readEntityType);
+		permissionMap.put(new PackageIdentity(PACK_PERMISSION), writeMetaPackage);
+		permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), writePackage);
+		testPermissionPopulator.populate(permissionMap, USERNAME);
 	}
 
 	private void depopulate()
 	{
 		List<EntityType> entityTypes = dataService.findAll(ENTITY_TYPE_META_DATA,
-				Stream.of(ENTITY_TYPE_ID, REF_ENTITY_TYPE_ID), EntityType.class).collect(toList());
+				Stream.of(ENTITY_TYPE_ID, REF_ENTITY_TYPE_ID, ENTITY_TYPE_1, ENTITY_TYPE_2, ENTITY_TYPE_3),
+				EntityType.class).collect(toList());
 		dataService.getMeta().deleteEntityType(entityTypes);
+		dataService.delete(PackageMetadata.PACKAGE, Stream.of(packNoPermission, packPermission));
 
 		try
 		{

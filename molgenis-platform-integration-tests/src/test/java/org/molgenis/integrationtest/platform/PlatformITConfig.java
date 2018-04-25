@@ -17,6 +17,7 @@ import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
+import org.molgenis.integrationtest.config.SecurityCoreITConfig;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.jobs.JobConfig;
 import org.molgenis.jobs.JobExecutionConfig;
@@ -74,10 +75,10 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
 		"org.molgenis.data.importer.emx", "org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings",
 		"org.molgenis.data.util", "org.molgenis.data.decorator", "org.molgenis.data.event" })
-@Import({ PlatformBootstrapper.class, TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class,
-		DatabaseConfig.class, ElasticsearchConfig.class, PostgreSqlConfiguration.class, RunAsSystemAspect.class,
-		IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class,
-		JobConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+@Import({ SecurityCoreITConfig.class, PlatformBootstrapper.class, TestAppSettings.class, TestHarnessConfig.class,
+		EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class, PostgreSqlConfiguration.class,
+		RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
+		OntologyTestConfig.class, JobConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
 		RepositoryCollectionDecoratorFactoryImpl.class, DataSourceAclTablesPopulator.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, DataPersisterImpl.class,
@@ -125,6 +126,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails adminUserDetails = mock(UserDetails.class);
+		when(adminUserDetails.isEnabled()).thenReturn(true);
 		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
 		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
 		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);

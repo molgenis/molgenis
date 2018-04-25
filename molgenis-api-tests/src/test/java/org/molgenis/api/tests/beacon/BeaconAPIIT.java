@@ -263,8 +263,6 @@ public class BeaconAPIIT
 
 		// Clean up permissions
 		removeRightsForUser(adminToken, testUserId);
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 
 }

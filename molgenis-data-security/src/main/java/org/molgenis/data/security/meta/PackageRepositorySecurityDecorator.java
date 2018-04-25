@@ -1,9 +1,19 @@
 package org.molgenis.data.security.meta;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.PackagePermission;
+import org.molgenis.data.security.exception.NullParentPackageNotSuException;
+import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
+import org.molgenis.security.core.UserPermissionEvaluator;
+import org.springframework.security.acls.domain.AbstractPermission;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -15,23 +25,49 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecorator<Package>
 {
 	private final MutableAclService mutableAclService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
+	private final DataService dataService;
 
 	public PackageRepositorySecurityDecorator(Repository<Package> delegateRepository,
-			MutableAclService mutableAclService)
+			MutableAclService mutableAclService, UserPermissionEvaluator userPermissionEvaluator,
+			DataService dataService)
 	{
 		super(delegateRepository);
 		this.mutableAclService = requireNonNull(mutableAclService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
 	public void update(Package pack)
 	{
+		checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE);
 		updateAcl(pack);
 		delegate().update(pack);
+	}
+
+	protected String toMessagePermission(AbstractRowLevelSecurityRepositoryDecorator.Action action)
+	{
+		AbstractPermission permission = getPermissionForOperation(action);
+		String name;
+		if (permission instanceof EntityTypePermission)
+		{
+			name = ((EntityTypePermission) permission).getName();
+		}
+		else if (permission instanceof PackagePermission)
+		{
+			name = ((PackagePermission) permission).getName();
+		}
+		else
+		{
+			throw new MolgenisDataException("Unexpected permission type");
+		}
+		return name;
 	}
 
 	@Override
@@ -39,6 +75,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	{
 		super.update(packages.filter(pack ->
 		{
+			checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE);
 			updateAcl(pack);
 			return true;
 		}));
@@ -88,6 +125,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void add(Package pack)
 	{
+		checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE);
 		createAcl(pack);
 		delegate().add(pack);
 	}
@@ -99,6 +137,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		resolveDependencies(packages.collect(Collectors.toList()), resolved);
 		return super.add(resolved.stream().filter(pack ->
 		{
+			checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE);
 			createAcl(pack);
 			return true;
 		}));
@@ -112,9 +151,9 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			{
 				if (!resolved.contains(pack) && (!packages.contains(pack.getParent()) || resolved.contains(
 						pack.getParent())))
-					{
-						resolved.add(pack);
-					}
+				{
+					resolved.add(pack);
+				}
 			}
 			resolveDependencies(packages, resolved);
 		}
@@ -158,5 +197,64 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 				mutableAclService.updateAcl(acl);
 			}
 		}
+	}
+
+	private void checkParentPermission(Package newPackage, AbstractRowLevelSecurityRepositoryDecorator.Action action)
+	{
+		Package parent = newPackage.getParent();
+		if (parent != null)
+		{
+			boolean checkPackage = isParentUpdated(action, newPackage);
+			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
+					PackagePermission.WRITEMETA))
+			{
+				throw new PackagePermissionException(PackagePermission.WRITEMETA, parent);
+			}
+		}
+		else
+		{
+			if (!currentUserIsSuOrSystem() && isParentUpdated(action, newPackage))
+			{
+				throw new NullParentPackageNotSuException();
+			}
+		}
+	}
+
+	private boolean isParentUpdated(AbstractRowLevelSecurityRepositoryDecorator.Action action, Package pack)
+	{
+		boolean updated;
+		if (action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE)
+		{
+			updated = true;
+		}
+		else
+		{
+			Package currentpackage = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
+			if (currentpackage.getParent() == null)
+			{
+				updated = pack.getParent() != null;
+			}
+			else
+			{
+				updated = !currentpackage.getParent().equals(pack.getParent());
+			}
+		}
+		return updated;
+	}
+
+	private static AbstractPermission getPermissionForOperation(
+			AbstractRowLevelSecurityRepositoryDecorator.Action action)
+	{
+		AbstractPermission permission;
+		switch (action)
+		{
+			case UPDATE:
+			case CREATE:
+				permission = PackagePermission.WRITEMETA;
+				break;
+			default:
+				throw new IllegalArgumentException("Illegal entity type permission");
+		}
+		return permission;
 	}
 }

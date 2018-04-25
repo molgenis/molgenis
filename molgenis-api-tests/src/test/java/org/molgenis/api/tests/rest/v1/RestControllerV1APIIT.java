@@ -26,7 +26,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.given;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
 
 /**
  * Tests each endpoint of the V1 Rest Api through http calls
@@ -968,8 +969,5 @@ public class RestControllerV1APIIT
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
-
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 }

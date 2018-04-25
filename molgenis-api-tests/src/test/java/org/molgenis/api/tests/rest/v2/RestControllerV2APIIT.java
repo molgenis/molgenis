@@ -99,6 +99,9 @@ public class RestControllerV2APIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 
+		setGrantedPackagePermissions(adminToken, testUserId,
+				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
+
 		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
 	}
 
@@ -165,7 +168,7 @@ public class RestControllerV2APIIT
 											  .log()
 											  .all();
 		response.statusCode(OKE);
-		response.body("_meta.attributes[0].categoricalOptions.id", Matchers.hasItems("ref1", "ref2","ref3"));
+		response.body("_meta.attributes[0].categoricalOptions.id", Matchers.hasItems("ref1", "ref2", "ref3"));
 	}
 
 	@Test
@@ -714,9 +717,6 @@ public class RestControllerV2APIIT
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);
-
-		// Clean up user
-		cleanupUser(adminToken, testUserId);
 	}
 
 }
