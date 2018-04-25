@@ -27,6 +27,8 @@
                                 <i class="fab fa-google"></i>&nbsp;
                             <#elseif clientName == 'GitHub'>
                                 <i class="fab fa-github"></i>&nbsp;
+                            <#elseif clientName == 'ORCID'>
+                                <i class="ai ai-orcid"></i>&nbsp;
                             </#if>Sign in with ${clientName?html}</a>
                         </#list>
                     </div>
