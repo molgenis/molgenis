@@ -4,6 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.ActionPermissionMappingRegistry;
 import org.molgenis.security.core.Permission;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.access.PermissionEvaluator;
@@ -16,6 +17,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -32,7 +34,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		userPermissionEvaluator = new UserPermissionEvaluatorImpl(permissionEvaluator, null);
+		userPermissionEvaluator = new UserPermissionEvaluatorImpl(permissionEvaluator,
+				mock(ActionPermissionMappingRegistry.class));
 	}
 
 	@WithMockUser(username = "USER")
@@ -75,8 +78,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	public void hasPermissionOnPluginTrue()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", Permission.READ)).thenReturn(
-				true);
+		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", Permission.READ)).thenReturn(true);
 		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), Permission.READ));
 	}
 
