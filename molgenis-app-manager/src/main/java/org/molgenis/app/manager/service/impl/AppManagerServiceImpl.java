@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import org.molgenis.app.manager.exception.AppManagerException;
+import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppFactory;
 import org.molgenis.app.manager.meta.AppMetadata;
@@ -15,6 +15,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.plugin.model.PluginFactory;
 import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
@@ -45,13 +46,16 @@ public class AppManagerServiceImpl implements AppManagerService
 	private final DataService dataService;
 	private final FileStore fileStore;
 	private final Gson gson;
+	private final PluginFactory pluginFactory;
 
-	public AppManagerServiceImpl(AppFactory appFactory, DataService dataService, FileStore fileStore, Gson gson)
+	public AppManagerServiceImpl(AppFactory appFactory, DataService dataService, FileStore fileStore, Gson gson,
+			PluginFactory pluginFactory)
 	{
 		this.appFactory = requireNonNull(appFactory);
 		this.dataService = requireNonNull(dataService);
 		this.fileStore = requireNonNull(fileStore);
 		this.gson = requireNonNull(gson);
+		this.pluginFactory = requireNonNull(pluginFactory);
 	}
 
 	@Override
@@ -77,7 +81,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 		// Add plugin to plugin table to enable permissions and menu management
 		String pluginId = generatePluginId(app);
-		Plugin plugin = new Plugin(pluginId, dataService.getEntityType(PluginMetadata.PLUGIN));
+		Plugin plugin = pluginFactory.create(pluginId);
 		plugin.setLabel(app.getLabel());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
@@ -110,28 +114,27 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Transactional
 	public void uploadApp(MultipartFile multipartFile) throws IOException, ZipException
 	{
-		String appZipFileName = "zip_file_" + multipartFile.getOriginalFilename();
-		ZipFile appZipFile = new ZipFile(fileStore.store(multipartFile.getInputStream(), appZipFileName));
+		String appArchiveName = "zip_file_" + multipartFile.getOriginalFilename();
+		ZipFile appArchive = new ZipFile(fileStore.store(multipartFile.getInputStream(), appArchiveName));
 
-		if (!appZipFile.isValidZipFile())
+		if (!appArchive.isValidZipFile())
 		{
-			fileStore.delete(appZipFileName);
-			throw new AppManagerException(multipartFile.getName() + " is not a valid zip file!");
+			fileStore.delete(appArchiveName);
+			throw new InvalidAppArchiveException(multipartFile.getName());
 		}
 
 		String appDirectoryName = fileStore.getStorageDir() + File.separator + multipartFile.getOriginalFilename();
-		appZipFile.extractAll(appDirectoryName);
-		fileStore.delete(appZipFileName);
+		appArchive.extractAll(appDirectoryName);
+		fileStore.delete(appArchiveName);
 
-		checkForMissingFilesInAppZip(appDirectoryName);
+		checkForMissingFilesInAppArchive(appDirectoryName);
 
 		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
 		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
 		if (!isConfigContentValidJson(configFile))
 		{
 			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppManagerException(
-					"The config file you provided has some problems. Please ensure it is a valid JSON file.");
+			throw new InvalidAppConfigException();
 		}
 
 		AppConfig appConfig = gson.fromJson(fileToString(configFile), AppConfig.class);
@@ -142,13 +145,9 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setDescription(appConfig.getDescription());
 		newApp.setAppVersion(appConfig.getVersion());
 		newApp.setApiDependency(appConfig.getApiDependency());
-
-		// TODO What to do with index.html?
 		newApp.setTemplateContent(fileToString(indexFile));
 		newApp.setActive(false);
-
-		// TODO make includeMenuAndFooter configurable?
-		newApp.setIncludeMenuAndFooter(true);
+		newApp.setIncludeMenuAndFooter(appConfig.getIncludeMenuAndFooter());
 		newApp.setResourceFolder(appDirectoryName);
 
 		// If provided config does not include runtimeOptions, set an empty map
@@ -160,7 +159,6 @@ public class AppManagerServiceImpl implements AppManagerService
 		dataService.add(AppMetadata.APP, newApp);
 	}
 
-	// TODO use a constant for '/'
 	private String generatePluginId(App app)
 	{
 		String pluginId = APP_PLUGIN_ROOT + app.getUri();
@@ -176,7 +174,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = dataService.findOneById(AppMetadata.APP, id, App.class);
 		if (app == null)
 		{
-			throw new AppManagerException("App with id [" + id + "] does not exist.");
+			throw new AppForIDDoesNotExistException(id);
 		}
 		return app;
 	}
@@ -187,7 +185,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		App app = dataService.findOne(AppMetadata.APP, query, App.class);
 		if (app == null)
 		{
-			throw new AppManagerException("App with uri [" + uri + "] does not exist.");
+			throw new AppForURIDoesNotExistException(uri);
 		}
 		return app;
 	}
@@ -213,35 +211,34 @@ public class AppManagerServiceImpl implements AppManagerService
 		FileReader fileReader = new FileReader(file);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
 		bufferedReader.lines().forEach(line -> fileContents.append(line).append(System.getProperty("line.separator")));
+		bufferedReader.close();
 
 		return fileContents.toString();
 	}
 
-	private void checkForMissingFilesInAppZip(String appDirectoryName) throws IOException
+	private void checkForMissingFilesInAppArchive(String appDirectoryName) throws IOException
 	{
-		List<String> missingFromZipFile = newArrayList();
+		List<String> missingFromArchive = newArrayList();
 
 		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
 		if (!indexFile.exists())
 		{
-			missingFromZipFile.add(ZIP_INDEX_FILE);
+			missingFromArchive.add(ZIP_INDEX_FILE);
 		}
 
 		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
 		if (!configFile.exists())
 		{
-			missingFromZipFile.add(ZIP_CONFIG_FILE);
+			missingFromArchive.add(ZIP_CONFIG_FILE);
 		}
 
-		if (missingFromZipFile.size() > 0)
+		if (!missingFromArchive.isEmpty())
 		{
 			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppManagerException("There were some missing files in your zip package " + missingFromZipFile
-					+ ". Please add these and upload again.");
+			throw new AppArchiveMissingFilesException(missingFromArchive);
 		}
 	}
 
-	// TODO add more required parameters???
 	private void checkForMissingParametersInAppConfig(AppConfig appConfig, String appDirectoryName) throws IOException
 	{
 		List<String> missingConfigParameters = newArrayList();
@@ -255,12 +252,10 @@ public class AppManagerServiceImpl implements AppManagerService
 			missingConfigParameters.add("version");
 		}
 
-		if (missingConfigParameters.size() > 0)
+		if (!missingConfigParameters.isEmpty())
 		{
 			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppManagerException(
-					"There were some missing parameters in your config file " + missingConfigParameters
-							+ ". Please add these and upload again.");
+			throw new AppConfigMissingParametersException(missingConfigParameters);
 		}
 	}
 }

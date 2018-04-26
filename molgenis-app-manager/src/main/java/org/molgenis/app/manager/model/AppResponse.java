@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AppResponse.class)
+@SuppressWarnings("squid:S1610")
 public abstract class AppResponse
 {
 	public abstract String getId();
@@ -26,6 +27,8 @@ public abstract class AppResponse
 
 	public abstract String getVersion();
 
+	public abstract String getResourceFolder();
+
 	@Nullable
 	public abstract String getAppConfig();
 
@@ -33,6 +36,6 @@ public abstract class AppResponse
 	{
 		return new AutoValue_AppResponse(app.getId(), app.getUri(), app.getLabel(), app.getDescription(),
 				app.isActive(), app.includeMenuAndFooter(), app.getTemplateContent(), app.getAppVersion(),
-				app.getAppConfig());
+				app.getResourceFolder(), app.getAppConfig());
 	}
 }

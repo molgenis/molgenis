@@ -1,10 +1,8 @@
 package org.molgenis.app.manager.meta;
 
-import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -30,12 +28,10 @@ public class AppMetadata extends SystemEntityType
 	public static final String APP_CONFIG = "appConfig";
 	public static final String INCLUDE_MENU_AND_FOOTER = "includeMenuAndFooter";
 
-	private final FileMetaMetaData fileMetaMetaData;
 
-	public AppMetadata(FileMetaMetaData fileMetaMetaData)
+	public AppMetadata()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
 	}
 
 	@Override

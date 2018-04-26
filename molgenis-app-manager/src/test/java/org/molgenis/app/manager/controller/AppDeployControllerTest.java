@@ -9,8 +9,8 @@ import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -68,6 +68,8 @@ public class AppDeployControllerTest
 		when(app.includeMenuAndFooter()).thenReturn(true);
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
+		when(app.getResourceFolder()).thenReturn("resources");
+
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
@@ -77,7 +79,7 @@ public class AppDeployControllerTest
 	}
 
 	@Test
-	public void testDeployApp() throws Exception
+	public void testServeApp() throws Exception
 	{
 		mockMvc.perform(get(AppDeployController.URI + "/uri/"))
 			   .andExpect(status().isOk())
@@ -87,29 +89,12 @@ public class AppDeployControllerTest
 	}
 
 	@Test
-	public void testLoadJavascriptResources() throws Exception
+	public void testServeResource() throws Exception
 	{
-		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
-									 .andExpect(status().isOk())
-									 .andReturn();
-		verify(appDeployService).loadJavascriptResources("uri", "test.js", mvcResult.getResponse());
-	}
-
-	@Test
-	public void testLoadCSSResources() throws Exception
-	{
-		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/css/test.css"))
-									 .andExpect(status().isOk())
-									 .andReturn();
-		verify(appDeployService).loadCSSResources("uri", "test.css", mvcResult.getResponse());
-	}
-
-	@Test
-	public void testLoadImageResources() throws Exception
-	{
-		MvcResult mvcResult = mockMvc.perform(get(AppDeployController.URI + "/uri/img/test.png"))
-									 .andExpect(status().isOk())
-									 .andReturn();
-		verify(appDeployService).loadImageResources("uri", "test.png", mvcResult.getResponse());
+		MockHttpServletResponse response = mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
+												  .andExpect(status().isOk())
+												  .andReturn()
+												  .getResponse();
+		verify(appDeployService).loadResource("resources/js/test.js", response);
 	}
 }
