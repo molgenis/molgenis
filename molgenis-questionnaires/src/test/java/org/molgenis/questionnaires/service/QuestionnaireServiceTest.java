@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
+import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.impl.QuestionnaireServiceImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -134,16 +135,28 @@ public class QuestionnaireServiceTest
 		when(questionnaireFactory.create(entity)).thenReturn(null);
 
 		EntityType entityType = mock(EntityType.class);
+		when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
 		when(dataService.getEntityType(QUESTIONNAIRE_ID)).thenReturn(entityType);
+
 
 		Entity questionnaireEntity = mock(Entity.class);
 		when(entityManager.create(entityType, POPULATE)).thenReturn(questionnaireEntity);
 
 		Questionnaire questionnaire = mock(Questionnaire.class);
+		when(questionnaire.getId()).thenReturn(QUESTIONNAIRE_ID);
+		when(questionnaire.getLabel()).thenReturn("label");
+		when(questionnaire.getDescription()).thenReturn("Description");
+		when(questionnaire.getStatus()).thenReturn(QuestionnaireStatus.NOT_STARTED);
+		when(questionnaire.getEntityType()).thenReturn(entityType);
+
 		when(questionnaireFactory.create(questionnaireEntity)).thenReturn(questionnaire);
+		when(questionnaireFactory.create(questionnaire.getEntityType().getId())).thenReturn(questionnaire);
+		when(questionnaireFactory.create(questionnaire)).thenReturn(null, questionnaire);
+		when(dataService.findOne(questionnaire.getEntityType().getId(), EQ(OWNER_USERNAME, null))).thenReturn(questionnaire);
 
 		// =========== Test ===========
-		questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
+		QuestionnaireResponse actual = questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
+		assertEquals(actual.getId(), QUESTIONNAIRE_ID);
 		verify(dataService).add(QUESTIONNAIRE_ID, questionnaire);
 	}
 
@@ -155,10 +168,15 @@ public class QuestionnaireServiceTest
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
 
 		Questionnaire questionnaire = mock(Questionnaire.class);
+		when(questionnaire.getId()).thenReturn(QUESTIONNAIRE_ID);
+		when(questionnaire.getLabel()).thenReturn("label");
+		when(questionnaire.getDescription()).thenReturn("Description");
+		when(questionnaire.getStatus()).thenReturn(QuestionnaireStatus.NOT_STARTED);
 		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
 
 		// =========== Test ===========
-		questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
+		QuestionnaireResponse actual = questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
+		assertEquals(actual.getId(), QUESTIONNAIRE_ID);
 		verify(dataService, times(0)).add(QUESTIONNAIRE_ID, questionnaire);
 	}
 

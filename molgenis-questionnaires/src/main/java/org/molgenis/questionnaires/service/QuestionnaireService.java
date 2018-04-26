@@ -22,9 +22,11 @@ public interface QuestionnaireService
 	 * <p>
 	 * Created questionnaire entries get the status 'OPEN'.
 	 *
-	 * @param id The ID of a questionnaire
+	 * @param entityTypeId The ID of a questionnaire type
+	 *
+	 * @return QuestionnaireResponse to return the added questionaire to the frontend
 	 */
-	void startQuestionnaire(String id);
+	QuestionnaireResponse startQuestionnaire(String entityTypeId);
 
 	/**
 	 * Retrieve static content for a specific questionnaire containing a "Thank you" text which is shown
