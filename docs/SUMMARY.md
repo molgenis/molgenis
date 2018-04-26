@@ -17,7 +17,7 @@
     - [Customize your MOLGENIS](user_documentation/guide-customize.md)
     - [Scheduled Jobs](user_documentation/guide-schedule.md)
     - [Localization](user_documentation/guide-l10n.md)
-    - [Using the Appstore](user_documentation/guide-appstore.md)
+    - [Using the App manager](user_documentation/guide-app-manager.md)
     - [Scripts](user_documentation/guide-scripts.md)
     - [SORTA](user_documentation/guide-SORTA.md)
     - [Download tool](user_documentation/guide-emx-download.md)

@@ -59,7 +59,7 @@ We just imported a lot of them
 
 and now we are interested in apps having to with Biobanks or Bio
 
-![am07 - after search](../images/app-manager/am07-before-search.png?raw=true, "am07-before-search")
+![am07 - after search](../images/app-manager/am07-after-search.png?raw=true, "am07-after-search")
 
 
 ### Deleting an app
