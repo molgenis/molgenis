@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.security;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.Ui;
@@ -23,9 +23,9 @@ public class MolgenisAccessDecisionVoterTest
 	public void setUp()
 	{
 		UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
-		when(permissionService.hasPermission(new PluginIdentity("plugingranted"), GeneralPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugingranted"), Permission.READ)).thenReturn(
 				true);
-		when(permissionService.hasPermission(new PluginIdentity("plugindenied"), GeneralPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugindenied"), Permission.READ)).thenReturn(
 				false);
 
 		Ui molgenisUi = mock(Ui.class);

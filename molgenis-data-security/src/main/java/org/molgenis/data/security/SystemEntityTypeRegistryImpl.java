@@ -5,7 +5,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +87,7 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	}
 
 	/**
-	 * See {@link Permission#COUNT} for an explanation why we are not using {@link Permission#READ} here
+	 * See {@link EntityTypePermission#COUNT} for an explanation why we are not using {@link EntityTypePermission#READ} here
 	 */
 	private boolean isReadAllowed(SystemEntityType systemEntityType)
 	{

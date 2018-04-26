@@ -20,7 +20,6 @@ import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.jobs.model.JobExecutionMetaData;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
@@ -48,10 +47,10 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.Permission.READ;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.Permission.WRITE;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
 
 /**
  * Controller class for the data explorer.
@@ -501,5 +500,17 @@ public class DataExplorerController extends PluginController
 		{
 			return false;
 		}
+	}
+
+	public static enum Permission
+	{
+		READ, WRITE, /**
+	 * COUNT permission on an entity type:
+	 * <ul>
+	 * <li>means that entities can be counted and aggregated</li>
+	 * <li>the entity type can be <b>READ</b></li>
+	 * </ul>
+	 */
+	COUNT, NONE, WRITEMETA
 	}
 }

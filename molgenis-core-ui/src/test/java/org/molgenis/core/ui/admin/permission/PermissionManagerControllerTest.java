@@ -18,7 +18,7 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +87,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	private PackageIdentity packageIdentity2;
 	private PackageIdentity packageIdentity3;
 
-	private GeneralPermission pluginPermissionRead;
+	private Permission pluginPermissionRead;
 	private CumulativePermission cumulativeEntityPermissionWritemeta;
 	private CumulativePermission cumulativeEntityPermissionWrite;
 	private CumulativePermission cumulativeEntityPermissionRead;
@@ -218,7 +218,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 				Stream.of(entityType1, entityType2, entityType3));
 		when(dataService.findAll(PACKAGE, Package.class)).thenReturn(Stream.of(package1, package2, package3));
 
-		pluginPermissionRead = GeneralPermission.READ;
+		pluginPermissionRead = Permission.READ;
 
 		cumulativeEntityPermissionWritemeta = new CumulativePermission();
 		cumulativeEntityPermissionWritemeta.set(EntityTypePermission.WRITEMETA)

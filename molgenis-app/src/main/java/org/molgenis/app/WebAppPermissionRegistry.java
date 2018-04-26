@@ -8,10 +8,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.security.core.GeneralPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
@@ -38,14 +37,15 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 	}
 
 	@Override
-	public Multimap<ObjectIdentity, Pair<Permission, Sid>> getPermissions()
+	public Multimap<ObjectIdentity, Pair<org.springframework.security.acls.model.Permission, Sid>> getPermissions()
 	{
 		User anonymousUser = dataService.query(USER, User.class).eq(USERNAME, ANONYMOUS_USERNAME).findOne();
 		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(HomeController.ID);
-		return new ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>>().putAll(pluginIdentity,
-				new Pair<>(GeneralPermission.READ, createSid(anonymousUser)),
-				new Pair<>(GeneralPermission.READ, createSid(allUsersGroup))).build();
+		return new ImmutableMultimap.Builder<ObjectIdentity, Pair<org.springframework.security.acls.model.Permission, Sid>>()
+				.putAll(pluginIdentity, new Pair<>(Permission.READ, createSid(anonymousUser)),
+						new Pair<>(Permission.READ, createSid(allUsersGroup)))
+				.build();
 	}
 }
