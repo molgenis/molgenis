@@ -35,10 +35,10 @@ _Note: This naming convention hasn't been applied to any APIs yet, but will be i
 of available APIs, see the API Documentation plugin in a running MOLGENIS app._
 
 ### Versioning
-Up the version when:
-- the response for existing endpoints has changed?
-- new endpoints are added?
-- the API has undergone a major overhaul?
+Use [semantic versioning](https://semver.org), showing MAJOR version number in the API URL.
+* Up the MAJOR version when you make incompatible API changes,
+* Up the MINOR version when you add functionality in a backwards-compatible manner, and
+* Up the PATCH version when you make backwards-compatible bug fixes
 
 ### Cross-Origin-Resource-Sharing
 MOLGENIS supports [CORS requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS), which are enabled for everything
