@@ -1,0 +1,53 @@
+.molgenis-table-container {
+    margin-bottom: 10px;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.molgenis-table {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.molgenis-table thead th.compact {
+    width: 1px;
+    white-space: nowrap;
+}
+
+.table-hover tbody tr {
+    cursor: pointer;
+}
+
+.molgenis-table .show-popover {
+    cursor: pointer;
+}
+
+.molgenis-table .table-hover tr:hover {
+    background-color: #7CBAD1;
+}
+
+.molgenis-table .popover-content {
+    word-wrap: break-word;
+}
+
+/* define borders on the left and right expanded without specifying border colors */
+.molgenis-table {
+    border-style: none;
+}
+
+.molgenis-table thead > tr > th:not(.expanded-left):not(.expanded-right), .molgenis-table tbody > tr > td:not(.expanded-left):not(.expanded-right) {
+    border-left-style: none;
+    border-right-style: none;
+}
+
+.molgenis-table tbody > tr:last-child > td {
+    border-bottom-style: none;
+}
+
+.molgenis-table th.expanded-left, .molgenis-table td.expanded-left {
+    border-right-style: none;
+}
+
+.molgenis-table th.expanded-right, .molgenis-table td.expanded-right {
+    border-left-style: none;
+}

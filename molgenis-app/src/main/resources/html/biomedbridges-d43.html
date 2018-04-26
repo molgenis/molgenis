@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+	<head>
+		<title>BioMedBridges WP4 4.3 Pilot integration using REST Web Services</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="../css/bootstrap.min.css" rel="stylesheet">
+		<style>
+			.center {
+				float: none !important;
+				margin-left: auto !important;
+				margin-right: auto !important;
+			}
+			#dataset-select-container {
+				text-align: center;
+			}
+			#server-list {
+				text-align: center;
+			}
+			#search-results-table-container {
+				overflow: auto;
+				white-space: nowrap;
+				max-height: 1000px;
+			}
+		</style>
+		<script src="../js/jquery-2.1.1.min.js"></script>
+		<script src="../js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="page-header">
+				<div class="row">
+					<div style="float:left;">
+						<img src="../img/logo_bmb.png">
+					</div>
+					<div style="float:right;">
+						<a id="example" href="#" class="btn btn-large btn-info" data-toggle="popover" data-placement="left" title="" data-content="Select a data set and enter a query to search real-time through multiple biobank datasets hosted on different servers. Explore integrated search results." data-original-title="Pilot integration using REST Web Services">How does it work?</a>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-8 center">
+						<div id="dataset-select-container">
+							<div class="col-md-9">
+								<select data-placeholder="Choose a Dataset" id="dataset-select">
+									<option value="cbm">cbm</option>
+								</select>
+								<div class="group-append">
+									<input id="search-text" type="text" value="Liver">
+									<button class="btn btn-default" id="search-btn" type="button">Search</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-8 center">
+					<ul class="inline" id="server-list"></ul>
+					<div id="search-results-container"></div>
+				</div>
+			</div>
+		</div>
+		<script>
+			var servers = [
+				{name: 'BioMedBridges D4.3 (server 1)', url: 'http://molgenis46.target.rug.nl'},
+				{name: 'BioMedBridges D4.3 (server 2)', url: 'http://molgenis47.target.rug.nl'}
+			];
+			
+			function performSearch(query, dataSet) {
+			
+				function search(query, dataSet, callback) {
+					// initialize results array
+					var results = [];
+					for(var i = 0; i < servers.length; ++i)
+						results[i] = false;
+					
+					// perform search on servers
+					for(var i = 0; i < servers.length; ++i) {
+						var server = servers[i].url;
+						$.ajax({
+							type : 'POST',
+							url : server + '/search',
+							data : JSON.stringify({
+								documentType: dataSet,
+								queryRules:[{
+									operator : 'LIMIT',
+									value : 10E6
+								},{
+									operator : 'SEARCH',
+									value : query
+								}]
+							}),
+							dataType : 'json',
+							contentType : 'application/json',
+							success : $.proxy(function(searchResponse) {
+								// call callback if all search requests finished
+								results[this.i] = searchResponse;
+								if($.inArray(false, results) === -1) {
+									this.callback(results);
+								}
+							}, {"i" : i, "callback" : callback}),
+							error : function() {
+								alert('error occured retrieving data');
+							}
+						});
+					}
+				};
+				
+				var dataSet = 'cbm';
+				var query = $("#search-text").val();
+				if(query.length == 0) {
+					$('#search-results-summary').html('<p>No search results</p>');
+				} else {
+					search(query, dataSet, function(searchResponses) {
+						// create search results summary table
+						var items = [];
+						items.push('<h3>Summary</h3>');
+						items.push('<table class="table table-condensed table-striped"><thead><th>Server</th><th>Query</th><th>Data set</th><th># Search Results</th></thead>' );
+						for(var i = 0; i < searchResponses.length; ++i)
+							items.push('<tr><td><a href="' + servers[i].url + '" target="_blank">' + servers[i].name + '</a></td><td>' + query + '</td><td>' + dataSet + '</td><td>' + searchResponses[i].totalHitCount + '</td></tr>');
+						items.push('</table>');
+						
+						var totalNrSearchResults = 0;
+						for(var i = 0; i < searchResponses.length; ++i)
+							totalNrSearchResults += searchResponses[i].totalHitCount;
+						
+						if(totalNrSearchResults > 0) {
+							// create search results table
+							items.push('<h3>Search Results</h3>');
+							
+							// determine columns
+							var columns = {};
+							for(var i = 0; i < searchResponses.length; ++i) {
+								var searchResponse = searchResponses[i];
+								for(var j = 0; j < searchResponse.searchHits.length; ++j) {
+									var searchHit = searchResponse.searchHits[j];
+									 $.each(searchHit.columnValueMap, function(key, val) {
+										columns[key] = null;
+									 });
+								}
+							}
+							
+							items.push('<div id="search-results-table-container"><table class="table table-condensed table-striped"><thead>');
+							$.each(columns, function(key, val) {
+								items.push('<th>' + key + '</th>');
+							});
+							items.push('</thead>' );
+							
+							for(var i = 0; i < searchResponses.length; ++i) {
+								var searchResponse = searchResponses[i];
+								for(var j = 0; j < searchResponse.searchHits.length; ++j) {
+									items.push('<tr>');
+									var searchHit = searchResponse.searchHits[j];
+									$.each(columns, function(key, val) {
+										var value = searchHit.columnValueMap[key];
+										items.push('<td>' + (value ? value : "") + '</td>');
+									});
+									items.push('</tr>');
+								}
+							}
+							items.push('</table></div>');
+						}
+						
+						$('#search-results-container').html(items.join(''));
+					});
+				}
+			}
+			
+			$(function() {
+				$('#example').popover({placement:'bottom'});
+				// update server list
+				var items = [];
+				for(var i = 0; i < servers.length; ++i)
+					items.push('<li><span class="badge badge-info">' + servers[i].name + '</span></li>');
+				$('#server-list').html(items.join(''));
+				
+				$("#search-btn").click(function() {
+					$('#search-results-container').empty();
+					performSearch($("#search-btn").val(), $("#search-text").val());
+				});
+				
+				$('#search-text').keydown(function(e) {
+					if(e.which == 13) {
+						$('#search-results-container').empty();
+						performSearch($("#search-btn").val(), $("#search-text").val());
+					} else if(e.which == 27) {
+						$('#search-results-container').empty();
+						$('#search-text').val("");
+					}
+				});
+				
+				$("#search-btn").click();
+			});
+		</script>
+	</body>
+</html>	

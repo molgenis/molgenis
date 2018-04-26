@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "href": "/api/v2/entity",
+    "hrefCollection": "/api/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/api/v2/entity/meta/xref",
+        "fieldType": "XREF",
+        "name": "xref",
+        "label": "xref",
+        "attributes": [],
+        "refEntity": {
+          "href": "/api/v2/refEntity",
+          "hrefCollection": "/api/v2/refEntity",
+          "name": "refEntity",
+          "label": "refEntity",
+          "attributes": [
+            {
+              "href": "/api/v2/refEntity/meta/value",
+              "fieldType": "STRING",
+              "name": "value",
+              "label": "value",
+              "attributes": [],
+              "maxLength": 255,
+              "auto": false,
+              "nillable": true,
+              "readOnly": false,
+              "labelAttribute": true,
+              "unique": false,
+              "visible": true,
+              "lookupAttribute": false,
+              "isAggregatable": false
+            }
+          ],
+          "labelAttribute": "value",
+          "idAttribute": "id",
+          "lookupAttributes": [
+            "id"
+          ],
+          "isAbstract": false,
+          "writable": false,
+          "languageCode": "en"
+        },
+        "auto": false,
+        "nillable": false,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "en"
+  },
+  "_href": "/api/v2/entity/0",
+  "xref": {
+    "_href": "/api/v2/refEntity/ref0",
+    "value": "label0"
+  }
+}

@@ -1,0 +1,4 @@
+#Phenotype	GeneSymbols	MIMNumber	CytoLocation
+17,20-lyase deficiency, isolated, 202110 (3)	CYP17A1, CYP17	609300	10q24.32
+{Thyroid cancer, monmedullary, 1}, 188550 (3)	NKX2-1, NMTC1	600635	14q13.3
+{Thyroid cancer, nonmedullary, 4}, 616534 (3)	FOXE1	602617	9q22.33

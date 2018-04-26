@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["es2015", { "modules": false }],
+    "stage-2"
+  ],
+  "plugins": ["transform-runtime", "transform-flow-comments"],
+  "comments": false,
+  "env": {
+    "test": {
+      "plugins": [ "istanbul" ],
+      "presets": [ ["es2015"] ]
+    }
+  }
+}

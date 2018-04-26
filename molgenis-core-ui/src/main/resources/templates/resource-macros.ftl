@@ -1,0 +1,3 @@
+<#-- Generates resource href by -->
+<#-- * appending resource name with automatically generated version number (this fingerprint avoids the use of stale browser data)-->
+<#macro resource_href resource_name><#assign filtered_resource_name = resource_name>${filtered_resource_name?html}<#if environment.environmentType == "production"><#attempt>?${resource_fingerprint_registry.getFingerprint(filtered_resource_name)?html}<#recover></#attempt></#if></#macro>

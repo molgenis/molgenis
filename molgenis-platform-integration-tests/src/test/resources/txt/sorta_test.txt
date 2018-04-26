@@ -1,0 +1,46 @@
+Name
+Height
+Weight
+Cardio-vascular disease
+Weight_Height
+Standing_height
+Gender
+Type 2 Diabetes
+Hypoplastic ilia
+Round face
+Abnormal isoelectric focusing of serum transferrin
+Split hand
+PECTUS EXCAVATUM
+Posterior vertebral hypoplasia
+Numerous nevi
+Recurrent mandibular subluxations
+Stomatocytosis
+Galactosuria
+Scapular exostoses
+Hematochezia
+Hypoplastic pulmonary veins
+Reticulocytopenia
+MICROCOLON
+High nonceruloplasmin-bound serum copper
+Lingual thyroid
+Broad, distal hallux
+Long clavicles
+Prolonged prothrombin time
+Talipes
+Prominent nipples
+Absent microvilli on the surface of peripheral blood lymphocytes
+Fat malabsorption
+Mitral regurgitation
+Paradoxical increased cortisol secretion on dexamethasone suppression test
+Cortical dysplasia
+Cardiomyopathy
+Ulnar bowing
+Clumsiness
+Wide tufts of distal phalanges
+Absent cellular immunity
+Cutaneous photosensitivity
+Acetabular dysplasia
+Adrenal hypoplasia
+Broad face
+Parietal bossing
+Atlantoaxial instability

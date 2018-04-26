@@ -1,0 +1,7 @@
+body > .container-fluid {
+    padding-top: 60px;
+}
+
+.nav-link.dropdown-toggle:hover {
+    cursor: pointer;
+}

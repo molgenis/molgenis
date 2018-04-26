@@ -1,0 +1,12 @@
+.refentitynode span.fancytree-icon, .refentitynode span.fancytree-icon:hover {
+	background-position: -32px -160px !important;
+}
+
+.nofilter span.fancytree-icon, .nofilter span.fancytree-icon:hover {
+	background-image:none !important;
+	cursor: default !important;
+}
+
+.nofilter span.fancytree-title {
+	cursor: default;
+}

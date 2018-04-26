@@ -1,0 +1,13 @@
+##fileformat=VCFv4.1
+##INFO=<ID=Gene_Name,Number=.,Type=String,Description="Common gene name (HGNC). Optional: use closest gene when the variant is intergenic(source:http://snpeff.sourceforge.net)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	249239510	test1	C	A	.	.	Gene_Name=SLEN3;
+2	249239511	test2	C	T	.	.	Gene_Name=PHBP;
+3	249239512	test3	C	G	.	.	Gene_Name=NALP1;
+4	249239513	test4	C	A	.	.	Gene_Name=SLC16A1;
+5	249239514	test5	C	T	.	.	Gene_Name=GNPTAB;
+6	249239515	test6	C	G	.	.	Gene_Name=COL18A1;
+7	249239516	test7	C	A	.	.	Gene_Name=CASK;
+8	249239517	test8	C	T	.	.	Gene_Name=CLOVE;
+9	249239518	test9	C	G	.	.	Gene_Name=ACADSB;
+10	249239519	test10	C	A	.	.	Gene_Name=CYP17;

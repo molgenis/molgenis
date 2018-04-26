@@ -1,0 +1,46 @@
+##fileformat=VCFv4.1
+##reference=1000GenomesRelease3
+##contig=<ID=1,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##contig=<ID=2>
+##contig=<ID=4>
+##contig=<ID=15>
+##contig=<ID=3>
+##contig=<ID=21>
+##contig=<ID=X>
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="aa">
+##FORMAT=<ID=.,Number=.,Type=String,Description="No format data!">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=PL,Number=.,Type=Integer,Description="aa">
+##INFO=<ID=AC,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=AF,Number=1,Type=Float,Description="aa">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="DB flag test">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="aa">
+##INFO=<ID=FS,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MLEAC,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MLEAF,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="aa">
+##INFO=<ID=MQ0,Number=1,Type=Float,Description="aa">
+##INFO=<ID=QD,Number=1,Type=Float,Description="aa">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="aa">
+##INFO=<ID=DESCR,Number=1,Type=String,Description="Description of this variant">
+##INFO=<ID=EXAC_AF,Number=.,Type=String,Description="The ExAC allele frequency">
+##INFO=<ID=EXAC_AC_HOM,Number=.,Type=String,Description="The ExAC homozygous alternative genotype count">
+##INFO=<ID=EXAC_AC_HET,Number=.,Type=String,Description="The ExAC heterozygous genotype count">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002
+1	13380	.	C	G	85	PASS	AC=4;AF=1.0;AN=4;DB;DP=1;FS=0.0;MLEAC=4.0;MLEAF=1.0;MQ=23.0;MQ0=0.0;QD=25.63;SOR=1.609;EXAC_AF=0.001209;EXAC_AC_HOM=0;EXAC_AC_HET=23;	GT:AD:_:DP:GQ:PL	1/1:.:.:.:3:33,3,0	1/1:0,1:.:1:6:78,6,0
+1	13980	rs151276478	T	C	85.84	.	AC=4;AF=1.0;AN=4;DB;DP=1;FS=0.0;MLEAC=4.0;MLEAF=1.0;MQ=23.0;MQ0=0.0;QD=25.63;SOR=1.609;	GT:AD:_:DP:GQ:PL	1/1:.:.:.:3:33,3,0	1/1:0,1:.:1:6:78,6,0
+1	78383467	rs1749913	G	A	85.84	.	AC=4;AF=1.0;AN=4;DB;DP=1;FS=0.0;MLEAC=4.0;MLEAF=1.0;MQ=23.0;MQ0=0.0;QD=25.63;SOR=1.609;EXAC_AF=0.809;EXAC_AC_HOM=38057;EXAC_AC_HET=17422;	GT:AD:_:DP:GQ:PL	1/1:.:.:.:3:33,3,0	1/1:0,1:.:1:6:78,6,0
+1	231094050	.	GAA	G,GAAA,GA	85.84	.	DB;EXAC_AF=0.064,0.045,0.433;EXAC_AC_HOM=0,0,93;EXAC_AC_HET=1424,2956,40688;	GT:AD:_:DP:GQ:PL	2|3:.:.:.:3:33,3,0	0/1:0,1:.:1:6:78,6,0
+2	171570151	rs72885464	C	T	.	.	EXAC_AF=0.267;EXAC_AC_HOM=911;EXAC_AC_HET=3366;	GT:AD:_:DP:GQ:PL	0|0:.:.:.:.:.	0/1:0,1:.:1:.:.
+4	69964234	.	CT	CTT,CTTT,C	85.84	.	EXAC_AF=0.394,0.131,0.005366;EXAC_AC_HOM=3743,120,0;EXAC_AC_HET=27251,7162,414;	GT:AD:_:DP:GQ:PL	0/1:.:.:.:.:.	1|2:.:.:.:.:.
+15	66641732	rs2063690	G	A,C,T	.	.	EXAC_AF=2.471E-5,0.112,1.648E-5;EXAC_AC_HOM=0,1094,0;EXAC_AC_HET=1,11380,2;	GT:AD:_:DP:GQ:PL	0/0:.:.:.:.:.	1/3:.:.:.:.:.
+21	46924425	rs149296338	CGGCCCCCCA	C	.	.	EXAC_AF=0.965;EXAC_AC_HOM=29713;EXAC_AC_HET=737;	GT:AD:_:DP:GQ:PL	0|1:.:.:.:.:.	0/1:.:.:.:.:.
+X	79943569	rs3122407	T	C	85.84	.	EXAC_AF=0.997;EXAC_AC_HOM=26864;EXAC_AC_HET=173;	GT:AD:_:DP:GQ:PL	0/1:.:.:.:.:.	0/1:.:.:.:.:.
+2	191904021	rs144421302	G	T	.	.	DESCR="regular variant-expected annotation EXAC_AF=0.003739";EXAC_AF=0.003739;EXAC_AC_HOM=5;EXAC_AC_HET=444;	GT:AD:_:DP:GQ:PL	.:.:.:.:.:.	.:.:.:.:.:.
+3	53219680	rs55929201	G	C	.	.	DESCR="Pos and ref matches ExAC-but not alt allele";	GT:AD:_:DP:GQ:PL	.:.:.:.:.:.	.:.:.:.:.:.
+2	219142023	rs2168703	G	A	.	.	DESCR="No match with ExAC";	GT:AD:_:DP:GQ:PL	.:.:.:.:.:.	.:.:.:.:.:.
+1	1115548	rs114390380	G	A	.	.	DESCR="When ExAC queried with Tabix gives multiple output lines-expected EXAC_AF=0.017";EXAC_AF=0.017;EXAC_AC_HOM=26;EXAC_AC_HET=1911;	GT:AD:_:DP:GQ:PL	.:.:.:.:.:.	.:.:.:.:.:.
+21	45650009	rs3831401	T	TG,A,G	.	.	DESCR="Multiple output lines and penta-allelic variant-expected EXAC_AF=5.475e-05,6.843e-05,0.167";EXAC_AF=5.475E-5,6.843E-5,0.167;EXAC_AC_HOM=0,0,434;EXAC_AC_HET=0,0,934;	GT:AD:_:DP:GQ:PL	.:.:.:.:.:.	.:.:.:.:.:.

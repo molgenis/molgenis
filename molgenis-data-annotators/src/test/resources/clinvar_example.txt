@@ -1,0 +1,2 @@
+#AlleleID	Type	Name	GeneID	GeneSymbol	ClinicalSignificance	RS# (dbSNP)	nsv (dbVar)	RCVaccession	TestedInGTR	PhenotypeIDs	Origin	Assembly	Chromosome	Start	Stop	Cytogenetic	ReviewStatus	HGVS(c.)	HGVS(p.)	NumberSubmitters	LastEvaluated	Guidelines	OtherIDs
+82492	single nucleotide variant	KIF5A:c.1678G>A (p.Glu560Lys)	3798	KIF5A	not provided	142701108	-	RCV000062571	N	MedGen:C0025202,SNOMED CT:2092003	somatic	GRCh37	12	57966471	57966471	12q13.3	not classified by submitter	NM_004984.2:c.1678G>A	NP_004975.2:p.Glu560Lys	1	-	-	ClinVar:NM_004984.2:c.1678G>A	71601

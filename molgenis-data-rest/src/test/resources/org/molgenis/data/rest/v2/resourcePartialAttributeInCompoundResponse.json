@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "href": "/api/v2/entity",
+    "hrefCollection": "/api/v2/entity",
+    "name": "entity",
+    "label": "entity",
+    "attributes": [
+      {
+        "href": "/api/v2/entity/meta/compound",
+        "fieldType": "COMPOUND",
+        "name": "compound",
+        "label": "compound",
+        "attributes": [
+          {
+            "href": "/api/v2/entity/meta/compound_attr0",
+            "fieldType": "STRING",
+            "name": "compound_attr0",
+            "label": "compound_attr0",
+            "attributes": [],
+            "maxLength": 255,
+            "auto": false,
+            "nillable": false,
+            "readOnly": false,
+            "labelAttribute": false,
+            "unique": false,
+            "visible": true,
+            "lookupAttribute": false,
+            "isAggregatable": false
+          }
+        ],
+        "auto": false,
+        "nillable": true,
+        "readOnly": false,
+        "labelAttribute": false,
+        "unique": false,
+        "visible": true,
+        "lookupAttribute": false,
+        "isAggregatable": false
+      }
+    ],
+    "labelAttribute": "id",
+    "idAttribute": "id",
+    "lookupAttributes": [
+      "id"
+    ],
+    "isAbstract": false,
+    "writable": false,
+    "languageCode": "en"
+  },
+  "_href": "/api/v2/entity/0",
+  "compound_attr0": "compoundAttr0Str"
+}

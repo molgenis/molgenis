@@ -1,0 +1,188 @@
+/* Application CSS - start */
+
+#spinner img {
+	display: block;
+	margin:0 auto;
+}
+
+.modal-backdrop {
+	opacity: .3;
+}
+
+.modal-backdrop.fade.in {
+	opacity: .3;
+}
+
+.dropdown-menu{
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: auto;
+	height: auto;
+	max-height: 500px;
+}
+
+body>.container-fluid {
+	padding-top: 55px;
+	margin-bottom: 6rem; /* #footer-container.height + 1rem for spacing */
+}
+
+/* Application CSS - end */
+/* Sticky footer - start */
+
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+body {
+	/* Margin bottom by footer height */
+	margin-bottom: 60px;
+}
+#footer-container {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	height: 5rem;
+}
+
+/* Sticky footer - end */
+/* Support collapsable panels - start */
+
+.panel-heading a:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";    
+    float: right;
+}
+.panel-heading a.collapsed:after {
+    content: "\e080";
+}
+
+/* Support collapsable panels - end */
+/* Bootstrap tooltip style - start */
+
+.tooltip {
+	position: absolute;
+	z-index: 1020;
+	display: block;
+	visibility: visible;
+	padding: 5px;
+	font-size: 14px;
+	opacity: 1;
+	filter: alpha(opacity = 1)
+}
+
+.tooltip.in {
+	opacity: 1;
+	filter: alpha(opacity = 1)
+}
+
+.tooltip.top {
+	margin-top: -2px
+}
+
+.tooltip.right {
+	margin-left: 2px
+}
+
+.tooltip.bottom {
+	margin-top: 2px
+}
+
+.tooltip.left {
+	margin-left: -2px
+}
+
+.tooltip.top .tooltip-arrow {
+	bottom: 0;
+	left: 50%;
+	margin-left: -5px;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid #333333
+}
+
+.tooltip.left .tooltip-arrow {
+	top: 50%;
+	right: 0;
+	margin-top: -5px;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 5px solid #333333
+}
+
+.tooltip.bottom .tooltip-arrow {
+	top: 0;
+	left: 50%;
+	margin-left: -5px;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-bottom: 5px solid #333333
+}
+
+.tooltip.right .tooltip-arrow {
+	top: 50%;
+	left: 0;
+	margin-top: -5px;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-right: 5px solid #333333
+}
+
+.tooltip-inner {
+	max-width: 300px;
+	padding: 3px 8px;
+	color: #333333;
+	text-align: center;
+	text-decoration: none;
+	background-color: #ffffcf;
+	border-style: solid;
+	border-color: #333333;
+	border-width: 1px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+.tooltip-arrow {
+	position: absolute;
+	width: 0;
+	height: 0
+}
+
+.background-lightgrey {
+	background: lightgrey;
+}
+
+/* Bootstrap tooltip style - end*/
+
+.popover-content {
+	word-wrap: break-word;
+}
+
+/* Change threshold for collapsing the menu, default is 768px*/
+@media (max-width: 1127px) {
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+    .navbar-header {
+        float: none;
+    }
+    .navbar-nav {
+        float: none!important;
+    }
+    .navbar-nav>li {
+        float: none!important;
+    }
+    .navbar-collapse.collapse.in { 
+        display: block!important;
+    }
+    .collapsing {
+        overflow: hidden!important;
+    }
+}

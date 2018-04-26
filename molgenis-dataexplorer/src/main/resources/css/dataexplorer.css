@@ -1,0 +1,226 @@
+.modal-xxl
+{
+    width: 90%;
+}
+
+.modal-xxl .modal-body
+{
+	overflow: auto;
+}
+
+#dataset-select-label {
+	margin-right: 10px;
+	font-size: 15.4px;
+}
+
+#feature-selection label {
+	display: inline;
+}
+
+#genomebrowser {
+    visibility: hidden
+}
+
+#observationset-search-container {
+	text-align: center;
+	padding-bottom: 15px;
+}
+
+.feature-filter-remove {
+	margin-left: 4px;
+}
+
+.feature-filter-remove .ui-icon-closethick {
+	display: inline-block;
+	background-image: url("images/ui-icons_cd0a0a_256x240.png");
+	vertical-align: middle;
+}
+
+body:not(.modal-open) #feature-selection .molgenis-tree {
+	height: 367px;
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+#aggregatesContainer {
+	clear: both;
+}
+
+#aggregate-table-container {
+	overflow: auto;	
+}
+
+#aggregate-table-container th {
+	background-color: #5B82A4;
+	color: white;
+}
+
+#dataexplorer-aggregate-data table {
+	margin-top: 20px;
+	background: #DDDDDD;
+	
+}
+
+.viewer {
+	cursor: pointer;
+}
+
+.view-disabled {
+	display: none;
+}
+
+.view-enabled {
+	display: block;
+}
+
+#dataDiv {
+	float: left;
+	height: 26px;
+	text-align: center;
+	border-radius: 3px;
+	width: 90px;
+}
+
+#aggregateDiv {
+	height: 26px;
+	float: left;
+	width: 90px;
+}
+
+#filter-nav-content{
+	margin-top: 25px;
+}
+
+#feature-select-container .row {	
+	margin-top: 10px;
+}
+
+#filter-nav li a:hover{
+	cursor: default
+}
+
+#feature-selection .fancytree-ico-e span.fancytree-icon
+{
+	background-position: 0 0;
+	background-image: url("../../img/filter-bw.png");
+}
+
+#feature-selection .fancytree-ico-e span.fancytree-icon:hover {
+	background-position: 0 0;
+	background-image: url("../../img/filter-bw.png");
+	cursor: pointer;
+}
+
+.molgenis-xrefmrefsearch .select2-result {
+	vertical-align: top;
+	padding: 2px;
+	font-size: 12px;
+	color: #333;
+}
+
+.select2-input {
+	width: 100% !important;
+}
+
+.molgenis-xrefmrefsearch .select2-results .select2-highlighted {
+    background: #04c;
+    color: #fff;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active{
+	overflow-x: visible !important;
+	width: auto !important;
+	border: 1px solid #5897fb !important;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active .select2-no-results{
+	width: 100%;
+}
+
+.select2-drop{
+	margin-top: -1px;
+}
+
+.select2-container {
+	min-width: 16rem;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active .select2-result-selectable{
+	width: 600px;
+}
+
+.molgenis-xrefmrefsearch .add-ref-query-part, .remove-ref-query-part {
+	margin-left: 10px;
+}
+
+/* default fancytree styling */
+span.fancytree-node{
+	border: none;
+}
+
+ul.fancytree-container {
+	padding: 0px;
+	border: none;
+	outline: none;
+}
+
+.bootstrap-switch {
+	width: 70px;
+	min-width: 70px;
+}
+
+#slider {
+	margin: 0px 25px;
+	width: 400px;
+}
+
+.form-horizontal .controls {
+	display: inline-block;
+	padding-left: 15px;
+	margin-left: 0px;
+	vertical-align: top;
+}
+
+.ui-rangeSlider-bar {
+	background-color: #5b82a4;	
+}
+
+.ui-editRangeSlider-inputValue {
+	width: 4em;
+}
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}
+/*
+#module-nav .nav {
+	margin-left: 2.1277%;
+}
+*/
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+	background-color: #7CBAD1;
+}
+
+.table-hover {
+	cursor: pointer;
+} 
+
+#chartCreationButtons {
+	padding-top: 10px;
+}
+
+.molgenis-table {
+	margin-bottom: 0px;
+}
+
+.molgenis-table-pager .pagination {
+	margin: 0px;
+}
+
+.togglediv_border { border: 1px solid; border-color: #C0C0C0; }
+.togglediv_grey { background-color: #F6F6F6; }
+.togglediv_lightgreen { background-color: #D6FFDB; }
+.togglediv_green { background-color: #8EFF9B; }
+.togglediv_red { background-color: #FFDDDD; }
+.togglediv_blue { background-color: #DDE4FF; }

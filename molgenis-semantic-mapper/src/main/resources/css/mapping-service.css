@@ -1,0 +1,48 @@
+#edit-algorithm-container {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.ace.readonly .ace_cursor {
+    display: none;
+}
+
+.clone-btn {
+    margin-left: 5px;
+}
+
+.validation-errors-anchor {
+    color: #fff !important;
+}
+
+.validation-error-messages-table {
+    display: block;
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.highlight {
+    background-color: #5bc0de;
+    padding: 3px;
+    color: white;
+    border-radius: 2px;
+}
+
+.table-borderless {
+    width: 100%;
+}
+
+.td-align-top {
+    vertical-align: top;
+    padding-top: 5px;
+}
+
+.algorithm-color-legend {
+    width: 50%;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: 5px;
+    font-weight: bold;
+}

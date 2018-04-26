@@ -1,0 +1,15 @@
+.scheduled-jobs-table {
+    margin: 20px;
+}
+
+legend button {
+    margin-left: 10px;
+}
+
+/*
+	Hide the collapse button on the Table so that we are sure the type is always
+	expanded. See #6164.
+ */
+th.expanded-left button.btn-xs.btn-default {
+    display: none;
+}

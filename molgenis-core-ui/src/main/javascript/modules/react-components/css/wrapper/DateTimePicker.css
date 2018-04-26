@@ -1,0 +1,4 @@
+/* Css fix in case of multiple addons */
+.input-group-addon:not(:first-child):not(:last-child) {
+    border-left: 0px;
+}

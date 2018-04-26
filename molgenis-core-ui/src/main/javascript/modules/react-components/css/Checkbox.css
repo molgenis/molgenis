@@ -1,0 +1,4 @@
+/* Fix for https://github.com/twbs/bootstrap/issues/13997 */
+.checkbox label {
+    min-height: 20px;
+}

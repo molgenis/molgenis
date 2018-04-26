@@ -1,0 +1,129 @@
+.molgenis-table-container {
+	margin-bottom: 10px;
+	overflow: auto;
+	white-space: nowrap;
+}
+
+.molgenis-table {
+	width: 100%;
+}
+
+.molgenis-table thead th {
+	background-color: #5B82A4;
+	color: white;
+	padding-left: 8px;
+}
+
+.molgenis-table thead th.ref-attr {
+    background-color: #8AAAC7;
+    color: white;
+    padding-left: 8px;
+}
+
+.molgenis-table thead th .ui-icon {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.molgenis-table thead th .updown {
+	vertical-align: middle;
+	background-image: url("images/ui-icons_454545_256x240.png");
+}
+
+.molgenis-table thead th .up {
+	vertical-align: top;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.molgenis-table thead th .down {
+	vertical-align: bottom;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.molgenis-table tbody td {
+	padding-left: 8px;	
+}
+
+.molgenis-table tbody td:focus {
+	border: 2px solid gray;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px gray;
+}
+
+.molgenis-table tbody.editable td {
+	padding-bottom: 0px;
+	padding-top: 0px;
+}
+
+.molgenis-table tbody td.edited:not(:focus) {
+   	border: 2px solid #90ee90;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px #90ee90;
+}
+
+.molgenis-table tbody td.invalid-input:not(:focus) {
+   	border: 2px solid red;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px red;
+}
+
+.molgenis-table-striped tbody>tr:nth-child(odd)>td,.molgenis-table-striped tbody>tr:nth-child(odd)>th {
+    background-color: #ddd;
+}
+
+.molgenis-table-info {
+	font-style: italic;	
+}
+
+.molgenis-table .show-popover {
+	cursor: pointer;
+}
+
+.molgenis-table .popover-content {
+	word-wrap: break-word;	
+}
+
+.molgenis-table .multi-os-datacell input[type=checkbox] {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+
+.molgenis-table .delete-row-btn {
+	cursor: pointer;
+}
+
+.molgenis-table input,select,div.group-append {
+	margin-bottom: 0px;
+}
+
+.molgenis-table-controls .btn {
+	margin-right: 6px;
+}
+
+.molgenis-table .btn {
+	margin: 4px;
+}
+
+label.error {
+	color: red;
+	padding-top: .5em;
+	vertical-align: top;
+}
+
+input.error {
+	border: 1px solid red;
+}
+
+.molgenis-table .expand-btn {
+	cursor: pointer;
+	color: black;
+}
+
+.molgenis-table .collapse-btn {
+    cursor: pointer;
+    color: black;
+}

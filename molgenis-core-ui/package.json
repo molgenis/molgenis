@@ -1,0 +1,105 @@
+{
+  "name": "MOLGENIS",
+  "version": "7.0.0-SNAPSHOT",
+  "description": "Dependencies for the MOLGENIS UI",
+  "scripts": {
+    "watch": "webpack -d --watch",
+    "build": "webpack -d",
+    "test": "cross-env NODE_ENV=test babel-node ./src/test/javascript/index.js",
+    "webpack-stats": "webpack --profile --json > target/json.stats"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/molgenis/molgenis.git"
+  },
+  "author": "MOLGENIS",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/molgenis/molgenis/issues"
+  },
+  "homepage": "http://molgenis.github.io/",
+  "dependencies": {
+    "babel-polyfill": "^6.3.13",
+    "bootbox": "4.4.0",
+    "bootstrap": "3.3.6",
+    "bootstrap-fileinput": "4.2.8",
+    "brace": "0.5.1",
+    "eonasdan-bootstrap-datetimepicker": "4.15.35",
+    "handlebars": "4.0.5",
+    "javascript-natural-sort": "0.7.1",
+    "jquery": "2.1.1",
+    "jquery-deparam": "0.5.2",
+    "jquery-form": "3.50.0",
+    "jquery-validation": "1.14.0",
+    "jquery.cookie": "^1.4.1",
+    "jquery.fancytree": "2.14.0",
+    "mdurl": "^1.0.1",
+    "moment": "2.11.2",
+    "moment-duration-format": "^1.3.0",
+    "pegjs": "^0.10.0",
+    "promise": "^6.1.0",
+    "react": "0.13.3",
+    "react-notification-system": "^0.1.17",
+    "svg-pan-zoom": "3.2.6",
+    "twix": "^0.9.0",
+    "typedarray": "0.0.6",
+    "underscore": "1.8.2",
+    "urijs": "1.17.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.3.13",
+    "babel-core": "^6.3.13",
+    "babel-loader": "^6.2.1",
+    "babel-plugin-module-alias": "^1.2.0",
+    "babel-plugin-react-transform": "^1.1.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "cross-env": "^3.1.4",
+    "css-loader": "^0.23.1",
+    "expect": "^1.6.0",
+    "express": "^4.13.3",
+    "faucet": "0.0.1",
+    "file-loader": "^0.8.5",
+    "fs": "0.0.2",
+    "gulp": "^3.9.0",
+    "node-libs-browser": "^0.5.2",
+    "null-loader": "^0.1.1",
+    "pom-parser": "^1.1.0",
+    "proxyquire": "^1.7.4",
+    "semver": "^5.1.0",
+    "skin-deep": "^0.13.0",
+    "style-loader": "^0.13.0",
+    "tape": "^4.4.0",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.9.11",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-hot-middleware": "^2.2.0"
+  },
+  "babel": {
+    "presets": [
+      "react",
+      "es2015",
+      "stage-0"
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          [
+            "babel-plugin-module-alias",
+            [
+              {
+                "src": "./src/main/javascript/modules/react-components",
+                "expose": "react-components"
+              },
+              {
+                "src": "./src/main/javascript/modules/rest-client",
+                "expose": "rest-client"
+              }
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

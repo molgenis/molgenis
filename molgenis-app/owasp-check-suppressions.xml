@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <suppress>
+        <gav regex="true">^org\.molgenis:molgenis-one-click-importer:.*$</gav>
+        <cpe>cpe:/a:click_project:click</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.postgresql:postgresql:42\..*$</gav>
+        <cpe>cpe:/a:postgresql:postgresql</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.molgenis:molgenis-data-postgresql:.*$</gav>
+        <cpe>cpe:/a:postgresql:postgresql</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.molgenis:molgenis-python:.*$</gav>
+        <cpe>cpe:/a:python_software_foundation:python</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.github\.spullara\.mustache\.java:compiler:.*$</gav>
+        <cpe>cpe:/a:mustache.js_project:mustache.js</cpe>
+    </suppress>
+</suppressions>

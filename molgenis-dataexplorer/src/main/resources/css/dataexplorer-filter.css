@@ -1,0 +1,93 @@
+#filter-wizard-modal .well {
+	overflow: auto;
+	min-height: 490px;
+	margin-bottom: 10px;
+	max-width: 100%;
+    overflow-x: hidden;
+}
+
+.filter-wizard-fixed-height {
+	min-height: 365px;
+}
+
+#filter-wizard-modal .pager {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#filter-wizard-modal .wizard-steps {
+	margin-bottom: 10px
+}
+
+#filter-wizard-modal .form-horizontal .form-group .select2-choices{
+	position: static;
+}
+
+#filter-wizard-modal-label {
+	display: inline-block;
+}
+
+#filter-modal .modal-body {
+	min-height: 250px;
+	padding-bottom: 0;
+}
+
+#filter-modal .form-horizontal .form-group .select2-choices{
+	position: static;
+}
+
+#filter-wizard-modal .controls.complex-removebutton-container, 
+#filter-wizard-modal .controls.complex-addbutton-container, 
+#filter-modal .controls.complex-removebutton-container, 
+#filter-modal .controls.complex-addbutton-container{
+	padding-left:0px;
+}
+
+#filter-wizard-modal .xrefmrefsearch.complex-simplefilter input.select2-input,
+#filter-modal .xrefmrefsearch.complex-simplefilter input.select2-input{
+	padding-bottom: 3px !important;
+	padding-top: 3px !important;
+}
+
+#filter-wizard-modal .xrefmrefsearch div.input-group-addon,
+#filter-modal .xrefmrefsearch div.input-group-addon{
+	padding: 0px;
+	border:0px;
+}
+
+#filter-wizard-modal .xrefmrefsearch div.input-group-addon>button,
+#filter-modal .xrefmrefsearch div.input-group-addon>button{
+	border-bottom-left-radius:4px !important;
+	-webkit-border-bottom-left-radius: 4px !important;
+	border-top-left-radius:4px !important;
+	-webkit-border-top-left-radius: 4px !important;
+	border-bottom-right-radius:0px !important;
+	-webkit-border-bottom-right-radius: 0px !important;
+	border-top-right-radius:0px !important;
+	-webkit-border-top-right-radius: 0px !important;
+}
+
+#filter-wizard-modal div.group-append.date.input-group,
+#filter-modal div.group-append.date.input-group,
+#filter-wizard-modal div.checkbox,
+#filter-modal div.checkbox,
+#filter-wizard-modal div.filter-radio-inline-container,
+#filter-modal div.filter-radio-inline-container,
+#filter-wizard-modal div.controls.complex-element,
+#filter-modal div.controls.complex-element,
+#filter-modal div.xrefmrefsearch
+{
+	padding-top: 0px;
+	padding-right: 15px;
+	padding-bottom: 0px;
+	padding-left: 15px;
+}
+
+.complex-addbutton-container>button, 
+.complex-removebutton-container>button{
+	margin-left: 5px;
+}
+
+.ui-rangeSlider-label-value {
+	color: black;
+}

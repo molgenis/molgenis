@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis label="OMX" name="omx">
+	<menu label="Home" name="main">
+		<plugin id="home" name="Home" url="home"/>
+		<menu label="Import data" name="importdata">
+			<plugin id="one-click-importer" name="Quick data import" url="one-click-importer"/>
+        	<plugin id="importwizard" name="Advanced data import" url="importwizard"/>
+		</menu>
+		<plugin id="navigator" name="Navigator" url="navigator"/>
+		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+		<menu label="Data Integration" name="dataintegration">
+			<plugin id="metadata-manager" name="Metadata Manager" url="metadata-manager"/>
+			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
+            <plugin id="sorta" name="SORTA" url="sorta"/>
+			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
+            <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
+		</menu>
+        <menu label="Plugins" name="plugins">
+            <plugin id="searchAll" name="Search all data" url="searchAll"/>
+            <plugin id="swagger" name="API documentation" url="swagger"/>
+            <plugin id="apps" name="App store" url="apps"/>
+			<plugin id="feedback" name="Feedback" url="feedback"/>
+			<plugin id="gavin-app" name="Gavin" url="gavin-app"/>
+            <plugin id="jobs" name="Job overview" url="jobs" />
+			<plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
+            <plugin id="scripts" name="Scripts" url="scripts" />
+	    </menu>
+        <menu label="Admin" name="admin">
+        	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
+        	<plugin id="logmanager" name="Log manager" url="logmanager"/>
+        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
+	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+            <plugin id="scheduledjobs" name="Scheduled Jobs" url="scheduledjobs"/>
+        	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
+        	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
+	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
+		</menu>
+		<plugin id="useraccount" name="Account" url="useraccount"/>
+	</menu>
+</molgenis>

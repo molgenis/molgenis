@@ -1,0 +1,5 @@
+## Choose one
+# [REFACTOR]
+# [DOCUMENTATION]
+# [FEATURE]
+# [FIX]
