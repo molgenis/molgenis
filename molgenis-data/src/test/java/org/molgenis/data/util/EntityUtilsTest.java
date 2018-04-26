@@ -667,6 +667,20 @@ public class EntityUtilsTest
 			testCases.add(new Object[] { attr, otherAttr, false });
 		}
 
+		{   // mappedBy attribute identifiers differ
+			Attribute attr = getMockAttr();
+			Attribute mappedByAttr = getMockAttr();
+			when(mappedByAttr.getIdentifier()).thenReturn("mappedByAttrId");
+			when(attr.getMappedBy()).thenReturn(mappedByAttr);
+
+			Attribute otherAttr = getMockAttr();
+			Attribute otherMappedByAttr = getMockAttr();
+			when(otherMappedByAttr.getIdentifier()).thenReturn("otherMappedByAttrId");
+			when(otherAttr.getMappedBy()).thenReturn(otherMappedByAttr);
+
+			testCases.add(new Object[] { attr, otherAttr, true });
+		}
+
 		return testCases.iterator();
 	}
 

@@ -367,62 +367,167 @@ public class EntityUtils
 	{
 		if (attr == null || otherAttr == null)
 		{
-			if (attr == null && otherAttr == null) return true;
+			if (attr == null && otherAttr == null)
+			{
+				return true;
+			}
 			return false;
 		}
 
-		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
+		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getName(), otherAttr.getName()))
+		{
+			return false;
+		}
 
 		EntityType entity = attr.getEntity();
 		EntityType otherEntity = otherAttr.getEntity();
 		if (checkIdentifier)
 		{
-			if (entity == null && otherEntity != null) return false;
-			if (entity != null && otherEntity == null) return false;
-			if (entity != null && !entity.getId().equals(otherEntity.getId())) return false;
+			if (entity == null && otherEntity != null)
+			{
+				return false;
+			}
+			if (entity != null && otherEntity == null)
+			{
+				return false;
+			}
+			if (entity != null && !entity.getId().equals(otherEntity.getId()))
+			{
+				return false;
+			}
 		}
-		if (!Objects.equals(attr.getSequenceNumber(), otherAttr.getSequenceNumber())) return false;
-		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
-		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
-		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
-		if (!Objects.equals(attr.isIdAttribute(), otherAttr.isIdAttribute())) return false;
-		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute())) return false;
-		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex())) return false;
+		if (!Objects.equals(attr.getSequenceNumber(), otherAttr.getSequenceNumber()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isIdAttribute(), otherAttr.isIdAttribute()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isLabelAttribute(), otherAttr.isLabelAttribute()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getLookupAttributeIndex(), otherAttr.getLookupAttributeIndex()))
+		{
+			return false;
+		}
 
 		// recursively compare attribute parent
-		if (!EntityUtils.equals(attr.getParent(), otherAttr.getParent(), checkIdentifier)) return false;
+		if (!EntityUtils.equals(attr.getParent(), otherAttr.getParent(), checkIdentifier))
+		{
+			return false;
+		}
 
 		// compare entity identifier
 		EntityType refEntity = attr.getRefEntity();
 		EntityType otherRefEntity = otherAttr.getRefEntity();
-		if (refEntity == null && otherRefEntity != null) return false;
-		if (refEntity != null && otherRefEntity == null) return false;
-		if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId())) return false;
-		if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy())) return false;
-		if (!Objects.equals(attr.getOrderBy(), otherAttr.getOrderBy())) return false;
-		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;
-		if (!Objects.equals(attr.isNillable(), otherAttr.isNillable())) return false;
-		if (!Objects.equals(attr.isAuto(), otherAttr.isAuto())) return false;
-		if (!Objects.equals(attr.isVisible(), otherAttr.isVisible())) return false;
-		if (!Objects.equals(attr.isAggregatable(), otherAttr.isAggregatable())) return false;
-		if (!Objects.equals(attr.getEnumOptions(), otherAttr.getEnumOptions())) return false;
-		if (!Objects.equals(attr.getRangeMin(), otherAttr.getRangeMin())) return false;
-		if (!Objects.equals(attr.getRangeMax(), otherAttr.getRangeMax())) return false;
-		if (!Objects.equals(attr.isReadOnly(), otherAttr.isReadOnly())) return false;
-		if (!Objects.equals(attr.isUnique(), otherAttr.isUnique())) return false;
-		if (!Objects.equals(attr.getNullableExpression(), otherAttr.getNullableExpression())) return false;
-		if (!Objects.equals(attr.getVisibleExpression(), otherAttr.getVisibleExpression())) return false;
-		if (!Objects.equals(attr.getValidationExpression(), otherAttr.getValidationExpression())) return false;
-		if (!Objects.equals(attr.getDefaultValue(), otherAttr.getDefaultValue())) return false;
+		if (refEntity == null && otherRefEntity != null)
+		{
+			return false;
+		}
+		if (refEntity != null && otherRefEntity == null)
+		{
+			return false;
+		}
+		if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId()))
+		{
+			return false;
+		}
+		if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy(), checkIdentifier))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getOrderBy(), otherAttr.getOrderBy()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isNillable(), otherAttr.isNillable()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isAuto(), otherAttr.isAuto()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isVisible(), otherAttr.isVisible()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isAggregatable(), otherAttr.isAggregatable()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getEnumOptions(), otherAttr.getEnumOptions()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getRangeMin(), otherAttr.getRangeMin()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getRangeMax(), otherAttr.getRangeMax()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isReadOnly(), otherAttr.isReadOnly()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.isUnique(), otherAttr.isUnique()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getNullableExpression(), otherAttr.getNullableExpression()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getVisibleExpression(), otherAttr.getVisibleExpression()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getValidationExpression(), otherAttr.getValidationExpression()))
+		{
+			return false;
+		}
+		if (!Objects.equals(attr.getDefaultValue(), otherAttr.getDefaultValue()))
+		{
+			return false;
+		}
 
 		// compare tag identifiers
 		List<Tag> tags = newArrayList(attr.getTags());
 		List<Tag> otherTags = newArrayList(otherAttr.getTags());
-		if (tags.size() != otherTags.size()) return false;
+		if (tags.size() != otherTags.size())
+		{
+			return false;
+		}
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!Objects.equals(tags.get(i).getId(), otherTags.get(i).getId())) return false;
+			if (!Objects.equals(tags.get(i).getId(), otherTags.get(i).getId()))
+			{
+				return false;
+			}
 		}
 		return true;
 	}
