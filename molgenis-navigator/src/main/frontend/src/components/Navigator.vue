@@ -1,17 +1,16 @@
 // @flow
 <template>
   <div>
+
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}
     </div>
 
-    <my-tour :firstPackage="items[0]" :homeUrl="homeUrl" :search="submitQuery" :reset="reset"></my-tour>
-
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="input-group col-lg-6">
-        <input id="navigator-search-input" v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
+        <input v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
         <div class="input-group-append">
 
           <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query"
@@ -30,7 +29,7 @@
       <div class="col input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a :href="homeUrl" @click="reset">
+            <a :href="homeUrl" v-on:click="reset">
               <i class="fa fa-home" aria-hidden="true"></i>
             </a>
           </li>
@@ -80,11 +79,8 @@
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
 
-  import MyTour from './NavigatorTour'
-
   export default {
     name: 'Navigator',
-    components: { MyTour },
     data () {
       return {
         fields: {
