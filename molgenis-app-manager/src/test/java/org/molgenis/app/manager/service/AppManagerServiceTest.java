@@ -10,6 +10,7 @@ import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.impl.AppManagerServiceImpl;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.menumanager.MenuManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
@@ -46,6 +47,9 @@ public class AppManagerServiceTest
 	private FileStore fileStore;
 
 	@Mock
+	private MenuManagerService menuManagerService;
+
+	@Mock
 	private MenuReaderService menuReaderService;
 
 	@Mock
@@ -73,8 +77,8 @@ public class AppManagerServiceTest
 		when(app.getResourceFolder()).thenReturn("folder");
 
 		gson = new Gson();
-		appManagerService = new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, menuReaderService,
-				pluginFactory);
+		appManagerService = new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, menuManagerService,
+				menuReaderService, pluginFactory);
 	}
 
 	@Test
@@ -129,6 +133,7 @@ public class AppManagerServiceTest
 		verify(dataService).update(APP_META_NAME, app);
 		verify(dataService).deleteById(PLUGIN_META_NAME, "app/uri/");
 		verify(menu).deleteMenuItem("app/uri/");
+		verify(menuManagerService).saveMenu(menu);
 	}
 
 	@Test

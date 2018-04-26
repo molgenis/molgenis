@@ -11,7 +11,9 @@ import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
+import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.core.ui.menumanager.MenuManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
@@ -47,16 +49,18 @@ public class AppManagerServiceImpl implements AppManagerService
 	private final DataService dataService;
 	private final FileStore fileStore;
 	private final Gson gson;
+	private final MenuManagerService menuManagerService;
 	private final MenuReaderService menuReaderService;
 	private final PluginFactory pluginFactory;
 
 	public AppManagerServiceImpl(AppFactory appFactory, DataService dataService, FileStore fileStore, Gson gson,
-			MenuReaderService menuReaderService, PluginFactory pluginFactory)
+			MenuManagerService menuManagerService, MenuReaderService menuReaderService, PluginFactory pluginFactory)
 	{
 		this.appFactory = requireNonNull(appFactory);
 		this.dataService = requireNonNull(dataService);
 		this.fileStore = requireNonNull(fileStore);
 		this.gson = requireNonNull(gson);
+		this.menuManagerService = requireNonNull(menuManagerService);
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.pluginFactory = requireNonNull(pluginFactory);
 	}
@@ -100,7 +104,10 @@ public class AppManagerServiceImpl implements AppManagerService
 
 		String pluginId = generatePluginId(app);
 		dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
-		menuReaderService.getMenu().deleteMenuItem(pluginId);
+
+		Menu menu = menuReaderService.getMenu();
+		menu.setItems(menu.deleteMenuItem(pluginId));
+		menuManagerService.saveMenu(menu);
 	}
 
 	@Override
