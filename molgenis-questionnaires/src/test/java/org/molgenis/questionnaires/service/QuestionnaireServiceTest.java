@@ -143,7 +143,7 @@ public class QuestionnaireServiceTest
 		when(entityManager.create(entityType, POPULATE)).thenReturn(questionnaireEntity);
 
 		Questionnaire questionnaire = mock(Questionnaire.class);
-		when(questionnaire.getId()).thenReturn(QUESTIONNAIRE_ID);
+		when(questionnaire.getIdValue()).thenReturn(QUESTIONNAIRE_ID);
 		when(questionnaire.getLabel()).thenReturn("label");
 		when(questionnaire.getDescription()).thenReturn("Description");
 		when(questionnaire.getStatus()).thenReturn(QuestionnaireStatus.NOT_STARTED);
