@@ -8,7 +8,7 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import java.io.IOException;
 
 /**
- * Directive that prints the body of the tag if the current user has permission on entity
+ * Directive that prints the body of the tag if the current user has Permission on entity
  * <p>
  * usage: <@hasPermission entityTypeId='celiacsprue' permission="WRITE">write permission</@hasPermission>
  */

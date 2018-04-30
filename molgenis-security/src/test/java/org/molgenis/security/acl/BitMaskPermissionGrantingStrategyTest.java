@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.lang.String.format;
-import static org.molgenis.security.core.Permission.*;
+import static org.molgenis.security.core.PermissionSet.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

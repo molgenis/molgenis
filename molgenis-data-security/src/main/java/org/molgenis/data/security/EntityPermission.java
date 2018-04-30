@@ -1,28 +1,28 @@
 package org.molgenis.data.security;
 
-import org.springframework.security.acls.domain.AbstractPermission;
+import org.molgenis.security.core.Permission;
 
-public class EntityPermission extends AbstractPermission
+/**
+ * Permission to perform an action on an entity instance.
+ */
+public enum EntityPermission implements Permission
 {
-	private final String name;
-	public static final EntityPermission COUNT = new EntityPermission("COUNT", 1 << 0, 'C'); // 1
-	public static final EntityPermission READ = new EntityPermission("READ", 1 << 1, 'R'); // 2
-	public static final EntityPermission WRITE = new EntityPermission("WRITE", 1 << 2, 'W'); // 4
+	// @formatter:off
+	READ("Permission to read this entity"),
+	UPDATE("Permission to update this entity"),
+	DELETE("Permission to delete this entity");
+	// @formatter:on
 
-	protected EntityPermission(String name, int mask)
+	private final String defaultDescription;
+
+	EntityPermission(String defaultDescription)
 	{
-		super(mask);
-		this.name = name;
+		this.defaultDescription = defaultDescription;
 	}
 
-	protected EntityPermission(String name, int mask, char code)
+	@Override
+	public String getDefaultDescription()
 	{
-		super(mask, code);
-		this.name = name;
-	}
-
-	public String getName()
-	{
-		return name;
+		return defaultDescription;
 	}
 }

@@ -5,8 +5,7 @@ import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.io.IOException;
@@ -39,13 +38,13 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		if (entityTypeIdValue != null)
 		{
 			hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityTypeIdValue),
-					toEntityTypePermission(permissionValue));
+					toPermissionSet(permissionValue));
 		}
 
 		if ((pluginIdValue != null) && hasPermission)
 		{
 			hasPermission = permissionService.hasPermission(new PluginIdentity(pluginIdValue),
-					toPluginPermission(permissionValue));
+					toPermissionSet(permissionValue));
 		}
 
 		execute(hasPermission, env, body);
@@ -54,32 +53,19 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 	protected abstract void execute(boolean hasPermission, Environment env, TemplateDirectiveBody body)
 			throws TemplateException, IOException;
 
-	private org.springframework.security.acls.model.Permission toEntityTypePermission(String permission)
+	private PermissionSet toPermissionSet(String permission)
 	{
 		switch (permission)
 		{
+			//TODO: enable fine-grained permission checks
 			case "COUNT":
-				return EntityTypePermission.COUNT;
+				return PermissionSet.COUNT;
 			case "READ":
-				return EntityTypePermission.READ;
+				return PermissionSet.READ;
 			case "WRITE":
-				return EntityTypePermission.WRITE;
+				return PermissionSet.WRITE;
 			case "WRITEMETA":
-				return EntityTypePermission.WRITEMETA;
-			case "NONE":
-				throw new IllegalArgumentException(
-						format("Permission evaluation for permission '%s' not allowed", permission));
-			default:
-				throw new IllegalArgumentException(format("Unknown permission '%s'", permission));
-		}
-	}
-
-	private org.springframework.security.acls.model.Permission toPluginPermission(String permission)
-	{
-		switch (permission)
-		{
-			case "READ":
-				return Permission.READ;
+				return PermissionSet.WRITEMETA;
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));

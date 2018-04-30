@@ -11,8 +11,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.plugin.model.PluginAction;
 import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
@@ -243,7 +243,7 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginAction.VIEW_PLUGIN)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
 				false);
 		assertFalse(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
@@ -251,7 +251,7 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButton()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginAction.VIEW_PLUGIN)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
 				true);
 		assertTrue(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
@@ -259,7 +259,7 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButtonPermissionsOnPluginNoConfig()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginAction.VIEW_PLUGIN)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
 				false);
 		when(entityType.getId()).thenReturn("blah2");
 

@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.*;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 /**
@@ -26,6 +26,9 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 {
 	private final MutableAclService mutableAclService;
 
+	/**
+	 * The operation that is being performed on this repository.
+	 */
 	public enum Action
 	{
 		COUNT, READ, CREATE, UPDATE, DELETE
@@ -42,7 +45,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public Iterator<E> iterator()
 	{
 		Iterable<E> iterable = () -> delegate().iterator();
-		return stream(iterable.spliterator(), false).filter(entity -> isOperationPermitted(entity, Action.READ))
+		return stream(iterable.spliterator(), false).filter(entity -> isActionPermitted(entity, READ))
 													.iterator();
 	}
 
@@ -50,32 +53,32 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize)
 	{
 		delegate().forEachBatched(fetch, entities -> consumer.accept(
-				entities.stream().filter(entity -> isOperationPermitted(entity, Action.READ)).collect(toList())),
+				entities.stream().filter(entity -> isActionPermitted(entity, READ)).collect(toList())),
 				batchSize);
 	}
 
 	@Override
 	public long count()
 	{
-		return findAllPermitted(Action.COUNT).count();
+		return findAllPermitted(COUNT).count();
 	}
 
 	@Override
 	public long count(Query<E> q)
 	{
-		return findAllPermitted(q, Action.COUNT).count();
+		return findAllPermitted(q, COUNT).count();
 	}
 
 	@Override
 	public Stream<E> findAll(Query<E> q)
 	{
-		return findAllPermitted(q, Action.READ);
+		return findAllPermitted(q, READ);
 	}
 
 	@Override
 	public E findOne(Query<E> q)
 	{
-		return findAllPermitted(q, Action.READ).findFirst().orElse(null);
+		return findAllPermitted(q, READ).findFirst().orElse(null);
 	}
 
 	@Override
@@ -83,7 +86,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		E entity = null;
 
-		if (isOperationPermitted(id, Action.READ))
+		if (isActionPermitted(id, READ))
 		{
 			entity = delegate().findOneById(id);
 		}
@@ -94,7 +97,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public E findOneById(Object id, Fetch fetch)
 	{
 		E entity = null;
-		if (isOperationPermitted(id, Action.READ))
+		if (isActionPermitted(id, READ))
 		{
 			entity = delegate().findOneById(id, fetch);
 		}
@@ -105,14 +108,14 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public Stream<E> findAll(Stream<Object> ids)
 	{
 		Stream<E> entities = delegate().findAll(ids);
-		entities = entities.filter(entity -> isOperationPermitted(entity, Action.READ));
+		entities = entities.filter(entity -> isActionPermitted(entity, READ));
 		return entities;
 	}
 
 	@Override
 	public Stream<E> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return delegate().findAll(ids, fetch).filter(entity -> isOperationPermitted(entity, Action.READ));
+		return delegate().findAll(ids, fetch).filter(entity -> isActionPermitted(entity, READ));
 	}
 
 	@Override
@@ -128,11 +131,9 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void update(E entity)
 	{
-		if (!isOperationPermitted(entity, Action.UPDATE))
+		if (!isActionPermitted(entity, UPDATE))
 		{
-			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(Action.DELETE),
-							entity.getEntityType().getLabel(), entity.getIdValue()));
+			throwPermissionException(entity, UPDATE);
 		}
 		delegate().update(entity);
 		updateAcl(entity);
@@ -143,7 +144,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		delegate().update(entities.filter((E entity) ->
 		{
-			boolean result = isOperationPermitted(entity, Action.UPDATE);
+			boolean result = isActionPermitted(entity, UPDATE);
 			if (result)
 			{
 				updateAcl(entity);
@@ -155,17 +156,13 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void delete(E entity)
 	{
-		if (!isOperationPermitted(entity, Action.DELETE))
+		if (!isActionPermitted(entity, DELETE))
 		{
-			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(Action.DELETE),
-							entity.getEntityType().getLabel(), entity.getIdValue()));
+			throwPermissionException(entity, DELETE);
 		}
 		deleteAcl(entity);
 		delegate().delete(entity);
 	}
-
-	protected abstract String toMessagePermission(Action action);
 
 	@Override
 	public void delete(Stream<E> entities)
@@ -176,7 +173,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void deleteById(Object id)
 	{
-		if (isOperationPermitted(id, Action.DELETE))
+		if (isActionPermitted(id, DELETE))
 		{
 			deleteAcl(id);
 			delegate().deleteById(id);
@@ -188,7 +185,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		delegate().deleteAll(ids.filter(id ->
 		{
-			boolean deleteAllowed = isOperationPermitted(id, Action.DELETE);
+			boolean deleteAllowed = isActionPermitted(id, DELETE);
 			if (deleteAllowed)
 			{
 				deleteAcl(id);
@@ -200,13 +197,13 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void deleteAll()
 	{
-		delegate().delete(findAllPermitted(new QueryImpl<>(), Action.DELETE));
+		delegate().delete(findAllPermitted(new QueryImpl<>(), DELETE));
 	}
 
 	@Override
 	public void add(E entity)
 	{
-		if (isOperationPermitted(entity, Action.CREATE))
+		if (isActionPermitted(entity, Action.CREATE))
 		{
 			createAcl(entity);
 			delegate().add(entity);
@@ -219,7 +216,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 		return delegate().add(entities.filter(entity ->
 		{
 			//throws exception if no permission on the containing package
-			isOperationPermitted(entity, Action.CREATE);
+			isActionPermitted(entity, Action.CREATE);
 			createAcl(entity);
 			return true;
 		}));
@@ -229,7 +226,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		delegate().delete(entityStream.filter(entity ->
 		{
-			boolean deleteAllowed = isOperationPermitted(entity, Action.DELETE);
+			boolean deleteAllowed = isActionPermitted(entity, DELETE);
 			if (deleteAllowed)
 			{
 				deleteAcl(entity);
@@ -248,7 +245,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 		Query<E> qWithoutLimitOffset = new QueryImpl<>(query);
 		qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 		Stream<E> permittedEntityStream = delegate().findAll(qWithoutLimitOffset)
-													.filter(entity -> isOperationPermitted(entity, action));
+													.filter(entity -> isActionPermitted(entity, action));
 		if (query.getOffset() > 0)
 		{
 			permittedEntityStream = permittedEntityStream.skip(query.getOffset());
@@ -260,14 +257,16 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 		return permittedEntityStream;
 	}
 
-	public void deleteAcl(ObjectIdentity objectIdentity)
+	void deleteAcl(ObjectIdentity objectIdentity)
 	{
 		mutableAclService.deleteAcl(objectIdentity, true);
 	}
 
-	public abstract boolean isOperationPermitted(E entity, Action action);
+	public abstract boolean isActionPermitted(E entity, Action action);
 
-	public abstract boolean isOperationPermitted(Object id, Action action);
+	public abstract boolean isActionPermitted(Object id, Action action);
+
+	public abstract void throwPermissionException(E entity, Action action);
 
 	public abstract void createAcl(E entity);
 

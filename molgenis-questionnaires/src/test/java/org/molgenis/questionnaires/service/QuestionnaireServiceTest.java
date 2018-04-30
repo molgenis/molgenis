@@ -9,6 +9,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
@@ -25,7 +26,6 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
@@ -77,7 +77,10 @@ public class QuestionnaireServiceTest
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(typedQuery);
 
 		when(query.findAll()).thenReturn(Stream.of(entityType));
-		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID),
+				EntityTypePermission.ADD_DATA)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID),
+				EntityTypePermission.UPDATE_DATA)).thenReturn(true);
 
 		Entity entity = mock(Entity.class);
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
@@ -110,7 +113,10 @@ public class QuestionnaireServiceTest
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(typedQuery);
 
 		when(query.findAll()).thenReturn(Stream.of(entityType));
-		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID),
+				EntityTypePermission.ADD_DATA)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID),
+				EntityTypePermission.UPDATE_DATA)).thenReturn(true);
 
 		Entity entity = null;
 		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);

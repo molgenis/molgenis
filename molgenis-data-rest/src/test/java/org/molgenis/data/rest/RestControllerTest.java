@@ -381,7 +381,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityTypeWritable() throws Exception
 	{
 		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME),
-				EntityTypePermission.WRITE)).thenReturn(true);
+				EntityTypePermission.ADD_DATA)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
@@ -397,7 +397,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityTypeNotWritable() throws Exception
 	{
 		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME),
-				EntityTypePermission.WRITE)).thenReturn(true);
+				EntityTypePermission.ADD_DATA)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))

@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 
 public class PackagePermissionException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "P01";
+	private static final String ERROR_CODE = "DS01";
 	private final PackagePermission permission;
 	private final transient Package pack;
 
@@ -22,6 +22,6 @@ public class PackagePermissionException extends CodedRuntimeException
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return new String[] { permission.getName(), pack.getLabel() };
+		return new Object[] { permission.getName(), pack.getLabel() };
 	}
 }

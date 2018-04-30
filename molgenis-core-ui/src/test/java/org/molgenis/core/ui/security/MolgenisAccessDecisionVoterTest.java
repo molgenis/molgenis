@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.plugin.model.PluginAction.VIEW_PLUGIN;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.springframework.security.access.AccessDecisionVoter.ACCESS_DENIED;
 import static org.springframework.security.access.AccessDecisionVoter.ACCESS_GRANTED;
 import static org.testng.Assert.assertEquals;

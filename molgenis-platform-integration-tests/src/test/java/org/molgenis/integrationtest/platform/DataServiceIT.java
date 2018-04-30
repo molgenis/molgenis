@@ -7,7 +7,8 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
@@ -15,10 +16,9 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -49,7 +49,6 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -881,30 +880,24 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 
 	private void populateDataPermissions()
 	{
-		// define cumulative permissions
-		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
-				EntityTypePermission.READ);
-		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
-		CumulativePermission writeEntity = EntityPermissionUtils.getCumulativePermission(EntityPermission.WRITE);
+		Map<ObjectIdentity, PermissionSet> basePermissions = new HashMap<>();
+		basePermissions.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
+		basePermissions.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.READ);
+		basePermissions.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.READ);
+		basePermissions.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		basePermissions.put(new EntityTypeIdentity(entityTypeStatic), PermissionSet.READ);
+		basePermissions.put(new EntityTypeIdentity(refEntityTypeStatic), PermissionSet.READ);
 
-		Map<ObjectIdentity, Permission> basePermissions = new HashMap<>();
-		basePermissions.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
-		basePermissions.put(new EntityTypeIdentity("sys_md_EntityType"), readEntityType);
-		basePermissions.put(new EntityTypeIdentity("sys_md_Attribute"), readEntityType);
-		basePermissions.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
-		basePermissions.put(new EntityTypeIdentity(entityTypeStatic), readEntityType);
-		basePermissions.put(new EntityTypeIdentity(refEntityTypeStatic), readEntityType);
-
-		Map<ObjectIdentity, Permission> readerPermissions = new HashMap<>(basePermissions);
-		readerPermissions.put(new EntityTypeIdentity(entityType), readEntityType);
-		readerPermissions.put(new EntityTypeIdentity(refEntityType), readEntityType);
-		readerPermissions.put(new EntityTypeIdentity(FILE_META), readEntityType);
-		readerPermissions.put(new EntityIdentity(publicFile), writeEntity);
+		Map<ObjectIdentity, PermissionSet> readerPermissions = new HashMap<>(basePermissions);
+		readerPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.READ);
+		readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
+		readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
+		readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
 		permissionPopulator.populate(readerPermissions, USERNAME_READ);
 
-		Map<ObjectIdentity, Permission> editorPermissions = new HashMap<>(basePermissions);
-		editorPermissions.put(new EntityTypeIdentity(entityType), writeEntityType);
-		editorPermissions.put(new EntityTypeIdentity(refEntityType), writeEntityType);
+		Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
+		editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
+		editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
 		permissionPopulator.populate(editorPermissions, USERNAME_WRITE);
 	}
 

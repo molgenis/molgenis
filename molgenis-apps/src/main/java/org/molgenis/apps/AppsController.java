@@ -65,7 +65,7 @@ public class AppsController extends PluginController
 		Query<App> query = dataService.query(APP, App.class);
 		query.sort().on(AppMetaData.NAME);
 		Stream<App> apps = query.findAll();
-		if (!permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.WRITE))
+		if (!permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.UPDATE_DATA))
 		{
 			apps = apps.filter(App::isActive);
 		}

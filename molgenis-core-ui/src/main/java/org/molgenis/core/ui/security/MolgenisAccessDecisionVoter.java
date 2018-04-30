@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.molgenis.data.plugin.model.PluginAction.VIEW_PLUGIN;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 
 public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterInvocation>
 {

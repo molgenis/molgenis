@@ -128,8 +128,8 @@ public class GenomeBrowserService
 	private boolean hasPermission()
 	{
 		return userPermissionEvaluator.hasPermission(new EntityTypeIdentity(GENOMEBROWSERSETTINGS),
-				EntityTypePermission.READ) && userPermissionEvaluator.hasPermission(
-				new EntityTypeIdentity(GENOMEBROWSERATTRIBUTES), EntityTypePermission.READ);
+				EntityTypePermission.READ_DATA) && userPermissionEvaluator.hasPermission(
+				new EntityTypeIdentity(GENOMEBROWSERATTRIBUTES), EntityTypePermission.READ_DATA);
 	}
 
 	private Stream<GenomeBrowserAttributes> getDefaultGenomeBrowserAttributes()

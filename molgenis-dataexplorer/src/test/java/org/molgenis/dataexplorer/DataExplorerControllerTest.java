@@ -114,10 +114,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest()
 	{
-		when(permissionService.hasPermission(new EntityTypeIdentity("yes"), EntityTypePermission.WRITEMETA)).thenReturn(
-				true);
-		when(permissionService.hasPermission(new EntityTypeIdentity("no"), EntityTypePermission.WRITEMETA)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("yes"),
+				EntityTypePermission.UPDATE_METADATA)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity("no"),
+				EntityTypePermission.UPDATE_METADATA)).thenReturn(false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
