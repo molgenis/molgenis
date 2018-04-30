@@ -122,7 +122,10 @@ describe('actions', () => {
       mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
       const expectedMutations = [
-        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id}
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
+        {type: 'SET_LOADING', payload: false}
       ]
 
       testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
@@ -134,6 +137,8 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
