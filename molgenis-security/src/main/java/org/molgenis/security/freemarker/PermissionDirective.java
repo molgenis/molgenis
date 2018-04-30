@@ -4,11 +4,10 @@ import freemarker.core.Environment;
 import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.Permission;
 
 import java.io.IOException;
 import java.util.Map;
@@ -55,7 +54,7 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 	protected abstract void execute(boolean hasPermission, Environment env, TemplateDirectiveBody body)
 			throws TemplateException, IOException;
 
-	private Permission toEntityTypePermission(String permission)
+	private org.springframework.security.acls.model.Permission toEntityTypePermission(String permission)
 	{
 		switch (permission)
 		{
@@ -75,12 +74,12 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		}
 	}
 
-	private Permission toPluginPermission(String permission)
+	private org.springframework.security.acls.model.Permission toPluginPermission(String permission)
 	{
 		switch (permission)
 		{
 			case "READ":
-				return PluginPermission.READ;
+				return Permission.READ;
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));

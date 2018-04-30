@@ -17,4 +17,6 @@ public interface UserPermissionEvaluator
 	 * @return <tt>true</tt> if the permission is granted, <tt>false</tt> otherwise
 	 */
 	boolean hasPermission(ObjectIdentity objectIdentity, Permission permission);
+
+	boolean hasPermission(ObjectIdentity objectIdentity, Action action);
 }

@@ -11,12 +11,12 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.*;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -207,7 +207,8 @@ public class PermissionManagerController extends PluginController
 		removePermissionForSid(sid, objectIdentity);
 	}
 
-	private void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
+	private void createSidPluginPermission(Plugin plugin, Sid sid,
+			org.springframework.security.acls.model.Permission pluginPermission)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
 		createSidPermission(sid, objectIdentity, pluginPermission);
@@ -274,12 +275,12 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	private static PluginPermission toPluginPermission(String paramValue)
+	private static Permission toPluginPermission(String paramValue)
 	{
 		switch (paramValue.toUpperCase())
 		{
 			case "READ":
-				return PluginPermission.READ;
+				return Permission.READ;
 			default:
 				throw new IllegalArgumentException(format("Unknown plugin permission '%s'", paramValue));
 		}
@@ -385,7 +386,7 @@ public class PermissionManagerController extends PluginController
 	private org.molgenis.security.permission.Permission toPluginPermission(AccessControlEntry ace)
 	{
 		org.molgenis.security.permission.Permission pluginPermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission().equals(PluginPermission.READ))
+		if (ace.getPermission().equals(Permission.READ))
 		{
 			pluginPermission.setType("read");
 		}
@@ -622,7 +623,8 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity, Permission permission)
+	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity,
+			org.springframework.security.acls.model.Permission permission)
 	{
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
 

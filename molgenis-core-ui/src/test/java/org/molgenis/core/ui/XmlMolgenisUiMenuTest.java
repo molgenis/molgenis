@@ -1,7 +1,7 @@
 package org.molgenis.core.ui;
 
+import org.molgenis.data.plugin.model.PluginAction;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
@@ -104,9 +104,12 @@ public class XmlMolgenisUiMenuTest
 		menuType.getMenuOrPlugin().add(plugin2Type);
 		menuType.getMenuOrPlugin().add(menu1Type);
 
-		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ)).thenReturn(true);
-		when(permissionService.hasPermission(new PluginIdentity("plugin2"), PluginPermission.READ)).thenReturn(false);
-		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
+		when(permissionService.hasPermission(new PluginIdentity("plugin2"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				false);
+		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, permissionService);
 		Iterator<UiMenuItem> it = xmlMolgenisUiMenu.getItems().iterator();
@@ -139,9 +142,12 @@ public class XmlMolgenisUiMenuTest
 		menuType.getMenuOrPlugin().add(menu1Type);
 		menuType.getMenuOrPlugin().add(plugin2Type);
 
-		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ)).thenReturn(false);
-		when(permissionService.hasPermission(new PluginIdentity("plugin2"), PluginPermission.READ)).thenReturn(true);
-		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				false);
+		when(permissionService.hasPermission(new PluginIdentity("plugin2"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
+		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, permissionService);
 		assertEquals(xmlMolgenisUiMenu.getActiveItem().getName(), "plugin2");
@@ -167,8 +173,10 @@ public class XmlMolgenisUiMenuTest
 		menuType.getMenuOrPlugin().add(plugin1Type);
 		menuType.getMenuOrPlugin().add(menu1Type);
 
-		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginPermission.READ)).thenReturn(false);
-		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("plugin1"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				false);
+		when(permissionService.hasPermission(new PluginIdentity("plugin3"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
 
 		XmlMolgenisUiMenu xmlMolgenisUiMenu = new XmlMolgenisUiMenu(menuType, permissionService);
 		assertNull(xmlMolgenisUiMenu.getActiveItem());
@@ -203,7 +211,7 @@ public class XmlMolgenisUiMenuTest
 		pluginType.setName(pluginName);
 		pluginType.setId(pluginId);
 
-		when(permissionService.hasPermission(new PluginIdentity(pluginId), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity(pluginId), PluginAction.VIEW_PLUGIN)).thenReturn(true);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(pluginType);
@@ -226,8 +234,10 @@ public class XmlMolgenisUiMenuTest
 		plugin2Type.setName(plugin2Name);
 		plugin2Type.setId(plugin2Id);
 
-		when(permissionService.hasPermission(new PluginIdentity(plugin1Id), PluginPermission.READ)).thenReturn(false);
-		when(permissionService.hasPermission(new PluginIdentity(plugin2Id), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity(plugin1Id), PluginAction.VIEW_PLUGIN)).thenReturn(
+				false);
+		when(permissionService.hasPermission(new PluginIdentity(plugin2Id), PluginAction.VIEW_PLUGIN)).thenReturn(
+				true);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(plugin1Type);
@@ -242,7 +252,8 @@ public class XmlMolgenisUiMenuTest
 	{
 		PluginType pluginType = new PluginType();
 		pluginType.setId("something");
-		when(permissionService.hasPermission(new PluginIdentity("something"), PluginPermission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new PluginIdentity("something"), PluginAction.VIEW_PLUGIN)).thenReturn(
+				false);
 
 		MenuType menuType = new MenuType();
 		menuType.getMenuOrPlugin().add(pluginType);

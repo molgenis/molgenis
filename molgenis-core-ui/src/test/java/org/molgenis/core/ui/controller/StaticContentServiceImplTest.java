@@ -88,7 +88,6 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permission on static content entity type.")
 	public void submitContentNoStaticContentPermissions()
 	{
-		//		doReturn(true).when(permissionService).hasPermission(new PluginIdentity("home"), PluginPermission.WRITE);
 		doReturn(false).when(permissionService)
 					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
 		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");

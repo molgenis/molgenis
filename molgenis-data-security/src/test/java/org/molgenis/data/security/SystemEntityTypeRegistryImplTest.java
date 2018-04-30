@@ -5,7 +5,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -19,7 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
 /**
- * See {@link Permission#COUNT} for an explanation why we are not using {@link Permission#READ} in the test cases.
+ * See {@link EntityTypePermission#COUNT} for an explanation why we are not using {@link EntityTypePermission#READ} in the test cases.
  */
 public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 {
@@ -66,7 +65,8 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.COUNT)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		systemEntityTypeRegistry.getSystemEntityType(entityTypeId);

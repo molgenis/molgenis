@@ -6,8 +6,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.model.PluginAction;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -75,7 +75,7 @@ public class NegotiatorController extends PluginController
 	public boolean showDirectoryButton(String entityTypeId)
 	{
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
-		return settings != null && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.READ);
+		return settings != null && permissions.hasPermission(new PluginIdentity(ID), PluginAction.VIEW_PLUGIN);
 	}
 
 	@PostMapping("/validate")

@@ -1,10 +1,12 @@
 package org.molgenis.security.permission;
 
+import org.molgenis.security.core.Action;
+import org.molgenis.security.core.ActionPermissionMappingRegistry;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,14 +17,18 @@ import static java.util.Objects.requireNonNull;
 public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 {
 	private final PermissionEvaluator permissionEvaluator;
+	private final ActionPermissionMappingRegistry actionPermissionMappingRegistry;
 
-	UserPermissionEvaluatorImpl(PermissionEvaluator permissionEvaluator)
+	UserPermissionEvaluatorImpl(PermissionEvaluator permissionEvaluator,
+			ActionPermissionMappingRegistry actionPermissionMappingRegistry)
 	{
 		this.permissionEvaluator = requireNonNull(permissionEvaluator);
+		this.actionPermissionMappingRegistry = requireNonNull(actionPermissionMappingRegistry);
 	}
 
 	@Override
-	public boolean hasPermission(ObjectIdentity objectIdentity, Permission permission)
+	public boolean hasPermission(ObjectIdentity objectIdentity,
+			org.springframework.security.acls.model.Permission permission)
 	{
 		if (SecurityUtils.currentUserIsSuOrSystem())
 		{
@@ -31,6 +37,22 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 		else
 		{
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			return authentication != null && permissionEvaluator.hasPermission(authentication,
+					objectIdentity.getIdentifier(), objectIdentity.getType(), permission);
+		}
+	}
+
+	public boolean hasPermission(ObjectIdentity objectIdentity, Action action)
+	{
+		if (SecurityUtils.currentUserIsSuOrSystem())
+		{
+			return true;
+		}
+		else
+		{
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			//FIXME: deal with no result and with multiple results
+			Permission permission = actionPermissionMappingRegistry.getPermissions(action).iterator().next();
 			return authentication != null && permissionEvaluator.hasPermission(authentication,
 					objectIdentity.getIdentifier(), objectIdentity.getType(), permission);
 		}

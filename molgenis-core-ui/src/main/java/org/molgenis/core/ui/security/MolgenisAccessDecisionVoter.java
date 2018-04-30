@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.security;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.Ui;
@@ -43,7 +43,7 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		{
 			String pluginId = pluginMatcher.group(1);
 			return getMolgenisPermissionService().hasPermission(new PluginIdentity(pluginId),
-					PluginPermission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
+					Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
 		Matcher menuMatcher = PATTERN_MENUID.matcher(requestUrl);
