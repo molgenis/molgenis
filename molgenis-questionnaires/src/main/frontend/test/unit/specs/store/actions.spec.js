@@ -122,7 +122,7 @@ describe('actions', () => {
       mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
       const expectedMutations = [
-        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id}
       ]
 
       testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
