@@ -562,6 +562,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void retrieveResourceCollectionUnknownEntityType() throws Exception
+	{
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponseUnknownEntityType.json"));
+		mockMvc.perform(get(BASE_URI + '/' + "unknown"))
+			   .andExpect(status().isNotFound())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
 	public void retrieveEntityCollectionWithZeroNumSize() throws Exception
 	{
 		// have count return a non null value irrespective of query

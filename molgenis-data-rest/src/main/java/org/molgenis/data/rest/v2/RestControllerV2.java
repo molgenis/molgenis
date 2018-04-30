@@ -632,11 +632,15 @@ public class RestControllerV2
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityTypeId,
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest, boolean includeCategories)
 	{
-		EntityType meta = dataService.getEntityType(entityTypeId);
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		if (entityType == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
-		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
+		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
+		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), entityType,
 				LocaleContextHolder.getLocale().getLanguage());
 		if (fetch != null)
 		{
@@ -646,7 +650,7 @@ public class RestControllerV2
 		if (request.getAggs() != null)
 		{
 			// return aggregates for aggregate query
-			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
+			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(entityType, q);
 			Attribute xAttr = aggsQ.getAttributeX();
 			Attribute yAttr = aggsQ.getAttributeY();
 			if (xAttr == null && yAttr == null)
@@ -655,10 +659,10 @@ public class RestControllerV2
 			}
 			AggregateResult aggs = dataService.aggregate(entityTypeId, aggsQ);
 			AttributeResponseV2 xAttrResponse =
-					xAttr != null ? new AttributeResponseV2(entityTypeId, meta, xAttr, fetch, permissionService,
+					xAttr != null ? new AttributeResponseV2(entityTypeId, entityType, xAttr, fetch, permissionService,
 							dataService) : null;
 			AttributeResponseV2 yAttrResponse =
-					yAttr != null ? new AttributeResponseV2(entityTypeId, meta, yAttr, fetch, permissionService,
+					yAttr != null ? new AttributeResponseV2(entityTypeId, entityType, yAttr, fetch, permissionService,
 							dataService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityTypeId);
 		}
@@ -700,7 +704,7 @@ public class RestControllerV2
 				nextHref = builder.build(false).toUriString();
 			}
 
-			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, meta,
+			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityTypeId, entityType,
 					permissionService, dataService, prevHref, nextHref, includeCategories);
 		}
 	}
@@ -725,7 +729,8 @@ public class RestControllerV2
 		return createEntityResponse(entity, fetch, includeMetaData, false);
 	}
 
-	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData, boolean includeCategories)
+	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData,
+			boolean includeCategories)
 	{
 		Map<String, Object> responseData = new LinkedHashMap<>();
 		if (includeMetaData)
@@ -736,9 +741,11 @@ public class RestControllerV2
 		return responseData;
 	}
 
-	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData, boolean includeCategories)
+	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData,
+			boolean includeCategories)
 	{
-		responseData.put("_meta", new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, includeCategories));
+		responseData.put("_meta",
+				new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, includeCategories));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
