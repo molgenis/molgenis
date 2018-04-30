@@ -1,7 +1,7 @@
 package org.molgenis.gavin.job.input.model;
 
-import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
 
