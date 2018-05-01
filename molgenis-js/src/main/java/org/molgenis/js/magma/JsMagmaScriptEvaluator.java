@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.util.ResourceUtils.getString;
 
 /**
@@ -69,6 +71,29 @@ public class JsMagmaScriptEvaluator
 		jsScriptEngine.eval(magmaBindings, string);
 	}
 
+	public List<Object> evalList(Collection<String> expressions, Entity entity)
+	{
+		return evalList(expressions, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
+	}
+
+	public List<Object> evalList(Collection<String> expressions, Entity entity, int depth)
+	{
+		Stopwatch stopwatch = null;
+		if (LOG.isTraceEnabled())
+		{
+			stopwatch = Stopwatch.createStarted();
+		}
+
+		Bindings bindings = createBindings(entity, depth);
+		List<Object> result = expressions.stream().map(expression -> eval(bindings, expression)).collect(toList());
+		if (stopwatch != null)
+		{
+			stopwatch.stop();
+			LOG.trace("Script evaluation took {} µs", stopwatch.elapsed(MICROSECONDS));
+		}
+		return result;
+	}
+
 	public Object eval(String expression, Entity entity)
 	{
 		return eval(expression, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
@@ -93,18 +118,11 @@ public class JsMagmaScriptEvaluator
 	 * @param expression  JavaScript expression to evaluate
 	 * @return evaluated expression result, return type depends on the expression.
 	 */
-	public Object eval(Bindings bindings, String expression)
+	private Object eval(Bindings bindings, String expression)
 	{
-		Stopwatch stopwatch = null;
-		if (LOG.isTraceEnabled())
-		{
-			stopwatch = Stopwatch.createStarted();
-		}
-
-		Object value;
 		try
 		{
-			value = jsScriptEngine.eval(bindings, expression);
+			return jsScriptEngine.eval(bindings, expression);
 		}
 		catch (javax.script.ScriptException t)
 		{
@@ -114,25 +132,6 @@ public class JsMagmaScriptEvaluator
 		{
 			return new ScriptException(t);
 		}
-
-		if (stopwatch != null)
-		{
-			stopwatch.stop();
-			LOG.trace("Script evaluation took {} µs", stopwatch.elapsed(MICROSECONDS));
-		}
-
-		return value;
-	}
-
-	/**
-	 * Creates magmascript bindings for a given Entity with default depth.
-	 *
-	 * @param entity the entity to bind to the magmascript $ function
-	 * @return Bindings with $ function bound to the entity
-	 */
-	public Bindings createBindings(Entity entity)
-	{
-		return createBindings(entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
 	}
 
 	/**
@@ -142,7 +141,7 @@ public class JsMagmaScriptEvaluator
 	 * @param depth  maximum depth to follow references when creating the entity value map
 	 * @return Bindings with $ function bound to the entity
 	 */
-	public Bindings createBindings(Entity entity, int depth)
+	private Bindings createBindings(Entity entity, int depth)
 	{
 		Bindings bindings = new SimpleBindings();
 		JSObject global = (JSObject) magmaBindings.get("nashorn.global");

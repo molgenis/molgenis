@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.script.Bindings;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Validates entities using JavaScript expressions. Expressions can use the Magma API.
@@ -58,14 +58,14 @@ public class ExpressionValidator
 			return Collections.emptyList();
 		}
 
-		Bindings bindings = jsMagmaScriptEvaluator.createBindings(entity);
+		return jsMagmaScriptEvaluator.evalList(expressions, entity)
+									 .stream()
+									 .map(this::convertToBoolean)
+									 .collect(toList());
+	}
 
-		List<Boolean> validationResults = new ArrayList<>(expressions.size());
-		for (String expression : expressions)
-		{
-			Object value = jsMagmaScriptEvaluator.eval(bindings, expression);
-			validationResults.add(value != null ? Boolean.valueOf(value.toString()) : null);
-		}
-		return validationResults;
+	private Boolean convertToBoolean(Object value)
+	{
+		return Optional.ofNullable(value).map(Object::toString).map(Boolean::valueOf).orElse(null);
 	}
 }

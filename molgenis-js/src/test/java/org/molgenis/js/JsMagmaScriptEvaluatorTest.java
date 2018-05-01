@@ -10,12 +10,14 @@ import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -515,31 +517,27 @@ public class JsMagmaScriptEvaluatorTest
 	}
 
 	@Test
-	public void evalWithBindings()
+	public void evalList()
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
-		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person);
-		Object result = jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
-		assertEquals(result, 0d);
+		List<Object> result = jsMagmaScriptEvaluator.evalList(
+				Arrays.asList("$('birthdate').age().value()", "$('height').pow(2).value()"), person);
+		assertEquals(result, Arrays.asList(0d, 400d));
 	}
 
-	@Test(enabled = false)
+	@Test
 	public void testPerformance()
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
-		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person);
-		jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
+		jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 
 		Stopwatch sw = Stopwatch.createStarted();
-		for (int i = 0; i < 10000; i++)
-		{
-			jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
-		}
-		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed reusing same bindings");
+		jsMagmaScriptEvaluator.evalList(Collections.nCopies(10000, "$('birthdate').age().value()"), person);
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed evalList");
 
 		sw.reset().start();
 
