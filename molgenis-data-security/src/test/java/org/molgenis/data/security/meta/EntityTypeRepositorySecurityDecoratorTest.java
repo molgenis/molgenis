@@ -16,9 +16,9 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.acl.MutableAclClassService;
@@ -116,7 +116,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void addNoPermissionOnPack()
 	{
 		EntityType entityType = mock(EntityType.class);
@@ -388,7 +388,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "permission:DELETE_METADATA entityTypeId:entityTypeId")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_METADATA entityTypeId:entityTypeId")
 	public void deleteNotAllowed()
 	{
 		String entityTypeId = "entityTypeId";
@@ -446,7 +446,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void updateNoPermissionOnPack()
 	{
 		String entityTypeId = "entityTypeId";
@@ -511,7 +511,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	}
 
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_METADATA entityTypeId:entityTypeId")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_METADATA entityTypeId:entityTypeId")
 	public void updateNotAllowed()
 	{
 		String entityTypeId = "entityTypeId";

@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityPermission;
-import org.molgenis.data.security.exception.EntityPermissionException;
+import org.molgenis.data.security.exception.EntityPermissionDeniedException;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -49,7 +49,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRowLevelSecurit
 	@Override
 	public void throwPermissionException(Entity entity, Action action)
 	{
-		throw new EntityPermissionException(getPermission(action), entity);
+		throw new EntityPermissionDeniedException(getPermission(action), entity);
 	}
 
 	private boolean isActionPermitted(EntityIdentity entityIdentity, Action action)

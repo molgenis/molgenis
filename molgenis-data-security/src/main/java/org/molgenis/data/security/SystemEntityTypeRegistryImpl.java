@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +95,7 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	{
 		if (!isReadAllowed(systemEntityType))
 		{
-			throw new EntityTypePermissionException(EntityTypePermission.READ_METADATA, systemEntityType.getId());
+			throw new EntityTypePermissionDeniedException(EntityTypePermission.READ_METADATA, systemEntityType.getId());
 		}
 	}
 

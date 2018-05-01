@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -228,7 +228,7 @@ public class DataExplorerController extends PluginController
 				if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
 						EntityTypePermission.UPDATE_METADATA))
 				{
-					throw new EntityTypePermissionException(EntityTypePermission.UPDATE_METADATA, entityTypeId);
+					throw new EntityTypePermissionDeniedException(EntityTypePermission.UPDATE_METADATA, entityTypeId);
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)

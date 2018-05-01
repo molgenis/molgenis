@@ -6,10 +6,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.model.MutableAcl;
@@ -85,7 +85,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).update(pack);
 	}
 
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testUpdateNoParentPermission()
 	{
 		Package pack = mock(Package.class);
@@ -255,7 +255,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).add(pack);
 	}
 
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testAddNoPermissionOnParent()
 	{
 		Package pack = mock(Package.class);

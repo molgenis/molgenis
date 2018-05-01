@@ -7,9 +7,9 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.*;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
@@ -173,7 +173,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
 					PackagePermission.ADD_ENTITY_TYPE))
 			{
-				throw new PackagePermissionException(PackagePermission.ADD_ENTITY_TYPE, pack);
+				throw new PackagePermissionDeniedException(PackagePermission.ADD_ENTITY_TYPE, pack);
 			}
 		}
 		else
@@ -188,7 +188,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 	@Override
 	public void throwPermissionException(EntityType entityType, Action action)
 	{
-		throw new EntityTypePermissionException(getPermissionForAction(action), entityType);
+		throw new EntityTypePermissionDeniedException(getPermissionForAction(action), entityType);
 	}
 
 	private boolean isPackageUpdated(Action action, EntityType newEntityType)

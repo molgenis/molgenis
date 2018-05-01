@@ -4,7 +4,7 @@ import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
@@ -97,14 +97,14 @@ public class StaticContentServiceImpl implements StaticContentService
 		{
 			if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), UPDATE_DATA))
 			{
-				throw new EntityTypePermissionException(UPDATE_DATA, STATIC_CONTENT);
+				throw new EntityTypePermissionDeniedException(UPDATE_DATA, STATIC_CONTENT);
 			}
 		}
 		else
 		{
 			if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), ADD_DATA))
 			{
-				throw new EntityTypePermissionException(ADD_DATA, STATIC_CONTENT);
+				throw new EntityTypePermissionDeniedException(ADD_DATA, STATIC_CONTENT);
 			}
 		}
 	}

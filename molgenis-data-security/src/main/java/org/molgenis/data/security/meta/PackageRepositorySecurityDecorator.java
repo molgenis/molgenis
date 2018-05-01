@@ -7,7 +7,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Acl;
@@ -186,7 +186,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
 					ADD_PACKAGE))
 			{
-				throw new PackagePermissionException(ADD_PACKAGE, parent);
+				throw new PackagePermissionDeniedException(ADD_PACKAGE, parent);
 			}
 		}
 		else

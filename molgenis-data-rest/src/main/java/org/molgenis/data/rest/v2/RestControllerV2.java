@@ -12,7 +12,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -84,9 +84,9 @@ public class RestControllerV2
 		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
 	}
 
-	static EntityTypePermissionException createNoReadPermissionOnEntityException(String entityTypeId)
+	static EntityTypePermissionDeniedException createNoReadPermissionOnEntityException(String entityTypeId)
 	{
-		return new EntityTypePermissionException(EntityTypePermission.READ_DATA, entityTypeId);
+		return new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, entityTypeId);
 	}
 
 	static MolgenisRepositoryCapabilitiesException createNoWriteCapabilitiesOnEntityException(String entityTypeId)

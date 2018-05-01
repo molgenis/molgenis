@@ -14,14 +14,14 @@ public class PackagePermissionExceptionTest extends ExceptionMessageTest
 {
 	@Mock
 	private Package aPackage;
-	private PackagePermissionException packagePermissionException;
+	private PackagePermissionDeniedException packagePermissionException;
 
 	@BeforeMethod
 	public void setUp()
 	{
 		messageSource.addMolgenisNamespaces("data-security");
 		when(aPackage.getLabel()).thenReturn("System");
-		packagePermissionException = new PackagePermissionException(ADD_PACKAGE, aPackage);
+		packagePermissionException = new PackagePermissionDeniedException(ADD_PACKAGE, aPackage);
 	}
 
 	@Test(dataProvider = "languageMessageProvider")

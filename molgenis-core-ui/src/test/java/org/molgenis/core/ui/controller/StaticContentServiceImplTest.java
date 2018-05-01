@@ -6,7 +6,7 @@ import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -87,7 +87,7 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
-	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_StaticContent")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_StaticContent")
 	public void checkPermissionsThrowsException()
 	{
 		this.staticContentService.checkPermissions("home");
@@ -105,8 +105,8 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void submitContentNoContentNoCreatePermissions()
 	{
 		doReturn(staticContent).when(staticContentFactory).create("home");
-		doThrow(new EntityTypePermissionException(EntityTypePermission.ADD_DATA, STATIC_CONTENT)).when(dataService)
-																								 .add(STATIC_CONTENT,
+		doThrow(new EntityTypePermissionDeniedException(EntityTypePermission.ADD_DATA, STATIC_CONTENT)).when(
+				dataService).add(STATIC_CONTENT,
 																										 staticContent);
 		assertFalse(staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 	}
@@ -115,8 +115,8 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void submitContentExistingContentNoUpdatePermissions()
 	{
 		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
-		doThrow(new EntityTypePermissionException(EntityTypePermission.UPDATE_DATA, STATIC_CONTENT)).when(dataService)
-																									.update(STATIC_CONTENT,
+		doThrow(new EntityTypePermissionDeniedException(EntityTypePermission.UPDATE_DATA, STATIC_CONTENT)).when(
+				dataService).update(STATIC_CONTENT,
 																											staticContent);
 		assertFalse(staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 	}

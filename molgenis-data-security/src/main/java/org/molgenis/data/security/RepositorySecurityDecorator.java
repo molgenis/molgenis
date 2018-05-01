@@ -4,7 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.io.IOException;
@@ -200,7 +200,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		boolean hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission);
 		if (!hasPermission)
 		{
-			throw new EntityTypePermissionException(permission, entityType);
+			throw new EntityTypePermissionDeniedException(permission, entityType);
 		}
 	}
 }

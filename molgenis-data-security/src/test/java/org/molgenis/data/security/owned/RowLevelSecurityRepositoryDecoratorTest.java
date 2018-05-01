@@ -11,7 +11,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityPermission;
-import org.molgenis.data.security.exception.EntityPermissionException;
+import org.molgenis.data.security.exception.EntityPermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -110,7 +110,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).update(entity);
 	}
 
-	@Test(expectedExceptions = EntityPermissionException.class, expectedExceptionsMessageRegExp = "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
+	@Test(expectedExceptions = EntityPermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
 	public void testUpdatePermissionDenied()
 	{
 		Entity entity = getEntityMock();
@@ -155,7 +155,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(mutableAclService).deleteAcl(new EntityIdentity(entity), true);
 	}
 
-	@Test(expectedExceptions = EntityPermissionException.class, expectedExceptionsMessageRegExp = "permission:DELETE entityTypeId:entityTypeId entityId:entityId")
+	@Test(expectedExceptions = EntityPermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE entityTypeId:entityTypeId entityId:entityId")
 	public void testDeletePermissionDenied()
 	{
 		Entity entity = getEntityMock();

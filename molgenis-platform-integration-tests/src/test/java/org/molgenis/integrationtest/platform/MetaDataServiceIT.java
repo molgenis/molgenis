@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
@@ -159,7 +159,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	@SuppressWarnings("deprecation")
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testCreateNoPackagePermission()
 	{
 		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_1)

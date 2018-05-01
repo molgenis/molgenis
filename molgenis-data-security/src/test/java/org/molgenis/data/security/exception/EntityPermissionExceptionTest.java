@@ -32,7 +32,7 @@ public class EntityPermissionExceptionTest extends ExceptionMessageTest
 	@Override
 	public void testGetLocalizedMessage(String lang, String message)
 	{
-		assertExceptionMessageEquals(new EntityPermissionException(DELETE, entity), lang, message);
+		assertExceptionMessageEquals(new EntityPermissionDeniedException(DELETE, entity), lang, message);
 	}
 
 	@DataProvider(name = "languageMessageProvider")

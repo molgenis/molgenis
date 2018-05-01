@@ -4,7 +4,7 @@ import org.mockito.Mock;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.exception.EntityTypePermissionException;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -55,7 +55,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
 	}
 
-	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
 	public void testGetSystemEntityTypeNotPermitted()
 	{
 		String entityTypeId = "entityType";
@@ -139,7 +139,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertNull(systemEntityTypeRegistry.getSystemAttribute("attr"));
 	}
 
-	@Test(expectedExceptions = EntityTypePermissionException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
 	public void testGetSystemAttributeNotPermitted()
 	{
 		String entityTypeId = "entityType";
