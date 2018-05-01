@@ -1,7 +1,6 @@
-package org.molgenis.core.ui.messageconverter;
+package org.molgenis.web.converter;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.core.util.BaseHttpMessageConverter;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.csv.CsvWriter;
 import org.springframework.http.HttpInputMessage;
@@ -19,7 +18,7 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 
 	public CsvHttpMessageConverter()
 	{
-		super(new MediaType("text", "csv", DEFAULT_CHARSET));
+		super(new MediaType("text", "csv", BaseHttpMessageConverter.DEFAULT_CHARSET));
 	}
 
 	@Override

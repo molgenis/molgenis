@@ -25,7 +25,7 @@ import java.time.format.DateTimeParseException;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.data.support.Href.concatEntityHref;
+import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;

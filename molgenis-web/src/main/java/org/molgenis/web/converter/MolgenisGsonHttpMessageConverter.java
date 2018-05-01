@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.molgenis.core.util;
+package org.molgenis.web.converter;
 
 import com.google.gson.Gson;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.lang.Nullable;
 
-import java.io.*;
+import java.io.Writer;
 import java.lang.reflect.Type;
 
 /**

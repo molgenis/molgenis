@@ -2,7 +2,6 @@ package org.molgenis.core.ui.admin.permission;
 
 import org.mockito.Mock;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -21,6 +20,7 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

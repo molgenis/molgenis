@@ -2,12 +2,12 @@ package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.EntityTypeUtils;

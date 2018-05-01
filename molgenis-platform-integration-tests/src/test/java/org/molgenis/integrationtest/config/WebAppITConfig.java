@@ -1,8 +1,8 @@
 package org.molgenis.integrationtest.config;
 
 import org.molgenis.core.ui.MolgenisWebAppConfig;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

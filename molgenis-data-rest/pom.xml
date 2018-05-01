@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core-ui</artifactId>
+            <artifactId>molgenis-web</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -30,6 +30,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
