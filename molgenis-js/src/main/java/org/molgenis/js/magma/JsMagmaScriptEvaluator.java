@@ -126,7 +126,7 @@ public class JsMagmaScriptEvaluator
 		}
 		catch (javax.script.ScriptException t)
 		{
-			return t;
+			return new ScriptException(t.getCause());
 		}
 		catch (Throwable t)
 		{

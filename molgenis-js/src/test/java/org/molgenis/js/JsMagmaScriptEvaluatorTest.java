@@ -163,7 +163,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"javax.script.ScriptException: TypeError: Cannot read property \"label\" from undefined in <eval> at line number 431");
+				"org.molgenis.script.core.ScriptException: <eval>:434 TypeError: Cannot read property \"label\" from undefined");
 	}
 
 	@Test
