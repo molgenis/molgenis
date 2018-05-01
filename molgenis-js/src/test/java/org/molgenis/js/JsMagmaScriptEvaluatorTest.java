@@ -510,18 +510,36 @@ public class JsMagmaScriptEvaluatorTest
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
+		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
+		assertEquals(result, 0d);
+	}
+
+	@Test
+	public void evalWithBindings()
+	{
+		Entity person = new DynamicEntity(personBirthDateMeta);
+		person.set("birthdate", now().atOffset(UTC).toLocalDate());
 
 		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person);
-
 		Object result = jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 		assertEquals(result, 0d);
+	}
+
+	@Test(enabled = false)
+	public void testPerformance()
+	{
+		Entity person = new DynamicEntity(personBirthDateMeta);
+		person.set("birthdate", now().atOffset(UTC).toLocalDate());
+
+		Bindings bindings = jsMagmaScriptEvaluator.createBindings(person);
+		jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 
 		Stopwatch sw = Stopwatch.createStarted();
 		for (int i = 0; i < 10000; i++)
 		{
 			jsMagmaScriptEvaluator.eval(bindings, "$('birthdate').age().value()");
 		}
-		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed new");
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed reusing same bindings");
 
 		sw.reset().start();
 
@@ -529,7 +547,8 @@ public class JsMagmaScriptEvaluatorTest
 		{
 			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 		}
-		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed old");
+		System.out.println(
+				sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed recreating bindings for each evaluation");
 	}
 
 	@Test
