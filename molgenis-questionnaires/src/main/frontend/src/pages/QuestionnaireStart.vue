@@ -38,8 +38,9 @@
     props: ['questionnaireId'],
     methods: {
       startQuestionnaire () {
-        this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId)
-        this.$router.push('/' + this.questionnaireId + '/chapter/1')
+        this.$store.dispatch('START_QUESTIONNAIRE', this.questionnaireId).then(() => {
+          this.$router.push('/' + this.questionnaireId + '/chapter/1')
+        })
       }
     },
     computed: {

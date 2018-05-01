@@ -40,9 +40,11 @@ describe('QuestionnaireChapter component', () => {
     }
 
     mutations = {
+      BLOCK_NAVIGATION: td.function(),
       UPDATE_FORM_STATUS: td.function(),
       SET_FORM_DATA: td.function(),
-      SET_MAPPER_OPTIONS: td.function()
+      SET_MAPPER_OPTIONS: td.function(),
+      SET_ERROR: td.function()
     }
 
     state = {

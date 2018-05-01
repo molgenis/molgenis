@@ -64,10 +64,10 @@ public class QuestionnaireController extends VuePluginController
 	 * @param id A questionnaire ID
 	 */
 	@GetMapping(value = "/start/{id}")
-	@ResponseStatus(value = OK)
-	public void startQuestionnaire(@PathVariable("id") String id)
+	@ResponseBody
+	public QuestionnaireResponse startQuestionnaire(@PathVariable("id") String id)
 	{
-		questionnaireService.startQuestionnaire(id);
+		return questionnaireService.startQuestionnaire(id);
 	}
 
 	/**

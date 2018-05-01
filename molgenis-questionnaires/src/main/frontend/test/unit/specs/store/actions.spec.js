@@ -118,13 +118,17 @@ describe('actions', () => {
   describe('START_QUESTIONNAIRE', () => {
     it('should call the start questionnaire uri', done => {
       const questionnaireId = 'test_quest'
-      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', 'OK')
-      const response = actions.START_QUESTIONNAIRE({}, questionnaireId)
+      const mockResponse = {id: 'mockId'}
+      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
-      response.then(actual => {
-        expect(actual).to.equal('OK')
-        done()
-      })
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
     })
 
     it('should commit any errors to the store', done => {
@@ -133,6 +137,8 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
