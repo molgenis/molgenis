@@ -1,13 +1,12 @@
 package org.molgenis.data.rest.v2;
 
 import org.molgenis.core.ui.data.support.Href;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Range;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
@@ -74,7 +73,10 @@ class AttributeResponseV2
 			if (includeCategories && (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
 					AttributeType.CATEGORICAL_MREF)))
 			{
-				this.categoricalOptions = dataService.findAll(refEntity.getId())
+				String refEntityIdAttributeName = refEntity.getIdAttribute().getName();
+				Query<Entity> refEntityQuery = new QueryImpl<>().pageSize(1000)
+																.sort(new Sort(refEntityIdAttributeName));
+				this.categoricalOptions = dataService.findAll(refEntity.getId(), refEntityQuery)
 													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
 															 entity.getLabelValue()))
 													 .collect(Collectors.toList());

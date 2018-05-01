@@ -234,6 +234,7 @@ public class RestControllerV2
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
 	 */
 	@GetMapping("/{entityTypeId}")
+	@Transactional(readOnly = true)
 	public EntityCollectionResponseV2 retrieveEntityCollection(@PathVariable("entityTypeId") String entityTypeId,
 			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest,
 			@RequestParam(value = "includeCategories", defaultValue = "false") boolean includeCategories)
