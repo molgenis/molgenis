@@ -7,9 +7,12 @@
  */
 function evalScript (script, entity) {
     // make functions available to the script in local scope
-    var $ = MagmaScript.$.bind(entity)
-    var newValue = MagmaScript.newValue
-    var _isNull = MagmaScript._isNull
+    // noinspection JSUnusedLocalSymbols
+    var $ = MagmaScript.$.bind(entity) //NOSONAR
+    // noinspection JSUnusedLocalSymbols
+    var newValue = MagmaScript.newValue // NOSONAR
+    // noinspection JSUnusedLocalSymbols
+    var _isNull = MagmaScript._isNull // NOSONAR
     return eval(script)
 }
 
