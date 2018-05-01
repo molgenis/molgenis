@@ -519,15 +519,16 @@ public class JsMagmaScriptEvaluatorTest
 	@Test
 	public void evalList()
 	{
-		Entity person = new DynamicEntity(personBirthDateMeta);
-		person.set("birthdate", now().atOffset(UTC).toLocalDate());
+		Entity person = new DynamicEntity(personWeightAndHeightEntityType);
+		person.set("weight", 80);
+		person.set("height", 20);
 
 		List<Object> result = jsMagmaScriptEvaluator.evalList(
-				Arrays.asList("$('birthdate').age().value()", "$('height').pow(2).value()"), person);
-		assertEquals(result, Arrays.asList(0d, 400d));
+				Arrays.asList("$('weight').value()", "$('height').pow(2).value()"), person);
+		assertEquals(result, Arrays.asList(80, 400d));
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testPerformance()
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
@@ -580,6 +581,16 @@ public class JsMagmaScriptEvaluatorTest
 		person1.set("weight", 99);
 		result = jsMagmaScriptEvaluator.eval(script, person1, 3);
 		assertEquals(result, false);
+	}
+
+	@Test
+	public void testIsValidJson()
+	{
+		Entity person = new DynamicEntity(personWeightEntityType);
+		List<Object> result = jsMagmaScriptEvaluator.evalList(
+				Arrays.asList("newValue('{\"foo\":3}').isValidJson().value()",
+						"newValue('{foo:3}').isValidJson().value()"), person);
+		assertEquals(result, Arrays.asList(true, false));
 	}
 
 	@Test
