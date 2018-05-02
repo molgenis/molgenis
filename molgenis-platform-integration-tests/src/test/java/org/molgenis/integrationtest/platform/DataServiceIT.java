@@ -9,6 +9,7 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
@@ -120,7 +121,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	}
 
 	@WithMockUser(username = USERNAME_READ)
-	@Test(groups = "readtest", expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[File metadata\\] with id \\[sys_FileMeta\\]")
+	@Test(groups = "readtest", expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_FileMeta")
 	public void testWritePublicFile()
 	{
 		FileMeta updated = fileMetaFactory.create(publicFile);
@@ -722,9 +723,8 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		assertEquals(result, expectedResult);
 	}
 
-	@SuppressWarnings("deprecation")
 	@WithMockUser(username = USERNAME_READ)
-	@Test(groups = "readtest", expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[DataServiceItEntityType\\] with id \\[DataServiceItEntityType\\]")
+	@Test(groups = "readtest", expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:ADD_DATA entityTypeId:DataServiceItEntityType")
 	public void testAddNotAllowed()
 	{
 		Entity entity = entityTestHarness.createEntity(entityType, 3, refEntities.get(0));

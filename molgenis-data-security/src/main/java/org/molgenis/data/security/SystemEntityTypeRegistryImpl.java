@@ -95,7 +95,7 @@ public class SystemEntityTypeRegistryImpl implements SystemEntityTypeRegistry
 	{
 		if (!isReadAllowed(systemEntityType))
 		{
-			throw new EntityTypePermissionDeniedException(EntityTypePermission.READ_METADATA, systemEntityType.getId());
+			throw new EntityTypePermissionDeniedException(EntityTypePermission.READ_METADATA, systemEntityType);
 		}
 	}
 

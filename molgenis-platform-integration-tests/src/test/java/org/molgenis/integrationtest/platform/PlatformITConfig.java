@@ -15,6 +15,7 @@ import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
+import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
 import org.molgenis.integrationtest.config.SecurityCoreITConfig;
@@ -28,6 +29,7 @@ import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
+import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -90,7 +92,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
 		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
-		TestPermissionPopulator.class })
+		TestPermissionPopulator.class, PermissionRegistry.class, DataPermissionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired

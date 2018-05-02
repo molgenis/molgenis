@@ -20,13 +20,12 @@ import static java.util.Objects.requireNonNull;
 public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 {
 	private final PermissionEvaluator permissionEvaluator;
-	private final PermissionRegistry actionPermissionMappingRegistry;
+	private final PermissionRegistry permissionRegistry;
 
-	UserPermissionEvaluatorImpl(PermissionEvaluator permissionEvaluator,
-			PermissionRegistry actionPermissionMappingRegistry)
+	UserPermissionEvaluatorImpl(PermissionEvaluator permissionEvaluator, PermissionRegistry permissionRegistry)
 	{
 		this.permissionEvaluator = requireNonNull(permissionEvaluator);
-		this.actionPermissionMappingRegistry = requireNonNull(actionPermissionMappingRegistry);
+		this.permissionRegistry = requireNonNull(permissionRegistry);
 	}
 
 	public boolean hasPermission(ObjectIdentity objectIdentity, PermissionSet permission)
@@ -60,7 +59,7 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 	private CumulativePermission getCumulativePermissionToCheck(Permission action)
 	{
 		CumulativePermission result = new CumulativePermission();
-		Set<PermissionSet> permissionSets = actionPermissionMappingRegistry.getPermissions(action);
+		Set<PermissionSet> permissionSets = permissionRegistry.getPermissions(action);
 		permissionSets.forEach(result::set);
 		return result;
 	}

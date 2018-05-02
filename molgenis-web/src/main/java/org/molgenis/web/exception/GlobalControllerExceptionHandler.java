@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethod;
 
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAnonymous;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -42,6 +42,7 @@ public class GlobalControllerExceptionHandler
 	public Object handlePermissionDeniedException(PermissionDeniedException e, HandlerMethod handlerMethod)
 	{
 		LOG.info(e.getErrorCode(), e);
-		return ExceptionHandlerUtils.handleException(e, handlerMethod, FORBIDDEN, e.getErrorCode(), environment);
+		return ExceptionHandlerUtils.handleException(e, handlerMethod,
+				currentUserIsAnonymous() ? UNAUTHORIZED : FORBIDDEN, e.getErrorCode(), environment);
 	}
 }

@@ -762,7 +762,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_UNTYPED_ID)).thenThrow(
 				new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, "entityTypeId"));
-		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isForbidden());
+		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isUnauthorized());
 	}
 
 	@Test
