@@ -6,6 +6,8 @@ import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.processor.AbstractCellProcessor;
 import org.molgenis.data.file.processor.CellProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +20,8 @@ import static java.time.ZoneOffset.UTC;
 
 public class ExcelUtils
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ExcelEntity.class);
+
 	static String toValue(Cell cell)
 	{
 		return toValue(cell, null);
@@ -68,7 +72,16 @@ public class ExcelUtils
 			case FORMULA:
 				// evaluate formula
 				FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-				CellValue cellValue = evaluator.evaluate(cell);
+				CellValue cellValue;
+				try
+				{
+					cellValue = evaluator.evaluate(cell);
+				}
+				catch (StackOverflowError e)
+				{
+					LOG.error("StackOverflowError evaluating formula", e);
+					throw new RuntimeException("Error evaluating formula, possibly due to deep formula nesting.");
+				}
 				switch (cellValue.getCellTypeEnum())
 				{
 					case BOOLEAN:
