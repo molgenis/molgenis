@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.plugin.model.Plugin;
@@ -39,6 +40,11 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 
 	private PluginPopulator pluginPopulator;
 
+	public PluginPopulatorTest()
+	{
+		super(Strictness.WARN);
+	}
+
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -47,7 +53,7 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void testPopulate()
+	public void testPopulate() throws Exception
 	{
 		PluginController pluginController0 = when(mock(PluginController.class).getId()).thenReturn("newPlugin")
 																					   .getMock();
@@ -63,10 +69,12 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 		Plugin changedPlugin = when(mock(Plugin.class).getId()).thenReturn("changedPlugin").getMock();
 		when(changedPlugin.setLabel("changedPlugin")).thenReturn(changedPlugin);
 		Plugin existingChangedPlugin = when(mock(Plugin.class).getId()).thenReturn("changedPlugin").getMock();
+		when(existingChangedPlugin.setLabel("oldChangedPlugin")).thenReturn(existingChangedPlugin);
 		Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn("deletedPlugin").getMock();
+		when(deletedPlugin.setLabel("deletedPlugin")).thenReturn(deletedPlugin);
 
-		doReturn(newPlugin).when(pluginFactory).create("newPlugin");
-		doReturn(changedPlugin).when(pluginFactory).create("changedPlugin");
+		when(pluginFactory.create("newPlugin")).thenReturn(newPlugin);
+		when(pluginFactory.create("changedPlugin")).thenReturn(changedPlugin);
 		when(dataService.getRepository(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(pluginRepository);
 		when(dataService.findAll(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(
 				Stream.of(existingChangedPlugin, deletedPlugin));
