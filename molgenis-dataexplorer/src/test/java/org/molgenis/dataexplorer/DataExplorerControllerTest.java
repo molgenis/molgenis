@@ -19,6 +19,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
@@ -114,10 +115,10 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	@BeforeMethod
 	public void beforeTest()
 	{
-		when(permissionService.hasPermission(new EntityTypeIdentity("yes"), EntityTypePermission.WRITEMETA)).thenReturn(
-				true);
-		when(permissionService.hasPermission(new EntityTypeIdentity("no"), EntityTypePermission.WRITEMETA)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("yes"),
+				EntityTypePermission.UPDATE_METADATA)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity("no"),
+				EntityTypePermission.UPDATE_METADATA)).thenReturn(false);
 
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getIdAttribute()).thenReturn(idAttr);
@@ -229,7 +230,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_METADATA entityTypeId:no")
 	public void getAnnotatorModuleFail()
 	{
 		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));

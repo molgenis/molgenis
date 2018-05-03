@@ -1,7 +1,7 @@
 package org.molgenis.security.permission;
 
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -34,8 +34,8 @@ public class MolgenisPermissionControllerTest
 	public void hasReadPermissionTrue()
 	{
 		String entityTypeId = "entity";
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.READ)).thenReturn(
+				true);
 		assertTrue(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
@@ -43,8 +43,8 @@ public class MolgenisPermissionControllerTest
 	public void hasReadPermissionFalse()
 	{
 		String entityTypeId = "entity";
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.READ)).thenReturn(
+				false);
 		assertFalse(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
@@ -52,8 +52,8 @@ public class MolgenisPermissionControllerTest
 	public void hasWritePermissionTrue()
 	{
 		String entityTypeId = "entity";
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.WRITE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.WRITE)).thenReturn(
+				true);
 		assertTrue(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 
@@ -61,8 +61,8 @@ public class MolgenisPermissionControllerTest
 	public void hasWritePermissionFalse()
 	{
 		String entityTypeId = "entity";
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.WRITE)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.WRITE)).thenReturn(
+				false);
 		assertFalse(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 }

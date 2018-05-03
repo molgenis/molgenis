@@ -98,11 +98,8 @@ class EntityTypeResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable =
-				permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE) && dataService
-						.getCapabilities(name)
-						.contains(
-																										  RepositoryCapability.WRITABLE);
+		this.writable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.ADD_DATA)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

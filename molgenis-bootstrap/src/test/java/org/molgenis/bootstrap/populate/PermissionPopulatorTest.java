@@ -3,11 +3,15 @@ package org.molgenis.bootstrap.populate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.mockito.Mock;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.model.*;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,13 +46,13 @@ public class PermissionPopulatorTest extends AbstractMockitoTest
 
 		ObjectIdentity objectIdentity0 = new ObjectIdentityImpl("type", "id0");
 		PermissionRegistry permissionRegistry0 = mock(PermissionRegistry.class);
-		Multimap<ObjectIdentity, Pair<Permission, Sid>> registry0Permissions = ArrayListMultimap.create();
-		registry0Permissions.put(objectIdentity0, new Pair<>(mock(Permission.class), mock(Sid.class)));
+		Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> registry0Permissions = ArrayListMultimap.create();
+		registry0Permissions.put(objectIdentity0, new Pair<>(mock(PermissionSet.class), mock(Sid.class)));
 		when(permissionRegistry0.getPermissions()).thenReturn(registry0Permissions);
 
 		ObjectIdentity objectIdentity1 = new ObjectIdentityImpl("type", "id1");
-		Multimap<ObjectIdentity, Pair<Permission, Sid>> registry1Permissions = ArrayListMultimap.create();
-		registry1Permissions.put(objectIdentity1, new Pair<>(mock(Permission.class), mock(Sid.class)));
+		Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> registry1Permissions = ArrayListMultimap.create();
+		registry1Permissions.put(objectIdentity1, new Pair<>(mock(PermissionSet.class), mock(Sid.class)));
 		PermissionRegistry permissionRegistry1 = mock(PermissionRegistry.class);
 		when(permissionRegistry1.getPermissions()).thenReturn(registry1Permissions);
 

@@ -252,7 +252,7 @@ public class SortaController extends PluginController
 	private void tryDeleteRepository(String entityTypeId)
 	{
 		if (dataService.hasRepository(entityTypeId) && permissionService.hasPermission(
-				new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITEMETA))
+				new EntityTypeIdentity(entityTypeId), EntityTypePermission.DELETE_METADATA))
 		{
 			RunAsSystemAspect.runAsSystem(() -> deleteRepository(entityTypeId));
 		}

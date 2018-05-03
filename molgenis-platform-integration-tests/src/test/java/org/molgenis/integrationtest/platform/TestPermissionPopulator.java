@@ -1,8 +1,12 @@
 package org.molgenis.integrationtest.platform;
 
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.*;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,16 +29,16 @@ public class TestPermissionPopulator
 	 * Populate entity type permissions for the current user.
 	 */
 	@Transactional
-	public void populate(Map<ObjectIdentity, Permission> entityTypePermissionMap)
+	public void populate(Map<ObjectIdentity, PermissionSet> entityTypePermissionMap)
 	{
 		populate(entityTypePermissionMap, SecurityUtils.getCurrentUsername());
 	}
 
 	/**
-	 * Populate entity type permissions for the current user.
+	 * Populate entity type permissions for a given user.
 	 */
 	@Transactional
-	public void populate(Map<ObjectIdentity, Permission> permissions, String username)
+	public void populate(Map<ObjectIdentity, PermissionSet> permissions, String username)
 	{
 		Sid sid = new PrincipalSid(username);
 		runAsSystem(() -> permissions.forEach((objectIdentity, permission) ->

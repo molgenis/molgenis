@@ -1,26 +1,35 @@
 package org.molgenis.security.core;
 
-import org.springframework.security.acls.domain.AbstractPermission;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 
-//FIXME: move to proper module
-public class Permission extends AbstractPermission
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
+
+/**
+ * Permission to perform a specific action on a resource type.
+ */
+public interface Permission
 {
-	private String name;
+	String name();
 
-	public static final Permission COUNT = new Permission("COUNT", 1 << 0, 'C'); // 1
-	public static final Permission READ = new Permission("READ", 1 << 1, 'R'); // 2
-	public static final Permission WRITE = new Permission("WRITE", 1 << 2, 'W'); // 4
-	public static final Permission WRITEMETA = new Permission("WRITEMETA", 1 << 3, 'M'); // 8
+	String getDefaultDescription();
 
-	protected Permission(String name, int mask)
+	default String getType()
 	{
-		super(mask);
-		this.name = name;
+		return getClass().getSimpleName();
 	}
 
-	public Permission(String name, int mask, char code)
+	default MessageSourceResolvable getDescription()
 	{
-		super(mask, code);
-		this.name = name;
+		String code = Stream.of("permission", getType(), name(), "description").collect(joining("."));
+		return new DefaultMessageSourceResolvable(new String[] { code }, null, getDefaultDescription());
+	}
+
+	default MessageSourceResolvable getName()
+	{
+		String code = Stream.of("permission", getType(), name(), "name").collect(joining("."));
+		return new DefaultMessageSourceResolvable(new String[] { code }, null, name());
 	}
 }

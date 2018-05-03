@@ -10,7 +10,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.*;
@@ -125,11 +125,13 @@ public class EntityTypeResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable =
-				permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE) && dataService
-						.getCapabilities(name)
-						.contains(
-																										  RepositoryCapability.WRITABLE);
+		//TODO: send exact permissions to the client
+		boolean hasWritePermission = permissionService.hasPermission(new EntityTypeIdentity(name), PermissionSet.WRITE);
+		boolean hasWriteMetaPermission = permissionService.hasPermission(new EntityTypeIdentity(name),
+				PermissionSet.WRITEMETA);
+		this.writable = (hasWritePermission || hasWriteMetaPermission) && dataService.getCapabilities(name)
+																					 .contains(
+																							 RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

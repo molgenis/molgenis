@@ -3,7 +3,6 @@ package org.molgenis.core.ui.security;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.UiMenu;
@@ -11,6 +10,8 @@ import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
 
 import java.util.List;
+
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 
 public class MolgenisUiMenuPermissionDecorator implements UiMenu
 {
@@ -109,7 +110,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
-				hasPermission = permissionService.hasPermission(new PluginIdentity(menuItemId), Permission.READ);
+				hasPermission = permissionService.hasPermission(new PluginIdentity(menuItemId), VIEW_PLUGIN);
 				break;
 			default:
 				throw new UnexpectedEnumException(molgenisUiMenuItem.getType());

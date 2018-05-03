@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
-import org.hamcrest.Matchers;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.data.security.auth.UserMetaData;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
 
@@ -72,17 +72,19 @@ public class RestControllerIT
 	@Test
 	public void getWithoutTokenNotAllowed()
 	{
+		// @formatter:off
 		ValidatableResponse response;
 
 		response = getWithoutToken("sys_FreemarkerTemplate");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+				.body("errors.message[0]",
+						equalTo("No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
 
 		response = getWithoutToken("sys_scr_ScriptType");
 		response.statusCode(UNAUTHORIZED)
-				.body("errors.message[0]", Matchers.equalTo(
-						"No read permission on entity type 'Script type' with id 'sys_scr_ScriptType'"));
+				.body("errors.message[0]", equalTo(
+						"No 'Read metadata' permission on entity type 'Script type' with id 'sys_scr_ScriptType'."));
+		// @formatter:on
 	}
 
 	@Test
@@ -107,6 +109,7 @@ public class RestControllerIT
 	@Test
 	public void deleteWithoutWritePermissionFails()
 	{
+		// @formatter:off
 		given().log()
 			   .method()
 			   .log()
@@ -115,20 +118,33 @@ public class RestControllerIT
 			   .when()
 			   .delete(PATH + "sys_scr_ScriptType/R")
 			   .then()
-			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No [WRITE] permission on entity type [Script type] with id [sys_scr_ScriptType]"));
+			   .statusCode(FORBIDDEN)
+			   .body("errors.message[0]", equalTo(
+					   "No 'Delete data' permission on entity type 'Script type' with id 'sys_scr_ScriptType'."));
+		// @formatter:on
 	}
 
 	@Test
 	public void logoutWithoutTokenFails()
 	{
-		given().log().uri().log().method().when().post(PATH + "logout").then().statusCode(BAD_REQUEST).log().all();
+		// @formatter:off
+		given().log()
+			   .uri()
+			   .log()
+			   .method()
+			   .when()
+			   .post(PATH + "logout")
+			   .then()
+			   .statusCode(BAD_REQUEST)
+			   .log()
+			   .all();
+		// @formatter:on
 	}
 
 	@Test
 	public void logoutWithToken()
 	{
+		// @formatter:off
 		given().log()
 			   .uri()
 			   .log()
@@ -137,7 +153,7 @@ public class RestControllerIT
 			   .when()
 			   .post(PATH + "logout")
 			   .then()
-			   .statusCode(RestTestUtils.OKE)
+			   .statusCode(OKE)
 			   .log()
 			   .all();
 
@@ -150,8 +166,9 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body("errors.code[0]", equalTo("DS04"))
+			   .body("errors.message[0]", equalTo(
+					   "No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
 
 		given().log()
 			   .uri()
@@ -161,8 +178,10 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
-			   .body("errors.message[0]", Matchers.equalTo(
-					   "No read permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'"));
+			   .body("errors.code[0]", equalTo("DS04"))
+			   .body("errors.message[0]", equalTo(
+					   "No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
+		// @formatter:on
 
 		// clean up after test
 		this.testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
@@ -172,6 +191,7 @@ public class RestControllerIT
 	@Test
 	public void testRetrieveResourceWithFileExtensionIdNotFound()
 	{
+		// @formatter:off
 		given().log()
 			   .uri()
 			   .log()
@@ -181,45 +201,58 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate/test.csv")
 			   .then()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", Matchers.equalTo("sys_FreemarkerTemplate test.csv not found"));
+			   .body("errors.message[0]", equalTo("sys_FreemarkerTemplate test.csv not found"));
+		// @formatter:on
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
 	@Test
 	public void testRetrieveSystemEntityTypeNotAllowed()
 	{
+		// @formatter:off
 		given().log()
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
 			   .get(PATH + "sys_App/meta")
 			   .then()
-			   .statusCode(UNAUTHORIZED)
+			   .statusCode(FORBIDDEN)
+			   .body("errors.code[0]", equalTo("DS04"))
 			   .body("errors.message[0]",
-					   Matchers.equalTo("No read permission on entity type 'App' with id 'sys_App'"));
+					   equalTo("No 'Read metadata' permission on entity type 'App' with id 'sys_App'."));
+		// @formatter:on
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6731
 	@Test
 	public void testRetrieveSystemEntityType()
 	{
+		// @formatter:off
 		given().log()
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
 			   .get(PATH + "sys_sec_User/meta")
 			   .then()
-			   .statusCode(RestTestUtils.OKE)
-			   .body("name", Matchers.equalTo("sys_sec_User"));
+			   .statusCode(OKE)
+			   .body("name", equalTo("sys_sec_User"));
+		// @formatter:on
 	}
 
 	private ValidatableResponse getWithoutToken(String requestedEntity)
 	{
-		return given().log().uri().when().get(PATH + requestedEntity).then();
+		// @formatter:off
+		return given().log()
+					  .uri()
+					  .when()
+					  .get(PATH + requestedEntity)
+					  .then();
+		// @formatter:on
 	}
 
 	private ValidatableResponse getWithToken(String requestedEntity, String token)
 	{
+		// @formatter:off
 		return given().log()
 					  .all()
 					  .header(X_MOLGENIS_TOKEN, token)
@@ -227,7 +260,7 @@ public class RestControllerIT
 					  .when()
 					  .get(PATH + requestedEntity)
 					  .then();
-
+		// @formatter:on
 	}
 
 	@AfterClass(alwaysRun = true)
