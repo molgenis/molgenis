@@ -315,6 +315,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		result.setDefaultEncoding("UTF-8");
 		Properties freemarkerSettings = new Properties();
 		freemarkerSettings.setProperty(Configuration.LOCALIZED_LOOKUP_KEY, Boolean.FALSE.toString());
+		freemarkerSettings.setProperty(Configuration.NUMBER_FORMAT_KEY, "computer");
 		result.setFreemarkerSettings(freemarkerSettings);
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
