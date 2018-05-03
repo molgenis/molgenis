@@ -73,18 +73,12 @@ public class JsMagmaScriptEvaluator
 
 	public List<Object> evalList(Collection<String> expressions, Entity entity)
 	{
-		return evalList(expressions, entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
-	}
-
-	public List<Object> evalList(Collection<String> expressions, Entity entity, int depth)
-	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
 		{
 			stopwatch = Stopwatch.createStarted();
 		}
-
-		Bindings bindings = createBindings(entity, depth);
+		Bindings bindings = createBindings(entity, ENTITY_REFERENCE_DEFAULT_FETCHING_DEPTH);
 		List<Object> result = expressions.stream().map(expression -> eval(bindings, expression)).collect(toList());
 		if (stopwatch != null)
 		{
