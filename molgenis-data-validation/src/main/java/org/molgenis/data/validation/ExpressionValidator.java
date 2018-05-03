@@ -58,7 +58,7 @@ public class ExpressionValidator
 			return Collections.emptyList();
 		}
 
-		return jsMagmaScriptEvaluator.evalList(expressions, entity)
+		return jsMagmaScriptEvaluator.eval(expressions, entity)
 									 .stream()
 									 .map(this::convertToBoolean)
 									 .collect(toList());

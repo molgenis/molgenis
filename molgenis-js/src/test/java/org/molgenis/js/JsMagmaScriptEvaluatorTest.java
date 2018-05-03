@@ -14,10 +14,11 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,9 @@ public class JsMagmaScriptEvaluatorTest
 	private static EntityType personAgeEntityType;
 	private static EntityType personGenderEntityType;
 	private static EntityType personTraitEntityType;
+	private static EntityType personSmokingEntityType;
+	private static EntityType personLastUpdatedEntityType;
+	private static EntityType personLongEntityType;
 
 	// Reference tables
 	private static EntityType genderEntityType;
@@ -120,7 +124,62 @@ public class JsMagmaScriptEvaluatorTest
 		when(traitEntityType.getAttribute("name")).thenReturn(nameAttr);
 		when(traitEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, nameAttr));
 
+		Attribute smokingAttr = when(mock(Attribute.class).getName()).thenReturn("smoking").getMock();
+		when(smokingAttr.getDataType()).thenReturn(BOOL);
+		personSmokingEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personSmokingEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personSmokingEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personSmokingEntityType.getAttribute("smoking")).thenReturn(smokingAttr);
+		when(personSmokingEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, smokingAttr));
+
+		Attribute lastUpdateAttr = when(mock(Attribute.class).getName()).thenReturn("lastUpdate").getMock();
+		when(lastUpdateAttr.getDataType()).thenReturn(DATE_TIME);
+		personLastUpdatedEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personLastUpdatedEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personLastUpdatedEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personLastUpdatedEntityType.getAttribute("lastUpdate")).thenReturn(lastUpdateAttr);
+		when(personLastUpdatedEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, lastUpdateAttr));
+
+		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("long").getMock();
+		when(longAttr.getDataType()).thenReturn(LONG);
+		personLongEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personLongEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personLongEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personLongEntityType.getAttribute("long")).thenReturn(longAttr);
+		when(personLongEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, longAttr));
+
 		jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new NashornScriptEngine());
+	}
+
+	@Test
+	public void testValueForDateTime()
+	{
+		Entity person = new DynamicEntity(personLastUpdatedEntityType);
+		Instant lastUpdate = Instant.now();
+		person.set("lastUpdate", lastUpdate);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('lastUpdate').value()", person, 1);
+		assertEquals(result, lastUpdate.toEpochMilli());
+	}
+
+	@Test
+	public void testValueForBool()
+	{
+		Entity person = new DynamicEntity(personSmokingEntityType);
+		person.set("smoking", true);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('smoking').value()", person, 1);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testValueForLong()
+	{
+		Entity person = new DynamicEntity(personLongEntityType);
+		person.set("long", Long.MAX_VALUE);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('long').value()", person, 1);
+		assertEquals(result, Long.MAX_VALUE);
 	}
 
 	@Test
@@ -523,7 +582,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("weight", 80);
 		person.set("height", 20);
 
-		List<Object> result = jsMagmaScriptEvaluator.evalList(
+		Collection<Object> result = jsMagmaScriptEvaluator.eval(
 				Arrays.asList("$('weight').value()", "$('height').pow(2).value()"), person);
 		assertEquals(result, Arrays.asList(80, 400d));
 	}
@@ -537,7 +596,7 @@ public class JsMagmaScriptEvaluatorTest
 		jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 
 		Stopwatch sw = Stopwatch.createStarted();
-		jsMagmaScriptEvaluator.evalList(Collections.nCopies(10000, "$('birthdate').age().value()"), person);
+		jsMagmaScriptEvaluator.eval(Collections.nCopies(10000, "$('birthdate').age().value()"), person);
 		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed evalList");
 
 		sw.reset().start();
@@ -587,7 +646,7 @@ public class JsMagmaScriptEvaluatorTest
 	public void testIsValidJson()
 	{
 		Entity person = new DynamicEntity(personWeightEntityType);
-		List<Object> result = jsMagmaScriptEvaluator.evalList(
+		Collection<Object> result = jsMagmaScriptEvaluator.eval(
 				Arrays.asList("newValue('{\"foo\":3}').isValidJson().value()",
 						"newValue('{foo:3}').isValidJson().value()"), person);
 		assertEquals(result, Arrays.asList(true, false));

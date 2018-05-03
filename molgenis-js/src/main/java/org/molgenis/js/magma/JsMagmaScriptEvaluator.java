@@ -71,7 +71,14 @@ public class JsMagmaScriptEvaluator
 		jsScriptEngine.eval(magmaBindings, string);
 	}
 
-	public List<Object> evalList(Collection<String> expressions, Entity entity)
+	/**
+	 * Evaluates multiple expressions for a single entity instance.
+	 *
+	 * @param expressions {@link Collection} containing the expression {@link String}s
+	 * @param entity      the entity to bind the magmascript $ function to
+	 * @return Collection containing the expression result {@link Object}s
+	 */
+	public Collection<Object> eval(Collection<String> expressions, Entity entity)
 	{
 		Stopwatch stopwatch = null;
 		if (LOG.isTraceEnabled())
@@ -94,7 +101,7 @@ public class JsMagmaScriptEvaluator
 	}
 
 	/**
-	 * Evaluate a expression for the given entity.
+	 * Evaluate a expression for a given entity.
 	 *
 	 * @param expression JavaScript expression
 	 * @param entity     entity
@@ -122,7 +129,7 @@ public class JsMagmaScriptEvaluator
 		{
 			return new ScriptException(t.getCause());
 		}
-		catch (Throwable t)
+		catch (Exception t)
 		{
 			return new ScriptException(t);
 		}
