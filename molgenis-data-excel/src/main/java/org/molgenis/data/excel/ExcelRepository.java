@@ -15,7 +15,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.*;
 
@@ -184,7 +183,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (headerRow == null) return null;
 
-		Map<String, Integer> columnIdx = new LinkedCaseInsensitiveMap<>();
+		Map<String, Integer> columnIdx = new LinkedHashMap<>();
 		int i = 0;
 		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext(); )
 		{
