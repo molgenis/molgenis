@@ -1,5 +1,6 @@
 package org.molgenis.js;
 
+import com.google.common.base.Stopwatch;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -9,10 +10,17 @@ import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.time.Instant.now;
@@ -23,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class JsMagmaScriptEvaluatorTest
 {
@@ -33,6 +42,9 @@ public class JsMagmaScriptEvaluatorTest
 	private static EntityType personAgeEntityType;
 	private static EntityType personGenderEntityType;
 	private static EntityType personTraitEntityType;
+	private static EntityType personSmokingEntityType;
+	private static EntityType personLastUpdatedEntityType;
+	private static EntityType personLongEntityType;
 
 	// Reference tables
 	private static EntityType genderEntityType;
@@ -41,7 +53,7 @@ public class JsMagmaScriptEvaluatorTest
 	private static JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@BeforeClass
-	protected static void beforeClass()
+	protected static void beforeClass() throws ScriptException, IOException
 	{
 		Attribute idAttribute = mock(Attribute.class);
 		when(idAttribute.getName()).thenReturn("id");
@@ -112,7 +124,62 @@ public class JsMagmaScriptEvaluatorTest
 		when(traitEntityType.getAttribute("name")).thenReturn(nameAttr);
 		when(traitEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, nameAttr));
 
+		Attribute smokingAttr = when(mock(Attribute.class).getName()).thenReturn("smoking").getMock();
+		when(smokingAttr.getDataType()).thenReturn(BOOL);
+		personSmokingEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personSmokingEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personSmokingEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personSmokingEntityType.getAttribute("smoking")).thenReturn(smokingAttr);
+		when(personSmokingEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, smokingAttr));
+
+		Attribute lastUpdateAttr = when(mock(Attribute.class).getName()).thenReturn("lastUpdate").getMock();
+		when(lastUpdateAttr.getDataType()).thenReturn(DATE_TIME);
+		personLastUpdatedEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personLastUpdatedEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personLastUpdatedEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personLastUpdatedEntityType.getAttribute("lastUpdate")).thenReturn(lastUpdateAttr);
+		when(personLastUpdatedEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, lastUpdateAttr));
+
+		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("long").getMock();
+		when(longAttr.getDataType()).thenReturn(LONG);
+		personLongEntityType = when(mock(EntityType.class).getId()).thenReturn("person").getMock();
+		when(personLongEntityType.getIdAttribute()).thenReturn(idAttribute);
+		when(personLongEntityType.getAttribute("id")).thenReturn(idAttribute);
+		when(personLongEntityType.getAttribute("long")).thenReturn(longAttr);
+		when(personLongEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttribute, longAttr));
+
 		jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new NashornScriptEngine());
+	}
+
+	@Test
+	public void testValueForDateTime()
+	{
+		Entity person = new DynamicEntity(personLastUpdatedEntityType);
+		Instant lastUpdate = Instant.now();
+		person.set("lastUpdate", lastUpdate);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('lastUpdate').value()", person, 1);
+		assertEquals(result, lastUpdate.toEpochMilli());
+	}
+
+	@Test
+	public void testValueForBool()
+	{
+		Entity person = new DynamicEntity(personSmokingEntityType);
+		person.set("smoking", true);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('smoking').value()", person, 1);
+		assertEquals(result, true);
+	}
+
+	@Test
+	public void testValueForLong()
+	{
+		Entity person = new DynamicEntity(personLongEntityType);
+		person.set("long", Long.MAX_VALUE);
+
+		Object result = jsMagmaScriptEvaluator.eval("$('long').value()", person, 1);
+		assertEquals(result, Long.MAX_VALUE);
 	}
 
 	@Test
@@ -140,7 +207,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("gender", gender);
 
 		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person);
-		assertEquals(result.toString(), "undefined");
+		assertNull(result);
 	}
 
 	@Test
@@ -155,7 +222,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"org.molgenis.script.core.ScriptException: <eval>:502 TypeError: Cannot read property \"label\" from undefined");
+				"org.molgenis.script.core.ScriptException: <eval>:434 TypeError: Cannot read property \"label\" from undefined");
 	}
 
 	@Test
@@ -504,9 +571,42 @@ public class JsMagmaScriptEvaluatorTest
 	{
 		Entity person = new DynamicEntity(personBirthDateMeta);
 		person.set("birthdate", now().atOffset(UTC).toLocalDate());
-
-		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person, 3);
+		Object result = jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
 		assertEquals(result, 0d);
+	}
+
+	@Test
+	public void evalList()
+	{
+		Entity person = new DynamicEntity(personWeightAndHeightEntityType);
+		person.set("weight", 80);
+		person.set("height", 20);
+
+		Collection<Object> result = jsMagmaScriptEvaluator.eval(
+				Arrays.asList("$('weight').value()", "$('height').pow(2).value()"), person);
+		assertEquals(result, Arrays.asList(80, 400d));
+	}
+
+	@Test(enabled = false)
+	public void testPerformance()
+	{
+		Entity person = new DynamicEntity(personBirthDateMeta);
+		person.set("birthdate", now().atOffset(UTC).toLocalDate());
+
+		jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
+
+		Stopwatch sw = Stopwatch.createStarted();
+		jsMagmaScriptEvaluator.eval(Collections.nCopies(10000, "$('birthdate').age().value()"), person);
+		System.out.println(sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed evalList");
+
+		sw.reset().start();
+
+		for (int i = 0; i < 10000; i++)
+		{
+			jsMagmaScriptEvaluator.eval("$('birthdate').age().value()", person);
+		}
+		System.out.println(
+				sw.elapsed(TimeUnit.MILLISECONDS) + " millis passed recreating bindings for each evaluation");
 	}
 
 	@Test
@@ -540,6 +640,16 @@ public class JsMagmaScriptEvaluatorTest
 		person1.set("weight", 99);
 		result = jsMagmaScriptEvaluator.eval(script, person1, 3);
 		assertEquals(result, false);
+	}
+
+	@Test
+	public void testIsValidJson()
+	{
+		Entity person = new DynamicEntity(personWeightEntityType);
+		Collection<Object> result = jsMagmaScriptEvaluator.eval(
+				Arrays.asList("newValue('{\"foo\":3}').isValidJson().value()",
+						"newValue('{foo:3}').isValidJson().value()"), person);
+		assertEquals(result, Arrays.asList(true, false));
 	}
 
 	@Test
