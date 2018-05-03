@@ -43,6 +43,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.script.ScriptException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -540,13 +542,13 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public JsMagmaScriptEvaluator jsScriptEvaluator()
+		public JsMagmaScriptEvaluator jsScriptEvaluator() throws ScriptException, IOException
 		{
 			return new JsMagmaScriptEvaluator(new NashornScriptEngine());
 		}
 
 		@Bean
-		public AlgorithmService algorithmService()
+		public AlgorithmService algorithmService() throws ScriptException, IOException
 		{
 			return new AlgorithmServiceImpl(ontologyTagService(), semanticSearchService(), algorithmGeneratorService(),
 					entityManager(), jsScriptEvaluator());
