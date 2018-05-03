@@ -1,9 +1,9 @@
 package org.molgenis.questionnaires.response;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
+import org.molgenis.util.AutoGson;
 
 import javax.annotation.Nullable;
 

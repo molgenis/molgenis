@@ -1,4 +1,4 @@
-package org.molgenis.core.ui.data.rsql;
+package org.molgenis.web.rsql;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;

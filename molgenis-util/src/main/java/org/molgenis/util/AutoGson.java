@@ -1,4 +1,4 @@
-package org.molgenis.core.gson;
+package org.molgenis.util;
 
 import com.google.gson.Gson;
 

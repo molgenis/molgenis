@@ -1,9 +1,9 @@
 package org.molgenis.semanticmapper.algorithmgenerator.bean;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.util.AutoGson;
 
 import javax.annotation.Nullable;
 import java.util.Set;

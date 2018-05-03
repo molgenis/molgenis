@@ -2,7 +2,6 @@ package org.molgenis.security.account;
 
 import com.google.gson.Gson;
 import org.mockito.ArgumentCaptor;
-import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.security.auth.User;
@@ -14,6 +13,7 @@ import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
+import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

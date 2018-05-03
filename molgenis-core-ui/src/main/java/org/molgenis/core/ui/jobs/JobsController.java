@@ -22,8 +22,8 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.core.ui.data.support.Href.concatEntityHref;
 import static org.molgenis.core.ui.jobs.JobsController.URI;
+import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 import static org.springframework.http.HttpStatus.NO_CONTENT;

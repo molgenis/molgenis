@@ -1,4 +1,4 @@
-package org.molgenis.core.util;
+package org.molgenis.web.converter;
 
 import com.google.gson.Gson;
 import org.springframework.http.MediaType;
