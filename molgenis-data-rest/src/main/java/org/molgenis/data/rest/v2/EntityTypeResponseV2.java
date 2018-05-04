@@ -38,6 +38,9 @@ class EntityTypeResponseV2
 	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
+	private final Boolean creatable;
+	private final Boolean deletable;
+
 	private String languageCode;
 
 	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService,
@@ -98,7 +101,13 @@ class EntityTypeResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.ADD_DATA)
+		this.writable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.UPDATE_DATA)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+
+		this.creatable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.ADD_DATA)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+
+		this.deletable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.DELETE_DATA)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
@@ -162,4 +171,13 @@ class EntityTypeResponseV2
 		return languageCode;
 	}
 
+	public Boolean getCreatable()
+	{
+		return creatable;
+	}
+
+	public Boolean getDeletable()
+	{
+		return deletable;
+	}
 }

@@ -113,14 +113,16 @@ var Table = React.createClass({
         }
 
         var writable = this.state.data.meta.writable;
+        var creatable = this.state.data.meta.creatable;
+        var deletable = this.state.data.meta.deletable;
 
         var TableHeader = TableHeaderFactory({
             entity: this.state.data.meta,
             attrs: this.state.attrs,
             sort: this.state.sort,
-            enableAdd: writable && this.props.enableAdd === true,
+            enableAdd: creatable && this.props.enableAdd === true,
             enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onSort: this._handleSort,
@@ -135,7 +137,7 @@ var Table = React.createClass({
             data: this.state.data,
             attrs: this.state.attrs,
             enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onEdit: this._handleEdit,
