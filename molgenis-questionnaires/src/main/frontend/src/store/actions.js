@@ -94,9 +94,10 @@ const actions = {
 
     return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
       commit('SET_FORM_DATA', formData)
+    }, error => {
+      handleError(commit, error)
     }).then(() => {
       commit('DECREMENT_SAVING_QUEUE')
-      commit('SET_LOADING', false)
     })
   },
 
