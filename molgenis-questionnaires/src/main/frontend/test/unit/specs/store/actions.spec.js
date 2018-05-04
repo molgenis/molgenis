@@ -328,8 +328,7 @@ describe('actions', () => {
       const expectedMutations = [
         {type: 'INCREMENT_SAVING_QUEUE'},
         {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'DECREMENT_SAVING_QUEUE'},
-        {type: 'SET_LOADING', payload: false}
+        {type: 'DECREMENT_SAVING_QUEUE'}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
