@@ -1,6 +1,8 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
 import type { VuexContext } from '../flow.types.js'
+// $FlowFixMe
+import Vue from 'vue'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 
 const handleError = (commit: Function, error: Error) => {
@@ -83,21 +85,28 @@ const actions = {
     })
   },
 
-  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, formData: Object) {
-    commit('INCREMENT_SAVING_QUEUE')
-    const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, payload: Object) {
+    const {formData, formState} = payload
 
-    const options = {
-      body: JSON.stringify(formData[updatedAttribute]),
-      method: 'PUT'
-    }
+    commit('SET_FORM_DATA', formData)
+    Vue.nextTick(() => {
+      if (formState.$valid) {
+        commit('INCREMENT_SAVING_QUEUE')
 
-    return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
-      commit('SET_FORM_DATA', formData)
-    }, error => {
-      handleError(commit, error)
-    }).then(() => {
-      commit('DECREMENT_SAVING_QUEUE')
+        const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
+        const options = {
+          body: JSON.stringify(formData[updatedAttribute]),
+          method: 'PUT'
+        }
+
+        return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
+
+        }, error => {
+          handleError(commit, error)
+        }).then(() => {
+          commit('DECREMENT_SAVING_QUEUE')
+        })
+      }
     })
   },
 
