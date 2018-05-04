@@ -88,16 +88,17 @@ const actions = {
   'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, payload: Object) {
     const {formData, formState} = payload
 
+    const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
     commit('SET_FORM_DATA', formData)
+
     Vue.nextTick(() => {
       if (formState.$valid) {
-        commit('INCREMENT_SAVING_QUEUE')
-
-        const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
         const options = {
           body: JSON.stringify(formData[updatedAttribute]),
           method: 'PUT'
         }
+
+        commit('INCREMENT_SAVING_QUEUE')
 
         return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
 
