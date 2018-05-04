@@ -3,6 +3,7 @@ package org.molgenis.security.permission;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
 import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.PermissionRegistry;
@@ -47,8 +48,10 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	public void hasPermissionSetOnEntityTypeTrue()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		when(permissionRegistry.getPermissions(READ_DATA)).thenReturn(ImmutableSet.of(READ));
 		when(permissionEvaluator.hasPermission(authentication, "entityType0", "entityType", READ)).thenReturn(true);
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"), READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
+				EntityTypePermission.READ_DATA));
 	}
 
 	@WithMockUser(username = "USER")
@@ -67,7 +70,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnEntityTypeFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"), READ));
+		assertFalse(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
+				EntityTypePermission.READ_DATA));
 	}
 
 	@WithMockUser(username = "USER")
@@ -81,7 +85,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnEntityTypeSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"), WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
+				EntityTypePermission.UPDATE_DATA));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
@@ -96,7 +101,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnEntityTypeSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"), WRITE));
+		assertTrue(userPermissionEvaluator.hasPermission(new EntityTypeIdentity("entityType0"),
+				EntityTypePermission.UPDATE_DATA));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })
@@ -112,9 +118,10 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	public void hasPermissionSetOnPluginTrue()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		when(permissionRegistry.getPermissions(VIEW_PLUGIN)).thenReturn(ImmutableSet.of(READ));
 		when(permissionEvaluator.hasPermission(authentication, "plugin1", "plugin", READ)).thenReturn(
 				true);
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), READ));
+		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.VIEW_PLUGIN));
 	}
 
 	@WithMockUser(username = "USER")
@@ -132,7 +139,7 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnPluginFalse()
 	{
-		assertFalse(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), READ));
+		assertFalse(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), PluginPermission.VIEW_PLUGIN));
 	}
 
 	@WithMockUser(username = "USER")
@@ -146,7 +153,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnPluginSuperuser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), READ));
+		assertTrue(
+				userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), EntityTypePermission.READ_DATA));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SU" })
@@ -160,7 +168,8 @@ public class UserPermissionEvaluatorImplTest extends AbstractMockitoTestNGSpring
 	@Test
 	public void hasPermissionSetOnPluginSystemUser()
 	{
-		assertTrue(userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), READ));
+		assertTrue(
+				userPermissionEvaluator.hasPermission(new PluginIdentity("plugin1"), EntityTypePermission.READ_DATA));
 	}
 
 	@WithMockUser(username = "USER", authorities = { "ROLE_SYSTEM" })

@@ -1,7 +1,6 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
@@ -11,11 +10,13 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
@@ -38,21 +39,20 @@ class EntityTypeResponseV2
 	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
-	private final Boolean creatable;
-	private final Boolean deletable;
-
 	private String languageCode;
+	private final List<Permission> permissions;
 
-	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService,
+	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator userPermissionEvaluator,
+			DataService dataService,
 			boolean includeCategories)
 	{
-		this(meta, null, permissionService, dataService, includeCategories);
+		this(meta, null, userPermissionEvaluator, dataService, includeCategories);
 	}
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator permissionService,
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator userPermissionEvaluator,
 			DataService dataService, boolean includeCategories)
 	{
 		String name = meta.getId();
@@ -84,7 +84,8 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr, languageCode);
 			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService, includeCategories);
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, userPermissionEvaluator, dataService,
+					includeCategories);
 		}).collect(Collectors.toList());
 
 		languageCode = getCurrentUserLanguageCode();
@@ -96,19 +97,17 @@ class EntityTypeResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
+		this.lookupAttributes = lookupAttributes != null ? newArrayList(
 				Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.UPDATE_DATA)
+		this.writable =
+				userPermissionEvaluator.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.UPDATE_DATA)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 
-		this.creatable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.ADD_DATA)
-				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
-
-		this.deletable = permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.DELETE_DATA)
-				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+		this.permissions = userPermissionEvaluator.getPermissions(new EntityTypeIdentity(name),
+				EntityTypePermission.values());
 	}
 
 	public String getHref()
@@ -171,13 +170,8 @@ class EntityTypeResponseV2
 		return languageCode;
 	}
 
-	public Boolean getCreatable()
+	public List<Permission> getPermissions()
 	{
-		return creatable;
-	}
-
-	public Boolean getDeletable()
-	{
-		return deletable;
+		return permissions;
 	}
 }

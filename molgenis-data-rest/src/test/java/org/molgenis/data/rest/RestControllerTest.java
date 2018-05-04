@@ -29,7 +29,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -382,7 +381,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityTypeWritable() throws Exception
 	{
-		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME), PermissionSet.WRITE)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity(ENTITY_NAME),
+				EntityTypePermission.UPDATE_DATA)).thenReturn(
 				true);
 		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
 				new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));

@@ -2,6 +2,8 @@ package org.molgenis.security.core;
 
 import org.springframework.security.acls.model.ObjectIdentity;
 
+import java.util.List;
+
 /**
  * Evaluates permissions for the currently authenticated user.
  */
@@ -18,13 +20,14 @@ public interface UserPermissionEvaluator
 	boolean hasPermission(ObjectIdentity objectIdentity, Permission permission);
 
 	/**
-	 * Returns whether the currently authenticated user has a given {@link PermissionSet} on the given domain object.
+	 * Returns whether the currently authenticated user has a given {@link Permission} on the given domain object.
 	 *
 	 * @param objectIdentity domain object identity
-	 * @param permissionSet  the {@link PermissionSet} to check
-	 * @return <tt>true</tt> if the permission is granted, <tt>false</tt> otherwise
-	 * @deprecated check the permission you want to check instead
+	 * @param permissions List of{@link Permission} to check.
+	 * @return <tt>true</tt> if all the permissions are granted, <tt>false</tt> otherwise
 	 */
-	@Deprecated
-	boolean hasPermission(ObjectIdentity objectIdentity, PermissionSet permissionSet);
+	//TODO: make sure the permission matches the resource type, e.g. subclass this for EntityType resource class
+	boolean hasPermission(ObjectIdentity objectIdentity, List<Permission> permissions);
+
+	List<Permission> getPermissions(ObjectIdentity objectIdentity, Permission[] permissions);
 }

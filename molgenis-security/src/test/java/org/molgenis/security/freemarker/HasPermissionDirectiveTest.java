@@ -7,7 +7,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.security.core.PermissionSet;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -40,7 +41,8 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), PermissionSet.COUNT)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				newArrayList(EntityTypePermission.COUNT_DATA))).thenReturn(
 				true);
 
 		Map<String, Object> params = Maps.newHashMap();
@@ -56,7 +58,8 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithoutPermission() throws TemplateException, IOException
 	{
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), PermissionSet.WRITE)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.UPDATE_DATA)).thenReturn(
 				false);
 
 		Map<String, Object> params = Maps.newHashMap();

@@ -159,11 +159,6 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		}
 	}
 
-	//	@Override
-	//	public void throwPermissionException(EntityType entityType, Action action)
-	//	{
-	//	}
-
 	private void checkPackagePermission(EntityType newEntityType, Action action)
 	{
 		Package pack = newEntityType.getPackage();
