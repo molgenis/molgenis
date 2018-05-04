@@ -5,6 +5,7 @@ import org.molgenis.data.security.PackagePermission;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class PackagePermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS01";
   private final PackagePermission permission;
