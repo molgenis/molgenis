@@ -42,6 +42,11 @@ describe('ChapterForm component', () => {
     const updatedFormData = {field1: 'new value'}
 
     wrapper.vm.onValueChanged(updatedFormData)
-    td.verify(actions.AUTO_SAVE_QUESTIONNAIRE(td.matchers.anything(), updatedFormData, undefined))
+    td.verify(actions.AUTO_SAVE_QUESTIONNAIRE(td.matchers.anything(),
+      {
+        formData: {field1: "new value"},
+        formState: {}
+      },
+      undefined))
   })
 })

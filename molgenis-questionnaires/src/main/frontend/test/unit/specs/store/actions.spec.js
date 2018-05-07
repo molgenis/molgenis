@@ -2,6 +2,7 @@ import actions from 'src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+import Vue from 'vue'
 
 const getters = {
   getQuestionnaireId: 'test_quest'
@@ -31,7 +32,6 @@ const testAction = (action, payload, state, expectedMutations, expectedActions, 
 
   const dispatch = (type, payload) => {
     const action = expectedActions[actionCount]
-
     try {
       expect(action.type).to.equal(type)
       if (payload) {
@@ -326,12 +326,17 @@ describe('actions', () => {
       mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
-        {type: 'INCREMENT_SAVING_QUEUE'},
-        {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'DECREMENT_SAVING_QUEUE'}
+        {type: 'SET_FORM_DATA', payload: formData}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, {
+        formData: formData,
+        formState: {}
+      }, state, expectedMutations, [], function () {
+        Vue.nextTick(() => {
+          done()
+        })
+      })
     })
     it('should post data for a single attribute and fail', done => {
       const error = 'error'
@@ -339,13 +344,17 @@ describe('actions', () => {
       mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
 
       const expectedMutations = [
-        {type: 'INCREMENT_SAVING_QUEUE'},
-        {type: 'SET_ERROR', payload: error},
-        {type: 'SET_LOADING'},
-        {type: 'DECREMENT_SAVING_QUEUE'}
+        {type: 'SET_FORM_DATA', payload: formData}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, {
+        formData: formData,
+        formState: {}
+      }, state, expectedMutations, [], function () {
+        Vue.nextTick(() => {
+          done()
+        })
+      })
     })
   })
 
