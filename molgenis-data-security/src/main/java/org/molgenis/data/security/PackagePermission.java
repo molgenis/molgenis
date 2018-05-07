@@ -23,5 +23,3 @@ public enum PackagePermission implements Permission
 		return defaultDescription;
 	}
 }
-
-
