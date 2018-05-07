@@ -494,8 +494,7 @@ public class PermissionManagerController extends PluginController
 		Map<String, String> entityTypeMap = entityTypes.stream()
 													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
 													   {
-														   throw new IllegalStateException(
-																   format("Duplicate key %s", u));
+														   throw new IllegalStateException(format(DUPLICATE_KEY, u));
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
@@ -509,7 +508,7 @@ public class PermissionManagerController extends PluginController
 		// set permissions: entity ids
 		Map<String, String> entityTypeMap = packages.stream().collect(toMap(Package::getId, Package::getId, (u, v) ->
 		{
-			throw new IllegalStateException(format("Duplicate key %s", u));
+			throw new IllegalStateException(format(DUPLICATE_KEY, u));
 		}, LinkedHashMap::new));
 
 		permissions.setEntityIds(entityTypeMap);

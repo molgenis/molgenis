@@ -285,7 +285,7 @@ public class DataExplorerController extends PluginController
 			String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
 			if (modEntitiesReportName != null)
 			{
-				modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+				modulesConfig.add(new ModuleConfig(MOD_ENTITIESREPORT, modEntitiesReportName, "report-icon.png"));
 			}
 		}
 		return modulesConfig;
