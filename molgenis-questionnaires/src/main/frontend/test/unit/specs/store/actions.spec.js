@@ -328,8 +328,21 @@ describe('actions', () => {
       const expectedMutations = [
         {type: 'INCREMENT_SAVING_QUEUE'},
         {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'DECREMENT_SAVING_QUEUE'},
-        {type: 'SET_LOADING', payload: false}
+        {type: 'DECREMENT_SAVING_QUEUE'}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
+    })
+    it('should post data for a single attribute and fail', done => {
+      const error = 'error'
+
+      mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
+
+      const expectedMutations = [
+        {type: 'INCREMENT_SAVING_QUEUE'},
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING'},
+        {type: 'DECREMENT_SAVING_QUEUE'}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
