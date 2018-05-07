@@ -12,10 +12,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 
 @Component
@@ -48,31 +49,15 @@ public class UserPermissionEvaluatorImpl implements UserPermissionEvaluator
 	@Override
 	public boolean hasPermission(ObjectIdentity objectIdentity, List<Permission> permissions)
 	{
-		for (Permission permission : permissions)
-		{
-			if (!hasPermission(objectIdentity, permission))
-			{
-				return false;
-			}
-		}
-		return true;
+		return permissions.stream().allMatch(permission -> hasPermission(objectIdentity, permission));
 	}
 
 	@Override
-	public List<Permission> getPermissions(ObjectIdentity objectIdentity, Permission[] permissions)
+	public Set<Permission> getPermissions(ObjectIdentity objectIdentity, Permission[] permissions)
 	{
-		List<Permission> grantedPermissions = newArrayList();
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		for (Permission permission : permissions)
-		{
-
-			if (permissionEvaluator.hasPermission(authentication, objectIdentity.getIdentifier(),
-					objectIdentity.getType(), getCumulativePermissionToCheck(permission)))
-			{
-				grantedPermissions.add(permission);
-			}
-		}
-		return grantedPermissions;
+		return Arrays.stream(permissions)
+					 .filter(permission -> hasPermission(objectIdentity, permission))
+					 .collect(Collectors.toSet());
 	}
 
 	private CumulativePermission getCumulativePermissionToCheck(Permission permission)

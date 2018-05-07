@@ -31,7 +31,7 @@ public class EntityTypeResponse
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 	private String languageCode;
-	private final List<Permission> permissions;
+	private final Set<Permission> permissions;
 
 	/**
 	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
@@ -199,7 +199,7 @@ public class EntityTypeResponse
 		return languageCode;
 	}
 
-	public List<Permission> getPermissions()
+	public Set<Permission> getPermissions()
 	{
 		return permissions;
 	}

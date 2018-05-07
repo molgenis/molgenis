@@ -14,6 +14,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -40,7 +41,7 @@ class EntityTypeResponseV2
 	 */
 	private final Boolean writable;
 	private String languageCode;
-	private final List<Permission> permissions;
+	private final Set<Permission> permissions;
 
 	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator userPermissionEvaluator,
 			DataService dataService,
@@ -170,7 +171,7 @@ class EntityTypeResponseV2
 		return languageCode;
 	}
 
-	public List<Permission> getPermissions()
+	public Set<Permission> getPermissions()
 	{
 		return permissions;
 	}

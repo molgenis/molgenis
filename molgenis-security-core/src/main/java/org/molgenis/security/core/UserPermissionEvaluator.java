@@ -3,6 +3,7 @@ package org.molgenis.security.core;
 import org.springframework.security.acls.model.ObjectIdentity;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Evaluates permissions for the currently authenticated user.
@@ -29,5 +30,5 @@ public interface UserPermissionEvaluator
 	//TODO: make sure the permission matches the resource type, e.g. subclass this for EntityType resource class
 	boolean hasPermission(ObjectIdentity objectIdentity, List<Permission> permissions);
 
-	List<Permission> getPermissions(ObjectIdentity objectIdentity, Permission[] permissions);
+	Set<Permission> getPermissions(ObjectIdentity objectIdentity, Permission[] permissions);
 }
