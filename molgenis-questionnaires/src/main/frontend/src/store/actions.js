@@ -92,6 +92,8 @@ const actions = {
     commit('SET_FORM_DATA', formData)
 
     Vue.nextTick(() => {
+      // TODO To refactor this code without the nextTick method we need to expose the validation
+      // TODO from the molgenis-ui-form to the interface of molgenis-ui-form
       if (formState.$valid) {
         const options = {
           body: JSON.stringify(formData[updatedAttribute]),
@@ -100,9 +102,7 @@ const actions = {
 
         commit('INCREMENT_SAVING_QUEUE')
 
-        return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
-
-        }, error => {
+        return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).catch((error) => {
           handleError(commit, error)
         }).then(() => {
           commit('DECREMENT_SAVING_QUEUE')
