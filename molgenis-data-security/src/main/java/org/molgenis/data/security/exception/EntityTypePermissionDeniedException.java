@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EntityTypePermissionDeniedException extends PermissionDeniedException
 {
 	private static final String ERROR_CODE = "DS04";

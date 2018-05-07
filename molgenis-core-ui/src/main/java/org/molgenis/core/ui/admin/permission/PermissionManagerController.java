@@ -61,6 +61,7 @@ public class PermissionManagerController extends PluginController
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
+	public static final String DUPLICATE_KEY = "Duplicate key %s";
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
@@ -361,7 +362,7 @@ public class PermissionManagerController extends PluginController
 		// set permissions: entity ids
 		Map<String, String> pluginMap = plugins.stream().collect(toMap(Plugin::getId, Plugin::getId, (u, v) ->
 		{
-			throw new IllegalStateException(format("Duplicate key %s", u));
+			throw new IllegalStateException(format(DUPLICATE_KEY, u));
 		}, LinkedHashMap::new));
 		permissions.setEntityIds(pluginMap);
 
@@ -493,8 +494,7 @@ public class PermissionManagerController extends PluginController
 		Map<String, String> entityTypeMap = entityTypes.stream()
 													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
 													   {
-														   throw new IllegalStateException(
-																   format("Duplicate key %s", u));
+														   throw new IllegalStateException(format(DUPLICATE_KEY, u));
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
@@ -508,7 +508,7 @@ public class PermissionManagerController extends PluginController
 		// set permissions: entity ids
 		Map<String, String> entityTypeMap = packages.stream().collect(toMap(Package::getId, Package::getId, (u, v) ->
 		{
-			throw new IllegalStateException(format("Duplicate key %s", u));
+			throw new IllegalStateException(format(DUPLICATE_KEY, u));
 		}, LinkedHashMap::new));
 
 		permissions.setEntityIds(entityTypeMap);

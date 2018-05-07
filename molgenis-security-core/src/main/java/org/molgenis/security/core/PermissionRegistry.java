@@ -13,13 +13,13 @@ public class PermissionRegistry
 {
 	private SetMultimap<Permission, PermissionSet> mapping = HashMultimap.create();
 
-	public void addMapping(Permission action, PermissionSet... permission)
+	public void addMapping(Permission permission, PermissionSet... permissionSet)
 	{
-		mapping.putAll(action, asList(permission));
+		mapping.putAll(permission, asList(permissionSet));
 	}
 
-	public Set<PermissionSet> getPermissions(Permission action)
+	public Set<PermissionSet> getPermissions(Permission permission)
 	{
-		return mapping.get(action);
+		return mapping.get(permission);
 	}
 }

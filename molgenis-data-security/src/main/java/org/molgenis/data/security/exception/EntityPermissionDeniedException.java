@@ -4,12 +4,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityPermission;
 
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class EntityPermissionDeniedException extends PermissionDeniedException {
   private static final String ERROR_CODE = "DS06";
 
   private final EntityPermission permission;
-  private final EntityType entityType;
-  private final Object entityId;
+  private final transient EntityType entityType;
+  private final transient Object entityId;
 
   public EntityPermissionDeniedException(EntityPermission permission, Entity entity) {
     super(ERROR_CODE);
@@ -20,8 +21,7 @@ public class EntityPermissionDeniedException extends PermissionDeniedException {
 
   @Override
   public String getMessage() {
-    return String.format(
-        "permission:%s entityTypeId:%s entityId:%s", permission, entityType.getId(), entityId);
+    return String.format("permission:%s entityTypeId:%s entityId:%s", permission, entityType.getId(), entityId);
   }
 
   @Override

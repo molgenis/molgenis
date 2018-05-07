@@ -48,8 +48,6 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.Permission.READ;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.Permission.WRITE;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 
@@ -261,64 +259,33 @@ public class DataExplorerController extends PluginController
 		boolean modData = dataExplorerSettings.getModData();
 		boolean modReports = dataExplorerSettings.getModReports();
 
-		if (modAggregates)
-		{
-			modAggregates = dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE);
-		}
-
-		// set data explorer permission
-		// TODO: Use fine-grained permission checks to show the exact tabs you can use
-		Permission pluginPermission = null;
-		if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.UPDATE_DATA))
-			pluginPermission = WRITE;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ_DATA))
-			pluginPermission = READ;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.AGGREGATE_DATA))
-			pluginPermission = Permission.COUNT;
-
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
 				LocaleContextHolder.getLocale());
-
-		if (pluginPermission != null)
+		if (modData && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_DATA))
 		{
-			switch (pluginPermission)
+			modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+		}
+		if (modAggregates && dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE)
+				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.AGGREGATE_DATA))
+		{
+			modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
+		}
+		if (modAnnotators && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.UPDATE_DATA))
+		{
+			modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
+		}
+		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_DATA) && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.UPDATE_METADATA))
+		{
+			String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
+			if (modEntitiesReportName != null)
 			{
-				case COUNT:
-					if (modAggregates)
-					{
-						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "grid-icon.png"));
-					}
-					break;
-				case READ:
-				case WRITE:
-					if (modData)
-					{
-						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
-					}
-					if (modAggregates)
-					{
-						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
-					}
-					if (modAnnotators && pluginPermission == WRITE)
-					{
-						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
-					}
-					if (modReports)
-					{
-						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
-						if (modEntitiesReportName != null)
-						{
-							modulesConfig.add(
-									new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
-						}
-					}
-					break;
-				case NONE:
-					break;
-				default:
-					throw new UnexpectedEnumException(pluginPermission);
+				modulesConfig.add(new ModuleConfig(MOD_ENTITIESREPORT, modEntitiesReportName, "report-icon.png"));
 			}
 		}
 		return modulesConfig;
@@ -501,17 +468,5 @@ public class DataExplorerController extends PluginController
 		{
 			return false;
 		}
-	}
-
-	public static enum Permission
-	{
-		READ, WRITE, /**
-	 * COUNT permission on an entity type:
-	 * <ul>
-	 * <li>means that entities can be counted and aggregated</li>
-	 * <li>the entity type can be <b>READ</b></li>
-	 * </ul>
-	 */
-	COUNT, NONE, WRITEMETA
 	}
 }

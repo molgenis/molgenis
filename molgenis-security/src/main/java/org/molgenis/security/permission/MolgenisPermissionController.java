@@ -1,7 +1,7 @@
 package org.molgenis.security.permission;
 
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.security.core.PermissionSet;
+import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,15 +26,17 @@ public class MolgenisPermissionController
 	@ResponseBody
 	public boolean hasReadPermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		//TODO: Enable fine-grained permission checks
-		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.READ);
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ_METADATA)
+				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_DATA);
 	}
 
 	@GetMapping("/{entityTypeId}/write")
 	@ResponseBody
 	public boolean hasWritePermission(@PathVariable("entityTypeId") String entityTypeId)
 	{
-		//TODO: Enable fine-grained permission checks
-		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), PermissionSet.WRITE);
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ_METADATA)
+				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.UPDATE_DATA);
 	}
 }
