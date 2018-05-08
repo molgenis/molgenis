@@ -18,6 +18,12 @@ public class PackagePermissionDeniedException extends PermissionDeniedException 
   }
 
   @Override
+  public String getMessage()
+  {
+    return String.format("permission:%s package:%s", permission.getName(), pack.getId());
+  }
+
+  @Override
   protected Object[] getLocalizedMessageArguments() {
     return new Object[] {permission.getName(), pack.getLabel()};
   }
