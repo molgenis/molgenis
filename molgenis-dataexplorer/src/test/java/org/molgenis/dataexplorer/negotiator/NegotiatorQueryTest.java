@@ -1,7 +1,7 @@
 package org.molgenis.dataexplorer.negotiator;
 
 import com.google.gson.Gson;
-import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;

@@ -1,8 +1,8 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.core.ui.data.rsql.AggregateQueryRsql;
-import org.molgenis.core.ui.data.rsql.QueryRsql;
 import org.molgenis.data.Sort;
+import org.molgenis.web.rsql.AggregateQueryRsql;
+import org.molgenis.web.rsql.QueryRsql;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

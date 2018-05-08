@@ -8,7 +8,7 @@ import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
-import org.molgenis.core.ui.util.GsonConfig;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;

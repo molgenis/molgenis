@@ -1,7 +1,6 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.core.ui.file.FileDownloadController;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -9,6 +8,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
+import org.molgenis.data.file.util.FileDownloadControllerUtils;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -276,7 +276,7 @@ public class RestService
 				fileEntity.setContentType(multipartFile.getContentType());
 				fileEntity.setSize(multipartFile.getSize());
 				ServletUriComponentsBuilder currentRequest = servletUriComponentsBuilderFactory.fromCurrentRequest();
-				UriComponents downloadUri = currentRequest.replacePath(FileDownloadController.URI + '/' + id)
+				UriComponents downloadUri = currentRequest.replacePath(FileDownloadControllerUtils.URI + '/' + id)
 														  .replaceQuery(null)
 														  .build();
 				fileEntity.setUrl(downloadUri.toUriString());

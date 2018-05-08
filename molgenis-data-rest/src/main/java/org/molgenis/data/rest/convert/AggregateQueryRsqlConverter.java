@@ -2,7 +2,7 @@ package org.molgenis.data.rest.convert;
 
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
-import org.molgenis.core.ui.data.rsql.AggregateQueryRsql;
+import org.molgenis.web.rsql.AggregateQueryRsql;
 import org.springframework.core.convert.converter.Converter;
 
 import static com.google.common.base.Preconditions.checkNotNull;

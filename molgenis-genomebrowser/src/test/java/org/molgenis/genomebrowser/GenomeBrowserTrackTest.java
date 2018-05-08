@@ -1,11 +1,11 @@
 package org.molgenis.genomebrowser;
 
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.Test;

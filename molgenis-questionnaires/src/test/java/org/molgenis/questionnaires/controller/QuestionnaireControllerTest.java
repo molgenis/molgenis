@@ -1,14 +1,16 @@
 package org.molgenis.questionnaires.controller;
 
+import org.hamcrest.Matchers;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -26,6 +28,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Locale.ENGLISH;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -116,8 +119,14 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void testStartQuestionnaire() throws Exception
 	{
-		mockMvc.perform(get(QuestionnaireController.URI + "/start/1")).andExpect(status().isOk());
-		verify(questionnaireService).startQuestionnaire("1");
+		String id = "1";
+		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(id, "label", "desc",
+				QuestionnaireStatus.NOT_STARTED);
+		when(questionnaireService.startQuestionnaire(id)).thenReturn(questionnaireResponse);
+		mockMvc.perform(get(QuestionnaireController.URI + "/start/" + id))
+					   .andExpect(status().isOk())
+					   .andExpect(jsonPath("$.id", Matchers.is(id)));
+		verify(questionnaireService).startQuestionnaire(id);
 	}
 
 	@Test

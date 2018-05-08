@@ -2,9 +2,9 @@ package org.molgenis.app.controller;
 
 import org.molgenis.app.controller.ContentControllersTest.Config;
 import org.molgenis.core.ui.controller.StaticContentService;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

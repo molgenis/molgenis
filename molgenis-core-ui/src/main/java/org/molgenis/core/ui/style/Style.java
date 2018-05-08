@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
+import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_Style.class)

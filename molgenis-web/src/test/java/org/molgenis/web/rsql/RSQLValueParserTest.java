@@ -1,4 +1,4 @@
-package org.molgenis.core.ui.data.rsql;
+package org.molgenis.web.rsql;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
