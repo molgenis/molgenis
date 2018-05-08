@@ -1,8 +1,8 @@
 package org.molgenis.security.captcha;
 
 import com.google.gson.Gson;
-import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
 import org.molgenis.security.captcha.CaptchaControllerTest.Config;
+import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

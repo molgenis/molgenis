@@ -1,9 +1,10 @@
-package org.molgenis.core.gson;
+package org.molgenis.web.converter;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
+import org.molgenis.util.AutoGson;
 
 public class AutoValueTypeAdapterFactory implements TypeAdapterFactory
 {

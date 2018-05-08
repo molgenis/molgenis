@@ -1,4 +1,4 @@
-package org.molgenis.core.ui.util;
+package org.molgenis.web.support;
 
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;

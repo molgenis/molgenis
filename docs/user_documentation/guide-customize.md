@@ -165,6 +165,7 @@ which you can use to specify the contents of your template.
 * To make a conditional check on the actual value of an attribute, use `<#if entity.get("P_Value") == 0>...</#if>`.
 * You can follow references to other entities: `<#list entity.getEntities("Genes") as gene>...</#list>` will iterate over all Genes. In between the list tags, the gene gets added as a variable `gene` which you can access the same way as you access the variable `entity`.
 * To open a page at a button click, use the `data-href` attribute to specify the href: `<button type="button" class="btn" data-href='<the link>'>Button label</button>`.
+* By default, number values will be shown in 'computer' format (e.g. 1234). If you want to show a human readable form of the number (with a thousand separator: 1,234), you can use the notation `${x?string.number}`. 
 * These are just examples, many powerful constructs are possible.
 
 ### Adding genome browser component

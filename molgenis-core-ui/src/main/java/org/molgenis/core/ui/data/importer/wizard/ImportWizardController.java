@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.core.ui.wizard.AbstractWizardController;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataService;
@@ -11,6 +10,7 @@ import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.util.FileExtensionUtils;
 import org.molgenis.data.importer.*;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;

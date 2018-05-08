@@ -1,4 +1,4 @@
-package org.molgenis.core.ui.data.support;
+package org.molgenis.data.rest.util;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;

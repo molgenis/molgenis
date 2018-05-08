@@ -1,6 +1,5 @@
-package org.molgenis.core.ui.data.rest;
+package org.molgenis.data.rest.util;
 
-import org.molgenis.core.ui.data.support.Href;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

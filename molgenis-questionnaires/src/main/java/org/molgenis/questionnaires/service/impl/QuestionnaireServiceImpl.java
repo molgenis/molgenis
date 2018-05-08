@@ -67,16 +67,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	}
 
 	@Override
-	public void startQuestionnaire(String id)
+	public QuestionnaireResponse startQuestionnaire(String entityTypeId)
 	{
-		Questionnaire questionnaire = findQuestionnaireEntity(id);
+		Questionnaire questionnaire = findQuestionnaireEntity(entityTypeId);
 		if (questionnaire == null)
 		{
-			EntityType questionnaireEntityType = dataService.getEntityType(id);
+			EntityType questionnaireEntityType = dataService.getEntityType(entityTypeId);
 			questionnaire = questionnaireFactory.create(entityManager.create(questionnaireEntityType, POPULATE));
 			questionnaire.setOwner(getCurrentUsername());
 			questionnaire.setStatus(OPEN);
-			dataService.add(id, questionnaire);
+			dataService.add(entityTypeId, questionnaire);
+			Questionnaire newQuestionnaire = findQuestionnaireEntity(questionnaire.getEntityType().getId());
+			return QuestionnaireResponse.create(newQuestionnaire);
+		} else {
+			return QuestionnaireResponse.create(questionnaire);
 		}
 	}
 
@@ -124,6 +128,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	 */
 	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
-		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
+		Entity questionnaireInstance = dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername()));
+		return questionnaireFactory.create(questionnaireInstance);
 	}
 }

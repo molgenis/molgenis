@@ -74,7 +74,7 @@
         <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgresql.version>9.4.1211</postgresql.version>
         <testng.version>6.8</testng.version>
-        <guava.version>21.0</guava.version>
+        <guava.version>25.0-jre</guava.version>
 
         <!-- dependency versions not managed by parent pom -->
         <google.auto-value.version>1.4.1</google.auto-value.version>

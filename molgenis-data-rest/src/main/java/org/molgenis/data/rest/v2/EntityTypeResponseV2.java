@@ -1,12 +1,12 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -14,6 +14,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -40,7 +41,7 @@ class EntityTypeResponseV2
 	 */
 	private final Boolean writable;
 	private String languageCode;
-	private final List<Permission> permissions;
+	private final Set<Permission> permissions;
 
 	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator userPermissionEvaluator,
 			DataService dataService,
@@ -170,7 +171,7 @@ class EntityTypeResponseV2
 		return languageCode;
 	}
 
-	public List<Permission> getPermissions()
+	public Set<Permission> getPermissions()
 	{
 		return permissions;
 	}

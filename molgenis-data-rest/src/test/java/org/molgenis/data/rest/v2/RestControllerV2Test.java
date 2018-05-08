@@ -3,7 +3,6 @@ package org.molgenis.data.rest.v2;
 import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.*;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
@@ -29,6 +28,7 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
@@ -557,6 +557,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String expectedContent = readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
+	public void retrieveResourceCollectionUnknownEntityType() throws Exception
+	{
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponseUnknownEntityType.json"));
+		mockMvc.perform(get(BASE_URI + '/' + "unknown"))
+			   .andExpect(status().isNotFound())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(expectedContent));
 	}

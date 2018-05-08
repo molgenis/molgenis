@@ -118,13 +118,17 @@ describe('actions', () => {
   describe('START_QUESTIONNAIRE', () => {
     it('should call the start questionnaire uri', done => {
       const questionnaireId = 'test_quest'
-      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', 'OK')
-      const response = actions.START_QUESTIONNAIRE({}, questionnaireId)
+      const mockResponse = {id: 'mockId'}
+      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
-      response.then(actual => {
-        expect(actual).to.equal('OK')
-        done()
-      })
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
     })
 
     it('should commit any errors to the store', done => {
@@ -133,6 +137,8 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -322,8 +328,21 @@ describe('actions', () => {
       const expectedMutations = [
         {type: 'INCREMENT_SAVING_QUEUE'},
         {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'DECREMENT_SAVING_QUEUE'},
-        {type: 'SET_LOADING', payload: false}
+        {type: 'DECREMENT_SAVING_QUEUE'}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
+    })
+    it('should post data for a single attribute and fail', done => {
+      const error = 'error'
+
+      mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
+
+      const expectedMutations = [
+        {type: 'INCREMENT_SAVING_QUEUE'},
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING'},
+        {type: 'DECREMENT_SAVING_QUEUE'}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)

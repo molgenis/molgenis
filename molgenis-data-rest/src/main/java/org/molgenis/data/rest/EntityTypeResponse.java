@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.Permission;
@@ -31,7 +31,7 @@ public class EntityTypeResponse
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 	private String languageCode;
-	private final List<Permission> permissions;
+	private final Set<Permission> permissions;
 
 	/**
 	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
@@ -199,7 +199,7 @@ public class EntityTypeResponse
 		return languageCode;
 	}
 
-	public List<Permission> getPermissions()
+	public Set<Permission> getPermissions()
 	{
 		return permissions;
 	}
