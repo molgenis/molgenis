@@ -46,10 +46,10 @@ public class UserServiceImpl implements UserService
 
 	@Override
 	@RunAsSystem
-	public Iterable<Group> getUserGroups(String username)
+	public Iterable<Role> getUserGroups(String username)
 	{
 		Fetch fetch = new Fetch().field(GroupMemberMetaData.GROUP,
-				new Fetch().field(GroupMetaData.ID).field(GroupMetaData.NAME).field(GroupMetaData.ACTIVE));
+				new Fetch().field(RoleMetadata.ID).field(RoleMetadata.NAME).field(RoleMetadata.ACTIVE));
 		Stream<GroupMember> molgenisGroupMembers = dataService.query(GROUP_MEMBER, GroupMember.class)
 															  .fetch(fetch)
 															  .eq(GroupMemberMetaData.USER, getUser(username))

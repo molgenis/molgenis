@@ -15,7 +15,7 @@ import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.permission.Permissions;
@@ -52,7 +52,7 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -69,7 +69,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 	private User user1, user2;
 	private PrincipalSid userSid;
-	private Group group1, group2;
+	private Role role1, role2;
 	private GrantedAuthoritySid groupSid;
 
 	private Plugin plugin1, plugin2;
@@ -179,9 +179,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		userSid = new PrincipalSid("Ipsum");
 		user2 = when(mock(User.class).getId()).thenReturn("2").getMock();
 
-		group1 = when(mock(Group.class).getId()).thenReturn("1").getMock();
+		role1 = when(mock(Role.class).getId()).thenReturn("1").getMock();
 		groupSid = new GrantedAuthoritySid("ROLE_1");
-		group2 = when(mock(Group.class).getId()).thenReturn("2").getMock();
+		role2 = when(mock(Role.class).getId()).thenReturn("2").getMock();
 
 		plugin1 = when(mock(Plugin.class).getId()).thenReturn("1").getMock();
 		plugin2 = when(mock(Plugin.class).getId()).thenReturn("2").getMock();
@@ -209,8 +209,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		packageIdentity3 = new PackageIdentity(package3);
 
 		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1, user2));
-		when(dataService.findAll(GROUP, Group.class)).thenReturn(Stream.of(group1, group2));
-		when(dataService.findOneById(GROUP, "1", Group.class)).thenReturn(group1);
+		when(dataService.findAll(GROUP, Role.class)).thenReturn(Stream.of(role1, role2));
+		when(dataService.findOneById(GROUP, "1", Role.class)).thenReturn(role1);
 		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 
 		when(dataService.findAll(PLUGIN, Plugin.class)).thenReturn(Stream.of(plugin1, plugin2));
@@ -248,7 +248,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 					.andExpect(status().isOk())
 					.andExpect(view().name("view-permissionmanager"))
 					.andExpect(model().attribute("users", Arrays.asList(user2)))
-					.andExpect(model().attribute("groups", Arrays.asList(group1, group2)));
+					.andExpect(model().attribute("groups", Arrays.asList(role1, role2)));
 	}
 
 	@Test
@@ -260,7 +260,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test
 	public void testGetGroups()
 	{
-		assertEquals(permissionManagerController.getGroups(), Arrays.asList(group1, group2));
+		assertEquals(permissionManagerController.getGroups(), Arrays.asList(role1, role2));
 	}
 
 	@Test

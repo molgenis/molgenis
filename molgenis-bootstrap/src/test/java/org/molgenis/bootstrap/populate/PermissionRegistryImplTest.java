@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -38,11 +38,11 @@ public class PermissionRegistryImplTest extends AbstractMockitoTest
 	public void testGetPermissions()
 	{
 		@SuppressWarnings("unchecked")
-		Query<Group> query = mock(Query.class);
+		Query<Role> query = mock(Query.class);
 		when(query.eq("name", "All Users")).thenReturn(query);
-		when(dataService.query("sys_sec_Group", Group.class)).thenReturn(query);
-		Group group = when(mock(Group.class).getId()).thenReturn("group0").getMock();
-		when(query.findOne()).thenReturn(group);
+		when(dataService.query("sys_sec_Group", Role.class)).thenReturn(query);
+		Role role = when(mock(Role.class).getId()).thenReturn("group0").getMock();
+		when(query.findOne()).thenReturn(role);
 		Multimap<ObjectIdentity, Pair<Permission, Sid>> expectedPermissions = ImmutableListMultimap.of(
 				new PluginIdentity("useraccount"), new Pair<>(PluginPermission.READ,
 						new GrantedAuthoritySid("ROLE_group0")));

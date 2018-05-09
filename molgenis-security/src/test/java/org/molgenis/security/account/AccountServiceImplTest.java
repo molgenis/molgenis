@@ -6,9 +6,9 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupMember;
 import org.molgenis.data.security.auth.GroupMemberFactory;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -29,8 +29,8 @@ import java.net.URISyntaxException;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 
@@ -69,12 +69,12 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		when(appSettings.getTitle()).thenReturn("Molgenis title");
 		when(authenticationSettings.getSignUpModeration()).thenReturn(false);
 
-		Group allUsersGroup = mock(Group.class);
+		Role userRole = mock(Role.class);
 		@SuppressWarnings("unchecked")
-		Query<Group> q = mock(Query.class);
+		Query<Role> q = mock(Query.class);
 		when(q.eq(NAME, ALL_USER_GROUP)).thenReturn(q);
-		when(q.findOne()).thenReturn(allUsersGroup);
-		when(dataService.query(GROUP, Group.class)).thenReturn(q);
+		when(q.findOne()).thenReturn(userRole);
+		when(dataService.query(GROUP, Role.class)).thenReturn(q);
 
 		when(user.getUsername()).thenReturn("jansenj");
 		when(user.getFirstName()).thenReturn("Jan");

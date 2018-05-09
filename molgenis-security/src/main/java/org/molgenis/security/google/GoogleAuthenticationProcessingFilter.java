@@ -35,8 +35,8 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -207,8 +207,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 		// add user to all-users group
 		GroupMember groupMember = groupMemberFactory.create();
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		groupMember.setGroup(group);
+		Role role = dataService.query(GROUP, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
+		groupMember.setGroup(role);
 		groupMember.setUser(user);
 		dataService.add(GROUP_MEMBER, groupMember);
 

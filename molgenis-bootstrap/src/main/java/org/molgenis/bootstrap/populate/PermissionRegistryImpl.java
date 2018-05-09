@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.*;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Permission;
@@ -29,8 +29,8 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.acl.SidUtils.createSid;
 
@@ -49,8 +49,8 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	{
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
-		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		Sid allUsersGroupSid = createSid(allUsersGroup);
+		Role userRole = dataService.query(GROUP, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
+		Sid allUsersGroupSid = createSid(userRole);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
 		mapBuilder.putAll(pluginIdentity, new Pair<>(PluginPermission.READ, allUsersGroupSid));

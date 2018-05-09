@@ -1,26 +1,26 @@
 <div class="well">
     <ul class="nav nav-pills">
-        <li class="active"><a href="#entity-class-group-permission-manager" data-toggle="tab">Groups</a></li>
+        <li class="active"><a href="#entity-class-role-permission-manager" data-toggle="tab">Groups</a></li>
         <li><a href="#entity-class-user-permission-manager" data-toggle="tab">Users</a></li>
     </ul>
     <div class="tab-content">
-        <div class="tab-pane active" id="entity-class-group-permission-manager">
-            <form class="form-horizontal" id="entity-class-group-permission-form" method="post"
+        <div class="tab-pane active" id="entity-class-role-permission-manager">
+            <form class="form-horizontal" id="entity-class-role-permission-form" method="post"
                   action="${context_url?html}/update/entityclass/group" role="form">
                 <div class="form-group">
-                    <label class="col-md-3 control-label" for="entity-class-group-select">Select Group:</label>
+                    <label class="col-md-3 control-label" for="entity-class-role-select">Select Group:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="groupId" id="entity-class-group-select">
-                        <#list groups as group>
-                            <option value="${group.id?html}"<#if group_index == 0>
-                                    selected</#if>>${group.name?html}</option>
+                        <select class="form-control" name="groupId" id="entity-class-role-select">
+                        <#list groups as role>
+                            <option value="${role.id?html}"<#if group_index == 0>
+                                    selected</#if>>${role.name?html}</option>
                         </#list>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="permission-table-container">
-                        <table class="table table-condensed table-borderless" id="entity-class-group-permission-table">
+                        <table class="table table-condensed table-borderless" id="entity-class-role-permission-table">
                             <thead>
                             <tr>
                                 <th>Entity Class</th>

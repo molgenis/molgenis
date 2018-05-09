@@ -1,6 +1,6 @@
 package org.molgenis.security.acl;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
@@ -32,15 +32,15 @@ public class SidUtilsTest
 	@Test
 	public void testCreateSidGroup()
 	{
-		Group group = when(mock(Group.class).getId()).thenReturn("groupId").getMock();
-		Sid sid = SidUtils.createSid(group);
+		Role role = when(mock(Role.class).getId()).thenReturn("groupId").getMock();
+		Sid sid = SidUtils.createSid(role);
 		assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_groupId")));
 	}
 
 	@Test
 	public void testCreateGroupAuthority()
 	{
-		Group group = when(mock(Group.class).getId()).thenReturn("groupId").getMock();
-		assertEquals("ROLE_groupId", SidUtils.createGroupAuthority(group));
+		Role role = when(mock(Role.class).getId()).thenReturn("groupId").getMock();
+		assertEquals("ROLE_groupId", SidUtils.createGroupAuthority(role));
 	}
 }

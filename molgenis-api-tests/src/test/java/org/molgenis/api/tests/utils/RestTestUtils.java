@@ -6,7 +6,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.molgenis.core.ui.admin.permission.PermissionManagerController;
 import org.molgenis.data.security.auth.GroupMemberMetaData;
-import org.molgenis.data.security.auth.GroupMetaData;
+import org.molgenis.data.security.auth.RoleMetadata;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -119,7 +119,7 @@ public class RestTestUtils
 		JSONObject groupMembership = new JSONObject();
 		groupMembership.put(USER, getUserId(adminToken, userName));
 		groupMembership.put(GroupMemberMetaData.GROUP,
-				getEntityId(adminToken, GroupMetaData.NAME, ALL_USER_GROUP, GroupMetaData.GROUP));
+				getEntityId(adminToken, RoleMetadata.NAME, ALL_USER_GROUP, RoleMetadata.GROUP));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)

@@ -4,9 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupMember;
 import org.molgenis.data.security.auth.GroupMemberFactory;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -30,8 +30,8 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
 
 @Service
@@ -101,13 +101,13 @@ public class AccountServiceImpl implements AccountService
 		dataService.add(USER, user);
 		LOG.debug("created user " + user.getUsername());
 
-		// add user to group
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
+		// add user to role
+		Role role = dataService.query(GROUP, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
 		GroupMember groupMember = null;
-		if (group != null)
+		if (role != null)
 		{
 			groupMember = groupMemberFactory.create();
-			groupMember.setGroup(group);
+			groupMember.setGroup(role);
 			groupMember.setUser(user);
 			dataService.add(GROUP_MEMBER, groupMember);
 		}

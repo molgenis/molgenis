@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.core.util.CountryCodes;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.model.RecoveryCode;
@@ -58,7 +58,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	@Mock
 	private User user;
 	@Mock
-	private Group allUsers;
+	private Role allUsers;
 
 	@BeforeMethod
 	public void setUp() throws Exception

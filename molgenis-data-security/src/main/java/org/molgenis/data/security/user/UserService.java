@@ -1,6 +1,6 @@
 package org.molgenis.data.security.user;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public interface UserService
 	/**
 	 * Returns the groups that the given user belongs to
 	 */
-	Iterable<Group> getUserGroups(String username);
+	Iterable<Role> getUserGroups(String username);
 
 	/**
 	 * Update user

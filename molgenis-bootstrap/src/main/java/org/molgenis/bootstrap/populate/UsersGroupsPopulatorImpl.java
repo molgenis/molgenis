@@ -1,8 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.GroupFactory;
+import org.molgenis.data.security.auth.RoleFactory;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.account.AccountService;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
@@ -25,7 +25,7 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 
 	private final DataService dataService;
 	private final UserFactory userFactory;
-	private final GroupFactory groupFactory;
+	private final RoleFactory roleFactory;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -34,11 +34,11 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	UsersGroupsPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory)
+	UsersGroupsPopulatorImpl(DataService dataService, UserFactory userFactory, RoleFactory roleFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
-		this.groupFactory = requireNonNull(groupFactory);
+		this.roleFactory = requireNonNull(roleFactory);
 	}
 
 	@Override
@@ -71,11 +71,11 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		anonymousUser.setChangePassword(false);
 
 		// create all users group
-		Group allUsersGroup = groupFactory.create();
-		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
+		Role userRole = roleFactory.create();
+		userRole.setName(AccountService.ALL_USER_GROUP);
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(GROUP, allUsersGroup);
+		dataService.add(GROUP, userRole);
 	}
 }

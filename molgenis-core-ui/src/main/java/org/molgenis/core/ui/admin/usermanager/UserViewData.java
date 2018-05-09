@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class UserViewData
 	private Boolean superuser;
 	private final List<String> groupList = new ArrayList<>();
 
-	UserViewData(User mu, List<Group> groups)
+	UserViewData(User mu, List<Role> roles)
 	{
 		this(mu.getId(), mu.getUsername());
 		firstName = (null == mu.getFirstName() ? "" : mu.getFirstName());
@@ -31,7 +31,7 @@ public class UserViewData
 		this.active = mu.isActive();
 		this.superuser = mu.isSuperuser();
 
-		for (Group mg : groups)
+		for (Role mg : roles)
 		{
 			this.groupList.add(mg.getId());
 		}

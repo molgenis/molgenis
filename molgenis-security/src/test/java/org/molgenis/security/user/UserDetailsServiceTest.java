@@ -61,10 +61,10 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Group group = mock(Group.class);
-		when(group.getId()).thenReturn("groupId");
+		Role role = mock(Role.class);
+		when(role.getId()).thenReturn("groupId");
 		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(group);
+		when(groupMember.getGroup()).thenReturn(role);
 
 		Query<GroupMember> groupMemberQuery = mock(Query.class);
 		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
@@ -99,10 +99,10 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Group group = mock(Group.class);
-		when(group.getId()).thenReturn("groupId");
+		Role role = mock(Role.class);
+		when(role.getId()).thenReturn("groupId");
 		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(group);
+		when(groupMember.getGroup()).thenReturn(role);
 
 		Query<GroupMember> groupMemberQuery = mock(Query.class);
 		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
@@ -136,10 +136,10 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Group group = mock(Group.class);
-		when(group.getId()).thenReturn("groupId");
+		Role role = mock(Role.class);
+		when(role.getId()).thenReturn("groupId");
 		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(group);
+		when(groupMember.getGroup()).thenReturn(role);
 
 		Query<GroupMember> groupMemberQuery = mock(Query.class);
 		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));

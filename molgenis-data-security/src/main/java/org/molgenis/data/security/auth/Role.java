@@ -4,22 +4,22 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.auth.GroupMetaData.*;
+import static org.molgenis.data.security.auth.RoleMetadata.*;
 
-public class Group extends StaticEntity
+public class Role extends StaticEntity
 {
-	public Group(Entity entity)
+	public Role(Entity entity)
 	{
 		super(entity);
 	}
 
-	public Group(EntityType entityType)
+	public Role(EntityType entityType)
 	{
 		super(entityType);
 		setDefaultValues();
 	}
 
-	public Group(String id, EntityType entityType)
+	public Role(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);

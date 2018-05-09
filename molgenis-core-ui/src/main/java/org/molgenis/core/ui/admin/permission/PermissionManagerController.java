@@ -13,7 +13,7 @@ import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.*;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
@@ -639,18 +639,18 @@ public class PermissionManagerController extends PluginController
 
 	private Sid getSidForGroupId(String groupId)
 	{
-		Group group = getGroup(groupId);
-		return SidUtils.createSid(group);
+		Role role = getGroup(groupId);
+		return SidUtils.createSid(role);
 	}
 
-	private Group getGroup(String groupId)
+	private Role getGroup(String groupId)
 	{
-		Group group = dataService.findOneById(GROUP, groupId, Group.class);
-		if (group == null)
+		Role role = dataService.findOneById(GROUP, groupId, Role.class);
+		if (role == null)
 		{
-			throw new RuntimeException("unknown group id [" + groupId + "]");
+			throw new RuntimeException("unknown role id [" + groupId + "]");
 		}
-		return group;
+		return role;
 	}
 
 	private User getUser(String userId)
@@ -674,9 +674,9 @@ public class PermissionManagerController extends PluginController
 	/**
 	 * package-private for testability
 	 */
-	List<Group> getGroups()
+	List<Role> getGroups()
 	{
-		return dataService.findAll(GROUP, Group.class).collect(toList());
+		return dataService.findAll(GROUP, Role.class).collect(toList());
 	}
 
 	List<Package> getPackages()

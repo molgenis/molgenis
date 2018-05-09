@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 
 import java.util.List;
 
@@ -12,11 +12,11 @@ public interface UserManagerService
 
 	void setActivationGroup(String groupId, Boolean active);
 
-	List<Group> getAllGroups();
+	List<Role> getAllGroups();
 
-	List<Group> getGroupsWhereUserIsMember(String userId);
+	List<Role> getGroupsWhereUserIsMember(String userId);
 
-	List<Group> getGroupsWhereUserIsNotMember(String userId);
+	List<Role> getGroupsWhereUserIsNotMember(String userId);
 
 	List<UserViewData> getUsersMemberInGroup(String groupId);
 

@@ -3,7 +3,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.importer.EntityImportReport;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 
 import java.io.File;
 import java.util.Collection;
@@ -25,7 +25,7 @@ public class ImportWizard extends Wizard
 	private String importRunId;
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
-	private Iterable<Group> groups;
+	private Iterable<Role> groups;
 	private List<String> entityTypeIds;
 	private boolean allowPermissions;
 	private List<String> packages;
@@ -156,12 +156,12 @@ public class ImportWizard extends Wizard
 		this.mustChangeEntityName = mustChangeEntityName;
 	}
 
-	public void setGroups(Iterable<Group> groups)
+	public void setGroups(Iterable<Role> groups)
 	{
 		this.groups = groups;
 	}
 
-	public Iterable<Group> getGroups()
+	public Iterable<Role> getGroups()
 	{
 		return groups;
 	}

@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 
 /**
@@ -60,7 +60,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void setActivationGroup(String groupId, Boolean active)
 	{
-		Group mg = this.dataService.findOneById(GROUP, groupId, Group.class);
+		Role mg = this.dataService.findOneById(GROUP, groupId, Role.class);
 		mg.setActive(active);
 		this.dataService.update(GROUP, mg);
 	}
@@ -68,15 +68,15 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<Group> getAllGroups()
+	public List<Role> getAllGroups()
 	{
-		return dataService.findAll(GROUP, Group.class).collect(toList());
+		return dataService.findAll(GROUP, Role.class).collect(toList());
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<Group> getGroupsWhereUserIsMember(String userId)
+	public List<Role> getGroupsWhereUserIsMember(String userId)
 	{
 		return this.getMolgenisGroups(userId);
 	}
@@ -89,7 +89,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		return this.parseToMolgenisUserViewData(this.getMolgenisUsers(groupId).stream());
 	}
 
-	private List<Group> getMolgenisGroups(String userId)
+	private List<Role> getMolgenisGroups(String userId)
 	{
 		final User user = dataService.findOneById(USER, userId, User.class);
 
@@ -106,15 +106,15 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	private List<User> getMolgenisUsers(final String groupId)
 	{
-		final Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		final Role role = dataService.findOneById(GROUP, groupId, Role.class);
 
-		if (group == null)
+		if (role == null)
 		{
 			throw new RuntimeException("unknown user id [" + groupId + "]");
 		}
 
 		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
-				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group), GroupMember.class).collect(toList());
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, role), GroupMember.class).collect(toList());
 
 		return this.getAllMolgenisUsersFromGroupMembers(groupMembers);
 	}
@@ -122,7 +122,7 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	public List<Group> getGroupsWhereUserIsNotMember(final String userId)
+	public List<Role> getGroupsWhereUserIsNotMember(final String userId)
 	{
 		final User user = dataService.findOneById(USER, userId, User.class);
 
@@ -134,12 +134,12 @@ public class UserManagerServiceImpl implements UserManagerService
 		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user), GroupMember.class).collect(toList());
 
-		final List<Group> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
+		final List<Role> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
 
-		Predicate<Group> predicate = new PredicateNotInMolgenisGroupList(groupsWhereUserIsMember);
-		List<Group> groups = this.getAllGroups();
+		Predicate<Role> predicate = new PredicateNotInMolgenisGroupList(groupsWhereUserIsMember);
+		List<Role> roles = this.getAllGroups();
 
-		return Lists.newArrayList(Iterables.filter(groups, predicate));
+		return Lists.newArrayList(Iterables.filter(roles, predicate));
 	}
 
 	@Override
@@ -147,11 +147,11 @@ public class UserManagerServiceImpl implements UserManagerService
 	@Transactional
 	public void addUserToGroup(String molgenisGroupId, String molgenisUserId)
 	{
-		Group group = dataService.findOneById(GROUP, molgenisGroupId, Group.class);
+		Role role = dataService.findOneById(GROUP, molgenisGroupId, Role.class);
 		User user = dataService.findOneById(USER, molgenisUserId, User.class);
 
 		GroupMember groupMember = groupMemberFactory.create();
-		groupMember.setGroup(group);
+		groupMember.setGroup(role);
 		groupMember.setUser(user);
 		dataService.add(GROUP_MEMBER, groupMember);
 	}
@@ -168,28 +168,27 @@ public class UserManagerServiceImpl implements UserManagerService
 			throw new RuntimeException("unknown user id [" + molgenisUserId + "]");
 		}
 
-		final Group group = dataService.findOneById(GROUP, molgenisGroupId, Group.class);
+		final Role role = dataService.findOneById(GROUP, molgenisGroupId, Role.class);
 
-		if (group == null)
+		if (role == null)
 		{
 			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
 		}
 
 		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user)
-														   .and()
-														   .eq(GroupMemberMetaData.GROUP, group);
+														   .and().eq(GroupMemberMetaData.GROUP, role);
 
 		final List<GroupMember> groupMembers = dataService.findAll(GROUP_MEMBER, q, GroupMember.class)
 														  .collect(toList());
 
 		if (null == groupMembers || groupMembers.isEmpty())
 		{
-			throw new RuntimeException("molgenis group member is not found");
+			throw new RuntimeException("molgenis role member is not found");
 		}
 
 		if (groupMembers.size() > 1)
 		{
-			throw new RuntimeException("there are more than one group member found");
+			throw new RuntimeException("there are more than one role member found");
 		}
 
 		GroupMember groupMember = groupMembers.get(0);
@@ -202,16 +201,16 @@ public class UserManagerServiceImpl implements UserManagerService
 	 * @param groupMembers A list of MolgenisGroupMember instances
 	 * @return List<MolgenisGroup>
 	 */
-	private List<Group> getAllMolgenisGroupsFromGroupMembers(final List<GroupMember> groupMembers)
+	private List<Role> getAllMolgenisGroupsFromGroupMembers(final List<GroupMember> groupMembers)
 	{
-		List<Group> groups = new ArrayList<>();
+		List<Role> roles = new ArrayList<>();
 
 		if (groupMembers != null && !groupMembers.isEmpty())
 		{
-			groups = Lists.transform(groupMembers, GroupMember::getGroup);
+			roles = Lists.transform(groupMembers, GroupMember::getGroup);
 		}
 
-		return groups;
+		return roles;
 	}
 
 	/**
@@ -232,20 +231,20 @@ public class UserManagerServiceImpl implements UserManagerService
 		return user;
 	}
 
-	private static class PredicateNotInMolgenisGroupList implements Predicate<Group>
+	private static class PredicateNotInMolgenisGroupList implements Predicate<Role>
 	{
-		final List<Group> toFilterItemList;
+		final List<Role> toFilterItemList;
 
-		PredicateNotInMolgenisGroupList(List<Group> notInList)
+		PredicateNotInMolgenisGroupList(List<Role> notInList)
 		{
 			this.toFilterItemList = notInList;
 		}
 
 		@Override
-		public boolean apply(Group item)
+		public boolean apply(Role item)
 		{
 			Object id = item.getId();
-			for (Group toFilterItem : toFilterItemList)
+			for (Role toFilterItem : toFilterItemList)
 			{
 				if (toFilterItem.getId().equals(id)) return false;
 			}

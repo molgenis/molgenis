@@ -1,6 +1,6 @@
 package org.molgenis.security.acl;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
@@ -8,7 +8,7 @@ import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
 
 /**
- * Util class to create security identities for {@link User users} and {@link Group groups}.
+ * Util class to create security identities for {@link User users} and {@link Role groups}.
  *
  * @see Sid
  */
@@ -44,9 +44,9 @@ public class SidUtils
 		return new GrantedAuthoritySid(SecurityUtils.AUTHORITY_ANONYMOUS);
 	}
 
-	public static Sid createSid(Group group)
+	public static Sid createSid(Role role)
 	{
-		String groupAuthority = createGroupAuthority(group);
+		String groupAuthority = createGroupAuthority(role);
 		return new GrantedAuthoritySid(groupAuthority);
 	}
 
@@ -54,8 +54,8 @@ public class SidUtils
 	 * @deprecated will be replaced with role retrieval based on persisted roles for a group.
 	 */
 	@Deprecated
-	public static String createGroupAuthority(Group group)
+	public static String createGroupAuthority(Role role)
 	{
-		return "ROLE" + '_' + group.getId();
+		return "ROLE" + '_' + role.getId();
 	}
 }

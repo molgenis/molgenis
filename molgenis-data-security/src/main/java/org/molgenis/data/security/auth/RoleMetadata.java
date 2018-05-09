@@ -10,9 +10,9 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
 @Component
-public class GroupMetaData extends SystemEntityType
+public class RoleMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "Group";
+	private static final String SIMPLE_NAME = "Role";
 	public static final String GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
@@ -21,7 +21,7 @@ public class GroupMetaData extends SystemEntityType
 
 	private final SecurityPackage securityPackage;
 
-	GroupMetaData(SecurityPackage securityPackage)
+	RoleMetadata(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
@@ -30,7 +30,7 @@ public class GroupMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Group");
+		setLabel("Role");
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);

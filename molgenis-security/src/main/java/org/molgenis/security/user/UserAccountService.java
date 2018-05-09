@@ -1,6 +1,6 @@
 package org.molgenis.security.user;
 
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 
 /**
@@ -18,7 +18,7 @@ public interface UserAccountService
 	/**
 	 * Returns the groups to which the currently logged in user belongs
 	 */
-	Iterable<Group> getCurrentUserGroups();
+	Iterable<Role> getCurrentUserGroups();
 
 	/**
 	 * Update the currently logged in user

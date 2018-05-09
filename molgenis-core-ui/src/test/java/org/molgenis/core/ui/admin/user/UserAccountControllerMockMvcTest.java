@@ -2,7 +2,7 @@ package org.molgenis.core.ui.admin.user;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.service.RecoveryService;
@@ -56,7 +56,7 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	@Mock
 	private User user;
 	@Mock
-	private Group allUsers;
+	private Role allUsers;
 
 	private MockMvc mockMvc;
 

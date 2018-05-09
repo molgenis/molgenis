@@ -44,13 +44,13 @@ public class GroupMember extends StaticEntity
 		set(USER, user);
 	}
 
-	public Group getGroup()
+	public Role getGroup()
 	{
-		return getEntity(GROUP, Group.class);
+		return getEntity(GROUP, Role.class);
 	}
 
-	public void setGroup(Group group)
+	public void setGroup(Role role)
 	{
-		set(GROUP, group);
+		set(GROUP, role);
 	}
 }

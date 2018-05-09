@@ -140,18 +140,18 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class)).thenReturn(user1);
 		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user0, user1));
 		GroupMember groupMember0 = mock(GroupMember.class);
-		Group group0 = mock(Group.class);
-		when(groupMember0.getGroup()).thenReturn(group0);
+		Role role0 = mock(Role.class);
+		when(groupMember0.getGroup()).thenReturn(role0);
 		GroupMember groupMember1 = mock(GroupMember.class);
-		Group group1 = mock(Group.class);
-		when(groupMember1.getGroup()).thenReturn(group1);
+		Role role1 = mock(Role.class);
+		when(groupMember1.getGroup()).thenReturn(role1);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user0),
 				GroupMember.class)).thenReturn(Stream.of(groupMember0));
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllUsers(), Arrays.asList(new UserViewData(user0, singletonList(group0)),
-				new UserViewData(user1, singletonList(group1))));
+		assertEquals(userManagerService.getAllUsers(), Arrays.asList(new UserViewData(user0, singletonList(role0)),
+				new UserViewData(user1, singletonList(role1))));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
@@ -164,11 +164,11 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getAllMolgenisGroupsSu()
 	{
-		Group group0 = mock(Group.class);
-		Group group1 = mock(Group.class);
-		when(dataService.findAll(GroupMetaData.GROUP, Group.class)).thenReturn(Stream.of(group0, group1));
+		Role role0 = mock(Role.class);
+		Role role1 = mock(Role.class);
+		when(dataService.findAll(RoleMetadata.GROUP, Role.class)).thenReturn(Stream.of(role0, role1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllGroups(), Arrays.asList(group0, group1));
+		assertEquals(userManagerService.getAllGroups(), Arrays.asList(role0, role1));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
@@ -191,23 +191,23 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		this.setSecurityContextSuperUser();
 
 		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
-		Group group20 = mock(Group.class);
-		Group group21 = mock(Group.class);
+		Role role20 = mock(Role.class);
+		Role role21 = mock(Role.class);
 
 		final GroupMember groupMemberOne = mock(GroupMember.class);
-		groupMemberOne.setGroup(group20);
+		groupMemberOne.setGroup(role20);
 		groupMemberOne.setUser(user1);
 
 		final GroupMember groupMemberTwo = mock(GroupMember.class);
-		groupMemberTwo.setGroup(group21);
+		groupMemberTwo.setGroup(role21);
 		groupMemberTwo.setUser(user1);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMemberOne, groupMemberTwo));
-		List<Group> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
+		List<Role> roles = this.userManagerService.getGroupsWhereUserIsMember("1");
 
-		assertEquals(groups.size(), 2);
+		assertEquals(roles.size(), 2);
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
@@ -228,19 +228,19 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(user1.getId()).thenReturn("1");
 		when(user1.getUsername()).thenReturn("Jonathan");
 
-		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
+		Role role22 = when(mock(Role.class).getId()).thenReturn("22").getMock();
 
 		GroupMember groupMember = mock(GroupMember.class);
 		when(groupMember.getUser()).thenReturn(user1);
-		when(groupMember.getGroup()).thenReturn(group22);
+		when(groupMember.getGroup()).thenReturn(role22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
+		when(dataService.findOneById(RoleMetadata.GROUP, "22", Role.class)).thenReturn(role22);
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
+		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, role22),
 				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
 
 		List<UserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
@@ -260,23 +260,23 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		setSecurityContextSuperUser();
 
 		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
-		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
-		Group group33 = when(mock(Group.class).getId()).thenReturn("33").getMock();
-		Group group44 = when(mock(Group.class).getId()).thenReturn("44").getMock();
+		Role role22 = when(mock(Role.class).getId()).thenReturn("22").getMock();
+		Role role33 = when(mock(Role.class).getId()).thenReturn("33").getMock();
+		Role role44 = when(mock(Role.class).getId()).thenReturn("44").getMock();
 
 		GroupMember groupMember = mock(GroupMember.class);
 		when(groupMember.getUser()).thenReturn(user1);
-		when(groupMember.getGroup()).thenReturn(group22);
+		when(groupMember.getGroup()).thenReturn(role22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 
 		when(dataService.findAll(GroupMemberMetaData.USER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1), GroupMember.class)).thenReturn(
 				Stream.of(groupMember));
-		when(dataService.findAll(GroupMetaData.GROUP, Group.class)).thenReturn(Stream.of(group22, group33, group44));
+		when(dataService.findAll(RoleMetadata.GROUP, Role.class)).thenReturn(Stream.of(role22, role33, role44));
 
 		groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(group22);
+		when(groupMember.getGroup()).thenReturn(role22);
 
 		List<GroupMember> groupMemberships = new ArrayList<>();
 		groupMemberships.add(groupMember);
@@ -284,8 +284,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(groupMemberships.stream());
 
-		List<Group> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
-		assertEquals(groups.size(), 2);
+		List<Role> roles = this.userManagerService.getGroupsWhereUserIsNotMember("1");
+		assertEquals(roles.size(), 2);
 	}
 
 	@Test
@@ -309,17 +309,16 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		setSecurityContextSuperUser();
 
 		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
-		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
+		Role role22 = when(mock(Role.class).getId()).thenReturn("22").getMock();
 		GroupMember groupMember = mock(GroupMember.class);
 		when(groupMember.getUser()).thenReturn(user1);
-		when(groupMember.getGroup()).thenReturn(group22);
+		when(groupMember.getGroup()).thenReturn(role22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
+		when(dataService.findOneById(RoleMetadata.GROUP, "22", Role.class)).thenReturn(role22);
 
 		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1)
-														   .and()
-														   .eq(GroupMemberMetaData.GROUP, group22);
+														   .and().eq(GroupMemberMetaData.GROUP, role22);
 
 		when(dataService.findAll(GROUP_MEMBER, q, GroupMember.class)).thenReturn(Stream.of(groupMember));
 

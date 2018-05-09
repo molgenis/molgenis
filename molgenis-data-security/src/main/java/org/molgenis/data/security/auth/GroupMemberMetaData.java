@@ -17,28 +17,28 @@ public class GroupMemberMetaData extends SystemEntityType
 
 	public static final String ID = "id";
 	public static final String USER = "User";
-	public static final String GROUP = "Group";
+	public static final String GROUP = "Role";
 
 	private final SecurityPackage securityPackage;
 	private final UserMetaData userMetaData;
-	private final GroupMetaData groupMetaData;
+	private final RoleMetadata roleMetadata;
 
-	GroupMemberMetaData(SecurityPackage securityPackage, UserMetaData userMetaData, GroupMetaData groupMetaData)
+	GroupMemberMetaData(SecurityPackage securityPackage, UserMetaData userMetaData, RoleMetadata roleMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
 		this.userMetaData = requireNonNull(userMetaData);
-		this.groupMetaData = requireNonNull(groupMetaData);
+		this.roleMetadata = requireNonNull(roleMetadata);
 	}
 
 	@Override
 	public void init()
 	{
-		setLabel("Group member");
+		setLabel("Role member");
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
-		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true).setNillable(false);
+		addAttribute(GROUP).setDataType(XREF).setRefEntity(roleMetadata).setAggregatable(true).setNillable(false);
 	}
 }
