@@ -26,7 +26,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_useraccount')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_USER')")
 	@Transactional
 	public void updateCurrentUser(User updatedCurrentUser)
 	{
@@ -45,7 +45,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_useraccount')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_USER')")
 	@Transactional
 	public boolean validateCurrentUserPassword(String password)
 	{
