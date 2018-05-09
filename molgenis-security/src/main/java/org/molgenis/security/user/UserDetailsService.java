@@ -1,11 +1,8 @@
 package org.molgenis.security.user;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMember;
-import org.molgenis.data.security.auth.GroupMemberMetaData;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
-import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
@@ -60,14 +56,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 			authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
 		}
 
-		// add authorities of groups that this user is member of
-		dataService.query(GROUP_MEMBER, GroupMember.class)
-				   .eq(GroupMemberMetaData.USER, user)
-				   .findAll()
-				   .map(GroupMember::getGroup)
-				   .map(SidUtils::createRoleAuthority)
-				   .map(SimpleGrantedAuthority::new)
-				   .forEach(authorities::add);
+		// TODO add authorities of roles that user belongs to
 
 		return grantedAuthoritiesMapper.mapAuthorities(authorities);
 	}

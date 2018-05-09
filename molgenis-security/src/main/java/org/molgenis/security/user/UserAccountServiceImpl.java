@@ -1,6 +1,5 @@
 package org.molgenis.security.user;
 
-import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -24,13 +23,6 @@ public class UserAccountServiceImpl implements UserAccountService
 	public User getCurrentUser()
 	{
 		return userService.getUser(SecurityUtils.getCurrentUsername());
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Iterable<Role> getCurrentUserGroups()
-	{
-		return userService.getUserGroups(SecurityUtils.getCurrentUsername());
 	}
 
 	@Override

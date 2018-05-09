@@ -30,7 +30,6 @@ import org.testng.annotations.Test;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Mockito.*;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
@@ -73,13 +72,11 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENABLED);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(user.isTwoFactorAuthentication()).thenReturn(true);
-		when(userAccountService.getCurrentUserGroups()).thenReturn(singletonList(allUsers));
 
 		assertEquals(userAccountController.showAccount(model, true), "view-useraccount");
 
 		verify(model).addAttribute("user", user);
 		verify(model).addAttribute("countries", CountryCodes.get());
-		verify(model).addAttribute("groups", singletonList(allUsers));
 		verify(model).addAttribute("min_password_length", 6);
 		verify(model).addAttribute("two_factor_authentication_app_option", ENABLED);
 		verify(model).addAttribute("two_factor_authentication_user_enabled", true);
@@ -182,7 +179,6 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 		accountUpdateRequest.setFirstname("First");
 		accountUpdateRequest.setMiddleNames("Middle Middle");
 		accountUpdateRequest.setLastname("Last");
-
 
 		userAccountController.updateAccount(accountUpdateRequest);
 
