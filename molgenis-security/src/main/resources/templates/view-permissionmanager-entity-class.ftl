@@ -1,18 +1,18 @@
 <div class="well">
     <ul class="nav nav-pills">
-        <li class="active"><a href="#entity-class-role-permission-manager" data-toggle="tab">Groups</a></li>
+        <li class="active"><a href="#entity-class-role-permission-manager" data-toggle="tab">Roles</a></li>
         <li><a href="#entity-class-user-permission-manager" data-toggle="tab">Users</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id="entity-class-role-permission-manager">
             <form class="form-horizontal" id="entity-class-role-permission-form" method="post"
-                  action="${context_url?html}/update/entityclass/group" role="form">
+                  action="${context_url?html}/update/entityclass/role" role="form">
                 <div class="form-group">
-                    <label class="col-md-3 control-label" for="entity-class-role-select">Select Group:</label>
+                    <label class="col-md-3 control-label" for="entity-class-role-select">Select Role:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="groupId" id="entity-class-role-select">
-                        <#list groups as role>
-                            <option value="${role.id?html}"<#if group_index == 0>
+                        <select class="form-control" name="roleId" id="entity-class-role-select">
+                        <#list roles as role>
+                            <option value="${role.id?html}"<#if role_index == 0>
                                     selected</#if>>${role.name?html}</option>
                         </#list>
                         </select>

@@ -61,7 +61,7 @@ public class PermissionManagerController extends PluginController
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
-	public static final String DUPLICATE_KEY = "Duplicate key %s";
+	private static final String DUPLICATE_KEY = "Duplicate key %s";
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;

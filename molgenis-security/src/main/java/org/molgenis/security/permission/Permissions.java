@@ -8,8 +8,7 @@ public class Permissions
 	private String groupId;
 	private Map<String, String> entityIds;
 	private Map<String, List<Permission>> userPermissionMap;
-	private Map<String, List<Permission>> groupPermissionMap;
-	private Map<String, List<Permission>> hierarchyPermissionMap;
+	private Map<String, List<Permission>> rolePermissionMap;
 
 	public String getUserId()
 	{
@@ -53,27 +52,15 @@ public class Permissions
 		pluginPermissions.add(pluginPermission);
 	}
 
-	public Map<String, List<Permission>> getGroupPermissions()
+	public Map<String, List<Permission>> getRolePermissions()
 	{
-		return groupPermissionMap != null ? groupPermissionMap : Collections.emptyMap();
+		return rolePermissionMap != null ? rolePermissionMap : Collections.emptyMap();
 	}
 
 	public void addRolePermission(String pluginId, Permission pluginPermission)
 	{
-		if (groupPermissionMap == null) groupPermissionMap = new HashMap<>();
-		List<Permission> pluginPermissions = groupPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
-		pluginPermissions.add(pluginPermission);
-	}
-
-	public Map<String, List<Permission>> getHierarchyPermissionMap()
-	{
-		return hierarchyPermissionMap;
-	}
-
-	public void addHierarchyPermission(String pluginId, Permission pluginPermission)
-	{
-		if (hierarchyPermissionMap == null) hierarchyPermissionMap = new HashMap<>();
-		List<Permission> pluginPermissions = hierarchyPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
+		if (rolePermissionMap == null) rolePermissionMap = new HashMap<>();
+		List<Permission> pluginPermissions = rolePermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());
 		pluginPermissions.add(pluginPermission);
 	}
 
@@ -87,26 +74,26 @@ public class Permissions
 				{
 					pluginPermissions.sort((o1, o2) ->
 					{
-						String group1 = o1.getGroup();
-						String group2 = o2.getGroup();
+						String group1 = o1.getRole();
+						String group2 = o2.getRole();
 						if (group1 == null) return group2 == null ? 0 : -1;
 						else return group2 == null ? 1 : group1.compareTo(group2);
 					});
 				}
 			}
 		}
-		if (groupPermissionMap != null)
+		if (rolePermissionMap != null)
 		{
-			for (List<Permission> pluginPermissions : groupPermissionMap.values())
+			for (List<Permission> pluginPermissions : rolePermissionMap.values())
 			{
 				if (pluginPermissions.size() > 1)
 				{
 					pluginPermissions.sort((o1, o2) ->
 					{
-						String group1 = o1.getGroup();
-						String group2 = o2.getGroup();
-						if (group1 == null) return group2 == null ? 0 : -1;
-						else return group2 == null ? 1 : group1.compareTo(group2);
+						String role1 = o1.getRole();
+						String role2 = o2.getRole();
+						if (role1 == null) return role2 == null ? 0 : -1;
+						else return role2 == null ? 1 : role1.compareTo(role2);
 					});
 				}
 			}
@@ -135,11 +122,7 @@ public class Permissions
 		{
 			return false;
 		}
-		if (!Objects.equals(groupPermissionMap, that.groupPermissionMap))
-		{
-			return false;
-		}
-		if (!Objects.equals(hierarchyPermissionMap, that.hierarchyPermissionMap))
+		if (!Objects.equals(rolePermissionMap, that.rolePermissionMap))
 		{
 			return false;
 		}
@@ -150,14 +133,13 @@ public class Permissions
 	public int hashCode()
 	{
 
-		return Objects.hash(userId, groupId, entityIds, userPermissionMap, groupPermissionMap, hierarchyPermissionMap);
+		return Objects.hash(userId, groupId, entityIds, userPermissionMap, rolePermissionMap);
 	}
 
 	@Override
 	public String toString()
 	{
 		return "Permissions{" + "userId='" + userId + '\'' + ", groupId='" + groupId + '\'' + ", entityIds=" + entityIds
-				+ ", userPermissionMap=" + userPermissionMap + ", groupPermissionMap=" + groupPermissionMap
-				+ ", hierarchyPermissionMap=" + hierarchyPermissionMap + '}';
+				+ ", userPermissionMap=" + userPermissionMap + ", rolePermissionMap=" + rolePermissionMap + '}';
 	}
 }
