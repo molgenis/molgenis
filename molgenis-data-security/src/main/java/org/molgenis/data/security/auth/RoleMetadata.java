@@ -4,7 +4,6 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
@@ -17,7 +16,6 @@ public class RoleMetadata extends SystemEntityType
 
 	public static final String NAME = "name";
 	public static final String ID = "id";
-	public static final String ACTIVE = "active";
 
 	private final SecurityPackage securityPackage;
 
@@ -35,11 +33,5 @@ public class RoleMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
-		addAttribute(ACTIVE).setLabel("Active")
-							.setDataType(BOOL)
-							.setDefaultValue("true")
-							.setDescription("Boolean to indicate whether this role is in use.")
-							.setAggregatable(true)
-							.setNillable(false);
 	}
 }

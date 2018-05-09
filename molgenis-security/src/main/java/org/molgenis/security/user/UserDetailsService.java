@@ -1,8 +1,10 @@
 package org.molgenis.security.user;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.GroupMembership;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.auth.GroupMembershipMetadata.GROUP_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupMembershipMetadata.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
@@ -44,6 +48,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 				user.isActive(), true, true, true, authorities);
 	}
 
+	@RunAsSystem
 	public Collection<? extends GrantedAuthority> getAuthorities(User user)
 	{
 		Set<GrantedAuthority> authorities = new LinkedHashSet<>();
@@ -61,7 +66,14 @@ public class UserDetailsService implements org.springframework.security.core.use
 			authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
 		}
 
-		// TODO add authorities of roles that user belongs to
+		dataService.query(GROUP_MEMBERSHIP, GroupMembership.class)
+				   .eq(USER, user)
+				   .findAll()
+				   .filter(GroupMembership::isCurrentlyActive)
+				   .map(GroupMembership::getRole)
+				   .map(SidUtils::createRoleAuthority)
+				   .map(SimpleGrantedAuthority::new)
+				   .forEach(authorities::add);
 
 		return grantedAuthoritiesMapper.mapAuthorities(authorities);
 	}

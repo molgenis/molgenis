@@ -4,7 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.auth.RoleMetadata.*;
+import static org.molgenis.data.security.auth.RoleMetadata.ID;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 
 public class Role extends StaticEntity
 {
@@ -16,25 +17,12 @@ public class Role extends StaticEntity
 	public Role(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
 	}
 
 	public Role(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);
-		setDefaultValues();
-	}
-
-	public boolean isActive()
-	{
-		Boolean active = getBoolean(ACTIVE);
-		return active != null ? active : false;
-	}
-
-	public void setActive(boolean active)
-	{
-		set(ACTIVE, active);
 	}
 
 	public String getId()
@@ -55,10 +43,5 @@ public class Role extends StaticEntity
 	public void setName(String name)
 	{
 		set(NAME, name);
-	}
-
-	private void setDefaultValues()
-	{
-		setActive(true);
 	}
 }
