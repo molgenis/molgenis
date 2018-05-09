@@ -4,7 +4,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 public class NullParentPackageNotSuException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "P03";
+	private static final String ERROR_CODE = "DS03";
 
 	public NullParentPackageNotSuException()
 	{

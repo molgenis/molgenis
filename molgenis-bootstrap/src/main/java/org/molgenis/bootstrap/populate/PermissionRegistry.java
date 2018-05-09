@@ -1,9 +1,9 @@
 package org.molgenis.bootstrap.populate;
 
 import com.google.common.collect.Multimap;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.Sid;
 
 /**
@@ -18,5 +18,5 @@ public interface PermissionRegistry
 	 *
 	 * @return permissions to populate
 	 */
-	Multimap<ObjectIdentity, Pair<Permission, Sid>> getPermissions();
+	Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> getPermissions();
 }

@@ -2,18 +2,14 @@ package org.molgenis.data.security.meta;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
-import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
+import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.domain.AbstractPermission;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -25,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecorator<Package>
@@ -46,28 +43,9 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void update(Package pack)
 	{
-		checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE);
+		checkParentPermission(pack, Action.UPDATE);
 		updateAcl(pack);
 		delegate().update(pack);
-	}
-
-	protected String toMessagePermission(AbstractRowLevelSecurityRepositoryDecorator.Action action)
-	{
-		AbstractPermission permission = getPermissionForOperation(action);
-		String name;
-		if (permission instanceof EntityTypePermission)
-		{
-			name = ((EntityTypePermission) permission).getName();
-		}
-		else if (permission instanceof PackagePermission)
-		{
-			name = ((PackagePermission) permission).getName();
-		}
-		else
-		{
-			throw new MolgenisDataException("Unexpected permission type");
-		}
-		return name;
 	}
 
 	@Override
@@ -75,7 +53,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	{
 		super.update(packages.filter(pack ->
 		{
-			checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE);
+			checkParentPermission(pack, Action.UPDATE);
 			updateAcl(pack);
 			return true;
 		}));
@@ -125,7 +103,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	@Override
 	public void add(Package pack)
 	{
-		checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE);
+		checkParentPermission(pack, Action.CREATE);
 		createAcl(pack);
 		delegate().add(pack);
 	}
@@ -137,7 +115,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		resolveDependencies(packages.collect(Collectors.toList()), resolved);
 		return super.add(resolved.stream().filter(pack ->
 		{
-			checkParentPermission(pack, AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE);
+			checkParentPermission(pack, Action.CREATE);
 			createAcl(pack);
 			return true;
 		}));
@@ -199,16 +177,16 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 	}
 
-	private void checkParentPermission(Package newPackage, AbstractRowLevelSecurityRepositoryDecorator.Action action)
+	private void checkParentPermission(Package newPackage, Action action)
 	{
 		Package parent = newPackage.getParent();
 		if (parent != null)
 		{
 			boolean checkPackage = isParentUpdated(action, newPackage);
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-					PackagePermission.WRITEMETA))
+					ADD_PACKAGE))
 			{
-				throw new PackagePermissionException(PackagePermission.WRITEMETA, parent);
+				throw new PackagePermissionDeniedException(ADD_PACKAGE, parent);
 			}
 		}
 		else
@@ -220,10 +198,10 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 	}
 
-	private boolean isParentUpdated(AbstractRowLevelSecurityRepositoryDecorator.Action action, Package pack)
+	private boolean isParentUpdated(Action action, Package pack)
 	{
 		boolean updated;
-		if (action == AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE)
+		if (action == Action.CREATE)
 		{
 			updated = true;
 		}
@@ -240,21 +218,5 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			}
 		}
 		return updated;
-	}
-
-	private static AbstractPermission getPermissionForOperation(
-			AbstractRowLevelSecurityRepositoryDecorator.Action action)
-	{
-		AbstractPermission permission;
-		switch (action)
-		{
-			case UPDATE:
-			case CREATE:
-				permission = PackagePermission.WRITEMETA;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal entity type permission");
-		}
-		return permission;
 	}
 }

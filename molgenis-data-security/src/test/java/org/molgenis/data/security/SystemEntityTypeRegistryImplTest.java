@@ -1,11 +1,10 @@
 package org.molgenis.data.security;
 
 import org.mockito.Mock;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.security.core.Permission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -18,9 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
-/**
- * See {@link Permission#COUNT} for an explanation why we are not using {@link Permission#READ} in the test cases.
- */
 public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 {
 	@Mock
@@ -53,20 +49,20 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(true);
+				EntityTypePermission.READ_METADATA)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityType(entityTypeId), systemEntityType);
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
 	public void testGetSystemEntityTypeNotPermitted()
 	{
 		String entityTypeId = "entityType";
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
-		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.COUNT)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_METADATA)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
@@ -79,7 +75,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(true);
+				EntityTypePermission.READ_METADATA)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().collect(toList()),
@@ -93,7 +89,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 		when(systemEntityType.getId()).thenReturn(entityTypeId);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(false);
+				EntityTypePermission.READ_METADATA)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemEntityTypes().count(), 0);
@@ -125,7 +121,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(true);
+				EntityTypePermission.READ_METADATA)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
@@ -143,8 +139,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		assertNull(systemEntityTypeRegistry.getSystemAttribute("attr"));
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_METADATA entityTypeId:entityType")
 	public void testGetSystemAttributeNotPermitted()
 	{
 		String entityTypeId = "entityType";
@@ -153,7 +148,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		Attribute attr = when(mock(Attribute.class).getIdentifier()).thenReturn("attr").getMock();
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(attr));
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(false);
+				EntityTypePermission.READ_METADATA)).thenReturn(false);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);
@@ -171,7 +166,7 @@ public class SystemEntityTypeRegistryImplTest extends AbstractMockitoTest
 		when(compoundAttr.getChildren()).thenReturn(singletonList(attr));
 		when(systemEntityType.getAllAttributes()).thenReturn(singletonList(compoundAttr));
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.COUNT)).thenReturn(true);
+				EntityTypePermission.READ_METADATA)).thenReturn(true);
 
 		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 		assertEquals(systemEntityTypeRegistry.getSystemAttribute("attr"), attr);

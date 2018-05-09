@@ -1,25 +1,24 @@
 package org.molgenis.data.security.meta;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.security.*;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
+import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.domain.AbstractPermission;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
@@ -28,7 +27,6 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem
  * Decorator for the entity type repository:
  * - filters requested entities based on the permissions of the current user
  * - validates permissions when adding, updating or deleting entity types
- * <p>
  */
 public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecurityRepositoryDecorator<EntityType>
 {
@@ -50,27 +48,8 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		this.dataService = requireNonNull(dataService);
 	}
 
-	protected String toMessagePermission(Action action)
-	{
-		AbstractPermission permission = getPermissionForOperation(action);
-		String name;
-		if (permission instanceof EntityTypePermission)
-		{
-			name = ((EntityTypePermission) permission).getName();
-		}
-		else if (permission instanceof PackagePermission)
-		{
-			name = ((PackagePermission) permission).getName();
-		}
-		else
-		{
-			throw new MolgenisDataException("Unexpected permission type");
-		}
-		return name;
-	}
-
 	@Override
-	public boolean isOperationPermitted(EntityType entityType, Action action)
+	public boolean isActionPermitted(EntityType entityType, Action action)
 	{
 		boolean permission = true;
 		if (action == Action.CREATE || action == Action.UPDATE)
@@ -85,51 +64,53 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 	}
 
 	@Override
-	public boolean isOperationPermitted(Object id, Action action)
+	public boolean isActionPermitted(Object id, Action action)
 	{
 		if (action == Action.CREATE || action == Action.UPDATE)
 		{
 			throw new IllegalStateException(
-					"CREATE and UPDATE permission checks should use 'isOperationPermitted(EntityType entityType, Action action)'");
+					"CREATE and UPDATE permission checks should use 'isActionPermitted(EntityType entityType, Action action)'");
 		}
-		return checkEntityTypePermission(id, action);
+		return checkEntityTypePermission(id.toString(), action);
 	}
 
-	private boolean checkEntityTypePermission(Object id, Action action)
+	private boolean checkEntityTypePermission(String entityTypeId, Action action)
 	{
-		AbstractPermission permission = getPermissionForOperation(action);
-		boolean hasPermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(id.toString()),
-				permission);
-		if (hasPermission && !permission.equals(EntityTypePermission.COUNT))
+		EntityTypePermission permission = getPermissionForAction(action);
+		boolean hasPermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityTypeId), permission);
+		if (hasPermission && action != Action.COUNT && action != Action.READ)
 		{
-			boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(id.toString());
+			boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityTypeId);
 			if (isSystem && !currentUserIsSystem())
 			{
-				throw new MolgenisDataException(
-						format("No [%s] permission on EntityType [%s]", toMessagePermission(action), id));
+				throw new SystemMetadataModificationException();
 			}
 		}
 		return hasPermission;
 	}
 
-	private static AbstractPermission getPermissionForOperation(Action action)
+	/**
+	 * @return the EntityTypeAction to check given the Action on the repository
+	 */
+	private static EntityTypePermission getPermissionForAction(Action action)
 	{
-		AbstractPermission permission;
+		EntityTypePermission permission;
 		switch (action)
 		{
 			case COUNT:
 			case READ:
-				permission = EntityTypePermission.COUNT;
+				permission = EntityTypePermission.READ_METADATA;
 				break;
 			case UPDATE:
+				permission = EntityTypePermission.UPDATE_METADATA;
+				break;
 			case DELETE:
-				permission = EntityTypePermission.WRITEMETA;
+				permission = EntityTypePermission.DELETE_METADATA;
 				break;
 			case CREATE:
-				permission = PackagePermission.WRITEMETA;
-				break;
+				throw new IllegalStateException("Shouldn't check entity types that you're creating");
 			default:
-				throw new IllegalArgumentException("Illegal entity type permission");
+				throw new IllegalArgumentException("Illegal repository ACtion");
 		}
 		return permission;
 	}
@@ -178,17 +159,16 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 		}
 	}
 
-	private void checkPackagePermission(EntityType newEntityType,
-			AbstractRowLevelSecurityRepositoryDecorator.Action action)
+	private void checkPackagePermission(EntityType newEntityType, Action action)
 	{
 		Package pack = newEntityType.getPackage();
 		if (pack != null)
 		{
 			boolean checkPackage = isPackageUpdated(action, newEntityType);
 			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(pack.getId()),
-					PackagePermission.WRITEMETA))
+					PackagePermission.ADD_ENTITY_TYPE))
 			{
-				throw new PackagePermissionException(PackagePermission.WRITEMETA, pack);
+				throw new PackagePermissionDeniedException(PackagePermission.ADD_ENTITY_TYPE, pack);
 			}
 		}
 		else
@@ -198,6 +178,12 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 				throw new NullPackageNotSuException();
 			}
 		}
+	}
+
+	@Override
+	public void throwPermissionException(EntityType entityType, Action action)
+	{
+		throw new EntityTypePermissionDeniedException(getPermissionForAction(action), entityType);
 	}
 
 	private boolean isPackageUpdated(Action action, EntityType newEntityType)

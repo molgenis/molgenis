@@ -2,15 +2,20 @@ package org.molgenis.data.security.owned;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityPermission;
+import org.molgenis.data.security.exception.EntityPermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -31,7 +36,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.security.EntityPermission.*;
+import static org.molgenis.data.security.EntityPermission.READ;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -72,7 +77,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 
 		rowLevelSecurityRepositoryDecorator.add(entity);
 
-		verify(acl).insertAce(0, new CumulativePermission().set(WRITE).set(READ).set(COUNT), new PrincipalSid(USERNAME),
+		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME),
 				true);
 		verify(delegateRepository).add(entity);
 	}
@@ -91,7 +96,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).add(entityStreamCaptor.capture());
 		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
-		verify(acl).insertAce(0, new CumulativePermission().set(WRITE).set(READ).set(COUNT), new PrincipalSid(USERNAME),
+		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME),
 				true);
 	}
 
@@ -99,17 +104,16 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdate()
 	{
 		Entity entity = getEntityMock();
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.UPDATE)).thenReturn(
+				true);
 		rowLevelSecurityRepositoryDecorator.update(entity);
 		verify(delegateRepository).update(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[test\\] with id \\[entityId\\]")
+	@Test(expectedExceptions = EntityPermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
 	public void testUpdatePermissionDenied()
 	{
 		Entity entity = getEntityMock();
-		EntityType entityType = entity.getEntityType();
-		when(entityType.getLabel()).thenReturn("test");
 		rowLevelSecurityRepositoryDecorator.update(entity);
 		verify(delegateRepository, times(0)).update(entity);
 	}
@@ -118,7 +122,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testUpdateStream()
 	{
 		Entity entity = getEntityMock();
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.UPDATE)).thenReturn(
+				true);
 		rowLevelSecurityRepositoryDecorator.update(Stream.of(entity));
 
 		@SuppressWarnings("unchecked")
@@ -143,18 +148,17 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDelete()
 	{
 		Entity entity = getEntityMock();
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.DELETE)).thenReturn(
+				true);
 		rowLevelSecurityRepositoryDecorator.delete(entity);
 		verify(delegateRepository).delete(entity);
 		verify(mutableAclService).deleteAcl(new EntityIdentity(entity), true);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITE\\] permission on entity type \\[test\\] with id \\[entityId\\]")
+	@Test(expectedExceptions = EntityPermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE entityTypeId:entityTypeId entityId:entityId")
 	public void testDeletePermissionDenied()
 	{
 		Entity entity = getEntityMock();
-		EntityType entityType = entity.getEntityType();
-		when(entityType.getLabel()).thenReturn("test");
 		rowLevelSecurityRepositoryDecorator.delete(entity);
 		verify(delegateRepository, times(0)).delete(entity);
 	}
@@ -163,7 +167,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 	public void testDeleteStream()
 	{
 		Entity entity = getEntityMock();
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.DELETE)).thenReturn(
+				true);
 		rowLevelSecurityRepositoryDecorator.delete(Stream.of(entity));
 
 		@SuppressWarnings("unchecked")
@@ -193,7 +198,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Object entityId = "entityId";
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entityTypeId, entityId), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entityTypeId, entityId), EntityPermission.DELETE))
+				.thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.deleteById(entityId);
 		verify(delegateRepository).deleteById(entityId);
 		verify(mutableAclService).deleteAcl(new EntityIdentity(entityTypeId, entityId), true);
@@ -217,7 +223,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
 				invocation -> Stream.of(entity));
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.DELETE)).thenReturn(
+				true);
 		rowLevelSecurityRepositoryDecorator.deleteAll();
 
 		@SuppressWarnings("unchecked")
@@ -247,7 +254,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		Object entityId = "entityId";
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entityTypeId, entityId), WRITE)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entityTypeId, entityId), EntityPermission.DELETE))
+				.thenReturn(true);
 		rowLevelSecurityRepositoryDecorator.deleteAll(Stream.of(entityId));
 
 		@SuppressWarnings("unchecked")
@@ -419,7 +427,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
 				invocation -> Stream.of(entity));
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), COUNT)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.READ)).thenReturn(true);
 		assertEquals(rowLevelSecurityRepositoryDecorator.count(), 1L);
 	}
 
@@ -440,7 +448,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenAnswer(
 				invocation -> Stream.of(entity));
-		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), COUNT)).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), EntityPermission.READ)).thenReturn(true);
 		assertEquals(rowLevelSecurityRepositoryDecorator.count(query), 1L);
 	}
 

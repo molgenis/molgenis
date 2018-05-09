@@ -45,7 +45,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracks()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -69,7 +69,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksAll()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -142,7 +142,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksNone()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -166,7 +166,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksNoPermission()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(false);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(false);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);

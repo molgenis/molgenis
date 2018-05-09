@@ -9,7 +9,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.model.MutableAcl;
@@ -85,7 +85,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).update(pack);
 	}
 
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testUpdateNoParentPermission()
 	{
 		Package pack = mock(Package.class);
@@ -246,7 +246,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		when(mutableAclService.readAclById(new PackageIdentity("2"))).thenReturn(parentAcl);
 
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-				PackagePermission.WRITEMETA)).thenReturn(true);
+				PackagePermission.ADD_PACKAGE)).thenReturn(true);
 
 		repo.add(pack);
 
@@ -255,7 +255,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		verify(delegateRepository).add(pack);
 	}
 
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testAddNoPermissionOnParent()
 	{
 		Package pack = mock(Package.class);
@@ -265,7 +265,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		when(pack.getParent()).thenReturn(parent);
 
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-				PackagePermission.WRITEMETA)).thenReturn(false);
+				PackagePermission.ADD_PACKAGE)).thenReturn(false);
 
 		repo.add(pack);
 	}
@@ -292,7 +292,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		when(package2.getParent()).thenReturn(parent);
 
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-				PackagePermission.WRITEMETA)).thenReturn(true);
+				PackagePermission.ADD_PACKAGE)).thenReturn(true);
 
 		MutableAcl acl1 = mock(MutableAcl.class);
 		MutableAcl acl2 = mock(MutableAcl.class);

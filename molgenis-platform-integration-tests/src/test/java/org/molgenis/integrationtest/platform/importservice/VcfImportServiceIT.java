@@ -5,13 +5,14 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
@@ -24,7 +25,6 @@ import static java.util.Collections.singleton;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.UploadPackage.UPLOAD;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 
 public class VcfImportServiceIT extends ImportServiceIT
 {
@@ -221,18 +221,12 @@ public class VcfImportServiceIT extends ImportServiceIT
 
 	private void populateUserPermissions()
 	{
-		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
-				EntityTypePermission.READ);
-		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
-		CumulativePermission writeMetaPackage = PackagePermissionUtils.getCumulativePermission(
-				PackagePermission.WRITEMETA);
-
-		Map<ObjectIdentity, org.springframework.security.acls.model.Permission> permissionMap = new HashMap<>();
-		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
-		permissionMap.put(new PackageIdentity(UPLOAD), writeMetaPackage);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		permissionMap.put(new PackageIdentity(UPLOAD), PermissionSet.WRITEMETA);
 
 		testPermissionPopulator.populate(permissionMap, SecurityUtils.getCurrentUsername());
 

@@ -12,6 +12,7 @@ import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
@@ -83,12 +84,12 @@ public class RestControllerV2
 		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
 	}
 
-	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityTypeId)
+	static EntityTypePermissionDeniedException createNoReadPermissionOnEntityException(String entityTypeId)
 	{
-		return new MolgenisDataAccessException("No read permission on entity " + entityTypeId);
+		return new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, entityTypeId);
 	}
 
-	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
+	static MolgenisRepositoryCapabilitiesException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
 	}
@@ -358,7 +359,7 @@ public class RestControllerV2
 
 		// Permission
 		boolean readPermission = permissionService.hasPermission(new EntityTypeIdentity(repositoryToCopyFrom.getName()),
-				EntityTypePermission.READ);
+				EntityTypePermission.READ_DATA);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
 
 		// Capabilities
