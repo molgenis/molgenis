@@ -5,8 +5,6 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.molgenis.core.ui.admin.permission.PermissionManagerController;
-import org.molgenis.data.security.auth.GroupMemberMetaData;
-import org.molgenis.data.security.auth.RoleMetadata;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -29,9 +27,6 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -109,24 +104,7 @@ public class RestTestUtils
 				   .body(createTestUserBody.toJSONString())
 				   .when()
 				   .post("api/v1/sys_sec_User");
-
-			addToAllUsersGroup(adminToken, userName);
 		}
-	}
-
-	private static void addToAllUsersGroup(String adminToken, String userName)
-	{
-
-		JSONObject groupMembership = new JSONObject();
-		groupMembership.put(USER, getUserId(adminToken, userName));
-		groupMembership.put(GroupMemberMetaData.GROUP,
-				getEntityId(adminToken, RoleMetadata.NAME, ALL_USER_GROUP, RoleMetadata.ROLE));
-
-		given().header(X_MOLGENIS_TOKEN, adminToken)
-			   .contentType(APPLICATION_JSON)
-			   .body(groupMembership.toJSONString())
-			   .when()
-			   .post("api/v1/" + GROUP_MEMBER);
 	}
 
 	/**

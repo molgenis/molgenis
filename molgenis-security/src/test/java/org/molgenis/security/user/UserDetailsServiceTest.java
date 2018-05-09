@@ -3,7 +3,8 @@ package org.molgenis.security.user;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +17,6 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
@@ -61,20 +61,13 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Role role = mock(Role.class);
-		when(role.getId()).thenReturn("groupId");
-		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(role);
-
-		Query<GroupMember> groupMemberQuery = mock(Query.class);
-		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
-		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
-		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
-		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+		//		Role role = mock(Role.class);
+		//		when(role.getId()).thenReturn("groupId");
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		//		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 
@@ -99,19 +92,12 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Role role = mock(Role.class);
-		when(role.getId()).thenReturn("groupId");
-		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(role);
-
-		Query<GroupMember> groupMemberQuery = mock(Query.class);
-		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
-		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
-		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
-		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+		//		Role role = mock(Role.class);
+		//		when(role.getId()).thenReturn("roleId");
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		//		userAuthorities.add(new SimpleGrantedAuthority("ROLE_roleId"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 
@@ -136,20 +122,12 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(baseUserQuery.eq(UserMetaData.USERNAME, username)).thenReturn(userQuery);
 		doReturn(baseUserQuery).when(dataService).query(UserMetaData.USER, User.class);
 
-		Role role = mock(Role.class);
-		when(role.getId()).thenReturn("groupId");
-		GroupMember groupMember = mock(GroupMember.class);
-		when(groupMember.getGroup()).thenReturn(role);
-
-		Query<GroupMember> groupMemberQuery = mock(Query.class);
-		when(groupMemberQuery.findAll()).thenReturn(Stream.of(groupMember));
-		Query<GroupMember> baseGroupMemberQuery = mock(Query.class);
-		when(baseGroupMemberQuery.eq(GroupMemberMetaData.USER, user)).thenReturn(groupMemberQuery);
-		doReturn(baseGroupMemberQuery).when(dataService).query(GroupMemberMetaData.GROUP_MEMBER, GroupMember.class);
+		//		Role role = mock(Role.class);
+		//		when(role.getId()).thenReturn("roleId");
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_groupId"));
+		//		userAuthorities.add(new SimpleGrantedAuthority("ROLE_roleId"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 

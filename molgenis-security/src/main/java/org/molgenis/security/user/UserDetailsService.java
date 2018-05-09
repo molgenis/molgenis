@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
@@ -54,6 +55,10 @@ public class UserDetailsService implements org.springframework.security.core.use
 		if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME))
 		{
 			authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
+		}
+		else
+		{
+			authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
 		}
 
 		// TODO add authorities of roles that user belongs to

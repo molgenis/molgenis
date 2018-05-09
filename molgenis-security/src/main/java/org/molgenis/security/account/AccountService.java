@@ -4,7 +4,7 @@ import org.molgenis.data.security.auth.User;
 
 public interface AccountService
 {
-	String ALL_USER_GROUP = "All Users";
+	String ROLE_USER = "User";
 
 	void createUser(User user, String baseActivationUri)
 			throws UsernameAlreadyExistsException, EmailAlreadyExistsException;

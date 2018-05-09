@@ -1,8 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.account.AccountService;
@@ -70,9 +70,9 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
 
-		// create all users group
-		Role userRole = roleFactory.create();
-		userRole.setName(AccountService.ALL_USER_GROUP);
+		// create user role
+		Role userRole = roleFactory.create("USER");
+		userRole.setName(AccountService.ROLE_USER);
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));

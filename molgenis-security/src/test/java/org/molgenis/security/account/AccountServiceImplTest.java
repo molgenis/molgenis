@@ -6,7 +6,9 @@ import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleMetadata;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
@@ -28,7 +30,7 @@ import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
+import static org.molgenis.security.account.AccountService.ROLE_USER;
 
 @ContextConfiguration
 public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTests
@@ -68,7 +70,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		Role userRole = mock(Role.class);
 		@SuppressWarnings("unchecked")
 		Query<Role> q = mock(Query.class);
-		when(q.eq(NAME, ALL_USER_GROUP)).thenReturn(q);
+		when(q.eq(NAME, ROLE_USER)).thenReturn(q);
 		when(q.findOne()).thenReturn(userRole);
 		when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(q);
 
@@ -221,7 +223,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		public AccountService accountService()
 		{
 			return new AccountServiceImpl(dataService(), mailSender(), molgenisUserService(), appSettings(),
-					authenticationSettings(), molgenisGroupMemberFactory(), idGenerator());
+					authenticationSettings(), idGenerator());
 		}
 
 		@Bean
@@ -258,14 +260,6 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 		public UserService molgenisUserService()
 		{
 			return mock(UserService.class);
-		}
-
-		@Bean
-		public GroupMemberFactory molgenisGroupMemberFactory()
-		{
-			GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);
-			when(groupMemberFactory.create()).thenAnswer(invocationOnMock -> mock(GroupMember.class));
-			return groupMemberFactory;
 		}
 	}
 }

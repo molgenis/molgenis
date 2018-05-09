@@ -15,6 +15,7 @@ public class SecurityUtils
 
 	public static final String AUTHORITY_SU = "ROLE_SU";
 	public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
+	public static final String AUTHORITY_USER = "ROLE_USER";
 
 	public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
 	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";

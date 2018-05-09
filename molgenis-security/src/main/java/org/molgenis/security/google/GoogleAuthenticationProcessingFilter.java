@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMemberFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -54,16 +53,13 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private final UserDetailsService userDetailsService;
 	private final AuthenticationSettings authenticationSettings;
 	private final UserFactory userFactory;
-	private final GroupMemberFactory groupMemberFactory;
 
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
 			DataService dataService, UserDetailsService userDetailsService,
-			AuthenticationSettings authenticationSettings, UserFactory userFactory,
-			GroupMemberFactory groupMemberFactory)
+			AuthenticationSettings authenticationSettings, UserFactory userFactory)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
 		this.userFactory = requireNonNull(userFactory);
-		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 
 		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 

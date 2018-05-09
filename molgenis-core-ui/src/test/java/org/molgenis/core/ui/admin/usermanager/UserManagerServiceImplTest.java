@@ -2,8 +2,8 @@ package org.molgenis.core.ui.admin.usermanager;
 
 import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.*;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
@@ -127,19 +126,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class)).thenReturn(user0);
 		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class)).thenReturn(user1);
 		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user0, user1));
-		GroupMember groupMember0 = mock(GroupMember.class);
-		Role role0 = mock(Role.class);
-		when(groupMember0.getGroup()).thenReturn(role0);
-		GroupMember groupMember1 = mock(GroupMember.class);
-		Role role1 = mock(Role.class);
-		when(groupMember1.getGroup()).thenReturn(role1);
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user0),
-				GroupMember.class)).thenReturn(Stream.of(groupMember0));
-		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
-				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllUsers(), Arrays.asList(new UserViewData(user0, singletonList(role0)),
-				new UserViewData(user1, singletonList(role1))));
+		assertEquals(userManagerService.getAllUsers(), Arrays.asList(new UserViewData(user0), new UserViewData(user1)));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
