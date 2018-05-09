@@ -4,6 +4,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.io.IOException;
@@ -12,11 +13,11 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.EntityTypePermission.*;
 
 /**
- * Repository decorated that validates that current user has permission to perform an operation for an entity type.
+ * Repository decorated that validates that current user has permission to perform an operation on an entity type's data.
  */
 public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Entity>
 {
@@ -32,7 +33,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Iterator<Entity> iterator()
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().iterator();
 	}
 
@@ -40,15 +41,13 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		delegate().forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
 		delegate().close();
 	}
 
@@ -56,7 +55,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public long count(Query<Entity> q)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.COUNT);
+		validatePermission(entityType, COUNT_DATA);
 		return delegate().count(q);
 	}
 
@@ -64,7 +63,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findAll(q);
 	}
 
@@ -72,7 +71,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOne(Query<Entity> q)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findOne(q);
 	}
 
@@ -80,7 +79,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOneById(Object id)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findOneById(id);
 	}
 
@@ -88,7 +87,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Entity findOneById(Object id, Fetch fetch)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findOneById(id, fetch);
 	}
 
@@ -96,7 +95,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findAll(ids);
 	}
 
@@ -104,7 +103,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.READ);
+		validatePermission(entityType, READ_DATA);
 		return delegate().findAll(ids, fetch);
 	}
 
@@ -112,7 +111,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public long count()
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.COUNT);
+		validatePermission(entityType, COUNT_DATA);
 		return delegate().count();
 	}
 
@@ -120,7 +119,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void update(Entity entity)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, UPDATE_DATA);
 		delegate().update(entity);
 	}
 
@@ -128,7 +127,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void update(Stream<Entity> entities)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, UPDATE_DATA);
 		delegate().update(entities);
 	}
 
@@ -136,7 +135,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void delete(Entity entity)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, DELETE_DATA);
 		delegate().delete(entity);
 	}
 
@@ -144,7 +143,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void delete(Stream<Entity> entities)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, DELETE_DATA);
 		delegate().delete(entities);
 	}
 
@@ -152,7 +151,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteById(Object id)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, DELETE_DATA);
 		delegate().deleteById(id);
 	}
 
@@ -160,7 +159,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteAll(Stream<Object> ids)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, DELETE_DATA);
 		delegate().deleteAll(ids);
 	}
 
@@ -168,7 +167,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void deleteAll()
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, DELETE_DATA);
 		delegate().deleteAll();
 	}
 
@@ -176,7 +175,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public void add(Entity entity)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, ADD_DATA);
 		delegate().add(entity);
 	}
 
@@ -184,7 +183,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public Integer add(Stream<Entity> entities)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.WRITE);
+		validatePermission(entityType, ADD_DATA);
 		return delegate().add(entities);
 	}
 
@@ -192,7 +191,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		EntityType entityType = delegate().getEntityType();
-		validatePermission(entityType, EntityTypePermission.COUNT);
+		validatePermission(entityType, AGGREGATE_DATA);
 		return delegate().aggregate(aggregateQuery);
 	}
 
@@ -201,36 +200,7 @@ public class RepositorySecurityDecorator extends AbstractRepositoryDecorator<Ent
 		boolean hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityType.getId()), permission);
 		if (!hasPermission)
 		{
-
-			throw new MolgenisDataAccessException(
-					format("No [%s] permission on entity type [%s] with id [%s]", toMessagePermission(permission),
-							entityType.getLabel(), entityType.getId()));
+			throw new EntityTypePermissionDeniedException(permission, entityType);
 		}
-	}
-
-	private static String toMessagePermission(EntityTypePermission permission)
-	{
-		String permissionStr;
-		if (permission == EntityTypePermission.COUNT)
-		{
-			permissionStr = "COUNT";
-		}
-		else if (permission == EntityTypePermission.READ)
-		{
-			permissionStr = "READ";
-		}
-		else if (permission == EntityTypePermission.WRITE)
-		{
-			permissionStr = "WRITE";
-		}
-		else if (permission == EntityTypePermission.WRITEMETA)
-		{
-			permissionStr = "WRITEMETA";
-		}
-		else
-		{
-			throw new IllegalArgumentException("Illegal entity type permission");
-		}
-		return permissionStr;
 	}
 }

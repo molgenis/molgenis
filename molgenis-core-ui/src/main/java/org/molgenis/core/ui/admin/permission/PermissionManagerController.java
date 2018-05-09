@@ -3,7 +3,6 @@ package org.molgenis.core.ui.admin.permission;
 import com.google.common.collect.Lists;
 import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -11,12 +10,15 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityIdentity;
+import org.molgenis.data.security.EntityIdentityUtils;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
@@ -49,6 +51,7 @@ import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
+import static org.molgenis.security.core.PermissionSet.*;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Controller
@@ -58,6 +61,7 @@ public class PermissionManagerController extends PluginController
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
+	public static final String DUPLICATE_KEY = "Duplicate key %s";
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
@@ -207,7 +211,7 @@ public class PermissionManagerController extends PluginController
 		removePermissionForSid(sid, objectIdentity);
 	}
 
-	private void createSidPluginPermission(Plugin plugin, Sid sid, PluginPermission pluginPermission)
+	private void createSidPluginPermission(Plugin plugin, Sid sid, PermissionSet pluginPermission)
 	{
 		ObjectIdentity objectIdentity = new PluginIdentity(plugin);
 		createSidPermission(sid, objectIdentity, pluginPermission);
@@ -274,14 +278,20 @@ public class PermissionManagerController extends PluginController
 		}
 	}
 
-	private static PluginPermission toPluginPermission(String paramValue)
+	private static PermissionSet paramValueToPermissionSet(String paramValue)
 	{
 		switch (paramValue.toUpperCase())
 		{
+			case "COUNT":
+				return PermissionSet.COUNT;
 			case "READ":
-				return PluginPermission.READ;
+				return PermissionSet.READ;
+			case "WRITE":
+				return PermissionSet.WRITE;
+			case "WRITEMETA":
+				return PermissionSet.WRITEMETA;
 			default:
-				throw new IllegalArgumentException(format("Unknown plugin permission '%s'", paramValue));
+				throw new IllegalArgumentException(format("Unknown PermissionSet '%s'", paramValue));
 		}
 	}
 
@@ -295,7 +305,7 @@ public class PermissionManagerController extends PluginController
 			{
 				if (!value.equals("none"))
 				{
-					createSidPluginPermission(plugin, sid, toPluginPermission(value));
+					createSidPluginPermission(plugin, sid, paramValueToPermissionSet(value));
 				}
 				else
 				{
@@ -315,7 +325,7 @@ public class PermissionManagerController extends PluginController
 			{
 				if (!value.equals("none"))
 				{
-					createSidPackagePermission(pack, sid, toPackagePermission(value));
+					createSidPackagePermission(pack, sid, paramValueToPermissionSet(value));
 				}
 				else
 				{
@@ -352,7 +362,7 @@ public class PermissionManagerController extends PluginController
 		// set permissions: entity ids
 		Map<String, String> pluginMap = plugins.stream().collect(toMap(Plugin::getId, Plugin::getId, (u, v) ->
 		{
-			throw new IllegalStateException(format("Duplicate key %s", u));
+			throw new IllegalStateException(format(DUPLICATE_KEY, u));
 		}, LinkedHashMap::new));
 		permissions.setEntityIds(pluginMap);
 
@@ -360,6 +370,13 @@ public class PermissionManagerController extends PluginController
 		boolean isUser = setUserOrGroup(sid, permissions);
 
 		// set permissions: permissions
+		writeAclsToPermissions(aclMap, sid, permissions, isUser);
+		return permissions;
+	}
+
+	private void writeAclsToPermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions,
+			boolean isUser)
+	{
 		aclMap.forEach((objectIdentity, acl) ->
 		{
 			String pluginId = objectIdentity.getIdentifier().toString();
@@ -367,7 +384,7 @@ public class PermissionManagerController extends PluginController
 			{
 				if (ace.getSid().equals(sid))
 				{
-					org.molgenis.security.permission.Permission pluginPermission = toPluginPermission(ace);
+					org.molgenis.security.permission.Permission pluginPermission = createPermissionDtoForAce(ace);
 					if (isUser)
 					{
 						permissions.addUserPermission(pluginId, pluginPermission);
@@ -379,21 +396,29 @@ public class PermissionManagerController extends PluginController
 				}
 			});
 		});
-		return permissions;
 	}
 
-	private org.molgenis.security.permission.Permission toPluginPermission(AccessControlEntry ace)
+	private org.molgenis.security.permission.Permission createPermissionDtoForAce(AccessControlEntry ace)
 	{
-		org.molgenis.security.permission.Permission pluginPermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission().equals(PluginPermission.READ))
+		org.molgenis.security.permission.Permission result = new org.molgenis.security.permission.Permission();
+		switch (ace.getPermission().getMask())
 		{
-			pluginPermission.setType("read");
+			case COUNT_MASK:
+				result.setType("count");
+				break;
+			case READ_MASK:
+				result.setType("read");
+				break;
+			case WRITE_MASK:
+				result.setType("write");
+				break;
+			case WRITEMETA_MASK:
+				result.setType("writemeta");
+				break;
+			default:
+				throw new UnexpectedPermissionException(ace.getPermission());
 		}
-		else
-		{
-			throw new UnexpectedPermissionException(ace.getPermission());
-		}
-		return pluginPermission;
+		return result;
 	}
 
 	private void removeSidEntityTypePermission(EntityType entityType, Sid sid)
@@ -402,18 +427,16 @@ public class PermissionManagerController extends PluginController
 		removePermissionForSid(sid, objectIdentity);
 	}
 
-	private void createSidEntityTypePermission(EntityType entityType, Sid sid,
-			EntityTypePermission entityTypePermission)
+	private void createSidEntityTypePermission(EntityType entityType, Sid sid, PermissionSet permissionSet)
 	{
 		ObjectIdentity objectIdentity = new EntityTypeIdentity(entityType);
-		createSidPermission(sid, objectIdentity,
-				EntityTypePermissionUtils.getCumulativePermission(entityTypePermission));
+		createSidPermission(sid, objectIdentity, permissionSet);
 	}
 
-	private void createSidPackagePermission(Package pack, Sid sid, PackagePermission packagePermission)
+	private void createSidPackagePermission(Package pack, Sid sid, PermissionSet permissionSet)
 	{
 		ObjectIdentity objectIdentity = new PackageIdentity(pack);
-		createSidPermission(sid, objectIdentity, PackagePermissionUtils.getCumulativePermission(packagePermission));
+		createSidPermission(sid, objectIdentity, permissionSet);
 	}
 
 	private void removeSidPackagePermission(Package pack, Sid sid)
@@ -443,7 +466,7 @@ public class PermissionManagerController extends PluginController
 			{
 				if (!value.equals("none"))
 				{
-					createSidEntityTypePermission(entityType, sid, toEntityTypePermission(value));
+					createSidEntityTypePermission(entityType, sid, paramValueToPermissionSet(value));
 				}
 				else
 				{
@@ -463,62 +486,6 @@ public class PermissionManagerController extends PluginController
 		return toEntityTypePermissions(entityTypes, aclMap, sid);
 	}
 
-	private org.molgenis.security.permission.Permission toEntityTypePermission(AccessControlEntry ace)
-	{
-		org.molgenis.security.permission.Permission entityTypePermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission()
-			   .equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITEMETA)))
-		{
-			entityTypePermission.setType("writemeta");
-		}
-		else if (ace.getPermission()
-					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.WRITE)))
-		{
-			entityTypePermission.setType("write");
-		}
-		else if (ace.getPermission()
-					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.READ)))
-		{
-			entityTypePermission.setType("read");
-		}
-		else if (ace.getPermission()
-					.equals(EntityTypePermissionUtils.getCumulativePermission(EntityTypePermission.COUNT)))
-		{
-			entityTypePermission.setType("count");
-		}
-		else
-		{
-			throw new UnexpectedPermissionException(ace.getPermission());
-		}
-		return entityTypePermission;
-	}
-
-	private org.molgenis.security.permission.Permission toPackagePermission(AccessControlEntry ace)
-	{
-		org.molgenis.security.permission.Permission entityTypePermission = new org.molgenis.security.permission.Permission();
-		if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITEMETA)))
-		{
-			entityTypePermission.setType("writemeta");
-		}
-		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITE)))
-		{
-			entityTypePermission.setType("write");
-		}
-		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.READ)))
-		{
-			entityTypePermission.setType("read");
-		}
-		else if (ace.getPermission().equals(PackagePermissionUtils.getCumulativePermission(PackagePermission.COUNT)))
-		{
-			entityTypePermission.setType("count");
-		}
-		else
-		{
-			throw new UnexpectedPermissionException(ace.getPermission());
-		}
-		return entityTypePermission;
-	}
-
 	private Permissions toEntityTypePermissions(List<EntityType> entityTypes, Map<ObjectIdentity, Acl> aclMap, Sid sid)
 	{
 		Permissions permissions = new Permissions();
@@ -527,8 +494,7 @@ public class PermissionManagerController extends PluginController
 		Map<String, String> entityTypeMap = entityTypes.stream()
 													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
 													   {
-														   throw new IllegalStateException(
-																   format("Duplicate key %s", u));
+														   throw new IllegalStateException(format(DUPLICATE_KEY, u));
 													   }, LinkedHashMap::new));
 		permissions.setEntityIds(entityTypeMap);
 
@@ -542,7 +508,7 @@ public class PermissionManagerController extends PluginController
 		// set permissions: entity ids
 		Map<String, String> entityTypeMap = packages.stream().collect(toMap(Package::getId, Package::getId, (u, v) ->
 		{
-			throw new IllegalStateException(format("Duplicate key %s", u));
+			throw new IllegalStateException(format(DUPLICATE_KEY, u));
 		}, LinkedHashMap::new));
 
 		permissions.setEntityIds(entityTypeMap);
@@ -555,74 +521,12 @@ public class PermissionManagerController extends PluginController
 		boolean isUser = setUserOrGroup(sid, permissions);
 
 		// set permissions: permissions
-		aclMap.forEach((objectIdentity, acl) ->
-		{
-			String id = objectIdentity.getIdentifier().toString();
-			acl.getEntries().forEach(ace ->
-			{
-				if (ace.getSid().equals(sid))
-				{
-					org.molgenis.security.permission.Permission permission;
-					switch (objectIdentity.getType())
-					{
-						case EntityTypeIdentity.TYPE:
-							permission = toEntityTypePermission(ace);
-							break;
-						case PackageIdentity.TYPE:
-							permission = toPackagePermission(ace);
-							break;
-						default:
-							throw new MolgenisDataException("Unexpected permission type");
-					}
-					if (isUser)
-					{
-						permissions.addUserPermission(id, permission);
-					}
-					else
-					{
-						permissions.addGroupPermission(id, permission);
-					}
-				}
-			});
-		});
+		writeAclsToPermissions(aclMap, sid, permissions, isUser);
 		return permissions;
 	}
 
-	private static EntityTypePermission toEntityTypePermission(String paramValue)
-	{
-		switch (paramValue.toUpperCase())
-		{
-			case "READ":
-				return EntityTypePermission.READ;
-			case "WRITE":
-				return EntityTypePermission.WRITE;
-			case "COUNT":
-				return EntityTypePermission.COUNT;
-			case "WRITEMETA":
-				return EntityTypePermission.WRITEMETA;
-			default:
-				throw new IllegalArgumentException(format("Unknown entity type permission '%s'", paramValue));
-		}
-	}
-
-	private static PackagePermission toPackagePermission(String paramValue)
-	{
-		switch (paramValue.toUpperCase())
-		{
-			case "READ":
-				return PackagePermission.READ;
-			case "WRITE":
-				return PackagePermission.WRITE;
-			case "COUNT":
-				return PackagePermission.COUNT;
-			case "WRITEMETA":
-				return PackagePermission.WRITEMETA;
-			default:
-				throw new IllegalArgumentException(format("Unknown entity type permission '%s'", paramValue));
-		}
-	}
-
-	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity, Permission permission)
+	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity,
+			org.springframework.security.acls.model.Permission permission)
 	{
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
 

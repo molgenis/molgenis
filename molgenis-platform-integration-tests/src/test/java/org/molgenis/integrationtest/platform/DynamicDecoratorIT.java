@@ -12,16 +12,13 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.EntityTypePermissionUtils;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
+import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
@@ -158,21 +154,16 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 
 	private void populatePermissions()
 	{
-		// define cumulative permissions
-		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
-				EntityTypePermission.READ);
-		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
-
-		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
-		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_Language"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_L10nString"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DynamicDecorator"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), readEntityType);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DynamicDecorator"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.READ);
 
 		testPermissionPopulator.populate(permissionMap);
 	}

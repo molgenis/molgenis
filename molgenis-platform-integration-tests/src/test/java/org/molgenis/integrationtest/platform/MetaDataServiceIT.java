@@ -8,17 +8,17 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
-import org.molgenis.data.security.exception.PackagePermissionException;
+import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,7 +44,6 @@ import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.security.EntityTypePermission.WRITEMETA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -160,7 +159,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	@SuppressWarnings("deprecation")
 	@WithMockUser(username = USERNAME)
-	@Test(expectedExceptions = PackagePermissionException.class)
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
 	public void testCreateNoPackagePermission()
 	{
 		EntityType entityType = entityTypeFactory.create(ENTITY_TYPE_1)
@@ -286,23 +285,15 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 
 	private void populateDataPermissions()
 	{
-		// define cumulative permissions
-		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
-				EntityTypePermission.READ);
-		CumulativePermission writeMetaEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITEMETA);
-		CumulativePermission writeMetaPackage = PackagePermissionUtils.getCumulativePermission(
-				PackagePermission.WRITEMETA);
-		CumulativePermission writePackage = PackagePermissionUtils.getCumulativePermission(PackagePermission.WRITE);
-
-		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
-		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeMetaEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeMetaEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity(ENTITY_TYPE_ID), writeMetaEntityType);
-		permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), readEntityType);
-		permissionMap.put(new PackageIdentity(PACK_PERMISSION), writeMetaPackage);
-		permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), writePackage);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITEMETA);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITEMETA);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity(ENTITY_TYPE_ID), PermissionSet.WRITEMETA);
+		permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), PermissionSet.READ);
+		permissionMap.put(new PackageIdentity(PACK_PERMISSION), PermissionSet.WRITEMETA);
+		permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), PermissionSet.WRITE);
 		testPermissionPopulator.populate(permissionMap, USERNAME);
 	}
 

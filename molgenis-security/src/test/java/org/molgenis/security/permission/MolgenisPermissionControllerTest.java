@@ -35,7 +35,10 @@ public class MolgenisPermissionControllerTest
 	{
 		String entityTypeId = "entity";
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ)).thenReturn(true);
+				EntityTypePermission.READ_DATA)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_METADATA)).thenReturn(
+				true);
 		assertTrue(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
@@ -44,7 +47,8 @@ public class MolgenisPermissionControllerTest
 	{
 		String entityTypeId = "entity";
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ)).thenReturn(false);
+				EntityTypePermission.READ_DATA)).thenReturn(
+				false);
 		assertFalse(molgenisPermissionController.hasReadPermission(entityTypeId));
 	}
 
@@ -53,7 +57,10 @@ public class MolgenisPermissionControllerTest
 	{
 		String entityTypeId = "entity";
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.WRITE)).thenReturn(true);
+				EntityTypePermission.UPDATE_DATA)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_METADATA)).thenReturn(
+				true);
 		assertTrue(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 
@@ -62,7 +69,8 @@ public class MolgenisPermissionControllerTest
 	{
 		String entityTypeId = "entity";
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.WRITE)).thenReturn(false);
+				EntityTypePermission.UPDATE_DATA)).thenReturn(
+				false);
 		assertFalse(molgenisPermissionController.hasWritePermission(entityTypeId));
 	}
 }

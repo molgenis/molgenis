@@ -160,7 +160,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
 		validationMessages.addBasenames("org.hibernate.validator.ValidationMessages");
 		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
-		messageSource.addMolgenisNamespaces("data", "web");
+		messageSource.addMolgenisNamespaces("data", "web", "data-security");
 		messageSource.setParentMessageSource(validationMessages);
 		MessageSourceHolder.setMessageSource(messageSource);
 	}
@@ -680,7 +680,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isBadRequest())
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
 					   is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
 		verifyZeroInteractions(repoCopier);
@@ -694,15 +693,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isUnauthorized())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No read permission on entity entity")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("DS04a")))
+			   .andExpect(
+					   jsonPath(FIRST_ERROR_MESSAGE, is("No 'Read data' permission on entity type with id 'entity'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -741,7 +741,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(
 				true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);

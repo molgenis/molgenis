@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.security;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.Ui;
@@ -15,10 +14,12 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
+
 public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterInvocation>
 {
-	private static Pattern PATTERN_MENUID = Pattern.compile("/menu/([^/]+).*");
-	private static Pattern PATTERN_PLUGINID = Pattern.compile("(?:/plugin|/menu/[^/]+)/([^/^?]+).*");
+	private static final Pattern PATTERN_MENUID = Pattern.compile("/menu/([^/]+).*");
+	private static final Pattern PATTERN_PLUGINID = Pattern.compile("(?:/plugin|/menu/[^/]+)/([^/^?]+).*");
 
 	@Override
 	public boolean supports(ConfigAttribute attribute)
@@ -43,7 +44,7 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		{
 			String pluginId = pluginMatcher.group(1);
 			return getMolgenisPermissionService().hasPermission(new PluginIdentity(pluginId),
-					PluginPermission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
+					VIEW_PLUGIN) ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
 		Matcher menuMatcher = PATTERN_MENUID.matcher(requestUrl);

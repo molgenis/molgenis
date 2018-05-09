@@ -11,13 +11,13 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -37,7 +37,6 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
@@ -883,20 +882,14 @@ public class EmxImportServiceIT extends ImportServiceIT
 		//users cannot create entities and packages without a parent package, therefor the root package needs to exist already.
 		runAsSystem(() -> dataService.getMeta().addPackage(packageFactory.create("it", "")));
 
-		CumulativePermission readEntityType = EntityTypePermissionUtils.getCumulativePermission(
-				EntityTypePermission.READ);
-		CumulativePermission writeEntityType = EntityTypePermissionUtils.getCumulativePermission(WRITE);
-		CumulativePermission writeMetaPackage = PackagePermissionUtils.getCumulativePermission(
-				PackagePermission.WRITEMETA);
-
-		Map<ObjectIdentity, Permission> permissionMap = new HashMap<>();
-		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_md_Tag"), writeEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_FileMeta"), readEntityType);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), readEntityType);
-		permissionMap.put(new PackageIdentity("it"), writeMetaPackage);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Tag"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_FileMeta"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		permissionMap.put(new PackageIdentity("it"), PermissionSet.WRITEMETA);
 
 		testPermissionPopulator.populate(permissionMap, USERNAME);
 	}

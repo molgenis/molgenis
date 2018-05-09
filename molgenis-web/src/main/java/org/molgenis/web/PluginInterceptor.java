@@ -64,7 +64,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter
 			{
 				String pluginSettingsEntityName = pluginSettings.getEntityType().getId();
 				pluginSettingsCanWrite = permissionService.hasPermission(
-						new EntityTypeIdentity(pluginSettingsEntityName), EntityTypePermission.WRITE);
+						new EntityTypeIdentity(pluginSettingsEntityName), EntityTypePermission.UPDATE_DATA);
 				modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SETTINGS, pluginSettings);
 			}
 			else

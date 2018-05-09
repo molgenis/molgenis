@@ -75,7 +75,7 @@ public class NegotiatorController extends PluginController
 	public boolean showDirectoryButton(String entityTypeId)
 	{
 		NegotiatorEntityConfig settings = getNegotiatorEntityConfig(entityTypeId);
-		return settings != null && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.READ);
+		return settings != null && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.VIEW_PLUGIN);
 	}
 
 	@PostMapping("/validate")

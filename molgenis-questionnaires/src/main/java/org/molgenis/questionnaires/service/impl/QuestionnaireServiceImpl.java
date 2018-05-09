@@ -59,7 +59,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 						  .eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
 						  .findAll()
 						  .filter(entityType -> userPermissionEvaluator.hasPermission(
-								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.WRITE))
+								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.ADD_DATA))
+						  .filter(entityType -> userPermissionEvaluator.hasPermission(
+								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.UPDATE_DATA))
 						  .map(this::createQuestionnaireResponse)
 						  .collect(toList());
 	}

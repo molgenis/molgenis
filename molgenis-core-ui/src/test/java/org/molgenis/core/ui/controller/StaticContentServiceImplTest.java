@@ -4,9 +4,9 @@ import org.mockito.Mock;
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -44,28 +44,50 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	}
 
 	@Test
-	public void isCurrentUserCanEditTrue()
+	public void isCurrentUserCanEditAnonymousFalse()
+	{
+		doReturn(false).when(permissionService)
+					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
+		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
+	}
+
+	@Test
+	public void isCurrentUserCanEditStaticContentPresentEditTrue()
 	{
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
+		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
+		doReturn(true).when(permissionService)
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.UPDATE_DATA);
 		assertTrue(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
 	@Test
-	public void isCurrentUserCanEditNoPluginPermissionFalse()
+	public void isCurrentUserCanEditStaticContentNotPresentEditTrue()
 	{
+		doReturn(true).when(permissionService)
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
+		doReturn(true).when(permissionService)
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.ADD_DATA);
+		assertTrue(staticContentService.isCurrentUserCanEdit("home"));
+	}
+
+	@Test
+	public void isCurrentUserCanEditStaticContentPresentEditFalse()
+	{
+		doReturn(true).when(permissionService)
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.READ_DATA);
+		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
 		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
 	@Test
-	public void isCurrentUserCanEditNoEntityTypePermissionFalse()
+	public void isCurrentUserCanEditStaticContentNotPresentEditFalse()
 	{
-		doReturn(false).when(permissionService)
-					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
 		assertFalse(staticContentService.isCurrentUserCanEdit("home"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permission on static content entity type.")
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:sys_StaticContent")
 	public void checkPermissionsThrowsException()
 	{
 		this.staticContentService.checkPermissions("home");
@@ -75,32 +97,34 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	public void checkPermissionsNoException()
 	{
 		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.UPDATE_DATA);
 		staticContentService.checkPermissions("home");
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permission on static content entity type.")
-	public void submitContentNoPluginPermissions()
+	@Test
+	public void submitContentNoContentNoCreatePermissions()
 	{
-		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");
+		doReturn(staticContent).when(staticContentFactory).create("home");
+		doThrow(new EntityTypePermissionDeniedException(EntityTypePermission.ADD_DATA, STATIC_CONTENT)).when(
+				dataService).add(STATIC_CONTENT,
+																										 staticContent);
+		assertFalse(staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No write permission on static content entity type.")
-	public void submitContentNoStaticContentPermissions()
+	@Test
+	public void submitContentExistingContentNoUpdatePermissions()
 	{
-		//		doReturn(true).when(permissionService).hasPermission(new PluginIdentity("home"), PluginPermission.WRITE);
-		doReturn(false).when(permissionService)
-					   .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
-		this.staticContentService.submitContent("home", "<p>Updated Content!</p>");
+		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
+		doThrow(new EntityTypePermissionDeniedException(EntityTypePermission.UPDATE_DATA, STATIC_CONTENT)).when(
+				dataService).update(STATIC_CONTENT,
+																											staticContent);
+		assertFalse(staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 	}
 
 	@Test
 	public void submitContentExisting()
 	{
 		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
-		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
-
 		assertTrue(this.staticContentService.submitContent("home", "<p>Updated Content!</p>"));
 
 		verify(staticContent).setContent("<p>Updated Content!</p>");
@@ -112,8 +136,6 @@ public class StaticContentServiceImplTest extends AbstractMockitoTest
 	{
 		when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(null);
 		when(staticContentFactory.create("home")).thenReturn(staticContent);
-		doReturn(true).when(permissionService)
-					  .hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
 
 		assertTrue(this.staticContentService.submitContent("home", "<p>New Content!</p>"));
 
