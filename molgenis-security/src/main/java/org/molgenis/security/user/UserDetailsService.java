@@ -65,7 +65,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 				   .eq(GroupMemberMetaData.USER, user)
 				   .findAll()
 				   .map(GroupMember::getGroup)
-				   .map(SidUtils::createGroupAuthority)
+				   .map(SidUtils::createRoleAuthority)
 				   .map(SimpleGrantedAuthority::new)
 				   .forEach(authorities::add);
 

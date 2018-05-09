@@ -45,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
@@ -82,7 +82,7 @@ public class PermissionManagerController extends PluginController
 			Boolean superuser = user.isSuperuser();
 			return superuser == null || !superuser;
 		}).collect(Collectors.toList())));
-		model.addAttribute("groups", getGroups());
+		model.addAttribute("roles", getRoles());
 		model.addAttribute("entityTypes", getEntityTypeDtos());
 		return "view-permissionmanager";
 	}
@@ -103,11 +103,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/entityclass/group/{groupId}")
+	@GetMapping("/entityclass/role/{roleId}")
 	@ResponseBody
-	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId)
+	public Permissions getRoleEntityClassPermissions(@PathVariable String roleId)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		return getEntityTypePermissions(sid);
 	}
 
@@ -133,11 +133,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/package/group/{groupId}")
+	@GetMapping("/package/role/{roleId}")
 	@ResponseBody
-	public Permissions getGroupPackagePermissions(@PathVariable String groupId)
+	public Permissions getRolePackagePermissions(@PathVariable String roleId)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		return getPackagePermissions(sid);
 	}
 
@@ -153,31 +153,31 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	@PostMapping("/update/plugin/group")
+	@PostMapping("/update/plugin/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateGroupPluginPermissions(@RequestParam String groupId, WebRequest webRequest)
+	public void updateRolePluginPermissions(@RequestParam String roleId, WebRequest webRequest)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		updatePluginPermissions(webRequest, sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	@PostMapping("/update/entityclass/group")
+	@PostMapping("/update/entityclass/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
+	public void updateRoleEntityClassPermissions(@RequestParam String roleId, WebRequest webRequest)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		updateEntityTypePermissions(webRequest, sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
-	@PostMapping("/update/package/group")
+	@PostMapping("/update/package/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateGroupPackagePermissions(@RequestParam String groupId, WebRequest webRequest)
+	public void updateRolePackagePermissions(@RequestParam String roleId, WebRequest webRequest)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		updatePackagePermissions(webRequest, sid);
 	}
 
@@ -215,11 +215,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/plugin/group/{groupId}")
+	@GetMapping("/plugin/role/{roleId}")
 	@ResponseBody
-	public Permissions getGroupPluginPermissions(@PathVariable String groupId)
+	public Permissions getRolePluginPermissions(@PathVariable String roleId)
 	{
-		Sid sid = getSidForGroupId(groupId);
+		Sid sid = getSidForRoleId(roleId);
 		return getPluginPermissions(sid);
 	}
 
@@ -356,8 +356,8 @@ public class PermissionManagerController extends PluginController
 		}, LinkedHashMap::new));
 		permissions.setEntityIds(pluginMap);
 
-		// set permissions: user of group id
-		boolean isUser = setUserOrGroup(sid, permissions);
+		// set permissions: user of role id
+		boolean isUser = setUserOrRole(sid, permissions);
 
 		// set permissions: permissions
 		aclMap.forEach((objectIdentity, acl) ->
@@ -374,7 +374,7 @@ public class PermissionManagerController extends PluginController
 					}
 					else
 					{
-						permissions.addGroupPermission(pluginId, pluginPermission);
+						permissions.addRolePermission(pluginId, pluginPermission);
 					}
 				}
 			});
@@ -552,7 +552,7 @@ public class PermissionManagerController extends PluginController
 
 	private Permissions toPermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions)
 	{
-		boolean isUser = setUserOrGroup(sid, permissions);
+		boolean isUser = setUserOrRole(sid, permissions);
 
 		// set permissions: permissions
 		aclMap.forEach((objectIdentity, acl) ->
@@ -580,7 +580,7 @@ public class PermissionManagerController extends PluginController
 					}
 					else
 					{
-						permissions.addGroupPermission(id, permission);
+						permissions.addRolePermission(id, permission);
 					}
 				}
 			});
@@ -637,18 +637,18 @@ public class PermissionManagerController extends PluginController
 		return SidUtils.createSid(user);
 	}
 
-	private Sid getSidForGroupId(String groupId)
+	private Sid getSidForRoleId(String roleId)
 	{
-		Role role = getGroup(groupId);
+		Role role = getRole(roleId);
 		return SidUtils.createSid(role);
 	}
 
-	private Role getGroup(String groupId)
+	private Role getRole(String roleId)
 	{
-		Role role = dataService.findOneById(GROUP, groupId, Role.class);
+		Role role = dataService.findOneById(ROLE, roleId, Role.class);
 		if (role == null)
 		{
-			throw new RuntimeException("unknown role id [" + groupId + "]");
+			throw new RuntimeException("unknown role id [" + roleId + "]");
 		}
 		return role;
 	}
@@ -674,9 +674,9 @@ public class PermissionManagerController extends PluginController
 	/**
 	 * package-private for testability
 	 */
-	List<Role> getGroups()
+	List<Role> getRoles()
 	{
-		return dataService.findAll(GROUP, Role.class).collect(toList());
+		return dataService.findAll(ROLE, Role.class).collect(toList());
 	}
 
 	List<Package> getPackages()
@@ -684,7 +684,7 @@ public class PermissionManagerController extends PluginController
 		return dataService.findAll(PackageMetadata.PACKAGE, Package.class).collect(toList());
 	}
 
-	private boolean setUserOrGroup(Sid sid, Permissions permissions)
+	private boolean setUserOrRole(Sid sid, Permissions permissions)
 	{
 		boolean isUser;
 		if (sid instanceof PrincipalSid)
@@ -701,8 +701,8 @@ public class PermissionManagerController extends PluginController
 		}
 		else
 		{
-			String groupId = ((GrantedAuthoritySid) sid).getGrantedAuthority().substring("ROLE_".length());
-			permissions.setGroupId(groupId);
+			String roleId = ((GrantedAuthoritySid) sid).getGrantedAuthority().substring("ROLE_".length());
+			permissions.setRoleId(roleId);
 			isUser = false;
 		}
 		return isUser;

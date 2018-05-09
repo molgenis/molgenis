@@ -41,6 +41,6 @@ public class SidUtilsTest
 	public void testCreateGroupAuthority()
 	{
 		Role role = when(mock(Role.class).getId()).thenReturn("groupId").getMock();
-		assertEquals("ROLE_groupId", SidUtils.createGroupAuthority(role));
+		assertEquals("ROLE_groupId", SidUtils.createRoleAuthority(role));
 	}
 }

@@ -13,7 +13,7 @@ import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 public class RoleMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Role";
-	public static final String GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ROLE = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
 	public static final String ID = "id";
@@ -38,7 +38,7 @@ public class RoleMetadata extends SystemEntityType
 		addAttribute(ACTIVE).setLabel("Active")
 							.setDataType(BOOL)
 							.setDefaultValue("true")
-							.setDescription("Boolean to indicate whether this group is in use.")
+							.setDescription("Boolean to indicate whether this role is in use.")
 							.setAggregatable(true)
 							.setNillable(false);
 	}

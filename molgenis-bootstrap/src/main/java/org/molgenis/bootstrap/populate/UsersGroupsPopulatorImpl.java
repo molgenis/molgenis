@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
@@ -76,6 +76,6 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(GROUP, userRole);
+		dataService.add(ROLE, userRole);
 	}
 }

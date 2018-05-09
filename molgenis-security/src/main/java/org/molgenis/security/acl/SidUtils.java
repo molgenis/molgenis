@@ -8,7 +8,7 @@ import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
 
 /**
- * Util class to create security identities for {@link User users} and {@link Role groups}.
+ * Util class to create security identities for {@link User users} and {@link Role roles}.
  *
  * @see Sid
  */
@@ -46,15 +46,11 @@ public class SidUtils
 
 	public static Sid createSid(Role role)
 	{
-		String groupAuthority = createGroupAuthority(role);
-		return new GrantedAuthoritySid(groupAuthority);
+		String roleAuthority = createRoleAuthority(role);
+		return new GrantedAuthoritySid(roleAuthority);
 	}
 
-	/**
-	 * @deprecated will be replaced with role retrieval based on persisted roles for a group.
-	 */
-	@Deprecated
-	public static String createGroupAuthority(Role role)
+	public static String createRoleAuthority(Role role)
 	{
 		return "ROLE" + '_' + role.getId();
 	}

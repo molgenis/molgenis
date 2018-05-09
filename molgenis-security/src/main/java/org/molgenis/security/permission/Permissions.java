@@ -26,7 +26,7 @@ public class Permissions
 		return groupId;
 	}
 
-	public void setGroupId(String groupId)
+	public void setRoleId(String groupId)
 	{
 		this.groupId = groupId;
 	}
@@ -58,7 +58,7 @@ public class Permissions
 		return groupPermissionMap != null ? groupPermissionMap : Collections.emptyMap();
 	}
 
-	public void addGroupPermission(String pluginId, Permission pluginPermission)
+	public void addRolePermission(String pluginId, Permission pluginPermission)
 	{
 		if (groupPermissionMap == null) groupPermissionMap = new HashMap<>();
 		List<Permission> pluginPermissions = groupPermissionMap.computeIfAbsent(pluginId, k -> new ArrayList<>());

@@ -16,7 +16,7 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
@@ -41,7 +41,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 	public Multimap<ObjectIdentity, Pair<Permission, Sid>> getPermissions()
 	{
 		User anonymousUser = dataService.query(USER, User.class).eq(USERNAME, ANONYMOUS_USERNAME).findOne();
-		Role userRole = dataService.query(GROUP, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
+		Role userRole = dataService.query(ROLE, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(HomeController.ID);
 		return new ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>>().putAll(pluginIdentity,

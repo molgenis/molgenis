@@ -119,7 +119,7 @@ public class RestTestUtils
 		JSONObject groupMembership = new JSONObject();
 		groupMembership.put(USER, getUserId(adminToken, userName));
 		groupMembership.put(GroupMemberMetaData.GROUP,
-				getEntityId(adminToken, RoleMetadata.NAME, ALL_USER_GROUP, RoleMetadata.GROUP));
+				getEntityId(adminToken, RoleMetadata.NAME, ALL_USER_GROUP, RoleMetadata.ROLE));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)

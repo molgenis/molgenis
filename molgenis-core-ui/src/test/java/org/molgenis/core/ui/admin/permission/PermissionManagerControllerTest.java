@@ -52,7 +52,7 @@ import static org.molgenis.data.meta.AttributeType.LONG;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -209,8 +209,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		packageIdentity3 = new PackageIdentity(package3);
 
 		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user1, user2));
-		when(dataService.findAll(GROUP, Role.class)).thenReturn(Stream.of(role1, role2));
-		when(dataService.findOneById(GROUP, "1", Role.class)).thenReturn(role1);
+		when(dataService.findAll(ROLE, Role.class)).thenReturn(Stream.of(role1, role2));
+		when(dataService.findOneById(ROLE, "1", Role.class)).thenReturn(role1);
 		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 
 		when(dataService.findAll(PLUGIN, Plugin.class)).thenReturn(Stream.of(plugin1, plugin2));
@@ -260,7 +260,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test
 	public void testGetGroups()
 	{
-		assertEquals(permissionManagerController.getGroups(), Arrays.asList(role1, role2));
+		assertEquals(permissionManagerController.getRoles(), Arrays.asList(role1, role2));
 	}
 
 	@Test
@@ -333,14 +333,14 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission = new org.molgenis.security.permission.Permission();
 		permission.setType("read");
-		expected.setGroupId("1");
-		expected.addGroupPermission(entityType1.getId(), permission);
+		expected.setRoleId("1");
+		expected.addRolePermission(entityType1.getId(), permission);
 		Map<String, String> ids = new HashMap<>();
 		ids.put("1", "1");
 		ids.put("2", "2");
 		expected.setEntityIds(ids);
 
-		assertEquals(permissionManagerController.getGroupPluginPermissions("1"), expected);
+		assertEquals(permissionManagerController.getRolePluginPermissions("1"), expected);
 	}
 
 	@Test
@@ -419,16 +419,16 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permission1.setType("write");
 		org.molgenis.security.permission.Permission permission2 = new org.molgenis.security.permission.Permission();
 		permission2.setType("read");
-		expected.setGroupId("1");
-		expected.addGroupPermission(entityType1.getId(), permission1);
-		expected.addGroupPermission(entityType2.getId(), permission2);
+		expected.setRoleId("1");
+		expected.addRolePermission(entityType1.getId(), permission1);
+		expected.addRolePermission(entityType2.getId(), permission2);
 		Map<String, String> ids = new HashMap<>();
 		ids.put("1", "1");
 		ids.put("2", "2");
 		ids.put("3", "3");
 		expected.setEntityIds(ids);
 
-		assertEquals(permissionManagerController.getGroupEntityClassPermissions("1"), expected);
+		assertEquals(permissionManagerController.getRoleEntityClassPermissions("1"), expected);
 	}
 
 	@Test
@@ -507,16 +507,16 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permission1.setType("write");
 		org.molgenis.security.permission.Permission permission2 = new org.molgenis.security.permission.Permission();
 		permission2.setType("read");
-		expected.setGroupId("1");
-		expected.addGroupPermission(package1.getId(), permission1);
-		expected.addGroupPermission(package2.getId(), permission2);
+		expected.setRoleId("1");
+		expected.addRolePermission(package1.getId(), permission1);
+		expected.addRolePermission(package2.getId(), permission2);
 		Map<String, String> ids = new HashMap<>();
 		ids.put("1", "1");
 		ids.put("2", "2");
 		ids.put("3", "3");
 		expected.setEntityIds(ids);
 
-		assertEquals(permissionManagerController.getGroupPackagePermissions("1"), expected);
+		assertEquals(permissionManagerController.getRolePackagePermissions("1"), expected);
 	}
 
 	@Test
@@ -540,7 +540,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(pluginIdentity1, singletonList(groupSid))).thenReturn(acl1);
 		when(mutableAclService.readAclById(pluginIdentity2, singletonList(groupSid))).thenReturn(acl2);
 
-		permissionManagerController.updateGroupPluginPermissions("1", webRequest);
+		permissionManagerController.updateRolePluginPermissions("1", webRequest);
 
 		verify(acl1).insertAce(0, pluginPermissionRead, groupSid, true);
 
@@ -607,7 +607,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(entityIdentity2, singletonList(sid))).thenReturn(acl2);
 		when(mutableAclService.readAclById(entityIdentity3, singletonList(sid))).thenReturn(acl3);
 
-		permissionManagerController.updateGroupEntityClassPermissions("1", webRequest);
+		permissionManagerController.updateRoleEntityClassPermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
 		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);
@@ -693,7 +693,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(packageIdentity2, singletonList(sid))).thenReturn(acl2);
 		when(mutableAclService.readAclById(packageIdentity3, singletonList(sid))).thenReturn(acl3);
 
-		permissionManagerController.updateGroupPackagePermissions("1", webRequest);
+		permissionManagerController.updateRolePackagePermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
 		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);

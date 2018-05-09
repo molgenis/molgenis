@@ -29,7 +29,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.acl.SidUtils.createSid;
@@ -49,7 +49,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	{
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
-		Role userRole = dataService.query(GROUP, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
+		Role userRole = dataService.query(ROLE, Role.class).eq(NAME, ALL_USER_GROUP).findOne();
 		Sid allUsersGroupSid = createSid(userRole);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);

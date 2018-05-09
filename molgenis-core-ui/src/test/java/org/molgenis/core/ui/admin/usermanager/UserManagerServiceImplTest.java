@@ -166,7 +166,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		Role role0 = mock(Role.class);
 		Role role1 = mock(Role.class);
-		when(dataService.findAll(RoleMetadata.GROUP, Role.class)).thenReturn(Stream.of(role0, role1));
+		when(dataService.findAll(RoleMetadata.ROLE, Role.class)).thenReturn(Stream.of(role0, role1));
 		this.setSecurityContextSuperUser();
 		assertEquals(userManagerService.getAllGroups(), Arrays.asList(role0, role1));
 	}
@@ -235,7 +235,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getGroup()).thenReturn(role22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(RoleMetadata.GROUP, "22", Role.class)).thenReturn(role22);
+		when(dataService.findOneById(RoleMetadata.ROLE, "22", Role.class)).thenReturn(role22);
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenAnswer(invocation -> Stream.of(groupMember));
@@ -273,7 +273,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(GroupMemberMetaData.USER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1), GroupMember.class)).thenReturn(
 				Stream.of(groupMember));
-		when(dataService.findAll(RoleMetadata.GROUP, Role.class)).thenReturn(Stream.of(role22, role33, role44));
+		when(dataService.findAll(RoleMetadata.ROLE, Role.class)).thenReturn(Stream.of(role22, role33, role44));
 
 		groupMember = mock(GroupMember.class);
 		when(groupMember.getGroup()).thenReturn(role22);
@@ -315,7 +315,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getGroup()).thenReturn(role22);
 
 		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
-		when(dataService.findOneById(RoleMetadata.GROUP, "22", Role.class)).thenReturn(role22);
+		when(dataService.findOneById(RoleMetadata.ROLE, "22", Role.class)).thenReturn(role22);
 
 		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1)
 														   .and().eq(GroupMemberMetaData.GROUP, role22);

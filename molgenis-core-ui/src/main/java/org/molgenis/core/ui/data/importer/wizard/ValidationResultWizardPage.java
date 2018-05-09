@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
@@ -110,7 +110,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			roles = dataService.findAll(GROUP, Role.class).collect(toList());
+			roles = dataService.findAll(ROLE, Role.class).collect(toList());
 		}
 
 		((ImportWizard) wizard).setGroups(roles);
