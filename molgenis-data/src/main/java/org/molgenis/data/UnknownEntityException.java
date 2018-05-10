@@ -1,30 +1,56 @@
 package org.molgenis.data;
 
-/**
- * @deprecated use class that extends from {@link org.molgenis.i18n.CodedRuntimeException}
- */
-@Deprecated
-public class UnknownEntityException extends MolgenisDataException
+import org.molgenis.data.meta.model.EntityType;
+
+import static java.util.Objects.requireNonNull;
+
+@SuppressWarnings({ "squid:MaximumInheritanceDepth" })
+public class UnknownEntityException extends UnknownDataException
 {
-	private static final long serialVersionUID = 5202731000953612564L;
+	private static final String ERROR_CODE = "D02";
 
-	public UnknownEntityException()
+	private transient EntityType entityType = null;
+
+	private final String entityTypeId;
+
+	private final transient Object entityId;
+
+	public UnknownEntityException(EntityType entityType, Object entityId)
 	{
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.entityTypeId = entityType.getId();
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(String msg)
+	public UnknownEntityException(String entityTypeId, Object entityId)
 	{
-		super(msg);
+		super(ERROR_CODE);
+		this.entityTypeId = requireNonNull(entityTypeId);
+		this.entityId = requireNonNull(entityId);
 	}
 
-	public UnknownEntityException(Throwable t)
+	public Object getEntityId()
 	{
-		super(t);
+		return entityId;
 	}
 
-	public UnknownEntityException(String msg, Throwable t)
+	@Override
+	public String getMessage()
 	{
-		super(msg, t);
+		return String.format("type:%s id:%s", entityTypeId, entityId.toString());
 	}
 
+	@Override
+	public String getErrorCode()
+	{
+		return entityType == null ? ERROR_CODE + "a" : ERROR_CODE;
+	}
+
+	@Override
+	protected Object[] getLocalizedMessageArguments()
+	{
+		return entityType == null ? new Object[] { entityTypeId, entityId } : new Object[] { entityType, entityId };
+	}
 }
+

@@ -235,7 +235,7 @@ public class DataPersisterImpl implements DataPersister
 		EntityType existingEntityType = dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, EntityType.class);
 		if (existingEntityType == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity type [%s]", entityType.getId()));
+			throw new UnknownEntityTypeException(entityType.getId());
 		}
 		return updateEntityTypeFirstPass(entityType, existingEntityType);
 

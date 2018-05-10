@@ -54,7 +54,7 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				Entity scriptType = dataService.findOne(ScriptTypeMetaData.SCRIPT_TYPE,
 						new QueryImpl<>().eq(ScriptTypeMetaData.NAME, "R"));
 
-				if (scriptType == null) throw new UnknownEntityException("ScriptType R does not exist!");
+				if (scriptType == null) throw new UnknownEntityException(ScriptMetaData.SCRIPT, "R");
 
 				String scriptContent;
 				try

@@ -72,7 +72,7 @@ public class JobSchedulerTest extends AbstractMolgenisSpringTest
 		verify(quartzScheduler).scheduleJob(ArgumentMatchers.any(JobDetail.class), ArgumentMatchers.any(Trigger.class));
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_job_ScheduledJob id:id")
 	public void runNowUnknownEntity()
 	{
 		when(dataService.findOneById(SCHEDULED_JOB, id)).thenReturn(null);

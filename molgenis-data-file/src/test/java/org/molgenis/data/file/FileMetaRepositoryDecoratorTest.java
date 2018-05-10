@@ -73,11 +73,10 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(fileStore).delete("id");
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "Unknown \\[file metadata] with id \\[id]")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_file_FileMeta id:id")
 	public void testDeleteByIdUnknownId()
 	{
-		EntityType entityType = when(mock(EntityType.class).getLabel()).thenReturn("file metadata").getMock();
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("sys_file_FileMeta").getMock();
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(delegateRepository.findOneById("id")).thenReturn(null);
 		fileMetaRepositoryDecorator.deleteById("id");

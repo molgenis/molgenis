@@ -966,8 +966,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
-		when(dataService.getEntityType("MyEntityType")).thenThrow(
-				new UnknownEntityException("Unknown entity [MyEntityType]"));
+		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
 
 		mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))

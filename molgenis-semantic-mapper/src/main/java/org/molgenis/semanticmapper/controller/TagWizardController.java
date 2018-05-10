@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.Relation;
@@ -95,7 +94,7 @@ public class TagWizardController extends PluginController
 
 		if (StringUtils.isEmpty(target))
 		{
-			throw new UnknownEntityException("There are no entities available!");
+			throw new IllegalStateException("There are no entities available!");
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
