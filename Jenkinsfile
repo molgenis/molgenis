@@ -4,7 +4,7 @@ pipeline {
         // Has to be configured on the host with this name : [ mvn-3.5.3 ]
         maven 'mvn-3.5.3'
         // Has to be configured on the host with this name : [ jdk-8u162 ]
-        jdk 'jdk-8u162'
+        jdk 'jdk-8u172'
     }
 
 //    environment {
