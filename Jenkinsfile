@@ -37,7 +37,8 @@ pipeline {
                         unit: {
                             sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit"
-                            withCredentials([string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
+                            withCredentials(
+                                [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
                                 sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode --quiet"
                             }
                         })
@@ -65,6 +66,7 @@ pipeline {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
            notifySuccess()
+           build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: ${version}]
         }
         failure {
            notifyFailed()
