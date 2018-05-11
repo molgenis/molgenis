@@ -19,7 +19,7 @@ pipeline {
                 script {
                     pom = readMavenPom file: 'pom.xml'
                     version = pom.version.replace("-SNAPSHOT", "-${currentBuild.number}-${env.GIT_COMMIT.substring(0,7)}")
-                    currentBuild.displayName = "#${currentBuild.number}-${version}"
+                    currentBuild.displayName = "#${currentBuild.number}.${version}"
                 }
 
                 sh "git config --global user.email molgenis+ci@gmail.com"
