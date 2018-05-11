@@ -35,10 +35,11 @@ pipeline {
             steps {
                 parallel(
                         unit: {
-
                             sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit"
-                            sh ".travis/sonar.sh"
+                            withCredentials([string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
+                                sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode --quiet"
+                            }
                         })
 //                        api: {
 //                            sh "sysctl -w vm.max_map_count=262144"
