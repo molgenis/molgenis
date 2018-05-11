@@ -1,3 +1,6 @@
+@Library('zion-pipeline-library')
+import com.sonatype.jenkins.pipeline.GitHub
+
 pipeline {
     agent any
     tools {
