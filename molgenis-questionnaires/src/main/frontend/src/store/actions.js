@@ -24,9 +24,17 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit}: VuexContext, questionnaireId: string) {
-    return api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).catch(error => {
-      handleError(commit, error)
+  'START_QUESTIONNAIRE' ({commit}: VuexContext, questionnaireId: string) : Promise<any> {
+    return new Promise((resolve, reject) => {
+      cleanScreen(commit)
+      api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(response => {
+        commit('SET_QUESTIONNAIRE_ROW_ID', response.id)
+        commit('SET_LOADING', false)
+        resolve(response.id)
+      }, error => {
+        handleError(commit, error)
+        reject(error)
+      })
     })
   },
 
@@ -86,9 +94,10 @@ const actions = {
 
     return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).then(() => {
       commit('SET_FORM_DATA', formData)
+    }, error => {
+      handleError(commit, error)
     }).then(() => {
       commit('DECREMENT_SAVING_QUEUE')
-      commit('SET_LOADING', false)
     })
   },
 

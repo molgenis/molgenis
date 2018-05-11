@@ -1,7 +1,6 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItemType;
@@ -12,6 +11,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.testng.Assert.*;
 
 @SuppressWarnings("deprecation")
@@ -98,7 +98,7 @@ public class XmlMolgenisUiPluginTest
 		PluginType pluginType = new PluginType();
 		pluginType.setName(type);
 		pluginType.setId(id);
-		when(permissionService.hasPermission(new PluginIdentity(id), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity(id), VIEW_PLUGIN)).thenReturn(true);
 		XmlMolgenisUiPlugin xmlMolgenisUiPlugin = new XmlMolgenisUiPlugin(pluginType, molgenisUiMenu,
 				permissionService);
 		assertTrue(xmlMolgenisUiPlugin.isAuthorized());

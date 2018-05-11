@@ -6,15 +6,13 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.integrationtest.platform.TestPermissionPopulator;
 import org.molgenis.ontology.core.meta.Ontology;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.Sid;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
@@ -25,9 +23,6 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptySet;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
-import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -187,25 +182,18 @@ public class OntologyImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private MutableAclService mutableAclService;
+	private TestPermissionPopulator testPermissionPopulator;
 
 	private void populateUserPermissions()
 	{
-		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermDynamicAnnotation"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermNodePath"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermSynonym"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_ont_Ontology"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTerm"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_ont_OntologyTermDynamicAnnotation", WRITE);
-		entityTypePermissionMap.put("sys_ont_OntologyTermNodePath", WRITE);
-		entityTypePermissionMap.put("sys_ont_OntologyTermSynonym", WRITE);
-		entityTypePermissionMap.put("sys_ont_Ontology", WRITE);
-		entityTypePermissionMap.put("sys_ont_OntologyTerm", WRITE);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-
-		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
-		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
-			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
-			mutableAclService.updateAcl(acl);
-		}));
+		testPermissionPopulator.populate(permissionMap, SecurityUtils.getCurrentUsername());
 	}
 }

@@ -7,6 +7,7 @@ import org.molgenis.jobs.JobExecutionUpdater;
 import org.molgenis.jobs.ProgressImpl;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -42,6 +43,9 @@ public class SortaJobFactory
 	@Autowired
 	private MenuReaderService menuReaderService;
 
+	@Autowired
+	private RunAsUserTokenFactory runAsUserTokenFactory;
+
 	@RunAsSystem
 	public SortaJobImpl create(SortaJobExecution jobExecution)
 	{
@@ -50,8 +54,8 @@ public class SortaJobFactory
 		ProgressImpl progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
 
 		String username = jobExecution.getUser();
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
-				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+		RunAsUserToken runAsAuthentication = runAsUserTokenFactory.create("Job Execution",
+				userDetailsService.loadUserByUsername(username), null);
 
 		SortaJobProcessor matchInputTermBatchService = new SortaJobProcessor(jobExecution.getOntologyIri(),
 				jobExecution.getSourceEntityName(), jobExecution.getResultEntityName(), progress, dataService,

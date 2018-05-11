@@ -5,7 +5,6 @@ import org.mockito.quality.Strictness;
 import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
@@ -13,6 +12,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
@@ -98,7 +98,7 @@ public class AppsControllerTest extends AbstractMockitoTestNGSpringContextTests
 		Sort sort = mock(Sort.class);
 		when(query.sort()).thenReturn(sort);
 		when(query.findAll()).thenReturn(Stream.of(app0, app1));
-		when(permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.WRITE)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity(APP), EntityTypePermission.UPDATE_DATA)).thenReturn(
 				hasWriteAppPermission);
 
 		AppInfoDto appInfoDto0 = AppInfoDto.builder()

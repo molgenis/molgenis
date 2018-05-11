@@ -324,7 +324,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public AuthenticationProvider tokenAuthenticationProvider()
 	{
-		return new TokenAuthenticationProvider(tokenService());
+		return new TokenAuthenticationProvider(tokenService(), userDetailsChecker());
 	}
 
 	@Bean

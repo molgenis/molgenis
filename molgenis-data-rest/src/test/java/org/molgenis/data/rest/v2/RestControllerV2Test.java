@@ -3,7 +3,6 @@ package org.molgenis.data.rest.v2;
 import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.*;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
@@ -29,6 +28,7 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
@@ -160,7 +160,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
 		validationMessages.addBasenames("org.hibernate.validator.ValidationMessages");
 		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
-		messageSource.addMolgenisNamespaces("data", "web");
+		messageSource.addMolgenisNamespaces("data", "web", "data-security");
 		messageSource.setParentMessageSource(validationMessages);
 		MessageSourceHolder.setMessageSource(messageSource);
 	}
@@ -562,6 +562,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void retrieveResourceCollectionUnknownEntityType() throws Exception
+	{
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponseUnknownEntityType.json"));
+		mockMvc.perform(get(BASE_URI + '/' + "unknown"))
+			   .andExpect(status().isNotFound())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
 	public void retrieveEntityCollectionWithZeroNumSize() throws Exception
 	{
 		// have count return a non null value irrespective of query
@@ -669,7 +680,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isBadRequest())
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
 					   is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
 		verifyZeroInteractions(repoCopier);
@@ -683,15 +693,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isUnauthorized())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No read permission on entity entity")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("DS04a")))
+			   .andExpect(
+					   jsonPath(FIRST_ERROR_MESSAGE, is("No 'Read data' permission on entity type with id 'entity'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -730,7 +741,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(
 				true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);

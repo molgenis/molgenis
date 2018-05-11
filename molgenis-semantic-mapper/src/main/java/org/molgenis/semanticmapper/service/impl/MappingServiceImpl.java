@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.google.api.client.util.Maps.newHashMap;
+import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -35,7 +35,6 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 
 public class MappingServiceImpl implements MappingService
@@ -228,7 +227,7 @@ public class MappingServiceImpl implements MappingService
 
 	private Repository<Entity> addTargetEntityType(EntityType targetMetadata)
 	{
-		Repository<Entity> targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetadata));
+		Repository<Entity> targetRepo = dataService.getMeta().createRepository(targetMetadata);
 		permissionSystemService.giveUserWriteMetaPermissions(targetMetadata);
 		return targetRepo;
 	}

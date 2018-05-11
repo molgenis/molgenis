@@ -13,6 +13,7 @@ import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -248,6 +249,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		JobFactoryRegistry jobFactoryRegistry;
 
 		@Mock
+		RunAsUserTokenFactory runAsUserTokenFactory;
+
+		@Mock
 		private ExecutorService executorService;
 
 		public void resetMocks()
@@ -283,6 +287,12 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		public MailSender mailSender()
 		{
 			return mock(MailSender.class);
+		}
+
+		@Bean
+		public RunAsUserTokenFactory runAsUserTokenFactory()
+		{
+			return runAsUserTokenFactory;
 		}
 
 		@Bean

@@ -19,13 +19,15 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
+import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,8 +53,6 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
@@ -139,8 +139,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		refEntityTypeStatic = testHarness.createStaticRefTestEntityType();
 		entityTypeStatic = testHarness.createStaticTestEntityType();
-		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("PlatformITRefEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "PlatformITEntityType");
 
 		// Create a self refer entity
 		selfXrefEntityType = entitySelfXrefTestHarness.createDynamicEntityType();
@@ -810,18 +810,18 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", WRITE);
-		entityTypePermissionMap.put("sys_md_Attribute", WRITE);
-		entityTypePermissionMap.put("sys_Language", WRITE);
-		entityTypePermissionMap.put("sys_L10nString", WRITE);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
-		entityTypePermissionMap.put(refEntityTypeStatic.getId(), WRITE);
-		entityTypePermissionMap.put(entityTypeStatic.getId(), WRITE);
-		entityTypePermissionMap.put(entityTypeDynamic.getId(), WRITE);
-		entityTypePermissionMap.put(refEntityTypeDynamic.getId(), READ);
-		entityTypePermissionMap.put(selfXrefEntityType.getId(), WRITE);
+		Map<ObjectIdentity, PermissionSet> entityTypePermissionMap = new HashMap<>();
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeStatic), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeStatic), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.WRITE);
+		entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), PermissionSet.WRITE);
 
 		testPermissionPopulator.populate(entityTypePermissionMap);
 	}

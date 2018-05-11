@@ -9,6 +9,7 @@ import org.molgenis.gavin.job.input.Parser;
 import org.molgenis.jobs.JobExecutionUpdater;
 import org.molgenis.jobs.ProgressImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,12 +40,13 @@ public class GavinJobFactory
 	private EffectBasedAnnotator gavin;
 	private MenuReaderService menuReaderService;
 	private AnnotatorRunner annotatorRunner;
+	private RunAsUserTokenFactory runAsUserTokenFactory;
 
 	public GavinJobFactory(DataService dataService, PlatformTransactionManager transactionManager,
 			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
 			FileStore fileStore, RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff,
 			EffectBasedAnnotator gavin, MenuReaderService menuReaderService, Parser parser,
-			AnnotatorRunner annotatorRunner)
+			AnnotatorRunner annotatorRunner, RunAsUserTokenFactory runAsUserTokenFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.transactionManager = requireNonNull(transactionManager);
@@ -59,6 +61,7 @@ public class GavinJobFactory
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.parser = requireNonNull(parser);
 		this.annotatorRunner = requireNonNull(annotatorRunner);
+		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
 	}
 
 	@RunAsSystem
@@ -67,8 +70,8 @@ public class GavinJobFactory
 		dataService.add(gavinJobExecution.getEntityType().getId(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
 		// create an authentication to run as the user that is listed as the owner of the job
-		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
-				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+		RunAsUserToken runAsAuthentication = runAsUserTokenFactory.create("Job Execution",
+				userDetailsService.loadUserByUsername(username), null);
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),

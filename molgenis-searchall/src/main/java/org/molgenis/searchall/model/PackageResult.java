@@ -1,8 +1,8 @@
 package org.molgenis.searchall.model;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_PackageResult.class)

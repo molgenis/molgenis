@@ -1,21 +1,23 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
@@ -39,17 +41,19 @@ class EntityTypeResponseV2
 	 */
 	private final Boolean writable;
 	private String languageCode;
+	private final Set<Permission> permissions;
 
-	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService,
+	public EntityTypeResponseV2(EntityType meta, UserPermissionEvaluator userPermissionEvaluator,
+			DataService dataService,
 			boolean includeCategories)
 	{
-		this(meta, null, permissionService, dataService, includeCategories);
+		this(meta, null, userPermissionEvaluator, dataService, includeCategories);
 	}
 
 	/**
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator permissionService,
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, UserPermissionEvaluator userPermissionEvaluator,
 			DataService dataService, boolean includeCategories)
 	{
 		String name = meta.getId();
@@ -81,7 +85,8 @@ class EntityTypeResponseV2
 			{
 				subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr, languageCode);
 			}
-			return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService, dataService, includeCategories);
+			return new AttributeResponseV2(name, meta, attr, subAttrFetch, userPermissionEvaluator, dataService,
+					includeCategories);
 		}).collect(Collectors.toList());
 
 		languageCode = getCurrentUserLanguageCode();
@@ -93,16 +98,17 @@ class EntityTypeResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(
+		this.lookupAttributes = lookupAttributes != null ? newArrayList(
 				Iterables.transform(lookupAttributes, Attribute::getName)) : null;
 
 		this.isAbstract = meta.isAbstract();
 
 		this.writable =
-				permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE) && dataService
-						.getCapabilities(name)
-						.contains(
-																										  RepositoryCapability.WRITABLE);
+				userPermissionEvaluator.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.UPDATE_DATA)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+
+		this.permissions = userPermissionEvaluator.getPermissions(new EntityTypeIdentity(name),
+				EntityTypePermission.values());
 	}
 
 	public String getHref()
@@ -165,4 +171,8 @@ class EntityTypeResponseV2
 		return languageCode;
 	}
 
+	public Set<Permission> getPermissions()
+	{
+		return permissions;
+	}
 }

@@ -35,6 +35,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
 		public static final String GENERAL_NAVIGATOR_LINK = "show_navigator_link";
+		public static final String DATA_USE_VUE_ROW_EDIT = "use_vue_data_row_edit";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
 		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
@@ -83,6 +84,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		private static final boolean DEFAULT_AGGREGATES_DISTINCT_SELECT = true;
 
 		private static final boolean DEFAULT_SHOW_NAVIGATOR_LINK = true;
+		private static final boolean DEFAULT_USE_VUE_DATA_ROW_EDIT = false;
 
 		public Meta()
 		{
@@ -215,6 +217,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 											 .setNillable(false)
 											 .setDefaultValue(String.valueOf(DEFAULT_DATA_GENOME_BROWSER))
 											 .setLabel("Genome Browser");
+
+			addAttribute(DATA_USE_VUE_ROW_EDIT).setParent(modAttr)
+											   .setDataType(BOOL)
+											   .setNillable(false)
+											   .setDefaultValue(String.valueOf(DEFAULT_USE_VUE_DATA_ROW_EDIT))
+											   .setLabel("Edit the data row using the forms edit plugin.");
 		}
 
 		private void createModAggregatesSettings(Attribute modAttr)
@@ -256,8 +264,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModAggregates()
 	{
-		Boolean value = getBoolean(Meta.MOD_AGGREGATES);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.MOD_AGGREGATES));
 	}
 
 	public void setModAggregates(boolean modAggregates)
@@ -267,8 +274,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModAnnotators()
 	{
-		Boolean value = getBoolean(Meta.MOD_ANNOTATORS);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.MOD_ANNOTATORS));
 	}
 
 	public void setModAnnotators(boolean modAnnotators)
@@ -278,8 +284,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModData()
 	{
-		Boolean value = getBoolean(Meta.MOD_DATA);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.MOD_DATA));
 	}
 
 	public void setModData(boolean modData)
@@ -289,14 +294,12 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getModReports()
 	{
-		Boolean value = getBoolean(Meta.MOD_REPORTS);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.MOD_REPORTS));
 	}
 
 	public boolean getModStandaloneReports()
 	{
-		Boolean value = getBoolean(Meta.MOD_STANDALONE_REPORTS);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.MOD_STANDALONE_REPORTS));
 	}
 
 	public void setModReports(boolean modReports)
@@ -325,8 +328,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getSearchbox()
 	{
-		Boolean value = getBoolean(Meta.GENERAL_SEARCHBOX);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.GENERAL_SEARCHBOX));
 	}
 
 	public void setSearchbox(boolean searchbox)
@@ -336,8 +338,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getItemSelection()
 	{
-		Boolean value = getBoolean(Meta.GENERAL_ITEM_SELECT_PANEL);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.GENERAL_ITEM_SELECT_PANEL));
 	}
 
 	public void setItemSelection(boolean itemSelection)
@@ -347,8 +348,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getLaunchWizard()
 	{
-		Boolean value = getBoolean(Meta.GENERAL_LAUNCH_WIZARD);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.GENERAL_LAUNCH_WIZARD));
 	}
 
 	public void setLaunchWizard(boolean launchWizard)
@@ -369,8 +369,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowser()
 	{
-		Boolean value = getBoolean(Meta.DATA_GENOME_BROWSER);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.DATA_GENOME_BROWSER));
 	}
 
 	public void setGenomeBrowser(boolean genomeBrowser)
@@ -421,8 +420,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getGenomeBrowserHighlightRegion()
 	{
-		Boolean value = getBoolean(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.GENOMEBROWSER_INIT_HIGHLIGHT_REGION));
 	}
 
 	public void setGenomeBrowserHighlightRegion(boolean genomeBrowserHighlightRegion)
@@ -432,8 +430,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 	public boolean getAggregatesDistinctSelect()
 	{
-		Boolean value = getBoolean(Meta.AGGREGATES_DISTINCT_SELECT);
-		return value != null ? value : false;
+		return isTruthy(getBoolean(Meta.AGGREGATES_DISTINCT_SELECT));
 	}
 
 	public void setAggregatesDistinctSelect(boolean aggregatesDistinctSelect)
@@ -483,13 +480,26 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	@Nullable
 	public boolean isShowNavigatorLink()
 	{
-		Boolean result = getBoolean(Meta.GENERAL_NAVIGATOR_LINK);
-		return result == null ? false : result.booleanValue();
+		return isTruthy(getBoolean(Meta.GENERAL_NAVIGATOR_LINK));
 	}
 
 	@Nullable
 	public void setShowNavigatorLink(boolean showNavigatorLink)
 	{
 		set(Meta.GENERAL_NAVIGATOR_LINK, showNavigatorLink);
+	}
+
+	public boolean isUseVueDataRowEdit()
+	{
+		return isTruthy(getBoolean(Meta.DATA_USE_VUE_ROW_EDIT));
+	}
+
+	/**
+	 * @param input nullable boolean
+	 * @return boolean Indicates if input is truthy; Returns false when input is null, else it returns the input value
+	 */
+	private boolean isTruthy(@Nullable Boolean input)
+	{
+		return input != null && input;
 	}
 }

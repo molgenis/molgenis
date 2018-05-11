@@ -12,6 +12,10 @@
     <name>app</name>
     <description>Default MOLGENIS application module containing all default plugins.</description>
 
+    <properties>
+        <owasp-check-format>HTML</owasp-check-format>
+    </properties>
+
     <build>
         <resources>
             <resource>
@@ -70,6 +74,20 @@
                 <plugin>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
+                </plugin>
+                <!--
+                    Checks (transitive) dependencies for known vulnerabilities.
+                    > mvn org.owasp:dependency-check-maven:check
+                    > mvn org.owasp:dependency-check-maven:check -Dowasp-check-format=XML
+                -->
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>3.1.2</version>
+                    <configuration>
+                        <suppressionFile>owasp-check-suppressions.xml</suppressionFile>
+                        <format>${owasp-check-format}</format>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -154,6 +172,11 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-row-edit</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -3,6 +3,7 @@ package org.molgenis.jobs;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,8 @@ public class JobExecutionConfig
 	private ExecutorService executorService;
 	@Autowired
 	private JobFactoryRegistry jobFactoryRegistry;
+	@Autowired
+	private RunAsUserTokenFactory runAsUserTokenFactory;
 
 	@Primary // Use this ExecutorService when no specific bean is demanded
 	@Bean
@@ -44,6 +47,6 @@ public class JobExecutionConfig
 	public JobExecutor jobExecutor()
 	{
 		return new JobExecutor(dataService, entityManager, userDetailsService, jobExecutionUpdater, mailSender,
-				executorService, jobFactoryRegistry);
+				executorService, jobFactoryRegistry, runAsUserTokenFactory);
 	}
 }

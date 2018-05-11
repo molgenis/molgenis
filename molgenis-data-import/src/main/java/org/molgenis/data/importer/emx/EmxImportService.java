@@ -122,14 +122,14 @@ public class EmxImportService implements ImportService
 	{
 		List<String> skipEntities = newArrayList(EmxMetaDataParser.EMX_ATTRIBUTES, EmxMetaDataParser.EMX_PACKAGES,
 				EmxMetaDataParser.EMX_ENTITIES, EmxMetaDataParser.EMX_TAGS);
-		ImmutableMap<String, EntityType> EntityTypeMap = parser.parse(repositoryCollection, selectedPackage)
+		ImmutableMap<String, EntityType> entityTypeMap = parser.parse(repositoryCollection, selectedPackage)
 															   .getEntityMap();
 
 		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-		stream(EntityTypeMap.keySet().spliterator(), false).forEach(entityTypeId ->
+		stream(entityTypeMap.keySet().spliterator(), false).forEach(entityTypeId ->
 		{
 			boolean importable = skipEntities.contains(entityTypeId) || metaDataService.isEntityTypeCompatible(
-					EntityTypeMap.get(entityTypeId));
+					entityTypeMap.get(entityTypeId));
 
 			importableEntitiesMap.put(entityTypeId, importable);
 		});

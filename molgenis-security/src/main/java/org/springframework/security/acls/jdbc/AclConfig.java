@@ -4,16 +4,16 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.molgenis.data.config.DataSourceConfig;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.NoOpAuditLogger;
-import org.molgenis.security.acl.AclCacheTransactionListener;
-import org.molgenis.security.acl.BitMaskPermissionGrantingStrategy;
-import org.molgenis.security.acl.TransactionalJdbcMutableAclService;
+import org.molgenis.security.acl.*;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.AclAuthorizationStrategy;
 import org.springframework.security.acls.domain.AclAuthorizationStrategyImpl;
@@ -38,6 +38,8 @@ public class AclConfig
 {
 	private final DataSource dataSource;
 	private final TransactionManager transactionManager;
+	@Autowired
+	JdbcTemplate jdbcTemplate;
 
 	public AclConfig(DataSource dataSource, TransactionManager transactionManager)
 	{
@@ -76,9 +78,16 @@ public class AclConfig
 	@Bean
 	public AclCacheTransactionListener aclCacheTransactionListener()
 	{
-		AclCacheTransactionListener aclCacheTransactionListener = new AclCacheTransactionListener(aclCache());
+		AclCacheTransactionListener aclCacheTransactionListener = new AclCacheTransactionListener(aclCache(),
+				mutableAclClassService());
 		transactionManager.addTransactionListener(aclCacheTransactionListener);
 		return aclCacheTransactionListener;
+	}
+
+	@Bean
+	public MutableAclClassService mutableAclClassService()
+	{
+		return new MutableAclClassServiceImpl(jdbcTemplate, aclCache());
 	}
 
 	@Bean

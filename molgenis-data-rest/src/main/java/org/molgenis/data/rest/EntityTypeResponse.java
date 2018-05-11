@@ -4,13 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import java.util.*;
@@ -30,15 +31,16 @@ public class EntityTypeResponse
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 	private String languageCode;
+	private final Set<Permission> permissions;
 
 	/**
 	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
 	 */
 	private final Boolean writable;
 
-	public EntityTypeResponse(EntityType meta, UserPermissionEvaluator permissionService, DataService dataService)
+	public EntityTypeResponse(EntityType meta, UserPermissionEvaluator userPermissionEvaluator, DataService dataService)
 	{
-		this(meta, null, null, permissionService, dataService);
+		this(meta, null, null, userPermissionEvaluator, dataService);
 	}
 
 	/**
@@ -46,7 +48,7 @@ public class EntityTypeResponse
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityTypeResponse(EntityType meta, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet,
-			UserPermissionEvaluator permissionService, DataService dataService)
+			UserPermissionEvaluator userPermissionEvaluator, DataService dataService)
 	{
 		String name = meta.getId();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -85,7 +87,7 @@ public class EntityTypeResponse
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeResponse(name, meta, attr, subAttributesSet,
 								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService, dataService));
+								userPermissionEvaluator, dataService));
 					}
 					else
 					{
@@ -125,11 +127,16 @@ public class EntityTypeResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable =
-				permissionService.hasPermission(new EntityTypeIdentity(name), EntityTypePermission.WRITE) && dataService
-						.getCapabilities(name)
-						.contains(
-																										  RepositoryCapability.WRITABLE);
+		boolean hasWritePermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(name),
+				EntityTypePermission.UPDATE_DATA);
+		boolean hasWriteMetaPermission = userPermissionEvaluator.hasPermission(new EntityTypeIdentity(name),
+				EntityTypePermission.UPDATE_METADATA);
+		this.writable = (hasWritePermission || hasWriteMetaPermission) && dataService.getCapabilities(name)
+																					 .contains(
+																							 RepositoryCapability.WRITABLE);
+
+		this.permissions = userPermissionEvaluator.getPermissions(new EntityTypeIdentity(name),
+				EntityTypePermission.values());
 	}
 
 	public String getHref()
@@ -192,4 +199,8 @@ public class EntityTypeResponse
 		return languageCode;
 	}
 
+	public Set<Permission> getPermissions()
+	{
+		return permissions;
+	}
 }

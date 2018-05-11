@@ -46,8 +46,9 @@
      * @memberOf molgenis.dataexplorer.data
      */
     function createDataTable() {
+        var useDateEditRowPlugin = this.useDateEditRowPlugin;
         $.get('/permission/sys_FreemarkerTemplate/read').done(function (canRead) {
-            Table = React.render(molgenis.ui.Table({
+            var tableProperties = {
                 entity: getEntity().name,
                 attrs: getAttributesTree(),
                 query: getQuery(),
@@ -65,7 +66,16 @@
                         }]
                     };
                 }
-            }), $('#data-table-container')[0]);
+            }
+            if (useDateEditRowPlugin) {
+                tableProperties.onEditClick = function (tableId, tableRowId) {
+                    window.location.assign(window.location.origin + '/plugin/data-row-edit/' + tableId + '/' + tableRowId)
+                },
+                tableProperties.onAddClick = function (tableId) {
+                    window.location.assign(window.location.origin + '/plugin/data-row-edit/' + tableId)
+                }
+            }
+            Table = React.render(molgenis.ui.Table(tableProperties), $('#data-table-container')[0]);
         });
     }
 

@@ -4,16 +4,17 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.EntityTypePermissionUtils;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,8 @@ import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.GroupMetaData.NAME;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.acl.SidUtils.createSid;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
 @Component
 public class PermissionRegistryImpl implements PermissionRegistry
@@ -44,24 +47,29 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	}
 
 	@Override
-	public Multimap<ObjectIdentity, Pair<Permission, Sid>> getPermissions()
+	public Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> getPermissions()
 	{
-		ImmutableMultimap.Builder<ObjectIdentity, Pair<Permission, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
+		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
 		Group allUsersGroup = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
 		Sid allUsersGroupSid = createSid(allUsersGroup);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
-		mapBuilder.putAll(pluginIdentity, new Pair<>(PluginPermission.READ, allUsersGroupSid));
+		mapBuilder.putAll(pluginIdentity, new Pair<>(READ, allUsersGroupSid));
+
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,
 						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
-			Permission entityTypePermissions = EntityTypePermissionUtils.getCumulativePermission(
-					EntityTypePermission.READ);
-			mapBuilder.putAll(entityTypeIdentity, new Pair<>(entityTypePermissions, allUsersGroupSid));
+			mapBuilder.putAll(entityTypeIdentity, new Pair<>(READ, allUsersGroupSid));
+		});
+
+		dataService.findAll(PackageMetadata.PACKAGE, Stream.of(UploadPackage.UPLOAD), Package.class).forEach(pack ->
+		{
+			ObjectIdentity packageIdentity = new PackageIdentity(pack);
+			mapBuilder.putAll(packageIdentity, new Pair<>(WRITEMETA, allUsersGroupSid));
 		});
 
 		return mapBuilder.build();

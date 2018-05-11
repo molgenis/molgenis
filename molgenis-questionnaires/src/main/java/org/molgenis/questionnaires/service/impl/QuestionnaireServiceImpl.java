@@ -59,22 +59,28 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 						  .eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)
 						  .findAll()
 						  .filter(entityType -> userPermissionEvaluator.hasPermission(
-								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.WRITE))
+								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.ADD_DATA))
+						  .filter(entityType -> userPermissionEvaluator.hasPermission(
+								  new EntityTypeIdentity(entityType.getId()), EntityTypePermission.UPDATE_DATA))
 						  .map(this::createQuestionnaireResponse)
 						  .collect(toList());
 	}
 
 	@Override
-	public void startQuestionnaire(String id)
+	public QuestionnaireResponse startQuestionnaire(String entityTypeId)
 	{
-		Questionnaire questionnaire = findQuestionnaireEntity(id);
+		Questionnaire questionnaire = findQuestionnaireEntity(entityTypeId);
 		if (questionnaire == null)
 		{
-			EntityType questionnaireEntityType = dataService.getEntityType(id);
+			EntityType questionnaireEntityType = dataService.getEntityType(entityTypeId);
 			questionnaire = questionnaireFactory.create(entityManager.create(questionnaireEntityType, POPULATE));
 			questionnaire.setOwner(getCurrentUsername());
 			questionnaire.setStatus(OPEN);
-			dataService.add(id, questionnaire);
+			dataService.add(entityTypeId, questionnaire);
+			Questionnaire newQuestionnaire = findQuestionnaireEntity(questionnaire.getEntityType().getId());
+			return QuestionnaireResponse.create(newQuestionnaire);
+		} else {
+			return QuestionnaireResponse.create(questionnaire);
 		}
 	}
 
@@ -122,6 +128,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	 */
 	private Questionnaire findQuestionnaireEntity(String entityTypeId)
 	{
-		return questionnaireFactory.create(dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername())));
+		Entity questionnaireInstance = dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername()));
+		return questionnaireFactory.create(questionnaireInstance);
 	}
 }

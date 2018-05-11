@@ -11,12 +11,14 @@ import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
+import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
@@ -73,8 +73,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	@BeforeClass
 	public void setUp()
 	{
-		refEntityTypeDynamic = testHarness.createDynamicRefEntityType();
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic);
+		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "DynamicDecoratorITEntityType");
 
 		runAsSystem(() ->
 		{
@@ -154,17 +154,17 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 
 	private void populatePermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", READ);
-		entityTypePermissionMap.put("sys_md_Attribute", READ);
-		entityTypePermissionMap.put("sys_Language", READ);
-		entityTypePermissionMap.put("sys_L10nString", READ);
-		entityTypePermissionMap.put("sys_dec_DynamicDecorator", WRITE);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", WRITE);
-		entityTypePermissionMap.put(entityTypeDynamic.getId(), WRITE);
-		entityTypePermissionMap.put(refEntityTypeDynamic.getId(), READ);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DynamicDecorator"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.READ);
 
-		testPermissionPopulator.populate(entityTypePermissionMap);
+		testPermissionPopulator.populate(permissionMap);
 	}
 }

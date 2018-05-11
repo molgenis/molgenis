@@ -9,6 +9,7 @@ import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;
@@ -238,6 +239,18 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertNull(entity.get("col1"));
 
 			assertFalse(it.hasNext());
+		}
+	}
+
+	@Test
+	public void iteratorCaseSensitity() throws IOException
+	{
+		File csvFile = ResourceUtils.getFile("case-sensitivity.csv");
+		try (CsvRepository csvRepository = new CsvRepository(csvFile, entityTypeFactory, attrMetaFactory, null))
+		{
+			Entity entity = csvRepository.iterator().next();
+			assertEquals(entity.get("Header"), "Value #0");
+			assertNull(entity.get("hEADER"));
 		}
 	}
 }

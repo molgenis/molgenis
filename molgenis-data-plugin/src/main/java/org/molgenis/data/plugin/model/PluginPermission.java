@@ -1,18 +1,23 @@
 package org.molgenis.data.plugin.model;
 
-import org.springframework.security.acls.domain.AbstractPermission;
+import org.molgenis.security.core.Permission;
 
-public class PluginPermission extends AbstractPermission
+import static java.util.Objects.requireNonNull;
+
+public enum PluginPermission implements Permission
 {
-	public static final PluginPermission READ = new PluginPermission(1 << 0, 'R'); // 1
+	VIEW_PLUGIN("Permission to view this plugin");
 
-	protected PluginPermission(int mask)
+	private String defaultDescription;
+
+	PluginPermission(String defaultDescription)
 	{
-		super(mask);
+		this.defaultDescription = requireNonNull(defaultDescription);
 	}
 
-	protected PluginPermission(int mask, char code)
+	@Override
+	public String getDefaultDescription()
 	{
-		super(mask, code);
+		return defaultDescription;
 	}
 }

@@ -214,6 +214,36 @@ describe('getters', () => {
 
       expect(actual).to.deep.equal(expected)
     })
+
+    it('should catch and log an error in case the visible expression evaluation throws an error', () => {
+      let stub = sinon.stub(console, 'error')
+
+      const stateWithError = {
+        chapterFields: [
+          {
+            id: 'chapter-1',
+            label: 'First chapter',
+            type: 'field-group',
+            children: [
+              {
+                id: 'chapter-1-field-1',
+                type: 'text',
+                visible: (data) => { throw new Error('This can\'t be happening!') }
+              }
+            ]
+          }
+        ],
+        formData: {'chapter-1-field-1': 'value'},
+        questionnaire: {}
+      }
+
+      getters.getChapterProgress(stateWithError)
+
+      expect(console.error.calledOnce).to.equal(true)
+      expect(console.error.calledWith(sinon.match('Error in getters.getTotalNumberOfFieldsForChapter'))).to.equal(true)
+      stub.reset()
+      stub.resetBehavior()
+    })
   })
 
   describe('getTotalNumberOfChapters', () => {

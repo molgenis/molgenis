@@ -123,6 +123,7 @@
             $.ajax('<@resource_href "/js/dataexplorer-directory.js"/>', {'cache': true}))
             .done(function () {
             <#-- do *not* js escape values below -->
+                molgenis.dataexplorer.data.useDateEditRowPlugin = ${plugin_settings.use_vue_data_row_edit?c}
                 molgenis.dataexplorer.data.setGenomeBrowserSettings({
                 ${plugin_settings.gb_init_location},
                         coordSystem

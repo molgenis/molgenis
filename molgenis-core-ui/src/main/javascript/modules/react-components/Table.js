@@ -112,29 +112,32 @@ var Table = React.createClass({
             return Spinner(); // entity not available yet
         }
 
-        var writable = this.state.data.meta.writable;
+        var editable = this.state.data.meta.permissions.indexOf("UPDATE_DATA") >= 0;
+        var creatable = this.state.data.meta.permissions.indexOf("ADD_DATA") >= 0;
+        var deletable = this.state.data.meta.permissions.indexOf("DELETE_DATA") >= 0;
 
         var TableHeader = TableHeaderFactory({
             entity: this.state.data.meta,
             attrs: this.state.attrs,
             sort: this.state.sort,
-            enableAdd: writable && this.props.enableAdd === true,
-            enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableAdd: creatable && this.props.enableAdd === true,
+            enableEdit: editable && this.props.enableEdit === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onSort: this._handleSort,
             onExpand: this._handleExpand,
             onCollapse: this._handleCollapse,
             onCreate: this._handleCreate,
-            onExecute: this.props.onExecute
+            onExecute: this.props.onExecute,
+            onAddClick: this.props.onAddClick
         });
 
         var TableBody = TableBodyFactory({
             data: this.state.data,
             attrs: this.state.attrs,
-            enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableEdit: editable && this.props.enableEdit === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onEdit: this._handleEdit,
@@ -142,7 +145,8 @@ var Table = React.createClass({
             onRowInspect: this.props.onRowInspect,
             onRowClick: this.props.onRowClick,
             onExecute: this.props.onExecute,
-            selectedRow: this.props.selectedRow
+            selectedRow: this.props.selectedRow,
+            onEditClick: this.props.onEditClick
         });
 
         var className = 'table table-striped table-condensed table-bordered molgenis-table';
@@ -304,7 +308,8 @@ var TableHeader = React.createClass({
         enableEdit: React.PropTypes.bool,
         enableDelete: React.PropTypes.bool,
         enableInspect: React.PropTypes.bool,
-        enableExecute: React.PropTypes.bool
+        enableExecute: React.PropTypes.bool,
+        onAddClick: React.PropTypes.func
     },
     render: function () {
         return thead(null,
@@ -318,7 +323,8 @@ var TableHeader = React.createClass({
         if (this.props.enableAdd === true) {
             Headers.push(th({className: 'compact', key: 'add'}, EntityCreateBtnFactory({
                 entity: this.props.entity,
-                onCreate: this.props.onCreate
+                onCreate: this.props.onCreate,
+                onClick: this.props.onAddClick
             })));
         }
         if (this.props.enableAdd === false && this.props.enableEdit === true) {
@@ -470,7 +476,8 @@ var TableBody = React.createClass({
         onRowInspect: React.PropTypes.func,
         onRowClick: React.PropTypes.func,
         onExecute: React.PropTypes.func,
-        selectedRow: React.PropTypes.object
+        selectedRow: React.PropTypes.object,
+        onEditClick: React.PropTypes.func,
     },
     getDefaultProps: function () {
         return {
@@ -511,7 +518,8 @@ var TableBody = React.createClass({
             var EntityEditBtn = EntityEditBtnFactory({
                 name: entity.name,
                 id: item[entity.idAttribute],
-                onEdit: this.props.onEdit
+                onEdit: this.props.onEdit,
+                onClick: this.props.onEditClick
             });
             Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
         }
@@ -925,7 +933,8 @@ var EntityCreateBtn = React.createClass({
     displayName: 'EntityCreateBtn',
     propTypes: {
         entity: React.PropTypes.object.isRequired,
-        onCreate: React.PropTypes.func
+        onCreate: React.PropTypes.func,
+        onClick: React.PropTypes.func
     },
     getInitialState: function () {
         return {
@@ -939,13 +948,24 @@ var EntityCreateBtn = React.createClass({
         };
     },
     render: function () {
-        return Button({
+        var btnProps = {
             icon: 'plus',
             title: 'Add row',
             style: 'success',
-            size: 'xsmall',
-            onClick: this._handleCreate
-        });
+            size: 'xsmall'
+        }
+        if (this.props.onClick != null) {
+            // Wrap supplied click handler in closure binding props of handler context
+            var clickHandler = this.props.onClick
+            var tableId = this.props.entity.name
+            btnProps.onClick = function () {
+                clickHandler(tableId, null)
+            }
+        } else {
+            // Use default handler if no handler was passed in
+            btnProps.onClick = this._handleCreate
+        }
+        return Button(btnProps)
     },
     renderLayer: function () {
         return this.state.form ? Form({
@@ -987,7 +1007,8 @@ var EntityEditBtn = React.createClass({
     propTypes: {
         name: React.PropTypes.string.isRequired,
         id: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]).isRequired,
-        onEdit: React.PropTypes.func
+        onEdit: React.PropTypes.func,
+        onClick: React.PropTypes.func
     },
     getInitialState: function () {
         return {
@@ -996,17 +1017,31 @@ var EntityEditBtn = React.createClass({
     },
     getDefaultProps: function () {
         return {
-            onEdit: function () {
-            }
+            onEdit: function () {},
+            onClick: null
         };
     },
     render: function () {
-        return Button({
+        var btnProps = {
             icon: 'edit',
             title: 'Edit row',
-            size: 'xsmall',
-            onClick: this._handleEdit
-        });
+            size: 'xsmall'
+        }
+
+        if (this.props.onClick != null) {
+            // Wrap supplied click handler in closure binding props of handler context
+            var clickHandler = this.props.onClick;
+            var tableId = this.props.name;
+            var rowId = this.props.id;
+            btnProps.onClick = function () {
+                clickHandler(tableId, rowId)
+            }
+        } else {
+            // Use default handler if no handler was passed in
+            btnProps.onClick = this._handleEdit;
+        }
+
+        return Button(btnProps);
     },
     renderLayer: function () {
         return this.state.form ? Form({

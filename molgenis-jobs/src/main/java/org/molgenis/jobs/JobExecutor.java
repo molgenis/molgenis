@@ -7,6 +7,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -14,6 +15,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +48,11 @@ public class JobExecutor
 	private final ExecutorService executorService;
 	private final JobFactoryRegistry jobFactoryRegistry;
 	private final Gson gson;
+	private final RunAsUserTokenFactory runAsUserTokenFactory;
 
 	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
-			JobFactoryRegistry jobFactoryRegistry)
+			JobFactoryRegistry jobFactoryRegistry, RunAsUserTokenFactory runAsUserTokenFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
@@ -58,6 +61,7 @@ public class JobExecutor
 		this.mailSender = requireNonNull(mailSender);
 		this.executorService = requireNonNull(executorService);
 		this.jobFactoryRegistry = jobFactoryRegistry;
+		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
 		this.gson = new Gson();
 	}
 
@@ -150,8 +154,8 @@ public class JobExecutor
 
 	private RunAsUserToken createAuthorization(String username)
 	{
-		return new RunAsUserToken("Job Execution", username, null,
-				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		return runAsUserTokenFactory.create("Job Execution", userDetails, null);
 	}
 
 	private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs)

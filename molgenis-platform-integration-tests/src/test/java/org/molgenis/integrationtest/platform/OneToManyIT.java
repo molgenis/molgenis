@@ -6,16 +6,18 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
 import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 import org.molgenis.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.data.staticentity.bidirectional.person4.PersonMetaData4;
+import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,8 +44,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermission.WRITE;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForIndexToBeStable;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -485,24 +485,23 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	private void populateUserPermissions()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = getEntityTypePermissionMap();
-		testPermissionPopulator.populate(entityTypePermissionMap);
+		testPermissionPopulator.populate(getPermissionMap());
 	}
 
-	private Map<String, EntityTypePermission> getEntityTypePermissionMap()
+	private Map<ObjectIdentity, PermissionSet> getPermissionMap()
 	{
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
 
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Author" + i, WRITE);
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Book" + i, WRITE);
-			entityTypePermissionMap.put("sys" + PACKAGE_SEPARATOR + "Person" + i, WRITE);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Author" + i), PermissionSet.WRITE);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Book" + i), PermissionSet.WRITE);
+			permissionMap.put(new EntityTypeIdentity("sys" + PACKAGE_SEPARATOR + "Person" + i), PermissionSet.WRITE);
 		}
-		entityTypePermissionMap.put(PACKAGE, READ);
-		entityTypePermissionMap.put(ENTITY_TYPE_META_DATA, READ);
-		entityTypePermissionMap.put(ATTRIBUTE_META_DATA, READ);
-		entityTypePermissionMap.put(DECORATOR_CONFIGURATION, READ);
-		return entityTypePermissionMap;
+		permissionMap.put(new EntityTypeIdentity(PACKAGE), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity(ENTITY_TYPE_META_DATA), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity(ATTRIBUTE_META_DATA), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), PermissionSet.READ);
+		return permissionMap;
 	}
 }

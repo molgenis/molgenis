@@ -15,8 +15,10 @@ import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
+import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
+import org.molgenis.integrationtest.config.SecurityCoreITConfig;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.jobs.JobConfig;
 import org.molgenis.jobs.JobExecutionConfig;
@@ -27,6 +29,7 @@ import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
+import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -74,10 +77,10 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		"org.molgenis.data.security.user", "org.molgenis.data.validation", "org.molgenis.data.transaction",
 		"org.molgenis.data.importer.emx", "org.molgenis.data.excel", "org.molgenis.util", "org.molgenis.settings",
 		"org.molgenis.data.util", "org.molgenis.data.decorator", "org.molgenis.data.event" })
-@Import({ PlatformBootstrapper.class, TestAppSettings.class, TestHarnessConfig.class, EntityBaseTestConfig.class,
-		DatabaseConfig.class, ElasticsearchConfig.class, PostgreSqlConfiguration.class, RunAsSystemAspect.class,
-		IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class, OntologyTestConfig.class,
-		JobConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+@Import({ SecurityCoreITConfig.class, PlatformBootstrapper.class, TestAppSettings.class, TestHarnessConfig.class,
+		EntityBaseTestConfig.class, DatabaseConfig.class, ElasticsearchConfig.class, PostgreSqlConfiguration.class,
+		RunAsSystemAspect.class, IdGeneratorImpl.class, ExpressionValidator.class, PlatformConfig.class,
+		OntologyTestConfig.class, JobConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
 		RepositoryCollectionDecoratorFactoryImpl.class, DataSourceAclTablesPopulator.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
 		org.molgenis.data.importer.emx.EmxImportService.class, DataPersisterImpl.class,
@@ -89,7 +92,7 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
 		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
-		TestPermissionPopulator.class })
+		TestPermissionPopulator.class, PermissionRegistry.class, DataPermissionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired
@@ -125,6 +128,7 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		UserDetails adminUserDetails = mock(UserDetails.class);
+		when(adminUserDetails.isEnabled()).thenReturn(true);
 		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
 		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
 		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);

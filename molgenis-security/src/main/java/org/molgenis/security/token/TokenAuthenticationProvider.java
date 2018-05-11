@@ -5,6 +5,9 @@ import org.molgenis.security.core.token.TokenService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * AuthenticationProvider that uses the TokenService and expects a RestAuthenticationToken
@@ -12,10 +15,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class TokenAuthenticationProvider implements AuthenticationProvider
 {
 	private final TokenService tokenService;
+	private UserDetailsChecker userDetailsChecker;
 
-	public TokenAuthenticationProvider(TokenService tokenService)
+	public TokenAuthenticationProvider(TokenService tokenService, UserDetailsChecker userDetailsChecker)
 	{
-		this.tokenService = tokenService;
+		this.tokenService = requireNonNull(tokenService);
+		this.userDetailsChecker = requireNonNull(userDetailsChecker);
 	}
 
 	@Override
@@ -30,6 +35,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider
 		if (authToken.getToken() != null)
 		{
 			UserDetails userDetails = tokenService.findUserByToken(authToken.getToken());// Throws UnknownTokenException
+			userDetailsChecker.check(userDetails);
 			// if token is invalid
 			authToken = new RestAuthenticationToken(userDetails, userDetails.getPassword(),
 					userDetails.getAuthorities(), authToken.getToken());

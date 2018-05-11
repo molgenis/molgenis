@@ -9,16 +9,15 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.acls.domain.PrincipalSid;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.Sid;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -38,18 +37,16 @@ import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.security.EntityTypePermission.READ;
-import static org.molgenis.data.security.EntityTypePermissionUtils.getCumulativePermission;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
 
 public class EmxImportServiceIT extends ImportServiceIT
 {
 	private static final String USERNAME = "emx_user";
-	private static final String CSV_HOSPITAL = "csv_hospital";
-	private static final String CSV_PATIENTS = "csv_patients";
-	private static final String TSV_HOSPITAL = "tsv_hospital";
-	private static final String TSV_PATIENTS = "tsv_patients";
+	private static final String CSV_HOSPITAL = "it_csv_hospital";
+	private static final String CSV_PATIENTS = "it_csv_patients";
+	private static final String TSV_HOSPITAL = "it_tsv_hospital";
+	private static final String TSV_PATIENTS = "it_tsv_patients";
 
 	@Override
 	User getTestUser()
@@ -876,25 +873,24 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private MutableAclService mutableAclService;
+	private TestPermissionPopulator testPermissionPopulator;
+	@Autowired
+	private PackageFactory packageFactory;
 
 	private void populateUserPermissions()
 	{
-		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
+		//users cannot create entities and packages without a parent package, therefor the root package needs to exist already.
+		runAsSystem(() -> dataService.getMeta().addPackage(packageFactory.create("it", "")));
 
-		Map<String, EntityTypePermission> entityTypePermissionMap = new HashMap<>();
-		entityTypePermissionMap.put("sys_md_Package", READ);
-		entityTypePermissionMap.put("sys_md_EntityType", READ);
-		entityTypePermissionMap.put("sys_md_Attribute", READ);
-		entityTypePermissionMap.put("sys_md_Tag", READ);
-		entityTypePermissionMap.put("sys_FileMeta", READ);
-		entityTypePermissionMap.put("sys_dec_DecoratorConfiguration", READ);
+		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_md_Tag"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity("sys_FileMeta"), PermissionSet.READ);
+		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
+		permissionMap.put(new PackageIdentity("it"), PermissionSet.WRITEMETA);
 
-		runAsSystem(() -> entityTypePermissionMap.forEach((entityTypeId, permission) ->
-		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId));
-			acl.insertAce(acl.getEntries().size(), getCumulativePermission(permission), sid, true);
-			mutableAclService.updateAcl(acl);
-		}));
+		testPermissionPopulator.populate(permissionMap, USERNAME);
 	}
 }

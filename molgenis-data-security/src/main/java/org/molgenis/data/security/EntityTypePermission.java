@@ -1,30 +1,34 @@
 package org.molgenis.data.security;
 
-import org.springframework.security.acls.domain.AbstractPermission;
+import org.molgenis.security.core.Permission;
 
-public class EntityTypePermission extends AbstractPermission
+/**
+ * Permission to perform an action on an EntityType.
+ */
+public enum EntityTypePermission implements Permission
 {
-	private final String name;
+	// @formatter:off
+	READ_METADATA("Permission to read the metadata of this EntityType"),
+	COUNT_DATA("Permission to count entities of this EntityType"),
+	AGGREGATE_DATA("Permission to aggregate entities of this EntityType"),
+	READ_DATA("Permission to read entities of this EntityType"),
+	ADD_DATA("Permission to add entities of this EntityType"),
+	UPDATE_DATA("Permission to update entities of this EntityType"),
+	DELETE_DATA("Permission to delete entities of this EntityType"),
+	UPDATE_METADATA("Permission to update the metadata of this EntityType"),
+	DELETE_METADATA("Permission to delete the data and metadata of this EntityType");
+	// @formatter:on
 
-	public static final EntityTypePermission COUNT = new EntityTypePermission("COUNT", 1 << 0, 'C'); // 1
-	public static final EntityTypePermission READ = new EntityTypePermission("READ", 1 << 1, 'R'); // 2
-	public static final EntityTypePermission WRITE = new EntityTypePermission("WRITE", 1 << 2, 'W'); // 4
-	public static final EntityTypePermission WRITEMETA = new EntityTypePermission("WRITEMETA", 1 << 3, 'M'); // 8
+	private final String defaultDescription;
 
-	protected EntityTypePermission(String name, int mask)
+	EntityTypePermission(String defaultDescription)
 	{
-		super(mask);
-		this.name = name;
+		this.defaultDescription = defaultDescription;
 	}
 
-	protected EntityTypePermission(String name, int mask, char code)
+	@Override
+	public String getDefaultDescription()
 	{
-		super(mask, code);
-		this.name = name;
-	}
-
-	public String getName()
-	{
-		return name;
+		return defaultDescription;
 	}
 }
