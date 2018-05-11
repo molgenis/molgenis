@@ -96,7 +96,7 @@
         <zip4j.version>1.3.2</zip4j.version>
 
         <node.version>v8.9.0</node.version>
-        <yarn.version>v1.1.0</yarn.version>
+        <yarn.version>v1.6.0</yarn.version>
 
         <!-- test-dependency versions not managed by parent pom -->
         <jsonpath.version>2.4.0</jsonpath.version>

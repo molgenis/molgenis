@@ -1,4 +1,4 @@
-def commitId, commitDate, pom, version
+def pom, version
 pipeline {
     agent any
     tools {
@@ -17,11 +17,9 @@ pipeline {
                 checkout scm
 
                 script {
-                    commitId = sh(returnStdout: true, script: "git rev-parse HEAD")
-                    commitDate = sh(returnStdout: true, script: "git show -s --format=%cd --date=format:%Y%m%d-%H%M%S ${commitId}")
                     pom = readMavenPom file: 'pom.xml'
-                    version = pom.version.replace("-SNAPSHOT", ".${commitDate}.${commitId.substring(0, 7)}")
-                    currentBuild.displayName = "#${currentBuild.number} - ${version}"
+                    version = pom.version.replace("-SNAPSHOT", "-${currentBuild.number}-${env.GIT_COMMIT.substring(0,7)}")
+                    currentBuild.displayName = "#${currentBuild.number}-${version}"
                 }
 
                 sh "git config --global user.email molgenis+ci@gmail.com"
@@ -57,7 +55,7 @@ pipeline {
             steps {
                 configFileProvider(
                     [configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                        sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
+                        sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B -Darguments=-DskipTests -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
                     }
             }
         }
