@@ -1,6 +1,4 @@
-@Library('zion-pipeline-library')
-import com.sonatype.jenkins.pipeline.GitHub
-
+def commitId, commitDate, pom, version
 pipeline {
     agent any
     tools {
@@ -18,33 +16,25 @@ pipeline {
                 // Get code from github/molgenis/molgenis
                 checkout scm
 
-                commitId = OsTools.runSafe(this, 'git rev-parse HEAD')
-                commitDate = OsTools.runSafe(this, "git show -s --format=%cd --date=format:%Y%m%d-%H%M%S ${commitId}")
+                script {
+                    commitId = sh(returnStdout: true, script: "git rev-parse HEAD")
+                    commitDate = sh(returnStdout: true, script: "git show -s --format=%cd --date=format:%Y%m%d-%H%M%S ${commitId}")
+                    pom = readMavenPom file: 'pom.xml'
+                    version = pom.version.replace("-SNAPSHOT", ".${commitDate}.${commitId.substring(0, 7)}")
+                    currentBuild.displayName = "#${currentBuild.number} - ${version}"
+                }
 
                 sh "git config --global user.email molgenis+ci@gmail.com"
                 sh "git config --global user.name 'MOLGENIS continuous integration user'"
-
-                pom = readMavenPom file: 'pom.xml'
-                version = pom.version.replace("-SNAPSHOT", ".${commitDate}.${commitId.substring(0, 7)}")
-
-                currentBuild.displayName = "#${currentBuild.number} - ${version}"
-
-                def apiToken
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jenkins-github', usernameVariable: 'GITHUB_API_USERNAME', passwordVariable: 'GITHUB_API_PASSWORD']]) {
-                    apiToken = env.GITHUB_API_PASSWORD
-                }
-                gitHub = new GitHub(this, 'molgenis/molgenis', apiToken)
             }
         }
         stage('Build package') {
             steps {
-                gitHub.statusUpdate commitId, 'pending', 'build', 'Building'
                 sh "mvn package -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
             }
         }
         stage('Test package') {
             steps {
-                gitHub.statusUpdate commitId, 'pending', 'tests', 'Unit, API and integration tests'
                 parallel(
                         unit: {
 
@@ -67,7 +57,6 @@ pipeline {
             steps {
                 configFileProvider(
                     [configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                        gitHub.statusUpdate commitId, 'pending', 'publish', 'Publishing to Sonatype'
                         sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
                     }
             }
@@ -76,12 +65,9 @@ pipeline {
     post {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
-           gitHub.statusUpdate commitId, 'success', 'success', 'Build success'
            notifySuccess()
-           build: 'molgenis'
         }
         failure {
-           gitHub.statusUpdate commitId, 'failure', 'failure', 'Build failed'
            notifyFailed()
         }
     }
