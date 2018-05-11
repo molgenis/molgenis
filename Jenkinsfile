@@ -1,5 +1,7 @@
 pipeline {
-    agent maven
+    agent {
+        maven
+    }
     tools {
         // Has to be configured on the host with this name : [ mvn-3.5.3 ]
         maven 'mvn-3.5.3'
