@@ -66,7 +66,7 @@ pipeline {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
            notifySuccess()
-           build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: ${version}]
+           build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: ${version}]]
         }
         failure {
            notifyFailed()
