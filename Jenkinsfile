@@ -3,45 +3,40 @@ pipeline {
     tools {
         // Has to be configured on the host with this name : [ mvn-3.5.3 ]
         maven 'mvn-3.5.3'
-        // Has to be configured on the host with this name : [ jdk-8u162 ]
+        // Has to be configured on the host with this name : [ jdk-8u172 ]
         jdk 'jdk-8u172'
     }
-
-//    environment {
-//        JAVA_HOME = "${tool 'jdk-8u162'}/jdk1.8.0_162"
-//        PATH = "${JAVA_HOME}/bin:${PATH}"
-//    }
 
     stages {
         stage('Preparation') {
             steps {
                 // Clean workspace
                 cleanWs()
-                // Get code from git.webhosting.rug.nl
+                // Get code from github/molgenis/molgenis
                 checkout scm
             }
         }
         stage('Build package') {
             steps {
-                sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V"
+                sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
             }
         }
         stage('Test package') {
             steps {
                 parallel(
                         unit: {
-                            sh "mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dskip.js.build=true -DskipITs"
+                            sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
                             sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
-                            sh ".travis / sonar.sh"
+                            sh ".travis/sonar.sh"
                         })
 //                        api: {
 //                            sh "sysctl -w vm.max_map_count=262144"
-//                            sh "mvn verify -pl molgenis -api - tests-- batch -mode-- quiet -Dmaven.test.redirectTestOutputToFile = true - Dit_db_user = postgres - Dit_db_password "
-//                            sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
+//                            sh "mvn verify -pl molgenis-api-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
+//                            sh "bash < (curl - s https://codecov.io/bash) -c -F api"
 //                        },
 //                        integration: {
-//                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
-//                            sh "bash < (curl - s https://codecov.io/bash) -c -F unit"
+//                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
+//                            sh "bash < (curl - s https://codecov.io/bash) -c -F integration"
 //                        })
             }
         }
@@ -58,7 +53,7 @@ pipeline {
 // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
 //        success {
 ///           notifySuccess()
-//            build: 'molgenis-dev-docker'
+//            build: 'molgenis'
 //        }
 //    }
 }
