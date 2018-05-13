@@ -44,7 +44,7 @@ pipeline {
                                 [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
                                 sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode --quiet"
                             }
-                        })
+                          }
 //                        api: {
 //                            sh "sysctl -w vm.max_map_count=262144"
 //                            sh "mvn verify -pl molgenis-api-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
@@ -52,7 +52,7 @@ pipeline {
 //                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
 //                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F api"
 //                            }
-//                        },
+//                        }
 //                        integration: {
 //                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
 //                            withCredentials(
