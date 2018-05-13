@@ -44,7 +44,7 @@ pipeline {
                                 [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
                                 sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode --quiet"
                             }
-                          }
+                          })
 //                        api: {
 //                            sh "sysctl -w vm.max_map_count=262144"
 //                            sh "mvn verify -pl molgenis-api-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
