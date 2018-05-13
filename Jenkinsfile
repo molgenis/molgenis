@@ -36,7 +36,10 @@ pipeline {
                 parallel(
                         unit: {
                             sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
-                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit"
+                            withCredentials(
+                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
+                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
+                            }
                             withCredentials(
                                 [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
                                 sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode --quiet"
@@ -45,11 +48,17 @@ pipeline {
 //                        api: {
 //                            sh "sysctl -w vm.max_map_count=262144"
 //                            sh "mvn verify -pl molgenis-api-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
-//                            sh "curl -s https://codecov.io/bash | bash -s - -c -F api"
+//                            withCredentials(
+//                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
+//                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F api"
+//                            }
 //                        },
 //                        integration: {
 //                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
-//                            sh "curl -s https://codecov.io/bash | bash -s - -c -F integration"
+//                            withCredentials(
+//                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
+//                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F integration"
+//                            }
 //                        })
             }
         }
