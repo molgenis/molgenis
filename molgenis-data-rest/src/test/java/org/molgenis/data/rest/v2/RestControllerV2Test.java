@@ -664,8 +664,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(
 				post("/api/v2/copy/unknown").content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'unknown'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'unknown'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -781,8 +782,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				post(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com', extraAttribute:'test'}]}")
 												.contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	/**
@@ -869,8 +871,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com'}]}")
 													   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -912,8 +915,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2" + "/" + "email").content("{entities:[{email:'test@email.com'}]}")
 																	   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@Test
@@ -970,8 +974,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity [MyEntityType]")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'MyEntityType'.")));
 	}
 
 	@Test
@@ -1048,7 +1053,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
 											   .contentType(APPLICATION_JSON))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("The entity you are trying to update [4] does not exist.")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D02")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity '4' of type 'EntityType{name=entity}'.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
