@@ -85,29 +85,33 @@ const actions = {
     })
   },
 
-  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, payload: Object) {
+  'VALIDATE_FIELD' ({commit, state, dispatch}: VuexContext, payload: Object) {
     const {formData, formState} = payload
 
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
     commit('SET_FORM_DATA', formData)
 
     Vue.nextTick(() => {
-      // TODO To refactor this code without the nextTick method we need to expose the validation
-      // TODO from the molgenis-ui-form to the interface of molgenis-ui-form
-      if (formState.$valid) {
-        const options = {
-          body: JSON.stringify(formData[updatedAttribute]),
-          method: 'PUT'
-        }
-
-        commit('INCREMENT_SAVING_QUEUE')
-
-        return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${updatedAttribute}`, options).catch((error) => {
-          handleError(commit, error)
-        }).then(() => {
-          commit('DECREMENT_SAVING_QUEUE')
-        })
+      const fieldState = formState[updatedAttribute]
+      const updatedValue = formData[updatedAttribute]
+      if (fieldState && fieldState.$valid) {
+        dispatch('AUTO_SAVE_QUESTIONNAIRE', {updatedAttribute, updatedValue})
       }
+    })
+  },
+
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, payload: Object) {
+    const options = {
+      body: JSON.stringify(payload.updatedValue),
+      method: 'PUT'
+    }
+
+    commit('INCREMENT_SAVING_QUEUE')
+
+    return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${payload.updatedAttribute}`, options).catch((error) => {
+      handleError(commit, error)
+    }).then(() => {
+      commit('DECREMENT_SAVING_QUEUE')
     })
   },
 
