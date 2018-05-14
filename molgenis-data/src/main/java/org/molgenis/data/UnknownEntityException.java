@@ -9,7 +9,7 @@ public class UnknownEntityException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D02";
 
-	private transient EntityType entityType = null;
+	private final transient EntityType entityType;
 
 	private final String entityTypeId;
 
@@ -26,6 +26,7 @@ public class UnknownEntityException extends UnknownDataException
 	public UnknownEntityException(String entityTypeId, Object entityId)
 	{
 		super(ERROR_CODE);
+		entityType = null;
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.entityId = requireNonNull(entityId);
 	}
