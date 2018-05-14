@@ -44,7 +44,7 @@ describe('ChapterForm component', () => {
     wrapper.vm.onValueChanged(updatedFormData)
     td.verify(actions.AUTO_SAVE_QUESTIONNAIRE(td.matchers.anything(),
       {
-        formData: {field1: "new value"},
+        formData: {field1: 'new value'},
         formState: {}
       },
       undefined))
