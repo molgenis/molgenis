@@ -1,7 +1,7 @@
 package org.molgenis.security.captcha;
 
-import nl.captcha.Captcha;
-import nl.captcha.backgrounds.GradiatedBackgroundProducer;
+import cn.apiclub.captcha.Captcha;
+import cn.apiclub.captcha.backgrounds.GradiatedBackgroundProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;

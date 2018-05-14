@@ -12,13 +12,6 @@
     <name>security</name>
     <description>Spaghetti module containing security-related plugins and security configuration.</description>
 
-    <repositories>
-        <repository>
-            <id>enonic</id>
-            <url>http://repo.enonic.com/public/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -65,7 +58,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>nl.captcha</groupId>
+            <groupId>cn.apiclub.tool</groupId>
             <artifactId>simplecaptcha</artifactId>
         </dependency>
         <dependency>
