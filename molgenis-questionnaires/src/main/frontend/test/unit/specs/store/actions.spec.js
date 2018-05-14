@@ -299,10 +299,32 @@ describe('actions', () => {
     })
   })
 
-  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    const formData = {
-      field1: 'updated value'
+  describe('VALIDATE_FIELD', () => {
+    const state = {
+      questionnaire: {
+        meta: {
+          name: 'test_quest'
+        }
+      },
+      formData: {
+        field1: 'value',
+        field2: 'value'
+      },
+      questionnaireRowId: 'test_row'
     }
+    const payload = {formState: {}, formData: {field1: 'updated value'}}
+
+    it('set the new value in the store', done => {
+      const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData}
+      ]
+
+      testAction(actions.VALIDATE_FIELD, payload, state, expectedMutations, [], done)
+    })
+  })
+
+  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
+    const payload = {updatedAttribute: 'field1', updatedValue: 'updated value'}
 
     const state = {
       questionnaire: {
@@ -318,7 +340,7 @@ describe('actions', () => {
     }
 
     const options = {
-      body: JSON.stringify(formData['field1']),
+      body: JSON.stringify(payload.updatedValue),
       method: 'PUT'
     }
 
@@ -326,17 +348,11 @@ describe('actions', () => {
       mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
-        {type: 'SET_FORM_DATA', payload: formData}
+        {type: 'INCREMENT_SAVING_QUEUE', payload},
+        {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, {
-        formData: formData,
-        formState: {}
-      }, state, expectedMutations, [], function () {
-        Vue.nextTick(() => {
-          done()
-        })
-      })
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
     })
     it('should post data for a single attribute and fail', done => {
       const error = 'error'
@@ -344,17 +360,13 @@ describe('actions', () => {
       mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
 
       const expectedMutations = [
-        {type: 'SET_FORM_DATA', payload: formData}
+        {type: 'INCREMENT_SAVING_QUEUE', payload},
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false},
+        {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, {
-        formData: formData,
-        formState: {}
-      }, state, expectedMutations, [], function () {
-        Vue.nextTick(() => {
-          done()
-        })
-      })
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
     })
   })
 
