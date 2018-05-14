@@ -241,7 +241,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 					.andExpect(status().isOk())
 					.andExpect(view().name("view-permissionmanager"))
 					.andExpect(model().attribute("users", Arrays.asList(user2)))
-					.andExpect(model().attribute("groups", Arrays.asList(role1, role2)));
+					.andExpect(model().attribute("roles", Arrays.asList(role1, role2)));
 	}
 
 	@Test

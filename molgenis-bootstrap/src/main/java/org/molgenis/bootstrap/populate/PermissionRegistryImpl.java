@@ -52,24 +52,23 @@ public class PermissionRegistryImpl implements PermissionRegistry
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
 		Role userRole = dataService.query(ROLE, Role.class).eq(NAME, ROLE_USER).findOne();
-		Sid allUsersGroupSid = createSid(userRole);
+		Sid userRoleSid = createSid(userRole);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
-		mapBuilder.putAll(pluginIdentity, new Pair<>(READ, allUsersGroupSid));
-
+		mapBuilder.putAll(pluginIdentity, new Pair<>(READ, userRoleSid));
 
 		dataService.findAll(ENTITY_TYPE_META_DATA,
 				Stream.of(ENTITY_TYPE_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, L10N_STRING, FILE_META,
 						DECORATOR_CONFIGURATION), EntityType.class).forEach(entityType ->
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
-			mapBuilder.putAll(entityTypeIdentity, new Pair<>(READ, allUsersGroupSid));
+			mapBuilder.putAll(entityTypeIdentity, new Pair<>(READ, userRoleSid));
 		});
 
 		dataService.findAll(PackageMetadata.PACKAGE, Stream.of(UploadPackage.UPLOAD), Package.class).forEach(pack ->
 		{
 			ObjectIdentity packageIdentity = new PackageIdentity(pack);
-			mapBuilder.putAll(packageIdentity, new Pair<>(WRITEMETA, allUsersGroupSid));
+			mapBuilder.putAll(packageIdentity, new Pair<>(WRITEMETA, userRoleSid));
 		});
 
 		return mapBuilder.build();
