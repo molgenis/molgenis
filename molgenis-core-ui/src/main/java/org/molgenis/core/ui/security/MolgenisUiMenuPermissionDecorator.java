@@ -86,7 +86,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 	}
 
 	@Override
-	@javax.annotation.CheckForNull
+	@javax.annotation.Nullable
 	public UiMenuItem getActiveItem()
 	{
 		//noinspection ConstantConditions
