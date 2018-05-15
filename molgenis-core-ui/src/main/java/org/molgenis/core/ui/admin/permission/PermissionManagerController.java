@@ -1,8 +1,11 @@
 package org.molgenis.core.ui.admin.permission;
 
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -25,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.acls.domain.GrantedAuthoritySid;
-import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,15 +45,12 @@ import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
-import static org.molgenis.security.acl.SidUtils.createAnonymousSid;
 import static org.molgenis.security.core.PermissionSet.*;
-import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Controller
 @RequestMapping(URI)
@@ -61,7 +59,6 @@ public class PermissionManagerController extends PluginController
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
-	private static final String DUPLICATE_KEY = "Duplicate key %s";
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
@@ -337,88 +334,54 @@ public class PermissionManagerController extends PluginController
 
 	private Permissions getPackagePermissions(Sid sid)
 	{
-		List<Package> packages = getPackages();
-		List<ObjectIdentity> packageIdentities = packages.stream().map(PackageIdentity::new).collect(toList());
-		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(packageIdentities, singletonList(sid));
-
-		return toPackagePermissions(packages, aclMap, sid);
-
+		return getPermissions(sid, getPackages().stream().map(PackageIdentity::new).collect(toList()));
 	}
 
 	private Permissions getPluginPermissions(Sid sid)
 	{
-		List<Plugin> plugins = getPlugins();
-
-		List<ObjectIdentity> pluginIdentities = plugins.stream().map(PluginIdentity::new).collect(toList());
-		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(pluginIdentities, singletonList(sid));
-
-		return toPluginPermissions(plugins, aclMap, sid);
+		return getPermissions(sid, getPlugins().stream().map(PluginIdentity::new).collect(toList()));
 	}
 
-	private Permissions toPluginPermissions(List<Plugin> plugins, Map<ObjectIdentity, Acl> aclMap, Sid sid)
+	private Permissions getPermissions(Sid sid, List<ObjectIdentity> objectIdentities)
 	{
-		Permissions permissions = new Permissions();
-
-		// set permissions: entity ids
-		Map<String, String> pluginMap = plugins.stream().collect(toMap(Plugin::getId, Plugin::getId, (u, v) ->
-		{
-			throw new IllegalStateException(format(DUPLICATE_KEY, u));
-		}, LinkedHashMap::new));
-		permissions.setEntityIds(pluginMap);
-
-		// set permissions: user of role id
-		boolean isUser = setUserOrRole(sid, permissions);
-
-		// set permissions: permissions
-		writeAclsToPermissions(aclMap, sid, permissions, isUser);
-		return permissions;
+		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(objectIdentities, singletonList(sid));
+		Set<String> ids = objectIdentities.stream()
+										  .map(ObjectIdentity::getIdentifier)
+										  .map(Object::toString)
+										  .collect(toSet());
+		return Permissions.create(ids, getPermissions(aclMap, sid));
 	}
 
-	private void writeAclsToPermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions,
-			boolean isUser)
+	private Multimap<String, String> getPermissions(Map<ObjectIdentity, Acl> acls, Sid sid)
 	{
-		aclMap.forEach((objectIdentity, acl) ->
+		Multimap<String, String> result = LinkedHashMultimap.create();
+		acls.forEach((objectIdentity, acl) ->
 		{
-			String pluginId = objectIdentity.getIdentifier().toString();
-			acl.getEntries().forEach(ace ->
-			{
-				if (ace.getSid().equals(sid))
-				{
-					org.molgenis.security.permission.Permission pluginPermission = createPermissionDtoForAce(ace);
-					if (isUser)
-					{
-						permissions.addUserPermission(pluginId, pluginPermission);
-					}
-					else
-					{
-						permissions.addRolePermission(pluginId, pluginPermission);
-					}
-				}
-			});
+			String id = objectIdentity.getIdentifier().toString();
+			acl.getEntries()
+			   .stream()
+			   .filter(ace -> ace.getSid().equals(sid))
+			   .map(this::getPermissionString)
+			   .forEach(permission -> result.put(id, permission));
 		});
+		return result;
 	}
 
-	private org.molgenis.security.permission.Permission createPermissionDtoForAce(AccessControlEntry ace)
+	private String getPermissionString(AccessControlEntry ace)
 	{
-		org.molgenis.security.permission.Permission result = new org.molgenis.security.permission.Permission();
 		switch (ace.getPermission().getMask())
 		{
 			case COUNT_MASK:
-				result.setType("count");
-				break;
+				return "count";
 			case READ_MASK:
-				result.setType("read");
-				break;
+				return "read";
 			case WRITE_MASK:
-				result.setType("write");
-				break;
+				return "write";
 			case WRITEMETA_MASK:
-				result.setType("writemeta");
-				break;
+				return "writemeta";
 			default:
 				throw new UnexpectedPermissionException(ace.getPermission());
 		}
-		return result;
 	}
 
 	private void removeSidEntityTypePermission(EntityType entityType, Sid sid)
@@ -478,51 +441,8 @@ public class PermissionManagerController extends PluginController
 
 	private Permissions getEntityTypePermissions(Sid sid)
 	{
-		List<EntityType> entityTypes = getEntityTypes().collect(toList());
-
-		List<ObjectIdentity> objectIdentities = entityTypes.stream().map(EntityTypeIdentity::new).collect(toList());
-		Map<ObjectIdentity, Acl> aclMap = mutableAclService.readAclsById(objectIdentities, singletonList(sid));
-
-		return toEntityTypePermissions(entityTypes, aclMap, sid);
-	}
-
-	private Permissions toEntityTypePermissions(List<EntityType> entityTypes, Map<ObjectIdentity, Acl> aclMap, Sid sid)
-	{
-		Permissions permissions = new Permissions();
-
-		// set permissions: entity ids
-		Map<String, String> entityTypeMap = entityTypes.stream()
-													   .collect(toMap(EntityType::getId, EntityType::getId, (u, v) ->
-													   {
-														   throw new IllegalStateException(format(DUPLICATE_KEY, u));
-													   }, LinkedHashMap::new));
-		permissions.setEntityIds(entityTypeMap);
-
-		return toPermissions(aclMap, sid, permissions);
-	}
-
-	private Permissions toPackagePermissions(List<Package> packages, Map<ObjectIdentity, Acl> aclMap, Sid sid)
-	{
-		Permissions permissions = new Permissions();
-
-		// set permissions: entity ids
-		Map<String, String> entityTypeMap = packages.stream().collect(toMap(Package::getId, Package::getId, (u, v) ->
-		{
-			throw new IllegalStateException(format(DUPLICATE_KEY, u));
-		}, LinkedHashMap::new));
-
-		permissions.setEntityIds(entityTypeMap);
-
-		return toPermissions(aclMap, sid, permissions);
-	}
-
-	private Permissions toPermissions(Map<ObjectIdentity, Acl> aclMap, Sid sid, Permissions permissions)
-	{
-		boolean isUser = setUserOrRole(sid, permissions);
-
-		// set permissions: permissions
-		writeAclsToPermissions(aclMap, sid, permissions, isUser);
-		return permissions;
+		return getPermissions(sid,
+				getEntityTypes().collect(toList()).stream().map(EntityTypeIdentity::new).collect(toList()));
 	}
 
 	private void createSidPermission(Sid sid, ObjectIdentity objectIdentity,
@@ -552,7 +472,7 @@ public class PermissionManagerController extends PluginController
 		Role role = dataService.findOneById(ROLE, roleId, Role.class);
 		if (role == null)
 		{
-			throw new RuntimeException("unknown role id [" + roleId + "]");
+			throw new UnknownEntityException("unknown role id [" + roleId + "]");
 		}
 		return role;
 	}
@@ -562,7 +482,7 @@ public class PermissionManagerController extends PluginController
 		User user = dataService.findOneById(USER, userId, User.class);
 		if (user == null)
 		{
-			throw new RuntimeException("unknown user id [" + userId + "]");
+			throw new UnknownEntityException("unknown user id [" + userId + "]");
 		}
 		return user;
 	}
@@ -586,30 +506,6 @@ public class PermissionManagerController extends PluginController
 	List<Package> getPackages()
 	{
 		return dataService.findAll(PackageMetadata.PACKAGE, Package.class).collect(toList());
-	}
-
-	private boolean setUserOrRole(Sid sid, Permissions permissions)
-	{
-		boolean isUser;
-		if (sid instanceof PrincipalSid)
-		{
-			String userId = ((PrincipalSid) sid).getPrincipal();
-			permissions.setUserId(userId);
-			isUser = true;
-		}
-		else if (sid.equals(createAnonymousSid()))
-		{
-			String userId = dataService.query(USER, User.class).eq(USERNAME, ANONYMOUS_USERNAME).findOne().getId();
-			permissions.setUserId(userId);
-			isUser = true;
-		}
-		else
-		{
-			String roleId = ((GrantedAuthoritySid) sid).getGrantedAuthority().substring("ROLE_".length());
-			permissions.setRoleId(roleId);
-			isUser = false;
-		}
-		return isUser;
 	}
 
 	private boolean deleteAceIfExists(Sid sid, MutableAcl acl)

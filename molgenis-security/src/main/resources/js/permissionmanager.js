@@ -2,86 +2,55 @@
     'use strict'
 
     $(function () {
-        function createRolePermissionTable (data, permissions) {
+        function createPermissionTable (data, permissions) {
             var items = []
-            $.each(data.entityIds, function (entityId, entityTypeId) {
-                if (data.rolePermissionMap && data.rolePermissionMap[entityId]) {
-                    $.each(data.rolePermissionMap[entityId], function (idx, perm) {
-                        items.push('<tr>')
-                        items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>')
-                        for (var i = 0; i < permissions.length; i++) {
-                            items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"' + (perm.type === permissions[i] ? ' checked' : '') + '></td>')
-                        }
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>')
-                        items.push('</tr>')
-                    })
-                } else {
-                    items.push('<tr>')
-                    items.push('<td>' + entityTypeId + '</td>')
-                    for (var i = 0; i < permissions.length; i++) {
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"></td>')
+            $.each(data.ids, function (index, id) {
+                items.push('<tr>')
+                items.push('<td>' + id + '</td>')
+                var noneChecked = true
+                for (var i = 0; i < permissions.length; i++) {
+                    var permission = permissions[i]
+                    var checked = data.permissions[id] && data.permissions[id].indexOf(permission) >= 0
+                    if (checked) {
+                        noneChecked = false
                     }
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>')
-                    items.push('</tr>')
+                    items.push('<td><input type="radio" name="radio-' + id + '" value="' + permission + '"' + (checked ? ' checked' : '') + '></td>')
                 }
-            })
-            return items.join('')
-        }
-
-        function createUserPermissionTable (data, permissions) {
-            var items = []
-            $.each(data.entityIds, function (entityId, entityTypeId) {
-                if (data.userPermissionMap && data.userPermissionMap[entityId]) {
-                    $.each(data.userPermissionMap[entityId], function (idx, perm) {
-                        items.push('<tr>')
-                        items.push('<td>' + (idx == 0 ? entityTypeId : '') + '</td>')
-                        for (var i = 0; i < permissions.length; i++) {
-                            items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"' + (perm.type === permissions[i] ? ' checked' : '') + '></td>')
-                        }
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>')
-                    })
-                } else {
-                    items.push('<tr>')
-                    items.push('<td>' + entityTypeId + '</td>')
-                    for (var i = 0; i < permissions.length; i++) {
-                        items.push('<td><input type="radio" name="radio-' + entityId + '" value="' + permissions[i] + '"></td>')
-                    }
-                    items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>')
-                    items.push('</tr>')
-                }
+                items.push('<td><input type="radio" name="radio-' + id + '" value="none" ' + (noneChecked ? ' checked' : '') + '></td>')
+                items.push('</tr>')
             })
             return items.join('')
         }
 
         $('#plugin-role-select').change(function () {
             $.get(molgenis.getContextUrl() + '/plugin/role/' + $(this).val(), function (data) {
-                $('#plugin-role-permission-table tbody').empty().html(createRolePermissionTable(data, ['read']))
+                $('#plugin-role-permission-table tbody').empty().html(createPermissionTable(data, ['read']))
             })
 
         })
         $('#plugin-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/plugin/user/' + $(this).val(), function (data) {
-                $('#plugin-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['read']))
+                $('#plugin-user-permission-table tbody').empty().html(createPermissionTable(data, ['read']))
             })
         })
         $('#package-role-select').change(function () {
             $.get(molgenis.getContextUrl() + '/package/role/' + $(this).val(), function (data) {
-                $('#package-role-permission-table tbody').empty().html(createRolePermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#package-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
             })
         })
         $('#package-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/package/user/' + $(this).val(), function (data) {
-                $('#package-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#package-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
             })
         })
         $('#entity-class-role-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/role/' + $(this).val(), function (data) {
-                $('#entity-class-role-permission-table tbody').empty().html(createRolePermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#entity-class-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
             })
         })
         $('#entity-class-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/user/' + $(this).val(), function (data) {
-                $('#entity-class-user-permission-table tbody').empty().html(createUserPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#entity-class-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
             })
         })
         $('input:checkbox', '#entity-type-rls-table').change(function () {
