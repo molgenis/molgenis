@@ -25,7 +25,6 @@ public class ImportWizard extends Wizard
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
 	private List<String> entityTypeIds;
-	private boolean allowPermissions;
 	private List<String> packages;
 	private List<String> entitiesInDefaultPackage;
 	private String selectedPackage;
