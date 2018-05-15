@@ -10,12 +10,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 
-/**
- * Manage user
- */
 @Service
 public class UserServiceImpl implements UserService
 {
@@ -23,8 +21,7 @@ public class UserServiceImpl implements UserService
 
 	UserServiceImpl(DataService dataService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override

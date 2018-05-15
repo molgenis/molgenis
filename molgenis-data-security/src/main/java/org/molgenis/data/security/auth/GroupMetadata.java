@@ -43,7 +43,7 @@ public class GroupMetadata extends SystemEntityType
 	{
 		setPackage(securityPackage);
 
-		setLabel("Group");
+		setLabel(SIMPLE_NAME);
 		setDescription("A number of people that work together or share certain beliefs.");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");

@@ -198,9 +198,6 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		}
 		user.setGoogleAccountId(googleAccountId);
 		dataService.add(USER, user);
-
-		//TODO give user the 'User Role'
-
 		return user;
 	}
 }

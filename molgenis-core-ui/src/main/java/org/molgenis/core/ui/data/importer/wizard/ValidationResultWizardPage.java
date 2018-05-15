@@ -2,12 +2,10 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
@@ -20,7 +18,6 @@ import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,18 +36,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	private DataService dataService;
-
-	@Autowired
 	private ImportRunService importRunService;
 
 	@Autowired
 	UserAccountService userAccountService;
 
 	@Autowired
-	UserService userService;
-
-	private List<Role> roles;
+	transient UserService userService;
 
 	@Override
 	public String getTitle()

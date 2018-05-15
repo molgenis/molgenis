@@ -13,9 +13,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 
-/**
- * Manage user
- */
 @Service
 public class UserManagerServiceImpl implements UserManagerService
 {
