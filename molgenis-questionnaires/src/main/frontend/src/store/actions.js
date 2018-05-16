@@ -77,7 +77,7 @@ const actions = {
 
   'GET_SUBMISSION_TEXT' ({commit}: VuexContext, questionnaireId: string) {
     cleanScreen(commit)
-    return api.get(`/menu/plugins/questionnaires/submission-text/${questionnaireId}`).then(response => {
+    return api.get('/menu/plugins/questionnaires/submission-text/' + encodeURIComponent(questionnaireId)).then(response => {
       commit('SET_SUBMISSION_TEXT', response)
       commit('SET_LOADING', false)
     }, error => {
@@ -108,7 +108,10 @@ const actions = {
 
     commit('INCREMENT_SAVING_QUEUE')
 
-    return api.post(`/api/v1/${state.questionnaire.meta.name}/${state.questionnaireRowId}/${payload.updatedAttribute}`, options).catch((error) => {
+    const encodedTableId = encodeURIComponent(state.questionnaire.meta.name)
+    const encodedRowId = encodeURIComponent(state.questionnaireRowId)
+    const encodedColumnId = encodeURIComponent(payload.updatedAttribute)
+    return api.post(`/api/v1/${encodedTableId}/${encodedRowId}/${encodedColumnId}`, options).catch((error) => {
       handleError(commit, error)
     }).then(() => {
       commit('DECREMENT_SAVING_QUEUE')
@@ -128,7 +131,9 @@ const actions = {
       method: 'PUT'
     }
 
-    return api.post(`/api/v2/${state.questionnaire.meta.name}`, options).then().catch(error => handleError(commit, error))
+    return api.post('/api/v2/' + encodeURIComponent(state.questionnaire.meta.name), options)
+      .then()
+      .catch(error => handleError(commit, error))
   }
 }
 
