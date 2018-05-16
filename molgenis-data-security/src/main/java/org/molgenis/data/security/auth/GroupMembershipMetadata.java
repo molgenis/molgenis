@@ -46,7 +46,7 @@ public class GroupMembershipMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(USER).setLabel("User").setDataType(XREF).setRefEntity(userMetaData).setNillable(false);
 		addAttribute(ROLE).setLabel("Role").setDataType(XREF).setRefEntity(roleMetadata).setNillable(false);
-		addAttribute(FROM).setLabel("From").setDataType(DATE_TIME).setNillable(false);
+		addAttribute(FROM).setLabel("From").setAuto(true).setDataType(DATE_TIME).setNillable(false);
 		addAttribute(TO).setLabel("To").setDataType(DATE_TIME);
 	}
 }

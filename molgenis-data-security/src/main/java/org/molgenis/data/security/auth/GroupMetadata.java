@@ -47,7 +47,7 @@ public class GroupMetadata extends SystemEntityType
 		setDescription("A number of people that work together or share certain beliefs.");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
-		addAttribute(NAME, ROLE_LABEL).setLabel("Name").setNillable(false);
+		addAttribute(NAME, ROLE_LABEL).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(DESCRIPTION).setLabel("Description");
 		addAttribute(PUBLIC).setDataType(BOOL)
 							.setLabel("Publicly visible")
