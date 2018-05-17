@@ -87,8 +87,10 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 	}
 
 	@Override
+	@javax.annotation.Nullable
 	public UiMenuItem getActiveItem()
 	{
+		//noinspection ConstantConditions
 		return Iterables.find(molgenisUiMenu.getItems(),
 				molgenisUiMenuItem -> molgenisUiMenuItem.getType() != UiMenuItemType.MENU && hasPermission(
 						molgenisUiMenuItem), null);
