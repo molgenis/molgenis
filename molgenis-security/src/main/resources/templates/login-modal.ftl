@@ -29,6 +29,8 @@
                                 <i class="fab fa-github"></i>&nbsp;
                             <#elseif clientName == 'ORCID'>
                                 <i class="ai ai-orcid"></i>&nbsp;
+                            <#elseif clientName == 'Auth0'>
+                                <img src="/img/auth0.png" width="16"/>&nbsp;
                             </#if>Sign in with ${clientName?html}</a>
                         </#list>
                     </div>

@@ -8,7 +8,7 @@ Your authorities:
 <#list authentication.authorities as grantedAuthority>
     ${grantedAuthority.authority}
 </#list>
-<#if authentication.principal?is_hash && authentication.principal.attributes?is_hash>
+<#if authentication.principal?is_hash && authentication.principal.attributes?? && authentication.principal.attributes?is_hash>
 <br/>
 Your attributes:<br/>
     <#list authentication.principal.attributes as attributename, attributevalue >

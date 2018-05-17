@@ -12,6 +12,7 @@ import static org.springframework.security.config.oauth2.client.CommonOAuth2Prov
 import static org.springframework.security.config.oauth2.client.CommonOAuth2Provider.GOOGLE;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
 import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC;
+import static org.springframework.security.oauth2.core.oidc.OidcScopes.*;
 
 @Configuration
 public class OAuth2Config
@@ -54,10 +55,29 @@ public class OAuth2Config
 	}
 
 	@Bean
+	public ClientRegistration auth0ClientRegistration()
+	{
+		return ClientRegistration.withRegistrationId("auth0")
+								 .clientAuthenticationMethod(BASIC)
+								 .redirectUriTemplate("{baseUrl}/login/oauth2/code/{registrationId}")
+								 .authorizationGrantType(AUTHORIZATION_CODE)
+								 .clientName("Auth0")
+								 .scope(OPENID, PROFILE, EMAIL)
+								 .jwkSetUri("https://fdlk.eu.auth0.com/.well-known/jwks.json")
+								 .authorizationUri("https://fdlk.eu.auth0.com/authorize")
+								 .tokenUri("https://fdlk.eu.auth0.com/oauth/token")
+								 .userInfoUri("https://fdlk.eu.auth0.com/userinfo")
+								 .userNameAttributeName("sub")
+								 .clientId("1lR5cRAX9aqYjGD6kF8Hv1DyI9snzdPb")
+								 .clientSecret("JQUvvlis40IvrOD9l78X_MWsfciLAuxg0ediviRrBmflFau7CHqdBT0pbHjntVuZ")
+								 .build();
+	}
+
+	@Bean
 	public InMemoryClientRegistrationRepository clientRegistrationRepository()
 	{
 		return new InMemoryClientRegistrationRepository(googleClientRegistration(), githubClientRegistration(),
-				orcidClientRegistration());
+				orcidClientRegistration(), auth0ClientRegistration());
 	}
 
 	@Bean
