@@ -56,6 +56,8 @@ const actions = {
 
         const chapters = form.formFields.filter(field => field.type === 'field-group')
         commit('SET_CHAPTER_FIELDS', chapters)
+        // Set state to submitted to have the form validate required fields
+        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
 
         commit('SET_LOADING', false)
       }, error => {
@@ -90,11 +92,15 @@ const actions = {
 
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
     commit('SET_FORM_DATA', formData)
+    // Set state to open allow required fields to be empty on auto-save
+    commit('UPDATE_FORM_STATUS', 'OPEN')
 
     Vue.nextTick(() => {
       const fieldState = formState[updatedAttribute]
       const updatedValue = formData[updatedAttribute]
       if (fieldState && fieldState.$valid) {
+        // Set state to submitted to have the form validate required fields
+        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         dispatch('AUTO_SAVE_QUESTIONNAIRE', {updatedAttribute, updatedValue})
       }
     })

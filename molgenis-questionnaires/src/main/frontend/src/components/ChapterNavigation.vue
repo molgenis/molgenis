@@ -118,7 +118,6 @@
        * Triggers client side validation by setting status to 'SUBMITTED'
        */
       validateBeforeNavigatingToNextChapter () {
-        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState._submit()
 
         if (this.chapterCompletion[this.currentChapter.id] === true) {
@@ -129,7 +128,6 @@
       },
 
       validateBeforeSubmit () {
-        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState._submit()
 
         if (this.chapterCompletion[this.currentChapter.id] === true) {
