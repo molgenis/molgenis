@@ -76,7 +76,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getId()).thenReturn("roleId");
+		when(role.getName()).thenReturn("roleId");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
@@ -106,7 +106,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getId()).thenReturn("roleId");
+		when(role.getName()).thenReturn("roleId");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
@@ -136,7 +136,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getId()).thenReturn("roleId");
+		when(role.getName()).thenReturn("roleId");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));

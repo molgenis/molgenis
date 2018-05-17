@@ -18,6 +18,7 @@ import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
@@ -104,11 +105,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/entityclass/role/{roleId}")
+	@GetMapping("/entityclass/role/{roleName}")
 	@ResponseBody
-	public Permissions getRoleEntityClassPermissions(@PathVariable String roleId)
+	public Permissions getRoleEntityClassPermissions(@PathVariable String roleName)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		return getEntityTypePermissions(sid);
 	}
 
@@ -134,11 +135,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/package/role/{roleId}")
+	@GetMapping("/package/role/{roleName}")
 	@ResponseBody
-	public Permissions getRolePackagePermissions(@PathVariable String roleId)
+	public Permissions getRolePackagePermissions(@PathVariable String roleName)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		return getPackagePermissions(sid);
 	}
 
@@ -156,9 +157,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/plugin/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRolePluginPermissions(@RequestParam String roleId, WebRequest webRequest)
+	public void updateRolePluginPermissions(@RequestParam String roleName, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		updatePluginPermissions(webRequest, sid);
 	}
 
@@ -166,9 +167,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/entityclass/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRoleEntityClassPermissions(@RequestParam String roleId, WebRequest webRequest)
+	public void updateRoleEntityClassPermissions(@RequestParam String roleName, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		updateEntityTypePermissions(webRequest, sid);
 	}
 
@@ -176,9 +177,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/package/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRolePackagePermissions(@RequestParam String roleId, WebRequest webRequest)
+	public void updateRolePackagePermissions(@RequestParam String roleName, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		updatePackagePermissions(webRequest, sid);
 	}
 
@@ -216,11 +217,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/plugin/role/{roleId}")
+	@GetMapping("/plugin/role/{roleName}")
 	@ResponseBody
-	public Permissions getRolePluginPermissions(@PathVariable String roleId)
+	public Permissions getRolePluginPermissions(@PathVariable String roleName)
 	{
-		Sid sid = getSidForRoleId(roleId);
+		Sid sid = getSidForRoleName(roleName);
 		return getPluginPermissions(sid);
 	}
 
@@ -461,18 +462,18 @@ public class PermissionManagerController extends PluginController
 		return SidUtils.createSid(user);
 	}
 
-	private Sid getSidForRoleId(String roleId)
+	private Sid getSidForRoleName(String roleName)
 	{
-		Role role = getRole(roleId);
+		Role role = getRole(roleName);
 		return SidUtils.createSid(role);
 	}
 
-	private Role getRole(String roleId)
+	private Role getRole(String roleName)
 	{
-		Role role = dataService.findOneById(ROLE, roleId, Role.class);
+		Role role = dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, roleName).findOne();
 		if (role == null)
 		{
-			throw new UnknownEntityException("unknown role id [" + roleId + "]");
+			throw new UnknownEntityException("unknown role name [" + roleName + "]");
 		}
 		return role;
 	}
