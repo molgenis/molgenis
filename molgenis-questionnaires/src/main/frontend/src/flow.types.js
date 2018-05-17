@@ -1,5 +1,5 @@
 export type QuestionnaireState = {
-  chapterFields: Array<*>,
+  chapters: Array<Chapter>,
   error: string,
   formData: Object,
   loading: boolean,
@@ -18,3 +18,23 @@ export type VuexContext = {
   dispatch: Function,
   getters: Object
 }
+
+export type ChapterField = {
+  id: string,
+  label: string,
+  description?: string,
+}
+
+export type ChapterFieldGroup = {
+  id: string,
+  label: string,
+  children?: Array<ChapterField | ChapterFieldGroup>
+}
+
+export type Chapter = {
+  id: string,
+  label: string,
+  description?: string,
+  children?: Array<ChapterField | ChapterFieldGroup>
+}
+

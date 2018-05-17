@@ -43,7 +43,8 @@
                 <!-- ================ ERROR BLOCK ================ -->
                 <div v-if="navigationBlocked" class="alert alert-warning mb-0" role="alert">
                   {{ 'questionnaire_chapter_incomplete_message' | i18n }}
-                  <span v-for="(value, key) in formState.$error" >{{ key }} </span>
+                  <span v-for="(value, key, index) in formState.$error" >{{ getQuestionLabelById(key) }}<span v-if="index !== Object.keys(formState.$error).length - 1">, </span>
+                  </span>
                 </div>
 
                 <div v-if="error" class="alert alert-warning mb-0" role="alert">
@@ -128,6 +129,11 @@
       },
       totalNumberOfChapters () {
         return this.$store.getters.getTotalNumberOfChapters
+      }
+    },
+    methods: {
+      getQuestionLabelById (questionId) {
+        return this.$store.getters.getQuestionLabel(questionId)
       }
     },
     created () {
