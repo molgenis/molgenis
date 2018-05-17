@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState, Chapter } from '../flow.types.js'
+import type { QuestionnaireState, Chapter, ChapterField } from '../flow.types.js'
 
 function InvalidChapterIdException (chapterId: string) {
   this.chapterId = chapterId
@@ -44,25 +44,43 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
   })
 }
 
-const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
-  return chapter.children.reduce((accumulator, child) => {
-    if (child.type === 'field-group') {
-      return accumulator + getTotalNumberOfFieldsForChapter(child, formData)
-    }
-
-    let visible = false
-    try {
-      visible = child.visible(formData)
-    } catch (e) {
-      console.error(`Error in getters.getTotalNumberOfFieldsForChapter, during evaluation of function 'visible' for field ${child.id}.
+const isVisible = (field: ChapterField, formData: Object) => {
+  let visible = false
+  try {
+    visible = field.visible(formData)
+  } catch (e) {
+    console.error(`Error in getters, during evaluation of function 'visible' for field ${field.id}.
       Where visible expression is: 
-        '${child.visible.toString()}'
+        '${field.visible.toString()}'
       And formData is: 
         '${JSON.stringify(formData)}'
       The default value of visible is set to false`, e)
+  }
+  return visible
+}
+
+const isRequired = (field: ChapterField, formData: Object) => {
+  let required = false
+  try {
+    required = field.required(formData)
+  } catch (e) {
+    console.error(`Error in getters, during evaluation of function 'required' for field ${field.id}.
+      Where required expression is: 
+        '${field.required.toString()}'
+      And formData is: 
+        '${JSON.stringify(formData)}'
+      The default value of required is set to false`, e)
+  }
+  return required
+}
+
+const getTotalNumberOfVisibleRequiredFieldsForChapter = (chapter, formData) => {
+  return chapter.children.reduce((accumulator, child) => {
+    if (child.type === 'field-group') {
+      return accumulator + getTotalNumberOfVisibleRequiredFieldsForChapter(child, formData)
     }
 
-    if (visible) {
+    if (isVisible(child, formData) && isRequired(child, formData)) {
       accumulator++
     }
 
@@ -70,13 +88,16 @@ const getTotalNumberOfFieldsForChapter = (chapter, formData) => {
   }, 0)
 }
 
-const getNumberOfFilledInFieldsForChapter = (chapter, formData) => {
+const getNumberOfFilledInVisibleRequiredFieldsForChapter = (chapter, formData) => {
   return chapter.children.reduce((accumulator, child) => {
     if (child.type === 'field-group') {
-      return accumulator + getNumberOfFilledInFieldsForChapter(child, formData)
+      return accumulator + getNumberOfFilledInVisibleRequiredFieldsForChapter(child, formData)
     }
 
-    if (isFilledInValue(formData[child.id])) {
+    if (
+      isVisible(child, formData) &&
+      isRequired(child, formData) &&
+      isFilledInValue(formData[child.id])) {
       accumulator++
     }
 
@@ -127,10 +148,15 @@ const getters = {
 
   getChapterProgress: (state: QuestionnaireState): Object => {
     return state.chapters.reduce((accumulator, chapter) => {
-      const totalNumberOfFieldsInChapter = getTotalNumberOfFieldsForChapter(chapter, state.formData)
-      const numberOfFilledInFieldsInChapter = getNumberOfFilledInFieldsForChapter(chapter, state.formData)
+      const totalNumberOfFieldsInChapter = getTotalNumberOfVisibleRequiredFieldsForChapter(chapter, state.formData)
+      const numberOfFilledInFieldsInChapter = getNumberOfFilledInVisibleRequiredFieldsForChapter(chapter, state.formData)
 
-      accumulator[chapter.id] = (numberOfFilledInFieldsInChapter / totalNumberOfFieldsInChapter) * 100
+      if (totalNumberOfFieldsInChapter === 0) {
+        accumulator[chapter.id] = 0
+      } else {
+        accumulator[chapter.id] = Math.round((numberOfFilledInFieldsInChapter / totalNumberOfFieldsInChapter) * 100)
+      }
+
       return accumulator
     }, {})
   },
