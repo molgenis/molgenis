@@ -40,6 +40,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.PermissionSet.READ;
@@ -80,8 +81,8 @@ public class PermissionRegistryImplTest extends AbstractMockitoTest
 	@Test
 	public void testGetPermissions()
 	{
-		when(dataService.query(ROLE, Role.class).eq("name", ROLE_USER).findOne()).thenReturn(userRole);
-		when(userRole.getId()).thenReturn("USER");
+		when(dataService.query(ROLE, Role.class).eq(NAME, ROLE_USER).findOne()).thenReturn(userRole);
+		when(userRole.getName()).thenReturn(ROLE_USER);
 
 		when(entityTypeEntityType.getId()).thenReturn(ENTITY_TYPE_META_DATA);
 		when(attributeEntityType.getId()).thenReturn(ATTRIBUTE_META_DATA);

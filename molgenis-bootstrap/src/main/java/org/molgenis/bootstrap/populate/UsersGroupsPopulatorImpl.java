@@ -5,7 +5,6 @@ import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Service
@@ -71,8 +71,10 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		anonymousUser.setChangePassword(false);
 
 		// create user role
-		Role userRole = roleFactory.create("USER");
-		userRole.setName(AccountService.ROLE_USER);
+		Role userRole = roleFactory.create();
+		userRole.setName(ROLE_USER);
+		userRole.setLabel("User");
+		userRole.setDescription("All authenticated users are a member of this Role.");
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));

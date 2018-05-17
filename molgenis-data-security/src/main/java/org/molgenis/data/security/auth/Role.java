@@ -4,8 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.auth.RoleMetadata.ID;
-import static org.molgenis.data.security.auth.RoleMetadata.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.*;
 
 public class Role extends StaticEntity
 {
@@ -43,5 +42,25 @@ public class Role extends StaticEntity
 	public void setName(String name)
 	{
 		set(NAME, name);
+	}
+
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
+	public void setLabel(String label)
+	{
+		set(LABEL, label);
+	}
+
+	public String getDescription()
+	{
+		return getString(DESCRIPTION);
+	}
+
+	public void setDescription(String description)
+	{
+		set(DESCRIPTION, description);
 	}
 }

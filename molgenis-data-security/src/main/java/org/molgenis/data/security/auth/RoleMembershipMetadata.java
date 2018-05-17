@@ -11,10 +11,10 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
 @Component
-public class GroupMembershipMetadata extends SystemEntityType
+public class RoleMembershipMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME = "GroupMembership";
-	public static final String GROUP_MEMBERSHIP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "RoleMembership";
+	public static final String ROLE_MEMBERSHIP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String USER = "user";
@@ -26,7 +26,7 @@ public class GroupMembershipMetadata extends SystemEntityType
 	private final UserMetaData userMetaData;
 	private final RoleMetadata roleMetadata;
 
-	public GroupMembershipMetadata(SecurityPackage securityPackage, UserMetaData userMetaData,
+	public RoleMembershipMetadata(SecurityPackage securityPackage, UserMetaData userMetaData,
 			RoleMetadata roleMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
@@ -40,13 +40,13 @@ public class GroupMembershipMetadata extends SystemEntityType
 	{
 		setPackage(securityPackage);
 
-		setLabel("Group Membership");
-		setDescription("Records the fact that a User is a member of a Group in a certain Role.");
+		setLabel("Role Membership");
+		setDescription("Records the fact that a User is a member of a Role during an interval.");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier").setVisible(false);
 		addAttribute(USER).setLabel("User").setDataType(XREF).setRefEntity(userMetaData).setNillable(false);
 		addAttribute(ROLE).setLabel("Role").setDataType(XREF).setRefEntity(roleMetadata).setNillable(false);
-		addAttribute(FROM).setLabel("From").setAuto(true).setDataType(DATE_TIME).setNillable(false);
+		addAttribute(FROM).setLabel("From").setDataType(DATE_TIME).setNillable(false);
 		addAttribute(TO).setLabel("To").setDataType(DATE_TIME);
 	}
 }

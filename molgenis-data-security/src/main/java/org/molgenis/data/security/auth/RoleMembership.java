@@ -1,5 +1,6 @@
 package org.molgenis.data.security.auth;
 
+import com.google.common.collect.Range;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -7,22 +8,30 @@ import org.molgenis.data.support.StaticEntity;
 import java.time.Instant;
 import java.util.Optional;
 
+import static com.google.common.collect.Range.atLeast;
+import static com.google.common.collect.Range.closedOpen;
 import static java.time.Instant.now;
-import static org.molgenis.data.security.auth.GroupMembershipMetadata.*;
+import static org.molgenis.data.security.auth.RoleMembership.Status.*;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.*;
 
-public class GroupMembership extends StaticEntity
+public class RoleMembership extends StaticEntity
 {
-	public GroupMembership(Entity entity)
+	public enum Status
+	{
+		FUTURE, CURRENT, PAST
+	}
+
+	public RoleMembership(Entity entity)
 	{
 		super(entity);
 	}
 
-	public GroupMembership(EntityType entityType)
+	public RoleMembership(EntityType entityType)
 	{
 		super(entityType);
 	}
 
-	public GroupMembership(String id, EntityType entityType)
+	public RoleMembership(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);
@@ -78,8 +87,19 @@ public class GroupMembership extends StaticEntity
 		return Optional.ofNullable(getInstant(TO));
 	}
 
-	public boolean isCurrentlyActive()
+	public Range<Instant> getValidity()
 	{
-		return getFrom().isBefore(now()) && !getTo().filter(now()::isAfter).isPresent();
+		return getTo().map(to -> closedOpen(getFrom(), to)).orElse(atLeast(getFrom()));
+	}
+
+	public Status getStatus()
+	{
+		if (getFrom().isAfter(now())) return FUTURE;
+		return getValidity().contains(now()) ? CURRENT : PAST;
+	}
+
+	public boolean isCurrent()
+	{
+		return getStatus() == CURRENT;
 	}
 }

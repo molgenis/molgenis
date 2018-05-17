@@ -3,9 +3,9 @@ package org.molgenis.security.user;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMembership;
-import org.molgenis.data.security.auth.GroupMembershipMetadata;
 import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleMembership;
+import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.GroupMembershipMetadata.GROUP_MEMBERSHIP;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.testng.Assert.assertEquals;
@@ -41,10 +41,10 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 	private User user;
 
 	@Mock
-	private GroupMembership activeMembership;
+	private RoleMembership currentMembership;
 
 	@Mock
-	private GroupMembership inactiveMembership;
+	private RoleMembership pastMembership;
 
 	@Mock
 	private Role role;
@@ -74,12 +74,12 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(user.isSuperuser()).thenReturn(true);
 		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-		when(activeMembership.isCurrentlyActive()).thenReturn(true);
-		when(activeMembership.getRole()).thenReturn(role);
+		when(currentMembership.isCurrent()).thenReturn(true);
+		when(currentMembership.getRole()).thenReturn(role);
 		when(role.getId()).thenReturn("roleId");
-		when(dataService.query(GROUP_MEMBERSHIP, GroupMembership.class)
-						.eq(GroupMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(activeMembership, inactiveMembership));
+		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
+						.eq(RoleMembershipMetadata.USER, user)
+						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
@@ -104,12 +104,12 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(user.isActive()).thenReturn(true);
 		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-		when(activeMembership.isCurrentlyActive()).thenReturn(true);
-		when(activeMembership.getRole()).thenReturn(role);
+		when(currentMembership.isCurrent()).thenReturn(true);
+		when(currentMembership.getRole()).thenReturn(role);
 		when(role.getId()).thenReturn("roleId");
-		when(dataService.query(GROUP_MEMBERSHIP, GroupMembership.class)
-						.eq(GroupMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(activeMembership, inactiveMembership));
+		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
+						.eq(RoleMembershipMetadata.USER, user)
+						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
 
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
@@ -134,12 +134,12 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		when(user.isSuperuser()).thenReturn(false);
 		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-		when(activeMembership.isCurrentlyActive()).thenReturn(true);
-		when(activeMembership.getRole()).thenReturn(role);
+		when(currentMembership.isCurrent()).thenReturn(true);
+		when(currentMembership.getRole()).thenReturn(role);
 		when(role.getId()).thenReturn("roleId");
-		when(dataService.query(GROUP_MEMBERSHIP, GroupMembership.class)
-						.eq(GroupMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(activeMembership, inactiveMembership));
+		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
+						.eq(RoleMembershipMetadata.USER, user)
+						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));

@@ -52,6 +52,6 @@ public class SidUtils
 
 	public static String createRoleAuthority(Role role)
 	{
-		return "ROLE" + '_' + role.getId();
+		return "ROLE" + '_' + role.getName();
 	}
 }

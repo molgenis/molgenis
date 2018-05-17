@@ -1,13 +1,6 @@
 package org.molgenis.core.ui.admin.user;
 
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.data.security.auth.Role;
-import org.molgenis.data.security.auth.User;
-import org.molgenis.security.settings.AuthenticationSettings;
-import org.molgenis.security.twofactor.service.RecoveryService;
-import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
@@ -20,7 +13,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,30 +30,16 @@ public class UserAccountControllerMockMvcTest extends AbstractTestNGSpringContex
 	@Autowired
 	private UserAccountControllerTestConfig config;
 	@Autowired
-	private UserAccountService userAccountService;
-	@Autowired
-	private RecoveryService recoveryService;
-	@Autowired
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	@Autowired
-	private AuthenticationSettings authenticationSettings;
-	@Autowired
 	private UserAccountController userAccountController;
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 	@Autowired
 	private LocaleResolver localeResolver;
-	@Mock
-	private Model model;
-	@Mock
-	private User user;
-	@Mock
-	private Role allUsers;
 
 	private MockMvc mockMvc;
 
 	@BeforeMethod
-	public void setUp() throws Exception
+	public void setUp()
 	{
 		config.resetMocks();
 		MockitoAnnotations.initMocks(this);

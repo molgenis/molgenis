@@ -45,6 +45,16 @@ public class Group extends StaticEntity
 		return getString(NAME);
 	}
 
+	public void setLabel(String label)
+	{
+		set(LABEL, label);
+	}
+
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
 	public void setDescription(String description)
 	{
 		set(DESCRIPTION, description);

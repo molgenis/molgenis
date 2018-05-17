@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.core.util.CountryCodes;
-import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.model.RecoveryCode;
@@ -56,18 +55,16 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	private Model model;
 	@Mock
 	private User user;
-	@Mock
-	private Role allUsers;
 
 	@BeforeMethod
-	public void setUp() throws Exception
+	public void setUp()
 	{
 		config.resetMocks();
 		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
-	public void testShowAccountWithCodes() throws Exception
+	public void testShowAccountWithCodes()
 	{
 		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENABLED);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
@@ -85,7 +82,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class, expectedExceptionsMessageRegExp = "Please enter old password to update your password.")
-	public void testUpdateAccountNoOldPassword() throws Exception
+	public void testUpdateAccountNoOldPassword()
 	{
 		AccountUpdateRequest accountUpdateRequest = new AccountUpdateRequest();
 		accountUpdateRequest.setNewpwd("abc");
@@ -94,7 +91,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class, expectedExceptionsMessageRegExp = "The password you entered is incorrect.")
-	public void testUpdateAccountOldPasswordIncorrect() throws Exception
+	public void testUpdateAccountOldPasswordIncorrect()
 	{
 		when(userAccountService.validateCurrentUserPassword("incorrect")).thenReturn(false);
 
@@ -107,7 +104,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class, expectedExceptionsMessageRegExp = "'New password' does not match 'Repeat new password'.")
-	public void testUpdateAccountNonMatchingNewPasswords() throws Exception
+	public void testUpdateAccountNonMatchingNewPasswords()
 	{
 		when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
 
@@ -120,7 +117,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test(expectedExceptions = MolgenisUserException.class, expectedExceptionsMessageRegExp = "New password must consist of at least 6 characters.")
-	public void testUpdateAccountNewPasswordTooShort() throws Exception
+	public void testUpdateAccountNewPasswordTooShort()
 	{
 		when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
 
@@ -133,7 +130,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testUpdateAccountUpdatesPassword() throws Exception
+	public void testUpdateAccountUpdatesPassword()
 	{
 		when(userAccountService.validateCurrentUserPassword("old")).thenReturn(true);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
@@ -151,7 +148,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testUpdateAccountAddressFields() throws Exception
+	public void testUpdateAccountAddressFields()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -170,7 +167,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testUpdateAccountNameFields() throws Exception
+	public void testUpdateAccountNameFields()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -191,7 +188,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testUpdateAccountWorkFields() throws Exception
+	public void testUpdateAccountWorkFields()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
@@ -217,7 +214,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testEnableTwoFactorAuthentication() throws Exception
+	public void testEnableTwoFactorAuthentication()
 	{
 		assertEquals(userAccountController.enableTwoFactorAuthentication(), "redirect:/login");
 
@@ -226,7 +223,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 
 	@Test
 	@WithMockUser
-	public void testDisableTwoFactorAuthentication() throws Exception
+	public void testDisableTwoFactorAuthentication()
 	{
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(user.isTwoFactorAuthentication()).thenReturn(false);
@@ -244,14 +241,14 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testResetTwoFactorAuthentication() throws Exception
+	public void testResetTwoFactorAuthentication()
 	{
 		assertEquals(userAccountController.resetTwoFactorAuthentication(), "redirect:/2fa/activation");
 		verify(twoFactorAuthenticationService).resetSecretForUser();
 	}
 
 	@Test
-	public void testGetRecoveryCodes() throws Exception
+	public void testGetRecoveryCodes()
 	{
 		RecoveryCode code1 = mock(RecoveryCode.class);
 		when(code1.getCode()).thenReturn("code1");
@@ -263,7 +260,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 	}
 
 	@Test
-	public void testGenerateRecoveryCodes() throws Exception
+	public void testGenerateRecoveryCodes()
 	{
 		RecoveryCode code1 = mock(RecoveryCode.class);
 		when(code1.getCode()).thenReturn("code1");

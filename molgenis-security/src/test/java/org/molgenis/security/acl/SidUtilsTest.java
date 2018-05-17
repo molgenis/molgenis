@@ -30,17 +30,17 @@ public class SidUtilsTest
 	}
 
 	@Test
-	public void testCreateSidGroup()
+	public void testCreateSidRole()
 	{
-		Role role = when(mock(Role.class).getId()).thenReturn("groupId").getMock();
+		Role role = when(mock(Role.class).getName()).thenReturn("NAME").getMock();
 		Sid sid = SidUtils.createSid(role);
-		assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_groupId")));
+		assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")));
 	}
 
 	@Test
-	public void testCreateGroupAuthority()
+	public void testCreateRoleAuthority()
 	{
-		Role role = when(mock(Role.class).getId()).thenReturn("groupId").getMock();
-		assertEquals("ROLE_groupId", SidUtils.createRoleAuthority(role));
+		Role role = when(mock(Role.class).getName()).thenReturn("NAME").getMock();
+		assertEquals("ROLE_NAME", SidUtils.createRoleAuthority(role));
 	}
 }
