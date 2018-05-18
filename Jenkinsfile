@@ -41,7 +41,7 @@ pipeline {
             steps {
                 parallel(
                         unit: {
-                            sh "mvn verify -pl molgenis-utils --batch-mode -Dskip.js.build=true -DskipITs"
+                            sh "mvn verify -pl molgenis-util --batch-mode -Dskip.js.build=true -DskipITs"
                             withCredentials(
                                     [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
                                 sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
@@ -79,34 +79,39 @@ pipeline {
         stage('Build docker') {
             steps {
                 script {
-                    docker.withTool("docker") {
-                        docker.withServer() {
-                            echo "Build MOLGENIS docker [ ${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts"
-                            molgenisDocker = docker.build("${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
+                    stage('Build image') {
+                        docker.withTool("docker") {
+                            docker.withServer() {
+                                echo "Build MOLGENIS docker [ ${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts"
+                                molgenisDocker = docker.build("${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
+                            }
                         }
-                        docker.withRegistry("https://${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}", 'jenkins-registry') {
-                            echo "Publish MOLGENIS docker to [ ${MOLGENIS_DOCKER_REGISTRY} ]"
-                            molgenisDocker.push("latest")
-                            molgenisDocker.push("lts")
+                        stage('Push docker') {
+                            docker.withTool("docker") {
+                                docker.withRegistry("https://${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}", 'jenkins-registry') {
+                                    echo "Publish MOLGENIS docker to [ ${MOLGENIS_DOCKER_REGISTRY} ]"
+                                    molgenisDocker.push("latest")
+                                    molgenisDocker.push("lts")
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
-post {
-    // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
-    success {
-        notifySuccess()
-        build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: $ {
-            version
-        }]]
+    post {
+        // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
+        success {
+            notifySuccess()
+            build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: $ {
+                version
+            }]]
+        }
+        failure {
+            notifyFailed()
+        }
     }
-    failure {
-        notifyFailed()
-    }
-}
 }
 
 def notifySuccess() {
