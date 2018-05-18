@@ -34,45 +34,17 @@ pipeline {
         }
         stage('Build package') {
             steps {
-                sh "mvn package -pl molgenis-util -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
-            }
-        }
-        stage('Test package') {
-            steps {
-                parallel(
-                        unit: {
-                            sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
-                            withCredentials(
-                                    [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
-                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
-                            }
-                            withCredentials(
-                                    [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
-                                sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode"
-                            }
-                        })
-//                        api: {
-//                            sh "sysctl -w vm.max_map_count=262144"
-//                            sh "mvn verify -pl molgenis-api-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
-//                            withCredentials(
-//                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
-//                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F api"
-//                            }
-//                        }
-//                        integration: {
-//                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode -Dit_db_user=postgres -Dit_db_password"
-//                            withCredentials(
-//                                [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
-//                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F integration"
-//                            }
-//                        })
+                sh "mvn package -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
             }
         }
         stage('Publish package') {
             steps {
-                configFileProvider(
-                        [configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn -s ${env.MAVEN_SETTINGS} -pl molgenis-util release:prepare release:perform -B -Darguments=-DskipTests -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
+                withCredentials([file(credentialsId: 'molgenis.pgp.secretkey', variable: 'KEYFILE'),
+                                 string(credentialsId: 'molgenis.pgp.passphrase', variable: 'PASSPHRASE')]) {
+                    configFileProvider(
+                            [configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
+                        sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B \"-Darguments=-DskipTests -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}\" -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
+                    }
                 }
             }
         }
