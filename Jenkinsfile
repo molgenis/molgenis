@@ -41,11 +41,11 @@ pipeline {
             steps {
                 parallel(
                         unit: {
-                            sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
-                            withCredentials(
-                                    [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
-                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
-                            }
+//                            sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
+//                            withCredentials(
+//                                    [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
+//                                sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
+//                            }
                             withCredentials(
                                     [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
                                 sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode"
