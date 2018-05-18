@@ -2,7 +2,7 @@ import getters from 'src/store/getters'
 
 describe('getters', () => {
   const state = {
-    chapterFields: [
+    chapters: [
       {
         id: 'chapter-1',
         label: 'First chapter',
@@ -60,6 +60,7 @@ describe('getters', () => {
             children: [
               {
                 id: 'chapter-3-field-2',
+                label: 'chapter-3-field-2-label',
                 type: 'text',
                 visible: (data) => true,
                 required: () => false,
@@ -144,7 +145,7 @@ describe('getters', () => {
     it('should return a chapter based on index [1]', () => {
       const getChapterByIndex = getters.getChapterByIndex(state)
       const actual = getChapterByIndex(1)
-      const expected = state.chapterFields[0]
+      const expected = state.chapters[0]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -152,7 +153,7 @@ describe('getters', () => {
     it('should return a chapter based on index [2]', () => {
       const getChapterByIndex = getters.getChapterByIndex(state)
       const actual = getChapterByIndex(2)
-      const expected = state.chapterFields[1]
+      const expected = state.chapters[1]
 
       expect(actual).to.deep.equal(expected)
     })
@@ -219,7 +220,7 @@ describe('getters', () => {
       let stub = sinon.stub(console, 'error')
 
       const stateWithError = {
-        chapterFields: [
+        chapters: [
           {
             id: 'chapter-1',
             label: 'First chapter',
@@ -293,4 +294,31 @@ describe('getters', () => {
       expect(getters.isSaving(state)).to.equal(true)
     })
   })
+
+  describe('getChapterLabel', () => {
+    it('should return the chapter label for a given chapter id', () => {
+      const chapterId = 'chapter-2'
+      expect(getters.getChapterLabel(state)(chapterId)).to.deep.equal('Second chapter')
+    })
+
+    it('should thrown an exception if the given id is not a chapter id', () => {
+      const chapterId = 'non-existent-id'
+      expect(() => getters.getChapterLabel(state)(chapterId)).to.throw()
+    })
+  })
+
+  describe('getQuestionLabel', () => {
+    it('should return the question label for a given question id', () => {
+      const questionId = 'chapter-3-field-2'
+      expect(getters.getQuestionLabel(state)(questionId)).to.deep.equal('chapter-3-field-2-label')
+    })
+
+    it('should thrown an exception if the given id is not a question id', () => {
+      const questionId = 'non-existent-id'
+      expect(() => getters.getQuestionLabel(state)(questionId)).to.throw()
+    })
+  })
+
+
+
 })

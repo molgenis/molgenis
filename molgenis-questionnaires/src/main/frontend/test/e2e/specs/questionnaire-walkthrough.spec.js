@@ -1,3 +1,4 @@
+/* eslint no-unused-expressions: "off" */
 /**
  * Due to long loading times, will not reset state of each
  * test but will continue from where the previous test ended

@@ -465,7 +465,10 @@ public class EntityAttributesValidator
 		return new ConstraintViolation(fullMessage);
 	}
 
-	private Object getDataValuesForType(Entity entity, Attribute attribute)
+	/**
+	 * Package-private for testability.
+	 */
+	Object getDataValuesForType(Entity entity, Attribute attribute)
 	{
 		String attributeName = attribute.getName();
 		switch (attribute.getDataType())
@@ -477,7 +480,9 @@ public class EntityAttributesValidator
 			case BOOL:
 				return entity.getBoolean(attributeName);
 			case DECIMAL:
+				return entity.getDouble(attributeName);
 			case LONG:
+				return entity.getLong(attributeName);
 			case INT:
 				return entity.getInt(attributeName);
 			case HYPERLINK:

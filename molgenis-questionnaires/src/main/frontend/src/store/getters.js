@@ -1,5 +1,19 @@
 // @flow
-import type { QuestionnaireState } from '../flow.types.js'
+import type { QuestionnaireState, Chapter } from '../flow.types.js'
+
+function InvalidChapterIdException (chapterId: string) {
+  this.chapterId = chapterId
+  this.name = 'InvalidChapterIdException'
+}
+
+(InvalidChapterIdException.prototype: any).toString = function () { return 'Unknown chapterId (' + this.chapterId + ')' }
+
+function InvalidQuestionIdException (questionId: string) {
+  this.questionId = questionId
+  this.name = 'InvalidQuestionIdException'
+}
+
+(InvalidQuestionIdException.prototype: any).toString = function () { return 'Unknown questionId (' + this.questionId + ')' }
 
 const isFilledInValue = (value): boolean => {
   if (value === undefined) return false
@@ -70,24 +84,49 @@ const getNumberOfFilledInFieldsForChapter = (chapter, formData) => {
   }, 0)
 }
 
+const getQuestionById = (chapters: Array<Chapter>, questionId: string) => {
+  const findQuestion = (accumulator, question) => {
+    if (question.id === questionId) {
+      accumulator = question
+    } else {
+      if (question.children) {
+        accumulator = question.children.reduce(findQuestion, accumulator)
+      }
+    }
+    return accumulator
+  }
+
+  const topLevelQuestions = chapters.reduce((questions, chapter) => {
+    return chapter.children ? questions.concat(chapter.children) : questions
+  }, [])
+
+  const question = topLevelQuestions.reduce(findQuestion, null)
+
+  if (question) {
+    return question
+  } else {
+    throw new InvalidQuestionIdException(questionId)
+  }
+}
+
 const getters = {
   getChapterByIndex: (state: QuestionnaireState): Function => (index: number) => {
-    return state.chapterFields[index - 1]
+    return state.chapters[index - 1]
   },
 
   getChapterCompletion: (state: QuestionnaireState): Object => {
-    return state.chapterFields.reduce((accumulator, chapter) => {
+    return state.chapters.reduce((accumulator, chapter) => {
       accumulator[chapter.id] = isChapterComplete(chapter, state.formData)
       return accumulator
     }, {})
   },
 
   getChapterNavigationList: (state: QuestionnaireState): Array<*> => {
-    return state.chapterFields.map((chapter, index) => ({id: chapter.id, label: chapter.label, index: (index + 1)}))
+    return state.chapters.map((chapter, index) => ({id: chapter.id, label: chapter.label, index: (index + 1)}))
   },
 
   getChapterProgress: (state: QuestionnaireState): Object => {
-    return state.chapterFields.reduce((accumulator, chapter) => {
+    return state.chapters.reduce((accumulator, chapter) => {
       const totalNumberOfFieldsInChapter = getTotalNumberOfFieldsForChapter(chapter, state.formData)
       const numberOfFilledInFieldsInChapter = getNumberOfFilledInFieldsForChapter(chapter, state.formData)
 
@@ -109,11 +148,24 @@ const getters = {
   },
 
   getTotalNumberOfChapters: (state: QuestionnaireState): number => {
-    return state.chapterFields.length
+    return state.chapters.length
   },
 
   isSaving: (state: QuestionnaireState): boolean => {
     return state.numberOfOutstandingCalls > 0
+  },
+
+  getChapterLabel: (state: QuestionnaireState): Function => (chapterId: string) => {
+    const chapter = state.chapters.find((chapter) => chapter.id === chapterId)
+    if (chapter) {
+      return chapter.label
+    } else {
+      throw new InvalidChapterIdException(chapterId)
+    }
+  },
+
+  getQuestionLabel: (state: QuestionnaireState): Function => (questionId: string) => {
+    return getQuestionById(state.chapters, questionId).label
   }
 }
 

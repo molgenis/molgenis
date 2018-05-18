@@ -39,7 +39,8 @@ describe('ChapterNavigation component', () => {
 
     getters = {
       getChapterCompletion: () => chapterCompletion,
-      getTotalNumberOfChapters: () => 2
+      getTotalNumberOfChapters: () => 2,
+      getChapterLabel: () => () => 'chapterLabel'
     }
 
     mutations = {
@@ -151,11 +152,11 @@ describe('ChapterNavigation component', () => {
     })
 
     it('should commit [SET_ERROR] if the current chapter is complete but not all chapters are', () => {
-      propsData.currentChapter = {id: 'chapter1'}
+      propsData.currentChapter = {id: 'chapter1', label: 'chapter1 label'}
 
       const wrapper = shallow(ChapterNavigation, {propsData, localVue, mocks, router, store, stubs})
       wrapper.vm.validateBeforeSubmit()
-      td.verify(mutations.SET_ERROR(td.matchers.anything(), 'forgot: chapter2'))
+      td.verify(mutations.SET_ERROR(td.matchers.anything(), 'forgot: chapterLabel'))
     })
 
     it('should commit [BLOCK_NAVIGATION] with the value "true" if the current chapter is not completed', () => {

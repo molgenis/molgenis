@@ -25,7 +25,7 @@
     },
     methods: {
       onValueChanged (formData) {
-        this.$store.dispatch('AUTO_SAVE_QUESTIONNAIRE', formData)
+        this.$store.dispatch('VALIDATE_FIELD', {formData, formState: this.formState})
       }
     },
     computed: {
