@@ -79,21 +79,15 @@ pipeline {
         stage('Build docker') {
             steps {
                 script {
-                    stage('Build image') {
-                        docker.withTool("docker") {
-                            docker.withServer() {
-                                echo "Build MOLGENIS docker [ ${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts"
-                                molgenisDocker = docker.build("${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
-                            }
+                    docker.withTool("docker") {
+                        docker.withServer() {
+                            echo "Build MOLGENIS docker [ ${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts"
+                            molgenisDocker = docker.build("${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
                         }
-                    }
-                    stage('Push image') {
-                        docker.withTool("docker") {
-                            docker.withRegistry("https://${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}", 'jenkins-registry') {
-                                echo "Publish MOLGENIS docker to [ ${MOLGENIS_DOCKER_REGISTRY} ]"
-                                molgenisDocker.push("latest")
-                                molgenisDocker.push("lts")
-                            }
+                        docker.withRegistry("https://${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}", 'jenkins-registry') {
+                            echo "Publish MOLGENIS docker to [ ${MOLGENIS_DOCKER_REGISTRY} ]"
+                            molgenisDocker.push("latest")
+                            molgenisDocker.push("lts")
                         }
                     }
                 }
