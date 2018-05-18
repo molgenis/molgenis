@@ -41,7 +41,7 @@ pipeline {
             steps {
                 parallel(
                         unit: {
-                            sh "mvn verify -pl molgenis-util --batch-mode -Dskip.js.build=true -DskipITs"
+                            sh "mvn verify --batch-mode -Dskip.js.build=true -DskipITs"
                             withCredentials(
                                     [string(credentialsId: 'jenkins-codecov', variable: 'CODECOV_TOKEN')]) {
                                 sh "curl -s https://codecov.io/bash | bash -s - -t ${CODECOV_TOKEN} -c -F unit"
@@ -81,7 +81,7 @@ pipeline {
                 script {
                     stage('Build image') {
                         docker.withTool("docker") {
-                            docker.withServer() {
+                            docker.withServer("${DOCKER_HOST}") {
                                 echo "Build MOLGENIS docker [ ${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts"
                                 molgenisDocker = docker.build("${MOLGENIS_DOCKER_REGISTRY}/${MOLGENIS_OPERATIONS_DOCKER_ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
                             }
