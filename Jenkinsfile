@@ -48,7 +48,7 @@ pipeline {
                             }
                             withCredentials(
                                     [string(credentialsId: 'jenkins-sonar', variable: 'SONAR_TOKEN')]) {
-                                sh "mvn sonar:sonar -pl molgenis-util -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode"
+                                sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH} --batch-mode"
                             }
                         })
 //                        api: {
