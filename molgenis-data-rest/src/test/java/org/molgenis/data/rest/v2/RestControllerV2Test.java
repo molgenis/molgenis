@@ -388,7 +388,11 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.count(ENTITY_NAME, new QueryImpl<>())).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
-		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
+		Sort sortOrder = new Sort(AttributeMetadata.ID);
+		when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrder))).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
+
+		Sort sortOrderWithSort = new Sort("sortOrder");
+		when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort))).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
 
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
@@ -469,6 +473,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourceIncludingCategories() throws Exception
 	{
 		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponseIncludingCategories.json"));
+		mockMvc.perform(get(HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE))
+			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
+	public void retrieveResourceIncludingCategoriesWithSort() throws Exception
+	{
+		String expectedContent = readFile(getClass().getResourceAsStream("resourceResponseIncludingCategoriesWithSort.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
