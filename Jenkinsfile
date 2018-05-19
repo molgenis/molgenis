@@ -47,7 +47,7 @@ pipeline {
             }
             environment {
                 SONAR_TOKEN = credentials('jenkins-sonar')
-                SONAR_GITHUB_TOKEN = credentials('jenkins-github')
+                SONAR_GITHUB_TOKEN = credentials('github.oauth.molgenis-jenkins')
             }
             steps {
                 sh "mvn sonar:sonar -B -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.SONAR_GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
