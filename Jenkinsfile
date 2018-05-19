@@ -21,7 +21,9 @@ pipeline {
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
             }
             steps {
-                sh "mvn deploy -B -DskipITs -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
+                configFileProvider([configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
+                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
+                }
             }
             post {
                 always {
@@ -67,6 +69,11 @@ pipeline {
         }
 
         stage('Publish to maven central') {
+            when {
+                not {
+                    changeRequest()
+                }
+            }
             environment {
                 KEYFILE = credentials('molgenis.pgp.secretkey')
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
@@ -81,6 +88,7 @@ pipeline {
             }
         }
 
+        // todo: move one step up
         stage('Build docker') {
             environment {
                 HOST = 'tcp://192.168.64.12:2375'
