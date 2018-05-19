@@ -1,4 +1,4 @@
-def molgenisDocker
+def molgenisDocker, version
 pipeline {
     agent any
     tools {
@@ -9,6 +9,7 @@ pipeline {
     stages {
         stage('Preparation') {
             steps {
+                // TODO: can this be configured higher up?
                 sh "git config --global user.email molgenis+ci@gmail.com"
                 sh "git config --global user.name 'MOLGENIS continuous integration user'"
             }
@@ -68,29 +69,33 @@ pipeline {
         }
 
         stage('Deploy to sonatype snapshot repository') {
+            environment {
+                KEYFILE = credentials('molgenis.pgp.secretkey')
+                PASSPHRASE = credentials('molgenis.pgp.passphrase')
+            }
             steps {
-                sh "mvn deploy -B"
+                sh "mvn deploy -B -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
             }
         }
 
-        stage('Publish to') {
+        stage('Publish to maven central') {
             environment {
                 KEYFILE = credentials('molgenis.pgp.secretkey')
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
             }
             steps {
                 timeout(time: 5, unit: 'DAYS') {
-                    input message: 'Release this build?'
+                    input message: 'Publish to maven central?'
                 }
                 configFileProvider([configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B \"-Darguments=-DskipTests -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}\" -DskipTests -DreleaseVersion=${version} -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
+                    sh "mvn -s ${env.MAVEN_SETTINGS} release:prepare release:perform -B \"-Darguments=-DskipTests -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}\" -DskipTests -DdevelopmentVersion=${pom.version} -DpushChanges=false -DlocalCheckout=true"
                 }
             }
         }
 
         stage('Build docker') {
             environment {
-                DOCKER_HOST = 'tcp://192.168.64.12:2375'
+                HOST = 'tcp://192.168.64.12:2375'
                 ORGANIZATION = 'molgenis-releases'
                 REGISTRY = 'registry.molgenis.org'
             }
@@ -98,15 +103,15 @@ pipeline {
                 script {
                     stage('Build image') {
                         docker.withTool("docker") {
-                            docker.withServer("${DOCKER_HOST}") {
-                                echo "Build MOLGENIS docker [ ${REGISTRY}/${ORGANIZATION}/molgenis:lts"
-                                molgenisDocker = docker.build("${REGISTRY}/${ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
+                            docker.withServer("${env.HOST}") {
+                                echo "Build MOLGENIS docker [ ${env.REGISTRY}/${env.ORGANIZATION}/molgenis:lts"
+                                molgenisDocker = docker.build("${env.REGISTRY}/${env.ORGANIZATION}/molgenis:lts", "--pull --no-cache --force-rm .")
                             }
                         }
                         stage('Push docker') {
                             docker.withTool("docker") {
-                                docker.withRegistry("https://${REGISTRY}/${ORGANIZATION}", 'jenkins-registry') {
-                                    echo "Publish MOLGENIS docker to [ ${REGISTRY} ]"
+                                docker.withRegistry("https://${env.REGISTRY}/${env.ORGANIZATION}", 'jenkins-registry') {
+                                    echo "Publish MOLGENIS docker to [ ${env.REGISTRY} ]"
                                     molgenisDocker.push("latest")
                                     molgenisDocker.push("lts")
                                 }
@@ -121,9 +126,7 @@ pipeline {
         // [ slackSend ]; has to be configured on the host, it is the "Slack Notification Plugin" that has to be installed
         success {
             notifySuccess()
-            build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: $ {
-                version
-            }]]
+            build job: 'molgenis-dev-docker', parameters: [[$class: 'StringParameterValue', name: 'version', value: "${version}"]]
         }
         failure {
             notifyFailed()
