@@ -40,15 +40,30 @@ pipeline {
             }
         }
 
-        stage('Sonar analysis') {
+        stage('Sonar analysis for change request') {
+            when {
+                changeRequest()
+            }
             environment {
                 SONAR_TOKEN = credentials('jenkins-sonar')
                 SONAR_GITHUB_TOKEN = credentials('jenkins-github')
             }
             steps {
-                sh "mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.SONAR_GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.GIT_BRANCH} -Dsonar.ws.timeout=120"
-                // TODO: Run this instead for merged code
-                // sh "mvn sonar:sonar -B -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH}"
+                sh "mvn sonar:sonar -B -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.SONAR_GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+            }
+        }
+
+        stage('Sonar analysis for branch update') {
+            when {
+                not {
+                    changeRequest()
+                }
+            }
+            environment {
+                SONAR_TOKEN = credentials('jenkins-sonar')
+            }
+            steps {
+                sh "mvn sonar:sonar -B -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH}"
             }
         }
 
