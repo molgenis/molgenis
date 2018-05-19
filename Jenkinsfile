@@ -15,15 +15,13 @@ pipeline {
             }
         }
 
-        stage('Build package') {
-            steps {
-                sh "mvn package -B -DskipTests -T4"
+        stage('Build, test and deploy to sonatype snapshot repo') {
+            environment {
+                KEYFILE = credentials('molgenis.pgp.secretkey')
+                PASSPHRASE = credentials('molgenis.pgp.passphrase')
             }
-        }
-
-        stage('Unit test') {
             steps {
-                sh "mvn verify -B -Dskip.js.build=true -DskipITs"
+                sh "mvn deploy -B -DskipITs -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
             }
             post {
                 always {
@@ -65,16 +63,6 @@ pipeline {
             }
             steps {
                 sh "mvn sonar:sonar -B -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.branch=${env.GIT_BRANCH}"
-            }
-        }
-
-        stage('Deploy to sonatype snapshot repository') {
-            environment {
-                KEYFILE = credentials('molgenis.pgp.secretkey')
-                PASSPHRASE = credentials('molgenis.pgp.passphrase')
-            }
-            steps {
-                sh "mvn deploy -B -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
             }
         }
 
