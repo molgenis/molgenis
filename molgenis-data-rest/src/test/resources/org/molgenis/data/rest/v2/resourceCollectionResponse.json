@@ -61,7 +61,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -124,7 +124,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -209,7 +209,7 @@
                   "readOnly": true,
                   "labelAttribute": false,
                   "unique": true,
-                  "visible": true,
+                  "visible": false,
                   "lookupAttribute": true,
                   "isAggregatable": false
                 },
@@ -490,7 +490,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -601,7 +601,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -679,7 +679,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -742,7 +742,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -949,7 +949,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
@@ -1060,7 +1060,7 @@
               "readOnly": true,
               "labelAttribute": false,
               "unique": true,
-              "visible": true,
+              "visible": false,
               "lookupAttribute": true,
               "isAggregatable": false
             },
