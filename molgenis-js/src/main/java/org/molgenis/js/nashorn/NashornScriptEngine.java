@@ -14,6 +14,7 @@ import javax.script.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.js.magma.JsMagmaScriptEvaluator.KEY_ID_VALUE;
 
 @Component
@@ -44,7 +45,7 @@ public class NashornScriptEngine
 	 */
 	public Object eval(Bindings bindings, String expression) throws ScriptException
 	{
-		CompiledScript compiledExpression = expressions.get(expression);
+		CompiledScript compiledExpression = requireNonNull(expressions.get(expression));
 		Object returnValue = compiledExpression.eval(bindings);
 		return convertNashornValue(returnValue);
 	}
