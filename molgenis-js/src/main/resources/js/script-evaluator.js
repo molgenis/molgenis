@@ -35,18 +35,6 @@ function MagmaScript (val) {
  *
  */
 MagmaScript.prototype.value = function () {
-    if (this.val !== null && typeof this.val === 'object') {
-        if (this.val['_idValue'] !== undefined) {
-
-            // Map a list of entities to a list of ID's
-            if (Array.isArray(this.val)) {
-                return this.val.map(function (value) {
-                    return new MagmaScript.newValue(value).value()
-                })
-            }
-            return this.val['_idValue']
-        }
-    }
     return this.val
 }
 
@@ -172,12 +160,20 @@ MagmaScript.prototype.age = function () {
  * @method map
  */
 MagmaScript.prototype.map = function (categoryMapping, defaultValue, nullValue) {
+    function toIdValue (value) {
+        if (value === null) return null
+        if (value === undefined) return undefined
+        if (Array.isArray(value)) return value.map(toIdValue)
+        if (typeof value === 'object' && value['_idValue'] !== undefined) return value._idValue
+        return value
+    }
+
     if (typeof categoryMapping === 'function') {
         this.val = this.val.map(MagmaScript.newValue).map(categoryMapping)
     } else {
-        this.val = this.value()
-        if (this.val in categoryMapping) {
-            this.val = categoryMapping[this.val]
+        var idValue = toIdValue(this.val)
+        if (idValue in categoryMapping) {
+            this.val = categoryMapping[idValue]
         } else {
             if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
                 this.val = nullValue

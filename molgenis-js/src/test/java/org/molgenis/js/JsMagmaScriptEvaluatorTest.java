@@ -193,7 +193,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("gender", gender);
 
 		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person, 3);
-		assertEquals(result.toString(), "male");
+		assertEquals(result, "male");
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"org.molgenis.script.core.ScriptException: <eval>:434 TypeError: Cannot read property \"label\" from undefined");
+				"org.molgenis.script.core.ScriptException: <eval>:430 TypeError: Cannot read property \"label\" from undefined");
 	}
 
 	@Test
@@ -237,7 +237,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("trait", singletonList(trait));
 
 		Object result = jsMagmaScriptEvaluator.eval("$('trait').value()", person, 3);
-		assertEquals(result.toString(), "[1]");
+		assertEquals(result, singletonList("1"));
 	}
 
 	@Test
@@ -252,8 +252,25 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("trait", singletonList(trait));
 
 		Object result = jsMagmaScriptEvaluator.eval(
-				"var result = [];$('trait').map(function (entity) {result.push(entity.val.name)});result", person, 3);
-		assertEquals(result.toString(), "[Hello]");
+				"var result = [];$('trait').map(function (entity) {result.push(entity.value().name)});result", person,
+				3);
+		assertEquals(result, singletonList("Hello"));
+	}
+
+	@Test
+	public void testValueForMrefWithSimplifiedAlgorithm()
+	{
+		Entity trait = new DynamicEntity(traitEntityType);
+		trait.set("id", "1");
+		trait.set("name", "Hello");
+
+		Entity person = new DynamicEntity(personTraitEntityType);
+		person.set("id", "1");
+		person.set("trait", singletonList(trait));
+
+		Object result = jsMagmaScriptEvaluator.eval(
+				"$('trait').map(function (entity) {return entity.value().name}).value()", person, 3);
+		assertEquals(result, singletonList("Hello"));
 	}
 
 	@Test
@@ -297,7 +314,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("gender", gender);
 
 		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'m':'Male'}).value()", person, 3);
-		assertEquals(result.toString(), "Male");
+		assertEquals(result, "Male");
 	}
 
 	@Test
@@ -311,7 +328,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("gender", gender);
 
 		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'m':'Male'}, 'Female').value()", person, 3);
-		assertEquals(result.toString(), "Female");
+		assertEquals(result, "Female");
 	}
 
 	@Test
@@ -319,7 +336,7 @@ public class JsMagmaScriptEvaluatorTest
 	{
 		Object result = jsMagmaScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()",
 				new DynamicEntity(personGenderEntityType), 3);
-		assertEquals(result.toString(), "B3");
+		assertEquals(result, "B3");
 	}
 
 	@Test
@@ -351,13 +368,13 @@ public class JsMagmaScriptEvaluatorTest
 
 		String script = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('SBP_1').isNull().value()){\n\tSUM.plus($('SBP_1').value());\n\tcounter++;\n}\nif(!$('SBP_2').isNull().value()){\n\tSUM.plus($('SBP_2').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\nSUM.value();\n}\nelse{\n\tnull;\n}";
 		Object result1 = jsMagmaScriptEvaluator.eval(script, entity0, 3);
-		assertEquals(result1.toString(), "122.0");
+		assertEquals(result1, 122.0);
 
 		Object result2 = jsMagmaScriptEvaluator.eval(script, entity1, 3);
-		assertEquals(result2.toString(), "120.0");
+		assertEquals(result2, 120.0);
 
 		Object result3 = jsMagmaScriptEvaluator.eval(script, entity2, 3);
-		assertEquals(result3, null);
+		assertNull(result3);
 	}
 
 	@Test
@@ -367,19 +384,19 @@ public class JsMagmaScriptEvaluatorTest
 		entity1.set("age", 29);
 
 		Object result1 = jsMagmaScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", entity1, 3);
-		assertEquals(result1.toString(), "18-35");
+		assertEquals(result1, "18-35");
 
 		Entity entity2 = new DynamicEntity(personAgeEntityType);
 		entity2.set("age", 999);
 
 		Object result2 = jsMagmaScriptEvaluator.eval("$('age').group([18, 35, 56], [888, 999]).value();", entity2, 3);
-		assertEquals(result2.toString(), "999");
+		assertEquals(result2, 999);
 
 		Entity entity3 = new DynamicEntity(personAgeEntityType);
 		entity3.set("age", 47);
 
 		Object result3 = jsMagmaScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", entity3, 3);
-		assertEquals(result3.toString(), "35-56");
+		assertEquals(result3, "35-56");
 	}
 
 	@Test
@@ -389,14 +406,14 @@ public class JsMagmaScriptEvaluatorTest
 		entity4.set("age", 47);
 
 		Object result4 = jsMagmaScriptEvaluator.eval("$('age').group().value();", entity4, 3);
-		assertEquals(result4, null);
+		assertNull(result4, null);
 
 		Object result5 = jsMagmaScriptEvaluator.eval("$('age').group([56, 18, 35]).value();", entity4, 3);
-		assertEquals(result5, null);
+		assertNull(result5, null);
 
 		Object result6 = jsMagmaScriptEvaluator.eval("$('age').group([56, 18, 35], null,'123456').value();", entity4,
 				3);
-		assertEquals(result6.toString(), "123456");
+		assertEquals(result6, "123456");
 	}
 
 	@Test
@@ -407,7 +424,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object result4 = jsMagmaScriptEvaluator.eval(
 				"var age_variable=new newValue(45);age_variable.group([18, 35, 56]).value();", entity4, 3);
-		assertEquals(result4.toString(), "35-56");
+		assertEquals(result4, "35-56");
 	}
 
 	@Test
@@ -418,28 +435,28 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object result1 = jsMagmaScriptEvaluator.eval(
 				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity1, 3);
-		assertEquals(result1.toString(), "1");
+		assertEquals(result1, "1");
 
 		Entity entity2 = new DynamicEntity(personAgeEntityType);
 		entity2.set("age", 17);
 
 		Object result2 = jsMagmaScriptEvaluator.eval(
 				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity2, 3);
-		assertEquals(result2.toString(), "0");
+		assertEquals(result2, "0");
 
 		Entity entity3 = new DynamicEntity(personAgeEntityType);
 		entity3.set("age", 40);
 
 		Object result3 = jsMagmaScriptEvaluator.eval(
 				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity3, 3);
-		assertEquals(result3.toString(), "2");
+		assertEquals(result3, "2");
 
 		Entity entity4 = new DynamicEntity(personAgeEntityType);
 		entity4.set("age", 70);
 
 		Object result4 = jsMagmaScriptEvaluator.eval(
 				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();", entity4, 3);
-		assertEquals(result4.toString(), "3");
+		assertEquals(result4, "3");
 
 		Entity entity5 = new DynamicEntity(personAgeEntityType);
 		entity5.set("age", 999);
@@ -447,7 +464,7 @@ public class JsMagmaScriptEvaluatorTest
 		Object result5 = jsMagmaScriptEvaluator.eval(
 				"$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
 				entity5, 3);
-		assertEquals(result5.toString(), "9");
+		assertEquals(result5, "9");
 	}
 
 	@Test
@@ -475,7 +492,7 @@ public class JsMagmaScriptEvaluatorTest
 				"var SUM_WEIGHT = new newValue(0);SUM_WEIGHT.plus($('FOOD59A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.plus($('FOOD60A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.group([0,1,2,6,7]).map({\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\", \"7+\" : \"1\"},null,null).value();",
 				entity0, 3);
 
-		assertEquals(result1.toString(), "1");
+		assertEquals(result1, "1");
 	}
 
 	@Test
