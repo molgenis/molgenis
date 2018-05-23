@@ -116,10 +116,11 @@ module.exports = {
     browser.setValue(chapterOneAgeQuestion, 20)
     browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('67')
 
-    browser.setValue(chapterOneRequiredQuestion, 'A nightwatch generated text')
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('75')
-
+    // this question is nillable and should not update progress
     browser.click(chapterOneBoolQuestion)
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('67')
+
+    browser.setValue(chapterOneRequiredQuestion, 'A nightwatch generated text')
     browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('100')
 
     browser.expect.element(chapterOneProgressBar).to.have.attribute('class').which.contains('bg-success')
