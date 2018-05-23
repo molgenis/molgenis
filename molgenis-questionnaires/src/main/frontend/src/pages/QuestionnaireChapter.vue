@@ -152,7 +152,8 @@
       }
     },
     beforeRouteUpdate (to, from, next) {
-      this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
+      // Set state to submitted to have the form validate required fields
+      this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
       this.$store.commit('SET_ERROR', '')
       next()
     },

@@ -13,21 +13,21 @@ describe('getters', () => {
             id: 'chapter-1-field-1',
             type: 'text',
             visible: (data) => true,
-            required: () => false,
+            required: () => true,
             validate: () => true
           },
           {
             id: 'chapter-1-field-2',
             type: 'number',
             visible: (data) => true,
-            required: () => false,
+            required: () => true,
             validate: () => true
           },
           {
             id: 'chapter-1-field-3',
             type: 'number',
             visible: (data) => false,
-            required: () => false,
+            required: () => true,
             validate: () => true
           }
         ]
@@ -210,7 +210,7 @@ describe('getters', () => {
         'chapter-1': 100,
         'chapter-2': 0,
         'chapter-3': 0,
-        'chapter-4': 50
+        'chapter-4': 67
       }
 
       expect(actual).to.deep.equal(expected)
@@ -240,8 +240,8 @@ describe('getters', () => {
 
       getters.getChapterProgress(stateWithError)
 
-      expect(console.error.calledOnce).to.equal(true)
-      expect(console.error.calledWith(sinon.match('Error in getters.getTotalNumberOfFieldsForChapter'))).to.equal(true)
+      expect(console.error.called).to.equal(true)
+      expect(console.error.calledWith(sinon.match('Error in getters'))).to.equal(true)
       stub.reset()
       stub.resetBehavior()
     })
