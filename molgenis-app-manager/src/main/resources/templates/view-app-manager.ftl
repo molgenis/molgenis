@@ -13,4 +13,4 @@
 <script type=text/javascript src="<@resource_href "/js/app-manager/vendor.js"/>"></script>
 <script type=text/javascript src="<@resource_href "/js/app-manager/app.js"/>"></script>
 
-<@footer/>
+<@footer version/>
