@@ -23,6 +23,8 @@ export type ChapterField = {
   id: string,
   label: string,
   description?: string,
+  visible: Function,
+  required: Function
 }
 
 export type ChapterFieldGroup = {
