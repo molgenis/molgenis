@@ -16,6 +16,7 @@ VOLUME /opt/molgenis
 
 EXPOSE 8080
 
-COPY target/molgenis-app-${version}.war ${CATALINA_HOME}/webapps/ROOT.war
+ARG WAR_FILE
+COPY ${WAR_FILE} ${CATALINA_HOME}/webapps/ROOT.war
 
 CMD ["catalina.sh", "run"]

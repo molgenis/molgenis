@@ -22,7 +22,7 @@ pipeline {
             }
             steps {
                 configFileProvider([configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
+                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Ddockerfile.tag=${env.CHANGE_ID} -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
                 }
             }
             post {
