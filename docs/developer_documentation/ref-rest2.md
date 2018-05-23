@@ -93,17 +93,19 @@ Key | Type | Description
 *includeCategories* | boolean | Includes a list of categorical options in attribute metadata for CATEGORICAL and CATEGORICAL_MREF attributes
 
 ### Sorting categorical options
-You can add a unique, visible attribute to the metadata of the table after the ID-attribute to sort the categorical options.
+You can add a unique, visible attribute to the metadata of the table after the ID-attribute to sort the categorical options. 
+
+**NOTE: Make sure the ID-attribute is invisible.**
 
 **Attribute definition**
 
 | id | visible | unique | type |
 |----|---------|--------|------|
-| sortOrder | TRUE | TRUE | int |
+| mySortAttribute | TRUE | TRUE | int |
 
 **Metadata of target table**
 
-| id | sortOrder | label |
+| id | mySortAttribute | label |
 |----|-----------|-------|
 | A  | 0 | A very awesome category |
 | B  | 2 | A very busy category |
