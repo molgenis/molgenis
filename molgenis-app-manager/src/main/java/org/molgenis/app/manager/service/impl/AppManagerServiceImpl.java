@@ -67,7 +67,12 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Override
 	public AppResponse getAppByUri(String uri)
 	{
-		return AppResponse.create(findAppByUri(uri));
+		Query<App> query = QueryImpl.EQ(AppMetadata.URI, uri);
+		App app = dataService.findOne(AppMetadata.APP, query, App.class);
+		if(app == null) {
+			throw new AppForURIDoesNotExistException(uri);
+		}
+		return AppResponse.create(app);
 	}
 
 	@Override
@@ -75,7 +80,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	public void activateApp(String id)
 	{
 		// Set app to active
-		App app = findAppById(id);
+		App app = getAppById(id);
 		app.setActive(true);
 		dataService.update(AppMetadata.APP, app);
 
@@ -91,7 +96,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Transactional
 	public void deactivateApp(String id)
 	{
-		App app = findAppById(id);
+		App app = getAppById(id);
 		app.setActive(false);
 		dataService.update(AppMetadata.APP, app);
 
@@ -105,7 +110,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Transactional
 	public void deleteApp(String id) throws IOException
 	{
-		App app = findAppById(id);
+		App app = getAppById(id);
 		deleteDirectory(new File(app.getResourceFolder()));
 		dataService.deleteById(AppMetadata.APP, id);
 	}
@@ -169,23 +174,12 @@ public class AppManagerServiceImpl implements AppManagerService
 		return pluginId;
 	}
 
-	private App findAppById(String id)
+	private App getAppById(String id)
 	{
 		App app = dataService.findOneById(AppMetadata.APP, id, App.class);
 		if (app == null)
 		{
 			throw new AppForIDDoesNotExistException(id);
-		}
-		return app;
-	}
-
-	private App findAppByUri(String uri)
-	{
-		Query<App> query = QueryImpl.EQ(AppMetadata.URI, uri);
-		App app = dataService.findOne(AppMetadata.APP, query, App.class);
-		if (app == null)
-		{
-			throw new AppForURIDoesNotExistException(uri);
 		}
 		return app;
 	}
