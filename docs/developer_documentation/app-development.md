@@ -53,15 +53,15 @@ _example.css_
 The config.json is a small configuration file that will tell MOLGENIS about your app. 
 It contains the following parameters
 
-| Parameter | Description |
-| ----------|-------------|
-| label     | The label used to name your app in the app manager screen |
-| description | A description for your app. Useful for making your app more findable in the app manager |
-| version | The version of your app. Used to manage app version, updating etc etc.. |
-| apiDependency | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
-| uri | the URL on which the app will be deployed once activated. Best if you make it a simple word without weird characters |
-| includeMenuAndFooter | If you want to use the MOLGENIS menu, you can this value to __true__ |
-| runtimeOptions | A map containing initial parameters you might want to give to your app on init |
+| Parameter | type | mandatory | Description |
+| ----------|-------------|-------------|-------------|
+| label     |string| yes| The label used to name your app in the app manager screen |
+| description |string| yes | A description for your app. Useful for making your app more findable in the app manager |
+| version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
+| apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
+| uri | string |yes | the URL on which the app will be deployed once activated. Best if you make it a simple word without weird characters |
+| includeMenuAndFooter | boolean |yes | If you want to use the MOLGENIS menu, you can this value to __true__ |
+| runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
 ### Example
 The following example shows every possible configuration option currently available
