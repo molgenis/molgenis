@@ -148,7 +148,7 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new InvalidAppConfigException();
 		}
 
-		AppConfig appConfig = gson.fromJson(UTF8EncodedFileToString(configFile), AppConfig.class);
+		AppConfig appConfig = gson.fromJson(utf8Encodedfiletostring(configFile), AppConfig.class);
 		List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
 		if (!missingAppConfigParams.isEmpty())
 		{
@@ -161,7 +161,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setDescription(appConfig.getDescription());
 		newApp.setAppVersion(appConfig.getVersion());
 		newApp.setApiDependency(appConfig.getApiDependency());
-		newApp.setTemplateContent(UTF8EncodedFileToString(indexFile));
+		newApp.setTemplateContent(utf8Encodedfiletostring(indexFile));
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(appConfig.getIncludeMenuAndFooter());
 		newApp.setResourceFolder(appDirectoryName);
@@ -200,7 +200,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	private boolean isConfigContentValidJson(File configFile)
 	{
-		String fileContents = UTF8EncodedFileToString(configFile);
+		String fileContents = utf8Encodedfiletostring(configFile);
 		try
 		{
 			gson.fromJson(fileContents, AppConfig.class);
@@ -212,7 +212,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		return true;
 	}
 
-	private String UTF8EncodedFileToString(File file)
+	private String utf8Encodedfiletostring(File file)
 	{
 		try (FileInputStream fileInputStream = new FileInputStream(file))
 		{

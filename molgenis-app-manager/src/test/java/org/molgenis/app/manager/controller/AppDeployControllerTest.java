@@ -3,7 +3,6 @@ package org.molgenis.app.manager.controller;
 import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
-import org.molgenis.app.manager.service.AppDeployService;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -17,6 +16,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+
 import static java.util.Locale.ENGLISH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -29,9 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AppDeployControllerTest
 {
 	private MockMvc mockMvc;
-
-	@Mock
-	private AppDeployService appDeployService;
 
 	@Mock
 	private AppManagerService appManagerService;
@@ -68,13 +66,15 @@ public class AppDeployControllerTest
 		when(app.includeMenuAndFooter()).thenReturn(true);
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
-		when(app.getResourceFolder()).thenReturn("resources");
+		ClassLoader classLoader = getClass().getClassLoader();
+		File testFile = new File(classLoader.getResource("test-resources/js/test.js").getFile());
+		String absoluteTestFileResourcePath = testFile.getAbsolutePath().replace("js/test.js", "");
+		when(app.getResourceFolder()).thenReturn(absoluteTestFileResourcePath);
 
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
-		AppDeployController controller = new AppDeployController(appDeployService, appManagerService, appSettings,
-				menuReaderService);
+		AppDeployController controller = new AppDeployController(appManagerService, appSettings, menuReaderService);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setLocaleResolver(localeResolver).build();
 	}
 
@@ -91,10 +91,10 @@ public class AppDeployControllerTest
 	@Test
 	public void testServeResource() throws Exception
 	{
-		MockHttpServletResponse response = mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
-												  .andExpect(status().isOk())
-												  .andReturn()
-												  .getResponse();
-		verify(appDeployService).loadResource("resources/js/test.js", response);
+		mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
+			   .andExpect(status().isOk())
+			   .andReturn()
+			   .getResponse();
+
 	}
 }
