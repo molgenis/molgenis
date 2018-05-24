@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.security;
 
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.Ui;
@@ -13,6 +12,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.springframework.security.access.AccessDecisionVoter.ACCESS_DENIED;
 import static org.springframework.security.access.AccessDecisionVoter.ACCESS_GRANTED;
 import static org.testng.Assert.assertEquals;
@@ -23,9 +23,9 @@ public class MolgenisAccessDecisionVoterTest
 	public void setUp()
 	{
 		UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
-		when(permissionService.hasPermission(new PluginIdentity("plugingranted"), PluginPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugingranted"), VIEW_PLUGIN)).thenReturn(
 				true);
-		when(permissionService.hasPermission(new PluginIdentity("plugindenied"), PluginPermission.READ)).thenReturn(
+		when(permissionService.hasPermission(new PluginIdentity("plugindenied"), VIEW_PLUGIN)).thenReturn(
 				false);
 
 		Ui molgenisUi = mock(Ui.class);

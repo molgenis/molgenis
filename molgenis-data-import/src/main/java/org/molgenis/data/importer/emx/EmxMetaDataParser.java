@@ -1069,6 +1069,12 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ rowIndex);
 				}
 
+				if (attributeName.equals(partOfAttribute))
+				{
+					throw new IllegalArgumentException(
+							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
+									+ entityTypeId + "] cannot refer to itself on line " + rowIndex);
+				}
 				attribute.setParent(compoundAttribute);
 			}
 

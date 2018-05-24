@@ -7,12 +7,14 @@ import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.Permission;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
 public abstract class PermissionDirective implements TemplateDirectiveModel
@@ -40,13 +42,13 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		if (entityTypeIdValue != null)
 		{
 			hasPermission = permissionService.hasPermission(new EntityTypeIdentity(entityTypeIdValue),
-					toEntityTypePermission(permissionValue));
+					toEntityTypePermissions(permissionValue));
 		}
 
 		if ((pluginIdValue != null) && hasPermission)
 		{
 			hasPermission = permissionService.hasPermission(new PluginIdentity(pluginIdValue),
-					toPluginPermission(permissionValue));
+					PluginPermission.VIEW_PLUGIN);
 		}
 
 		execute(hasPermission, env, body);
@@ -55,32 +57,18 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 	protected abstract void execute(boolean hasPermission, Environment env, TemplateDirectiveBody body)
 			throws TemplateException, IOException;
 
-	private Permission toEntityTypePermission(String permission)
+	private List<Permission> toEntityTypePermissions(String permission)
 	{
 		switch (permission)
 		{
 			case "COUNT":
-				return EntityTypePermission.COUNT;
+				return newArrayList(EntityTypePermission.COUNT_DATA);
 			case "READ":
-				return EntityTypePermission.READ;
+				return newArrayList(EntityTypePermission.READ_METADATA, EntityTypePermission.READ_DATA);
 			case "WRITE":
-				return EntityTypePermission.WRITE;
+				return newArrayList(EntityTypePermission.READ_METADATA, EntityTypePermission.UPDATE_DATA);
 			case "WRITEMETA":
-				return EntityTypePermission.WRITEMETA;
-			case "NONE":
-				throw new IllegalArgumentException(
-						format("Permission evaluation for permission '%s' not allowed", permission));
-			default:
-				throw new IllegalArgumentException(format("Unknown permission '%s'", permission));
-		}
-	}
-
-	private Permission toPluginPermission(String permission)
-	{
-		switch (permission)
-		{
-			case "READ":
-				return PluginPermission.READ;
+				return newArrayList(EntityTypePermission.UPDATE_METADATA);
 			case "NONE":
 				throw new IllegalArgumentException(
 						format("Permission evaluation for permission '%s' not allowed", permission));

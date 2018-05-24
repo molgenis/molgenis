@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
+import org.molgenis.util.AutoGson;
 
 import javax.validation.constraints.NotNull;
 

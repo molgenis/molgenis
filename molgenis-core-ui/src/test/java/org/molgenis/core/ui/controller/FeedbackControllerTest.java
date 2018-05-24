@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.controller;
 
 import org.molgenis.core.ui.controller.FeedbackControllerTest.Config;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
@@ -10,6 +9,7 @@ import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

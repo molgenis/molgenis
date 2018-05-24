@@ -112,15 +112,17 @@ var Table = React.createClass({
             return Spinner(); // entity not available yet
         }
 
-        var writable = this.state.data.meta.writable;
+        var editable = this.state.data.meta.permissions.indexOf("UPDATE_DATA") >= 0;
+        var creatable = this.state.data.meta.permissions.indexOf("ADD_DATA") >= 0;
+        var deletable = this.state.data.meta.permissions.indexOf("DELETE_DATA") >= 0;
 
         var TableHeader = TableHeaderFactory({
             entity: this.state.data.meta,
             attrs: this.state.attrs,
             sort: this.state.sort,
-            enableAdd: writable && this.props.enableAdd === true,
-            enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableAdd: creatable && this.props.enableAdd === true,
+            enableEdit: editable && this.props.enableEdit === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onSort: this._handleSort,
@@ -134,8 +136,8 @@ var Table = React.createClass({
         var TableBody = TableBodyFactory({
             data: this.state.data,
             attrs: this.state.attrs,
-            enableEdit: writable && this.props.enableEdit === true,
-            enableDelete: writable && this.props.enableDelete === true,
+            enableEdit: editable && this.props.enableEdit === true,
+            enableDelete: deletable && this.props.enableDelete === true,
             enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
             enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
             onEdit: this._handleEdit,

@@ -36,13 +36,16 @@ describe('QuestionnaireChapter component', () => {
 
     getters = {
       getChapterByIndex: () => () => ({id: 'chapter1'}),
-      getTotalNumberOfChapters: () => 1
+      getTotalNumberOfChapters: () => 1,
+      getQuestionLabel: () => () => 'questionLabel'
     }
 
     mutations = {
+      BLOCK_NAVIGATION: td.function(),
       UPDATE_FORM_STATUS: td.function(),
       SET_FORM_DATA: td.function(),
-      SET_MAPPER_OPTIONS: td.function()
+      SET_MAPPER_OPTIONS: td.function(),
+      SET_ERROR: td.function()
     }
 
     state = {

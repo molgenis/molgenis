@@ -3,10 +3,9 @@ package org.molgenis.security.permission;
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -53,10 +52,7 @@ public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpring
 
 		permissionSystemServiceImpl.giveUserWriteMetaPermissions(entityType);
 		verify(mutableAclService).updateAcl(acl);
-		verify(acl).insertAce(0, new CumulativePermission().set(EntityTypePermission.WRITEMETA)
-														   .set(EntityTypePermission.WRITE)
-														   .set(EntityTypePermission.READ)
-														   .set(EntityTypePermission.COUNT), new PrincipalSid("user"),
+		verify(acl).insertAce(0, PermissionSet.WRITEMETA, new PrincipalSid("user"),
 				true);
 	}
 

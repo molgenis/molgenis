@@ -3,7 +3,6 @@ package org.molgenis.dataexplorer.negotiator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.molgenis.core.ui.data.rsql.QueryRsql;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -21,6 +20,7 @@ import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.web.rsql.QueryRsql;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -243,21 +243,24 @@ public class NegotiatorControllerTest
 	@Test
 	public void testShowButtonNoPermissionsOnPlugin()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
+				false);
 		assertFalse(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButton()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(true);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
+				true);
 		assertTrue(negotiatorController.showDirectoryButton("molgenis_id_1"));
 	}
 
 	@Test
 	public void testShowButtonPermissionsOnPluginNoConfig()
 	{
-		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.READ)).thenReturn(false);
+		when(permissionService.hasPermission(new PluginIdentity("directory"), PluginPermission.VIEW_PLUGIN)).thenReturn(
+				false);
 		when(entityType.getId()).thenReturn("blah2");
 
 		assertFalse(negotiatorController.showDirectoryButton("blah2"));

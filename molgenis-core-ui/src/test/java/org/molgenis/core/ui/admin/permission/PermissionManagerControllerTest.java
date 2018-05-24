@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.admin.permission;
 
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.core.ui.admin.permission.PermissionManagerControllerTest.Config;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -11,21 +11,20 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginIdentity;
-import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
+import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.security.acls.domain.CumulativePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.*;
@@ -54,6 +53,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.security.core.PermissionSet.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.testng.Assert.assertEquals;
@@ -87,11 +87,14 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	private PackageIdentity packageIdentity2;
 	private PackageIdentity packageIdentity3;
 
-	private PluginPermission pluginPermissionRead;
-	private CumulativePermission cumulativeEntityPermissionWritemeta;
-	private CumulativePermission cumulativeEntityPermissionWrite;
-	private CumulativePermission cumulativeEntityPermissionRead;
-	private CumulativePermission cumulativeEntityPermissionCount;
+	@Mock
+	private Permission permissionWritemeta;
+	@Mock
+	private Permission permissionWrite;
+	@Mock
+	private Permission permissionRead;
+	@Mock
+	private Permission permissionCount;
 
 	@Configuration
 	public static class Config extends WebMvcConfigurerAdapter
@@ -169,6 +172,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	public void setUp()
 	{
 		config.resetMocks();
+		MockitoAnnotations.initMocks(this);
 		mockMvc = MockMvcBuilders.standaloneSetup(permissionManagerController)
 								 .setMessageConverters(gsonHttpMessageConverter)
 								 .build();
@@ -218,21 +222,10 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 				Stream.of(entityType1, entityType2, entityType3));
 		when(dataService.findAll(PACKAGE, Package.class)).thenReturn(Stream.of(package1, package2, package3));
 
-		pluginPermissionRead = PluginPermission.READ;
-
-		cumulativeEntityPermissionWritemeta = new CumulativePermission();
-		cumulativeEntityPermissionWritemeta.set(EntityTypePermission.WRITEMETA)
-										   .set(EntityTypePermission.WRITE)
-										   .set(EntityTypePermission.READ)
-										   .set(EntityTypePermission.COUNT);
-		cumulativeEntityPermissionWrite = new CumulativePermission();
-		cumulativeEntityPermissionWrite.set(EntityTypePermission.WRITE)
-									   .set(EntityTypePermission.READ)
-									   .set(EntityTypePermission.COUNT);
-		cumulativeEntityPermissionRead = new CumulativePermission();
-		cumulativeEntityPermissionRead.set(EntityTypePermission.READ).set(EntityTypePermission.COUNT);
-		cumulativeEntityPermissionCount = new CumulativePermission();
-		cumulativeEntityPermissionCount.set(EntityTypePermission.COUNT);
+		when(permissionWritemeta.getMask()).thenReturn(WRITEMETA_MASK);
+		when(permissionWrite.getMask()).thenReturn(WRITE_MASK);
+		when(permissionCount.getMask()).thenReturn(COUNT_MASK);
+		when(permissionRead.getMask()).thenReturn(READ_MASK);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -294,7 +287,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(pluginIdentity1, pluginIdentity2),
 				singletonList(userSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(pluginPermissionRead);
+		when(ace1.getPermission()).thenReturn(permissionRead);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission = new org.molgenis.security.permission.Permission();
@@ -328,7 +321,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(pluginIdentity1, pluginIdentity2),
 				singletonList(groupSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(pluginPermissionRead);
+		when(ace1.getPermission()).thenReturn(permissionRead);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission = new org.molgenis.security.permission.Permission();
@@ -367,8 +360,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(entityIdentity1, entityIdentity2, entityIdentity3),
 				singletonList(userSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(cumulativeEntityPermissionWritemeta);
-		when(ace2.getPermission()).thenReturn(cumulativeEntityPermissionCount);
+		when(ace1.getPermission()).thenReturn(permissionWritemeta);
+		when(ace2.getPermission()).thenReturn(permissionCount);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission1 = new org.molgenis.security.permission.Permission();
@@ -411,8 +404,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(entityIdentity1, entityIdentity2, entityIdentity3),
 				singletonList(groupSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(cumulativeEntityPermissionWrite);
-		when(ace2.getPermission()).thenReturn(cumulativeEntityPermissionRead);
+		when(ace1.getPermission()).thenReturn(permissionWrite);
+		when(ace2.getPermission()).thenReturn(permissionRead);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission1 = new org.molgenis.security.permission.Permission();
@@ -455,8 +448,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(packageIdentity1, packageIdentity2, packageIdentity3),
 				singletonList(userSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(cumulativeEntityPermissionWritemeta);
-		when(ace2.getPermission()).thenReturn(cumulativeEntityPermissionCount);
+		when(ace1.getPermission()).thenReturn(permissionWritemeta);
+		when(ace2.getPermission()).thenReturn(permissionCount);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission1 = new org.molgenis.security.permission.Permission();
@@ -499,8 +492,8 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclsById(Arrays.asList(packageIdentity1, packageIdentity2, packageIdentity3),
 				singletonList(groupSid))).thenReturn(acls);
 
-		when(ace1.getPermission()).thenReturn(cumulativeEntityPermissionWrite);
-		when(ace2.getPermission()).thenReturn(cumulativeEntityPermissionRead);
+		when(ace1.getPermission()).thenReturn(permissionWrite);
+		when(ace2.getPermission()).thenReturn(permissionRead);
 
 		Permissions expected = new Permissions();
 		org.molgenis.security.permission.Permission permission1 = new org.molgenis.security.permission.Permission();
@@ -542,7 +535,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 		permissionManagerController.updateGroupPluginPermissions("1", webRequest);
 
-		verify(acl1).insertAce(0, pluginPermissionRead, groupSid, true);
+		verify(acl1).insertAce(0, PermissionSet.READ, groupSid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 	}
@@ -573,7 +566,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 		permissionManagerController.updateUserPluginPermissions("1", webRequest);
 
-		verify(acl1).insertAce(0, pluginPermissionRead, userSid, true);
+		verify(acl1).insertAce(0, PermissionSet.READ, userSid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 	}
@@ -610,9 +603,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permissionManagerController.updateGroupEntityClassPermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
-		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);
+		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
 		verify(acl2).deleteAce(0);
-		verify(acl3).insertAce(0, cumulativeEntityPermissionRead, sid, true);
+		verify(acl3).insertAce(0, PermissionSet.READ, sid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 		verify(mutableAclService).updateAcl(acl2);
@@ -655,9 +648,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permissionManagerController.updateUserEntityClassPermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
-		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);
+		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
 		verify(acl2).deleteAce(0);
-		verify(acl3).insertAce(0, cumulativeEntityPermissionRead, sid, true);
+		verify(acl3).insertAce(0, PermissionSet.READ, sid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 		verify(mutableAclService).updateAcl(acl2);
@@ -696,9 +689,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permissionManagerController.updateGroupPackagePermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
-		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);
+		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
 		verify(acl2).deleteAce(0);
-		verify(acl3).insertAce(0, cumulativeEntityPermissionRead, sid, true);
+		verify(acl3).insertAce(0, PermissionSet.READ, sid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 		verify(mutableAclService).updateAcl(acl2);
@@ -737,9 +730,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		permissionManagerController.updateUserPackagePermissions("1", webRequest);
 
 		verify(acl1).deleteAce(0);
-		verify(acl1).insertAce(0, cumulativeEntityPermissionWrite, sid, true);
+		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
 		verify(acl2).deleteAce(0);
-		verify(acl3).insertAce(0, cumulativeEntityPermissionRead, sid, true);
+		verify(acl3).insertAce(0, PermissionSet.READ, sid, true);
 
 		verify(mutableAclService).updateAcl(acl1);
 		verify(mutableAclService).updateAcl(acl2);

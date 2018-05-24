@@ -58,7 +58,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 		is.close();
 	}
 
-	@SuppressWarnings("resource")
+	@SuppressWarnings({ "resource", "deprecation" })
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void ExcelRepository()
 	{
@@ -74,6 +74,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 		when(processor.process("col2")).thenReturn("col2");
 
 		excelSheetReader.addCellProcessor(processor);
+		//noinspection StatementWithEmptyBody
 		for (@SuppressWarnings("unused") Entity entity : excelSheetReader)
 		{
 		}
@@ -204,7 +205,22 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void attributesAndIterator() throws IOException
+	public void iteratorHeaderCaseSensitive() throws IOException, InvalidFormatException
+	{
+		String fileName = "/case-sensitivity.xlsx";
+		try (InputStream inputStream = getClass().getResourceAsStream(fileName))
+		{
+			Workbook workbook = WorkbookFactory.create(inputStream);
+			ExcelRepository excelRepository = new ExcelRepository(fileName, workbook.getSheet("case-sensitivity"),
+					entityTypeFactory, attrMetaFactory);
+			Entity entity = excelRepository.iterator().next();
+			assertEquals(entity.get("Header"), "Value #0");
+			assertNull(entity.get("hEADER"));
+		}
+	}
+
+	@Test
+	public void attributesAndIterator()
 	{
 		Iterator<Attribute> headerIt = excelSheetReader.getEntityType().getAttributes().iterator();
 		assertTrue(headerIt.hasNext());

@@ -3,7 +3,6 @@ package org.molgenis.data.rest.v2;
 import com.google.common.collect.Sets;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.*;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
@@ -29,6 +28,7 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
@@ -86,6 +86,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String REF_ATTR_ID_NAME = "id";
 	private static final String REF_ATTR_VALUE_NAME = "value";
 	private static final String REF_ATTR_REF_NAME = "ref";
+	private static final String REF_ATTR_SORT_NAME = "sort";
 	private static final String REF_REF_ATTR_VALUE_NAME = "value";
 	private static final String REF_REF_ATTR_ID_NAME = "id";
 
@@ -104,6 +105,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
 	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
 	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
+
+	private static final Sort sortOrderWithSort = new Sort(REF_ATTR_SORT_NAME);
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -160,7 +163,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		ResourceBundleMessageSource validationMessages = new ResourceBundleMessageSource();
 		validationMessages.addBasenames("org.hibernate.validator.ValidationMessages");
 		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
-		messageSource.addMolgenisNamespaces("data", "web");
+		messageSource.addMolgenisNamespaces("data", "web", "data-security");
 		messageSource.setParentMessageSource(validationMessages);
 		MessageSourceHolder.setMessageSource(messageSource);
 	}
@@ -199,15 +202,23 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		EntityType refEntityType = entityTypeFactory.create(REF_ENTITY_NAME)
 													.setLabel(REF_ENTITY_NAME)
-													.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME),
-															ROLE_ID, ROLE_LOOKUP)
+													.addAttribute(attributeFactory.create()
+																				  .setName(REF_ATTR_ID_NAME)
+																				  .setVisible(false), ROLE_ID,
+															ROLE_LOOKUP)
 													.addAttribute(
 															attributeFactory.create().setName(REF_ATTR_VALUE_NAME),
 															ROLE_LABEL)
 													.addAttribute(attributeFactory.create()
 																				  .setName(REF_ATTR_REF_NAME)
 																				  .setDataType(XREF)
-																				  .setRefEntity(refRefEntityType));
+																				  .setRefEntity(refRefEntityType))
+													.addAttribute(attributeFactory.create()
+																				  .setName(REF_ATTR_SORT_NAME)
+																				  .setVisible(true)
+																				  .setUnique(true)
+																				  .setDataType(INT));
+		;
 
 		// required
 		String attrIdName = "id";
@@ -269,7 +280,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
-		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false).setParent(attrCompound);
+		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false)
+																								.setParent(
+																										attrCompound);
 		Attribute compoundAttrCategorical = createAttributeMeta(entityType, attrCompoundCategorical, CATEGORICAL,
 				refEntityType).setNillable(false).setParent(attrCompound);
 		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName,
@@ -328,11 +341,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		refEntity0.set(REF_ATTR_ID_NAME, REF_ENTITY0_ID);
 		refEntity0.set(REF_ATTR_VALUE_NAME, REF_ENTITY0_LABEL);
 		refEntity0.set(REF_ATTR_REF_NAME, refRefEntity);
+		refEntity0.set(REF_ATTR_SORT_NAME, 0);
 
 		Entity refEntity1 = new DynamicEntity(refEntityType);
 		refEntity1.set(REF_ATTR_ID_NAME, REF_ENTITY1_ID);
 		refEntity1.set(REF_ATTR_VALUE_NAME, REF_ENTITY1_LABEL);
 		refEntity1.set(REF_ATTR_REF_NAME, refRefEntity);
+		refEntity1.set(REF_ATTR_SORT_NAME, 1);
 
 		Entity entity = new DynamicEntity(entityType);
 
@@ -388,7 +403,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.count(ENTITY_NAME, new QueryImpl<>())).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
-		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
+		when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort))).thenAnswer(
+				invocation -> Stream.of(refEntity0, refEntity1));
 
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
@@ -473,6 +489,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(expectedContent));
+
+		verify(dataService, times(5)).findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort));
 	}
 
 	@Test
@@ -557,6 +575,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String expectedContent = readFile(getClass().getResourceAsStream("resourceCollectionResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE))
 			   .andExpect(status().isOk())
+			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(content().json(expectedContent));
+	}
+
+	@Test
+	public void retrieveResourceCollectionUnknownEntityType() throws Exception
+	{
+		String expectedContent = readFile(
+				getClass().getResourceAsStream("resourceCollectionResponseUnknownEntityType.json"));
+		mockMvc.perform(get(BASE_URI + '/' + "unknown"))
+			   .andExpect(status().isNotFound())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(expectedContent));
 	}
@@ -669,7 +698,6 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isBadRequest())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isBadRequest())
 			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
 					   is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
 		verifyZeroInteractions(repoCopier);
@@ -683,15 +711,16 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mocksForCopyEntitySuccess(repositoryToCopy);
 
 		// Override mock
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
-				false);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-			   .andExpect(status().isUnauthorized())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No read permission on entity entity")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("DS04a")))
+			   .andExpect(
+					   jsonPath(FIRST_ERROR_MESSAGE, is("No 'Read data' permission on entity type with id 'entity'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -730,8 +759,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(entityType.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(permissionService.hasPermission(new EntityTypeIdentity("entity"), EntityTypePermission.READ)).thenReturn(
-				true);
+		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
+				EntityTypePermission.READ_DATA)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 

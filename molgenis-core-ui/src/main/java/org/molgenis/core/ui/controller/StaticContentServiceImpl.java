@@ -3,9 +3,8 @@ package org.molgenis.core.ui.controller;
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.settings.StaticContentMeta.STATIC_CONTENT;
+import static org.molgenis.data.security.EntityTypePermission.*;
 
 /**
  * Controller that handles static content pages requests.
@@ -41,7 +41,6 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Transactional
 	public boolean submitContent(String key, String content)
 	{
-		this.checkPermissions(key);
 		try
 		{
 			StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, key, StaticContent.class);
@@ -68,7 +67,19 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public boolean isCurrentUserCanEdit(String pluginId)
 	{
-		return permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE);
+		if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), READ_DATA))
+		{
+			return false;
+		}
+		StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, pluginId, StaticContent.class);
+		if (staticContent == null)
+		{
+			return permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), ADD_DATA);
+		}
+		else
+		{
+			return permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), UPDATE_DATA);
+		}
 	}
 
 	@Override
@@ -81,9 +92,20 @@ public class StaticContentServiceImpl implements StaticContentService
 
 	public void checkPermissions(String pluginId)
 	{
-		if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), EntityTypePermission.WRITE))
+		StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, pluginId, StaticContent.class);
+		if (staticContent == null)
 		{
-			throw new MolgenisDataAccessException("No write permission on static content entity type.");
+			if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), UPDATE_DATA))
+			{
+				throw new EntityTypePermissionDeniedException(UPDATE_DATA, STATIC_CONTENT);
+			}
+		}
+		else
+		{
+			if (!permissionService.hasPermission(new EntityTypeIdentity(STATIC_CONTENT), ADD_DATA))
+			{
+				throw new EntityTypePermissionDeniedException(ADD_DATA, STATIC_CONTENT);
+			}
 		}
 	}
 }

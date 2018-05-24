@@ -1,7 +1,7 @@
 package org.molgenis.semanticmapper.data.request;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.core.gson.AutoGson;
+import org.molgenis.util.AutoGson;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

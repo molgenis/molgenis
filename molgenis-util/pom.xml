@@ -33,6 +33,10 @@
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>

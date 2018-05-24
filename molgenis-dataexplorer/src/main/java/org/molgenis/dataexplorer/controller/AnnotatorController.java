@@ -134,7 +134,7 @@ public class AnnotatorController
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
 						permissionService.hasPermission(new EntityTypeIdentity(settingsEntityName),
-								EntityTypePermission.WRITE));
+								EntityTypePermission.UPDATE_DATA));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}

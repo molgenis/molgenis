@@ -2,6 +2,7 @@ import actions from 'src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+import Vue from 'vue'
 
 const getters = {
   getQuestionnaireId: 'test_quest'
@@ -31,7 +32,6 @@ const testAction = (action, payload, state, expectedMutations, expectedActions, 
 
   const dispatch = (type, payload) => {
     const action = expectedActions[actionCount]
-
     try {
       expect(action.type).to.equal(type)
       if (payload) {
@@ -118,13 +118,17 @@ describe('actions', () => {
   describe('START_QUESTIONNAIRE', () => {
     it('should call the start questionnaire uri', done => {
       const questionnaireId = 'test_quest'
-      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', 'OK')
-      const response = actions.START_QUESTIONNAIRE({}, questionnaireId)
+      const mockResponse = {id: 'mockId'}
+      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
-      response.then(actual => {
-        expect(actual).to.equal('OK')
-        done()
-      })
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
     })
 
     it('should commit any errors to the store', done => {
@@ -133,6 +137,8 @@ describe('actions', () => {
       mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
 
       const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false}
       ]
@@ -207,6 +213,7 @@ describe('actions', () => {
         {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: 'id'},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
         {type: 'SET_CHAPTER_FIELDS', payload: chapters},
+        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'SET_LOADING', payload: false}
       ]
 
@@ -293,10 +300,32 @@ describe('actions', () => {
     })
   })
 
-  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    const formData = {
-      field1: 'updated value'
+  describe('VALIDATE_FIELD', () => {
+    const state = {
+      questionnaire: {
+        meta: {
+          name: 'test_quest'
+        }
+      },
+      formData: {
+        field1: 'value',
+        field2: 'value'
+      },
+      questionnaireRowId: 'test_row'
     }
+    const payload = {formState: {}, formData: {field1: 'updated value'}}
+
+    it('set the new value in the store', done => {
+      const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData}
+      ]
+
+      testAction(actions.VALIDATE_FIELD, payload, state, expectedMutations, [], done)
+    })
+  })
+
+  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
+    const payload = {updatedAttribute: 'field1', updatedValue: 'updated value'}
 
     const state = {
       questionnaire: {
@@ -312,7 +341,7 @@ describe('actions', () => {
     }
 
     const options = {
-      body: JSON.stringify(formData['field1']),
+      body: JSON.stringify(payload.updatedValue),
       method: 'PUT'
     }
 
@@ -320,13 +349,25 @@ describe('actions', () => {
       mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
-        {type: 'INCREMENT_SAVING_QUEUE'},
-        {type: 'SET_FORM_DATA', payload: formData},
-        {type: 'DECREMENT_SAVING_QUEUE'},
-        {type: 'SET_LOADING', payload: false}
+        {type: 'INCREMENT_SAVING_QUEUE', payload},
+        {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
 
-      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, formData, state, expectedMutations, [], done)
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
+    })
+    it('should post data for a single attribute and fail', done => {
+      const error = 'error'
+
+      mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
+
+      const expectedMutations = [
+        {type: 'INCREMENT_SAVING_QUEUE', payload},
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false},
+        {type: 'DECREMENT_SAVING_QUEUE', payload}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
     })
   })
 

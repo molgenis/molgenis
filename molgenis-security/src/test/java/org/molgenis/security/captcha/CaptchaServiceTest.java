@@ -1,6 +1,6 @@
 package org.molgenis.security.captcha;
 
-import nl.captcha.Captcha;
+import cn.apiclub.captcha.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

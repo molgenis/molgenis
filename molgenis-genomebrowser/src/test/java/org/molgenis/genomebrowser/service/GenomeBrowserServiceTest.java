@@ -1,7 +1,6 @@
 package org.molgenis.genomebrowser.service;
 
 import org.mockito.Mock;
-import org.molgenis.core.ui.util.GsonConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.MetaDataService;
@@ -15,6 +14,7 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.web.converter.GsonConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.BeforeMethod;
@@ -45,7 +45,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracks()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -69,7 +69,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksAll()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -142,7 +142,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksNone()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(true);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(true);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);
@@ -166,7 +166,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
 	@Test
 	public void testGetReferenceTracksNoPermission()
 	{
-		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ))).thenReturn(false);
+		when(userPermissionEvaluator.hasPermission(any(), eq(EntityTypePermission.READ_DATA))).thenReturn(false);
 		EntityType entity = mock(EntityType.class);
 		Entity attrsEntity = mock(Entity.class);
 		GenomeBrowserAttributes genomeBrowserAttributes = new GenomeBrowserAttributes(attrsEntity);

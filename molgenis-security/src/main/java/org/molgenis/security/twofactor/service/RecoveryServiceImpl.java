@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.google.api.client.util.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.LONG_SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;

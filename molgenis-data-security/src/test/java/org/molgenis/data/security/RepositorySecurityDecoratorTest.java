@@ -1,9 +1,13 @@
 package org.molgenis.data.security;
 
 import org.mockito.Mock;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -15,14 +19,11 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.security.EntityTypePermission.*;
 
 @SuppressWarnings("deprecation")
 public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 {
-	private static final String MESSAGE_NO_COUNT_PERMISSION = "No \\[COUNT\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
-	private static final String MESSAGE_NO_READ_PERMISSION = "No \\[READ\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
-	private static final String MESSAGE_NO_WRITE_PERMISSION = "No \\[WRITE\\] permission on entity type \\[Entity type\\] with id \\[entityTypeId\\]";
-
 	@Mock
 	private Repository<Entity> delegateRepository;
 	@Mock
@@ -45,16 +46,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(ADD_DATA, true);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.add(entity);
 		verify(delegateRepository).add(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:ADD_DATA entityTypeId:entityTypeId")
 	public void testAddPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(ADD_DATA, false);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.add(entity);
 		verify(delegateRepository).add(entity);
@@ -63,16 +64,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAddStreamPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(ADD_DATA, true);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.add(entityStream);
 		verify(delegateRepository).add(entityStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:ADD_DATA entityTypeId:entityTypeId")
 	public void testAddStreamPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(ADD_DATA, false);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.add(entityStream);
 		verify(delegateRepository).add(entityStream);
@@ -81,48 +82,41 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testAggregatePermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, true);
+		initPermissionServiceMock(AGGREGATE_DATA, true);
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		repositorySecurityDecorator.aggregate(aggregateQuery);
 		verify(delegateRepository).aggregate(aggregateQuery);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_COUNT_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:AGGREGATE_DATA entityTypeId:entityTypeId")
 	public void testAggregatePermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, false);
+		initPermissionServiceMock(AGGREGATE_DATA, false);
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		repositorySecurityDecorator.aggregate(aggregateQuery);
 		verify(delegateRepository).aggregate(aggregateQuery);
 	}
 
 	@Test
-	public void testClosePermissionGranted() throws IOException
+	public void testCloseNoPermissionsNeeded() throws IOException
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
 		repositorySecurityDecorator.close();
 		verify(delegateRepository).close();
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
-	public void testClosePermissionDenied() throws IOException
-	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
-		repositorySecurityDecorator.close();
+		verifyZeroInteractions(permissionService);
 	}
 
 	@Test
 	public void testCountPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, true);
+		initPermissionServiceMock(COUNT_DATA, true);
 		repositorySecurityDecorator.count();
 		verify(delegateRepository).count();
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_COUNT_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:COUNT_DATA entityTypeId:entityTypeId")
 	public void testCountPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, false);
+		initPermissionServiceMock(COUNT_DATA, false);
 		repositorySecurityDecorator.count();
 		verify(delegateRepository).count();
 	}
@@ -130,17 +124,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testCountQueryPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, true);
+		initPermissionServiceMock(COUNT_DATA, true);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.count(query);
 		verify(delegateRepository).count(query);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_COUNT_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:COUNT_DATA entityTypeId:entityTypeId")
 	public void testCountQueryPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.COUNT, false);
+		initPermissionServiceMock(COUNT_DATA, false);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.count(query);
@@ -150,16 +144,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testDeletePermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, true);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.delete(entity);
 		verify(delegateRepository).delete(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_DATA entityTypeId:entityTypeId")
 	public void testDeletePermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, false);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.delete(entity);
 		verify(delegateRepository).delete(entity);
@@ -168,16 +162,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testDeleteStreamPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, true);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.delete(entityStream);
 		verify(delegateRepository).delete(entityStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_DATA entityTypeId:entityTypeId")
 	public void testDeleteStreamPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, false);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.delete(entityStream);
 		verify(delegateRepository).delete(entityStream);
@@ -186,15 +180,15 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testDeleteAllPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, true);
 		repositorySecurityDecorator.deleteAll();
 		verify(delegateRepository).deleteAll();
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_DATA entityTypeId:entityTypeId")
 	public void testDeleteAllPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, false);
 		repositorySecurityDecorator.deleteAll();
 		verify(delegateRepository).deleteAll();
 	}
@@ -202,16 +196,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testDeleteAllStreamPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, true);
 		Stream<Object> entityIdStream = Stream.empty();
 		repositorySecurityDecorator.deleteAll(entityIdStream);
 		verify(delegateRepository).deleteAll(entityIdStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_DATA entityTypeId:entityTypeId")
 	public void testDeleteAllStreamPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, false);
 		Stream<Object> entityIdStream = Stream.empty();
 		repositorySecurityDecorator.deleteAll(entityIdStream);
 		verify(delegateRepository).deleteAll(entityIdStream);
@@ -220,16 +214,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testDeleteByIdPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, true);
 		Object entityId = mock(Object.class);
 		repositorySecurityDecorator.deleteById(entityId);
 		verify(delegateRepository).deleteById(entityId);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:DELETE_DATA entityTypeId:entityTypeId")
 	public void testDeleteByIdPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.DELETE_DATA, false);
 		Object entityId = mock(Object.class);
 		repositorySecurityDecorator.deleteById(entityId);
 		verify(delegateRepository).deleteById(entityId);
@@ -238,17 +232,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindAllQueryPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.findAll(query);
 		verify(delegateRepository).findAll(query);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindAllQueryPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.findAll(query);
@@ -258,16 +252,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindAllStreamPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		Stream<Object> entityIdStream = Stream.empty();
 		repositorySecurityDecorator.findAll(entityIdStream);
 		verify(delegateRepository).findAll(entityIdStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindAllStreamPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		Stream<Object> entityIdStream = Stream.empty();
 		repositorySecurityDecorator.findAll(entityIdStream);
 		verify(delegateRepository).findAll(entityIdStream);
@@ -276,17 +270,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindAllStreamFetchPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		Stream<Object> entityIdStream = Stream.empty();
 		Fetch fetch = mock(Fetch.class);
 		repositorySecurityDecorator.findAll(entityIdStream, fetch);
 		verify(delegateRepository).findAll(entityIdStream, fetch);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindAllStreamFetchPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		Stream<Object> entityIdStream = Stream.empty();
 		Fetch fetch = mock(Fetch.class);
 		repositorySecurityDecorator.findAll(entityIdStream, fetch);
@@ -296,17 +290,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindOneQueryPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.findOne(query);
 		verify(delegateRepository).findOne(query);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindOneQueryPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		repositorySecurityDecorator.findOne(query);
@@ -316,16 +310,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindOneByIdPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		Object entityId = mock(Object.class);
 		repositorySecurityDecorator.findOneById(entityId);
 		verify(delegateRepository).findOneById(entityId);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindOneByIdPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		Object entityId = mock(Object.class);
 		repositorySecurityDecorator.findOneById(entityId);
 		verify(delegateRepository).findOneById(entityId);
@@ -334,17 +328,17 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testFindOneByIdFetchPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		Object entityId = mock(Object.class);
 		Fetch fetch = mock(Fetch.class);
 		repositorySecurityDecorator.findOneById(entityId, fetch);
 		verify(delegateRepository).findOneById(entityId, fetch);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testFindOneByIdFetchPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		Object entityId = mock(Object.class);
 		Fetch fetch = mock(Fetch.class);
 		repositorySecurityDecorator.findOneById(entityId, fetch);
@@ -354,7 +348,7 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testForEachBatchedPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		Fetch fetch = mock(Fetch.class);
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
@@ -363,10 +357,10 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).forEachBatched(fetch, consumer, batchSize);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testForEachBatchedPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		Fetch fetch = mock(Fetch.class);
 		@SuppressWarnings("unchecked")
 		Consumer<List<Entity>> consumer = mock(Consumer.class);
@@ -378,15 +372,15 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testIteratorPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, true);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, true);
 		repositorySecurityDecorator.iterator();
 		verify(delegateRepository).iterator();
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_READ_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:READ_DATA entityTypeId:entityTypeId")
 	public void testIteratorPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.READ, false);
+		initPermissionServiceMock(EntityTypePermission.READ_DATA, false);
 		repositorySecurityDecorator.iterator();
 		verify(delegateRepository).iterator();
 	}
@@ -394,16 +388,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testUpdatePermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.UPDATE_DATA, true);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.update(entity);
 		verify(delegateRepository).update(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:entityTypeId")
 	public void testUpdatePermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.UPDATE_DATA, false);
 		Entity entity = mock(Entity.class);
 		repositorySecurityDecorator.update(entity);
 		verify(delegateRepository).update(entity);
@@ -412,16 +406,16 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 	@Test
 	public void testUpdateStreamPermissionGranted()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, true);
+		initPermissionServiceMock(EntityTypePermission.UPDATE_DATA, true);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.update(entityStream);
 		verify(delegateRepository).update(entityStream);
 	}
 
-	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = MESSAGE_NO_WRITE_PERMISSION)
+	@Test(expectedExceptions = EntityTypePermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE_DATA entityTypeId:entityTypeId")
 	public void testUpdateStreamPermissionDenied()
 	{
-		initPermissionServiceMock(EntityTypePermission.WRITE, false);
+		initPermissionServiceMock(EntityTypePermission.UPDATE_DATA, false);
 		Stream<Entity> entityStream = Stream.empty();
 		repositorySecurityDecorator.update(entityStream);
 		verify(delegateRepository).update(entityStream);
@@ -432,11 +426,6 @@ public class RepositorySecurityDecoratorTest extends AbstractMockitoTest
 		EntityType entityType = mock(EntityType.class);
 		String entityTypeId = "entityTypeId";
 		when(entityType.getId()).thenReturn(entityTypeId);
-		if (!hasPermission)
-		{
-			String entityTypeLabel = "Entity type";
-			when(entityType.getLabel()).thenReturn(entityTypeLabel);
-		}
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), permission)).thenReturn(
 				hasPermission);

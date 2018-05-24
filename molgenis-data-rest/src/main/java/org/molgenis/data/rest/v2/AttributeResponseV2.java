@@ -1,12 +1,12 @@
 package org.molgenis.data.rest.v2;
 
-import org.molgenis.core.ui.data.support.Href;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
@@ -71,13 +71,10 @@ class AttributeResponseV2
 			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
 					includeCategories);
 
-			if (includeCategories && (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
-					AttributeType.CATEGORICAL_MREF)))
+			if (includeCategories && (this.fieldType == AttributeType.CATEGORICAL
+					|| this.fieldType == AttributeType.CATEGORICAL_MREF))
 			{
-				this.categoricalOptions = dataService.findAll(refEntity.getId())
-													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
-															 entity.getLabelValue()))
-													 .collect(Collectors.toList());
+				this.categoricalOptions = CategoricalUtils.getCategoricalOptionsForRefEntity(dataService, refEntity);
 			}
 		}
 		else

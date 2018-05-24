@@ -3,6 +3,7 @@ package org.molgenis.js.nashorn;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.script.ScriptException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
@@ -25,8 +26,7 @@ public class NashornScriptEngineTest
 	public void testInvokeFunction() throws Exception
 	{
 		long epoch = 1487342481434L;
-		assertEquals(nashornScriptEngine.invokeFunction("evalScript", "new Date(" + epoch + ")"), epoch);
-
+		assertEquals(nashornScriptEngine.eval("new Date(" + epoch + ")"), epoch);
 	}
 
 	@Test
@@ -36,7 +36,14 @@ public class NashornScriptEngineTest
 		String script = String.format("new Date(%d,%d,%d)", localDate.getYear(), localDate.getMonth().getValue() - 1,
 				localDate.getDayOfMonth());
 		long epochMilli = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		assertEquals(nashornScriptEngine.invokeFunction("evalScript", script), epochMilli);
+		assertEquals(nashornScriptEngine.eval(script), epochMilli);
+	}
+
+	@Test(expectedExceptions = ScriptException.class, expectedExceptionsMessageRegExp = "ReferenceError: \"piet\" is not defined in <eval> at line number 1")
+	public void doesntDirtyContext() throws ScriptException
+	{
+		nashornScriptEngine.eval("piet = 3");
+		nashornScriptEngine.eval("piet");
 	}
 
 }

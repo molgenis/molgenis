@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
-        <version>Cairo-RELEASE</version>
+        <version>Cairo-SR1</version>
     </parent>
     <packaging>pom</packaging>
 
@@ -74,7 +74,7 @@
         <elasticsearch.version>5.5.1</elasticsearch.version>
         <postgresql.version>9.4.1211</postgresql.version>
         <testng.version>6.8</testng.version>
-        <guava.version>21.0</guava.version>
+        <guava.version>25.0-jre</guava.version>
 
         <!-- dependency versions not managed by parent pom -->
         <google.auto-value.version>1.4.1</google.auto-value.version>
@@ -92,7 +92,7 @@
         <UserAgentUtils.version>1.17</UserAgentUtils.version>
         <freemarker-java8.version>1.1.2</freemarker-java8.version>
         <mapdb.version>1.0.6</mapdb.version>
-        <simplecaptcha.version>1.2.1</simplecaptcha.version>
+        <simplecaptcha.version>1.2.2</simplecaptcha.version>
         <zip4j.version>1.3.2</zip4j.version>
 
         <node.version>v8.9.0</node.version>
@@ -724,7 +724,6 @@
                 <configuration>
                     <!-- improve report generation performance -->
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                    <project.remoteArtifactRepositories>enonic</project.remoteArtifactRepositories>
                 </configuration>
             </plugin>
         </plugins>
@@ -732,6 +731,33 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.j2objc</groupId>
+                        <artifactId>j2objc-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>animal-sniffer-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-compat-qual</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>guava</artifactId>
@@ -889,7 +915,7 @@
                 <version>${mapdb.version}</version>
             </dependency>
             <dependency>
-                <groupId>nl.captcha</groupId>
+                <groupId>cn.apiclub.tool</groupId>
                 <artifactId>simplecaptcha</artifactId>
                 <version>${simplecaptcha.version}</version>
             </dependency>

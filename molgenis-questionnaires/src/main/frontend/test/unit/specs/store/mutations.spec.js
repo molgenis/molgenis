@@ -2,7 +2,7 @@ import mutations from 'src/store/mutations'
 
 describe('mutations', () => {
   const state = {
-    chapterFields: [],
+    chapters: [],
     error: '',
     formData: {},
     loading: true,
@@ -36,11 +36,11 @@ describe('mutations', () => {
   })
 
   describe('SET_CHAPTER_FIELDS', () => {
-    it('should update the chapterFields in the state with the payload', () => {
+    it('should update the chapters in the state with the payload', () => {
       const payload = ['chapter1']
       mutations.SET_CHAPTER_FIELDS(state, payload)
 
-      expect(state.chapterFields).to.deep.equal(payload)
+      expect(state.chapters).to.deep.equal(payload)
     })
   })
 
@@ -98,7 +98,7 @@ describe('mutations', () => {
       mutations.CLEAR_STATE(state)
 
       expect(state.questionnaireId).to.deep.equal('')
-      expect(state.chapterFields).to.deep.equal([])
+      expect(state.chapters).to.deep.equal([])
       expect(state.formData).to.deep.equal({})
       expect(state.questionnaireLabel).to.deep.equal('')
       expect(state.questionnaireDescription).to.deep.equal('')

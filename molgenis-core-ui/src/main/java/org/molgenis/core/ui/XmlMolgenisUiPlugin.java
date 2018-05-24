@@ -55,7 +55,7 @@ public class XmlMolgenisUiPlugin implements UiMenuItem
 	@Override
 	public boolean isAuthorized()
 	{
-		return permissionService.hasPermission(new PluginIdentity(getId()), PluginPermission.READ);
+		return permissionService.hasPermission(new PluginIdentity(getId()), PluginPermission.VIEW_PLUGIN);
 	}
 
 	@Override

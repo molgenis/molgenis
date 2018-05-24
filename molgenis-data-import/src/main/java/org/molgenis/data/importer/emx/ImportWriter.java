@@ -15,7 +15,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -32,6 +31,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.importer.DataPersister.MetadataMode.UPSERT;
+import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 /**
@@ -117,7 +117,7 @@ public class ImportWriter
 	private void validateEntityTypePermission(EntityType entityType)
 	{
 		String entityTypeName = entityType.getId();
-		if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeName), EntityTypePermission.COUNT))
+		if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeName), READ_METADATA))
 		{
 			throw new MolgenisValidationException(
 					new ConstraintViolation(format("Permission denied on existing entity type [%s]", entityTypeName)));

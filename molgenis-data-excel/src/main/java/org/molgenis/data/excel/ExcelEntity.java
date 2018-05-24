@@ -6,8 +6,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.file.processor.CellProcessor;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class ExcelEntity extends DynamicEntity
 	{
 		if (cachedValueMap == null)
 		{
-			cachedValueMap = new LinkedCaseInsensitiveMap<>();
+			cachedValueMap = new LinkedHashMap<>();
 		}
 
 		Object value;
@@ -86,7 +86,7 @@ public class ExcelEntity extends DynamicEntity
 	{
 		if (cachedValueMap == null)
 		{
-			cachedValueMap = new LinkedCaseInsensitiveMap<>();
+			cachedValueMap = new LinkedHashMap<>();
 		}
 		cachedValueMap.put(attributeName, value);
 	}

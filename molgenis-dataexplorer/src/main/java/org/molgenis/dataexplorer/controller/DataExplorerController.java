@@ -11,6 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
@@ -20,7 +21,6 @@ import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
 import org.molgenis.jobs.model.JobExecutionMetaData;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
@@ -50,8 +50,6 @@ import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaDa
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
 
 /**
  * Controller class for the data explorer.
@@ -169,7 +167,7 @@ public class DataExplorerController extends PluginController
 	{
 		boolean entityExists = dataService.hasRepository(selectedEntityName);
 		boolean hasEntityPermission = permissionService.hasPermission(new EntityTypeIdentity(selectedEntityName),
-				EntityTypePermission.COUNT);
+				EntityTypePermission.READ_METADATA);
 
 		if (!(entityExists && hasEntityPermission))
 		{
@@ -226,11 +224,9 @@ public class DataExplorerController extends PluginController
 				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
 				// self-explanatory
 				if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-						EntityTypePermission.WRITEMETA))
+						EntityTypePermission.UPDATE_METADATA))
 				{
-					throw new MolgenisDataAccessException(
-							"No " + Permission.WRITEMETA + " permission on entity [" + entityTypeId
-									+ "], this permission is necessary run the annotators.");
+					throw new EntityTypePermissionDeniedException(EntityTypePermission.UPDATE_METADATA, entityTypeId);
 				}
 				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
 						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
@@ -247,7 +243,7 @@ public class DataExplorerController extends PluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ)
+		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ_DATA)
 				&& dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
 	}
 
@@ -263,62 +259,33 @@ public class DataExplorerController extends PluginController
 		boolean modData = dataExplorerSettings.getModData();
 		boolean modReports = dataExplorerSettings.getModReports();
 
-		if (modAggregates)
-		{
-			modAggregates = dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE);
-		}
-
-		// set data explorer permission
-		Permission pluginPermission = null;
-		if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.WRITE))
-			pluginPermission = WRITE;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ))
-			pluginPermission = READ;
-		else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.COUNT))
-			pluginPermission = Permission.COUNT;
-
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
 				LocaleContextHolder.getLocale());
-
-		if (pluginPermission != null)
+		if (modData && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_DATA))
 		{
-			switch (pluginPermission)
+			modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+		}
+		if (modAggregates && dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE)
+				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.AGGREGATE_DATA))
+		{
+			modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
+		}
+		if (modAnnotators && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.UPDATE_DATA))
+		{
+			modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
+		}
+		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.READ_DATA) && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+				EntityTypePermission.UPDATE_METADATA))
+		{
+			String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
+			if (modEntitiesReportName != null)
 			{
-				case COUNT:
-					if (modAggregates)
-					{
-						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "grid-icon.png"));
-					}
-					break;
-				case READ:
-				case WRITE:
-					if (modData)
-					{
-						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
-					}
-					if (modAggregates)
-					{
-						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
-					}
-					if (modAnnotators && pluginPermission == WRITE)
-					{
-						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
-					}
-					if (modReports)
-					{
-						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
-						if (modEntitiesReportName != null)
-						{
-							modulesConfig.add(
-									new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
-						}
-					}
-					break;
-				case NONE:
-					break;
-				default:
-					throw new UnexpectedEnumException(pluginPermission);
+				modulesConfig.add(new ModuleConfig(MOD_ENTITIESREPORT, modEntitiesReportName, "report-icon.png"));
 			}
 		}
 		return modulesConfig;
