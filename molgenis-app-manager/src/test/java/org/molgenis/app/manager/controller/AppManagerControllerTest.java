@@ -5,7 +5,7 @@ import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
-import org.molgenis.core.util.MolgenisGsonHttpMessageConverter;
+import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
