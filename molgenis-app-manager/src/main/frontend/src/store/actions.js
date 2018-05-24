@@ -2,7 +2,7 @@ import api from '@molgenis/molgenis-api-client'
 
 export default {
   'ACTIVATE_APP' ({commit, dispatch}, appId) {
-    api.get('/plugin/appmanager/activate/' + appId).then(() => {
+    api.post('/plugin/appmanager/activate/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
       commit('SET_ERROR', error)
@@ -10,15 +10,16 @@ export default {
   },
 
   'DEACTIVATE_APP' ({commit, dispatch}, appId) {
-    api.get('/plugin/appmanager/deactivate/' + appId).then(() => {
+    api.post('/plugin/appmanager/deactivate/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
+      console.log('error')
       commit('SET_ERROR', error)
     })
   },
 
   'DELETE_APP' ({commit, dispatch}, appId) {
-    api.get('/plugin/appmanager/delete/' + appId).then(() => {
+    api.delete_('/plugin/appmanager/delete/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
       commit('SET_ERROR', error)
