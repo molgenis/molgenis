@@ -71,13 +71,10 @@ class AttributeResponseV2
 			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
 					includeCategories);
 
-			if (includeCategories && (this.fieldType.equals(AttributeType.CATEGORICAL) || this.fieldType.equals(
-					AttributeType.CATEGORICAL_MREF)))
+			if (includeCategories && (this.fieldType == AttributeType.CATEGORICAL
+					|| this.fieldType == AttributeType.CATEGORICAL_MREF))
 			{
-				this.categoricalOptions = dataService.findAll(refEntity.getId())
-													 .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
-															 entity.getLabelValue()))
-													 .collect(Collectors.toList());
+				this.categoricalOptions = CategoricalUtils.getCategoricalOptionsForRefEntity(dataService, refEntity);
 			}
 		}
 		else
