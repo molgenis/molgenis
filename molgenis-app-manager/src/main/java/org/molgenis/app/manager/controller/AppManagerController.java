@@ -43,21 +43,21 @@ public class AppManagerController extends PluginController
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping("/activate/{id}")
+	@PostMapping("/activate/{id}")
 	public void activateApp(@PathVariable(value = "id") String id)
 	{
 		appManagerService.activateApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping("/deactivate/{id}")
+	@PostMapping("/deactivate/{id}")
 	public void deactivateApp(@PathVariable(value = "id") String id)
 	{
 		appManagerService.deactivateApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping("/delete/{id}")
+	@DeleteMapping("/delete/{id}")
 	public void deleteApp(@PathVariable("id") String id) throws IOException
 	{
 		appManagerService.deleteApp(id);

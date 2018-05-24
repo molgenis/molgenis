@@ -6,9 +6,9 @@ import utils from '@molgenis/molgenis-vue-test-utils'
 describe('actions', () => {
   describe('ACTIVATE_APP', () => {
     it('should dispatch FETCH_APPS on successful get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/activate/test_id')).thenResolve('OK')
-      td.replace(api, 'get', get)
+      const post = td.function('api.post')
+      td.when(post('/plugin/appmanager/activate/test_id')).thenResolve('OK')
+      td.replace(api, 'post', post)
 
       const options = {
         payload: 'test_id',
@@ -20,10 +20,10 @@ describe('actions', () => {
       utils.testAction(actions.ACTIVATE_APP, options, done)
     })
 
-    it('should commit SET_ERROR on failed get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/activate/test_id')).thenReject('failed get request')
-      td.replace(api, 'get', get)
+    it('should commit SET_ERROR on failed post request', done => {
+      const post = td.function('api.post')
+      td.when(post('/plugin/appmanager/activate/test_id')).thenReject('failed get request')
+      td.replace(api, 'post', post)
 
       const options = {
         payload: 'test_id',
@@ -38,9 +38,9 @@ describe('actions', () => {
 
   describe('DEACTIVATE_APP', () => {
     it('should dispatch FETCH_APPS on successful get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/deactivate/test_id')).thenResolve('OK')
-      td.replace(api, 'get', get)
+      const post = td.function('api.post')
+      td.when(post('/plugin/appmanager/deactivate/test_id')).thenResolve('OK')
+      td.replace(api, 'post', post)
 
       const options = {
         payload: 'test_id',
@@ -52,15 +52,15 @@ describe('actions', () => {
       utils.testAction(actions.DEACTIVATE_APP, options, done)
     })
 
-    it('should commit SET_ERROR on failed get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/deactivate/test_id')).thenReject('failed get request')
-      td.replace(api, 'get', get)
+    it('should commit SET_ERROR on failed post request', done => {
+      const post = td.function('api.post')
+      td.when(post('/plugin/appmanager/deactivate/test_id')).thenReject('failed post request')
+      td.replace(api, 'post', post)
 
       const options = {
         payload: 'test_id',
         expectedMutations: [
-          {type: 'SET_ERROR', payload: 'failed get request'}
+          {type: 'SET_ERROR', payload: 'failed post request'}
         ]
       }
 
@@ -69,10 +69,10 @@ describe('actions', () => {
   })
 
   describe('DELETE_APP', () => {
-    it('should dispatch FETCH_APPS on successful get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/delete/test_id')).thenResolve('OK')
-      td.replace(api, 'get', get)
+    it('should dispatch FETCH_APPS on successful delete request', done => {
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/appmanager/delete/test_id')).thenResolve('OK')
+      td.replace(api, 'delete_', delete_)
 
       const options = {
         payload: 'test_id',
@@ -85,14 +85,14 @@ describe('actions', () => {
     })
 
     it('should commit SET_ERROR on failed get request', done => {
-      const get = td.function('api.get')
-      td.when(get('/plugin/appmanager/delete/test_id')).thenReject('failed get request')
-      td.replace(api, 'get', get)
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/appmanager/delete/test_id')).thenReject('failed delete request')
+      td.replace(api, 'delete_', delete_)
 
       const options = {
         payload: 'test_id',
         expectedMutations: [
-          {type: 'SET_ERROR', payload: 'failed get request'}
+          {type: 'SET_ERROR', payload: 'failed delete request'}
         ]
       }
 
