@@ -1,17 +1,30 @@
 package org.molgenis.app.manager.controller;
 
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
+import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
+import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.converter.CsvHttpMessageConverter;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -44,6 +57,20 @@ public class AppControllerTest
 
 	private AppResponse appResponse;
 
+	@BeforeClass
+	public void beforeClass()
+	{
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("app-manager");
+		MessageSourceHolder.setMessageSource(messageSource);
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		MessageSourceHolder.setMessageSource(null);
+	}
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -74,7 +101,11 @@ public class AppControllerTest
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
 		AppController controller = new AppController(appManagerService, appSettings, menuReaderService);
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setLocaleResolver(localeResolver).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(controller)
+								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
+										 new FallbackExceptionHandler(), new SpringExceptionHandler())
+								 .setLocaleResolver(localeResolver)
+								 .build();
 	}
 
 	@Test
@@ -85,6 +116,35 @@ public class AppControllerTest
 			   .andExpect(model().attribute("app", appResponse))
 			   .andExpect(model().attribute("baseUrl", "/test/path"))
 			   .andExpect(view().name("view-app"));
+	}
+
+	@Test
+	public void testServeAppRedirectToApp() throws Exception
+	{
+		mockMvc.perform(get(AppController.URI + "/uri"))
+			   .andExpect(status().is3xxRedirection());
+	}
+
+	@Test
+	public void testServeAppInactiveApp() throws Exception
+	{
+		App app = mock(App.class);
+		when(app.getId()).thenReturn("id");
+		when(app.getUri()).thenReturn("uri");
+		when(app.getLabel()).thenReturn("label");
+		when(app.getDescription()).thenReturn("description");
+		when(app.getAppVersion()).thenReturn("v1.0.0");
+		when(app.includeMenuAndFooter()).thenReturn(true);
+		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
+		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
+		when(app.getResourceFolder()).thenReturn("foo/bar");
+
+		when(app.isActive()).thenReturn(false);
+
+		AppResponse appResponse = AppResponse.create(app);
+		appResponse.create(app);
+		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
+		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().is4xxClientError());
 	}
 
 	@Test
