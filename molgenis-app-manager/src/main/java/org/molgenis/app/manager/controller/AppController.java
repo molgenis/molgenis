@@ -26,12 +26,12 @@ import java.io.InputStream;
 
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.app.manager.controller.AppDeployController.URI;
+import static org.molgenis.app.manager.controller.AppController.URI;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 @Controller
 @RequestMapping(URI)
-public class AppDeployController extends PluginController
+public class AppController extends PluginController
 {
 	public static final String ID = "app";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
@@ -40,7 +40,7 @@ public class AppDeployController extends PluginController
 	private final AppSettings appSettings;
 	private final MenuReaderService menuReaderService;
 
-	public AppDeployController(AppManagerService appManagerService,
+	public AppController(AppManagerService appManagerService,
 			AppSettings appSettings, MenuReaderService menuReaderService)
 	{
 		super(URI);

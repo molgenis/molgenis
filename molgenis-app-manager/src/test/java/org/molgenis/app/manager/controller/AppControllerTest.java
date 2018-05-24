@@ -8,7 +8,6 @@ import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Configuration
 @EnableWebMvc
-public class AppDeployControllerTest
+public class AppControllerTest
 {
 	private MockMvc mockMvc;
 
@@ -51,7 +50,7 @@ public class AppDeployControllerTest
 		initMocks(this);
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(AppDeployController.ID + "/uri/")).thenReturn("/test/path");
+		when(menu.findMenuItemPath(AppController.ID + "/uri/")).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(appSettings.getLanguageCode()).thenReturn("en");
 		when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
@@ -74,14 +73,14 @@ public class AppDeployControllerTest
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
-		AppDeployController controller = new AppDeployController(appManagerService, appSettings, menuReaderService);
+		AppController controller = new AppController(appManagerService, appSettings, menuReaderService);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).setLocaleResolver(localeResolver).build();
 	}
 
 	@Test
 	public void testServeApp() throws Exception
 	{
-		mockMvc.perform(get(AppDeployController.URI + "/uri/"))
+		mockMvc.perform(get(AppController.URI + "/uri/"))
 			   .andExpect(status().isOk())
 			   .andExpect(model().attribute("app", appResponse))
 			   .andExpect(model().attribute("baseUrl", "/test/path"))
@@ -91,7 +90,7 @@ public class AppDeployControllerTest
 	@Test
 	public void testServeResource() throws Exception
 	{
-		mockMvc.perform(get(AppDeployController.URI + "/uri/js/test.js"))
+		mockMvc.perform(get(AppController.URI + "/uri/js/test.js"))
 			   .andExpect(status().isOk())
 			   .andReturn()
 			   .getResponse();
