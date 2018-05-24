@@ -15,14 +15,15 @@ pipeline {
             }
         }
 
-        stage('Build, test and deploy to sonatype snapshot repo') {
+        stage('Build, test and deploy to molgenis.org registry') {
             environment {
                 KEYFILE = credentials('molgenis.pgp.secretkey')
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
+                DOCKER_TAG = '${env.CHANGE_ID}-${env.BUILD_NUMBER}'
             }
             steps {
                 configFileProvider([configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Ddockerfile.tag=${env.CHANGE_ID} -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
+                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Ddockerfile.tag=${env.DOCKER_TAG} -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
                 }
             }
             post {
@@ -57,7 +58,7 @@ pipeline {
         stage('Sonar analysis for branch update') {
             when {
                 not {
-                    changeRequest()
+                    changeRequest
                 }
             }
             environment {
@@ -71,7 +72,7 @@ pipeline {
         stage('Publish to maven central') {
             when {
                 not {
-                    changeRequest()
+                    changeRequest
                 }
             }
             environment {
@@ -79,6 +80,7 @@ pipeline {
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
             }
             steps {
+                milestone
                 timeout(time: 5, unit: 'DAYS') {
                     input message: 'Publish to maven central?'
                 }
