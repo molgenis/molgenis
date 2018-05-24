@@ -2,8 +2,10 @@ package org.molgenis.app.manager.service.impl;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppFactory;
@@ -22,14 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
@@ -148,7 +148,7 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new InvalidAppConfigException();
 		}
 
-		AppConfig appConfig = gson.fromJson(fileToString(configFile), AppConfig.class);
+		AppConfig appConfig = gson.fromJson(UTF8EncodedFileToString(configFile), AppConfig.class);
 		List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
 		if (!missingAppConfigParams.isEmpty())
 		{
@@ -161,14 +161,17 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setDescription(appConfig.getDescription());
 		newApp.setAppVersion(appConfig.getVersion());
 		newApp.setApiDependency(appConfig.getApiDependency());
-		newApp.setTemplateContent(fileToString(indexFile));
+		newApp.setTemplateContent(UTF8EncodedFileToString(indexFile));
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(appConfig.getIncludeMenuAndFooter());
 		newApp.setResourceFolder(appDirectoryName);
 
 		// If provided config does not include runtimeOptions, set an empty map
 		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();
-		if (runtimeOptions == null) runtimeOptions = Maps.newHashMap();
+		if (runtimeOptions == null)
+		{
+			runtimeOptions = Maps.newHashMap();
+		}
 		newApp.setAppConfig(gson.toJson(runtimeOptions));
 
 		newApp.setUri(appConfig.getUri());
@@ -195,30 +198,30 @@ public class AppManagerServiceImpl implements AppManagerService
 		return app;
 	}
 
-	private boolean isConfigContentValidJson(File configFile) throws IOException
+	private boolean isConfigContentValidJson(File configFile)
 	{
-		String fileContents = fileToString(configFile);
+		String fileContents = UTF8EncodedFileToString(configFile);
 		try
 		{
 			gson.fromJson(fileContents, AppConfig.class);
 		}
-		catch (Exception e)
+		catch (JsonSyntaxException e)
 		{
 			return false;
 		}
 		return true;
 	}
 
-	private String fileToString(File file) throws IOException
+	private String UTF8EncodedFileToString(File file)
 	{
-		StringBuilder fileContents = new StringBuilder((int) file.length());
-
-		FileReader fileReader = new FileReader(file);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
-		bufferedReader.lines().forEach(line -> fileContents.append(line).append(System.getProperty("line.separator")));
-		bufferedReader.close();
-
-		return fileContents.toString();
+		try (FileInputStream fileInputStream = new FileInputStream(file))
+		{
+			return IOUtils.toString(fileInputStream, UTF_8);
+		}
+		catch (IOException e)
+		{
+			throw new InvalidAppConfigException();
+		}
 	}
 
 	private List<String> buildMissingRequiredFiles(String appDirectoryName)

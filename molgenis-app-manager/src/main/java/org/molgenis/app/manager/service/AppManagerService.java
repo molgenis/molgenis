@@ -16,7 +16,7 @@ public interface AppManagerService
 
 	/**
 	 * Retrieve an {@link AppResponse} based a unique URI
-	 * Throws an {@link org.molgenis.app.manager.exception.AppManagerException} when there is no app with the requested URI
+	 * Throws an {@link org.molgenis.app.manager.exception.AppForURIDoesNotExistException} when there is no app with the requested URI
 	 *
 	 * @param uri The URI of an App
 	 * @return An {@link AppResponse}
