@@ -132,7 +132,13 @@ public class AppManagerServiceImpl implements AppManagerService
 		appArchive.extractAll(appDirectoryName);
 		fileStore.delete(appArchiveName);
 
-		checkForMissingFilesInAppArchive(appDirectoryName);
+		List<String> missingRequiredFilesList = buildMissingRequiredFiles(appDirectoryName);
+		if (!missingRequiredFilesList.isEmpty())
+		{
+			fileStore.deleteDirectory(appDirectoryName);
+			throw new AppArchiveMissingFilesException(missingRequiredFilesList);
+		}
+
 
 		File indexFile = new File(appDirectoryName + File.separator + ZIP_INDEX_FILE);
 		File configFile = new File(appDirectoryName + File.separator + ZIP_CONFIG_FILE);
@@ -143,7 +149,12 @@ public class AppManagerServiceImpl implements AppManagerService
 		}
 
 		AppConfig appConfig = gson.fromJson(fileToString(configFile), AppConfig.class);
-		checkForMissingParametersInAppConfig(appConfig, appDirectoryName);
+		List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
+		if (!missingAppConfigParams.isEmpty())
+		{
+			fileStore.deleteDirectory(appDirectoryName);
+			throw new AppConfigMissingParametersException(missingAppConfigParams);
+		}
 
 		App newApp = appFactory.create();
 		newApp.setLabel(appConfig.getLabel());
@@ -210,7 +221,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		return fileContents.toString();
 	}
 
-	private void checkForMissingFilesInAppArchive(String appDirectoryName) throws IOException
+	private List<String> buildMissingRequiredFiles(String appDirectoryName)
 	{
 		List<String> missingFromArchive = newArrayList();
 
@@ -226,14 +237,10 @@ public class AppManagerServiceImpl implements AppManagerService
 			missingFromArchive.add(ZIP_CONFIG_FILE);
 		}
 
-		if (!missingFromArchive.isEmpty())
-		{
-			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppArchiveMissingFilesException(missingFromArchive);
-		}
+		return missingFromArchive;
 	}
 
-	private void checkForMissingParametersInAppConfig(AppConfig appConfig, String appDirectoryName) throws IOException
+	private List<String> buildMissingConfigParams(AppConfig appConfig)
 	{
 		List<String> missingConfigParameters = newArrayList();
 		if (appConfig.getUri() == null)
@@ -246,10 +253,6 @@ public class AppManagerServiceImpl implements AppManagerService
 			missingConfigParameters.add("version");
 		}
 
-		if (!missingConfigParameters.isEmpty())
-		{
-			fileStore.deleteDirectory(appDirectoryName);
-			throw new AppConfigMissingParametersException(missingConfigParameters);
-		}
+		return missingConfigParameters;
 	}
 }
