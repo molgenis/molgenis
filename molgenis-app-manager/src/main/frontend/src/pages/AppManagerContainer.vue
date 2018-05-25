@@ -65,7 +65,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="app-card-container">
-                            <template v-if="apps.length == 0">
+                            <template v-if="apps.length === 0">
                                 No apps were found
                             </template>
 
