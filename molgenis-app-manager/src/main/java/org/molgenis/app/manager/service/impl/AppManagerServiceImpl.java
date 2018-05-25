@@ -22,9 +22,11 @@ import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -117,18 +119,18 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	@Override
 	@Transactional
-	public void uploadApp(MultipartFile multipartFile) throws IOException, ZipException
+	public void uploadApp(InputStream zipData, String zipFileName, String formFieldName) throws IOException, ZipException
 	{
-		String appArchiveName = "zip_file_" + multipartFile.getOriginalFilename();
-		ZipFile appArchive = new ZipFile(fileStore.store(multipartFile.getInputStream(), appArchiveName));
+		String appArchiveName = "zip_file_" + zipFileName;
+		ZipFile appArchive = new ZipFile(fileStore.store(zipData, appArchiveName));
 
 		if (!appArchive.isValidZipFile())
 		{
 			fileStore.delete(appArchiveName);
-			throw new InvalidAppArchiveException(multipartFile.getName());
+			throw new InvalidAppArchiveException(formFieldName);
 		}
 
-		String appDirectoryName = fileStore.getStorageDir() + File.separator + multipartFile.getOriginalFilename();
+		String appDirectoryName = fileStore.getStorageDir() + File.separator + zipFileName;
 		appArchive.extractAll(appDirectoryName);
 		fileStore.delete(appArchiveName);
 
@@ -156,6 +158,13 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new AppConfigMissingParametersException(missingAppConfigParams);
 		}
 
+		// If provided config does not include runtimeOptions, set an empty map
+		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();
+		if (runtimeOptions == null)
+		{
+			runtimeOptions = Maps.newHashMap();
+		}
+
 		App newApp = appFactory.create();
 		newApp.setLabel(appConfig.getLabel());
 		newApp.setDescription(appConfig.getDescription());
@@ -165,16 +174,9 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setActive(false);
 		newApp.setIncludeMenuAndFooter(appConfig.getIncludeMenuAndFooter());
 		newApp.setResourceFolder(appDirectoryName);
-
-		// If provided config does not include runtimeOptions, set an empty map
-		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();
-		if (runtimeOptions == null)
-		{
-			runtimeOptions = Maps.newHashMap();
-		}
 		newApp.setAppConfig(gson.toJson(runtimeOptions));
-
 		newApp.setUri(appConfig.getUri());
+
 		dataService.add(AppMetadata.APP, newApp);
 	}
 
@@ -246,6 +248,22 @@ public class AppManagerServiceImpl implements AppManagerService
 	private List<String> buildMissingConfigParams(AppConfig appConfig)
 	{
 		List<String> missingConfigParameters = newArrayList();
+
+		if (appConfig.getLabel() == null)
+		{
+			missingConfigParameters.add("label");
+		}
+
+		if (appConfig.getDescription() == null)
+		{
+			missingConfigParameters.add("description");
+		}
+
+		if (appConfig.getIncludeMenuAndFooter() == null)
+		{
+			missingConfigParameters.add("includeMenuAndFooter");
+		}
+
 		if (appConfig.getUri() == null)
 		{
 			missingConfigParameters.add("uri");

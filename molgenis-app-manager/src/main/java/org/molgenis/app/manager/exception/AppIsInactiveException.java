@@ -20,4 +20,10 @@ public class AppIsInactiveException extends CodedRuntimeException
 	{
 		return new Object[] { uri };
 	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("uri:%s", uri);
+	}
 }

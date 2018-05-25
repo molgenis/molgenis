@@ -1,11 +1,12 @@
 package org.molgenis.app.manager.service;
 
 import com.google.gson.Gson;
+import net.lingala.zip4j.exception.ZipException;
 import org.mockito.Mock;
-import org.molgenis.app.manager.exception.AppForIDDoesNotExistException;
-import org.molgenis.app.manager.exception.AppForURIDoesNotExistException;
+import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppFactory;
+import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.impl.AppManagerServiceImpl;
 import org.molgenis.data.DataService;
@@ -14,10 +15,21 @@ import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -49,6 +61,20 @@ public class AppManagerServiceTest
 	private Gson gson;
 
 	private App app;
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("app-manager");
+		MessageSourceHolder.setMessageSource(messageSource);
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		MessageSourceHolder.setMessageSource(null);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -159,5 +185,115 @@ public class AppManagerServiceTest
 		{
 			assertEquals(actual.getId(), "test");
 		}
+	}
+
+	@Test
+	public  void testUploadApp() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/valid-app.zip");
+		File zipFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(zipFile);
+		String fileName = zipFile.getName();
+
+		when(fileStore.store(zipData, "zip_file_" + fileName)).thenReturn(zipFile);
+		String storageDir = "dir";
+		when(fileStore.getStorageDir()).thenReturn(storageDir);
+		when(appFactory.create()).thenReturn(app);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+
+		verify(dataService).add(AppMetadata.APP, app);
+	}
+
+	@Test
+	public  void testUploadAppEmptyRuntimeOptions() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/valid-no-runtime-app.zip");
+		File zipFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(zipFile);
+		String fileName = zipFile.getName();
+
+		when(fileStore.store(zipData, "zip_file_" + fileName)).thenReturn(zipFile);
+		String storageDir = "dir";
+		when(fileStore.getStorageDir()).thenReturn(storageDir);
+		when(appFactory.create()).thenReturn(app);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+
+		verify(dataService).add(AppMetadata.APP, app);
+	}
+
+	@Test(expectedExceptions = InvalidAppArchiveException.class)
+	public  void testUploadAppInvalidZip() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/invalid-app.txt");
+		File textFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(textFile);
+		String fileName = textFile.getName();
+
+		String archiveName = "zip_file_" + fileName;
+		when(fileStore.store(zipData, archiveName)).thenReturn(textFile);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+
+	}
+
+	@Test(expectedExceptions = AppArchiveMissingFilesException.class,
+			expectedExceptionsMessageRegExp = "missingFromArchive:\\[index.html\\]")
+	public void testUploadAppMissingRequiredIndexFile() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/missing-index.zip");
+		File textFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(textFile);
+		String fileName = textFile.getName();
+
+		String archiveName = "zip_file_" + fileName;
+		when(fileStore.store(zipData, archiveName)).thenReturn(textFile);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+	}
+
+	@Test(expectedExceptions = AppArchiveMissingFilesException.class,
+			expectedExceptionsMessageRegExp = "missingFromArchive:\\[config.json\\]")
+	public void testUploadAppMissingRequiredConfigFile() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/missing-config.zip");
+		File textFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(textFile);
+		String fileName = textFile.getName();
+
+		String archiveName = "zip_file_" + fileName;
+		when(fileStore.store(zipData, archiveName)).thenReturn(textFile);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+	}
+
+	@Test(expectedExceptions = InvalidAppConfigException.class)
+	public void testUploadAppInvalidJsonConfigFile() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/invalid-json-config.zip");
+		File textFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(textFile);
+		String fileName = textFile.getName();
+
+		String archiveName = "zip_file_" + fileName;
+		when(fileStore.store(zipData, archiveName)).thenReturn(textFile);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
+	}
+
+	@Test(expectedExceptions = AppConfigMissingParametersException.class,
+			expectedExceptionsMessageRegExp = "missingConfigParameters:\\[label, description, includeMenuAndFooter, uri, version\\]")
+	public void testUploadAppMissingRequiredConfigParameters() throws URISyntaxException, IOException, ZipException
+	{
+		URL url = AppManagerServiceTest.class.getResource("/missing-config-params.zip");
+		File textFile = new File(new URI(url.toString()).getPath());
+		FileInputStream zipData = new FileInputStream(textFile);
+		String fileName = textFile.getName();
+
+		String archiveName = "zip_file_" + fileName;
+		when(fileStore.store(zipData, archiveName)).thenReturn(textFile);
+
+		appManagerService.uploadApp(zipData, fileName, "app");
 	}
 }

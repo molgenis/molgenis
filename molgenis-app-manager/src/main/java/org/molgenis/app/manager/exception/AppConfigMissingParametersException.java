@@ -22,4 +22,10 @@ public class AppConfigMissingParametersException extends CodedRuntimeException
 	{
 		return new Object[] { missingConfigParameters };
 	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("missingConfigParameters:%s", missingConfigParameters);
+	}
 }

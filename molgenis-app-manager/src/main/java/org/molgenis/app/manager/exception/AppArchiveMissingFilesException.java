@@ -22,4 +22,11 @@ public class AppArchiveMissingFilesException extends CodedRuntimeException
 	{
 		return new Object[] { missingFromArchive };
 	}
+
+	@Override
+	public String getMessage()
+	{
+		return String.format("missingFromArchive:%s", missingFromArchive);
+	}
+
 }

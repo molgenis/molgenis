@@ -9,7 +9,7 @@ public class AppConfig
 	private String version;
 	private String apiDependency;
 	private String uri;
-	private boolean includeMenuAndFooter;
+	private Boolean includeMenuAndFooter;
 	private Map<String, Object> runtimeOptions;
 
 	public String getLabel()
@@ -37,7 +37,7 @@ public class AppConfig
 		return uri;
 	}
 
-	public boolean getIncludeMenuAndFooter()
+	public Boolean getIncludeMenuAndFooter()
 	{
 		return includeMenuAndFooter;
 	}
@@ -72,7 +72,7 @@ public class AppConfig
 		this.uri = uri;
 	}
 
-	public void setIncludeMenuAndFooter(boolean includeMenuAndFooter)
+	public void setIncludeMenuAndFooter(Boolean includeMenuAndFooter)
 	{
 		this.includeMenuAndFooter = includeMenuAndFooter;
 	}

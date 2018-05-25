@@ -36,6 +36,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.testng.Assert.assertEquals;
 
 @Configuration
 @EnableWebMvc
@@ -142,9 +143,20 @@ public class AppControllerTest
 		when(app.isActive()).thenReturn(false);
 
 		AppResponse appResponse = AppResponse.create(app);
-		appResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
-		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().is4xxClientError());
+		String expectedMessage = "";
+		try
+		{
+			mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().is4xxClientError());
+		}
+		catch (Exception e)
+		{
+			expectedMessage = e.getCause().getMessage();
+		}
+		finally
+		{
+			assertEquals(expectedMessage, "uri:uri");
+		}
 	}
 
 	@Test
