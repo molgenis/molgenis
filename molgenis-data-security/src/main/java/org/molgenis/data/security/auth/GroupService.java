@@ -41,13 +41,14 @@ public class GroupService
 	public void persist(GroupValue groupValue)
 	{
 		Package rootPackage = packageFactory.create(groupValue.getRootPackage());
-		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
+
 		Group group = groupFactory.create(groupValue);
-		group.setRoles(roles);
 		group.setRootPackage(rootPackage);
 
 		dataService.add(PACKAGE, rootPackage);
-		dataService.add(ROLE, roles.stream());
 		dataService.add(GROUP, group);
+		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
+		roles.forEach(role -> role.setGroup(group));
+		dataService.add(ROLE, roles.stream());
 	}
 }

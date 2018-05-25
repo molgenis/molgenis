@@ -63,4 +63,14 @@ public class Role extends StaticEntity
 	{
 		set(DESCRIPTION, description);
 	}
+
+	public void setGroup(Group group)
+	{
+		set(GROUP, group);
+	}
+
+	public Group getGroup()
+	{
+		return getEntity(GROUP, Group.class);
+	}
 }
