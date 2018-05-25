@@ -42,7 +42,7 @@ public class GroupValueFactory
 
 	private static String createGroupName(String label)
 	{
-		return label.replaceAll(NON_ALPHA_NUMERIC, "-");
+		return label.replaceAll(NON_ALPHA_NUMERIC, "_").toLowerCase();
 	}
 
 	private static String createRoleName(String groupName, String roleLabel)

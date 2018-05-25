@@ -29,7 +29,7 @@ public class GroupRestController
 		this.groupService = requireNonNull(groupService);
 	}
 
-	@PostMapping("/plugin/group/api/group")
+	@PostMapping("api/plugin/group")
 	public String createGroup(@RequestParam(required = false) @Nullable String name, @RequestParam String label,
 			@RequestParam(required = false) @Nullable String description,
 			@RequestParam(required = false, defaultValue = "true") boolean publiclyAvailable)

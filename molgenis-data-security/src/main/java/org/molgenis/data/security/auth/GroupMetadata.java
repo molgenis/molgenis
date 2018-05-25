@@ -51,7 +51,7 @@ public class GroupMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
-		addAttribute(DESCRIPTION).setLabel("Description");
+		addAttribute(DESCRIPTION).setLabel("Description").setNillable(true);
 		addAttribute(PUBLIC).setDataType(BOOL)
 							.setLabel("Publicly visible")
 							.setDescription("Indication if this group is publicly visible.")

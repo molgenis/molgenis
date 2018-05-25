@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ public class GroupService
 	 *
 	 * @param groupValue details of the group that should be created
 	 */
+	@Transactional
 	public void persist(GroupValue groupValue)
 	{
 		Package rootPackage = packageFactory.create(groupValue.getRootPackage());

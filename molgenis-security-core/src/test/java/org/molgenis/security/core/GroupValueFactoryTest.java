@@ -15,7 +15,7 @@ public class GroupValueFactoryTest
 	@Test
 	public void testCreateGroup()
 	{
-		GroupValue bbmri_eric = groupValueFactory.createGroup("bbmri-eric", "BBMRI Eric",
+		GroupValue bbmri_eric = groupValueFactory.createGroup(null, "BBMRI Eric",
 				"The world's largest biobank catalogue", true, ImmutableList.of("Manager", "Editor", "Viewer"));
 
 		RoleValue manager = RoleValue.builder()
@@ -36,14 +36,12 @@ public class GroupValueFactoryTest
 									.setDescription("BBMRI Eric Viewer")
 									.build();
 
-		PackageValue rootPackage = PackageValue.builder()
-											   .setName("bbmri-eric")
+		PackageValue rootPackage = PackageValue.builder().setName("bbmri_eric")
 											   .setLabel("BBMRI Eric")
 											   .setDescription("The world's largest biobank catalogue")
 											   .build();
 
-		GroupValue.Builder expectedBuilder = GroupValue.builder()
-													   .setName("bbmri-eric")
+		GroupValue.Builder expectedBuilder = GroupValue.builder().setName("bbmri_eric")
 													   .setLabel("BBMRI Eric")
 													   .setDescription("The world's largest biobank catalogue")
 													   .setPublic(true)
