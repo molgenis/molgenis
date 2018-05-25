@@ -2,7 +2,6 @@ package org.molgenis.app.manager.service;
 
 import net.lingala.zip4j.exception.ZipException;
 import org.molgenis.app.manager.model.AppResponse;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;

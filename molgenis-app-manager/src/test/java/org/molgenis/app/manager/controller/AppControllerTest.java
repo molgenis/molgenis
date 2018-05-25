@@ -1,8 +1,6 @@
 package org.molgenis.app.manager.controller;
 
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
-import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
@@ -11,14 +9,11 @@ import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
-import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.converter.CsvHttpMessageConverter;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
@@ -32,7 +27,8 @@ import java.io.File;
 
 import static java.util.Locale.ENGLISH;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
