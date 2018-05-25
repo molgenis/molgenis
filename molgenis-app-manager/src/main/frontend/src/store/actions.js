@@ -1,7 +1,10 @@
+// @flow
 import api from '@molgenis/molgenis-api-client'
 
+import type { VuexContext } from '../flow.types'
+
 export default {
-  'ACTIVATE_APP' ({commit, dispatch}, appId) {
+  'ACTIVATE_APP' ({commit, dispatch}: VuexContext, appId: string) {
     api.post('/plugin/appmanager/activate/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
@@ -9,7 +12,7 @@ export default {
     })
   },
 
-  'DEACTIVATE_APP' ({commit, dispatch}, appId) {
+  'DEACTIVATE_APP' ({commit, dispatch}: VuexContext, appId: string) {
     api.post('/plugin/appmanager/deactivate/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
@@ -18,7 +21,7 @@ export default {
     })
   },
 
-  'DELETE_APP' ({commit, dispatch}, appId) {
+  'DELETE_APP' ({commit, dispatch}: VuexContext, appId: string) {
     api.delete_('/plugin/appmanager/delete/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
@@ -26,7 +29,7 @@ export default {
     })
   },
 
-  'FETCH_APPS' ({commit}) {
+  'FETCH_APPS' ({commit}: VuexContext) {
     api.get('/plugin/appmanager/apps').then(apps => {
       commit('UPDATE_APPS', apps)
       commit('SET_LOADING', false)
@@ -36,7 +39,7 @@ export default {
     })
   },
 
-  'UPLOAD_APP' ({commit, dispatch}, file) {
+  'UPLOAD_APP' ({commit, dispatch}: VuexContext, file: File) {
     api.postFile('/plugin/appmanager/upload', file).then(() => {
       dispatch('FETCH_APPS')
     }, error => {

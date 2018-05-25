@@ -1,10 +1,15 @@
+// @flow
+// $FlowFixMe
 import Vue from 'vue'
+// $FlowFixMe
 import Vuex from 'vuex'
 
 import actions from './actions'
 import mutations from './mutations'
 
-const state = {
+import type { AppManagerState } from '../flow.types'
+
+const state: AppManagerState = {
   /**
    * List of available apps
    */
