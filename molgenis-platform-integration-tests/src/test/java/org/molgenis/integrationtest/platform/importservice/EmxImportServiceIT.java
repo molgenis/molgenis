@@ -14,7 +14,7 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -33,6 +33,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
@@ -239,7 +241,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME)
-	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
+	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
 		populateUserPermissions();
 		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
@@ -873,7 +876,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService permissionService;
 	@Autowired
 	private PackageFactory packageFactory;
 
@@ -891,6 +894,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 		permissionMap.put(new PackageIdentity("it"), PermissionSet.WRITEMETA);
 
-		testPermissionPopulator.populate(permissionMap, USERNAME);
+		User user = mock(User.class);
+		when(user.getUsername()).thenReturn(USERNAME);
+		permissionService.grant(permissionMap, user);
 	}
 }

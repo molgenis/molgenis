@@ -9,7 +9,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singleton;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.UploadPackage.UPLOAD;
@@ -217,7 +219,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService permissionService;
 
 	private void populateUserPermissions()
 	{
@@ -228,7 +230,8 @@ public class VcfImportServiceIT extends ImportServiceIT
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 		permissionMap.put(new PackageIdentity(UPLOAD), PermissionSet.WRITEMETA);
 
-		testPermissionPopulator.populate(permissionMap, SecurityUtils.getCurrentUsername());
-
+		User user = mock(User.class);
+		when(user.getUsername()).thenReturn(SecurityUtils.getCurrentUsername());
+		permissionService.grant(permissionMap, user);
 	}
 }
