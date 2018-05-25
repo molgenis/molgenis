@@ -122,5 +122,5 @@ $('cookies').map(function (cookie) {
     return cookie.value().id        // results in ['1', '2', '3']
     return cookie.value().name      // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
     return cookie.value().tastiness // results in ['9/10', '10/10', '7/10']
-})
+}).value()
 ```
