@@ -79,16 +79,6 @@ public class RestControllerV2
 	private final RepositoryCopier repoCopier;
 	private final LocalizationService localizationService;
 
-	static UnknownEntityException createUnknownEntityException(String entityTypeId)
-	{
-		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityTypeId + "'");
-	}
-
-	static EntityTypePermissionDeniedException createNoReadPermissionOnEntityException(String entityTypeId)
-	{
-		return new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, entityTypeId);
-	}
-
 	static MolgenisRepositoryCapabilitiesException createNoWriteCapabilitiesOnEntityException(String entityTypeId)
 	{
 		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityTypeId);
@@ -114,12 +104,6 @@ public class RestControllerV2
 	static MolgenisDataException createMolgenisDataExceptionIdentifierAndValue()
 	{
 		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
-	}
-
-	static UnknownEntityException createUnknownEntityExceptionNotValidId(Object id)
-	{
-		return new UnknownEntityException(
-				"The entity you are trying to update [" + id.toString() + "] does not exist.");
 	}
 
 	public RestControllerV2(DataService dataService, UserPermissionEvaluator permissionService, RestService restService,
@@ -188,7 +172,7 @@ public class RestControllerV2
 		Entity entity = dataService.findOneById(entityTypeId, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " [" + untypedId + "] not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		return createEntityResponse(entity, fetch, true, includeCategories);
@@ -283,7 +267,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -345,7 +329,7 @@ public class RestControllerV2
 			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		// No repo
-		if (!dataService.hasRepository(entityTypeId)) throw createUnknownEntityException(entityTypeId);
+		if (!dataService.hasRepository(entityTypeId)) throw new UnknownEntityTypeException(entityTypeId);
 
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityTypeId);
 
@@ -360,7 +344,8 @@ public class RestControllerV2
 		// Permission
 		boolean readPermission = permissionService.hasPermission(new EntityTypeIdentity(repositoryToCopyFrom.getName()),
 				EntityTypePermission.READ_DATA);
-		if (!readPermission) throw createNoReadPermissionOnEntityException(entityTypeId);
+		if (!readPermission)
+			throw new EntityTypePermissionDeniedException(EntityTypePermission.READ_DATA, entityTypeId);
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
@@ -394,7 +379,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -432,7 +417,7 @@ public class RestControllerV2
 		final EntityType meta = dataService.getEntityType(entityTypeId);
 		if (meta == null)
 		{
-			throw createUnknownEntityException(entityTypeId);
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		try
@@ -467,7 +452,7 @@ public class RestControllerV2
 				Entity originalEntity = dataService.findOneById(entityTypeId, id);
 				if (originalEntity == null)
 				{
-					throw createUnknownEntityExceptionNotValidId(id);
+					throw new UnknownEntityException(meta, id);
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
@@ -618,13 +603,13 @@ public class RestControllerV2
 		EntityType entity = dataService.getEntityType(entityTypeId);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " not found");
+			throw new UnknownEntityTypeException(entityTypeId);
 		}
 
 		Attribute attribute = entity.getAttribute(attributeName);
 		if (attribute == null)
 		{
-			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
+			throw new UnknownAttributeException(entity, attributeName);
 		}
 
 		return new AttributeResponseV2(entityTypeId, entity, attribute, null, permissionService, dataService);

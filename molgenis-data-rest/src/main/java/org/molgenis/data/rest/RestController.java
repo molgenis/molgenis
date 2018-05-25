@@ -232,7 +232,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -255,7 +255,7 @@ public class RestController
 
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + untypedId + " not found");
+			throw new UnknownEntityException(meta, untypedId);
 		}
 
 		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
@@ -504,7 +504,7 @@ public class RestController
 	{
 		if (entityMap == null)
 		{
-			throw new UnknownEntityException("Missing entity in body");
+			throw new IllegalArgumentException("Missing entity in body");
 		}
 
 		createInternal(entityTypeId, entityMap, response);
@@ -565,7 +565,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(entityType, id);
 		}
 
 		Attribute attr = entityType.getAttribute(attributeName);
@@ -816,14 +816,6 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	@ExceptionHandler(UnknownEntityException.class)
-	@ResponseStatus(NOT_FOUND)
-	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.debug("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
 	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
@@ -913,7 +905,7 @@ public class RestController
 		Entity existing = dataService.findOneById(entityTypeId, id, new Fetch().field(meta.getIdAttribute().getName()));
 		if (existing == null)
 		{
-			throw new UnknownEntityException("Entity of type " + entityTypeId + " with id " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		Entity entity = this.restService.toEntity(meta, entityMap);
@@ -988,7 +980,7 @@ public class RestController
 		Entity entity = dataService.findOneById(entityTypeId, id);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityTypeId + " " + id + " not found");
+			throw new UnknownEntityException(meta, id);
 		}
 
 		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getId(), entity.getIdValue(),

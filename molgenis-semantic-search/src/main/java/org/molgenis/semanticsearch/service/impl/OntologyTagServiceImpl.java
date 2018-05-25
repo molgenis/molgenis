@@ -108,19 +108,19 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package package_)
+	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package aPackage)
 	{
-		Entity packageEntity = dataService.findOneById(PACKAGE, package_.getId());
+		Entity packageEntity = dataService.findOneById(PACKAGE, aPackage.getId());
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + package_.getId() + "]");
+			throw new UnknownEntityException(PACKAGE, aPackage.getId());
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetadata.TAGS))
 		{
-			tags.add(asTag(package_, tagEntity));
+			tags.add(asTag(aPackage, tagEntity));
 		}
 
 		return tags;

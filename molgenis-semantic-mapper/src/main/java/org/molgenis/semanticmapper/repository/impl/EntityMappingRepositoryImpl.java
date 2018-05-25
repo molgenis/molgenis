@@ -3,7 +3,7 @@ package org.molgenis.semanticmapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
@@ -60,7 +60,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			targetEntityType = dataService.getEntityType(
 					entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
 		}
-		catch (UnknownEntityException uee)
+		catch (UnknownEntityTypeException uee)
 		{
 			LOG.error(uee.getMessage());
 			targetEntityType = null;
@@ -72,7 +72,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityType = dataService.getEntityType(
 					entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
 		}
-		catch (UnknownEntityException uee)
+		catch (UnknownEntityTypeException uee)
 		{
 			LOG.error(uee.getMessage());
 			sourceEntityType = null;
