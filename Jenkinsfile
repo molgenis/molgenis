@@ -6,29 +6,45 @@ pipeline {
         maven 'mvn-3.5.3'
         jdk 'jdk-8u172'
     }
+    environment {
+        ORG = 'molgenis'
+        APP_NAME = 'molgenis'
+    }
     stages {
-        stage('Preparation') {
-            steps {
-                // TODO: can this be configured higher up?
-                sh "git config --global user.email molgenis+ci@gmail.com"
-                sh "git config --global user.name 'MOLGENIS continuous integration user'"
+        stage('Prepare') {
+            script {
+                env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
             }
+            echo "Git commit ID: $GIT_COMMIT  $env.GIT_COMMIT"
         }
-
-        stage('Build, test and deploy to molgenis.org registry') {
+        stage('CI Build and push snapshot') {
+            when {
+                changeRequest
+            }
             environment {
+                //PR-1234-231
+                TAG = "$CHANGE_ID-$BUILD_NUMBER"
+                //0.0.0-SNAPSHOT-PR-1234-231
+                PREVIEW_VERSION = "0.0.0-SNAPSHOT-$TAG"
+                //molgenis-docker-ready
+                PREVIEW_NAMESPACE = "$APP_NAME-$BRANCH_NAME".toLowerCase()
                 KEYFILE = credentials('molgenis.pgp.secretkey')
                 PASSPHRASE = credentials('molgenis.pgp.passphrase')
-                DOCKER_TAG = '${env.CHANGE_ID}-${env.BUILD_NUMBER}'
             }
             steps {
+                sh "git rev-parse HEAD"
+                sh "mvn -V -B versions:set -DnewVersion=$PREVIEW_VERSION -DgenerateBackupPoms=false"
+                sh "mvn -V -B "
                 configFileProvider([configFile(fileId: 'sonatype-settings', variable: 'MAVEN_SETTINGS')]) {
-                    sh "mvn deploy -s ${env.MAVEN_SETTINGS} -V -B -DskipITs -Ddockerfile.tag=${env.DOCKER_TAG} -Dpgp.secretkey=keyfile:${env.KEYFILE} -Dpgp.passphrase=literal:${env.PASSPHRASE}"
+                    sh "mvn -V -B clean package -s $MAVEN_SETTINGS -DskipTests -Ddockerfile.tag=$TAG -Dpgp.secretkey=keyfile:$KEYFILE -Dpgp.passphrase=literal:$PASSPHRASE"
                 }
+            }
+            dir('./molgenis-app') {
+
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/junitreports/TEST-*.xml'
+                    junit '**/target/surefire-reports/**.xml'
                 }
             }
         }
