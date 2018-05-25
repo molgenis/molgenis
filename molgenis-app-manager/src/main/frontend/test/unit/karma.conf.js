@@ -18,9 +18,10 @@ module.exports = function (config) {
       noInfo: true
     },
     coverageReporter: {
-      dir: '../../../../../target/generated-sources/coverage',
+      dir: './coverage',
       reporters: [
-        {type: 'cobertura', subdir: 'cobertura'}
+        {type: 'lcov', subdir: '.'},
+        {type: 'text-summary'}
       ]
     },
     junitReporter: {
