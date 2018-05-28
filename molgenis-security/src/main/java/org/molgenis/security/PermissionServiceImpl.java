@@ -2,7 +2,6 @@ package org.molgenis.security;
 
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
@@ -13,7 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.acl.SidUtils.createRoleSid;
+import static org.molgenis.security.acl.SidUtils.createUserSid;
 
 @Component
 public class PermissionServiceImpl implements PermissionService
@@ -28,30 +28,36 @@ public class PermissionServiceImpl implements PermissionService
 	@Override
 	public void grant(Map<ObjectIdentity, PermissionSet> objectPermissionMap, Role role)
 	{
-		runAsSystem(() -> objectPermissionMap.forEach(
-				(objectIdentity, permissionSet) -> grant(objectIdentity, permissionSet, role)));
+		grant(objectPermissionMap, createRoleSid(role));
 	}
 
 	@Override
 	public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, Role role)
 	{
-		Sid sid = SidUtils.createRoleSid(role);
-		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
-		acl.insertAce(acl.getEntries().size(), permissionSet, sid, true);
-		mutableAclService.updateAcl(acl);
+		grant(objectIdentity, permissionSet, createRoleSid(role));
 	}
 
 	@Override
 	public void grant(Map<ObjectIdentity, PermissionSet> objectPermissionMap, User user)
 	{
-		runAsSystem(() -> objectPermissionMap.forEach(
-				(objectIdentity, permissionSet) -> grant(objectIdentity, permissionSet, user)));
+		grant(objectPermissionMap, createUserSid(user));
 	}
 
 	@Override
 	public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, User user)
 	{
-		Sid sid = SidUtils.createUserSid(user);
+		grant(objectIdentity, permissionSet, createUserSid(user));
+	}
+
+	@Override
+	public void grant(Map<ObjectIdentity, PermissionSet> objectPermissionMap, Sid sid)
+	{
+		objectPermissionMap.forEach((objectIdentity, permissionSet) -> grant(objectIdentity, permissionSet, sid));
+	}
+
+	@Override
+	public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, Sid sid)
+	{
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
 		acl.insertAce(acl.getEntries().size(), permissionSet, sid, true);
 		mutableAclService.updateAcl(acl);

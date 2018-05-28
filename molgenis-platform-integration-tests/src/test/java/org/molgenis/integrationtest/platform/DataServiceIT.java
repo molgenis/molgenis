@@ -17,6 +17,8 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.security.PermissionService;
+import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -81,7 +83,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
-	private TestPermissionPopulator permissionPopulator;
+	private PermissionService permissionService;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -893,12 +895,12 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
 		readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
 		readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
-		permissionPopulator.populate(readerPermissions, USERNAME_READ);
+		permissionService.grant(readerPermissions, SidUtils.createUserSid(USERNAME_READ));
 
 		Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
 		editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
 		editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
-		permissionPopulator.populate(editorPermissions, USERNAME_WRITE);
+		permissionService.grant(editorPermissions, SidUtils.createUserSid(USERNAME_WRITE));
 	}
 
 	private void depopulate()

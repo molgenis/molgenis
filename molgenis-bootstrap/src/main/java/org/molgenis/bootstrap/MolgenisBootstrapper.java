@@ -25,7 +25,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Application bootstrapper
- *
+ * <p>
  * TODO code duplication with org.molgenis.integrationtest.platform.PlatformBootstrapper
  */
 @SuppressWarnings("unused")
@@ -55,7 +55,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			RepositoryPopulator repositoryPopulator, PermissionPopulator systemPermissionPopulator,
 			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
 			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator,
-			BootstrapThemePopulator bootstrapThemePopulator,BootstrappingEventPublisher bootstrappingEventPublisher)
+			BootstrapThemePopulator bootstrapThemePopulator, BootstrappingEventPublisher bootstrappingEventPublisher)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.dataSourceAclTablesPopulator = requireNonNull(dataSourceAclTablesPopulator);

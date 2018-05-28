@@ -41,6 +41,6 @@ public class SidUtilsTest
 	public void testCreateRoleAuthority()
 	{
 		Role role = when(mock(Role.class).getName()).thenReturn("NAME").getMock();
-		assertEquals("ROLE_NAME", SidUtils.createRoleAuthority(role));
+		assertEquals("ROLE_NAME", SidUtils.createRoleAuthority(role.getName()));
 	}
 }

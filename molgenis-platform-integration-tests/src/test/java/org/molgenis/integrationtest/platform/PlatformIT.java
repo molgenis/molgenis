@@ -23,6 +23,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
+import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,9 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.security.acl.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -96,7 +99,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private PackageFactory packageFactory;
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService testPermissionService;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -823,6 +826,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.WRITE);
 		entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), PermissionSet.WRITE);
 
-		testPermissionPopulator.populate(entityTypePermissionMap);
+		testPermissionService.grant(entityTypePermissionMap, createUserSid(requireNonNull(getCurrentUsername())));
 	}
 }

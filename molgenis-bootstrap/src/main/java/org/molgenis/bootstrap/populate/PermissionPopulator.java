@@ -1,8 +1,9 @@
 package org.molgenis.bootstrap.populate;
 
+import org.molgenis.security.PermissionService;
+import org.molgenis.security.core.PermissionSet;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +15,11 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class PermissionPopulator
 {
-	private final MutableAclService mutableAclService;
+	private final PermissionService permissionService;
 
-	public PermissionPopulator(MutableAclService mutableAclService)
+	public PermissionPopulator(PermissionService permissionService)
 	{
-		this.mutableAclService = requireNonNull(mutableAclService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Transactional
@@ -32,9 +33,13 @@ public class PermissionPopulator
 	{
 		systemPermissionRegistry.getPermissions().asMap().forEach((objectIdentity, pairs) ->
 		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
-			pairs.forEach(pair -> acl.insertAce(acl.getEntries().size(), pair.getA(), pair.getB(), true));
-			mutableAclService.updateAcl(acl);
+			pairs.forEach(pair ->
+			{
+				PermissionSet permissionSet = pair.getA();
+				Sid sid = pair.getB();
+
+				permissionService.grant(objectIdentity, permissionSet, sid);
+			});
 		});
 	}
 }

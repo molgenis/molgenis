@@ -16,6 +16,8 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
+import org.molgenis.security.PermissionService;
+import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -67,7 +69,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IndexJobScheduler indexJobScheduler;
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService testPermissionService;
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
@@ -294,7 +296,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), PermissionSet.READ);
 		permissionMap.put(new PackageIdentity(PACK_PERMISSION), PermissionSet.WRITEMETA);
 		permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), PermissionSet.WRITE);
-		testPermissionPopulator.populate(permissionMap, USERNAME);
+		testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
 	}
 
 	private void depopulate()
