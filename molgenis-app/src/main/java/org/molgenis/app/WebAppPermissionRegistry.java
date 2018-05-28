@@ -8,6 +8,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -20,7 +21,7 @@ import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
-import static org.molgenis.security.acl.SidUtils.createSid;
+import static org.molgenis.security.acl.SidUtils.createRoleSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 /**
@@ -44,8 +45,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(HomeController.ID);
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
-		builder.putAll(pluginIdentity, new Pair<>(PermissionSet.READ, createSid(anonymousUser)),
-				new Pair<>(PermissionSet.READ, createSid(userRole)));
+		builder.putAll(pluginIdentity, new Pair<>(PermissionSet.READ, SidUtils.createUserSid(anonymousUser)),
+				new Pair<>(PermissionSet.READ, createRoleSid(userRole)));
 		return builder.build();
 	}
 }

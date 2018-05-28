@@ -18,14 +18,14 @@ public class SidUtilsTest
 	public void testCreateSidUser()
 	{
 		User user = when(mock(User.class).getUsername()).thenReturn("username").getMock();
-		Sid sid = SidUtils.createSid(user);
+		Sid sid = SidUtils.createUserSid(user);
 		assertEquals(sid, new PrincipalSid("username"));
 	}
 
 	@Test
 	public void testCreateSidUsernameAnonymous()
 	{
-		Sid sid = SidUtils.createSid("anonymous");
+		Sid sid = SidUtils.createUserSid("anonymous");
 		assertEquals(sid, new GrantedAuthoritySid("ROLE_ANONYMOUS"));
 	}
 
@@ -33,7 +33,7 @@ public class SidUtilsTest
 	public void testCreateSidRole()
 	{
 		Role role = when(mock(Role.class).getName()).thenReturn("NAME").getMock();
-		Sid sid = SidUtils.createSid(role);
+		Sid sid = SidUtils.createRoleSid(role);
 		assertEquals(sid, new GrantedAuthoritySid(new SimpleGrantedAuthority("ROLE_NAME")));
 	}
 

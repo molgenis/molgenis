@@ -18,16 +18,12 @@ public class SidUtils
 	{
 	}
 
-	public static Sid createSid(User user)
+	public static Sid createUserSid(User user)
 	{
-		return createSid(user.getUsername());
+		return createUserSid(user.getUsername());
 	}
 
-	/**
-	 * @deprecated use {@link #createSid(User)}
-	 */
-	@Deprecated
-	public static Sid createSid(String username)
+	public static Sid createUserSid(String username)
 	{
 		if (username.equals(SecurityUtils.ANONYMOUS_USERNAME))
 		{
@@ -39,19 +35,24 @@ public class SidUtils
 		}
 	}
 
-	public static Sid createAnonymousSid()
+	public static Sid createRoleSid(String roleName)
 	{
-		return new GrantedAuthoritySid(SecurityUtils.AUTHORITY_ANONYMOUS);
-	}
-
-	public static Sid createSid(Role role)
-	{
-		String roleAuthority = createRoleAuthority(role);
+		String roleAuthority = createRoleAuthority(roleName);
 		return new GrantedAuthoritySid(roleAuthority);
 	}
 
-	public static String createRoleAuthority(Role role)
+	public static Sid createRoleSid(Role role)
 	{
-		return "ROLE" + '_' + role.getName();
+		return createRoleSid(role.getName());
+	}
+
+	public static String createRoleAuthority(String roleName)
+	{
+		return "ROLE" + '_' + roleName;
+	}
+
+	private static Sid createAnonymousSid()
+	{
+		return new GrantedAuthoritySid(SecurityUtils.AUTHORITY_ANONYMOUS);
 	}
 }

@@ -40,7 +40,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService
 	@Override
 	public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes)
 	{
-		Sid sid = SidUtils.createSid(getCurrentUsername());
+		Sid sid = SidUtils.createUserSid(getCurrentUsername());
 		runAsSystem(() -> entityTypes.forEach(entityType ->
 		{
 			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(new EntityTypeIdentity(entityType));

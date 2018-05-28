@@ -459,13 +459,13 @@ public class PermissionManagerController extends PluginController
 	private Sid getSidForUserId(String userId)
 	{
 		User user = getUser(userId);
-		return SidUtils.createSid(user);
+		return SidUtils.createUserSid(user);
 	}
 
 	private Sid getSidForRoleName(String roleName)
 	{
 		Role role = getRole(roleName);
-		return SidUtils.createSid(role);
+		return SidUtils.createRoleSid(role);
 	}
 
 	private Role getRole(String roleName)

@@ -35,7 +35,7 @@ public class PermissionServiceImpl implements PermissionService
 	@Override
 	public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, Role role)
 	{
-		Sid sid = SidUtils.createSid(role);
+		Sid sid = SidUtils.createRoleSid(role);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
 		acl.insertAce(acl.getEntries().size(), permissionSet, sid, true);
 		mutableAclService.updateAcl(acl);
@@ -51,7 +51,7 @@ public class PermissionServiceImpl implements PermissionService
 	@Override
 	public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, User user)
 	{
-		Sid sid = SidUtils.createSid(user);
+		Sid sid = SidUtils.createUserSid(user);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
 		acl.insertAce(acl.getEntries().size(), permissionSet, sid, true);
 		mutableAclService.updateAcl(acl);
