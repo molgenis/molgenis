@@ -25,6 +25,7 @@ import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.util.AppDataRootProvider;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
@@ -55,9 +56,10 @@ import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,8 +73,6 @@ import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 @Import({ PlatformConfig.class, RdfConverter.class })
 public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 {
-	private static final String MOLGENIS_HOME = "molgenis.home";
-
 	@Autowired
 	private DataService dataService;
 
@@ -237,11 +237,13 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	}
 
 	@Bean
-	public static PropertySourcesPlaceholderConfigurer properties()
+	public static PropertySourcesPlaceholderConfigurer properties() throws IOException
 	{
+		AppDataRootInitializer.init();
+
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[] {
-				new FileSystemResource(System.getProperty(MOLGENIS_HOME) + "/molgenis-server.properties"),
+		Resource[] resources = new Resource[] { new FileSystemResource(
+				AppDataRootProvider.getAppDataRoot().toString() + File.separator + "molgenis-server.properties"),
 				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
@@ -255,16 +257,10 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	public FileStore fileStore()
 	{
 		// get molgenis home directory
-		String molgenisHomeDir = System.getProperty(MOLGENIS_HOME);
-		if (molgenisHomeDir == null)
-		{
-			throw new IllegalArgumentException(
-					String.format("missing required java system property '%s'", MOLGENIS_HOME));
-		}
-		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
+		Path appDataRoot = AppDataRootProvider.getAppDataRoot();
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
+		String molgenisFileStoreDirStr = Paths.get(appDataRoot.toString(), "data", "filestore").toString();
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs())
 		{
@@ -272,15 +268,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		}
 
 		return new FileStore(molgenisFileStoreDirStr);
-	}
-
-	/**
-	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 */
-	@Bean
-	public ApplicationContextProvider applicationContextProvider()
-	{
-		return new ApplicationContextProvider();
 	}
 
 	/**
@@ -347,6 +334,15 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		return new MenuReaderServiceImpl(appSettings);
 	}
 
+	/**
+	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 */
+	@Bean
+	public ApplicationContextProvider applicationContextProvider()
+	{
+		return new ApplicationContextProvider();
+	}
+
 	@Bean
 	public Ui molgenisUi()
 	{
@@ -358,22 +354,5 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	public LocaleResolver localeResolver()
 	{
 		return new MolgenisLocaleResolver(dataService, () -> new Locale(appSettings.getLanguageCode()));
-	}
-
-	@PostConstruct
-	public void validateMolgenisServerProperties()
-	{
-		// validate properties defined in molgenis-server.properties
-		String path = System.getProperty(MOLGENIS_HOME) + File.separator + "molgenis-server.properties";
-		if (environment == null)
-		{
-			throw new RuntimeException("Missing required property 'environment' in " + path
-					+ ", allowed values are [development, production].");
-		}
-		else if (!environment.equals("development") && !environment.equals("production"))
-		{
-			throw new RuntimeException("Invalid value '" + environment + "' for property 'environment' in " + path
-					+ ", allowed values are [development, production].");
-		}
 	}
 }
