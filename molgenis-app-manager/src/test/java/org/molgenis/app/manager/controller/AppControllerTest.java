@@ -91,7 +91,7 @@ public class AppControllerTest
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
 		ClassLoader classLoader = getClass().getClassLoader();
 		File testFile = new File(classLoader.getResource("test-resources/js/test.js").getFile());
-		String absoluteTestFileResourcePath = testFile.getAbsolutePath().replace("js/test.js", "");
+		String absoluteTestFileResourcePath = testFile.getPath().replace("js/test.js", "");;
 		when(app.getResourceFolder()).thenReturn(absoluteTestFileResourcePath);
 
 		appResponse = AppResponse.create(app);
