@@ -10,14 +10,12 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
-import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -42,8 +40,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -71,7 +67,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IndexJobScheduler indexJobScheduler;
 	@Autowired
-	private PermissionService permissionService;
+	private TestPermissionPopulator testPermissionPopulator;
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
@@ -298,10 +294,7 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 		permissionMap.put(new EntityTypeIdentity(REF_ENTITY_TYPE_ID), PermissionSet.READ);
 		permissionMap.put(new PackageIdentity(PACK_PERMISSION), PermissionSet.WRITEMETA);
 		permissionMap.put(new PackageIdentity(PACK_NO_WRITEMETA_PERMISSION), PermissionSet.WRITE);
-
-		User user = mock(User.class);
-		when(user.getUsername()).thenReturn(USERNAME);
-		permissionService.grant(permissionMap, user);
+		testPermissionPopulator.populate(permissionMap, USERNAME);
 	}
 
 	private void depopulate()

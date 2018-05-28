@@ -9,7 +9,6 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.staticentity.TestEntityStatic;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
@@ -18,7 +17,6 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -49,8 +47,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
@@ -85,7 +81,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 	@Autowired
-	private PermissionService permissionService;
+	private TestPermissionPopulator permissionPopulator;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -897,18 +893,12 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests
 		readerPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.READ);
 		readerPermissions.put(new EntityTypeIdentity(FILE_META), PermissionSet.READ);
 		readerPermissions.put(new EntityIdentity(publicFile), PermissionSet.WRITE);
-
-		User readUser = mock(User.class);
-		when(readUser.getUsername()).thenReturn(USERNAME_READ);
-		permissionService.grant(readerPermissions, readUser);
+		permissionPopulator.populate(readerPermissions, USERNAME_READ);
 
 		Map<ObjectIdentity, PermissionSet> editorPermissions = new HashMap<>(basePermissions);
 		editorPermissions.put(new EntityTypeIdentity(entityType), PermissionSet.WRITE);
 		editorPermissions.put(new EntityTypeIdentity(refEntityType), PermissionSet.WRITE);
-
-		User writeUser = mock(User.class);
-		when(writeUser.getUsername()).thenReturn(USERNAME_WRITE);
-		permissionService.grant(editorPermissions, writeUser);
+		permissionPopulator.populate(editorPermissions, USERNAME_WRITE);
 	}
 
 	private void depopulate()

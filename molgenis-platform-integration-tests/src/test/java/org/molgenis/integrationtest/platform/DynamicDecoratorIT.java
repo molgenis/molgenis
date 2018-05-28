@@ -12,12 +12,9 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
-import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.AssertJUnit.assertEquals;
@@ -68,7 +63,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DecoratorConfigurationFactory decoratorConfigurationFactory;
 	@Autowired
-	private PermissionService permissionService;
+	private TestPermissionPopulator testPermissionPopulator;
 
 	private EntityType refEntityTypeDynamic;
 	private EntityType entityTypeDynamic;
@@ -79,8 +74,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic,
-				"DynamicDecoratorITEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "DynamicDecoratorITEntityType");
 
 		runAsSystem(() ->
 		{
@@ -171,8 +165,6 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.READ);
 
-		User user = mock(User.class);
-		when(user.getUsername()).thenReturn(SecurityUtils.getCurrentUsername());
-		permissionService.grant(permissionMap, user);
+		testPermissionPopulator.populate(permissionMap);
 	}
 }

@@ -20,13 +20,10 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +47,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityTestHarness.*;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
@@ -101,7 +96,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private PackageFactory packageFactory;
 	@Autowired
-	private PermissionService permissionService;
+	private TestPermissionPopulator testPermissionPopulator;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -828,8 +823,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.WRITE);
 		entityTypePermissionMap.put(new EntityTypeIdentity(selfXrefEntityType), PermissionSet.WRITE);
 
-		User user = mock(User.class);
-		when(user.getUsername()).thenReturn(SecurityUtils.getCurrentUsername());
-		permissionService.grant(entityTypePermissionMap, user);
+		testPermissionPopulator.populate(entityTypePermissionMap);
 	}
 }
