@@ -11,6 +11,7 @@ import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,7 @@ public class GroupRestController
 
 	@PostMapping("api/plugin/group")
 	@ApiOperation(value = "Create a new Group", response = String.class)
+	@Transactional
 	public String createGroup(
 			@ApiParam("Alphanumeric name for the group, will be generated based on the label if not specified.") @RequestParam(name = "name", required = false) @Nullable String name,
 			@ApiParam("Label for the group") @RequestParam("label") String label,
@@ -58,7 +60,7 @@ public class GroupRestController
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(group.getRootPackage());
 		group.getRoles()
-			 .forEach(role -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(role.getName()), role));
+			 .forEach(role -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(role.getLabel()), role));
 	}
 
 }
