@@ -21,7 +21,7 @@ import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
-import org.molgenis.security.acl.SidUtils;
+import org.molgenis.data.security.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;

@@ -1,29 +1,25 @@
 package org.molgenis.security.group;
 
-import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.GroupValueFactory;
-import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
+import static org.molgenis.data.security.auth.GroupService.MANAGER;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @RestController
 @Api("Group")
@@ -33,13 +29,6 @@ public class GroupRestController
 	private final GroupService groupService;
 	private final PermissionService permissionService;
 	private final RoleMembershipService roleMembershipService;
-
-	private static final String MANAGER = "Manager";
-	private static final String EDITOR = "Editor";
-	private static final String VIEWER = "Viewer";
-
-	private static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of(MANAGER, WRITEMETA, EDITOR, WRITE,
-			VIEWER, READ);
 
 	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
 			PermissionService permissionService, RoleMembershipService roleMembershipService)
@@ -61,20 +50,12 @@ public class GroupRestController
 	{
 		GroupValue groupValue = groupValueFactory.createGroup(name, label, description, publiclyVisible,
 				DEFAULT_ROLES.keySet());
-		Group group = groupService.persist(groupValue);
 
-		grantPermissions(group);
-
-		roleMembershipService.addUserToRole(SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
+		groupService.persist(groupValue);
+		groupService.grantPermissions(groupValue);
+		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
 		return groupValue.getName();
-	}
-
-	private void grantPermissions(Group group)
-	{
-		PackageIdentity packageIdentity = new PackageIdentity(group.getRootPackage());
-		group.getRoles()
-			 .forEach(role -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(role.getLabel()), role));
 	}
 
 	private String getManagerRoleName(GroupValue groupValue)

@@ -1,6 +1,6 @@
 package org.molgenis.bootstrap.populate;
 
-import org.molgenis.security.PermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.model.Sid;

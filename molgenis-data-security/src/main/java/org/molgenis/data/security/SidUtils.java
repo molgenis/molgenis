@@ -1,4 +1,4 @@
-package org.molgenis.security.acl;
+package org.molgenis.data.security;
 
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;

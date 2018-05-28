@@ -3,7 +3,7 @@ package org.molgenis.bootstrap.populate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.mockito.Mock;
-import org.molgenis.security.PermissionService;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;

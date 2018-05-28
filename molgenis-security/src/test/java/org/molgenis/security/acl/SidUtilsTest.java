@@ -1,5 +1,6 @@
 package org.molgenis.security.acl;
 
+import org.molgenis.data.security.SidUtils;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;

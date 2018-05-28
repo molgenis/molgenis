@@ -32,7 +32,7 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
-import static org.molgenis.security.acl.SidUtils.createRoleSid;
+import static org.molgenis.data.security.SidUtils.createRoleSid;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
