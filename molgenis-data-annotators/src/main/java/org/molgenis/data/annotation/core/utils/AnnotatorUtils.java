@@ -7,7 +7,10 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.util.AppDataRootProvider;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,14 +24,8 @@ public class AnnotatorUtils
 	public static String getAnnotatorResourceDir()
 	{
 		// Annotators include files/tools
-		String molgenisHomeDir = System.getProperty("molgenis.home");
-
-		if (molgenisHomeDir != null)
-		{
-			if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
-			return molgenisHomeDir + "data/annotation_resources";
-		}
-		return null;
+		Path appDataRoot = AppDataRootProvider.getAppDataRoot();
+		return Paths.get(appDataRoot.toString(), "data", "annotation_resources").toString();
 	}
 
 	public static Map<String, Double> toAlleleMap(String alternatives, String annotations)
