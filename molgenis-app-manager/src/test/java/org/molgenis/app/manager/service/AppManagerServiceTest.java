@@ -2,6 +2,7 @@ package org.molgenis.app.manager.service;
 
 import com.google.gson.Gson;
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.io.FileUtils;
 import org.mockito.Mock;
 import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
@@ -29,6 +30,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -94,6 +97,13 @@ public class AppManagerServiceTest
 
 		gson = new Gson();
 		appManagerService = new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, pluginFactory);
+	}
+
+	@AfterClass(alwaysRun = true)
+	public void cleanup() throws IOException
+	{
+		FileUtils.deleteDirectory(Paths.get("dir").toFile());
+		FileUtils.deleteDirectory(Paths.get("null").toFile());
 	}
 
 	@Test
