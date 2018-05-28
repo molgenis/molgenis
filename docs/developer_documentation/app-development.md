@@ -81,6 +81,10 @@ _config.json_
 }
 ```
 
+_Note that you can not create a config.json on your root path of the project. It will not build anymore._
+
+
+
 ## Available javascript variables
 MOLGENIS deploys apps with a bit of system information inside a global variable to get your app up and running. These are described below.
 
