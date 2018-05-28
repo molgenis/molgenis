@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +26,13 @@ public class GroupRestController
 {
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
-	private final PermissionService permissionService;
 	private final RoleMembershipService roleMembershipService;
 
 	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			PermissionService permissionService, RoleMembershipService roleMembershipService)
+			RoleMembershipService roleMembershipService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
-		this.permissionService = requireNonNull(permissionService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 	}
 
