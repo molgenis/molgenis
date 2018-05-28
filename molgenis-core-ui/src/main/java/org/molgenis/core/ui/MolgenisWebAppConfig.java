@@ -59,6 +59,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -259,7 +260,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		Path appDataRoot = AppDataRootProvider.getAppDataRoot();
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = appDataRoot.toString() + "data" + File.separator + "filestore";
+		String molgenisFileStoreDirStr = Paths.get(appDataRoot.toString(), "data", "filestore").toString();
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs())
 		{
