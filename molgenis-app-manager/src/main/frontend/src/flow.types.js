@@ -18,7 +18,7 @@ export type AppManagerState = {|
 |}
 
 export type VuexContext = {
-  state: QuestionnaireState,
+  state: AppManagerState,
   commit: Function,
   dispatch: Function,
   getters: Object
