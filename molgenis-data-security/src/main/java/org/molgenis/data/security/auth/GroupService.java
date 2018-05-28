@@ -51,6 +51,7 @@ public class GroupService
 		dataService.add(GROUP, group);
 		roles.forEach(role -> role.setGroup(group));
 		dataService.add(ROLE, roles.stream());
+
 		return group;
 	}
 }

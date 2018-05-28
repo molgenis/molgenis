@@ -4,22 +4,28 @@ import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.molgenis.data.DataService;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.security.core.PermissionSet.*;
 
 @RestController
@@ -29,15 +35,27 @@ public class GroupRestController
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final PermissionService permissionService;
-	private static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of("Manager", WRITEMETA, "Editor",
-			WRITE, "Viewer", READ);
+	private final UserService userService;
+	private final RoleMembershipFactory roleMembershipFactory;
+	private final DataService dataService;
+
+	private static final String MANAGER = "Manager";
+	private static final String EDITOR = "Editor";
+	private static final String VIEWER = "Viewer";
+
+	private static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of(MANAGER, WRITEMETA, EDITOR, WRITE,
+			VIEWER, READ);
 
 	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			PermissionService permissionService)
+			PermissionService permissionService, UserService userService, RoleMembershipFactory roleMembershipFactory,
+			DataService dataService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.permissionService = requireNonNull(permissionService);
+		this.userService = requireNonNull(userService);
+		this.roleMembershipFactory = requireNonNull(roleMembershipFactory);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@PostMapping("api/plugin/group")
@@ -53,7 +71,25 @@ public class GroupRestController
 				DEFAULT_ROLES.keySet());
 		Group group = groupService.persist(groupValue);
 		grantPermissions(group);
+
+		addGroupCreatorToManagerRole(group);
+
 		return groupValue.getName();
+	}
+
+	private void addGroupCreatorToManagerRole(Group group)
+	{
+		User groupCreator = userService.getUser(SecurityUtils.getCurrentUsername());
+		Stream<Role> roles = stream(group.getRoles().spliterator(), false);
+
+		RoleMembership roleMembership = roleMembershipFactory.create();
+		roleMembership.setUser(groupCreator);
+		roleMembership.setFrom(Instant.now());
+		roleMembership.setRole(roles.filter(role -> role.getLabel().equals(MANAGER))
+									.findFirst()
+									.orElseThrow(() -> new IllegalStateException("Manager role is missing")));
+
+		dataService.add(ROLE_MEMBERSHIP, roleMembership);
 	}
 
 	private void grantPermissions(Group group)
