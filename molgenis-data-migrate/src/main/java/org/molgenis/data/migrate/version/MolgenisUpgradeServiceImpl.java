@@ -42,30 +42,29 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Override
 	public boolean upgrade()
 	{
-		if (versionService.getMolgenisVersionFromServerProperties() < 19)
+		int schemaVersion = versionService.getSchemaVersion();
+		if (schemaVersion < 19)
 		{
 			throw new UnsupportedOperationException(
 					"Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
 		}
-		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
+		if (schemaVersion < versionService.getAppVersion())
 		{
-			LOG.info("MetaData version:{}, current version:{} upgrade needed",
-					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
+			LOG.info("MetaData version:{}, current version:{} upgrade needed", schemaVersion,
+					versionService.getAppVersion());
 
-			upgrades.stream()
-					.filter(upgrade -> upgrade.getFromVersion()
-							>= versionService.getMolgenisVersionFromServerProperties())
+			upgrades.stream().filter(upgrade -> upgrade.getFromVersion() >= schemaVersion)
 					.forEach(this::runUpgrade);
 
-			versionService.updateToCurrentVersion();
+			versionService.setSchemaVersion(versionService.getAppVersion());
 
 			LOG.info("MetaData upgrade done.");
 			return true;
 		}
 		else
 		{
-			LOG.debug("MetaData version:{}, current version:{} upgrade not needed",
-					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
+			LOG.debug("MetaData version:{}, current version:{} upgrade not needed", schemaVersion,
+					versionService.getAppVersion());
 			return false;
 		}
 	}
@@ -75,6 +74,6 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 		LOG.info("Upgrading from {} to {}...", upgrade.getFromVersion(), upgrade.getToVersion());
 		upgrade.upgrade();
 		LOG.debug("Upgraded from {} to {}.", upgrade.getFromVersion(), upgrade.getToVersion());
-		versionService.updateToVersion(upgrade.getToVersion());
+		versionService.setSchemaVersion(upgrade.getToVersion());
 	}
 }
