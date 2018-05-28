@@ -31,22 +31,20 @@ public class AppDataRootInitializer
 	public static void init() throws IOException
 	{
 		Path appDataRoot = getAppDataRoot();
-		if (Files.notExists(appDataRoot))
+		if (!appDataRoot.toFile().exists())
 		{
-			LOG.info("Creating application data root directory: {}", appDataRoot.toString());
+			LOG.info("Creating application data root directory: {}", appDataRoot);
 			Files.createDirectory(appDataRoot);
 		}
 		else
 		{
-			if (!Files.isDirectory(appDataRoot))
+			if (!appDataRoot.toFile().isDirectory())
 			{
-				throw new IOException(
-						format("Application data root path '%s' is not a directory", appDataRoot.toString()));
+				throw new IOException(format("Application data root path '%s' is not a directory", appDataRoot));
 			}
 			if (!Files.isWritable(appDataRoot))
 			{
-				throw new IOException(
-						format("Application data root directory '%s' is not writable", appDataRoot.toString()));
+				throw new IOException(format("Application data root directory '%s' is not writable", appDataRoot));
 			}
 		}
 		LOG.info("Application data directory: {}", appDataRoot.toString());

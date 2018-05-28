@@ -20,7 +20,7 @@ public class AppDataRootProvider
 	{
 		if (APP_DATA_ROOT == null)
 		{
-			throw new RuntimeException("Missing required application data root");
+			throw new IllegalStateException("Missing required application data root");
 		}
 		return APP_DATA_ROOT;
 	}

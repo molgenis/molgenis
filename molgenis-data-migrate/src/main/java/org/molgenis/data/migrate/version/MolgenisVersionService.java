@@ -1,5 +1,6 @@
 package org.molgenis.data.migrate.version;
 
+import org.molgenis.util.UncheckedSqlException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class MolgenisVersionService
 			}
 			catch (SQLException e)
 			{
-				throw new RuntimeException(e);
+				throw new UncheckedSqlException(e);
 			}
 		}
 	}
@@ -92,20 +93,22 @@ public class MolgenisVersionService
 			try (Statement statement = connection.createStatement())
 			{
 				String selectVersionSql = "SELECT \"id\" FROM \"Version\"";
-				ResultSet resultSet = statement.executeQuery(selectVersionSql);
-				if (resultSet.next())
+				try (ResultSet resultSet = statement.executeQuery(selectVersionSql))
 				{
-					version = resultSet.getInt("id");
-				}
-				else
-				{
-					throw new SQLException("Expected non-empty result set");
+					if (resultSet.next())
+					{
+						version = resultSet.getInt("id");
+					}
+					else
+					{
+						throw new SQLException("Expected non-empty result set");
+					}
 				}
 			}
 		}
 		catch (SQLException e)
 		{
-			throw new RuntimeException(e);
+			throw new UncheckedSqlException(e);
 		}
 		return version;
 	}
@@ -122,7 +125,7 @@ public class MolgenisVersionService
 		}
 		catch (SQLException e)
 		{
-			throw new RuntimeException(e);
+			throw new UncheckedSqlException(e);
 		}
 	}
 }
