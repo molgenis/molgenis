@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.molgenis.data.DataService;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.*;
-import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
+import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,13 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.security.core.PermissionSet.*;
 
 @RestController
@@ -35,9 +32,7 @@ public class GroupRestController
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final PermissionService permissionService;
-	private final UserService userService;
-	private final RoleMembershipFactory roleMembershipFactory;
-	private final DataService dataService;
+	private final RoleMembershipService roleMembershipService;
 
 	private static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -47,15 +42,12 @@ public class GroupRestController
 			VIEWER, READ);
 
 	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			PermissionService permissionService, UserService userService, RoleMembershipFactory roleMembershipFactory,
-			DataService dataService)
+			PermissionService permissionService, RoleMembershipService roleMembershipService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.permissionService = requireNonNull(permissionService);
-		this.userService = requireNonNull(userService);
-		this.roleMembershipFactory = requireNonNull(roleMembershipFactory);
-		this.dataService = requireNonNull(dataService);
+		this.roleMembershipService = requireNonNull(roleMembershipService);
 	}
 
 	@PostMapping("api/plugin/group")
@@ -70,26 +62,12 @@ public class GroupRestController
 		GroupValue groupValue = groupValueFactory.createGroup(name, label, description, publiclyVisible,
 				DEFAULT_ROLES.keySet());
 		Group group = groupService.persist(groupValue);
+
 		grantPermissions(group);
 
-		addGroupCreatorToManagerRole(group);
+		roleMembershipService.addUserToRole(SecurityUtils.getCurrentUsername(), getManagerRoleName(groupValue));
 
 		return groupValue.getName();
-	}
-
-	private void addGroupCreatorToManagerRole(Group group)
-	{
-		User groupCreator = userService.getUser(SecurityUtils.getCurrentUsername());
-		Stream<Role> roles = stream(group.getRoles().spliterator(), false);
-
-		RoleMembership roleMembership = roleMembershipFactory.create();
-		roleMembership.setUser(groupCreator);
-		roleMembership.setFrom(Instant.now());
-		roleMembership.setRole(roles.filter(role -> role.getLabel().equals(MANAGER))
-									.findFirst()
-									.orElseThrow(() -> new IllegalStateException("Manager role is missing")));
-
-		dataService.add(ROLE_MEMBERSHIP, roleMembership);
 	}
 
 	private void grantPermissions(Group group)
@@ -97,6 +75,16 @@ public class GroupRestController
 		PackageIdentity packageIdentity = new PackageIdentity(group.getRootPackage());
 		group.getRoles()
 			 .forEach(role -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(role.getLabel()), role));
+	}
+
+	private String getManagerRoleName(GroupValue groupValue)
+	{
+		return groupValue.getRoles()
+						 .stream()
+						 .filter(role -> role.getLabel().equals(MANAGER))
+						 .map(RoleValue::getName)
+						 .findFirst()
+						 .orElseThrow(() -> new IllegalStateException("Manager role is missing"));
 	}
 
 }
