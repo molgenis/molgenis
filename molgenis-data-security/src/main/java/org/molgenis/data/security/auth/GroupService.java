@@ -38,17 +38,19 @@ public class GroupService
 	 * @param groupValue details of the group that should be created
 	 */
 	@Transactional
-	public void persist(GroupValue groupValue)
+	public Group persist(GroupValue groupValue)
 	{
 		Package rootPackage = packageFactory.create(groupValue.getRootPackage());
+		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
 
 		Group group = groupFactory.create(groupValue);
 		group.setRootPackage(rootPackage);
+		group.setRoles(roles);
 
 		dataService.add(PACKAGE, rootPackage);
 		dataService.add(GROUP, group);
-		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
 		roles.forEach(role -> role.setGroup(group));
 		dataService.add(ROLE, roles.stream());
+		return group;
 	}
 }

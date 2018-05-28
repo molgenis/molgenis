@@ -18,13 +18,13 @@ public class GroupValueFactory
 	private static final String NON_ALPHA_NUMERIC = "[^a-zA-Z0-9\\u00C0-\\u00FF]";
 
 	public GroupValue createGroup(@Nullable String name, String label, @Nullable String description,
-			boolean publiclyAvailable, Collection<String> roleNames)
+			boolean publiclyVisible, Collection<String> roleNames)
 	{
 		final String groupName = Optional.ofNullable(name).orElse(createGroupName(label));
 		GroupValue.Builder groupBuilder = GroupValue.builder()
 													.setName(groupName)
 													.setLabel(label)
-													.setPublic(publiclyAvailable);
+													.setPublic(publiclyVisible);
 		Optional.ofNullable(description).ifPresent(groupBuilder::setDescription);
 
 		PackageValue.Builder packageBuilder = PackageValue.builder().setName(groupName).setLabel(label);
