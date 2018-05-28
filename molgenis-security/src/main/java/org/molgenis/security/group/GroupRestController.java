@@ -2,6 +2,7 @@ package org.molgenis.security.group;
 
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.security.PermissionService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
@@ -20,13 +21,16 @@ public class GroupRestController
 {
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
+	private final PermissionService permissionService;
 	private static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of("Manager", WRITEMETA, "Editor",
 			WRITE, "Viewer", READ);
 
-	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService)
+	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
+			PermissionService permissionService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@PostMapping("api/plugin/group")
