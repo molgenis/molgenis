@@ -1,8 +1,6 @@
 package org.molgenis.security.group;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
@@ -39,6 +37,8 @@ public class GroupRestController
 	@PostMapping("api/plugin/group")
 	@ApiOperation(value = "Create a new Group", response = String.class)
 	@Transactional
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "The name of the newly created group", response = String.class) })
 	public String createGroup(
 			@ApiParam("Alphanumeric name for the group, will be generated based on the label if not specified.") @RequestParam(name = "name", required = false) @Nullable String name,
 			@ApiParam("Label for the group") @RequestParam("label") String label,
