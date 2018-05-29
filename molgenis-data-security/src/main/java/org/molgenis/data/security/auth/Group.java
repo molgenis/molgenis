@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.security.auth.GroupMetadata.*;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
 public class Group extends StaticEntity
 {
@@ -45,14 +46,34 @@ public class Group extends StaticEntity
 		return getString(NAME);
 	}
 
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
+	public String getLabel(String languageCode)
+	{
+		return getString(getI18nAttributeName(LABEL, languageCode));
+	}
+
 	public void setLabel(String label)
 	{
 		set(LABEL, label);
 	}
 
-	public String getLabel()
+	public void setLabel(String languageCode, String label)
 	{
-		return getString(LABEL);
+		set(getI18nAttributeName(LABEL, languageCode), label);
+	}
+
+	public String getDescription()
+	{
+		return getString(DESCRIPTION);
+	}
+
+	public String getDescription(String languageCode)
+	{
+		return getString(getI18nAttributeName(DESCRIPTION, languageCode));
 	}
 
 	public void setDescription(String description)
@@ -60,9 +81,9 @@ public class Group extends StaticEntity
 		set(DESCRIPTION, description);
 	}
 
-	public String getDescription()
+	public void setDescription(String languageCode, String label)
 	{
-		return getString(DESCRIPTION);
+		set(getI18nAttributeName(DESCRIPTION, languageCode), label);
 	}
 
 	public void setPublic(boolean isPublic)

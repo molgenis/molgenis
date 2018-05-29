@@ -81,7 +81,11 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator
 		Role userRole = roleFactory.create();
 		userRole.setName(ROLE_USER);
 		userRole.setLabel("User");
+		userRole.setLabel("en", "User");
+		userRole.setLabel("nl", "Gebruiker");
 		userRole.setDescription("All authenticated users are a member of this Role.");
+		userRole.setDescription("en", "All authenticated users are a member of this role.");
+		userRole.setDescription("nl", "Alle geauthenticeerde gebruikers hebben deze rol.");
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));

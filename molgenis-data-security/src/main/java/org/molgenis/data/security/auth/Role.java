@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.security.auth.RoleMetadata.*;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
 public class Role extends StaticEntity
 {
@@ -49,9 +50,19 @@ public class Role extends StaticEntity
 		return getString(LABEL);
 	}
 
+	public String getLabel(String languageCode)
+	{
+		return getString(getI18nAttributeName(LABEL, languageCode));
+	}
+
 	public void setLabel(String label)
 	{
 		set(LABEL, label);
+	}
+
+	public void setLabel(String languageCode, String label)
+	{
+		set(getI18nAttributeName(LABEL, languageCode), label);
 	}
 
 	public String getDescription()
@@ -59,8 +70,19 @@ public class Role extends StaticEntity
 		return getString(DESCRIPTION);
 	}
 
+	public String getDescription(String languageCode)
+	{
+		return getString(getI18nAttributeName(DESCRIPTION, languageCode));
+	}
+
 	public void setDescription(String description)
 	{
 		set(DESCRIPTION, description);
 	}
+
+	public void setDescription(String languageCode, String label)
+	{
+		set(getI18nAttributeName(DESCRIPTION, languageCode), label);
+	}
+
 }
