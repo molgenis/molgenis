@@ -8,11 +8,11 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.security.auth.InvitationMetadata.Status.PENDING;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status.PENDING;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
 @Component
-public class InvitationMetadata extends SystemEntityType
+public class MembershipInvitationMetadata extends SystemEntityType
 {
 	public enum Status
 	{
@@ -39,7 +39,8 @@ public class InvitationMetadata extends SystemEntityType
 	private final UserMetaData userMetadata;
 	private final RoleMetadata roleMetadata;
 
-	public InvitationMetadata(SecurityPackage securityPackage, UserMetaData userMetadata, RoleMetadata roleMetadata)
+	public MembershipInvitationMetadata(SecurityPackage securityPackage, UserMetaData userMetadata,
+			RoleMetadata roleMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

@@ -61,6 +61,7 @@ public class PermissionManagerController extends PluginController
 	private static final Logger LOG = LoggerFactory.getLogger(PermissionManagerController.class);
 
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "permissionmanager";
+	public static final String RADIO = "radio-";
 
 	private final DataService dataService;
 	private final MutableAclService mutableAclService;
@@ -303,7 +304,7 @@ public class PermissionManagerController extends PluginController
 	{
 		for (Plugin plugin : getPlugins())
 		{
-			String param = "radio-" + plugin.getId();
+			String param = RADIO + plugin.getId();
 			String value = webRequest.getParameter(param);
 			if (value != null)
 			{
@@ -323,7 +324,7 @@ public class PermissionManagerController extends PluginController
 	{
 		for (Package pack : getPackages())
 		{
-			String param = "radio-" + pack.getId();
+			String param = RADIO + pack.getId();
 			String value = webRequest.getParameter(param);
 			if (value != null)
 			{
@@ -430,7 +431,7 @@ public class PermissionManagerController extends PluginController
 	{
 		getEntityTypes().forEach(entityType ->
 		{
-			String param = "radio-" + entityType.getId();
+			String param = RADIO + entityType.getId();
 			String value = webRequest.getParameter(param);
 			if (value != null)
 			{

@@ -40,7 +40,10 @@ public class UserManagerController extends PluginController
 	{
 		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
 
-		if (!model.containsAttribute(VIEW_STATE)) model.addAttribute(VIEW_STATE, "users");
+		if (!model.containsAttribute(VIEW_STATE))
+		{
+			model.addAttribute(VIEW_STATE, "users");
+		}
 
 		return "view-usermanager";
 	}
@@ -52,7 +55,7 @@ public class UserManagerController extends PluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void setViewState(@PathVariable("viewState") String viewState, Model model)
 	{
-		model.addAttribute("viewState", viewState);
+		model.addAttribute(VIEW_STATE, viewState);
 	}
 
 	@ApiOperation("Sets activation status for a user")
