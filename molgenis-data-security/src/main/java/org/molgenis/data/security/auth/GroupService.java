@@ -38,7 +38,7 @@ public class GroupService
 	public static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of(MANAGER, WRITEMETA, EDITOR, WRITE,
 			VIEWER, READ);
 
-	public GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
+	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService)
 	{
 		this.groupFactory = requireNonNull(groupFactory);

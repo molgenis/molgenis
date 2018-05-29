@@ -26,7 +26,7 @@ public class GroupRestController
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
 
-	public GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
+	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
 			RoleMembershipService roleMembershipService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);

@@ -19,7 +19,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 	private final RoleMembershipFactory roleMembershipFactory;
 	private final DataService dataService;
 
-	public RoleMembershipServiceImpl(UserService userService, RoleMembershipFactory roleMembershipFactory,
+	RoleMembershipServiceImpl(UserService userService, RoleMembershipFactory roleMembershipFactory,
 			DataService dataService)
 	{
 		this.userService = requireNonNull(userService);
@@ -28,14 +28,18 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 	}
 
 	@Override
-	public void addUserToRole(String username, String roleName)
+	public void addUserToRole(String username, String rolename)
 	{
 		User groupCreator = userService.getUser(username);
+		if (groupCreator == null)
+		{
+			throw new UnknownEntityException(format("User with name [%s] not found", username));
+		}
 
-		Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, roleName).findOne();
+		Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne();
 		if (role == null)
 		{
-			throw new UnknownEntityException(format("Role with name [%s] not found", roleName));
+			throw new UnknownEntityException(format("Role with name [%s] not found", rolename));
 		}
 
 		RoleMembership roleMembership = roleMembershipFactory.create();

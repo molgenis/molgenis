@@ -52,6 +52,5 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Configuration
 	public static class Config
 	{
-
 	}
 }
