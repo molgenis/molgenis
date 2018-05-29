@@ -43,6 +43,7 @@ public class JsMagmaScriptEvaluator
 	private static final String KEY_NEW_VALUE = "newValue";
 	private static final String KEY_DOLLAR = "$";
 	private static final String KEY_MAGMA_SCRIPT = "MagmaScript";
+	private static final String KEY_DEFAULT = "default";
 	private static final String BIND = "bind";
 	public static final String KEY_ID_VALUE = "_idValue";
 
@@ -53,7 +54,8 @@ public class JsMagmaScriptEvaluator
 
 	static
 	{
-		RESOURCE_NAMES = asList("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js");
+		RESOURCE_NAMES = asList("/js/es6-shims.min.js", "/js/math.min.js", "/js/moment.min.js",
+				"/js/MagmaScript.min.js");
 	}
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine) throws javax.script.ScriptException, IOException
@@ -146,7 +148,7 @@ public class JsMagmaScriptEvaluator
 	{
 		Bindings bindings = new SimpleBindings();
 		JSObject global = (JSObject) magmaBindings.get("nashorn.global");
-		JSObject magmaScript = (JSObject) global.getMember(KEY_MAGMA_SCRIPT);
+		JSObject magmaScript = (JSObject) ((JSObject) global.getMember(KEY_MAGMA_SCRIPT)).getMember(KEY_DEFAULT);
 		JSObject dollarFunction = (JSObject) magmaScript.getMember(KEY_DOLLAR);
 		JSObject bindFunction = (JSObject) dollarFunction.getMember(BIND);
 		Object boundDollar = bindFunction.call(dollarFunction, toScriptEngineValueMap(entity, depth));
