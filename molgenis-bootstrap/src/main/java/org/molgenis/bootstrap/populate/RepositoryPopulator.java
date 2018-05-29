@@ -22,7 +22,7 @@ public class RepositoryPopulator
 	private static final Logger LOG = LoggerFactory.getLogger(RepositoryPopulator.class);
 
 	private final DataService dataService;
-	private final UsersGroupsPopulator usersGroupsAuthoritiesPopulator;
+	private final UsersRolesPopulator usersGroupsAuthoritiesPopulator;
 	private final SystemEntityPopulator systemEntityPopulator;
 	private final PluginPopulator pluginPopulator;
 	private final SettingsPopulator settingsPopulator;
@@ -31,7 +31,7 @@ public class RepositoryPopulator
 	private final GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator;
 	private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
 
-	public RepositoryPopulator(DataService dataService, UsersGroupsPopulator usersGroupsAuthoritiesPopulator,
+	public RepositoryPopulator(DataService dataService, UsersRolesPopulator usersGroupsAuthoritiesPopulator,
 			SystemEntityPopulator systemEntityPopulator, PluginPopulator pluginPopulator,
 			SettingsPopulator settingsPopulator, I18nPopulator i18nPopulator, ScriptTypePopulator scriptTypePopulator,
 			GenomeBrowserAttributesPopulator genomeBrowserAttributesPopulator,

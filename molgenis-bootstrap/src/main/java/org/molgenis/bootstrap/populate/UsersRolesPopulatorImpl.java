@@ -22,9 +22,9 @@ import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Service
-public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
+public class UsersRolesPopulatorImpl implements UsersRolesPopulator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(UsersGroupsPopulatorImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UsersRolesPopulatorImpl.class);
 
 	private static final String USERNAME_ADMIN = "admin";
 
@@ -39,7 +39,7 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	UsersGroupsPopulatorImpl(DataService dataService, UserFactory userFactory, RoleFactory roleFactory)
+	UsersRolesPopulatorImpl(DataService dataService, UserFactory userFactory, RoleFactory roleFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
