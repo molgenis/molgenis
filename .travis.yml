@@ -19,7 +19,7 @@ services:
 addons:
   sauce_connect: true
   postgresql: '9.6'
-sudo: true
+sudo: required
 before_install:
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
