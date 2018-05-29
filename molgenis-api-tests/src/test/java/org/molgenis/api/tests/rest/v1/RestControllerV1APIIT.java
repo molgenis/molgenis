@@ -695,7 +695,8 @@ public class RestControllerV1APIIT
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'ref6' of type 'TypeTestRefAPIV1'."));
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
@@ -742,7 +743,8 @@ public class RestControllerV1APIIT
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'ref6' of type 'TypeTestRefAPIV1'."));
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
