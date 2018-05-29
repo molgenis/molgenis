@@ -2,6 +2,7 @@ package org.molgenis.security;
 
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;
@@ -38,8 +39,8 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		if ((authentication != null) && authentication.isAuthenticated() && !authentication.getName()
-																						   .equals(ANONYMOUS_USERNAME)
+		if (authentication != null && authentication instanceof UsernamePasswordAuthenticationToken
+				&& authentication.isAuthenticated() && !authentication.getName().equals(ANONYMOUS_USERNAME)
 				&& !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI))
 		{
 			User user = userService.getUser(authentication.getName());

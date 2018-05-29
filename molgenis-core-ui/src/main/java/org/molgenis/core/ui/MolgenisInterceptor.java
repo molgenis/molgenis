@@ -1,13 +1,18 @@
 package org.molgenis.core.ui;
 
+import com.google.common.collect.Streams;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.settings.AppSettings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceResourceBundle;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -17,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.web.PluginAttributes.*;
+import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
 /**
  * Interceptor that adds default model objects to all requests that return a view.
@@ -30,6 +37,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final AppSettings appSettings;
 	private final String environment;
 	private final MessageSource messageSource;
+	@Autowired
+	InMemoryClientRegistrationRepository clientRegistrationRepository;
 
 	public static final String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
 
@@ -48,7 +57,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception
+			ModelAndView modelAndView)
 	{
 		if (modelAndView != null)
 		{
@@ -59,6 +68,8 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 			modelAndView.addObject(KEY_ENVIRONMENT, getEnvironmentAttributes());
 			modelAndView.addObject(KEY_I18N,
 					new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
+			modelAndView.addObject(KEY_OAUTH2_CLIENT_REGISTRATIONS_ATTRIBUTE, oauth2ClientRegistrations());
+			modelAndView.addObject(KEY_AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
 		}
 	}
 
@@ -74,6 +85,13 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 		Map<String, String> environmentAttributes = new HashMap<>();
 		environmentAttributes.put(ATTRIBUTE_ENVIRONMENT_TYPE, environment);
 		return environmentAttributes;
+	}
+
+	private Map<String, String> oauth2ClientRegistrations()
+	{
+		return Streams.stream(clientRegistrationRepository.iterator())
+					  .collect(toMap(registration -> DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/"
+							  + registration.getRegistrationId(), ClientRegistration::getClientName));
 	}
 
 }

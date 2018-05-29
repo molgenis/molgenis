@@ -1,5 +1,4 @@
 <#-- Bootstrap login modal -->
-<#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
 <div id="login-modal" class="modal" tabindex="0"<#if disableClose?? && disableClose == "true"><#else>
      tabindex="-1"</#if>
      aria-labelledby="login-modal-label" aria-hidden="true" xmlns="http://www.w3.org/1999/html">
@@ -19,25 +18,24 @@
             <div class="modal-body">
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
-                <#if googleSignIn>
                 <div class="row">
-                    <div class="col-md-5">
-                        <form id="login-google-form" role="form" method="POST" action="/login/google">
-                            <input type="hidden" id="google-id-token" name="id_token" value=""/>
-                            <div class="g-signin2" data-width="200" data-longtitle="true" data-theme="dark"
-                                 data-onsuccess="onSignIn"></div>
-                        </form>
-                        <script>
-                            function onSignIn(googleUser) {
-                                <#if !(errorMessage??)>
-                                    $('#google-id-token').val(googleUser.getAuthResponse().id_token)
-                                    $('#login-google-form').submit()
-                                </#if>
-                            }
-                        </script>
+                    <#if oauth2Clients?has_content>
+                    <div class="col-md-4">
+                        <#list oauth2Clients as clientUrl, clientName>
+                            <a href="${clientUrl}" class="btn btn-primary btn-block">
+                            <#if clientName == 'Google'>
+                                <i class="fab fa-google"></i>&nbsp;
+                            <#elseif clientName == 'GitHub'>
+                                <i class="fab fa-github"></i>&nbsp;
+                            <#elseif clientName == 'ORCID'>
+                                <i class="ai ai-orcid"></i>&nbsp;
+                            <#elseif clientName == 'Auth0'>
+                                <img src="/img/auth0.png" width="16"/>&nbsp;
+                            </#if>Sign in with ${clientName?html}</a>
+                        </#list>
                     </div>
-                <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
-                </#if>
+                    </#if>
+                    <div class="col-md-8" style="border-left: 1px solid #e5e5e5">
                 <#-- login form -->
                     <form id="login-form" role="form" method="POST" action="/login">
                         <div class="form-group">
@@ -60,10 +58,8 @@
                             </div>
                         </div>
                     </form>
-                <#if googleSignIn>
                 </div>
                 </div>
-                </#if>
                 <#if authentication_settings.signUp>
                     <div class="row" style="margin-top: 20px;">
                         <div class="col-md-12 text-center">

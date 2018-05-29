@@ -78,7 +78,7 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		anonymousUser.setChangePassword(false);
 
 		// create all users group
-		Group allUsersGroup = groupFactory.create();
+		Group allUsersGroup = groupFactory.create("USER");
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 
 		// persist entities
