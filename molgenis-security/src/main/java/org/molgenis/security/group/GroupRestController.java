@@ -40,7 +40,7 @@ public class GroupRestController
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "The name of the newly created group", response = String.class) })
 	public String createGroup(
-			@ApiParam("Alphanumeric name for the group, will be generated based on the label if not specified.") @RequestParam(value = "name", required = false) @Nullable String name,
+			@ApiParam("Alphanumeric name for the group") @RequestParam(value = "name") @Nullable String name,
 			@ApiParam("Label for the group") @RequestParam("label") String label,
 			@ApiParam("Description for the group") @RequestParam(value = "description", required = false) @Nullable String description,
 			@ApiParam("Indication if this group should be publicly visible (not yet implemented!)") @RequestParam(value = "public", required = false, defaultValue = "true") boolean publiclyVisible)
