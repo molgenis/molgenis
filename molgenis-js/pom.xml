@@ -18,23 +18,35 @@
                 <groupId>com.samaxes.maven</groupId>
                 <artifactId>minify-maven-plugin</artifactId>
             </plugin>
-        </plugins>
-    </build>
-
-    <reporting>
-        <plugins>
+            <!-- download javascript dependencies and put them on classpath -->
             <plugin>
-                <groupId>com.phasebash.jsdoc</groupId>
-                <artifactId>jsdoc3-maven-plugin</artifactId>
-                <version>${jsdoc3-maven-plugin.version}</version>
-                <configuration>
-                    <sourceFiles>
-                        <sourceFile>src/main/resources/js/script-evaluator.js</sourceFile>
-                    </sourceFiles>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo message="download @molgenis/magma-script javascript"/>
+                                <get src="https://unpkg.com/@molgenis/magma-script@0.0.9/dist/MagmaScript.min.js"
+                                     dest="${project.build.directory}/generated-resources/js/MagmaScript.min.js"/>
+                                <echo message="download mathjs javascript"/>
+                                <get src="https://unpkg.com/mathjs@4.3.0/dist/math.min.js"
+                                     dest="${project.build.directory}/generated-resources/js/math.min.js"/>
+                                <echo message="download moment javascript"/>
+                                <get src="https://unpkg.com/moment@2.22.1/min/moment.min.js"
+                                     dest="${project.build.directory}/generated-resources/js/moment.min.js"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
-    </reporting>
+    </build>
 
     <dependencies>
         <dependency>

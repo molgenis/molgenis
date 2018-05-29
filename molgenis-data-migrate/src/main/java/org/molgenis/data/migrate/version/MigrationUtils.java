@@ -1,6 +1,9 @@
 package org.molgenis.data.migrate.version;
 
+import org.molgenis.util.AppDataRootProvider;
+
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -12,7 +15,6 @@ public class MigrationUtils
 {
 	public static final String VERSION_KEY = "molgenis.version";
 	public static final String DB_KEY = "db_uri";
-	public static final String MOLGENIS_HOME_KEY = "molgenis.home";
 
 	static File propertiesFile;
 
@@ -30,11 +32,6 @@ public class MigrationUtils
 		}
 
 		return prop.substring(prop.lastIndexOf('/') + 1);
-	}
-
-	public static String getVersion()
-	{
-		return getServerProperty(VERSION_KEY);
 	}
 
 	public static Properties getMolgenisServerProperties()
@@ -58,13 +55,8 @@ public class MigrationUtils
 		if (propertiesFile == null || !propertiesFile.exists())
 		{
 			// get molgenis home directory
-			String molgenisHomeDir = System.getProperty(MOLGENIS_HOME_KEY);
-			if (molgenisHomeDir == null)
-			{
-				throw new IllegalArgumentException(
-						String.format("missing required java system property '%s'", MOLGENIS_HOME_KEY));
-			}
-			propertiesFile = new File(molgenisHomeDir, "molgenis-server.properties");
+			Path appDataRootPath = AppDataRootProvider.getAppDataRoot();
+			propertiesFile = new File(appDataRootPath.toString(), "molgenis-server.properties");
 		}
 
 		return propertiesFile;

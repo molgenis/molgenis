@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState } from '../flow.types.js'
+import type { QuestionnaireState, Chapter } from '../flow.types.js'
 
 const mutations = {
   'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
@@ -7,7 +7,7 @@ const mutations = {
   },
 
   'CLEAR_STATE' (state: QuestionnaireState) {
-    state.chapterFields = []
+    state.chapters = []
     state.error = ''
     state.formData = {}
     state.loading = true
@@ -33,8 +33,8 @@ const mutations = {
     state.questionnaireList = questionnaireList
   },
 
-  'SET_CHAPTER_FIELDS' (state: QuestionnaireState, chapterFields: Array<*>) {
-    state.chapterFields = chapterFields
+  'SET_CHAPTER_FIELDS' (state: QuestionnaireState, chapters: Array<Chapter>) {
+    state.chapters = chapters
   },
 
   'SET_FORM_DATA' (state: QuestionnaireState, formData: Object) {

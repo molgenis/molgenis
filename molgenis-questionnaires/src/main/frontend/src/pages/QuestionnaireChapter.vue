@@ -43,7 +43,8 @@
                 <!-- ================ ERROR BLOCK ================ -->
                 <div v-if="navigationBlocked" class="alert alert-warning mb-0" role="alert">
                   {{ 'questionnaire_chapter_incomplete_message' | i18n }}
-                  <span v-for="(value, key) in formState.$error" >{{ key }} </span>
+                  <span v-for="(value, key, index) in formState.$error" >{{ getQuestionLabelById(key) }}<span v-if="index !== Object.keys(formState.$error).length - 1">, </span>
+                  </span>
                 </div>
 
                 <div v-if="error" class="alert alert-warning mb-0" role="alert">
@@ -130,6 +131,11 @@
         return this.$store.getters.getTotalNumberOfChapters
       }
     },
+    methods: {
+      getQuestionLabelById (questionId) {
+        return this.$store.getters.getQuestionLabel(questionId)
+      }
+    },
     created () {
       this.$store.commit('BLOCK_NAVIGATION', false)
       this.$store.commit('SET_ERROR', '')
@@ -146,7 +152,8 @@
       }
     },
     beforeRouteUpdate (to, from, next) {
-      this.$store.commit('UPDATE_FORM_STATUS', 'OPEN')
+      // Set state to submitted to have the form validate required fields
+      this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
       this.$store.commit('SET_ERROR', '')
       next()
     },

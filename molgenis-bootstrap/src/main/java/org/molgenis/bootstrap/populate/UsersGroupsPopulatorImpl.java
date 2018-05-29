@@ -6,10 +6,13 @@ import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -21,6 +24,8 @@ import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 @Service
 public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(UsersGroupsPopulatorImpl.class);
+
 	private static final String USERNAME_ADMIN = "admin";
 
 	private final DataService dataService;
@@ -46,10 +51,12 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 	@RunAsSystem
 	public void populate()
 	{
+		boolean changeAdminPassword = false;
 		if (adminPassword == null)
 		{
-			throw new RuntimeException(
-					"please configure the admin.password property in your molgenis-server.properties");
+			adminPassword = UUID.randomUUID().toString();
+			changeAdminPassword = true;
+			LOG.info("Password for user 'admin': {}", adminPassword);
 		}
 
 		// create admin user
@@ -59,7 +66,7 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
-		userAdmin.setChangePassword(false);
+		userAdmin.setChangePassword(changeAdminPassword);
 
 		// create anonymous user
 		User anonymousUser = userFactory.create();

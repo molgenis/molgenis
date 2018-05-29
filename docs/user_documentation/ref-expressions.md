@@ -27,42 +27,42 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 ### Numerical operations
 | Operator | Parameters | Example                                  | Description   |
 |----------|------------|------------------------------------------|---------------|
-| plus     | Number     | $('height').plus(100)                    | height + 100  |
-| pow      | Number     | $('height').pow(100)                     | height ^ 100  |
-| times    | Number     | $('height').times(100                    | height * 100  |
-| div      | Number     | $('height').div(100)                     | height / 100  |
-| gt       | Number     | $('height').gt(100).value()              | height > 100  |
-| lt       | Number     | $('height').lt(100).value()              | height < 100  |
-| ge       | Number     | $('height').ge(100).value()              | height >= 100 |
-| le       | Number     | $('height').le(100).value()              | height <= 100 |
+| plus     | Number     | `$('height').plus(100).value()`            | height + 100  |
+| pow      | Number     | `$('height').pow(100).value()`          | height ^ 100  |
+| times    | Number     | `$('height').times(100).value()`           | height * 100  |
+| div      | Number     | `$('height').div(100).value()`             | height / 100  |
+| gt       | Number     | `$('height').gt(100).value()`              | height > 100  |
+| lt       | Number     | `$('height').lt(100).value()`             | height < 100  |
+| ge       | Number     | `$('height').ge(100).value()`              | height >= 100 |
+| le       | Number     | `$('height').le(100).value()`              | height <= 100 |
 
 ### Binary operations
 | Operator | Parameters | Example                                  | Description            |
 |----------|------------|------------------------------------------|------------------------|
-| eq       | Number     | $('height').eq(100).value()              | height === 100         |
-| matches  | Regex      | $('name').matches(/^[a-z0-9]+$/i).value()| name is alphanumerical |
-| isNull   | -          | $('height').isNull().value()             | height === null        |
-| not      | -          | $('hasEars').not().value()               | !hasEars               |
-| or       | Expression | $('male').or($('female')).value()        | male || female         |
-| and      | Expression | $('female').and($('pregnant')).value()   | female && pregnant     |
+| eq       | Number     | `$('height').eq(100).value()`              | height === 100         |
+| matches  | Regex      | `$('name').matches(/^[a-z0-9]+$/i).value()`| name is alphanumerical |
+| isNull   | -          | `$('height').isNull().value()`             | height === null        |
+| not      | -          | `$('hasEars').not().value()`               | !hasEars               |
+| or       | Expression | `$('male').or($('female')).value()`        | male || female         |
+| and      | Expression | `$('female').and($('pregnant')).value()`   | female && pregnant     |
 
 ### Unit operations
-| Operator | Parameters | Example                                  | Description                                             |
-|----------|------------|------------------------------------------|---------------------------------------------------------|
-| unit     | Unit       | $('height').unit('cm')                   | Sets the current value unit to cm                       |
-| toUnit   | Unit       | $('height').unit('m').toUnit('cm')       | Converts the current value based on the change in units |
+| Operator | Parameters | Example                                    | Description                                             |
+|----------|------------|--------------------------------------------|---------------------------------------------------------|
+| unit     | Unit       | `$('height').unit('cm')`                     | Sets the current value unit to cm                       |
+| toUnit   | Unit       | `$('height').unit('m').toUnit('cm').value()` | Converts the current value based on the change in units |
 
 ### Other
-| Operator | Parameters | Example                                  | Description                                                                                |
-|----------|------------|------------------------------------------|--------------------------------------------------------------------------------------------|
-| age      | -          | $('dateOfBirth').age()                   | Returns the age based on the date of birth and the current year                            |
-| map      | Object     | $('data').map({0:1, 1:2}).value()        | Maps categories to eachother                                                               |
-| group    | Array      | $('age').group([18, 35, 50, 75]).value() | Produces ranges which are left inclusive, (-∞, 18), [18, 35), [35, 50), [50, 75), [75, +∞)|                                                                |
+| Operator | Parameters | Example                                  | Description                                                           |
+|----------|------------|------------------------------------------|-----------------------------------------------------------------------|
+| age      | -          | `$('dateOfBirth').age().value()`           | Returns the age based on the date of birth and the current year       |
+| map      | Object     | `$('data').map({0:1, 1:2}).value()`       | Maps categories to each other                                         |
+| group    | Array      | `$('age').group([18, 35, 50, 75]).value()` | Produces left-inclusive ranges with the given boundaries, i.e. `(-∞, 18), [18, 35), [35, 50), [50, 75), [75, +∞)` and then returns the interval that the attribute value is in, i.el '18-35'                |
 
 ## Terminal operations
 | Operator | Parameters | Example             | Description      |
 |----------|------------|---------------------|------------------|
-| value    | -          | $('Height').value() | JavaScript value |
+| value    | -          | `$('height').value()` | JavaScript value |
 
 # Special case: reference types
 If an attribute is a reference type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use dot notation, to access the values of different columns in the row being referenced. E.g. `$('cookie.name').value()` gives you the value of the name column inside the table being referenced by the cookie column. See below for a more detailed example.
@@ -116,13 +116,11 @@ __Table B__
 ```js
 // Expressions are based on table A
 
-var cookies = []
 $('cookies').map(function (cookie) {
-    // You should use one of the following
-    cookies.push(cookie.value()) // results in ['1', '2', '3']
-    cookies.push(cookie.val.id) // results in ['1', '2', '3']
-    cookies.push(cookie.val.name) // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
-    cookies.push(cookie.val.tastiness) // results in ['9/10', '10/10', '7/10']
-});
-cookies
+    // Pick one of the following
+    return cookie.value()           // results in ['1', '2', '3']
+    return cookie.value().id        // results in ['1', '2', '3']
+    return cookie.value().name      // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
+    return cookie.value().tastiness // results in ['9/10', '10/10', '7/10']
+}).value()
 ```

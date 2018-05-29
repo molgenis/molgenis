@@ -118,7 +118,6 @@
        * Triggers client side validation by setting status to 'SUBMITTED'
        */
       validateBeforeNavigatingToNextChapter () {
-        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState._submit()
 
         if (this.chapterCompletion[this.currentChapter.id] === true) {
@@ -129,7 +128,6 @@
       },
 
       validateBeforeSubmit () {
-        this.$store.commit('UPDATE_FORM_STATUS', 'SUBMITTED')
         this.formState._submit()
 
         if (this.chapterCompletion[this.currentChapter.id] === true) {
@@ -137,8 +135,11 @@
             this.submitting = true
             this.submitQuestionnaire()
           } else {
-            const incompleteChapters = Object.keys(this.chapterCompletion).find(chapter => !this.chapterCompletion[chapter])
-            const error = this.$t('questionnaire_forgotten_chapters') + ': ' + incompleteChapters
+            const getChapterLabel = this.$store.getters.getChapterLabel
+            const incompleteChaptersIds = Object.keys(this.chapterCompletion)
+              .filter(chapter => !this.chapterCompletion[chapter])
+            const incompleteChaptersLabels = incompleteChaptersIds.map((chapterKey) => getChapterLabel(chapterKey))
+            const error = this.$t('questionnaire_forgotten_chapters') + ': ' + incompleteChaptersLabels.join(',')
 
             this.$store.commit('SET_ERROR', error)
           }
