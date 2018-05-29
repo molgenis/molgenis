@@ -18,7 +18,7 @@ public class GroupValueFactory
 	private static final String NON_ALPHA_NUMERIC = "[^a-zA-Z0-9\\u00C0-\\u00FF]";
 
 	public GroupValue createGroup(@Nullable String name, String label, @Nullable String description,
-			boolean publiclyVisible, Collection<String> roleNames)
+			boolean publiclyVisible, Collection<String> roleLabels)
 	{
 		final String groupName = Optional.ofNullable(name).orElse(createGroupName(label));
 		GroupValue.Builder groupBuilder = GroupValue.builder()
@@ -32,9 +32,9 @@ public class GroupValueFactory
 		PackageValue rootPackage = packageBuilder.build();
 		groupBuilder.setRootPackage(rootPackage);
 
-		List<RoleValue> roles = roleNames.stream()
-										 .map(roleLabel -> create(groupName, label, roleLabel))
-										 .collect(toList());
+		List<RoleValue> roles = roleLabels.stream()
+										  .map(roleLabel -> create(groupName, label, roleLabel))
+										  .collect(toList());
 		groupBuilder.rolesBuilder().addAll(roles);
 
 		return groupBuilder.build();

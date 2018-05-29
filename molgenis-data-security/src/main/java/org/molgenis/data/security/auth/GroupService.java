@@ -69,6 +69,11 @@ public class GroupService
 		dataService.add(ROLE, roles.stream());
 	}
 
+	/**
+	 * Grants default permissions on the root package to the roles of the group
+	 *
+	 * @param groupValue details of the group for wich the permissions will be granted
+	 */
 	public void grantPermissions(GroupValue groupValue)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
