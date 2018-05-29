@@ -43,7 +43,12 @@ public class RoleMetadata extends SystemEntityType
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name").setUnique(true).setNillable(false);
+		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name")
+									   .setDescription("Name of the Role. Use screaming snake case, e.g. MY_ROLE.")
+									   .setUnique(true)
+									   .setNillable(false)
+									   .setValidationExpression(
+											   "$('name').matches(/^[A-Z][A-Z0-9](_[A-Z0-9]+)$/).value()");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		getLanguageCodes().map(languageCode -> getI18nAttributeName(LABEL, languageCode)).forEach(this::addAttribute);
 		addAttribute(DESCRIPTION).setLabel("Description");
