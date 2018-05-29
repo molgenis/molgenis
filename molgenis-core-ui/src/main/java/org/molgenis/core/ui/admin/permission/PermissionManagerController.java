@@ -20,6 +20,7 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.acl.SidUtils;
 import org.molgenis.security.core.PermissionSet;
@@ -65,15 +66,20 @@ public class PermissionManagerController extends PluginController
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private final RoleMetadata roleMetadata;
+	private final UserMetaData userMetaData;
 
-	PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry)
+	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
+			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			RoleMetadata roleMetadata, UserMetaData userMetaData)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+		this.roleMetadata = requireNonNull(roleMetadata);
+		this.userMetaData = requireNonNull(userMetaData);
 	}
 
 	@GetMapping
@@ -473,7 +479,7 @@ public class PermissionManagerController extends PluginController
 		Role role = dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, roleName).findOne();
 		if (role == null)
 		{
-			throw new UnknownEntityException("unknown role name [" + roleName + "]");
+			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(RoleMetadata.NAME), roleName);
 		}
 		return role;
 	}
@@ -483,7 +489,7 @@ public class PermissionManagerController extends PluginController
 		User user = dataService.findOneById(USER, userId, User.class);
 		if (user == null)
 		{
-			throw new UnknownEntityException("unknown user id [" + userId + "]");
+			throw new UnknownEntityException(userMetaData, userId);
 		}
 		return user;
 	}
