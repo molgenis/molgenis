@@ -48,21 +48,6 @@
         </plugins>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>com.phasebash.jsdoc</groupId>
-                <artifactId>jsdoc3-maven-plugin</artifactId>
-                <version>${jsdoc3-maven-plugin.version}</version>
-                <configuration>
-                    <sourceFiles>
-                        <sourceFile>src/main/resources/js/script-evaluator.js</sourceFile>
-                    </sourceFiles>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
