@@ -5,6 +5,7 @@ package org.molgenis.data;
  *
  * @see UnknownAttributeException
  * @see UnknownEntityTypeException
+ * @see UnknownEntityException
  * @see UnknownRepositoryException
  * @see UnknownRepositoryCollectionException
  */

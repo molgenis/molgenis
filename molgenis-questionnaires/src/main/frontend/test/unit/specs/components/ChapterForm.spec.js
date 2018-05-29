@@ -14,7 +14,7 @@ describe('ChapterForm component', () => {
     localVue.use(Vuex)
 
     actions = {
-      AUTO_SAVE_QUESTIONNAIRE: td.function()
+      VALIDATE_FIELD: td.function()
     }
 
     state = {
@@ -37,11 +37,16 @@ describe('ChapterForm component', () => {
     expect(wrapper.vm.formData).to.deep.equal(state.formData)
   })
 
-  it('should dispatch [AUTO_SAVE_QUESTIONNAIRE] action when onValueChanged method is called', () => {
+  it('should dispatch [VALIDATE_FIELD] action when onValueChanged method is called', () => {
     const wrapper = shallow(ChapterForm, {propsData, localVue, store})
     const updatedFormData = {field1: 'new value'}
 
     wrapper.vm.onValueChanged(updatedFormData)
-    td.verify(actions.AUTO_SAVE_QUESTIONNAIRE(td.matchers.anything(), updatedFormData, undefined))
+    td.verify(actions.VALIDATE_FIELD(td.matchers.anything(),
+      {
+        formData: {field1: 'new value'},
+        formState: {}
+      },
+      undefined))
   })
 })

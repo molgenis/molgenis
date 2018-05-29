@@ -201,7 +201,8 @@ public class RestControllerIT
 			   .get(PATH + "sys_FreemarkerTemplate/test.csv")
 			   .then()
 			   .statusCode(NOT_FOUND)
-			   .body("errors.message[0]", equalTo("sys_FreemarkerTemplate test.csv not found"));
+			   .body("errors[0].code", equalTo("D02"))
+			   .body("errors[0].message", equalTo("Unknown entity with 'Id' 'test.csv' of type 'Freemarker template'."));
 		// @formatter:on
 	}
 

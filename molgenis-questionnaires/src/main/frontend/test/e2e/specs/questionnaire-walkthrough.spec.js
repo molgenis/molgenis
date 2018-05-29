@@ -1,3 +1,4 @@
+/* eslint no-unused-expressions: "off" */
 /**
  * Due to long loading times, will not reset state of each
  * test but will continue from where the previous test ended
@@ -110,15 +111,16 @@ module.exports = {
     browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('0')
 
     browser.setValue(chapterOneNameQuestion, 'Nightwatch test')
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('25')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('33')
 
     browser.setValue(chapterOneAgeQuestion, 20)
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('50')
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('67')
+
+    // this question is nillable and should not update progress
+    browser.click(chapterOneBoolQuestion)
+    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('67')
 
     browser.setValue(chapterOneRequiredQuestion, 'A nightwatch generated text')
-    browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('75')
-
-    browser.click(chapterOneBoolQuestion)
     browser.expect.element(chapterOneProgressBar).to.have.attribute('aria-valuenow').which.contains('100')
 
     browser.expect.element(chapterOneProgressBar).to.have.attribute('class').which.contains('bg-success')

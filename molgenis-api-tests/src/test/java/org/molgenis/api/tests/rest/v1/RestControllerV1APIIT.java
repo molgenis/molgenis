@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
-import org.hamcrest.Matchers;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.data.rest.EntityCollectionRequest;
 import org.molgenis.data.rest.EntityTypeRequest;
@@ -25,6 +24,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.molgenis.api.tests.utils.RestTestUtils.*;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
 import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
@@ -113,7 +113,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(200)
-			   .body(Matchers.equalTo("true"));
+			   .body(equalTo("true"));
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(200)
-			   .body(Matchers.equalTo("false"));
+			   .body(equalTo("false"));
 	}
 
 	@Test
@@ -334,8 +334,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value",
-					   Matchers.equalTo("ref6"), "label", Matchers.equalTo("label6"));
+			   .body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value", equalTo("ref6"), "label",
+					   equalTo("label6"));
 
 		given().log()
 			   .all()
@@ -378,8 +378,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("href", Matchers.equalTo("/api/v1/base_ApiTestFile/6"), "id", Matchers.equalTo("6"), "file.href",
-					   Matchers.equalTo("/api/v1/base_ApiTestFile/6/file"));
+			   .body("href", equalTo("/api/v1/base_ApiTestFile/6"), "id", equalTo("6"), "file.href",
+					   equalTo("/api/v1/base_ApiTestFile/6/file"));
 
 		// test passes if no exception occured
 	}
@@ -413,8 +413,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(200)
-			   .body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value",
-					   Matchers.equalTo("ref6"), "label", Matchers.equalTo("label6"));
+			   .body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref6"), "value", equalTo("ref6"), "label",
+					   equalTo("label6"));
 
 		given().log()
 			   .all()
@@ -451,7 +451,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("label", Matchers.equalTo("label900"));
+			   .body("label", equalTo("label900"));
 
 		parameters.put("label", "label1");
 		given().log()
@@ -491,7 +491,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("label", Matchers.equalTo("label900"));
+			   .body("label", equalTo("label900"));
 
 		parameters.put("label", "label1");
 		given().log()
@@ -528,7 +528,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("label", Matchers.equalTo("label900"));
+			   .body("label", equalTo("label900"));
 
 		given().log()
 			   .all()
@@ -564,7 +564,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("label", Matchers.equalTo("label900"));
+			   .body("label", equalTo("label900"));
 
 		given().log()
 			   .all()
@@ -607,8 +607,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("href", Matchers.equalTo("/api/v1/base_ApiTestFile/1"), "id", Matchers.equalTo("1"), "file.href",
-					   Matchers.equalTo("/api/v1/base_ApiTestFile/1/file"));
+			   .body("href", equalTo("/api/v1/base_ApiTestFile/1"), "id", equalTo("1"), "file.href",
+					   equalTo("/api/v1/base_ApiTestFile/1/file"));
 	}
 
 	@Test
@@ -635,7 +635,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("label", Matchers.equalTo("label900"));
+			   .body("label", equalTo("label900"));
 
 		given().log()
 			   .all()
@@ -675,7 +675,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("value", Matchers.equalTo("ref6"), "label", Matchers.equalTo("label6"));
+			   .body("value", equalTo("ref6"), "label", equalTo("label6"));
 
 		given().log()
 			   .all()
@@ -694,7 +694,9 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].message", Matchers.equalTo("V1_API_TypeTestRefAPIV1 ref6 not found"));
+			   .body("errors[0].code", equalTo("D02"))
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
@@ -721,7 +723,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .body("value", Matchers.equalTo("ref6"), "label", Matchers.equalTo("label6"));
+			   .body("value", equalTo("ref6"), "label", equalTo("label6"));
 
 		given().log()
 			   .all()
@@ -740,7 +742,9 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].message", Matchers.equalTo("V1_API_TypeTestRefAPIV1 ref6 not found"));
+			   .body("errors[0].code", equalTo("D02"))
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
@@ -754,8 +758,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(40));
+			   .body("total", equalTo(40));
 
 		given().log()
 			   .all()
@@ -774,8 +777,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(0));
+			   .body("total", equalTo(0));
 	}
 
 	@Test
@@ -789,8 +791,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(40));
+			   .body("total", equalTo(40));
 
 		given().log()
 			   .all()
@@ -809,8 +810,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(0));
+			   .body("total", equalTo(0));
 	}
 
 	@Test
@@ -824,8 +824,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(40));
+			   .body("total", equalTo(40));
 
 		given().log()
 			   .all()
@@ -844,7 +843,8 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].code", Matchers.equalTo("D01"));
+			   .body("errors[0].code", equalTo("D01"))
+			   .body("errors[0].message", equalTo("Unknown entity type 'base_APITest3'."));
 	}
 
 	@Test
@@ -858,8 +858,7 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(OKE)
-			   .
-					   body("total", Matchers.equalTo(40));
+			   .body("total", equalTo(40));
 
 		given().log()
 			   .all()
@@ -878,73 +877,65 @@ public class RestControllerV1APIIT
 			   .log()
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
-			   .body("errors[0].code", Matchers.equalTo("D01"));
+			   .body("errors[0].code", equalTo("D01"))
+			   .body("errors[0].message", equalTo("Unknown entity type 'base_APITest4'."));
 	}
 
 	private void validateGetEntityType(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta"), "hrefCollection",
-				Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "name",
-				Matchers.equalTo("V1_API_TypeTestRefAPIV1"), "label", Matchers.equalTo("TypeTestRefAPIV1"),
-				"description", Matchers.equalTo("MOLGENIS Data types test ref entity"), "attributes.value.href",
-				Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "attributes.label.href",
-				Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/label"), "labelAttribute",
-				Matchers.equalTo("label"), "idAttribute", Matchers.equalTo("value"), "lookupAttributes",
-				Matchers.equalTo(newArrayList("value", "label")), "isAbstract", Matchers.equalTo(false), "languageCode",
-				Matchers.equalTo("en"), "writable", Matchers.equalTo(true));
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta"), "hrefCollection",
+				equalTo("/api/v1/V1_API_TypeTestRefAPIV1"), "name", equalTo("V1_API_TypeTestRefAPIV1"), "label",
+				equalTo("TypeTestRefAPIV1"), "description", equalTo("MOLGENIS Data types test ref entity"),
+				"attributes.value.href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "attributes.label.href",
+				equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/label"), "labelAttribute", equalTo("label"),
+				"idAttribute", equalTo("value"), "lookupAttributes", equalTo(newArrayList("value", "label")),
+				"isAbstract", equalTo(false), "languageCode", equalTo("en"), "writable", equalTo(true));
 	}
 
 	private void validateRetrieveEntityAttributeMeta(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "fieldType",
-				Matchers.equalTo("STRING"), "name", Matchers.equalTo("value"), "label", Matchers.equalTo("value label"),
-				"description", Matchers.equalTo("TypeTestRef value attribute"), "attributes",
-				Matchers.equalTo(newArrayList()), "enumOptions", Matchers.equalTo(newArrayList()), "maxLength",
-				Matchers.equalTo(255), "auto", Matchers.equalTo(false), "nillable", Matchers.equalTo(false), "readOnly",
-				Matchers.equalTo(true), "labelAttribute", Matchers.equalTo(false), "unique", Matchers.equalTo(true),
-				"visible", Matchers.equalTo(true), "lookupAttribute", Matchers.equalTo(true), "isAggregatable",
-				Matchers.equalTo(false));
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/meta/value"), "fieldType", equalTo("STRING"),
+				"name", equalTo("value"), "label", equalTo("value label"), "description",
+				equalTo("TypeTestRef value attribute"), "attributes", equalTo(newArrayList()), "enumOptions",
+				equalTo(newArrayList()), "maxLength", equalTo(255), "auto", equalTo(false), "nillable", equalTo(false),
+				"readOnly", equalTo(true), "labelAttribute", equalTo(false), "unique", equalTo(true), "visible",
+				equalTo(true), "lookupAttribute", equalTo(true), "isAggregatable", equalTo(false));
 	}
 
 	private void validateRetrieveEntity(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref1"), "value",
-				Matchers.equalTo("ref1"), "label", Matchers.equalTo("label1"));
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestRefAPIV1/ref1"), "value", equalTo("ref1"), "label",
+				equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityAttribute(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", Matchers.equalTo("/api/v1/V1_API_TypeTestAPIV1/1/xxref_value"), "value",
-				Matchers.equalTo("ref1"), "label", Matchers.equalTo("label1"));
+		response.body("href", equalTo("/api/v1/V1_API_TypeTestAPIV1/1/xxref_value"), "value", equalTo("ref1"), "label",
+				equalTo("label1"));
 	}
 
 	private void validateRetrieveEntityCollectionResponse(ValidatableResponse response)
 	{
 		response.statusCode(200);
-		response.body("href", Matchers.equalTo("/api/v1/V1_API_Items"), "meta.href",
-				Matchers.equalTo("/api/v1/V1_API_Items/meta"), "meta.hrefCollection",
-				Matchers.equalTo("/api/v1/V1_API_Items"), "meta.name", Matchers.equalTo("V1_API_Items"), "meta.label",
-				Matchers.equalTo("Items"), "meta.description", Matchers.equalTo("Items"), "meta.attributes.value.href",
-				Matchers.equalTo("/api/v1/V1_API_Items/meta/value"), "meta.attributes.label.href",
-				Matchers.equalTo("/api/v1/V1_API_Items/meta/label"), "meta.labelAttribute", Matchers.equalTo("label"),
-				"meta.idAttribute", Matchers.equalTo("value"), "meta.lookupAttributes",
-				Matchers.equalTo(newArrayList("value", "label")), "meta.isAbstract", Matchers.equalTo(false),
-				"meta.languageCode", Matchers.equalTo("en"), "meta.writable", Matchers.equalTo(true), "start",
-				Matchers.equalTo(0), "num", Matchers.equalTo(100), "total", Matchers.equalTo(5), "items[0].href",
-				Matchers.equalTo("/api/v1/V1_API_Items/ref1"), "items[0].value", Matchers.equalTo("ref1"),
-				"items[0].label", Matchers.equalTo("label1"), "items[1].href",
-				Matchers.equalTo("/api/v1/V1_API_Items/ref2"), "items[1].value", Matchers.equalTo("ref2"),
-				"items[1].label", Matchers.equalTo("label2"), "items[2].href",
-				Matchers.equalTo("/api/v1/V1_API_Items/ref3"), "items[2].value", Matchers.equalTo("ref3"),
-				"items[2].label", Matchers.equalTo("label3"), "items[3].href",
-				Matchers.equalTo("/api/v1/V1_API_Items/ref4"), "items[3].value", Matchers.equalTo("ref4"),
-				"items[3].label", Matchers.equalTo("label4"), "items[4].href",
-				Matchers.equalTo("/api/v1/V1_API_Items/ref5"), "items[4].value", Matchers.equalTo("ref5"),
-				"items[4].label", Matchers.equalTo("label5"));
+		response.body("href", equalTo("/api/v1/V1_API_Items"), "meta.href", equalTo("/api/v1/V1_API_Items/meta"),
+				"meta.hrefCollection", equalTo("/api/v1/V1_API_Items"), "meta.name", equalTo("V1_API_Items"),
+				"meta.label", equalTo("Items"), "meta.description", equalTo("Items"), "meta.attributes.value.href",
+				equalTo("/api/v1/V1_API_Items/meta/value"), "meta.attributes.label.href",
+				equalTo("/api/v1/V1_API_Items/meta/label"), "meta.labelAttribute", equalTo("label"), "meta.idAttribute",
+				equalTo("value"), "meta.lookupAttributes", equalTo(newArrayList("value", "label")), "meta.isAbstract",
+				equalTo(false), "meta.languageCode", equalTo("en"), "meta.writable", equalTo(true), "start", equalTo(0),
+				"num", equalTo(100), "total", equalTo(5), "items[0].href", equalTo("/api/v1/V1_API_Items/ref1"),
+				"items[0].value", equalTo("ref1"), "items[0].label", equalTo("label1"), "items[1].href",
+				equalTo("/api/v1/V1_API_Items/ref2"), "items[1].value", equalTo("ref2"), "items[1].label",
+				equalTo("label2"), "items[2].href", equalTo("/api/v1/V1_API_Items/ref3"), "items[2].value",
+				equalTo("ref3"), "items[2].label", equalTo("label3"), "items[3].href",
+				equalTo("/api/v1/V1_API_Items/ref4"), "items[3].value", equalTo("ref4"), "items[3].label",
+				equalTo("label4"), "items[4].href", equalTo("/api/v1/V1_API_Items/ref5"), "items[4].value",
+				equalTo("ref5"), "items[4].label", equalTo("label5"));
 	}
 
 	@AfterClass(alwaysRun = true)

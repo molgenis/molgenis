@@ -9,6 +9,7 @@ import org.molgenis.web.UiMenu;
 import org.molgenis.web.UiMenuItem;
 import org.molgenis.web.UiMenuItemType;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
@@ -87,11 +88,15 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu
 	}
 
 	@Override
+	@Nullable
 	public UiMenuItem getActiveItem()
 	{
-		return Iterables.find(molgenisUiMenu.getItems(),
-				molgenisUiMenuItem -> molgenisUiMenuItem.getType() != UiMenuItemType.MENU && hasPermission(
-						molgenisUiMenuItem), null);
+		return molgenisUiMenu.getItems().stream().filter(this::isActiveItem).findFirst().orElse(null);
+	}
+
+	private boolean isActiveItem(UiMenuItem uiMenuItem)
+	{
+		return uiMenuItem.getType() != UiMenuItemType.MENU && hasPermission(uiMenuItem);
 	}
 
 	@Override
