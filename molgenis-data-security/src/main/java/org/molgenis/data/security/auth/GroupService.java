@@ -72,7 +72,7 @@ public class GroupService
 	/**
 	 * Grants default permissions on the root package to the roles of the group
 	 *
-	 * @param groupValue details of the group for wich the permissions will be granted
+	 * @param groupValue details of the group for which the permissions will be granted
 	 */
 	public void grantPermissions(GroupValue groupValue)
 	{
