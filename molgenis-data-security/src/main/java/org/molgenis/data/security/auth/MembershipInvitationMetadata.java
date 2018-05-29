@@ -19,8 +19,8 @@ public class MembershipInvitationMetadata extends SystemEntityType
 		PENDING, ACCEPTED, REVOKED, EXPIRED, DECLINED
 	}
 
-	private static final String SIMPLE_NAME = "Invitation";
-	public static final String INVITATION = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	private static final String SIMPLE_NAME = "MembershipInvitation";
+	public static final String MEMBERSHIP_INVITATION = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String TOKEN = "token";
