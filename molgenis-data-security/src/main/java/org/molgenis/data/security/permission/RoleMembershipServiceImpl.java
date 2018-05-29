@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.user.UserService;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
@@ -11,6 +12,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 
+@Component
 public class RoleMembershipServiceImpl implements RoleMembershipService
 {
 	private final UserService userService;
