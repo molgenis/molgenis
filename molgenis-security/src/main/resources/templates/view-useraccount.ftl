@@ -379,7 +379,7 @@
             e.stopPropagation()
             form.submit()
         })
-        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress does not work cross-browser -->
             if (e.which === 13) {
                 e.preventDefault()
                 e.stopPropagation()

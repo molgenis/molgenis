@@ -9,23 +9,23 @@ import java.util.Optional;
 
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MONTHS;
-import static org.molgenis.data.security.auth.InvitationMetadata.*;
-import static org.molgenis.data.security.auth.InvitationMetadata.Status.EXPIRED;
-import static org.molgenis.data.security.auth.InvitationMetadata.Status.PENDING;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.*;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status.EXPIRED;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status.PENDING;
 
-public class Invitation extends StaticEntity
+public class MembershipInvitation extends StaticEntity
 {
-	public Invitation(Entity entity)
+	public MembershipInvitation(Entity entity)
 	{
 		super(entity);
 	}
 
-	public Invitation(EntityType entityType)
+	public MembershipInvitation(EntityType entityType)
 	{
 		super(entityType);
 	}
 
-	public Invitation(String id, EntityType entityType)
+	public MembershipInvitation(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);

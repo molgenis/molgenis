@@ -12,7 +12,7 @@ const state: QuestionnaireState = {
   /**
    * All the compound fields of the questionnaire metadata as chapters
    */
-  chapterFields: [],
+  chapters: [],
 
   /**
    * Error string filled when something goes wrong

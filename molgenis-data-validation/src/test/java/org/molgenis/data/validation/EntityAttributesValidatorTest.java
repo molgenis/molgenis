@@ -357,6 +357,42 @@ public class EntityAttributesValidatorTest extends AbstractMockitoTest
 		assertEquals(newHashSet(constraintViolations), expectedConstraintViolations);
 	}
 
+	@Test
+	public void testGetDataValuesForTypeDecimal()
+	{
+		String attributeName = "attr";
+		double value = 1.23;
+		Entity entity = mock(Entity.class);
+		when(entity.getDouble(attributeName)).thenReturn(value);
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		when(attribute.getDataType()).thenReturn(AttributeType.DECIMAL);
+		assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+	}
+
+	@Test
+	public void testGetDataValuesForTypeInt()
+	{
+		String attributeName = "attr";
+		int value = 123;
+		Entity entity = mock(Entity.class);
+		when(entity.getInt(attributeName)).thenReturn(value);
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		when(attribute.getDataType()).thenReturn(AttributeType.INT);
+		assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+	}
+
+	@Test
+	public void testGetDataValuesForTypeLong()
+	{
+		String attributeName = "attr";
+		long value = 123L;
+		Entity entity = mock(Entity.class);
+		when(entity.getLong(attributeName)).thenReturn(value);
+		Attribute attribute = when(mock(Attribute.class).getName()).thenReturn(attributeName).getMock();
+		when(attribute.getDataType()).thenReturn(AttributeType.LONG);
+		assertEquals(entityAttributesValidator.getDataValuesForType(entity, attribute), value);
+	}
+
 	private Attribute createMockAttribute(String attributeName, AttributeType attributeType, String expression)
 	{
 		Attribute attribute = mock(Attribute.class);

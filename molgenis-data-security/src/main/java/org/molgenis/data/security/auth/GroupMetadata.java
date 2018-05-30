@@ -9,11 +9,12 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component
 public class GroupMetadata extends SystemEntityType
@@ -49,9 +50,18 @@ public class GroupMetadata extends SystemEntityType
 		setDescription("A number of people that work together or share certain beliefs.");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
-		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
+		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name")
+									   .setDescription("Name of the group. Use kebab-case, e.g. my-group.")
+									   .setNillable(false)
+									   .setUnique(true)
+									   .setValidationExpression(
+											   "$('name').matches(/^[a-z][a-z0-9](-[a-z0-9]+)$/).value()");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
-		addAttribute(DESCRIPTION).setLabel("Description").setNillable(true);
+		getLanguageCodes().map(languageCode -> getI18nAttributeName(LABEL, languageCode)).forEach(this::addAttribute);
+		addAttribute(DESCRIPTION).setLabel("Description").setDataType(TEXT);
+		getLanguageCodes().map(languageCode -> getI18nAttributeName(DESCRIPTION, languageCode))
+						  .map(this::addAttribute)
+						  .forEach(attribute -> attribute.setDataType(TEXT));
 		addAttribute(PUBLIC).setDataType(BOOL)
 							.setLabel("Publicly visible")
 							.setDescription("Indication if this group is publicly visible.")
@@ -61,7 +71,8 @@ public class GroupMetadata extends SystemEntityType
 						   .setRefEntity(roleMetadata)
 						   .setMappedBy(roleMetadata.getAttribute(RoleMetadata.GROUP))
 						   .setLabel("Roles")
-						   .setDescription("Roles a User can have within this Group");
+						   .setDescription("Roles a User can have within this Group")
+						   .setCascadeDelete(true);
 		addAttribute(ROOT_PACKAGE).setDataType(AttributeType.XREF)
 								  .setRefEntity(packageMetadata)
 								  .setLabel("Root package")

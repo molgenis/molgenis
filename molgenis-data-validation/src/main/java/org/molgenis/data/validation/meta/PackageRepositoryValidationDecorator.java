@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.Package;
 
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -81,7 +80,7 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 		Package package_ = findOneById(id);
 		if (package_ == null)
 		{
-			throw new UnknownEntityException(format("Unknown package [%s]", id.toString()));
+			throw new UnknownEntityException(getEntityType(), id);
 		}
 		packageValidator.validate(package_);
 		super.deleteById(id);

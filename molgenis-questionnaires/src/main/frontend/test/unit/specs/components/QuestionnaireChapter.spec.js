@@ -36,7 +36,8 @@ describe('QuestionnaireChapter component', () => {
 
     getters = {
       getChapterByIndex: () => () => ({id: 'chapter1'}),
-      getTotalNumberOfChapters: () => 1
+      getTotalNumberOfChapters: () => 1,
+      getQuestionLabel: () => () => 'questionLabel'
     }
 
     mutations = {

@@ -86,6 +86,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String REF_ATTR_ID_NAME = "id";
 	private static final String REF_ATTR_VALUE_NAME = "value";
 	private static final String REF_ATTR_REF_NAME = "ref";
+	private static final String REF_ATTR_SORT_NAME = "sort";
 	private static final String REF_REF_ATTR_VALUE_NAME = "value";
 	private static final String REF_REF_ATTR_ID_NAME = "id";
 
@@ -104,6 +105,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			HREF_ENTITY_COLLECTION + '/' + ENTITY_ID + "?includeCategories=true";
 	private static final String FIRST_ERROR_MESSAGE = "$.errors[0].message";
 	private static final String FIRST_ERROR_CODE = "$.errors[0].code";
+
+	private static final Sort sortOrderWithSort = new Sort(REF_ATTR_SORT_NAME);
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
@@ -199,15 +202,23 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		EntityType refEntityType = entityTypeFactory.create(REF_ENTITY_NAME)
 													.setLabel(REF_ENTITY_NAME)
-													.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME),
-															ROLE_ID, ROLE_LOOKUP)
+													.addAttribute(attributeFactory.create()
+																				  .setName(REF_ATTR_ID_NAME)
+																				  .setVisible(false), ROLE_ID,
+															ROLE_LOOKUP)
 													.addAttribute(
 															attributeFactory.create().setName(REF_ATTR_VALUE_NAME),
 															ROLE_LABEL)
 													.addAttribute(attributeFactory.create()
 																				  .setName(REF_ATTR_REF_NAME)
 																				  .setDataType(XREF)
-																				  .setRefEntity(refRefEntityType));
+																				  .setRefEntity(refRefEntityType))
+													.addAttribute(attributeFactory.create()
+																				  .setName(REF_ATTR_SORT_NAME)
+																				  .setVisible(true)
+																				  .setUnique(true)
+																				  .setDataType(INT));
+		;
 
 		// required
 		String attrIdName = "id";
@@ -269,7 +280,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Attribute attrCategoricalMref = createAttributeMeta(entityType, attrCategoricalMrefName, CATEGORICAL_MREF,
 				refEntityType).setNillable(false);
 		Attribute attrCompound = createAttributeMeta(entityType, attrCompoundName, COMPOUND);
-		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false).setParent(attrCompound);
+		Attribute compoundAttr0 = createAttributeMeta(entityType, attrCompoundAttr0Name, STRING).setNillable(false)
+																								.setParent(
+																										attrCompound);
 		Attribute compoundAttrCategorical = createAttributeMeta(entityType, attrCompoundCategorical, CATEGORICAL,
 				refEntityType).setNillable(false).setParent(attrCompound);
 		Attribute compoundAttr0Optional = createAttributeMeta(entityType, attrCompoundAttr0OptionalName,
@@ -328,11 +341,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		refEntity0.set(REF_ATTR_ID_NAME, REF_ENTITY0_ID);
 		refEntity0.set(REF_ATTR_VALUE_NAME, REF_ENTITY0_LABEL);
 		refEntity0.set(REF_ATTR_REF_NAME, refRefEntity);
+		refEntity0.set(REF_ATTR_SORT_NAME, 0);
 
 		Entity refEntity1 = new DynamicEntity(refEntityType);
 		refEntity1.set(REF_ATTR_ID_NAME, REF_ENTITY1_ID);
 		refEntity1.set(REF_ATTR_VALUE_NAME, REF_ENTITY1_LABEL);
 		refEntity1.set(REF_ATTR_REF_NAME, refRefEntity);
+		refEntity1.set(REF_ATTR_SORT_NAME, 1);
 
 		Entity entity = new DynamicEntity(entityType);
 
@@ -388,7 +403,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.count(ENTITY_NAME, new QueryImpl<>())).thenReturn(2L);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
-		when(dataService.findAll(REF_ENTITY_NAME)).thenAnswer(invocation -> Stream.of(refEntity0, refEntity1));
+		when(dataService.findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort))).thenAnswer(
+				invocation -> Stream.of(refEntity0, refEntity1));
 
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOneById(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
@@ -473,6 +489,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(expectedContent));
+
+		verify(dataService, times(5)).findAll(REF_ENTITY_NAME, new QueryImpl<>().sort(sortOrderWithSort));
 	}
 
 	@Test
@@ -664,8 +682,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		mockMvc.perform(
 				post("/api/v2/copy/unknown").content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'unknown'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'unknown'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -742,8 +761,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
 		when(permissionService.hasPermission(new EntityTypeIdentity("entity"),
-				EntityTypePermission.READ_DATA)).thenReturn(
-				true);
+				EntityTypePermission.READ_DATA)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
@@ -781,8 +799,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				post(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com', extraAttribute:'test'}]}")
 												.contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	/**
@@ -869,8 +888,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2").content("{entities:[{email:'test@email.com'}]}")
 													   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -912,8 +932,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		mockMvc.perform(put(BASE_URI + "/" + "entity2" + "/" + "email").content("{entities:[{email:'test@email.com'}]}")
 																	   .contentType(APPLICATION_JSON))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Operation failed. Unknown entity: 'entity2'")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
 	}
 
 	@Test
@@ -966,13 +987,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testDeleteEntityCollectionExceptionUnknownEntity() throws Exception
 	{
-		when(dataService.getEntityType("MyEntityType")).thenThrow(
-				new UnknownEntityException("Unknown entity [MyEntityType]"));
+		when(dataService.getEntityType("MyEntityType")).thenThrow(new UnknownEntityTypeException("MyEntityType"));
 
 		mockMvc.perform(
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity [MyEntityType]")));
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'MyEntityType'.")));
 	}
 
 	@Test
@@ -1049,7 +1070,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		mockMvc.perform(
 				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
 											   .contentType(APPLICATION_JSON))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("The entity you are trying to update [4] does not exist.")));
+			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D02")))
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity with 'id' '4' of type 'entity'.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
