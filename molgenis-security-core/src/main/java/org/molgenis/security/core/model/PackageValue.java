@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("squid:S1610")
 @AutoValue
 public abstract class PackageValue
 {
