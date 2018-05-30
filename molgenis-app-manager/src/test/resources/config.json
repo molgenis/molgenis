@@ -1,0 +1,11 @@
+{
+	"label": "Hello app manager",
+	"description": "Test app",
+	"version": "0.1-beta",
+	"apiDependency": "v2",
+	"uri": "example2",
+	"includeMenuAndFooter": true,
+	"runtimeOptions": {
+		"language": "en"
+	}
+}

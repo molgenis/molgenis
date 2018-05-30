@@ -90,7 +90,7 @@
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-apps</artifactId>
+            <artifactId>molgenis-app-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
