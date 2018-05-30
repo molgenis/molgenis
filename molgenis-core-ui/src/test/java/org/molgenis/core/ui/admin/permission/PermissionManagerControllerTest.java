@@ -295,7 +295,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 		Permissions expected = Permissions.create(ImmutableSet.of("1", "2"),
 				ImmutableMultimap.of(plugin1.getId(), "read"));
-		assertEquals(permissionManagerController.getUserPluginPermissions("1"), expected);
+		assertEquals(permissionManagerController.getUserPluginPermissions("Ipsum"), expected);
 	}
 
 	@Test
@@ -355,7 +355,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		Permissions expected = Permissions.create(ImmutableSet.of("1", "2", "3"),
 				ImmutableMultimap.of(entityType1.getId(), "writemeta", entityType2.getId(), "count"));
 
-		assertEquals(permissionManagerController.getUserEntityClassPermissions("1"), expected);
+		assertEquals(permissionManagerController.getUserEntityClassPermissions("Ipsum"), expected);
 	}
 
 	@Test
@@ -421,7 +421,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		Permissions expected = Permissions.create(ImmutableSet.of("1", "2", "3"),
 				ImmutableMultimap.of(package1.getId(), "writemeta", package2.getId(), "count"));
 
-		assertEquals(permissionManagerController.getUserPackagePermissions("1"), expected);
+		assertEquals(permissionManagerController.getUserPackagePermissions("Ipsum"), expected);
 	}
 
 	@Test
@@ -509,7 +509,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(objectIdentity1, singletonList(userSid))).thenReturn(acl1);
 		when(mutableAclService.readAclById(objectIdentity2, singletonList(userSid))).thenReturn(acl2);
 
-		permissionManagerController.updateUserPluginPermissions("1", webRequest);
+		permissionManagerController.updateUserPluginPermissions("Ipsum", webRequest);
 
 		verify(acl1).insertAce(0, PermissionSet.READ, userSid, true);
 
@@ -590,7 +590,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(objectIdentity2, singletonList(sid))).thenReturn(acl2);
 		when(mutableAclService.readAclById(objectIdentity3, singletonList(sid))).thenReturn(acl3);
 
-		permissionManagerController.updateUserEntityClassPermissions("1", webRequest);
+		permissionManagerController.updateUserEntityClassPermissions("Ipsum", webRequest);
 
 		verify(acl1).deleteAce(0);
 		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
@@ -672,7 +672,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(mutableAclService.readAclById(packageIdentity2, singletonList(sid))).thenReturn(acl2);
 		when(mutableAclService.readAclById(packageIdentity3, singletonList(sid))).thenReturn(acl3);
 
-		permissionManagerController.updateUserPackagePermissions("1", webRequest);
+		permissionManagerController.updateUserPackagePermissions("Ipsum", webRequest);
 
 		verify(acl1).deleteAce(0);
 		verify(acl1).insertAce(0, PermissionSet.WRITE, sid, true);
