@@ -60,7 +60,7 @@ public class GroupService
 		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
 
 		Group group = groupFactory.create(groupValue);
-		group.setRootPackage(rootPackage);
+		group.setRootPackage(rootPackage.getId());
 		group.setRoles(roles);
 
 		dataService.add(PACKAGE, rootPackage);

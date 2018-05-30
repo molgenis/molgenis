@@ -1,8 +1,6 @@
 package org.molgenis.data.security.auth;
 
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -31,14 +29,12 @@ public class GroupMetadata extends SystemEntityType
 	public static final String ROOT_PACKAGE = "rootPackage";
 
 	private final SecurityPackage securityPackage;
-	private final PackageMetadata packageMetadata;
 	private RoleMetadata roleMetadata;
 
-	public GroupMetadata(SecurityPackage securityPackage, PackageMetadata packageMetadata)
+	public GroupMetadata(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
-		this.packageMetadata = requireNonNull(packageMetadata);
 	}
 
 	@Override
@@ -73,10 +69,8 @@ public class GroupMetadata extends SystemEntityType
 						   .setLabel("Roles")
 						   .setDescription("Roles a User can have within this Group")
 						   .setCascadeDelete(true);
-		addAttribute(ROOT_PACKAGE).setDataType(AttributeType.XREF)
-								  .setRefEntity(packageMetadata)
-								  .setLabel("Root package")
-								  .setDescription("Package where this Group's resources reside.")
+		addAttribute(ROOT_PACKAGE).setLabel("Root package")
+								  .setDescription("Id of the package where this Group's resources reside.")
 								  .setNillable(false);
 	}
 

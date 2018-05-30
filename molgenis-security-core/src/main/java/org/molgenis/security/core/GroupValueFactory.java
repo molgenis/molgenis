@@ -27,7 +27,9 @@ public class GroupValueFactory
 													.setPublic(publiclyVisible);
 		Optional.ofNullable(description).ifPresent(groupBuilder::setDescription);
 
-		PackageValue.Builder packageBuilder = PackageValue.builder().setName(groupName).setLabel(label);
+		PackageValue.Builder packageBuilder = PackageValue.builder()
+														  .setName(groupName.replace('-', '_'))
+														  .setLabel(label);
 		Optional.ofNullable(description).ifPresent(packageBuilder::setDescription);
 		PackageValue rootPackage = packageBuilder.build();
 		groupBuilder.setRootPackage(rootPackage);
