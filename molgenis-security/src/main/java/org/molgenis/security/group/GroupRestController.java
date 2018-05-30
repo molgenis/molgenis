@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.Pattern;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
@@ -40,7 +41,7 @@ public class GroupRestController
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "The name of the newly created group", response = String.class) })
 	public String createGroup(
-			@ApiParam("Alphanumeric name for the group") @RequestParam(value = "name") @Nullable String name,
+			@ApiParam("Alphanumeric name for the group") @Pattern(regexp = "^[a-z][a-z0-9]*(-[a-z0-9]+)*$") @RequestParam(value = "name") @Nullable String name,
 			@ApiParam("Label for the group") @RequestParam("label") String label,
 			@ApiParam("Description for the group") @RequestParam(value = "description", required = false) @Nullable String description,
 			@ApiParam("Indication if this group should be publicly visible (not yet implemented!)") @RequestParam(value = "public", required = false, defaultValue = "true") boolean publiclyVisible)
