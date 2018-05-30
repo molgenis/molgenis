@@ -26,11 +26,12 @@ import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.security.MolgenisRoleHierarchy;
-import org.molgenis.security.core.PermissionServiceImpl;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.PermissionRegistry;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.PermissionServiceImpl;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.permission.AuthenticationAuthoritiesUpdaterImpl;
 import org.molgenis.security.permission.PrincipalSecurityContextRegistryImpl;
@@ -49,6 +50,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.springframework.security.acls.jdbc.AclConfig;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -93,17 +95,25 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
 		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
-		TestPermissionPopulator.class, PermissionRegistry.class, DataPermissionConfig.class,
-		PermissionServiceImpl.class })
+		PermissionRegistry.class, DataPermissionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired
 	private PlatformBootstrapper platformBootstrapper;
 
+	@Autowired
+	private MutableAclService mutableAclService;
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		platformBootstrapper.bootstrap(event);
+	}
+
+	@Bean
+	public PermissionService permissionService()
+	{
+		return new RunAsSystemPermissionService(new PermissionServiceImpl(mutableAclService));
 	}
 
 	@Bean

@@ -15,7 +15,7 @@ public class PermissionServiceImpl implements PermissionService
 {
 	private MutableAclService mutableAclService;
 
-	PermissionServiceImpl(MutableAclService mutableAclService)
+	public PermissionServiceImpl(MutableAclService mutableAclService)
 	{
 		this.mutableAclService = requireNonNull(mutableAclService);
 	}
