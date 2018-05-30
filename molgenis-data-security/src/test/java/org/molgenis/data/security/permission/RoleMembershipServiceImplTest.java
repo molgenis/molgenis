@@ -6,6 +6,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -17,6 +18,7 @@ import java.time.Instant;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.testng.Assert.assertTrue;
 
 public class RoleMembershipServiceImplTest extends AbstractMockitoTest
@@ -30,6 +32,12 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private DataService dataService;
 
+	@Mock
+	private UserMetaData userMetaData;
+
+	@Mock
+	private RoleMetadata roleMetadata;
+
 	@Captor
 	private ArgumentCaptor<Instant> instantCaptor;
 
@@ -38,7 +46,8 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		roleMembershipService = new RoleMembershipServiceImpl(userService, roleMembershipFactory, dataService);
+		roleMembershipService = new RoleMembershipServiceImpl(userService, roleMembershipFactory, dataService,
+				userMetaData, roleMetadata);
 	}
 
 	@Test
@@ -66,9 +75,14 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 		assertTrue(Duration.between(Instant.now(), instantCaptor.getValue()).getSeconds() < 1);
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "Role with name \\[GCC_DELETER\\] not found")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_Role id:GCC_DELETER attribute:name")
 	public void addUserToNonExistingRole()
 	{
+		Attribute roleNameAttr = mock(Attribute.class);
+		when(roleNameAttr.getName()).thenReturn("name");
+		when(userMetaData.getAttribute(USERNAME)).thenReturn(roleNameAttr);
+		when(userMetaData.getId()).thenReturn("sys_sec_Role");
+
 		String username = "henk";
 		User user = mock(User.class);
 		when(userService.getUser(username)).thenReturn(user);
@@ -80,9 +94,14 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 		roleMembershipService.addUserToRole(username, rolename);
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "User with name \\[henk\\] not found")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_User id:henk attribute:username")
 	public void addNonExistingUserToRole()
 	{
+		Attribute userNameAttr = mock(Attribute.class);
+		when(userNameAttr.getName()).thenReturn("username");
+		when(userMetaData.getAttribute(USERNAME)).thenReturn(userNameAttr);
+		when(userMetaData.getId()).thenReturn("sys_sec_User");
+
 		String username = "henk";
 		when(userService.getUser(username)).thenReturn(null);
 
