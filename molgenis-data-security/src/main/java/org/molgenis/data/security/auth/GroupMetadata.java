@@ -55,7 +55,7 @@ public class GroupMetadata extends SystemEntityType
 									   .setNillable(false)
 									   .setUnique(true)
 									   .setValidationExpression(
-											   "$('name').matches(/^[a-z][a-z0-9](-[a-z0-9]+)$/).value()");
+											   "$('name').matches(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/).value()");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		getLanguageCodes().map(languageCode -> getI18nAttributeName(LABEL, languageCode)).forEach(this::addAttribute);
 		addAttribute(DESCRIPTION).setLabel("Description").setDataType(TEXT);
