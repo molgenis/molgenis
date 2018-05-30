@@ -80,8 +80,8 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 	{
 		Attribute roleNameAttr = mock(Attribute.class);
 		when(roleNameAttr.getName()).thenReturn("name");
-		when(userMetaData.getAttribute(USERNAME)).thenReturn(roleNameAttr);
-		when(userMetaData.getId()).thenReturn("sys_sec_Role");
+		when(roleMetadata.getAttribute(RoleMetadata.NAME)).thenReturn(roleNameAttr);
+		when(roleMetadata.getId()).thenReturn("sys_sec_Role");
 
 		String username = "henk";
 		User user = mock(User.class);
