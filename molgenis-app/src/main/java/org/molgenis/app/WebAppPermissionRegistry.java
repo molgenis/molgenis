@@ -11,10 +11,10 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.data.security.SidUtils.createRoleSid;
-import static org.molgenis.data.security.SidUtils.createUserSid;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 /**

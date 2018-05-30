@@ -5,7 +5,7 @@ import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
-import org.molgenis.data.security.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;

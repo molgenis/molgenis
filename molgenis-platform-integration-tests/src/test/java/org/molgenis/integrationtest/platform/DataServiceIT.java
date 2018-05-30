@@ -18,7 +18,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.data.security.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;

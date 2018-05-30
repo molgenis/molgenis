@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.testng.Assert.assertEquals;
 

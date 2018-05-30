@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
-import static org.molgenis.data.security.SidUtils.createUserSid;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.AssertJUnit.assertEquals;

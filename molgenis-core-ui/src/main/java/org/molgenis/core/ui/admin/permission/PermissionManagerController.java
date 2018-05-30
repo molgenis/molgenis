@@ -46,11 +46,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
-import static org.molgenis.data.security.SidUtils.createRoleSid;
-import static org.molgenis.data.security.SidUtils.createUserSid;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 
 @Controller
 @RequestMapping(URI)

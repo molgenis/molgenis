@@ -1,14 +1,12 @@
-package org.molgenis.data.security;
+package org.molgenis.security.core;
 
-import org.molgenis.data.security.auth.Role;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Sid;
 
 /**
- * Util class to create security identities for {@link User users} and {@link Role roles}.
+ * Util class to create security identities for users and roles.
  *
  * @see Sid
  */
@@ -16,11 +14,6 @@ public class SidUtils
 {
 	private SidUtils()
 	{
-	}
-
-	public static Sid createUserSid(User user)
-	{
-		return createUserSid(user.getUsername());
 	}
 
 	public static Sid createUserSid(String username)
@@ -35,15 +28,10 @@ public class SidUtils
 		}
 	}
 
-	public static Sid createRoleSid(String roleName)
+	public static Sid createRoleSid(String rolename)
 	{
-		String roleAuthority = createRoleAuthority(roleName);
+		String roleAuthority = createRoleAuthority(rolename);
 		return new GrantedAuthoritySid(roleAuthority);
-	}
-
-	public static Sid createRoleSid(Role role)
-	{
-		return createRoleSid(role.getName());
 	}
 
 	public static String createRoleAuthority(String roleName)

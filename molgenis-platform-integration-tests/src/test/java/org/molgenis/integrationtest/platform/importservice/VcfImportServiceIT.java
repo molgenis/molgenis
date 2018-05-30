@@ -25,7 +25,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.UploadPackage.UPLOAD;
-import static org.molgenis.data.security.SidUtils.createUserSid;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 public class VcfImportServiceIT extends ImportServiceIT

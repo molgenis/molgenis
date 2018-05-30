@@ -15,7 +15,7 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.data.security.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;

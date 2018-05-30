@@ -3,7 +3,7 @@ package org.molgenis.security.permission;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionSystemService;
-import org.molgenis.data.security.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
