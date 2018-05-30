@@ -1,6 +1,7 @@
 package org.molgenis.app.manager.controller;
 
 import net.lingala.zip4j.exception.ZipException;
+import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.PluginController;
@@ -13,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static java.io.File.separator;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.*;
 
 @Controller
 @RequestMapping(AppManagerController.URI)
@@ -71,6 +74,11 @@ public class AppManagerController extends PluginController
 		InputStream fileInputStream = multipartFile.getInputStream();
 		String filename = multipartFile.getOriginalFilename();
 		String formFieldName = multipartFile.getName();
-		appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+		String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+		String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
+		AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
+		String htmlTemplate = appManagerService.extractFileContent(APPS_DIR + separator + appConfig.getUri(),
+				ZIP_INDEX_FILE);
+		appManagerService.configureApp(appConfig, htmlTemplate);
 	}
 }
