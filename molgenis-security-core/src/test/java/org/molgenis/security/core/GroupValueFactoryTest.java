@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -15,7 +16,7 @@ public class GroupValueFactoryTest
 	@Test
 	public void testCreateGroup()
 	{
-		GroupValue bbmri_eric = groupValueFactory.createGroup(null, "BBMRI Eric",
+		GroupValue bbmri_eric = groupValueFactory.createGroup("bbmri-eric", "BBMRI Eric",
 				"The world's largest biobank catalogue", true, ImmutableList.of("Manager", "Editor", "Viewer"));
 
 		RoleValue manager = RoleValue.builder()
@@ -41,7 +42,7 @@ public class GroupValueFactoryTest
 											   .setDescription("The world's largest biobank catalogue")
 											   .build();
 
-		GroupValue.Builder expectedBuilder = GroupValue.builder().setName("bbmri_eric")
+		GroupValue.Builder expectedBuilder = GroupValue.builder().setName("bbmri-eric")
 													   .setLabel("BBMRI Eric")
 													   .setDescription("The world's largest biobank catalogue")
 													   .setPublic(true)
@@ -50,5 +51,19 @@ public class GroupValueFactoryTest
 		expectedBuilder.rolesBuilder().add(manager).add(editor).add(viewer);
 
 		assertEquals(bbmri_eric, expectedBuilder.build());
+	}
+
+	@Test(dataProvider = "roleNameProvider")
+	public void testCreateRoleName(String groupName, String roleLabel, String roleName)
+	{
+		assertEquals(GroupValueFactory.createRoleName(groupName, roleLabel), roleName);
+	}
+
+	@DataProvider(name = "roleNameProvider")
+	public Object[][] roleNameProvider()
+	{
+		return new Object[][] { new Object[] { "bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER" },
+				new Object[] { "bbmri-eric", "Manager", "BBMRI_ERIC_MANAGER" },
+				new Object[] { "patientenfederatie-nederland", "Member", "PATIENTENFEDERATIE_NEDERLAND_MEMBER" } };
 	}
 }
