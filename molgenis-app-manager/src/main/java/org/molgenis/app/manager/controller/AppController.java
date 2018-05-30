@@ -4,6 +4,9 @@ import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.plugin.model.PluginIdentity;
+import org.molgenis.data.plugin.model.PluginPermissionDeniedException;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -27,6 +30,7 @@ import java.io.InputStream;
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppController.URI;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 @Controller
@@ -37,36 +41,44 @@ public class AppController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final AppManagerService appManagerService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final AppSettings appSettings;
 	private final MenuReaderService menuReaderService;
 
-	public AppController(AppManagerService appManagerService,
+	public AppController(AppManagerService appManagerService, UserPermissionEvaluator userPermissionEvaluator,
 			AppSettings appSettings, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.appSettings = requireNonNull(appSettings);
 		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
-	@GetMapping("/{uri}/**")
+	@GetMapping("/{pluginId}/**")
 	@Nullable
-	public ModelAndView serveApp(@PathVariable String uri, Model model, HttpServletRequest request,
+	public ModelAndView serveApp(@PathVariable String pluginId, Model model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException
 	{
-		String wildCardPath = extractWildcardPath(request, uri);
+		PluginIdentity pluginIdentity = new PluginIdentity(pluginId);
+		if (!userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN))
+		{
+			throw new PluginPermissionDeniedException(pluginId, VIEW_PLUGIN);
+		}
+
+		String wildCardPath = extractWildcardPath(request, pluginId);
 		if (wildCardPath.isEmpty())
 		{
-			RedirectView redirectView = new RedirectView(findAppMenuURL(uri));
+			RedirectView redirectView = new RedirectView(findAppMenuURL(pluginId));
 			redirectView.setExposePathVariables(false);
 			return new ModelAndView(redirectView);
 		}
 
-		AppResponse appResponse = appManagerService.getAppByUri(uri);
+		AppResponse appResponse = appManagerService.getAppByUri(pluginId);
 
 		if (!appResponse.getIsActive())
 		{
-			throw new AppIsInactiveException(uri);
+			throw new AppIsInactiveException(pluginId);
 		}
 		else if (isResourceRequest(wildCardPath))
 		{
@@ -76,14 +88,13 @@ public class AppController extends PluginController
 		}
 		else
 		{
-			return serveAppTemplate(uri, model, appResponse);
+			return serveAppTemplate(pluginId, model, appResponse);
 		}
 	}
 
 	private static boolean isResourceRequest(String wildCardPath)
 	{
-		return wildCardPath.startsWith("/js/") || wildCardPath.startsWith("/css/") || wildCardPath.startsWith(
-				"/img/");
+		return wildCardPath.startsWith("/js/") || wildCardPath.startsWith("/css/") || wildCardPath.startsWith("/img/");
 	}
 
 	private ModelAndView serveAppTemplate(@PathVariable String uri, Model model, AppResponse appResponse)
