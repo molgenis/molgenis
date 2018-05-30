@@ -34,7 +34,6 @@ public class BeaconAPIIT
 	private static final String BEACON_TEST_USER_PASSWORD = "beacon_test_user_password";
 
 	private String adminToken;
-	private String testUserId;
 	private String userToken;
 
 	private Gson gson = new Gson();
@@ -76,7 +75,6 @@ public class BeaconAPIIT
 		adminToken = login(adminUserName, adminPassword);
 		testUsername = "beacon_test_user" + System.currentTimeMillis();
 		createUser(adminToken, testUsername, BEACON_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, testUsername);
 
 		RestTestUtils.uploadVCFToEntity(adminToken, "/beacon_set.vcf", BEACON_SET);
 
@@ -135,7 +133,7 @@ public class BeaconAPIIT
 			   .all()
 			   .statusCode(CREATED);
 
-		setGrantedRepositoryPermissions(adminToken, testUserId,
+		setGrantedRepositoryPermissions(adminToken, testUsername,
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", READ)
 														  .put("sys_md_EntityType", READ)
 														  .put("sys_md_Attribute", READ)
@@ -261,8 +259,8 @@ public class BeaconAPIIT
 		// Cleanup beacon data
 		removeEntities(adminToken, Arrays.asList(BEACON_SET, BEACON_SET_SAMPLE));
 
-		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		// Clean up permissionsr
+		removeRightsForUser(adminToken, testUsername);
 	}
 
 }

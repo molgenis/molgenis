@@ -19,7 +19,6 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
@@ -112,10 +111,6 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		MutableAclClassService mutableAclClassService;
 		@Mock
 		SystemEntityTypeRegistry systemEntityTypeRegistry;
-		@Mock
-		RoleMetadata roleMetadata;
-		@Mock
-		UserMetaData userMetaData;
 
 		public Config()
 		{
@@ -150,13 +145,12 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		public PermissionManagerController permissionManagerController()
 		{
 			return new PermissionManagerController(dataService(), mutableAclService(), mutableAclClassService(),
-					systemEntityTypeRegistry(), roleMetadata, userMetaData);
+					systemEntityTypeRegistry());
 		}
 
 		void resetMocks()
 		{
-			reset(dataService, mutableAclService, mutableAclClassService, systemEntityTypeRegistry, roleMetadata,
-					userMetaData);
+			reset(dataService, mutableAclService, mutableAclClassService, systemEntityTypeRegistry);
 		}
 	}
 
@@ -241,7 +235,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Test(expectedExceptions = NullPointerException.class)
 	public void PermissionManagerController()
 	{
-		new PermissionManagerController(null, null, null, null, null, null);
+		new PermissionManagerController(null, null, null, null);
 	}
 
 	@Test

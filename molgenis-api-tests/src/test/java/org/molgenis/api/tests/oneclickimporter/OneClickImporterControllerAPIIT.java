@@ -49,7 +49,6 @@ public class OneClickImporterControllerAPIIT
 
 	private String testUserToken;
 	private String adminToken;
-	private String testUserId;
 
 	// Fields to store created entity ids from import test, used during cleanup to remove the entities
 	private List<String> importedEntities = new ArrayList<>();
@@ -76,9 +75,8 @@ public class OneClickImporterControllerAPIIT
 
 		oneClickImporterTestUsername = "one_click_importer_test_user" + System.currentTimeMillis();
 		createUser(adminToken, oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, oneClickImporterTestUsername);
 
-		setGrantedRepositoryPermissions(adminToken, testUserId,
+		setGrantedRepositoryPermissions(adminToken, oneClickImporterTestUsername,
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
 														  .put("sys_md_EntityType", WRITE)
 														  .put("sys_md_Attribute", WRITE)
@@ -87,9 +85,9 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_job_JobExecution", READ)
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
-		setGrantedPackagePermissions(adminToken, testUserId,
+		setGrantedPackagePermissions(adminToken, oneClickImporterTestUsername,
 				ImmutableMap.<String, Permission>builder().put("base_upload", WRITEMETA).build());
-		setGrantedPluginPermissions(adminToken, testUserId, "one-click-importer");
+		setGrantedPluginPermissions(adminToken, oneClickImporterTestUsername, "one-click-importer");
 
 		testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
 	}
@@ -190,7 +188,7 @@ public class OneClickImporterControllerAPIIT
 		removeImportJobs(adminToken, importJobIds);
 
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, oneClickImporterTestUsername);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

@@ -10,7 +10,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="entity-class-role-select">Select Role:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="roleName" id="entity-class-role-select">
+                        <select class="form-control" name="rolename" id="entity-class-role-select">
                         <#list roles as role>
                             <option value="${role.name?html}"<#if role_index == 0>
                                     selected</#if>>${role.name?html}</option>
@@ -47,9 +47,9 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="entity-class-user-select">Select User:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="userId" id="entity-class-user-select">
+                        <select class="form-control" name="username" id="entity-class-user-select">
                         <#list users as user>
-                            <option value="${user.id?html}"<#if user_index == 0>
+                            <option value="${user.username?html}"<#if user_index == 0>
                                     selected</#if>>${user.username?html}</option>
                         </#list>
                         </select>

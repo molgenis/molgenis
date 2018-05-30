@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -18,11 +17,8 @@ import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Role;
-import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.security.acl.MutableAclClassService;
-import org.molgenis.data.security.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
@@ -50,6 +46,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.data.security.SidUtils.createRoleSid;
+import static org.molgenis.data.security.SidUtils.createUserSid;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.PermissionSet.*;
@@ -67,20 +65,15 @@ public class PermissionManagerController extends PluginController
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final RoleMetadata roleMetadata;
-	private final UserMetaData userMetaData;
 
 	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry,
-			RoleMetadata roleMetadata, UserMetaData userMetaData)
+			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
-		this.roleMetadata = requireNonNull(roleMetadata);
-		this.userMetaData = requireNonNull(userMetaData);
 	}
 
 	@GetMapping
@@ -112,51 +105,51 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/entityclass/role/{roleName}")
+	@GetMapping("/entityclass/role/{rolename}")
 	@ResponseBody
-	public Permissions getRoleEntityClassPermissions(@PathVariable String roleName)
+	public Permissions getRoleEntityClassPermissions(@PathVariable String rolename)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		return getEntityTypePermissions(sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/plugin/user/{userId}")
+	@GetMapping("/plugin/user/{username}")
 	@ResponseBody
-	public Permissions getUserPluginPermissions(@PathVariable String userId)
+	public Permissions getUserPluginPermissions(@PathVariable String username)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		return getPluginPermissions(sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/package/user/{userId}")
+	@GetMapping("/package/user/{username}")
 	@ResponseBody
-	public Permissions getUserPackagePermissions(@PathVariable String userId)
+	public Permissions getUserPackagePermissions(@PathVariable String username)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		return getPackagePermissions(sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/package/role/{roleName}")
+	@GetMapping("/package/role/{rolename}")
 	@ResponseBody
-	public Permissions getRolePackagePermissions(@PathVariable String roleName)
+	public Permissions getRolePackagePermissions(@PathVariable String rolename)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		return getPackagePermissions(sid);
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/entityclass/user/{userId}")
+	@GetMapping("/entityclass/user/{username}")
 	@ResponseBody
-	public Permissions getUserEntityClassPermissions(@PathVariable String userId)
+	public Permissions getUserEntityClassPermissions(@PathVariable String username)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		return getEntityTypePermissions(sid);
 	}
 
@@ -164,9 +157,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/plugin/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRolePluginPermissions(@RequestParam String roleName, WebRequest webRequest)
+	public void updateRolePluginPermissions(@RequestParam String rolename, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		updatePluginPermissions(webRequest, sid);
 	}
 
@@ -174,9 +167,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/entityclass/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRoleEntityClassPermissions(@RequestParam String roleName, WebRequest webRequest)
+	public void updateRoleEntityClassPermissions(@RequestParam String rolename, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		updateEntityTypePermissions(webRequest, sid);
 	}
 
@@ -184,9 +177,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/package/role")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRolePackagePermissions(@RequestParam String roleName, WebRequest webRequest)
+	public void updateRolePackagePermissions(@RequestParam String rolename, WebRequest webRequest)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		updatePackagePermissions(webRequest, sid);
 	}
 
@@ -194,9 +187,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/package/user")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUserPackagePermissions(@RequestParam String userId, WebRequest webRequest)
+	public void updateUserPackagePermissions(@RequestParam String username, WebRequest webRequest)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		updatePackagePermissions(webRequest, sid);
 	}
 
@@ -204,9 +197,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/plugin/user")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUserPluginPermissions(@RequestParam String userId, WebRequest webRequest)
+	public void updateUserPluginPermissions(@RequestParam String username, WebRequest webRequest)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		updatePluginPermissions(webRequest, sid);
 	}
 
@@ -224,11 +217,11 @@ public class PermissionManagerController extends PluginController
 
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
-	@GetMapping("/plugin/role/{roleName}")
+	@GetMapping("/plugin/role/{rolename}")
 	@ResponseBody
-	public Permissions getRolePluginPermissions(@PathVariable String roleName)
+	public Permissions getRolePluginPermissions(@PathVariable String rolename)
 	{
-		Sid sid = getSidForRoleName(roleName);
+		Sid sid = createRoleSid(rolename);
 		return getPluginPermissions(sid);
 	}
 
@@ -244,9 +237,9 @@ public class PermissionManagerController extends PluginController
 	@Transactional
 	@PostMapping("/update/entityclass/user")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUserEntityClassPermissions(@RequestParam String userId, WebRequest webRequest)
+	public void updateUserEntityClassPermissions(@RequestParam String username, WebRequest webRequest)
 	{
-		Sid sid = getSidForUserId(userId);
+		Sid sid = createUserSid(username);
 		updateEntityTypePermissions(webRequest, sid);
 	}
 
@@ -461,38 +454,6 @@ public class PermissionManagerController extends PluginController
 		deleteAceIfExists(sid, acl);
 		acl.insertAce(0, permission, sid, true);
 		mutableAclService.updateAcl(acl);
-	}
-
-	private Sid getSidForUserId(String userId)
-	{
-		User user = getUser(userId);
-		return SidUtils.createUserSid(user);
-	}
-
-	private Sid getSidForRoleName(String roleName)
-	{
-		Role role = getRole(roleName);
-		return SidUtils.createRoleSid(role);
-	}
-
-	private Role getRole(String roleName)
-	{
-		Role role = dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, roleName).findOne();
-		if (role == null)
-		{
-			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(RoleMetadata.NAME), roleName);
-		}
-		return role;
-	}
-
-	private User getUser(String userId)
-	{
-		User user = dataService.findOneById(USER, userId, User.class);
-		if (user == null)
-		{
-			throw new UnknownEntityException(userMetaData, userId);
-		}
-		return user;
 	}
 
 	/**

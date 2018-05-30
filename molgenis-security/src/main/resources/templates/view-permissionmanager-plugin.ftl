@@ -10,7 +10,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="plugin-role-select">Select Role:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="roleName" id="plugin-role-select">
+                        <select class="form-control" name="rolename" id="plugin-role-select">
                         <#list roles as role>
                             <option value="${role.name?html}"<#if role_index == 0>
                                     selected</#if>>${role.name?html}</option>
@@ -44,9 +44,9 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label" for="plugin-user-select">Select User:</label>
                     <div class="col-md-4">
-                        <select class="form-control" name="userId" id="plugin-user-select">
+                        <select class="form-control" name="username" id="plugin-user-select">
                         <#list users as user>
-                            <option value="${user.id?html}"<#if user_index == 0>
+                            <option value="${user.username?html}"<#if user_index == 0>
                                     selected</#if>>${user.username?html}</option>
                         </#list>
                         </select>
