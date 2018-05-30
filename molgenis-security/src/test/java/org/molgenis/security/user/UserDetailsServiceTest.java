@@ -76,7 +76,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("roleId");
+		when(role.getName()).thenReturn("MY_ROLE");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
@@ -84,7 +84,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_roleId"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 
@@ -106,7 +106,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("roleId");
+		when(role.getName()).thenReturn("MY_ROLE");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
@@ -114,7 +114,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_roleId"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 
@@ -136,14 +136,14 @@ public class UserDetailsServiceTest extends AbstractMockitoTest
 
 		when(currentMembership.isCurrent()).thenReturn(true);
 		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("roleId");
+		when(role.getName()).thenReturn("MY_ROLE");
 		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
 						.eq(RoleMembershipMetadata.USER, user)
 						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
 
 		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
 		userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_roleId"));
+		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
 		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
 		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
 
