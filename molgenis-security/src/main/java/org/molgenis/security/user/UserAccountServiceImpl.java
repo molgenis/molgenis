@@ -1,6 +1,5 @@
 package org.molgenis.security.user;
 
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -27,14 +26,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public Iterable<Group> getCurrentUserGroups()
-	{
-		return userService.getUserGroups(SecurityUtils.getCurrentUsername());
-	}
-
-	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_useraccount')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_USER')")
 	@Transactional
 	public void updateCurrentUser(User updatedCurrentUser)
 	{
@@ -53,7 +45,7 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_useraccount')")
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_USER')")
 	@Transactional
 	public boolean validateCurrentUserPassword(String password)
 	{

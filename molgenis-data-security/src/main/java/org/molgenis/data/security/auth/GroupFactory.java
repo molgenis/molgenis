@@ -5,10 +5,10 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GroupFactory extends AbstractSystemEntityFactory<Group, GroupMetaData, String>
+public class GroupFactory extends AbstractSystemEntityFactory<Group, GroupMetadata, String>
 {
-	GroupFactory(GroupMetaData groupMetaData, EntityPopulator entityPopulator)
+	GroupFactory(GroupMetadata groupMetadata, EntityPopulator entityPopulator)
 	{
-		super(Group.class, groupMetaData, entityPopulator);
+		super(Group.class, groupMetadata, entityPopulator);
 	}
 }

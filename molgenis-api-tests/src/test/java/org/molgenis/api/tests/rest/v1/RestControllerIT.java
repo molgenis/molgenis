@@ -202,7 +202,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'test.csv' of type 'Freemarker template'."));
+			   .body("errors[0].message", equalTo("Unknown entity with 'Id' 'test.csv' of type 'Freemarker template'."));
 		// @formatter:on
 	}
 

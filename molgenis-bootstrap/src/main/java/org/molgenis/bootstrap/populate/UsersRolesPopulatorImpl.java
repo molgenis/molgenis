@@ -1,11 +1,10 @@
 package org.molgenis.bootstrap.populate;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.GroupFactory;
+import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,20 +16,21 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 
 @Service
-public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
+public class UsersRolesPopulatorImpl implements UsersRolesPopulator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(UsersGroupsPopulatorImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UsersRolesPopulatorImpl.class);
 
 	private static final String USERNAME_ADMIN = "admin";
 
 	private final DataService dataService;
 	private final UserFactory userFactory;
-	private final GroupFactory groupFactory;
+	private final RoleFactory roleFactory;
 
 	@Value("${admin.password:@null}")
 	private String adminPassword;
@@ -39,11 +39,11 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	UsersGroupsPopulatorImpl(DataService dataService, UserFactory userFactory, GroupFactory groupFactory)
+	UsersRolesPopulatorImpl(DataService dataService, UserFactory userFactory, RoleFactory roleFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userFactory = requireNonNull(userFactory);
-		this.groupFactory = requireNonNull(groupFactory);
+		this.roleFactory = requireNonNull(roleFactory);
 	}
 
 	@Override
@@ -77,12 +77,18 @@ public class UsersGroupsPopulatorImpl implements UsersGroupsPopulator
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
 
-		// create all users group
-		Group allUsersGroup = groupFactory.create();
-		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
+		// create user role
+		Role userRole = roleFactory.create();
+		userRole.setName(ROLE_USER);
+		userRole.setLabel("User");
+		userRole.setLabel("en", "User");
+		userRole.setLabel("nl", "Gebruiker");
+		userRole.setDescription("All authenticated users are a member of this Role.");
+		userRole.setDescription("en", "All authenticated users are a member of this role.");
+		userRole.setDescription("nl", "Alle geauthenticeerde gebruikers hebben deze rol.");
 
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(GROUP, allUsersGroup);
+		dataService.add(ROLE, userRole);
 	}
 }

@@ -11,15 +11,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import static org.molgenis.core.ui.admin.usermanager.UserManagerController.URI;
+import static org.molgenis.core.ui.admin.usermanager.UserManagerController.VIEW_STATE;
 
 @Api("User manager")
 @Controller
 @RequestMapping(URI)
-@SessionAttributes("viewState")
-// either users or groups
+@SessionAttributes(VIEW_STATE)
 public class UserManagerController extends PluginController
 {
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
+	static final String VIEW_STATE = "viewState";
 	private final UserManagerService pluginUserManagerService;
 
 	public UserManagerController(UserManagerService pluginUserManagerService)
@@ -38,9 +39,11 @@ public class UserManagerController extends PluginController
 	public String init(Model model)
 	{
 		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
-		model.addAttribute("groups", this.pluginUserManagerService.getAllGroups());
 
-		if (!model.containsAttribute("viewState")) model.addAttribute("viewState", "users");
+		if (!model.containsAttribute(VIEW_STATE))
+		{
+			model.addAttribute(VIEW_STATE, "users");
+		}
 
 		return "view-usermanager";
 	}
@@ -52,7 +55,7 @@ public class UserManagerController extends PluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void setViewState(@PathVariable("viewState") String viewState, Model model)
 	{
-		model.addAttribute("viewState", viewState);
+		model.addAttribute(VIEW_STATE, viewState);
 	}
 
 	@ApiOperation("Sets activation status for a user")
@@ -65,28 +68,14 @@ public class UserManagerController extends PluginController
 	{
 		ActivationResponse activationResponse = new ActivationResponse();
 		activationResponse.setId(activation.getId());
-		activationResponse.setType(activation.getType());
-		if ("user".equals(activation.getType()))
-		{
-			this.pluginUserManagerService.setActivationUser(activation.getId(), activation.getActive());
-			activationResponse.setSuccess(true);
-		}
-		else if ("group".equals(activation.getType()))
-		{
-			this.pluginUserManagerService.setActivationGroup(activation.getId(), activation.getActive());
-			activationResponse.setSuccess(true);
-		}
-		else throw new RuntimeException(
-					"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: "
-							+ activation.getType());
-
+		pluginUserManagerService.setActivationUser(activation.getId(), activation.getActive());
+		activationResponse.setSuccess(true);
 		return activationResponse;
 	}
 
 	public class ActivationResponse
 	{
 		private boolean success = false;
-		private String type;
 		private String id;
 
 		public boolean isSuccess()
@@ -97,16 +86,6 @@ public class UserManagerController extends PluginController
 		public void setSuccess(boolean success)
 		{
 			this.success = success;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public void setType(String type)
-		{
-			this.type = type;
 		}
 
 		public String getId()
@@ -122,31 +101,13 @@ public class UserManagerController extends PluginController
 
 	public class Activation
 	{
-		private String type;
 		private String id;
 		private Boolean active;
 
-		Activation(String type, String id, Boolean active)
+		Activation(String id, Boolean active)
 		{
 			this.id = id;
-			this.type = type;
 			this.active = active;
-		}
-
-		/**
-		 * @return the type
-		 */
-		public String getType()
-		{
-			return type;
-		}
-
-		/**
-		 * @param type the type to set
-		 */
-		public void setType(String type)
-		{
-			this.type = type;
 		}
 
 		/**
@@ -179,122 +140,6 @@ public class UserManagerController extends PluginController
 		public void setActive(Boolean active)
 		{
 			this.active = active;
-		}
-	}
-
-	@ApiOperation("Change group membership")
-	@ApiResponses({
-			@ApiResponse(code = 200, message = "Updated groupMemberShip", response = GroupMembershipResponse.class), })
-	@PutMapping("/changeGroupMembership")
-	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody
-	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
-	{
-		GroupMembershipResponse groupMembershipResponse = new GroupMembershipResponse();
-		groupMembershipResponse.setUserId(groupMembership.getUserId());
-
-		if (null != groupMembership.getMember())
-		{
-			if (groupMembership.getMember())
-			{
-				this.pluginUserManagerService.addUserToGroup(groupMembership.getGroupId(), groupMembership.getUserId());
-			}
-			else if (!groupMembership.getMember())
-			{
-				this.pluginUserManagerService.removeUserFromGroup(groupMembership.getGroupId(),
-						groupMembership.getUserId());
-			}
-
-			groupMembershipResponse.setSuccess(true);
-		}
-
-		return groupMembershipResponse;
-	}
-
-	public class GroupMembership
-	{
-		/**
-		 * @return the userId
-		 */
-		public String getUserId()
-		{
-			return userId;
-		}
-
-		/**
-		 * @param userId the userId to set
-		 */
-		public void setUserId(String userId)
-		{
-			this.userId = userId;
-		}
-
-		/**
-		 * @return the groupId
-		 */
-		public String getGroupId()
-		{
-			return groupId;
-		}
-
-		/**
-		 * @param groupId the groupId to set
-		 */
-		public void setGroupId(String groupId)
-		{
-			this.groupId = groupId;
-		}
-
-		/**
-		 * @return the member
-		 */
-		public Boolean getMember()
-		{
-			return member;
-		}
-
-		/**
-		 * @param member the member to set
-		 */
-		public void setMember(Boolean member)
-		{
-			this.member = member;
-		}
-
-		String userId;
-		String groupId;
-		Boolean member;
-	}
-
-	public class GroupMembershipResponse
-	{
-		String userId;
-		boolean success;
-
-		public boolean isSuccess()
-		{
-			return success;
-		}
-
-		public void setSuccess(boolean success)
-		{
-			this.success = success;
-		}
-
-		/**
-		 * @return the userId
-		 */
-		public String getUserId()
-		{
-			return userId;
-		}
-
-		/**
-		 * @param userId the userId to set
-		 */
-		public void setUserId(String userId)
-		{
-			this.userId = userId;
 		}
 	}
 }

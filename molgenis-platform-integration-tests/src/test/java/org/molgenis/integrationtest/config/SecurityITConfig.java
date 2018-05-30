@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 		TokenMetaData.class, SecurityPackage.class, UserMetaData.class,
 		UserAccountServiceImpl.class, UserServiceImpl.class, BCryptPasswordEncoder.class,
 		PermissionSystemServiceImpl.class, UserFactory.class, AggregationTestConfig.class,
-		RoleHierarchyAuthoritiesMapper.class, GroupMetaData.class, AuthenticationSettingsImpl.class,
+		RoleHierarchyAuthoritiesMapper.class, RoleMetadata.class, AuthenticationSettingsImpl.class,
 		PrincipalSecurityContextRegistryImpl.class, SecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig

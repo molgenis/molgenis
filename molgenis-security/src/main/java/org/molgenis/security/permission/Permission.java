@@ -3,7 +3,7 @@ package org.molgenis.security.permission;
 public class Permission
 {
 	private String type;
-	private String group;
+	private String role;
 
 	public String getType()
 	{
@@ -15,14 +15,14 @@ public class Permission
 		this.type = type;
 	}
 
-	public String getGroup()
+	public String getRole()
 	{
-		return group;
+		return role;
 	}
 
-	public void setGroup(String group)
+	public void setRole(String role)
 	{
-		this.group = group;
+		this.role = role;
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class Permission
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((group == null) ? 0 : group.hashCode());
+		result = prime * result + ((role == null) ? 0 : role.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
@@ -42,22 +42,21 @@ public class Permission
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		Permission other = (Permission) obj;
-		if (group == null)
+		if (role == null)
 		{
-			if (other.group != null) return false;
+			if (other.role != null) return false;
 		}
-		else if (!group.equals(other.group)) return false;
+		else if (!role.equals(other.role)) return false;
 		if (type == null)
 		{
-			if (other.type != null) return false;
+			return other.type == null;
 		}
-		else if (!type.equals(other.type)) return false;
-		return true;
+		else return type.equals(other.type);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "Permission [type=" + type + ", group=" + group + "]";
+		return "Permission [type=" + type + ", role=" + role + "]";
 	}
 }

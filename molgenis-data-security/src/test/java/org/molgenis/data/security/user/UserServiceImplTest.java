@@ -49,7 +49,7 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DataService dataService;
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void MolgenisUserServiceImpl()
 	{
 		new UserServiceImpl(null);

@@ -1,10 +1,7 @@
 package org.molgenis.core.ui.admin.usermanager;
 
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.User;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class UserViewData
@@ -17,9 +14,8 @@ public class UserViewData
 	private String fullName; // first, middle, last name
 	private Boolean active;
 	private Boolean superuser;
-	private final List<String> groupList = new ArrayList<>();
 
-	UserViewData(User mu, List<Group> groups)
+	UserViewData(User mu)
 	{
 		this(mu.getId(), mu.getUsername());
 		firstName = (null == mu.getFirstName() ? "" : mu.getFirstName());
@@ -31,10 +27,6 @@ public class UserViewData
 		this.active = mu.isActive();
 		this.superuser = mu.isSuperuser();
 
-		for (Group mg : groups)
-		{
-			this.groupList.add(mg.getId());
-		}
 	}
 
 	UserViewData(String id, final String username)
@@ -76,26 +68,22 @@ public class UserViewData
 		return this.superuser;
 	}
 
-	public Boolean isGroupMember(String id)
-	{
-		return groupList.contains(id);
-	}
-
 	@Override
 	public boolean equals(Object o)
 	{
 		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (!(o instanceof UserViewData)) return false;
 		UserViewData that = (UserViewData) o;
-		return Objects.equals(id, that.id) && Objects.equals(username, that.username) && Objects.equals(firstName,
-				that.firstName) && Objects.equals(middleName, that.middleName) && Objects.equals(lastName,
-				that.lastName) && Objects.equals(fullName, that.fullName) && Objects.equals(active, that.active)
-				&& Objects.equals(superuser, that.superuser) && Objects.equals(groupList, that.groupList);
+		return Objects.equals(getId(), that.getId()) && Objects.equals(getUsername(), that.getUsername())
+				&& Objects.equals(firstName, that.firstName) && Objects.equals(middleName, that.middleName)
+				&& Objects.equals(lastName, that.lastName) && Objects.equals(getFullName(), that.getFullName())
+				&& Objects.equals(active, that.active) && Objects.equals(superuser, that.superuser);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(id, username, firstName, middleName, lastName, fullName, active, superuser, groupList);
+
+		return Objects.hash(getId(), getUsername(), firstName, middleName, lastName, getFullName(), active, superuser);
 	}
 }

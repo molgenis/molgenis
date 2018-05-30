@@ -4,9 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.GroupMember;
-import org.molgenis.data.security.auth.GroupMemberFactory;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -25,13 +22,10 @@ import java.net.URI;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
 
 @Service
@@ -44,19 +38,16 @@ public class AccountServiceImpl implements AccountService
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final AuthenticationSettings authenticationSettings;
-	private final GroupMemberFactory groupMemberFactory;
 	private final IdGenerator idGenerator;
 
-	public AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService,
-			AppSettings appSettings, AuthenticationSettings authenticationSettings,
-			GroupMemberFactory groupMemberFactory, IdGenerator idGenerator)
+	AccountServiceImpl(DataService dataService, MailSender mailSender, UserService userService, AppSettings appSettings,
+			AuthenticationSettings authenticationSettings, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.authenticationSettings = requireNonNull(authenticationSettings);
-		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 		this.idGenerator = requireNonNull(idGenerator);
 	}
 
@@ -92,25 +83,14 @@ public class AccountServiceImpl implements AccountService
 			String activationEmailAddress = user.getEmail();
 			if (activationEmailAddress == null || activationEmailAddress.isEmpty())
 				throw new MolgenisDataException("User '" + user.getUsername() + "' is missing required email address");
-			activationEmailAddresses = asList(activationEmailAddress);
+			activationEmailAddresses = singletonList(activationEmailAddress);
 		}
 
 		// create user
 		user.setActivationCode(activationCode);
 		user.setActive(false);
 		dataService.add(USER, user);
-		LOG.debug("created user " + user.getUsername());
-
-		// add user to group
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		GroupMember groupMember = null;
-		if (group != null)
-		{
-			groupMember = groupMemberFactory.create();
-			groupMember.setGroup(group);
-			groupMember.setUser(user);
-			dataService.add(GROUP_MEMBER, groupMember);
-		}
+		LOG.debug("created user {}", user.getUsername());
 
 		// send activation email
 		URI activationUri = URI.create(baseActivationUri + '/' + activationCode);
@@ -127,18 +107,16 @@ public class AccountServiceImpl implements AccountService
 		{
 			LOG.error("Could not send signup mail", mce);
 
-			if (groupMember != null)
-			{
-				dataService.delete(GROUP_MEMBER, groupMember);
-			}
-
 			dataService.delete(USER, user);
 
 			throw new MolgenisUserException(
 					"An error occurred. Please contact the administrator. You are not signed up!");
 		}
-		LOG.debug("send activation email for user " + user.getUsername() + " to " + StringUtils.join(
-				activationEmailAddresses, ','));
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("send activation email for user {} to {}", user.getUsername(),
+					StringUtils.join(activationEmailAddresses, ','));
+		}
 
 	}
 

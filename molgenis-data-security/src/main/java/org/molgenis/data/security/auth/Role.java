@@ -2,33 +2,27 @@ package org.molgenis.data.security.auth;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.auth.GroupMetadata.*;
+import static org.molgenis.data.security.auth.RoleMetadata.*;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
-public class Group extends StaticEntity
+public class Role extends StaticEntity
 {
-	public Group(Entity entity)
+	public Role(Entity entity)
 	{
 		super(entity);
 	}
 
-	public Group(EntityType entityType)
+	public Role(EntityType entityType)
 	{
 		super(entityType);
 	}
 
-	public Group(String id, EntityType entityType)
+	public Role(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);
-	}
-
-	public void setId(String id)
-	{
-		set(ID, id);
 	}
 
 	public String getId()
@@ -36,14 +30,19 @@ public class Group extends StaticEntity
 		return getString(ID);
 	}
 
-	public void setName(String name)
+	public void setId(String id)
 	{
-		set(NAME, name);
+		set(ID, id);
 	}
 
 	public String getName()
 	{
 		return getString(NAME);
+	}
+
+	public void setName(String name)
+	{
+		set(NAME, name);
 	}
 
 	public String getLabel()
@@ -86,33 +85,4 @@ public class Group extends StaticEntity
 		set(getI18nAttributeName(DESCRIPTION, languageCode), label);
 	}
 
-	public void setPublic(boolean isPublic)
-	{
-		set(PUBLIC, isPublic);
-	}
-
-	public boolean isPublic()
-	{
-		return getBoolean(PUBLIC);
-	}
-
-	public Iterable<Role> getRoles()
-	{
-		return getEntities(ROLES, Role.class);
-	}
-
-	public void setRoles(Iterable<Role> roles)
-	{
-		set(ROLES, roles);
-	}
-
-	public void setRootPackage(Package rootPackage)
-	{
-		set(ROOT_PACKAGE, rootPackage);
-	}
-
-	public Package getRootPackage()
-	{
-		return getEntity(ROOT_PACKAGE, Package.class);
-	}
 }

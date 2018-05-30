@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.admin.user;
 
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -89,7 +88,6 @@ public class UserAccountController extends PluginController
 
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());
-		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		model.addAttribute("two_factor_authentication_app_option", twoFactorAuthenticationApp);
 		model.addAttribute("two_factor_authentication_user_enabled", isTwoFactorAuthenticationEnableForUser);
