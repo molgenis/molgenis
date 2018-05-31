@@ -68,9 +68,11 @@ public class AppManagerController extends PluginController
 	@PostMapping("/upload")
 	public void uploadApp(@RequestParam("file") MultipartFile multipartFile) throws IOException, ZipException
 	{
-		InputStream fileInputStream = multipartFile.getInputStream();
-		String filename = multipartFile.getOriginalFilename();
-		String formFieldName = multipartFile.getName();
-		appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+		try (InputStream fileInputStream = multipartFile.getInputStream())
+		{
+			String filename = multipartFile.getOriginalFilename();
+			String formFieldName = multipartFile.getName();
+			appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+		}
 	}
 }

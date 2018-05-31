@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponents;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -262,9 +263,9 @@ public class RestService
 				MultipartFile multipartFile = (MultipartFile) paramValue;
 
 				String id = idGenerator.generateId();
-				try
+				try (InputStream inputStream = multipartFile.getInputStream())
 				{
-					fileStore.store(multipartFile.getInputStream(), id);
+					fileStore.store(inputStream, id);
 				}
 				catch (IOException e)
 				{

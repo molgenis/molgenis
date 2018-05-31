@@ -41,7 +41,6 @@ public class FileStore
 		finally
 		{
 			IOUtils.closeQuietly(fos);
-			IOUtils.closeQuietly(is);
 		}
 		return file;
 	}
