@@ -1,28 +1,33 @@
 package org.molgenis.app.manager.controller;
 
-import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.DataService;
+import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,37 +37,53 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.testng.Assert.assertEquals;
 
-@Configuration
-@EnableWebMvc
-public class AppControllerTest
+@WebAppConfiguration
+@ContextConfiguration(classes = AppControllerTest.Config.class)
+public class AppControllerTest extends AbstractTestNGSpringContextTests
 {
 	private MockMvc mockMvc;
 
-	@Mock
+	@Autowired
+	private AppController appController;
+
+	@Autowired
+	private FallbackExceptionHandler fallbackExceptionHandler;
+
+	@Autowired
+	private SpringExceptionHandler springExceptionHandler;
+
+	@Autowired
+	private GlobalControllerExceptionHandler globalControllerExceptionHandler;
+
+	@Autowired
 	private AppManagerService appManagerService;
 
-	@Mock
+	@Autowired
 	private AppSettings appSettings;
 
-	@Mock
+	@Autowired
 	private LocaleResolver localeResolver;
 
-	@Mock
+	@Autowired
 	private MenuReaderService menuReaderService;
+
+	@Autowired
+	private UserPermissionEvaluator userPermissionEvaluator;
 
 	private AppResponse appResponse;
 
-	private FileStore fileStore = mock(FileStore.class);
+	@Autowired
+	private FileStore fileStore;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
-		messageSource.addMolgenisNamespaces("app-manager");
+		messageSource.addMolgenisNamespaces("app-manager", "data-plugin");
 		MessageSourceHolder.setMessageSource(messageSource);
 	}
 
@@ -100,17 +121,25 @@ public class AppControllerTest
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
-		AppController controller = new AppController(appManagerService, appSettings, menuReaderService, fileStore);
-		mockMvc = MockMvcBuilders.standaloneSetup(controller)
-								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
-										 new FallbackExceptionHandler(), new SpringExceptionHandler())
+		mockMvc = MockMvcBuilders.standaloneSetup(appController)
+								 .setControllerAdvice(globalControllerExceptionHandler, fallbackExceptionHandler,
+										 springExceptionHandler)
 								 .setLocaleResolver(localeResolver)
 								 .build();
+	}
+
+	@AfterMethod
+	public void afterMethod()
+	{
+		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
 	}
 
 	@Test
 	public void testServeApp() throws Exception
 	{
+		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri/"))
 			   .andExpect(status().isOk())
 			   .andExpect(model().attribute("app", appResponse))
@@ -119,14 +148,25 @@ public class AppControllerTest
 	}
 
 	@Test
+	public void testServeAppNoPermissions() throws Exception
+	{
+		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().isUnauthorized());
+	}
+
+	@Test
 	public void testServeAppRedirectToApp() throws Exception
 	{
+		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri")).andExpect(status().is3xxRedirection());
 	}
 
 	@Test
 	public void testServeAppInactiveApp() throws Exception
 	{
+		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
+
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
 		when(app.getUri()).thenReturn("uri");
@@ -142,28 +182,95 @@ public class AppControllerTest
 
 		AppResponse appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
-		String expectedMessage = "";
-		try
-		{
-			mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().is4xxClientError());
-		}
-		catch (Exception e)
-		{
-			expectedMessage = e.getCause().getMessage();
-		}
-		finally
-		{
-			assertEquals(expectedMessage, "uri:uri");
-		}
+
+		mockMvc.perform(get(AppController.URI + "/uri/"))
+			   .andExpect(status().is4xxClientError())
+			   .andExpect(model().attribute("errorMessageResponse",
+					   ErrorMessageResponse.create("Access denied for inactive app at location /app/uri", "AM07")))
+			   .andExpect(view().name("view-exception"));
 	}
 
 	@Test
 	public void testServeResource() throws Exception
 	{
+		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri/js/test.js"))
 			   .andExpect(status().isOk())
 			   .andReturn()
 			   .getResponse();
 
 	}
+
+	@Configuration
+	@EnableWebMvc
+	public static class Config
+	{
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public FileStore fileStore() {
+			return mock(FileStore.class);
+		}
+
+		@Bean
+		public AppController appController()
+		{
+			return new AppController(appManagerService(), userPermissionEvaluator(), appSettings(),
+					menuReaderService(), fileStore());
+		}
+
+		@Bean
+		public GlobalControllerExceptionHandler globalControllerExceptionHandler()
+		{
+			return new GlobalControllerExceptionHandler();
+		}
+
+		@Bean
+		public AppManagerService appManagerService()
+		{
+			return mock(AppManagerService.class);
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public LocaleResolver localeResolver()
+		{
+			return mock(LocaleResolver.class);
+		}
+
+		@Bean
+		public MenuReaderService menuReaderService()
+		{
+			return mock(MenuReaderService.class);
+		}
+
+		@Bean
+		public UserPermissionEvaluator userPermissionEvaluator()
+		{
+			return mock(UserPermissionEvaluator.class);
+		}
+
+		@Bean
+		public FallbackExceptionHandler fallbackExceptionHandler()
+		{
+			return new FallbackExceptionHandler();
+		}
+
+		@Bean
+		public SpringExceptionHandler springExceptionHandler()
+		{
+			return new SpringExceptionHandler();
+		}
+	}
+
 }
