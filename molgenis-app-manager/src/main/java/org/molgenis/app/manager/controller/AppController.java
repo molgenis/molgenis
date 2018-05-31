@@ -4,6 +4,7 @@ import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -36,17 +37,19 @@ public class AppController extends PluginController
 	public static final String ID = "app";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
+	private final FileStore fileStore;
 	private final AppManagerService appManagerService;
 	private final AppSettings appSettings;
 	private final MenuReaderService menuReaderService;
 
-	public AppController(AppManagerService appManagerService,
-			AppSettings appSettings, MenuReaderService menuReaderService)
+	public AppController(AppManagerService appManagerService, AppSettings appSettings,
+			MenuReaderService menuReaderService, FileStore fileStore)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
 		this.appSettings = requireNonNull(appSettings);
 		this.menuReaderService = requireNonNull(menuReaderService);
+		this.fileStore = requireNonNull(fileStore);
 	}
 
 	@GetMapping("/{uri}/**")
@@ -82,8 +85,7 @@ public class AppController extends PluginController
 
 	private static boolean isResourceRequest(String wildCardPath)
 	{
-		return wildCardPath.startsWith("/js/") || wildCardPath.startsWith("/css/") || wildCardPath.startsWith(
-				"/img/");
+		return wildCardPath.startsWith("/js/") || wildCardPath.startsWith("/css/") || wildCardPath.startsWith("/img/");
 	}
 
 	private ModelAndView serveAppTemplate(@PathVariable String uri, Model model, AppResponse appResponse)
@@ -100,7 +102,7 @@ public class AppController extends PluginController
 	private void serveAppResource(HttpServletResponse response, String wildCardPath, AppResponse appResponse)
 			throws IOException
 	{
-		File requestedResource = new File(appResponse.getResourceFolder() + wildCardPath);
+		File requestedResource = fileStore.getFile(appResponse.getResourceFolder() + wildCardPath);
 		response.setContentType(guessMimeType(requestedResource.getName()));
 		response.setContentLength((int) requestedResource.length());
 		response.setHeader(CONTENT_DISPOSITION,

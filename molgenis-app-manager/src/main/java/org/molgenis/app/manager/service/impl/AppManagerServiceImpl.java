@@ -186,7 +186,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Transactional
 	public void configureApp(AppConfig appConfig, String htmlTemplate)
 	{
-		String appDirName = fileStore.getStorageDir() + separator + APPS_DIR + separator + appConfig.getUri();
+		String appDirName = APPS_DIR + separator + appConfig.getUri();
 
 		// If provided config does not include runtimeOptions, set an empty map
 		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();

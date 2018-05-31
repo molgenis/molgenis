@@ -6,6 +6,7 @@ import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
@@ -24,6 +25,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static java.util.Locale.ENGLISH;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +56,8 @@ public class AppControllerTest
 
 	private AppResponse appResponse;
 
+	private FileStore fileStore = mock(FileStore.class);
+
 	@BeforeClass
 	public void beforeClass()
 	{
@@ -69,7 +73,7 @@ public class AppControllerTest
 	}
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
 		initMocks(this);
 
@@ -89,15 +93,14 @@ public class AppControllerTest
 		when(app.includeMenuAndFooter()).thenReturn(true);
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
-		ClassLoader classLoader = getClass().getClassLoader();
-		File testFile = new File(classLoader.getResource("test-resources/js/test.js").getFile());
-		String absoluteTestFileResourcePath = testFile.getPath().replace("js/test.js", "");;
-		when(app.getResourceFolder()).thenReturn(absoluteTestFileResourcePath);
+		when(app.getResourceFolder()).thenReturn("fake-app");
+		File testJs = new File(AppControllerTest.class.getResource("/fake-app/js/test.js").getFile());
+		when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
 
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
 
-		AppController controller = new AppController(appManagerService, appSettings, menuReaderService);
+		AppController controller = new AppController(appManagerService, appSettings, menuReaderService, fileStore);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setControllerAdvice(new GlobalControllerExceptionHandler(),
 										 new FallbackExceptionHandler(), new SpringExceptionHandler())
@@ -118,8 +121,7 @@ public class AppControllerTest
 	@Test
 	public void testServeAppRedirectToApp() throws Exception
 	{
-		mockMvc.perform(get(AppController.URI + "/uri"))
-			   .andExpect(status().is3xxRedirection());
+		mockMvc.perform(get(AppController.URI + "/uri")).andExpect(status().is3xxRedirection());
 	}
 
 	@Test
