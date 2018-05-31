@@ -100,6 +100,9 @@ public class AppManagerServiceTest
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
 		when(app.getResourceFolder()).thenReturn("folder");
 
+		File appDir = mock(File.class);
+		when(fileStore.getFile("folder")).thenReturn(appDir);
+
 		gson = new Gson();
 		appManagerService = new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, pluginFactory);
 	}

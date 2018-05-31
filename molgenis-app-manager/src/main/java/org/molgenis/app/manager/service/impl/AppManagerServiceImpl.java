@@ -118,7 +118,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	public void deleteApp(String id) throws IOException
 	{
 		App app = getAppById(id);
-		deleteDirectory(new File(app.getResourceFolder()));
+		deleteDirectory(fileStore.getFile(app.getResourceFolder()));
 		dataService.deleteById(AppMetadata.APP, id);
 	}
 

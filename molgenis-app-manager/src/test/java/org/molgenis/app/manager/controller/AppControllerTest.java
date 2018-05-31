@@ -6,8 +6,8 @@ import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.file.FileStore;
+import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
@@ -213,15 +213,16 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public FileStore fileStore() {
+		public FileStore fileStore()
+		{
 			return mock(FileStore.class);
 		}
 
 		@Bean
 		public AppController appController()
 		{
-			return new AppController(appManagerService(), userPermissionEvaluator(), appSettings(),
-					menuReaderService(), fileStore());
+			return new AppController(appManagerService(), userPermissionEvaluator(), appSettings(), menuReaderService(),
+					fileStore());
 		}
 
 		@Bean
