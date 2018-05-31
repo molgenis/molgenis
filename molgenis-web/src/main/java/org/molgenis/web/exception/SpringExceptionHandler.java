@@ -24,6 +24,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -47,7 +48,7 @@ public class SpringExceptionHandler
 			ServletRequestBindingException.class, ConversionNotSupportedException.class, TypeMismatchException.class,
 			HttpMessageNotReadableException.class, HttpMessageNotWritableException.class,
 			MethodArgumentNotValidException.class, MissingServletRequestPartException.class, BindException.class,
-			AsyncRequestTimeoutException.class })
+			AsyncRequestTimeoutException.class, ConstraintViolationException.class })
 	public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod)
 	{
 		HttpStatus status;
@@ -73,7 +74,7 @@ public class SpringExceptionHandler
 		}
 		else if (ex instanceof MissingServletRequestParameterException || ex instanceof ServletRequestBindingException
 				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException || ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
-				|| ex instanceof BindException)
+				|| ex instanceof BindException || ex instanceof ConstraintViolationException)
 		{
 			status = HttpStatus.BAD_REQUEST;
 			return handleException(ex, handlerMethod, status, null);
