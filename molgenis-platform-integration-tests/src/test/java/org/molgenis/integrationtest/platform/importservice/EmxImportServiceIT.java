@@ -14,7 +14,8 @@ import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.integrationtest.platform.TestPermissionPopulator;
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -239,7 +240,8 @@ public class EmxImportServiceIT extends ImportServiceIT
 
 	@Test(dataProvider = "doImportEmxAddProvider")
 	@WithMockUser(username = USERNAME)
-	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap, Set<String> addedEntityTypes, Runnable entityValidationMethod)
+	public void testDoImportAddEmxAsNonSuperuser(File file, Map<String, Integer> entityCountMap,
+			Set<String> addedEntityTypes, Runnable entityValidationMethod)
 	{
 		populateUserPermissions();
 		testDoImportAddEmx(file, entityCountMap, addedEntityTypes, entityValidationMethod);
@@ -873,7 +875,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService testPermissionService;
 	@Autowired
 	private PackageFactory packageFactory;
 
@@ -891,6 +893,6 @@ public class EmxImportServiceIT extends ImportServiceIT
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 		permissionMap.put(new PackageIdentity("it"), PermissionSet.WRITEMETA);
 
-		testPermissionPopulator.populate(permissionMap, USERNAME);
+		testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
 	}
 }

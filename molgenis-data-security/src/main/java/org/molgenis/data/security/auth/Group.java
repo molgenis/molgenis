@@ -2,7 +2,6 @@ package org.molgenis.data.security.auth;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.security.auth.GroupMetadata.*;
@@ -106,13 +105,13 @@ public class Group extends StaticEntity
 		set(ROLES, roles);
 	}
 
-	public void setRootPackage(Package rootPackage)
+	public void setRootPackage(String rootPackage)
 	{
 		set(ROOT_PACKAGE, rootPackage);
 	}
 
-	public Package getRootPackage()
+	public String getRootPackage()
 	{
-		return getEntity(ROOT_PACKAGE, Package.class);
+		return getString(ROOT_PACKAGE);
 	}
 }

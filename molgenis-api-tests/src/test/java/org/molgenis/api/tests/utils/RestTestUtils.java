@@ -61,14 +61,14 @@ public class RestTestUtils
 	/**
 	 * Login with user name and password and return token on success.
 	 *
-	 * @param userName the username to login with
+	 * @param username the username to login with
 	 * @param password the password to use for login
 	 * @return the token returned from the login
 	 */
-	public static String login(String userName, String password)
+	public static String login(String username, String password)
 	{
 		JSONObject loginBody = new JSONObject();
-		loginBody.put("username", userName);
+		loginBody.put("username", username);
 		loginBody.put("password", password);
 
 		return given().contentType(APPLICATION_JSON)
@@ -81,23 +81,23 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Create a user with userName and password as admin using given token.
+	 * Create a user with username and password as admin using given token.
 	 *
 	 * @param adminToken the token to use for login
-	 * @param userName   the name of the user to create
+	 * @param username   the name of the user to create
 	 * @param password   the password of the user to create
 	 */
-	public static void createUser(String adminToken, String userName, String password)
+	public static void createUser(String adminToken, String username, String password)
 	{
 		if (adminToken != null)
 		{
 			JSONObject createTestUserBody = new JSONObject();
 			createTestUserBody.put("active", true);
-			createTestUserBody.put("username", userName);
+			createTestUserBody.put("username", username);
 			createTestUserBody.put("password_", password);
 			createTestUserBody.put("superuser", false);
 			createTestUserBody.put("changePassword", false);
-			createTestUserBody.put("Email", userName + "@example.com");
+			createTestUserBody.put("Email", username + "@example.com");
 
 			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(APPLICATION_JSON)
@@ -294,18 +294,6 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Get the used id by querying the user entity
-	 *
-	 * @param adminToken token for signin
-	 * @param userName   the name of the user to fetch the id for
-	 * @return the id of the user
-	 */
-	public static String getUserId(String adminToken, String userName)
-	{
-		return getEntityId(adminToken, "username", userName, "sys_sec_User");
-	}
-
-	/**
 	 * Get the id for a given entity.
 	 *
 	 * @param adminToken token for signin
@@ -339,7 +327,7 @@ public class RestTestUtils
 	 * @param userId     the ID (not the name) of the user that needs to get the rights
 	 * @param plugins    the IDs of the plugins the user should be able to read
 	 */
-	public static void setGrantedPluginPermissions(String adminToken, String userId, String... plugins)
+	public static void setGrantedPluginPermissions(String adminToken, String username, String... plugins)
 	{
 		Map<String, String> pluginParams = stream(plugins).collect(
 				toMap(pluginId -> "radio-" + pluginId, pluginId -> "READ"));
@@ -347,7 +335,7 @@ public class RestTestUtils
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(X_WWW_FORM_URLENCODED)
 			   .params(pluginParams)
-			   .param("userId", userId)
+			   .param("username", username)
 			   .when()
 			   .post(PermissionManagerController.URI + "/update/plugin/user")
 			   .then()
@@ -358,10 +346,10 @@ public class RestTestUtils
 	 * Sets user permissions on repositories. Existing repository permissions will be removed.
 	 *
 	 * @param adminToken  the token to use for authentication
-	 * @param userId      the id of the user to grant the permissions to
+	 * @param username    the name of the user to grant the permissions to
 	 * @param permissions Map mapping entity type ID to permission to grant
 	 */
-	public static void setGrantedRepositoryPermissions(String adminToken, String userId,
+	public static void setGrantedRepositoryPermissions(String adminToken, String username,
 			Map<String, Permission> permissions)
 	{
 		if (adminToken != null)
@@ -374,7 +362,7 @@ public class RestTestUtils
 			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(X_WWW_FORM_URLENCODED)
 				   .params(params)
-				   .param("userId", userId)
+				   .param("username", username)
 				   .when()
 				   .log()
 				   .all()
@@ -390,10 +378,10 @@ public class RestTestUtils
 	 * Sets user permissions on repositories. Existing repository permissions will be removed.
 	 *
 	 * @param adminToken  the token to use for authentication
-	 * @param userId      the id of the user to grant the permissions to
+	 * @param username      the id of the user to grant the permissions to
 	 * @param permissions Map mapping entity type ID to permission to grant
 	 */
-	public static void setGrantedPackagePermissions(String adminToken, String userId,
+	public static void setGrantedPackagePermissions(String adminToken, String username,
 			Map<String, Permission> permissions)
 	{
 		if (adminToken != null)
@@ -406,7 +394,7 @@ public class RestTestUtils
 			given().header(X_MOLGENIS_TOKEN, adminToken)
 				   .contentType(X_WWW_FORM_URLENCODED)
 				   .params(params)
-				   .param("userId", userId)
+				   .param("username", username)
 				   .when()
 				   .log()
 				   .all()
@@ -476,9 +464,9 @@ public class RestTestUtils
 	/**
 	 * Removes all permissions for a given user identifier
 	 */
-	public static void removeRightsForUser(String adminToken, String testUserId)
+	public static void removeRightsForUser(String adminToken, String username)
 	{
-		if (adminToken != null && testUserId != null)
+		if (adminToken != null && username != null)
 		{
 			//TODO: no api to revoke permissions currently
 		}

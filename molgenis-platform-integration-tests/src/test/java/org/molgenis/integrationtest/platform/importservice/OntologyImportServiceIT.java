@@ -7,10 +7,9 @@ import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.integrationtest.platform.TestPermissionPopulator;
 import org.molgenis.ontology.core.meta.Ontology;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -21,9 +20,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -182,7 +184,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 	}
 
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService testPermissionService;
 
 	private void populateUserPermissions()
 	{
@@ -194,6 +196,6 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTerm"), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 
-		testPermissionPopulator.populate(permissionMap, SecurityUtils.getCurrentUsername());
+		testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
 	}
 }

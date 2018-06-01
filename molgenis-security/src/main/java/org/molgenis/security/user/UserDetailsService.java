@@ -1,10 +1,11 @@
 package org.molgenis.security.user;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
-import org.molgenis.security.acl.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,6 +72,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 				   .findAll()
 				   .filter(RoleMembership::isCurrent)
 				   .map(RoleMembership::getRole)
+				   .map(Role::getName)
 				   .map(SidUtils::createRoleAuthority)
 				   .map(SimpleGrantedAuthority::new)
 				   .forEach(authorities::add);

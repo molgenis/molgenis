@@ -1,10 +1,15 @@
 package org.molgenis.bootstrap.populate;
 
+import org.molgenis.security.core.PermissionService;
+import org.molgenis.security.core.PermissionSet;
+import org.molgenis.util.Pair;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
 
 import static java.util.Objects.requireNonNull;
 
@@ -14,27 +19,28 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class PermissionPopulator
 {
-	private final MutableAclService mutableAclService;
+	private final PermissionService permissionService;
 
-	public PermissionPopulator(MutableAclService mutableAclService)
+	public PermissionPopulator(PermissionService permissionService)
 	{
-		this.mutableAclService = requireNonNull(mutableAclService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Transactional
 	public void populate(ApplicationContext applicationContext)
 	{
-		// discover system entity registries
-		applicationContext.getBeansOfType(PermissionRegistry.class).values().forEach(this::populate);
+		Collection<PermissionRegistry> registries = applicationContext.getBeansOfType(PermissionRegistry.class)
+																	  .values();
+		registries.forEach(this::populate);
 	}
 
 	private void populate(PermissionRegistry systemPermissionRegistry)
 	{
-		systemPermissionRegistry.getPermissions().asMap().forEach((objectIdentity, pairs) ->
-		{
-			MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
-			pairs.forEach(pair -> acl.insertAce(acl.getEntries().size(), pair.getA(), pair.getB(), true));
-			mutableAclService.updateAcl(acl);
-		});
+		systemPermissionRegistry.getPermissions().asMap().forEach(this::populate);
+	}
+
+	private void populate(ObjectIdentity objectIdentity, Collection<Pair<PermissionSet, Sid>> pairs)
+	{
+		pairs.forEach(pair -> permissionService.grant(objectIdentity, pair.getA(), pair.getB()));
 	}
 }

@@ -11,7 +11,6 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.auth.Role;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -29,12 +28,10 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.security.auth.RoleMetadata.NAME;
-import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
-import static org.molgenis.security.acl.SidUtils.createSid;
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
 
 @Component
 public class PermissionRegistryImpl implements PermissionRegistry
@@ -51,8 +48,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	{
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
-		Role userRole = dataService.query(ROLE, Role.class).eq(NAME, ROLE_USER).findOne();
-		Sid userRoleSid = createSid(userRole);
+		Sid userRoleSid = createRoleSid(ROLE_USER);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
 		mapBuilder.putAll(pluginIdentity, new Pair<>(READ, userRoleSid));
