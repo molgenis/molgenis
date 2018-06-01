@@ -48,7 +48,8 @@ public class RoleMetadata extends SystemEntityType
 									   .setUnique(true)
 									   .setNillable(false)
 									   .setValidationExpression(
-											   "$('name').matches(/^[A-Z]+[A-Z0-9]*(_[A-Z0-9]+)*$/).value()");
+											   "$('name').matches(/^[A-Z]+[A-Z0-9]*(_[A-Z0-9]+)*$/).value()")
+									   .setReadOnly(true);
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		getLanguageCodes().map(languageCode -> getI18nAttributeName(LABEL, languageCode)).forEach(this::addAttribute);
 		addAttribute(DESCRIPTION).setLabel("Description");

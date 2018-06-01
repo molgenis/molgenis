@@ -61,7 +61,10 @@ public class UserMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true)
 								 .setVisible(false)
 								 .setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true).setNillable(false);
+		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username")
+													   .setUnique(true)
+													   .setNillable(false)
+													   .setReadOnly(true);
 		addAttribute(PASSWORD_).setLabel("Password")
 							   .setDescription("This is the hashed password, enter a new plaintext password to update.")
 							   .setNillable(false);
