@@ -115,10 +115,17 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	@Override
 	@Transactional
-	public void deleteApp(String id) throws IOException
+	public void deleteApp(String id) throws CouldNotDeleteAppException
 	{
 		App app = getAppById(id);
-		deleteDirectory(fileStore.getFile(app.getResourceFolder()));
+		try
+		{
+			deleteDirectory(fileStore.getFile(app.getResourceFolder()));
+		}
+		catch (IOException err)
+		{
+			throw new CouldNotDeleteAppException(id);
+		}
 		dataService.deleteById(AppMetadata.APP, id);
 	}
 

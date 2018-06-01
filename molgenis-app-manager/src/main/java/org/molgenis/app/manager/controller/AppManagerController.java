@@ -1,6 +1,8 @@
 package org.molgenis.app.manager.controller;
 
 import net.lingala.zip4j.exception.ZipException;
+import org.molgenis.app.manager.exception.CouldNotDeleteAppException;
+import org.molgenis.app.manager.exception.CouldNotUploadAppException;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
@@ -62,23 +64,30 @@ public class AppManagerController extends PluginController
 
 	@ResponseStatus(HttpStatus.OK)
 	@DeleteMapping("/delete/{id}")
-	public void deleteApp(@PathVariable("id") String id) throws IOException
+	public void deleteApp(@PathVariable("id") String id) throws CouldNotDeleteAppException
 	{
 		appManagerService.deleteApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping("/upload")
-	public void uploadApp(@RequestParam("file") MultipartFile multipartFile) throws IOException, ZipException
+	public void uploadApp(@RequestParam("file") MultipartFile multipartFile) throws CouldNotUploadAppException
 	{
-		InputStream fileInputStream = multipartFile.getInputStream();
 		String filename = multipartFile.getOriginalFilename();
 		String formFieldName = multipartFile.getName();
-		String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
-		String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
-		AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
-		String htmlTemplate = appManagerService.extractFileContent(APPS_DIR + separator + appConfig.getUri(),
-				ZIP_INDEX_FILE);
-		appManagerService.configureApp(appConfig, htmlTemplate);
+		try
+		{
+			InputStream fileInputStream = multipartFile.getInputStream();
+			String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+			String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
+			AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
+			String htmlTemplate = appManagerService.extractFileContent(APPS_DIR + separator + appConfig.getUri(),
+					ZIP_INDEX_FILE);
+			appManagerService.configureApp(appConfig, htmlTemplate);
+		}
+		catch (IOException | ZipException err)
+		{
+			throw new CouldNotUploadAppException(filename);
+		}
 	}
 }

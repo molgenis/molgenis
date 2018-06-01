@@ -1,6 +1,7 @@
 package org.molgenis.app.manager.service;
 
 import net.lingala.zip4j.exception.ZipException;
+import org.molgenis.app.manager.exception.CouldNotDeleteAppException;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 
@@ -43,7 +44,7 @@ public interface AppManagerService
 	 *
 	 * @param id The id of an App
 	 */
-	void deleteApp(String id) throws IOException;
+	void deleteApp(String id) throws CouldNotDeleteAppException;
 
 	/**
 	 * Upload an app
@@ -69,21 +70,19 @@ public interface AppManagerService
 	AppConfig checkAndObtainConfig(String tempDir, String configContent) throws IOException;
 
 	/**
-	 *
 	 * Configure app in database./§
 	 *
-	 * @param appConfig app configuration object
+	 * @param appConfig    app configuration object
 	 * @param htmlTemplate HTML template based on the packaged index.html
- 	 */
+	 */
 	void configureApp(AppConfig appConfig, String htmlTemplate);
 
 	/**
+	 * Get the UTF-8 file-content of a file served by an app
 	 *
-	 *
-	 *
-	 * @param appDir app directory
+	 * @param appDir   app directory
 	 * @param fileName file name
-	 * @return HTML template
+	 * @return UTF-8 file-content
 	 */
 	String extractFileContent(String appDir, String fileName);
 }

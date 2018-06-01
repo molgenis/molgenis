@@ -319,6 +319,15 @@ public class AppManagerServiceTest
 	}
 
 	@Test
+	public void testExtractFileContent()
+	{
+		File testIndexHtml = new File(AppManagerServiceTest.class.getResource("/index.html").getFile());
+		when(fileStore.getFile("testDir" + separator + "test")).thenReturn(testIndexHtml);
+
+		appManagerService.extractFileContent("testDir", "test");
+	}
+
+	@Test
 	public void testConfigureApp()
 	{
 		when(appFactory.create()).thenReturn(app);
