@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.UnexpectedEnumException;
@@ -291,7 +292,7 @@ class PostgreSqlEntityFactory
 					case COMPOUND:
 					case MREF:
 					case ONE_TO_MANY:
-						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+						throw new IllegalAttributeTypeException(attrType);
 					default:
 						throw new UnexpectedEnumException(attrType);
 				}

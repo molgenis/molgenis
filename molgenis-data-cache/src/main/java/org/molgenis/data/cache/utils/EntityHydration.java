@@ -3,6 +3,7 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityWithComputedAttributes;
@@ -16,7 +17,6 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
@@ -147,7 +147,7 @@ public class EntityHydration
 				value = entity.get(name);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", type.toString()));
+				throw new IllegalAttributeTypeException(type);
 			default:
 				throw new UnexpectedEnumException(type);
 		}

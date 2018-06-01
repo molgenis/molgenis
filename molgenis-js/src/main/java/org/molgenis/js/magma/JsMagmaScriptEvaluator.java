@@ -6,6 +6,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.core.ScriptException;
@@ -24,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
@@ -251,7 +251,7 @@ public class JsMagmaScriptEvaluator
 				value = entity.getLong(attrName);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

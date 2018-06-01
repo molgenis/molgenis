@@ -3,14 +3,13 @@ package org.molgenis.web.support;
 import com.google.gson.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
-
-import static java.lang.String.format;
 
 /**
  * Serializer for concrete Entity subclasses. This allows you to return Entities in your Controllers, without having to
@@ -84,7 +83,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 						result.addProperty(attributeName, value.toString());
 						break;
 					case COMPOUND:
-						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+						throw new IllegalAttributeTypeException(attrType);
 					default:
 						throw new UnexpectedEnumException(attrType);
 				}
