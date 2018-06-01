@@ -208,6 +208,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		// add user to all-users group
 		GroupMember groupMember = groupMemberFactory.create();
 		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
+		groupMember.setLabel(format("%s-%s", group.getName(), user.getUsername()));
 		groupMember.setGroup(group);
 		groupMember.setUser(user);
 		dataService.add(GROUP_MEMBER, groupMember);

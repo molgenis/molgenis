@@ -107,6 +107,7 @@ public class AccountServiceImpl implements AccountService
 		if (group != null)
 		{
 			groupMember = groupMemberFactory.create();
+			groupMember.setLabel(format("%s-%s", group.getName(), user.getUsername()));
 			groupMember.setGroup(group);
 			groupMember.setUser(user);
 			dataService.add(GROUP_MEMBER, groupMember);

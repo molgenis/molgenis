@@ -34,6 +34,16 @@ public class GroupMember extends StaticEntity
 		set(ID, id);
 	}
 
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
+	public void setLabel(String label)
+	{
+		set(LABEL, label);
+	}
+
 	public User getUser()
 	{
 		return getEntity(USER, User.class);

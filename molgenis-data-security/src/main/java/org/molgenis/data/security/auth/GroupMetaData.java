@@ -33,7 +33,7 @@ public class GroupMetaData extends SystemEntityType
 		setLabel(SIMPLE_NAME);
 		setPackage(securityPackage);
 
-		addAttribute(ID, ROLE_ID).setAuto(true);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false).setUnique(true);
 		addAttribute(ACTIVE).setLabel("Active")
 							.setDataType(BOOL)
