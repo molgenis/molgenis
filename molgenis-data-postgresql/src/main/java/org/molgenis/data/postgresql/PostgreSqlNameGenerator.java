@@ -12,7 +12,7 @@ public class PostgreSqlNameGenerator
 	 * <p>
 	 * https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 	 */
-	private static int MAX_IDENTIFIER_BYTE_LENGTH = 63;
+	private static final int MAX_IDENTIFIER_BYTE_LENGTH = 63;
 
 	private PostgreSqlNameGenerator()
 	{
