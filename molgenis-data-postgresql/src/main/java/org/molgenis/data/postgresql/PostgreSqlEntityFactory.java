@@ -112,72 +112,65 @@ class PostgreSqlEntityFactory
 		 */
 		private Object mapValue(ResultSet resultSet, Attribute attr, String colName) throws SQLException
 		{
-			try
+			Object value;
+			switch (attr.getDataType())
 			{
-				Object value;
-				switch (attr.getDataType())
-				{
-					case BOOL:
-						boolean boolValue = resultSet.getBoolean(colName);
-						value = resultSet.wasNull() ? null : boolValue;
-						break;
-					case CATEGORICAL:
-					case FILE:
-					case XREF:
-						EntityType xrefEntityType = attr.getRefEntity();
-						Object refIdValue = mapValue(resultSet, xrefEntityType.getIdAttribute(), colName);
-						value = refIdValue != null ? entityManager.getReference(xrefEntityType, refIdValue) : null;
-						break;
-					case CATEGORICAL_MREF:
-					case MREF:
-						EntityType mrefEntityMeta = attr.getRefEntity();
-						Array mrefArrayValue = resultSet.getArray(colName);
-						value = resultSet.wasNull() ? null : mapValueMref(mrefArrayValue, mrefEntityMeta);
-						break;
-					case ONE_TO_MANY:
-						Array oneToManyArrayValue = resultSet.getArray(colName);
-						value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
-						break;
-					case COMPOUND:
-						throw new RuntimeException(format("Value mapping not allowed for attribute type [%s]",
-								attr.getDataType().toString()));
-					case DATE:
-						value = resultSet.getObject(colName, LocalDate.class);
-						break;
-					case DATE_TIME:
-						OffsetDateTime offsetDateTime = resultSet.getObject(colName, OffsetDateTime.class);
-						value = resultSet.wasNull() ? null : offsetDateTime.toInstant();
-						break;
-					case DECIMAL:
-						BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);
-						value = bigDecimalValue != null ? bigDecimalValue.doubleValue() : null;
-						break;
-					case EMAIL:
-					case ENUM:
-					case HTML:
-					case HYPERLINK:
-					case SCRIPT:
-					case STRING:
-					case TEXT:
-						value = resultSet.getString(colName);
-						break;
-					case INT:
-						int intValue = resultSet.getInt(colName);
-						value = resultSet.wasNull() ? null : intValue;
-						break;
-					case LONG:
-						long longValue = resultSet.getLong(colName);
-						value = resultSet.wasNull() ? null : longValue;
-						break;
-					default:
-						throw new UnexpectedEnumException(attr.getDataType());
-				}
-				return value;
+				case BOOL:
+					boolean boolValue = resultSet.getBoolean(colName);
+					value = resultSet.wasNull() ? null : boolValue;
+					break;
+				case CATEGORICAL:
+				case FILE:
+				case XREF:
+					EntityType xrefEntityType = attr.getRefEntity();
+					Object refIdValue = mapValue(resultSet, xrefEntityType.getIdAttribute(), colName);
+					value = refIdValue != null ? entityManager.getReference(xrefEntityType, refIdValue) : null;
+					break;
+				case CATEGORICAL_MREF:
+				case MREF:
+					EntityType mrefEntityMeta = attr.getRefEntity();
+					Array mrefArrayValue = resultSet.getArray(colName);
+					value = resultSet.wasNull() ? null : mapValueMref(mrefArrayValue, mrefEntityMeta);
+					break;
+				case ONE_TO_MANY:
+					Array oneToManyArrayValue = resultSet.getArray(colName);
+					value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
+					break;
+				case COMPOUND:
+					throw new RuntimeException(
+							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
+				case DATE:
+					value = resultSet.getObject(colName, LocalDate.class);
+					break;
+				case DATE_TIME:
+					OffsetDateTime offsetDateTime = resultSet.getObject(colName, OffsetDateTime.class);
+					value = resultSet.wasNull() ? null : offsetDateTime.toInstant();
+					break;
+				case DECIMAL:
+					BigDecimal bigDecimalValue = resultSet.getBigDecimal(colName);
+					value = bigDecimalValue != null ? bigDecimalValue.doubleValue() : null;
+					break;
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					value = resultSet.getString(colName);
+					break;
+				case INT:
+					int intValue = resultSet.getInt(colName);
+					value = resultSet.wasNull() ? null : intValue;
+					break;
+				case LONG:
+					long longValue = resultSet.getLong(colName);
+					value = resultSet.wasNull() ? null : longValue;
+					break;
+				default:
+					throw new UnexpectedEnumException(attr.getDataType());
 			}
-			catch (SQLException e)
-			{
-				throw e;
-			}
+			return value;
 		}
 
 		/**
@@ -190,12 +183,12 @@ class PostgreSqlEntityFactory
 		 */
 		private Object mapValueOneToMany(Array arrayValue, Attribute attr) throws SQLException
 		{
-			EntityType entityType = attr.getRefEntity();
+			EntityType refEntityType = attr.getRefEntity();
 			Object value;
 			Object[] postgreSqlMrefIds = (Object[]) arrayValue.getArray();
 			if (postgreSqlMrefIds.length > 0 && postgreSqlMrefIds[0] != null)
 			{
-				Attribute idAttr = entityType.getIdAttribute();
+				Attribute idAttr = refEntityType.getIdAttribute();
 				Object[] mrefIds = new Object[postgreSqlMrefIds.length];
 				for (int i = 0; i < postgreSqlMrefIds.length; ++i)
 				{
@@ -205,7 +198,7 @@ class PostgreSqlEntityFactory
 				}
 
 				// convert ids to (lazy) entities
-				value = entityManager.getReferences(entityType, asList(mrefIds));
+				value = entityManager.getReferences(refEntityType, asList(mrefIds));
 			}
 			else
 			{
