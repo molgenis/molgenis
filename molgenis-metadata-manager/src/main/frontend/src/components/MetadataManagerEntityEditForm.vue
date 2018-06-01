@@ -131,8 +131,6 @@
       saveEntityType () {
         if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
           this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'ID attribute can not be empty'})
-        } else if (this.editorEntityType.labelAttribute === null || this.editorEntityType.labelAttribute === undefined) {
-          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'Label attribute can not be empty'})
         } else {
           this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
         }
