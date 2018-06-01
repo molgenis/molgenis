@@ -33,7 +33,7 @@ public class RecoveryCodeMetadata extends SystemEntityType
 
 		setDescription("Codes for recovering an account when using two factor authorisation");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(USER_ID).setNillable(false).setLabel("User identifier");
 		addAttribute(CODE).setNillable(false).setLabel("Recovery code");
 	}

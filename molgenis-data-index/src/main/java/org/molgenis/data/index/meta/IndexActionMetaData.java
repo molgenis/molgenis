@@ -67,7 +67,7 @@ public class IndexActionMetaData extends SystemEntityType
 		setLabel("Index action");
 		setPackage(indexPackage);
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(INDEX_ACTION_GROUP_ATTR).setDescription("The group that this index action belongs to")
 											 .setDataType(XREF)
 											 .setRefEntity(indexActionGroupMetaData);
