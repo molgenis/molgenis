@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static java.util.Objects.requireNonNull;
 
@@ -117,10 +114,10 @@ public class MolgenisVersionService
 	{
 		try (Connection connection = dataSource.getConnection())
 		{
-			try (Statement statement = connection.createStatement())
+			try (PreparedStatement statement = connection.prepareStatement("UPDATE \"Version\" SET \"id\"=?"))
 			{
-				String updateVersionSql = "UPDATE \"Version\" SET \"id\"=" + version;
-				statement.execute(updateVersionSql);
+				statement.setInt(1, version);
+				statement.execute();
 			}
 		}
 		catch (SQLException e)
