@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
@@ -138,8 +137,7 @@ class PostgreSqlEntityFactory
 					value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
 					break;
 				case COMPOUND:
-					throw new RuntimeException(
-							format("Value mapping not allowed for attribute type [%s]", attr.getDataType().toString()));
+					throw new IllegalAttributeTypeException(attr.getDataType());
 				case DATE:
 					value = resultSet.getObject(colName, LocalDate.class);
 					break;
