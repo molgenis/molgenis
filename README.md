@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/molgenis/molgenis.svg?branch=master)](https://travis-ci.org/molgenis/molgenis)
-[![Quality Status](https://sonarcloud.io/api/project_badges/measure?project=org.molgenis%3Amolgenis&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.molgenis%3Amolgenis)
+[![Quality Status](https://sonarcloud.io/api/project_badges/measure?project=org.molgenis%3Amolgenis%3Amaster&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.molgenis%3Amolgenis%3Amaster)
 [![Code Coverage](https://codecov.io/gh/molgenis/molgenis/branch/master/graph/badge.svg)](https://codecov.io/gh/molgenis/molgenis/branch/master)
 # Welcome to MOLGENIS
 
