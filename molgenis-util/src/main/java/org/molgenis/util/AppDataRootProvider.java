@@ -7,7 +7,7 @@ import java.nio.file.Path;
  */
 public class AppDataRootProvider
 {
-	private static Path APP_DATA_ROOT;
+	private static Path appDataRoot;
 
 	private AppDataRootProvider()
 	{
@@ -18,15 +18,15 @@ public class AppDataRootProvider
 	 */
 	public static Path getAppDataRoot()
 	{
-		if (APP_DATA_ROOT == null)
+		if (appDataRoot == null)
 		{
 			throw new IllegalStateException("Missing required application data root");
 		}
-		return APP_DATA_ROOT;
+		return appDataRoot;
 	}
 
 	public static void setAppDataRoot(Path appDataRoot)
 	{
-		APP_DATA_ROOT = appDataRoot;
+		AppDataRootProvider.appDataRoot = appDataRoot;
 	}
 }

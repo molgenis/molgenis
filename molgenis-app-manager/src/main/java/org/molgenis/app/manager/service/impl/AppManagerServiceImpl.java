@@ -115,7 +115,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	@Override
 	@Transactional
-	public void deleteApp(String id) throws CouldNotDeleteAppException
+	public void deleteApp(String id)
 	{
 		App app = getAppById(id);
 		try
