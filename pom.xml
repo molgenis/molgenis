@@ -737,10 +737,6 @@
                 <version>${guava.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.google.code.findbugs</groupId>
-                        <artifactId>jsr305</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>com.google.errorprone</groupId>
                         <artifactId>error_prone_annotations</artifactId>
                     </exclusion>
@@ -928,6 +924,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
