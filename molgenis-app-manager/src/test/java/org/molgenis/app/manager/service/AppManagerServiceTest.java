@@ -1,10 +1,12 @@
 package org.molgenis.app.manager.service;
 
+import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mock;
+import org.molgenis.app.manager.controller.AppControllerTest;
 import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppFactory;
@@ -319,11 +321,11 @@ public class AppManagerServiceTest
 	}
 
 	@Test
-	public void testExtractFileContent()
+	public void testExtractFileContent() throws URISyntaxException
 	{
-		File testIndexHtml = new File(AppManagerServiceTest.class.getResource("/index.html").getFile());
+		URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
+		File testIndexHtml = new File(new URI(resourceUrl.toString()).getPath());
 		when(fileStore.getFile("testDir" + separator + "test")).thenReturn(testIndexHtml);
-
 		appManagerService.extractFileContent("testDir", "test");
 	}
 
@@ -344,5 +346,4 @@ public class AppManagerServiceTest
 
 		verify(dataService).add(AppMetadata.APP, app);
 	}
-
 }

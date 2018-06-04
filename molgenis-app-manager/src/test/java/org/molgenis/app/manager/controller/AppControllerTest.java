@@ -1,5 +1,6 @@
 package org.molgenis.app.manager.controller;
 
+import com.google.common.io.Resources;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
@@ -30,7 +31,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.*;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static java.util.Locale.ENGLISH;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,7 +97,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@BeforeMethod
-	public void beforeMethod() throws IOException
+	public void beforeMethod() throws URISyntaxException
 	{
 		initMocks(this);
 
@@ -115,7 +118,9 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
 		when(app.getResourceFolder()).thenReturn("fake-app");
-		File testJs = new File(AppControllerTest.class.getResource("/fake-app/js/test.js").getFile());
+		URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
+		File testJs = new File(new URI(resourceUrl.toString()).getPath());
+
 		when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
 
 		appResponse = AppResponse.create(app);
