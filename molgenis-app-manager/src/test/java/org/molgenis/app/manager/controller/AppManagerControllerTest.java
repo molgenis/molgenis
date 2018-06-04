@@ -3,6 +3,7 @@ package org.molgenis.app.manager.controller;
 import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
+import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
@@ -96,7 +97,10 @@ public class AppManagerControllerTest
 	@Test
 	public void testUploadApp() throws Exception
 	{
-		String testFile = getClass().getClassLoader().getResource("test-app.zip").getFile();
+		AppConfig appConfig = mock(AppConfig.class);
+		when(appConfig.getUri()).thenReturn("");
+		when(appManagerService.checkAndObtainConfig(null, null)).thenReturn(appConfig);
+		String testFile = AppManagerControllerTest.class.getResource("/test-app.zip").getFile();
 		mockMvc.perform(multipart(AppManagerController.URI + "/upload").file("file", testFile.getBytes()))
 			   .andExpect(status().is(200));
 	}

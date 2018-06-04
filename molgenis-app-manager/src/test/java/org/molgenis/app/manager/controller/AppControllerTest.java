@@ -1,11 +1,13 @@
 package org.molgenis.app.manager.controller;
 
+import com.google.common.io.Resources;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
@@ -29,6 +31,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.testng.annotations.*;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static java.util.Locale.ENGLISH;
 import static org.mockito.ArgumentMatchers.any;
@@ -74,6 +79,9 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 
 	private AppResponse appResponse;
 
+	@Autowired
+	private FileStore fileStore;
+
 	@BeforeClass
 	public void beforeClass()
 	{
@@ -89,7 +97,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws URISyntaxException
 	{
 		initMocks(this);
 
@@ -109,11 +117,11 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(app.includeMenuAndFooter()).thenReturn(true);
 		when(app.getTemplateContent()).thenReturn("<h1>Test</h1>");
 		when(app.getAppConfig()).thenReturn("{'config': 'test'}");
-		ClassLoader classLoader = getClass().getClassLoader();
-		File testFile = new File(classLoader.getResource("test-resources/js/test.js").getFile());
-		String absoluteTestFileResourcePath = testFile.getPath().replace("js/test.js", "");
-		;
-		when(app.getResourceFolder()).thenReturn(absoluteTestFileResourcePath);
+		when(app.getResourceFolder()).thenReturn("fake-app");
+		URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
+		File testJs = new File(new URI(resourceUrl.toString()).getPath());
+
+		when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
 
 		appResponse = AppResponse.create(app);
 		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
@@ -210,10 +218,16 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
+		}
+
+		@Bean
 		public AppController appController()
 		{
-			return new AppController(appManagerService(), userPermissionEvaluator(), appSettings(),
-					menuReaderService());
+			return new AppController(appManagerService(), userPermissionEvaluator(), appSettings(), menuReaderService(),
+					fileStore());
 		}
 
 		@Bean
