@@ -16,7 +16,6 @@ export default {
     api.post('/plugin/appmanager/deactivate/' + appId).then(() => {
       dispatch('FETCH_APPS')
     }, error => {
-      console.log('error')
       commit('SET_ERROR', error)
     })
   },

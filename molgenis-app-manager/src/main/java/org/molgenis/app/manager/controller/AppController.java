@@ -4,6 +4,7 @@ import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -40,19 +41,21 @@ public class AppController extends PluginController
 	public static final String ID = "app";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
+	private final FileStore fileStore;
 	private final AppManagerService appManagerService;
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final AppSettings appSettings;
 	private final MenuReaderService menuReaderService;
 
 	public AppController(AppManagerService appManagerService, UserPermissionEvaluator userPermissionEvaluator,
-			AppSettings appSettings, MenuReaderService menuReaderService)
+			AppSettings appSettings, MenuReaderService menuReaderService, FileStore fileStore)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.appSettings = requireNonNull(appSettings);
 		this.menuReaderService = requireNonNull(menuReaderService);
+		this.fileStore = requireNonNull(fileStore);
 	}
 
 	@GetMapping("/{pluginId}/**")
@@ -111,7 +114,7 @@ public class AppController extends PluginController
 	private void serveAppResource(HttpServletResponse response, String wildCardPath, AppResponse appResponse)
 			throws IOException
 	{
-		File requestedResource = new File(appResponse.getResourceFolder() + wildCardPath);
+		File requestedResource = fileStore.getFile(appResponse.getResourceFolder() + wildCardPath);
 		response.setContentType(guessMimeType(requestedResource.getName()));
 		response.setContentLength((int) requestedResource.length());
 		response.setHeader(CONTENT_DISPOSITION,
