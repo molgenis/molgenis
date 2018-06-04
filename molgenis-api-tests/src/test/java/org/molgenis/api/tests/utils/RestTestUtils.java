@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static io.restassured.RestAssured.given;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -29,8 +30,7 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.USER;
+import static org.molgenis.data.security.auth.GroupMemberMetaData.*;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -119,14 +119,14 @@ public class RestTestUtils
 
 		JSONObject groupMembership = new JSONObject();
 		groupMembership.put(USER, getUserId(adminToken, userName));
+		groupMembership.put(LABEL, format("%s-%s", userName, ALL_USER_GROUP));
 		groupMembership.put(GroupMemberMetaData.GROUP,
 				getEntityId(adminToken, GroupMetaData.NAME, ALL_USER_GROUP, GroupMetaData.GROUP));
 
 		given().header(X_MOLGENIS_TOKEN, adminToken)
 			   .contentType(APPLICATION_JSON)
 			   .body(groupMembership.toJSONString())
-			   .when()
-			   .post("api/v1/" + GROUP_MEMBER);
+			   .when().post("api/v1/" + GROUP_MEMBER).then().statusCode(CREATED);
 	}
 
 	/**
