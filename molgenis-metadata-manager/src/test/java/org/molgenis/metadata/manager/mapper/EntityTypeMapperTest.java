@@ -39,9 +39,6 @@ public class EntityTypeMapperTest
 	private TagMapper tagMapper;
 
 	@Mock
-	private EntityTypeReferenceMapper entityTypeReferenceMapper;
-
-	@Mock
 	private EntityTypeParentMapper entityTypeParentMapper;
 
 	private EntityTypeMapper entityTypeMapper;
@@ -75,14 +72,11 @@ public class EntityTypeMapperTest
 		String i18nDescriptionLangEn = "en";
 		String i18nDescriptionValue = "en description";
 		Map<String, String> i18nDescription = singletonMap(i18nDescriptionLangEn, i18nDescriptionValue);
-		boolean abstract_ = true;
 		String backend = "backend";
 		EditorPackageIdentifier editorPackageIdentifier = EditorPackageIdentifier.create("packageId", "package label");
 		EditorEntityTypeParent editorEntityTypeParent = EditorEntityTypeParent.create("entityTypeParentId",
 				"entity type parent label",
 				of(EditorAttributeIdentifier.create("parentAttrId0", "parent attribute #0")), null);
-		List<EditorEntityTypeIdentifier> entityTypeChildren = of(
-				EditorEntityTypeIdentifier.create("entityTypeChild0", "entity type #0"));
 		List<EditorAttribute> editorAttributes = of(mock(EditorAttribute.class));
 		List<EditorAttributeIdentifier> editorReferringAttributes = of(mock(EditorAttributeIdentifier.class));
 		ImmutableList<EditorTagIdentifier> editorTags = of(EditorTagIdentifier.create("tag0", "tag #0"));
@@ -92,7 +86,7 @@ public class EntityTypeMapperTest
 				EditorAttributeIdentifier.create("attr0", "attribute #0"));
 
 		EditorEntityType editorEntityType = EditorEntityType.create(id, label, i18nLabel, description, i18nDescription,
-				abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
+				true, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
 				editorReferringAttributes, editorTags, idAttribute, labelAttribute, lookupAttributes);
 
 		EntityType entityType = mock(EntityType.class);
@@ -127,7 +121,7 @@ public class EntityTypeMapperTest
 		verify(entityType).setDescription("pt", null);
 		verify(entityType).setDescription("fr", null);
 		verify(entityType).setDescription("xx", null);
-		verify(entityType).setAbstract(abstract_);
+		verify(entityType).setAbstract(true);
 		verify(entityType).setBackend(backend);
 		verify(entityType).setPackage(package_);
 		verify(entityType).setExtends(parentEntityType);
@@ -147,6 +141,7 @@ public class EntityTypeMapperTest
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testToEditorEntityType()
 	{
 		String id = "id";
@@ -158,7 +153,6 @@ public class EntityTypeMapperTest
 		String i18nDescriptionLangEn = "en";
 		String i18nDescriptionValue = "en description";
 		Map<String, String> i18nDescription = singletonMap(i18nDescriptionLangEn, i18nDescriptionValue);
-		boolean abstract_ = true;
 		String backend = "backend";
 		List<Attribute> referringAttributes = new ArrayList<>();
 
@@ -217,12 +211,13 @@ public class EntityTypeMapperTest
 		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 
 		EditorEntityType expectedEditorEntityType = EditorEntityType.create(id, label, i18nLabel, description,
-				i18nDescription, abstract_, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
+				i18nDescription, true, backend, editorPackageIdentifier, editorEntityTypeParent, editorAttributes,
 				editorReferringAttributes, editorTags, editorIdAttribute, editorLabelAttribute, editorLookupAttributes);
 		assertEquals(editorEntityType, expectedEditorEntityType);
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testCreateEditorEntityType()
 	{
 		String id = "id";
