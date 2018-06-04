@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
@@ -151,6 +152,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		User user = dataService.findOneById(USER, molgenisUserId, User.class);
 
 		GroupMember groupMember = groupMemberFactory.create();
+		groupMember.setLabel(format("%s-%s", group.getName(), user.getUsername()));
 		groupMember.setGroup(group);
 		groupMember.setUser(user);
 		dataService.add(GROUP_MEMBER, groupMember);

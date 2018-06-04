@@ -37,6 +37,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
@@ -136,9 +138,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
 		when(user1.getIdValue()).thenReturn(molgenisUserId1);
 		when(user1.getUsername()).thenReturn(molgenisUserName1);
-		when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class)).thenReturn(user0);
-		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class)).thenReturn(user1);
-		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user0, user1));
+		when(dataService.findOneById(USER, molgenisUserId0, User.class)).thenReturn(user0);
+		when(dataService.findOneById(USER, molgenisUserId1, User.class)).thenReturn(user1);
+		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(user0, user1));
 		GroupMember groupMember0 = mock(GroupMember.class);
 		Group group0 = mock(Group.class);
 		when(groupMember0.getGroup()).thenReturn(group0);
@@ -202,7 +204,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		groupMemberTwo.setGroup(group21);
 		groupMemberTwo.setUser(user1);
 
-		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
 				GroupMember.class)).thenReturn(Stream.of(groupMemberOne, groupMemberTwo));
 		List<Group> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
@@ -234,7 +236,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getUser()).thenReturn(user1);
 		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
 		when(dataService.findAll(GROUP_MEMBER, new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
@@ -268,7 +270,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getUser()).thenReturn(user1);
 		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 
 		when(dataService.findAll(GroupMemberMetaData.USER,
 				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1), GroupMember.class)).thenReturn(
@@ -293,6 +295,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		when(groupMemberFactory.create()).thenReturn(mock(GroupMember.class));
 		setSecurityContextSuperUser();
+		when(dataService.findOneById(GROUP, "22", Group.class)).thenReturn(mock(Group.class));
+		when(dataService.findOneById(USER, "1", User.class)).thenReturn(mock(User.class));
 		this.userManagerService.addUserToGroup("22", "1");
 	}
 
@@ -314,7 +318,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(groupMember.getUser()).thenReturn(user1);
 		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(USER, "1", User.class)).thenReturn(user1);
 		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class)).thenReturn(group22);
 
 		Query<GroupMember> q = new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1)

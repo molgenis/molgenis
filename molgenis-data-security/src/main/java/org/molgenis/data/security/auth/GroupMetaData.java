@@ -30,7 +30,7 @@ public class GroupMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Group");
+		setLabel(SIMPLE_NAME);
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);

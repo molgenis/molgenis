@@ -102,8 +102,7 @@ public class RestControllerIT
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
 			   .delete(PATH + "sys_FileMeta" + "/non-existing-entity_id")
-			   .then()
-			   .log().all().statusCode(NO_CONTENT);
+			   .then().log().all().statusCode(NO_CONTENT);
 	}
 
 	@Test

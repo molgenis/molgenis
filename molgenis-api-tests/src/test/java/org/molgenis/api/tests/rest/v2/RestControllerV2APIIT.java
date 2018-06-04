@@ -43,7 +43,6 @@ public class RestControllerV2APIIT
 	private static final String V2_COPY_TEST_FILE = "/RestControllerV2_CopyEMX.xlsx";
 	private static final String API_V2 = "api/v2/";
 
-	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
 	private String testUserId;
@@ -77,7 +76,7 @@ public class RestControllerV2APIIT
 		uploadEMX(adminToken, V2_COPY_TEST_FILE);
 		LOG.info("Importing Done");
 
-		testUserName = "api_v2_test_user" + System.currentTimeMillis();
+		String testUserName = "api_v2_test_user" + System.currentTimeMillis();
 		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
 		testUserId = getUserId(adminToken, testUserName);

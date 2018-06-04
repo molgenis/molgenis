@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
@@ -16,6 +17,7 @@ public class GroupMemberMetaData extends SystemEntityType
 	public static final String GROUP_MEMBER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
+	public static final String LABEL = "label";
 	public static final String USER = "User";
 	public static final String GROUP = "Group";
 
@@ -38,6 +40,7 @@ public class GroupMemberMetaData extends SystemEntityType
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setUnique(true);
 		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
 		addAttribute(GROUP).setDataType(XREF).setRefEntity(groupMetaData).setAggregatable(true).setNillable(false);
 	}

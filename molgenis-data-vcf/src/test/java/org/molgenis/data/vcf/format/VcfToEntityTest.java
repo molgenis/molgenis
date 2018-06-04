@@ -81,7 +81,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		expectedEntityType.addAttribute(vcfAttrs.getQualAttribute());
 		expectedEntityType.addAttribute(vcfAttrs.getIdAttribute());
 
-		Attribute internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING).setVisible(false);
+		Attribute internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
 		expectedEntityType.addAttribute(internalIdMeta, ROLE_ID);
 
 		Attribute infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
