@@ -305,7 +305,7 @@
         mappedByAttributes: 'getMappedByAttributes'
       }),
       isReferenceType: function () {
-        return ['xref', 'mref', 'categorical', 'categoricalmref'].includes(this.selectedAttribute.type)
+        return ['file', 'xref', 'mref', 'categorical', 'categoricalmref'].includes(this.selectedAttribute.type)
       },
       isNumericType: function () {
         return ['int', 'long'].includes(this.selectedAttribute.type)
