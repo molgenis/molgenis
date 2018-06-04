@@ -12,6 +12,7 @@ import org.molgenis.semanticmapper.algorithmgenerator.generator.OneToOneCategory
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.semanticmapper.service.UnitResolver;
+import org.molgenis.semanticmapper.service.impl.AlgorithmException;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplate;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.semanticmapper.utils.AlgorithmGeneratorHelper;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
@@ -50,6 +52,11 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
 			EntityType sourceEntityType)
 	{
+		if (targetAttribute.hasExpression())
+		{
+			throw new AlgorithmException(format("Algorithm generation for expressed attribute '%s' is not allowed",
+					targetAttribute.getName()));
+		}
 		if (!sourceAttributes.isEmpty())
 		{
 			for (AlgorithmGenerator generator : generators)
@@ -72,7 +79,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 		if (sourceAttributes.size() == 1)
 		{
-			stringBuilder.append(String.format("$('%s').value();", sourceAttributes.get(0).getName()));
+			stringBuilder.append(format("$('%s').value();", sourceAttributes.get(0).getName()));
 		}
 		else if (sourceAttributes.size() > 1)
 		{
@@ -90,6 +97,12 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	public GeneratedAlgorithm generate(Attribute targetAttribute, Map<Attribute, ExplainedAttribute> sourceAttributes,
 			EntityType targetEntityType, EntityType sourceEntityType)
 	{
+		if (targetAttribute.hasExpression())
+		{
+			throw new AlgorithmException(format("Algorithm generation for expressed attribute '%s' is not allowed",
+					targetAttribute.getName()));
+		}
+
 		String algorithm = StringUtils.EMPTY;
 		AlgorithmState algorithmState = null;
 		Set<Attribute> mappedSourceAttributes = null;
@@ -139,7 +152,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 			if (StringUtils.isNotBlank(convertUnit))
 			{
-				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
+				String attrMagamSyntax = format("$('%s')", sourceAttribute.getName());
 				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ?
 						attrMagamSyntax + convertUnit : attrMagamSyntax + "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
