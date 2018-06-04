@@ -136,22 +136,12 @@ public class EntityTypeMapperTest
 		verifyNoMoreInteractions(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID attribute for EntityType \\[test\\] can not be null")
 	public void testToEntityTypeWithoutIdAttribute()
 	{
 		EditorEntityType editorEntityType = mock(EditorEntityType.class);
 		when(editorEntityType.getIdAttribute()).thenReturn(null);
 		when(editorEntityType.getLabelAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
-		when(editorEntityType.getLabel()).thenReturn("test");
-		entityTypeMapper.toEntityType(editorEntityType);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID and Label attribute for EntityType \\[test\\] can not be null")
-	public void testToEntityTypeWithoutLabelAttribute()
-	{
-		EditorEntityType editorEntityType = mock(EditorEntityType.class);
-		when(editorEntityType.getIdAttribute()).thenReturn(mock(EditorAttributeIdentifier.class));
-		when(editorEntityType.getLabelAttribute()).thenReturn(null);
 		when(editorEntityType.getLabel()).thenReturn("test");
 		entityTypeMapper.toEntityType(editorEntityType);
 	}
