@@ -18,6 +18,7 @@ import javax.servlet.http.Part;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -122,7 +123,10 @@ public class MenuManagerController extends PluginController
 
 			// Store the logo in the logo dir of the filestore
 			String file = "/logo/" + FileUploadUtils.getOriginalFileName(part);
-			fileStore.store(part.getInputStream(), file);
+			try (InputStream inputStream = part.getInputStream())
+			{
+				fileStore.store(inputStream, file);
+			}
 
 			// Set logo
 			appSettings.setLogoNavBarHref(file);

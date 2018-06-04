@@ -10,6 +10,7 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.file.util.FileDownloadControllerUtils;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponents;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -156,7 +158,7 @@ public class RestService
 				value = convertLong(attr, paramValue);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -262,9 +264,9 @@ public class RestService
 				MultipartFile multipartFile = (MultipartFile) paramValue;
 
 				String id = idGenerator.generateId();
-				try
+				try (InputStream inputStream = multipartFile.getInputStream())
 				{
-					fileStore.store(multipartFile.getInputStream(), id);
+					fileStore.store(inputStream, id);
 				}
 				catch (IOException e)
 				{

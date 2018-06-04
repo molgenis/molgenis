@@ -75,9 +75,8 @@ public class AppManagerController extends PluginController
 	{
 		String filename = multipartFile.getOriginalFilename();
 		String formFieldName = multipartFile.getName();
-		try
+		try (InputStream fileInputStream = multipartFile.getInputStream())
 		{
-			InputStream fileInputStream = multipartFile.getInputStream();
 			String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
 			String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
 			AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);

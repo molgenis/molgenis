@@ -58,22 +58,39 @@ public class BootstrapThemePopulator
 			for (Resource bootstrap3Resource : newThemes)
 			{
 				String bootstrap3FileName = bootstrap3Resource.getFilename();
-				InputStream bootstrap3Data = bootstrap3Resource.getInputStream();
 
-				String bootstrap4FileName = null;
+				InputStream bootstrap3Data = null;
 				InputStream bootstrap4Data = null;
-				Optional<Resource> bootstrap4Optional = guessMatchingBootstrap4File(bootstrap4Themes,
-						bootstrap3FileName);
-
-				if (bootstrap4Optional.isPresent())
+				try
 				{
-					Resource bootstrap4resource = bootstrap4Optional.get();
-					bootstrap4FileName = bootstrap4resource.getFilename();
-					bootstrap4Data = bootstrap4resource.getInputStream();
-				}
+					bootstrap3Data = bootstrap3Resource.getInputStream();
 
-				styleService.addStyle(bootstrap3FileName, bootstrap3FileName, bootstrap3Data, bootstrap4FileName,
-						bootstrap4Data);
+					String bootstrap4FileName = null;
+					bootstrap4Data = null;
+					Optional<Resource> bootstrap4Optional = guessMatchingBootstrap4File(bootstrap4Themes,
+							bootstrap3FileName);
+
+					if (bootstrap4Optional.isPresent())
+					{
+						Resource bootstrap4resource = bootstrap4Optional.get();
+						bootstrap4FileName = bootstrap4resource.getFilename();
+						bootstrap4Data = bootstrap4resource.getInputStream();
+					}
+
+					styleService.addStyle(bootstrap3FileName, bootstrap3FileName, bootstrap3Data, bootstrap4FileName,
+							bootstrap4Data);
+				}
+				finally
+				{
+					if (bootstrap3Data != null)
+					{
+						bootstrap3Data.close();
+					}
+					if (bootstrap4Data != null)
+					{
+						bootstrap4Data.close();
+					}
+				}
 			}
 		}
 		catch (MolgenisStyleException | IOException e)

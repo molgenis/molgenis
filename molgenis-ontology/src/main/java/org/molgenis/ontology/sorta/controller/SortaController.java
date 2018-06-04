@@ -344,8 +344,10 @@ public class SortaController extends PluginController
 			throws IOException
 	{
 		if (isEmpty(ontologyIri) || isEmpty(inputTerms)) return init(model);
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"));
-		return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
+		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8")))
+		{
+			return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
+		}
 	}
 
 	@PostMapping(value = "/match/upload", headers = "Content-Type=multipart/form-data")
@@ -355,8 +357,10 @@ public class SortaController extends PluginController
 			throws IOException
 	{
 		if (isEmpty(ontologyIri) || file == null) return init(model);
-		InputStream inputStream = file.getInputStream();
-		return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
+		try (InputStream inputStream = file.getInputStream())
+		{
+			return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
+		}
 	}
 
 	@PostMapping("/match/entity")
