@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.format.DateTimeParseException;
 
 import static java.util.Collections.singletonList;
@@ -67,7 +68,10 @@ public class OneClickImporterController extends VuePluginController
 	public String importFile(@RequestParam(value = "file") MultipartFile multipartFile) throws IOException
 	{
 		String filename = multipartFile.getOriginalFilename();
-		fileStore.store(multipartFile.getInputStream(), filename);
+		try (InputStream inputStream = multipartFile.getInputStream())
+		{
+			fileStore.store(inputStream, filename);
+		}
 
 		OneClickImportJobExecution jobExecution = oneClickImportJobExecutionFactory.create();
 		jobExecution.setUser(getCurrentUsername());

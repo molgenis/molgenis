@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class ExcelRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String NAME = "EXCEL";
+	private static final String REPOSITORY_COLLECTION_NAME = "EXCEL";
 
 	private final String name;
 	private final Workbook workbook;
@@ -143,7 +143,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public String getName()
 	{
-		return NAME;
+		return REPOSITORY_COLLECTION_NAME;
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 
@@ -78,7 +79,7 @@ class PostgreSqlUtils
 			case LONG:
 				return entity.getLong(attrName);
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -211,7 +212,7 @@ class PostgreSqlUtils
 					}
 					return queryValue;
 				case COMPOUND:
-					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+					throw new IllegalAttributeTypeException(attrType);
 				default:
 					throw new UnexpectedEnumException(attrType);
 			}

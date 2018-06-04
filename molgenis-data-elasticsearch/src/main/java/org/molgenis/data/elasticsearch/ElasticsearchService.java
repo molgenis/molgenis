@@ -20,6 +20,7 @@ import org.molgenis.data.elasticsearch.generator.model.*;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
@@ -167,7 +167,7 @@ public class ElasticsearchService implements SearchService, IndexService
 			case LONG:
 				return Long.parseLong(documentId);
 			default:
-				throw new RuntimeException(format("Invalid id attribute type '%s'", attributeType));
+				throw new IllegalAttributeTypeException(attributeType);
 		}
 	}
 

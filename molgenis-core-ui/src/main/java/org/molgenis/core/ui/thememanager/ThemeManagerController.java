@@ -71,14 +71,30 @@ public class ThemeManagerController extends PluginController
 		try
 		{
 			String bs4FileName = null;
+			InputStream bs3InputStream = null;
 			InputStream bs4InputStream = null;
-			if (bootstrap4Style != null)
+			try
 			{
-				bs4FileName = bootstrap4Style.getOriginalFilename();
-				bs4InputStream = bootstrap4Style.getInputStream();
+				bs3InputStream = bootstrap3Style.getInputStream();
+				if (bootstrap4Style != null)
+				{
+					bs4FileName = bootstrap4Style.getOriginalFilename();
+					bs4InputStream = bootstrap4Style.getInputStream();
+				}
+				return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(), bs3InputStream,
+						bs4FileName, bs4InputStream);
 			}
-			return styleService.addStyle(styleIdentifier, bootstrap3Style.getOriginalFilename(),
-					bootstrap3Style.getInputStream(), bs4FileName, bs4InputStream);
+			finally
+			{
+				if (bs3InputStream != null)
+				{
+					bs3InputStream.close();
+				}
+				if (bs4InputStream != null)
+				{
+					bs4InputStream.close();
+				}
+			}
 		}
 		catch (IOException e)
 		{

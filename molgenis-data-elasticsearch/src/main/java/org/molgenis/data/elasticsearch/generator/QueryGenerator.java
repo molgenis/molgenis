@@ -4,6 +4,7 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.*;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.UnexpectedEnumException;
@@ -239,7 +240,7 @@ public class QueryGenerator
 				return QueryBuilders.nestedQuery(fieldName, QueryBuilders.termQuery(indexFieldName, queryValue),
 						ScoreMode.Avg);
 			case COMPOUND:
-				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new MolgenisQueryException(new IllegalAttributeTypeException(attrType));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -287,7 +288,7 @@ public class QueryGenerator
 									.mustNot(QueryBuilders.nestedQuery(fieldName,
 											QueryBuilders.existsQuery(indexFieldName), ScoreMode.Avg));
 			case COMPOUND:
-				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new MolgenisQueryException(new IllegalAttributeTypeException(attrType));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -712,7 +713,7 @@ public class QueryGenerator
 			case ONE_TO_MANY:
 				return useNotAnalyzedField(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
-				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new MolgenisQueryException(new IllegalAttributeTypeException(attrType));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -862,7 +863,7 @@ public class QueryGenerator
 							queryRuleValue.getClass().getSimpleName()));
 				}
 			case COMPOUND:
-				throw new MolgenisQueryException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new MolgenisQueryException(new IllegalAttributeTypeException(attrType));
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

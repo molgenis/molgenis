@@ -30,10 +30,11 @@ public class FileStoreDownloadImpl implements FileStoreDownload
 			File folder = new File(fileStore.getStorageDir(), folderName);
 			folder.mkdir();
 
-			InputStream in = new URL(url).openStream();
-			String filename = folderName + '/' + fileName;
-
-			return fileStore.store(in, filename);
+			try (InputStream in = new URL(url).openStream())
+			{
+				String filename = folderName + '/' + fileName;
+				return fileStore.store(in, filename);
+			}
 		}
 		catch (IOException e)
 		{

@@ -105,8 +105,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		}
 		else
 		{
-			LOG.error("Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
-					entityType.getId(), entityId);
+			LOG.error("Transaction id is unknown, register of entityFullName [{}], entityId [{}]", entityType.getId(),
+					entityId);
 		}
 	}
 
