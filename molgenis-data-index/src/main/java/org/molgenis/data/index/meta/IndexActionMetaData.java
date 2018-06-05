@@ -1,5 +1,6 @@
 package org.molgenis.data.index.meta;
 
+import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 /**
@@ -23,6 +25,11 @@ public class IndexActionMetaData extends SystemEntityType
 	 * Is auto generated
 	 */
 	public static final String ID = "id";
+
+	/**
+	 * The creation time of the index action.
+	 */
+	public static final String CREATION_DATE_TIME = "creationDateTime";
 
 	/**
 	 * The group that this index action belongs to.
@@ -68,6 +75,7 @@ public class IndexActionMetaData extends SystemEntityType
 		setPackage(indexPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
 		addAttribute(INDEX_ACTION_GROUP_ATTR).setDescription("The group that this index action belongs to")
 											 .setDataType(XREF)
 											 .setRefEntity(indexActionGroupMetaData);

@@ -43,7 +43,7 @@ public class RoleMembershipMetadata extends SystemEntityType
 		setLabel("Role Membership");
 		setDescription("Records the fact that a User is a member of a Role during an interval.");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier").setVisible(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(USER).setLabel("User").setDataType(XREF).setRefEntity(userMetaData).setNillable(false);
 		addAttribute(ROLE).setLabel("Role").setDataType(XREF).setRefEntity(roleMetadata).setNillable(false);
 		addAttribute(FROM).setLabel("From").setDataType(DATE_TIME).setNillable(false);

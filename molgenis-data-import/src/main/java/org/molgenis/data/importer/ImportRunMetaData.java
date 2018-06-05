@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -40,7 +41,7 @@ public class ImportRunMetaData extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true)
 								 .setVisible(false)
 								 .setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(STARTDATE).setDataType(DATE_TIME).setNillable(false);
+		addAttribute(STARTDATE, ROLE_LABEL).setDataType(DATE_TIME).setNillable(false);
 		addAttribute(ENDDATE).setDataType(DATE_TIME).setNillable(true);
 		addAttribute(USERNAME).setNillable(false);
 		addAttribute(STATUS).setDataType(ENUM)
