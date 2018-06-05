@@ -39,6 +39,11 @@
             <artifactId>molgenis-i18n</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- third party dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -95,6 +100,10 @@
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
             <version>0.9.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
     </dependencies>
 </project>

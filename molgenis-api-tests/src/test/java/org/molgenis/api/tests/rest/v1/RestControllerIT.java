@@ -25,9 +25,8 @@ public class RestControllerIT
 	private static final String PATH = "api/v1/";
 
 	// User credentials
-	private String testUserName;
+	private String testUsername;
 	private static final String REST_TEST_USER_PASSWORD = "rest_test_user_password";
-	private String testUserId;
 	private String testUserToken;
 	private String adminToken;
 
@@ -46,27 +45,26 @@ public class RestControllerIT
 		LOG.info("baseURI: " + RestAssured.baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
-		LOG.info("adminUserName: " + adminUserName);
+		String adminUsername = Strings.isNullOrEmpty(envAdminName) ? RestTestUtils.DEFAULT_ADMIN_NAME : envAdminName;
+		LOG.info("adminUsername: " + adminUsername);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
 		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? RestTestUtils.DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		adminToken = login(adminUserName, adminPassword);
+		adminToken = login(adminUsername, adminPassword);
 
-		testUserName = "rest_test_user" + System.currentTimeMillis();
-		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, testUserName);
+		testUsername = "rest_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD);
 
-		setGrantedRepositoryPermissions(adminToken, testUserId,
+		setGrantedRepositoryPermissions(adminToken, testUsername,
 				ImmutableMap.<String, Permission>builder().put("sys_FreemarkerTemplate", WRITE)
 														  .put("sys_scr_ScriptType", READ)
 														  .put("sys_FileMeta", WRITEMETA)
 														  .put(UserMetaData.USER, COUNT)
 														  .build());
 
-		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUsername, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -184,7 +182,7 @@ public class RestControllerIT
 		// @formatter:on
 
 		// clean up after test
-		this.testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+		this.testUserToken = login(testUsername, REST_TEST_USER_PASSWORD);
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6575
@@ -202,7 +200,7 @@ public class RestControllerIT
 			   .then()
 			   .statusCode(NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'test.csv' of type 'Freemarker template'."));
+			   .body("errors[0].message", equalTo("Unknown entity with 'Id' 'test.csv' of type 'Freemarker template'."));
 		// @formatter:on
 	}
 
@@ -268,7 +266,7 @@ public class RestControllerIT
 	public void afterClass()
 	{
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUsername);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

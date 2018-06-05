@@ -32,13 +32,15 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 	private final DataService dataService;
 	private final ScriptFactory scriptFactory;
 	private final ScriptParameterFactory scriptParameterFactory;
+	private final ScriptMetaData scriptMetaData;
 
 	public OntologyScriptInitializerImpl(DataService dataService, ScriptFactory scriptFactory,
-			ScriptParameterFactory scriptParameterFactory)
+			ScriptParameterFactory scriptParameterFactory, ScriptMetaData scriptMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.scriptFactory = requireNonNull(scriptFactory);
 		this.scriptParameterFactory = requireNonNull(scriptParameterFactory);
+		this.scriptMetaData = requireNonNull(scriptMetaData);
 	}
 
 	@Override
@@ -54,7 +56,9 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				Entity scriptType = dataService.findOne(ScriptTypeMetaData.SCRIPT_TYPE,
 						new QueryImpl<>().eq(ScriptTypeMetaData.NAME, "R"));
 
-				if (scriptType == null) throw new UnknownEntityException(ScriptMetaData.SCRIPT, "R");
+				if (scriptType == null)
+					throw new UnknownEntityException(scriptMetaData, scriptMetaData.getAttribute(ScriptMetaData.NAME),
+							"R");
 
 				String scriptContent;
 				try

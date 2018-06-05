@@ -2,7 +2,6 @@ package org.molgenis.security.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMemberFactory;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -35,9 +34,8 @@ public class GoogleAuthenticationProcessingFilterTest
 		DataService dataService = mock(DataService.class);
 		GooglePublicKeysManager googlePublicKeysManager = mock(GooglePublicKeysManager.class);
 		UserFactory userFactory = mock(UserFactory.class);
-		GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);
 		googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(googlePublicKeysManager,
-				dataService, userDetailsService, authenticationSettings, userFactory, groupMemberFactory);
+				dataService, userDetailsService, authenticationSettings, userFactory);
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
 	}
@@ -45,7 +43,7 @@ public class GoogleAuthenticationProcessingFilterTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void GoogleAuthenticationProcessingFilter()
 	{
-		new GoogleAuthenticationProcessingFilter(null, null, null, null, null, null);
+		new GoogleAuthenticationProcessingFilter(null, null, null, null, null);
 	}
 
 	@Test(expectedExceptions = AuthenticationServiceException.class)

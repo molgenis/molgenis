@@ -6,6 +6,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -73,10 +74,12 @@ public class FileMetaRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(fileStore).delete("id");
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_file_FileMeta id:id")
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_file_FileMeta id:id attribute:idAttribute")
 	public void testDeleteByIdUnknownId()
 	{
+		Attribute idAttribute = when(mock(Attribute.class).getName()).thenReturn("idAttribute").getMock();
 		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("sys_file_FileMeta").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttribute);
 		when(delegateRepository.getEntityType()).thenReturn(entityType);
 		when(delegateRepository.findOneById("id")).thenReturn(null);
 		fileMetaRepositoryDecorator.deleteById("id");

@@ -14,6 +14,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
+import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -63,7 +67,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DecoratorConfigurationFactory decoratorConfigurationFactory;
 	@Autowired
-	private TestPermissionPopulator testPermissionPopulator;
+	private PermissionService testPermissionService;
 
 	private EntityType refEntityTypeDynamic;
 	private EntityType entityTypeDynamic;
@@ -74,7 +78,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		refEntityTypeDynamic = testHarness.createDynamicRefEntityType("DynamicDecoratorITRefEntityType");
-		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic, "DynamicDecoratorITEntityType");
+		entityTypeDynamic = testHarness.createDynamicTestEntityType(refEntityTypeDynamic,
+				"DynamicDecoratorITEntityType");
 
 		runAsSystem(() ->
 		{
@@ -165,6 +170,6 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.READ);
 
-		testPermissionPopulator.populate(permissionMap);
+		testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
 	}
 }

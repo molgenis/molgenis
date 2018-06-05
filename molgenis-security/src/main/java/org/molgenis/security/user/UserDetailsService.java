@@ -1,11 +1,11 @@
 package org.molgenis.security.user;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMember;
-import org.molgenis.data.security.auth.GroupMemberMetaData;
+import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
-import org.molgenis.security.acl.SidUtils;
+import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +19,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
 {
@@ -47,6 +49,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 				user.isActive(), true, true, true, authorities);
 	}
 
+	@RunAsSystem
 	public Collection<? extends GrantedAuthority> getAuthorities(User user)
 	{
 		Set<GrantedAuthority> authorities = new LinkedHashSet<>();
@@ -59,13 +62,18 @@ public class UserDetailsService implements org.springframework.security.core.use
 		{
 			authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
 		}
+		else
+		{
+			authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
+		}
 
-		// add authorities of groups that this user is member of
-		dataService.query(GROUP_MEMBER, GroupMember.class)
-				   .eq(GroupMemberMetaData.USER, user)
+		dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
+				   .eq(USER, user)
 				   .findAll()
-				   .map(GroupMember::getGroup)
-				   .map(SidUtils::createGroupAuthority)
+				   .filter(RoleMembership::isCurrent)
+				   .map(RoleMembership::getRole)
+				   .map(Role::getName)
+				   .map(SidUtils::createRoleAuthority)
 				   .map(SimpleGrantedAuthority::new)
 				   .forEach(authorities::add);
 

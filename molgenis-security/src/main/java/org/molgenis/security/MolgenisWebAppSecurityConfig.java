@@ -6,7 +6,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.GroupMemberFactory;
 import org.molgenis.data.security.auth.TokenFactory;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.user.UserService;
@@ -89,9 +88,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 	@Autowired
 	private UserFactory userFactory;
-
-	@Autowired
-	private GroupMemberFactory groupMemberFactory;
 
 	@Autowired
 	private OtpService otpService;
@@ -342,7 +338,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
 				googlePublicKeysManager(), dataService, (UserDetailsService) userDetailsService(),
-				authenticationSettings, userFactory, groupMemberFactory);
+				authenticationSettings, userFactory);
 		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
 		return googleAuthenticationProcessingFilter;
 	}

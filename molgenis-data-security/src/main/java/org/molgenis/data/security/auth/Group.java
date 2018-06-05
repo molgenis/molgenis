@@ -4,7 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.security.auth.GroupMetaData.*;
+import static org.molgenis.data.security.auth.GroupMetadata.*;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
 public class Group extends StaticEntity
 {
@@ -16,30 +17,12 @@ public class Group extends StaticEntity
 	public Group(EntityType entityType)
 	{
 		super(entityType);
-		setDefaultValues();
 	}
 
 	public Group(String id, EntityType entityType)
 	{
 		super(entityType);
 		setId(id);
-		setDefaultValues();
-	}
-
-	public boolean isActive()
-	{
-		Boolean active = getBoolean(ACTIVE);
-		return active != null ? active : false;
-	}
-
-	public void setActive(boolean active)
-	{
-		set(ACTIVE, active);
-	}
-
-	public String getId()
-	{
-		return getString(ID);
 	}
 
 	public void setId(String id)
@@ -47,9 +30,9 @@ public class Group extends StaticEntity
 		set(ID, id);
 	}
 
-	public String getName()
+	public String getId()
 	{
-		return getString(NAME);
+		return getString(ID);
 	}
 
 	public void setName(String name)
@@ -57,8 +40,78 @@ public class Group extends StaticEntity
 		set(NAME, name);
 	}
 
-	private void setDefaultValues()
+	public String getName()
 	{
-		setActive(true);
+		return getString(NAME);
+	}
+
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
+	public String getLabel(String languageCode)
+	{
+		return getString(getI18nAttributeName(LABEL, languageCode));
+	}
+
+	public void setLabel(String label)
+	{
+		set(LABEL, label);
+	}
+
+	public void setLabel(String languageCode, String label)
+	{
+		set(getI18nAttributeName(LABEL, languageCode), label);
+	}
+
+	public String getDescription()
+	{
+		return getString(DESCRIPTION);
+	}
+
+	public String getDescription(String languageCode)
+	{
+		return getString(getI18nAttributeName(DESCRIPTION, languageCode));
+	}
+
+	public void setDescription(String description)
+	{
+		set(DESCRIPTION, description);
+	}
+
+	public void setDescription(String languageCode, String label)
+	{
+		set(getI18nAttributeName(DESCRIPTION, languageCode), label);
+	}
+
+	public void setPublic(boolean isPublic)
+	{
+		set(PUBLIC, isPublic);
+	}
+
+	public boolean isPublic()
+	{
+		return getBoolean(PUBLIC);
+	}
+
+	public Iterable<Role> getRoles()
+	{
+		return getEntities(ROLES, Role.class);
+	}
+
+	public void setRoles(Iterable<Role> roles)
+	{
+		set(ROLES, roles);
+	}
+
+	public void setRootPackage(String rootPackage)
+	{
+		set(ROOT_PACKAGE, rootPackage);
+	}
+
+	public String getRootPackage()
+	{
+		return getString(ROOT_PACKAGE);
 	}
 }
