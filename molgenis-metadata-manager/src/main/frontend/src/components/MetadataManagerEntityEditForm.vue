@@ -138,8 +138,7 @@
             type: 'warning',
             message: 'Label attribute can not be empty because the ID attribute is not visible'
           })
-        }
-        else {
+        } else {
           this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
         }
       },
