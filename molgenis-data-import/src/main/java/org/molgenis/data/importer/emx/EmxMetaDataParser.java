@@ -408,8 +408,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory,
-				defaultPackage);
+		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tagEntity : tagRepository)
@@ -1192,6 +1191,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (entityType.getPackage() == null)
 			{
+				entityType.setId(defaultPackageId + PACKAGE_SEPARATOR + entityType.getId());
 				entityType.setPackage(p);
 			}
 			entities.add(entityType);

@@ -22,17 +22,17 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		intermediateParseResults = new IntermediateParseResults(entityTypeFactory, defaultPackage);
+		intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
 	}
 
 	@Test
-	public void testAddEntityType() throws Exception
+	public void testAddEntityType()
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.setLabel(any())).thenReturn(entityType);
 		when(entityType.setPackage(any())).thenReturn(entityType);
 
-		when(entityTypeFactory.create("base_entityType")).thenReturn(entityType);
+		when(entityTypeFactory.create("entityType")).thenReturn(entityType);
 
 		assertEquals(intermediateParseResults.addEntityType("entityType"), entityType);
 		verify(entityType).setLabel("entityType");

@@ -11,14 +11,13 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 
-public class ImportWizardUtil
+class ImportWizardUtil
 {
 	private ImportWizardUtil()
 	{
-
 	}
 
-	public static DatabaseAction toDatabaseAction(String actionStr)
+	static DatabaseAction toDatabaseAction(String actionStr)
 	{
 		// convert input to database action
 		DatabaseAction dbAction;
@@ -42,7 +41,7 @@ public class ImportWizardUtil
 		return dbAction;
 	}
 
-	public static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
+	static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();
@@ -53,10 +52,10 @@ public class ImportWizardUtil
 					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption), e);
 		}
 
-		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getLocalizedMessage()));
 	}
 
-	public static void validateImportWizard(Wizard wizard)
+	static void validateImportWizard(Wizard wizard)
 	{
 		if (!(wizard instanceof ImportWizard))
 		{

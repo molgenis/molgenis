@@ -17,24 +17,27 @@
                 </div>
             </div>
         </div>
+    <#if wizard.entitiesInDefaultPackage?? && wizard.entitiesInDefaultPackage?size &gt; 0>
         <div class="col-md-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h4 class="panel-title">Add to package</h4>
                 </div>
                 <div class="panel-body">
-                <#list wizard.packages as packageName>
+                <#list wizard.packages as packageId, packageLabel>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="selectedPackage"
-                                   <#if packageName == wizard.packages?first>checked</#if>
-                                   value="${packageName?html}">${packageName?html}
+                            <input type="radio" name="selectedPackage" value="${packageId?html}">${packageLabel?html}
                         </label>
                     </div>
                 </#list>
+                    <script>
+                        $('input[name="selectedPackage"]:first').prop('checked', true);
+                    </script>
                 </div>
             </div>
         </div>
+    </#if>
     </div>
 
 </form>

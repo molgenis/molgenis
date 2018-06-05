@@ -5,10 +5,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.NoWritablePackageException;
+import org.molgenis.data.security.PackagePermissionUtils;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -16,9 +17,11 @@ import org.molgenis.oneclickimporter.service.AttributeTypeService;
 import org.molgenis.oneclickimporter.service.EntityService;
 import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -42,14 +45,14 @@ public class EntityServiceImpl implements EntityService
 	private final OneClickImporterNamingService oneClickImporterNamingService;
 	private final PackageFactory packageFactory;
 	private final PermissionSystemService permissionSystemService;
-	private final Package uploadPackage;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 
 	public EntityServiceImpl(EntityTypeFactory entityTypeFactory, AttributeFactory attributeFactory,
 			IdGenerator idGenerator, DataService dataService, MetaDataService metaDataService,
 			EntityManager entityManager, AttributeTypeService attributeTypeService,
 			OneClickImporterService oneClickImporterService,
 			OneClickImporterNamingService oneClickImporterNamingService, PackageFactory packageFactory,
-			PermissionSystemService permissionSystemService, UploadPackage uploadPackage)
+			PermissionSystemService permissionSystemService, UserPermissionEvaluator userPermissionEvaluator)
 	{
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeFactory = requireNonNull(attributeFactory);
@@ -62,7 +65,7 @@ public class EntityServiceImpl implements EntityService
 		this.oneClickImporterNamingService = requireNonNull(oneClickImporterNamingService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.uploadPackage = requireNonNull(uploadPackage);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public class EntityServiceImpl implements EntityService
 		{
 			package_ = packageFactory.create(packageName);
 			package_.setLabel(packageName);
-			package_.setParent(uploadPackage);
+			package_.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
 			metaDataService.addPackage(package_);
 		}
 
@@ -134,6 +137,19 @@ public class EntityServiceImpl implements EntityService
 		dataService.add(entityType.getId(), rows.stream());
 
 		return entityType;
+	}
+
+	/**
+	 * @return the first writable package
+	 */
+	private Optional<Package> getParentPackage()
+	{
+		return metaDataService.getPackages().stream().filter(this::isWritablePackage).findFirst();
+	}
+
+	private boolean isWritablePackage(Package aPackage)
+	{
+		return PackagePermissionUtils.isWritablePackage(aPackage, userPermissionEvaluator);
 	}
 
 	private void setRowValueForAttribute(Entity row, int index, Column column)

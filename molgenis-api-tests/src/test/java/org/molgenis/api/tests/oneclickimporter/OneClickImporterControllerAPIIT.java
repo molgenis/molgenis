@@ -86,7 +86,7 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 		setGrantedPackagePermissions(adminToken, oneClickImporterTestUsername,
-				ImmutableMap.<String, Permission>builder().put("base_upload", WRITEMETA).build());
+				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
 		setGrantedPluginPermissions(adminToken, oneClickImporterTestUsername, "one-click-importer");
 
 		testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
@@ -128,7 +128,7 @@ public class OneClickImporterControllerAPIIT
 								  .all()
 								  .header(X_MOLGENIS_TOKEN, testUserToken)
 								  .get(jobUrl)
-								  .then()
+								  .then().log().all()
 								  .statusCode(OKE)
 								  .extract()
 								  .path("status");

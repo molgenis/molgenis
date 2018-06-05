@@ -144,7 +144,7 @@ public class RestTestUtils
 	{
 		String importJobStatusUrl = given().multiPart(file)
 										   .param("file")
-										   .param("action", "ADD_UPDATE_EXISTING")
+										   .param("action", "ADD_UPDATE_EXISTING").param("packageId", "base")
 										   .header(X_MOLGENIS_TOKEN, adminToken)
 										   .post("plugin/importwizard/importFile")
 										   .then()
