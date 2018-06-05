@@ -131,7 +131,13 @@
       saveEntityType () {
         if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
           this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'ID attribute can not be empty'})
-        } else {
+        } else if (!this.idAttribute.visible && !this.editorEntityType.labelAttribute) {
+          this.$store.commit(CREATE_ALERT, {
+            type: 'warning',
+            message: 'Label attribute can not be empty because the ID attribute is not visible'
+          })
+        }
+        else {
           this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
         }
       },
@@ -146,7 +152,8 @@
       ...mapGetters({
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes',
-        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited'
+        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited',
+        idAttribute: 'getEditorEntityTypeIdAttribute'
       }),
       entityTypeParent: {
         get () {
