@@ -128,6 +128,7 @@
         <it_db_password>molgenis</it_db_password>
         <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
         <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
+        <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
     </properties>
 
     <distributionManagement>
@@ -603,6 +604,14 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>findbugs-maven-plugin</artifactId>
+                    <version>${findbugs-maven-plugin.version}</version>
+                    <configuration>
+                        <xmlOutput>true</xmlOutput>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -702,6 +711,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <configuration>
+                    <threshold>High</threshold>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -711,10 +727,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <xmlOutput>true</xmlOutput>
-                </configuration>
             </plugin>
             <!-- project reports -->
             <plugin>
