@@ -48,12 +48,12 @@ public class User extends StaticEntity
 
 	public String getPassword()
 	{
-		return getString(PASSWORD_);
+		return getString(PASSWORD);
 	}
 
 	public void setPassword(String password)
 	{
-		set(PASSWORD_, password);
+		set(PASSWORD, password);
 	}
 
 	@Nullable
