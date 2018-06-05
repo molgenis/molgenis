@@ -26,7 +26,7 @@ public class EntityTypeMapper
 	private final TagMapper tagMapper;
 	private final EntityTypeParentMapper entityTypeParentMapper;
 
-	public EntityTypeMapper(EntityTypeFactory entityTypeFactory, AttributeMapper attributeMapper,
+	EntityTypeMapper(EntityTypeFactory entityTypeFactory, AttributeMapper attributeMapper,
 			AttributeReferenceMapper attributeReferenceMapper, PackageMapper packageMapper, TagMapper tagMapper,
 			EntityTypeParentMapper entityTypeParentMapper)
 	{
@@ -45,9 +45,9 @@ public class EntityTypeMapper
 		ImmutableMap<String, String> i18nLabel = toI18nLabel(entityType);
 		String description = entityType.getDescription();
 		ImmutableMap<String, String> i18nDescription = toI18nDescription(entityType);
-		boolean abstract_ = entityType.isAbstract();
+		boolean isAbstract = entityType.isAbstract();
 		String backend = entityType.getBackend();
-		EditorPackageIdentifier package_ = packageMapper.toEditorPackage(entityType.getPackage());
+		EditorPackageIdentifier pack = packageMapper.toEditorPackage(entityType.getPackage());
 		EditorEntityTypeParent entityTypeParent = entityTypeParentMapper.toEditorEntityTypeParent(
 				entityType.getExtends());
 		ImmutableList<EditorAttribute> attributes = attributeMapper.toEditorAttributes(
@@ -62,7 +62,7 @@ public class EntityTypeMapper
 		ImmutableList<EditorAttributeIdentifier> lookupAttributes = attributeReferenceMapper.toEditorAttributeIdentifiers(
 				entityType.getLookupAttributes());
 
-		return EditorEntityType.create(id, label, i18nLabel, description, i18nDescription, abstract_, backend, package_,
+		return EditorEntityType.create(id, label, i18nLabel, description, i18nDescription, isAbstract, backend, pack,
 				entityTypeParent, attributes, editorReferringAttributes, tags, idAttribute, labelAttribute,
 				lookupAttributes);
 	}
