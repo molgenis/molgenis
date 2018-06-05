@@ -18,10 +18,10 @@ public interface AppManagerService
 
 	/**
 	 * Retrieve an {@link AppResponse} based a unique URI
-	 * Throws an {@link org.molgenis.app.manager.exception.AppForURIDoesNotExistException} when there is no app with the requested URI
 	 *
 	 * @param uri The URI of an App
 	 * @return An {@link AppResponse}
+	 * @throws org.molgenis.app.manager.exception.AppForURIDoesNotExistException if there is no app with the requested URI
 	 */
 	AppResponse getAppByUri(String uri);
 
@@ -43,8 +43,9 @@ public interface AppManagerService
 	 * Delete an existing App
 	 *
 	 * @param id The id of an App
+	 * @throws CouldNotDeleteAppException if deletion fails
 	 */
-	void deleteApp(String id) throws CouldNotDeleteAppException;
+	void deleteApp(String id);
 
 	/**
 	 * Upload an app
