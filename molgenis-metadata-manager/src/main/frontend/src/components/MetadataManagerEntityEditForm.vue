@@ -72,7 +72,9 @@
         <div class="form-group row">
           <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
           <div class="col">
-            <multiselect v-model="labelAttribute" :options="attributes" label="label"
+            <multiselect v-model="labelAttribute" @select="selectLabelAttribute"
+                         :options="['CLEAR_SELECTION', ...attributes]"
+                         label="label"
                          selectLabel="" deselectLabel=""
                          :placeholder="$t('entity-edit-form-label-attribute-placeholder')"></multiselect>
           </div>
@@ -208,7 +210,11 @@
           return this.$store.state.editorEntityType.labelAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
+          if (!value || value === 'CLEAR_SELECTION') {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: null})
+          } else {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
+          }
         }
       },
       lookupAttributes: {
