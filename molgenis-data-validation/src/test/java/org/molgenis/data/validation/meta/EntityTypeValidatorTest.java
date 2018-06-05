@@ -245,6 +245,16 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
 	}
 
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[labelAttr\\] of EntityType \\[entity\\] must be visible.")
+	public void testValidateLabelAttributeHidden()
+	{
+		when(entityType.getLabelAttribute()).thenReturn(labelAttr);
+		when(labelAttr.isVisible()).thenReturn(false);
+		when(entityType.getId()).thenReturn("entity");
+		when(labelAttr.getName()).thenReturn("labelAttr");
+		EntityTypeValidator.validateLabelAttribute(entityType);
+	}
+
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] must define a label attribute because the identifier is hidden")
 	public void testValidateLabelAttributeNullIdAttributeInvisible()
 	{
