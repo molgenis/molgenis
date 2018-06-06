@@ -60,7 +60,7 @@ public class EntityTypeValidator
 		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
 				toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
 				{
-					throw new IllegalStateException(String.format("Duplicate key %s", u));
+					throw new IllegalStateException(format("Duplicate key %s", u));
 				}, LinkedHashMap::new));
 
 		validateOwnIdAttribute(entityType, ownAllAttrMap);
@@ -146,7 +146,15 @@ public class EntityTypeValidator
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label attribute [%s] is not is not one of the attributes of entity [%s]",
+						format("Label attribute [%s] is not one of the attributes of entity [%s]",
+								ownLabelAttr.getName(), entityType.getId())));
+			}
+
+			// Validate that the label attribute is not nillable
+			if (ownAttr.isNillable())
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Label attribute [%s] of entity type [%s] is not a non-nillable attribute",
 								ownLabelAttr.getName(), entityType.getId())));
 			}
 		}

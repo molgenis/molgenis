@@ -199,6 +199,10 @@ public class Attribute extends StaticEntity implements Labeled
 	public Attribute setLabelAttribute(Boolean isLabelAttr)
 	{
 		set(IS_LABEL_ATTRIBUTE, isLabelAttr);
+		if (isLabelAttr != null && isLabelAttr)
+		{
+			setNillable(false);
+		}
 		return this;
 	}
 
