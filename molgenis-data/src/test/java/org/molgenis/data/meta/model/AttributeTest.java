@@ -26,6 +26,7 @@ public class AttributeTest
 		Attribute isUniqueAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute isIdAttr = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		Attribute parentAttr = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+		Attribute isLabelAttribute = when(mock(Attribute.class).getDataType()).thenReturn(BOOL).getMock();
 		when(entityType.getAttribute(TYPE)).thenReturn(typeAttr);
 		when(entityType.getAttribute(IS_NULLABLE)).thenReturn(isNullableAttr);
 		when(entityType.getAttribute(IS_AUTO)).thenReturn(isAutoAttr);
@@ -35,6 +36,8 @@ public class AttributeTest
 		when(entityType.getAttribute(IS_UNIQUE)).thenReturn(isUniqueAttr);
 		when(entityType.getAttribute(IS_ID_ATTRIBUTE)).thenReturn(isIdAttr);
 		when(entityType.getAttribute(PARENT)).thenReturn(parentAttr);
+		when(entityType.getAttribute(IS_LABEL_ATTRIBUTE)).thenReturn(isLabelAttribute);
+
 		attribute = new Attribute(entityType);
 	}
 
@@ -99,6 +102,20 @@ public class AttributeTest
 		attribute.setIdAttribute(false);
 		assertFalse(attribute.isReadOnly());
 		assertFalse(attribute.isUnique());
+		assertTrue(attribute.isNillable());
+	}
+
+	@Test
+	public void setLabelAttributeTrue()
+	{
+		attribute.setLabelAttribute(true);
+		assertFalse(attribute.isNillable());
+	}
+
+	@Test
+	public void setLabelAttributeFalse()
+	{
+		attribute.setLabelAttribute(false);
 		assertTrue(attribute.isNillable());
 	}
 
