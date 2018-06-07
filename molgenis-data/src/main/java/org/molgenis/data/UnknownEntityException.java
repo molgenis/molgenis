@@ -1,6 +1,10 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,7 +13,11 @@ public class UnknownEntityException extends UnknownDataException
 {
 	private static final String ERROR_CODE = "D02";
 
+	@Nullable
 	private final transient EntityType entityType;
+
+	// the attribute you used to look up the entity, defaults to id
+	private final transient Attribute attribute;
 
 	private final String entityTypeId;
 
@@ -21,6 +29,16 @@ public class UnknownEntityException extends UnknownDataException
 		this.entityType = requireNonNull(entityType);
 		this.entityTypeId = entityType.getId();
 		this.entityId = requireNonNull(entityId);
+		this.attribute = entityType.getIdAttribute();
+	}
+
+	public UnknownEntityException(EntityType entityType, Attribute attribute, Object entityId)
+	{
+		super(ERROR_CODE);
+		this.entityType = requireNonNull(entityType);
+		this.entityTypeId = entityType.getId();
+		this.entityId = requireNonNull(entityId);
+		this.attribute = requireNonNull(attribute);
 	}
 
 	public UnknownEntityException(String entityTypeId, Object entityId)
@@ -29,6 +47,7 @@ public class UnknownEntityException extends UnknownDataException
 		entityType = null;
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.entityId = requireNonNull(entityId);
+		this.attribute = null;
 	}
 
 	public Object getEntityId()
@@ -39,7 +58,8 @@ public class UnknownEntityException extends UnknownDataException
 	@Override
 	public String getMessage()
 	{
-		return String.format("type:%s id:%s", entityTypeId, entityId.toString());
+		return String.format("type:%s id:%s attribute:%s", entityTypeId, entityId.toString(),
+				Optional.ofNullable(attribute).map(Attribute::getName).orElse("null"));
 	}
 
 	@Override
@@ -51,7 +71,8 @@ public class UnknownEntityException extends UnknownDataException
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{
-		return entityType == null ? new Object[] { entityTypeId, entityId } : new Object[] { entityType, entityId };
+		return entityType == null ? new Object[] { entityTypeId, entityId } : new Object[] { entityType, entityId,
+				attribute };
 	}
 }
 

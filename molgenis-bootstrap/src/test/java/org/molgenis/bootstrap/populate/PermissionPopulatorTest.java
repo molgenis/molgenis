@@ -3,13 +3,12 @@ package org.molgenis.bootstrap.populate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.mockito.Mock;
+import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.util.Pair;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.testng.annotations.BeforeMethod;
@@ -23,14 +22,14 @@ import static org.mockito.Mockito.*;
 public class PermissionPopulatorTest extends AbstractMockitoTest
 {
 	@Mock
-	private MutableAclService mutableAclService;
+	private PermissionService permissionService;
 
 	private PermissionPopulator permissionPopulator;
 
 	@BeforeMethod
 	private void setUpBeforeMethod()
 	{
-		permissionPopulator = new PermissionPopulator(mutableAclService);
+		permissionPopulator = new PermissionPopulator(permissionService);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -47,12 +46,14 @@ public class PermissionPopulatorTest extends AbstractMockitoTest
 		ObjectIdentity objectIdentity0 = new ObjectIdentityImpl("type", "id0");
 		PermissionRegistry permissionRegistry0 = mock(PermissionRegistry.class);
 		Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> registry0Permissions = ArrayListMultimap.create();
-		registry0Permissions.put(objectIdentity0, new Pair<>(mock(PermissionSet.class), mock(Sid.class)));
+		Sid sid0 = mock(Sid.class);
+		registry0Permissions.put(objectIdentity0, new Pair<>(PermissionSet.COUNT, sid0));
 		when(permissionRegistry0.getPermissions()).thenReturn(registry0Permissions);
 
 		ObjectIdentity objectIdentity1 = new ObjectIdentityImpl("type", "id1");
 		Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> registry1Permissions = ArrayListMultimap.create();
-		registry1Permissions.put(objectIdentity1, new Pair<>(mock(PermissionSet.class), mock(Sid.class)));
+		Sid sid1 = mock(Sid.class);
+		registry1Permissions.put(objectIdentity1, new Pair<>(PermissionSet.READ, sid1));
 		PermissionRegistry permissionRegistry1 = mock(PermissionRegistry.class);
 		when(permissionRegistry1.getPermissions()).thenReturn(registry1Permissions);
 
@@ -61,16 +62,9 @@ public class PermissionPopulatorTest extends AbstractMockitoTest
 		registryMap.put("registry1", permissionRegistry1);
 		when(applicationContext.getBeansOfType(PermissionRegistry.class)).thenReturn(registryMap);
 
-		MutableAcl acl0 = mock(MutableAcl.class);
-		doReturn(acl0).when(mutableAclService).readAclById(objectIdentity0);
-
-		MutableAcl acl1 = mock(MutableAcl.class);
-		doReturn(acl1).when(mutableAclService).readAclById(objectIdentity1);
-
 		permissionPopulator.populate(applicationContext);
 
-		verify(mutableAclService).updateAcl(acl0);
-		verify(mutableAclService).updateAcl(acl1);
-
+		verify(permissionService).grant(objectIdentity0, PermissionSet.COUNT, sid0);
+		verify(permissionService).grant(objectIdentity1, PermissionSet.READ, sid1);
 	}
 }

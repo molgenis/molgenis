@@ -3,6 +3,7 @@ package org.molgenis.data.populate;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AttributeUtils;
@@ -92,7 +93,7 @@ public class DefaultValuePopulator
 			case LONG:
 				return convertLong(valueAsString);
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

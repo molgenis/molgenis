@@ -70,10 +70,24 @@ public class EntityTypeValidator
 		validateBackend(entityType);
 	}
 
+	/**
+	 * Validates that the label attribute of this EntityType:
+	 * 1) Is visible.
+	 * 2) Is not null if the id attribute is hidden.
+	 *
+	 * @param entityType entity metadata
+	 */
 	static void validateLabelAttribute(EntityType entityType)
 	{
-		if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible()
-				&& entityType.getLabelAttribute() == null)
+		if (entityType.getLabelAttribute() != null && !entityType.getLabelAttribute().isVisible())
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Label attribute [%s] of EntityType [%s] must be visible.",
+							entityType.getLabelAttribute().getName(), entityType.getId())));
+		}
+
+		if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible() && (entityType.getLabelAttribute()
+				== null))
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("EntityType [%s] must define a label attribute because the identifier is hidden",

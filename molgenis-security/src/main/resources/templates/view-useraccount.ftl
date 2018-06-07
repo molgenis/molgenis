@@ -185,24 +185,6 @@
                     </form>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <legend>Group information</legend>
-                    <div class="row">
-                        <div class="col-md-4">
-                            A member of the following groups:
-                        </div>
-                        <div class="col-md-4">
-                            <ul id="groups" class="inline">
-                            <#list groups as group>
-                                <li>${group.name?html}</li>
-                            </#list>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="security">
@@ -397,7 +379,7 @@
             e.stopPropagation()
             form.submit()
         })
-        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+        $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress does not work cross-browser -->
             if (e.which === 13) {
                 e.preventDefault()
                 e.stopPropagation()
@@ -405,7 +387,7 @@
             }
         })
 
-        function listRecoveryCodes(codes) {
+        function listRecoveryCodes (codes) {
             let listItems = []
             const listTagOpen = '<li class="list-group-item">'
             const listTagClose = '</li>'
@@ -415,7 +397,7 @@
             $('#recovery-codes-list').html(listItems.join(''))
         }
 
-        function showRecoveryCodes() {
+        function showRecoveryCodes () {
             $.get('${context_url?html}/recoveryCodes', function (codes) {
                 listRecoveryCodes(codes['recoveryCodes'])
             })

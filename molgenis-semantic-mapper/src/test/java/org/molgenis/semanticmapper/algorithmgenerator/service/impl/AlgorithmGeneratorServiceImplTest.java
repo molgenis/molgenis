@@ -18,6 +18,7 @@ import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.service.UnitResolver;
+import org.molgenis.semanticmapper.service.impl.AlgorithmException;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.semanticmapper.service.impl.UnitResolverImpl;
@@ -31,11 +32,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -138,6 +140,26 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
 
 		assertEquals(actualAlgorithm, expectedAlgorithm);
+	}
+
+	@Test(expectedExceptions = AlgorithmException.class)
+	public void testGenerateListExpressedTargetAttribute()
+	{
+		Attribute targetAttribute = when(mock(Attribute.class).hasExpression()).thenReturn(true).getMock();
+		List<Attribute> sourceAttributes = emptyList();
+		EntityType targetEntityType = mock(EntityType.class);
+		EntityType sourceEntityType = mock(EntityType.class);
+		algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+	}
+
+	@Test(expectedExceptions = AlgorithmException.class)
+	public void testGenerateMapExpressedTargetAttribute()
+	{
+		Attribute targetAttribute = when(mock(Attribute.class).hasExpression()).thenReturn(true).getMock();
+		Map<Attribute, ExplainedAttribute> sourceAttributes = emptyMap();
+		EntityType targetEntityType = mock(EntityType.class);
+		EntityType sourceEntityType = mock(EntityType.class);
+		algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
 	}
 
 	@Configuration

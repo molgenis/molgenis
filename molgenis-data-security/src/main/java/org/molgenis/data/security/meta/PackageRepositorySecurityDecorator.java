@@ -207,14 +207,14 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 		else
 		{
-			Package currentpackage = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
-			if (currentpackage.getParent() == null)
+			Package currentPackage = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
+			if (currentPackage.getParent() == null)
 			{
 				updated = pack.getParent() != null;
 			}
 			else
 			{
-				updated = !currentpackage.getParent().equals(pack.getParent());
+				updated = !currentPackage.getParent().equals(pack.getParent());
 			}
 		}
 		return updated;

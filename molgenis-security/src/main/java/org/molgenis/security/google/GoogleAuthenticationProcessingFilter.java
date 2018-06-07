@@ -5,7 +5,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -34,11 +35,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupMemberMetaData.GROUP_MEMBER;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
-import static org.molgenis.data.security.auth.GroupMetaData.NAME;
 import static org.molgenis.data.security.auth.UserMetaData.*;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -56,16 +53,13 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private final UserDetailsService userDetailsService;
 	private final AuthenticationSettings authenticationSettings;
 	private final UserFactory userFactory;
-	private final GroupMemberFactory groupMemberFactory;
 
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
 			DataService dataService, UserDetailsService userDetailsService,
-			AuthenticationSettings authenticationSettings, UserFactory userFactory,
-			GroupMemberFactory groupMemberFactory)
+			AuthenticationSettings authenticationSettings, UserFactory userFactory)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
 		this.userFactory = requireNonNull(userFactory);
-		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 
 		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
@@ -204,14 +198,6 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		}
 		user.setGoogleAccountId(googleAccountId);
 		dataService.add(USER, user);
-
-		// add user to all-users group
-		GroupMember groupMember = groupMemberFactory.create();
-		Group group = dataService.query(GROUP, Group.class).eq(NAME, ALL_USER_GROUP).findOne();
-		groupMember.setGroup(group);
-		groupMember.setUser(user);
-		dataService.add(GROUP_MEMBER, groupMember);
-
 		return user;
 	}
 }

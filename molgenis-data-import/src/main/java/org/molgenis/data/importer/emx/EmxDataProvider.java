@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.DataProvider;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.UnexpectedEnumException;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
@@ -144,7 +144,7 @@ class EmxDataProvider implements DataProvider
 						}
 						break;
 					case COMPOUND:
-						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+						throw new IllegalAttributeTypeException(attrType);
 					default:
 						throw new UnexpectedEnumException(attrType);
 				}

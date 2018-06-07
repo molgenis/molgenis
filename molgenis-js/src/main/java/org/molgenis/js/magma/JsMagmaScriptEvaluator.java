@@ -6,6 +6,7 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.js.nashorn.NashornScriptEngine;
 import org.molgenis.script.core.ScriptException;
@@ -24,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
@@ -43,7 +43,6 @@ public class JsMagmaScriptEvaluator
 	private static final String KEY_NEW_VALUE = "newValue";
 	private static final String KEY_DOLLAR = "$";
 	private static final String KEY_MAGMA_SCRIPT = "MagmaScript";
-	private static final String KEY_DEFAULT = "default";
 	private static final String BIND = "bind";
 	public static final String KEY_ID_VALUE = "_idValue";
 
@@ -54,8 +53,7 @@ public class JsMagmaScriptEvaluator
 
 	static
 	{
-		RESOURCE_NAMES = asList("/js/es6-shims.min.js", "/js/math.min.js", "/js/moment.min.js",
-				"/js/MagmaScript.min.js");
+		RESOURCE_NAMES = asList("/js/es6-shims.js", "/js/math.min.js", "/js/script-evaluator.js");
 	}
 
 	public JsMagmaScriptEvaluator(NashornScriptEngine jsScriptEngine) throws javax.script.ScriptException, IOException
@@ -148,7 +146,7 @@ public class JsMagmaScriptEvaluator
 	{
 		Bindings bindings = new SimpleBindings();
 		JSObject global = (JSObject) magmaBindings.get("nashorn.global");
-		JSObject magmaScript = (JSObject) ((JSObject) global.getMember(KEY_MAGMA_SCRIPT)).getMember(KEY_DEFAULT);
+		JSObject magmaScript = (JSObject) global.getMember(KEY_MAGMA_SCRIPT);
 		JSObject dollarFunction = (JSObject) magmaScript.getMember(KEY_DOLLAR);
 		JSObject bindFunction = (JSObject) dollarFunction.getMember(BIND);
 		Object boundDollar = bindFunction.call(dollarFunction, toScriptEngineValueMap(entity, depth));
@@ -251,7 +249,7 @@ public class JsMagmaScriptEvaluator
 				value = entity.getLong(attrName);
 				break;
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

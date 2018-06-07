@@ -49,7 +49,6 @@ public class RestControllerV1APIIT
 
 	private String testUserToken;
 	private String adminToken;
-	private String testUserId;
 
 	@BeforeClass
 	public void beforeClass()
@@ -78,10 +77,9 @@ public class RestControllerV1APIIT
 		testUserName = "api_v1_test_user" + System.currentTimeMillis();
 		RestTestUtils.createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = RestTestUtils.getUserId(adminToken, testUserName);
-		LOG.info("testUserId: " + testUserId);
+		LOG.info("testUserName: " + testUserName);
 
-		setGrantedRepositoryPermissions(adminToken, testUserId,
+		setGrantedRepositoryPermissions(adminToken, testUserName,
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
 														  .put("sys_md_EntityType", WRITE)
 														  .put("sys_md_Attribute", WRITE)
@@ -695,7 +693,8 @@ public class RestControllerV1APIIT
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'ref6' of type 'TypeTestRefAPIV1'."));
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
@@ -742,7 +741,8 @@ public class RestControllerV1APIIT
 			   .all()
 			   .statusCode(RestTestUtils.NOT_FOUND)
 			   .body("errors[0].code", equalTo("D02"))
-			   .body("errors[0].message", equalTo("Unknown entity 'ref6' of type 'TypeTestRefAPIV1'."));
+			   .body("errors[0].message",
+					   equalTo("Unknown entity with 'value label' 'ref6' of type 'TypeTestRefAPIV1'."));
 	}
 
 	@Test
@@ -954,7 +954,7 @@ public class RestControllerV1APIIT
 		removeEntity(adminToken, "V1_API_Items");
 
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUserName);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

@@ -34,10 +34,9 @@ public class RestControllerV2IT
 
 	private static final String REST_TEST_USER_PASSWORD = "Blahdiblah";
 
-	private String testUserName;
+	private String testUsername;
 	private String testUserToken;
 	private String adminToken;
-	private String testUserId;
 
 	private List<String> testEntities = newArrayList("it_emx_datatypes_TypeTestv2", "it_emx_datatypes_TypeTestRefv2",
 			"it_emx_datatypes_Locationv2", "it_emx_datatypes_Personv2");
@@ -56,14 +55,14 @@ public class RestControllerV2IT
 		LOG.info("baseURI: " + RestAssured.baseURI);
 
 		String envAdminName = System.getProperty("REST_TEST_ADMIN_NAME");
-		String adminUserName = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
-		LOG.info("adminUserName: " + adminUserName);
+		String adminUsername = Strings.isNullOrEmpty(envAdminName) ? DEFAULT_ADMIN_NAME : envAdminName;
+		LOG.info("adminUsername: " + adminUsername);
 
 		String envAdminPW = System.getProperty("REST_TEST_ADMIN_PW");
 		String adminPassword = Strings.isNullOrEmpty(envAdminPW) ? DEFAULT_ADMIN_PW : envAdminPW;
 		LOG.info("adminPassword: " + adminPassword);
 
-		adminToken = login(adminUserName, adminPassword);
+		adminToken = login(adminUsername, adminPassword);
 
 		LOG.info("Clean up test entities if they already exist...");
 		removeEntities(adminToken, testEntities);
@@ -73,9 +72,8 @@ public class RestControllerV2IT
 		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
 		LOG.info("Importing Done");
 
-		testUserName = "rest_test_v2" + System.currentTimeMillis();
-		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, testUserName);
+		testUsername = "rest_test_v2" + System.currentTimeMillis();
+		createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD);
 
 		ImmutableMap.Builder<String, Permission> permissionsBuilder = ImmutableMap.builder();
 		permissionsBuilder.put(PACKAGE, WRITE)
@@ -84,9 +82,9 @@ public class RestControllerV2IT
 						  .put(FILE_META, READ)
 						  .put(UserMetaData.USER, COUNT);
 		testEntities.forEach(entity -> permissionsBuilder.put(entity, WRITE));
-		setGrantedRepositoryPermissions(adminToken, testUserId, permissionsBuilder.build());
+		setGrantedRepositoryPermissions(adminToken, testUsername, permissionsBuilder.build());
 
-		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
+		testUserToken = login(testUsername, REST_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -307,7 +305,7 @@ public class RestControllerV2IT
 		removeEntities(adminToken, testEntities);
 
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUsername);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

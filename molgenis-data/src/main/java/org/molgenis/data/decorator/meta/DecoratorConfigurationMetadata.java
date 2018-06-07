@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.decorator.meta.DecoratorPackage.PACKAGE_DECORATOR;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
@@ -38,7 +39,7 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 				"Configuration entity to configure which dynamic decorators should be applied to an entity type.");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
-		addAttribute(ENTITY_TYPE_ID).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");
+		addAttribute(ENTITY_TYPE_ID, ROLE_LABEL).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");
 		addAttribute(DYNAMIC_DECORATORS).setNillable(true)
 										.setDataType(AttributeType.MREF)
 										.setRefEntity(dynamicDecoratorMetadata)

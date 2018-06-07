@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AttributeUtils;
@@ -332,7 +333,7 @@ class PostgreSqlQueryGenerator
 				   .append(')');
 				break;
 			default:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 		}
 		sql.append(", UNIQUE (")
 		   .append(getJunctionTableOrderColumnName())
@@ -668,7 +669,7 @@ class PostgreSqlQueryGenerator
 			case COMPOUND:
 			case CATEGORICAL_MREF:
 			case MREF:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}
@@ -781,7 +782,7 @@ class PostgreSqlQueryGenerator
 			case COMPOUND:
 			case MREF:
 			case ONE_TO_MANY:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attributeType.toString()));
+				throw new IllegalAttributeTypeException(attributeType);
 			default:
 				throw new UnexpectedEnumException(attributeType);
 		}
@@ -1259,7 +1260,7 @@ class PostgreSqlQueryGenerator
 				case MREF:
 				case ONE_TO_MANY:
 				case COMPOUND:
-					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+					throw new IllegalAttributeTypeException(attrType);
 				default:
 					throw new UnexpectedEnumException(attrType);
 			}

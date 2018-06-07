@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -190,7 +191,11 @@ public class ImportWizardController extends AbstractWizardController
 		try
 		{
 			filename = getFilename(file.getOriginalFilename(), entityTypeId);
-			File tmpFile = fileStore.store(file.getInputStream(), filename);
+			File tmpFile;
+			try (InputStream inputStream = file.getInputStream())
+			{
+				tmpFile = fileStore.store(inputStream, filename);
+			}
 
 			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
 			{
@@ -222,7 +227,10 @@ public class ImportWizardController extends AbstractWizardController
 		String filename = path.getFileName().toString();
 		URL url = new URL(fileLocation);
 
-		return fileStore.store(url.openStream(), getFilename(filename, entityTypeId));
+		try (InputStream is = url.openStream())
+		{
+			return fileStore.store(is, getFilename(filename, entityTypeId));
+		}
 	}
 
 	private String getFilename(String originalFileName, String entityTypeId)

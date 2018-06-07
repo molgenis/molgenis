@@ -1,8 +1,9 @@
 package org.molgenis.core.ui;
 
 import com.google.common.collect.Maps;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.core.ui.freemarker.LimitMethod;
 import org.molgenis.core.ui.freemarker.MolgenisFreemarkerObjectWrapper;
@@ -292,9 +293,15 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer()
 		{
 			@Override
-			protected void postProcessConfiguration(Configuration config) throws IOException, TemplateException
+			protected void postProcessConfiguration(Configuration config)
 			{
 				config.setObjectWrapper(new MolgenisFreemarkerObjectWrapper(VERSION_2_3_23));
+			}
+
+			@Override
+			protected void postProcessTemplateLoaders(List<TemplateLoader> templateLoaders)
+			{
+				templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
 			}
 		};
 		result.setPreferFileSystemAccess(false);

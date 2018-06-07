@@ -46,7 +46,6 @@ public class RestControllerV2APIIT
 	private String testUserName;
 	private String testUserToken;
 	private String adminToken;
-	private String testUserId;
 
 	// Fields to store created entity ids from import test, used during cleanup to remove the entities
 	private List<String> importedEntities = new ArrayList<>();
@@ -80,9 +79,7 @@ public class RestControllerV2APIIT
 		testUserName = "api_v2_test_user" + System.currentTimeMillis();
 		createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
 
-		testUserId = getUserId(adminToken, testUserName);
-
-		setGrantedRepositoryPermissions(adminToken, testUserId,
+		setGrantedRepositoryPermissions(adminToken, testUserName,
 				ImmutableMap.<String, Permission>builder().put("sys_md_Package", WRITE)
 														  .put("sys_md_EntityType", WRITE)
 														  .put("sys_md_Attribute", WRITE)
@@ -99,7 +96,7 @@ public class RestControllerV2APIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 
-		setGrantedPackagePermissions(adminToken, testUserId,
+		setGrantedPackagePermissions(adminToken, testUserName,
 				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
 
 		testUserToken = login(testUserName, REST_TEST_USER_PASSWORD);
@@ -713,7 +710,7 @@ public class RestControllerV2APIIT
 		removeEntity(adminToken, "base_CopiedEntity");
 
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUserName);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

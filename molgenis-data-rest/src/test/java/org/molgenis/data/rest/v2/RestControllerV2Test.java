@@ -1057,7 +1057,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
 											   .contentType(APPLICATION_JSON))
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D02")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity '4' of type 'entity'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity with 'id' '4' of type 'entity'.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()

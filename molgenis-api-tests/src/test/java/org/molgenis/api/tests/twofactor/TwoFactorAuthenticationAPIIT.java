@@ -26,12 +26,11 @@ public class TwoFactorAuthenticationAPIIT
 	private static final String PATH = "api/v1/";
 
 	// User credentials
-	private String testUserName;
+	private String testUsername;
 	private static final String TWO_FA_AUTH_TEST_USER_PASSWORD = "two_fa_auth_test_user_password";
 
 	private String adminToken;
 	private String testUserToken;
-	private String testUserId;
 
 	/**
 	 * Pass down system properties via the mvn commandline argument
@@ -56,9 +55,8 @@ public class TwoFactorAuthenticationAPIIT
 		LOG.info("adminPassword: " + adminPassword);
 
 		adminToken = login(adminUserName, adminPassword);
-		testUserName = "two_fa_auth_test_user" + System.currentTimeMillis();
-		createUser(adminToken, testUserName, TWO_FA_AUTH_TEST_USER_PASSWORD);
-		testUserId = getUserId(adminToken, testUserName);
+		testUsername = "two_fa_auth_test_user" + System.currentTimeMillis();
+		createUser(adminToken, testUsername, TWO_FA_AUTH_TEST_USER_PASSWORD);
 	}
 
 	@Test
@@ -68,7 +66,7 @@ public class TwoFactorAuthenticationAPIIT
 
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", testUserName);
+		loginBody.put("username", testUsername);
 		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
 		given().contentType(APPLICATION_JSON)
@@ -88,7 +86,7 @@ public class TwoFactorAuthenticationAPIIT
 
 		Gson gson = new Gson();
 		Map<String, String> loginBody = new HashMap<>();
-		loginBody.put("username", testUserName);
+		loginBody.put("username", testUsername);
 		loginBody.put("password", TWO_FA_AUTH_TEST_USER_PASSWORD);
 
 		ValidatableResponse response = given().contentType(APPLICATION_JSON)
@@ -105,7 +103,7 @@ public class TwoFactorAuthenticationAPIIT
 	public void afterClass()
 	{
 		// Clean up permissions
-		removeRightsForUser(adminToken, testUserId);
+		removeRightsForUser(adminToken, testUsername);
 
 		// Clean up Token for user
 		cleanupUserToken(testUserToken);

@@ -1,16 +1,12 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import com.google.common.collect.Lists;
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.*;
-import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
@@ -22,12 +18,8 @@ import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.auth.GroupMetaData.GROUP;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
@@ -44,18 +36,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	private DataService dataService;
-
-	@Autowired
 	private ImportRunService importRunService;
 
 	@Autowired
 	UserAccountService userAccountService;
 
 	@Autowired
-	UserService userService;
-
-	private List<Group> groups;
+	transient UserService userService;
 
 	@Override
 	public String getTitle()
@@ -101,19 +88,6 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			}
 
 		}
-
-		// Convert to list because it's less impossible use in FreeMarker
-		if (!userAccountService.getCurrentUser().isSuperuser())
-		{
-			String username = SecurityUtils.getCurrentUsername();
-			groups = RunAsSystemAspect.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
-		}
-		else
-		{
-			groups = dataService.findAll(GROUP, Group.class).collect(toList());
-		}
-
-		((ImportWizard) wizard).setGroups(groups);
 
 		return null;
 	}

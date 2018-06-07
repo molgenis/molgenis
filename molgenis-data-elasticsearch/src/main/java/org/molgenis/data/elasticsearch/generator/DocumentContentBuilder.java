@@ -7,6 +7,7 @@ import org.elasticsearch.common.xcontent.XContentGenerator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.elasticsearch.common.xcontent.XContentType.JSON;
 
@@ -200,7 +200,7 @@ class DocumentContentBuilder
 				break;
 			}
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

@@ -2,6 +2,7 @@ package org.molgenis.web.rsql;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class RSQLValueParser
 			case LONG:
 				return Long.valueOf(valueString);
 			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				throw new IllegalAttributeTypeException(attrType);
 			default:
 				throw new UnexpectedEnumException(attrType);
 		}

@@ -49,9 +49,10 @@ public class AmazonBucketClientImpl implements AmazonBucketClient
 			key = keyName;
 		}
 		S3Object s3Object = s3Client.getObject(new GetObjectRequest(bucketName, key));
-		InputStream in = s3Object.getObjectContent();
-
-		return storeFile(fileStore, key, extension, targetEntityType, jobIdentifier, in);
+		try (InputStream in = s3Object.getObjectContent())
+		{
+			return storeFile(fileStore, key, extension, targetEntityType, jobIdentifier, in);
+		}
 	}
 
 	private File storeFile(FileStore fileStore, String key, String extension, String targetEntityName,

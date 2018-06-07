@@ -70,6 +70,7 @@
             </thead>
             <tbody>
             <#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes() as attribute>
+                <#if !attribute.expression??>
             <tr>
                 <td>
                     <b>${attribute.label?html}</b> (${attribute.dataType})
@@ -138,6 +139,7 @@
                     </td>
                 </#list>
             </tr>
+                </#if>
             </#list>
             <#list mappingProject.getMappingTarget(selectedTarget).getMissingTargetAttributeNames() as missing>
                 <tr>
