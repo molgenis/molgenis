@@ -124,20 +124,13 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
 
 		appResponse = AppResponse.create(app);
-		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
+		when(appManagerService.getAppByName("uri")).thenReturn(appResponse);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(appController)
 								 .setControllerAdvice(globalControllerExceptionHandler, fallbackExceptionHandler,
 										 springExceptionHandler)
 								 .setLocaleResolver(localeResolver)
 								 .build();
-	}
-
-	@AfterMethod
-	public void afterMethod()
-	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri");
-		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
 	}
 
 	@Test
@@ -176,7 +169,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("app/uri");
+		when(app.getUri()).thenReturn("uri");
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.getAppVersion()).thenReturn("v1.0.0");
@@ -188,7 +181,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(app.isActive()).thenReturn(false);
 
 		AppResponse appResponse = AppResponse.create(app);
-		when(appManagerService.getAppByUri("uri")).thenReturn(appResponse);
+		when(appManagerService.getAppByName("uri")).thenReturn(appResponse);
 
 		mockMvc.perform(get(AppController.URI + "/uri/"))
 			   .andExpect(status().is4xxClientError())

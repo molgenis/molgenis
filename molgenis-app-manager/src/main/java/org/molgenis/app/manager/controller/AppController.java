@@ -58,30 +58,30 @@ public class AppController extends PluginController
 		this.fileStore = requireNonNull(fileStore);
 	}
 
-	@GetMapping("/{pluginId}/**")
+	@GetMapping("/{appName}/**")
 	@Nullable
-	public ModelAndView serveApp(@PathVariable String pluginId, Model model, HttpServletRequest request,
+	public ModelAndView serveApp(@PathVariable String appName, Model model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/" + pluginId + "/");
+		PluginIdentity pluginIdentity = new PluginIdentity(AppManagerService.APP_PLUGIN_ROOT + appName + "/");
 		if (!userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN))
 		{
-			throw new PluginPermissionDeniedException(pluginId, VIEW_PLUGIN);
+			throw new PluginPermissionDeniedException(appName, VIEW_PLUGIN);
 		}
 
-		String wildCardPath = extractWildcardPath(request, pluginId);
+		String wildCardPath = extractWildcardPath(request, appName);
 		if (wildCardPath.isEmpty())
 		{
-			RedirectView redirectView = new RedirectView(findAppMenuURL(pluginId));
+			RedirectView redirectView = new RedirectView(findAppMenuURL(appName));
 			redirectView.setExposePathVariables(false);
 			return new ModelAndView(redirectView);
 		}
 
-		AppResponse appResponse = appManagerService.getAppByUri(pluginId);
+		AppResponse appResponse = appManagerService.getAppByName(appName);
 
 		if (!appResponse.getIsActive())
 		{
-			throw new AppIsInactiveException(pluginId);
+			throw new AppIsInactiveException(appName);
 		}
 		else if (isResourceRequest(wildCardPath))
 		{
@@ -91,7 +91,7 @@ public class AppController extends PluginController
 		}
 		else
 		{
-			return serveAppTemplate(pluginId, model, appResponse);
+			return serveAppTemplate(appName, model, appResponse);
 		}
 	}
 
@@ -100,9 +100,9 @@ public class AppController extends PluginController
 		return wildCardPath.startsWith("/js/") || wildCardPath.startsWith("/css/") || wildCardPath.startsWith("/img/");
 	}
 
-	private ModelAndView serveAppTemplate(@PathVariable String uri, Model model, AppResponse appResponse)
+	private ModelAndView serveAppTemplate(String appName, Model model, AppResponse appResponse)
 	{
-		model.addAttribute("baseUrl", findAppMenuURL(uri));
+		model.addAttribute("baseUrl", findAppMenuURL(appName));
 		model.addAttribute("template", appResponse.getTemplateContent());
 		model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
@@ -132,9 +132,9 @@ public class AppController extends PluginController
 		return request.getRequestURI().substring(index + key.length());
 	}
 
-	private String findAppMenuURL(String uri)
+	private String findAppMenuURL(String appName)
 	{
-		return menuReaderService.getMenu().findMenuItemPath("app/" + uri + "/");
+		return menuReaderService.getMenu().findMenuItemPath("app/" + appName + "/");
 	}
 
 	private static String guessMimeType(String fileName)

@@ -40,14 +40,6 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 @Service
 public class AppManagerServiceImpl implements AppManagerService
 {
-	public static final String APPS_DIR = "apps";
-	public static final String APPS_TMP_DIR = "apps_tmp";
-	public static final String ZIP_FILE_PREFIX = "zip_file_";
-	public static final String ZIP_INDEX_FILE = "index.html";
-	public static final String ZIP_CONFIG_FILE = "config.json";
-
-	private static final String APP_PLUGIN_ROOT = "app/";
-
 	private final AppFactory appFactory;
 	private final DataService dataService;
 	private final FileStore fileStore;
@@ -71,13 +63,13 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
-	public AppResponse getAppByUri(String uri)
+	public AppResponse getAppByName(String appName)
 	{
-		Query<App> query = QueryImpl.EQ(AppMetadata.URI, uri);
+		Query<App> query = QueryImpl.EQ(AppMetadata.URI, appName);
 		App app = dataService.findOne(AppMetadata.APP, query, App.class);
 		if (app == null)
 		{
-			throw new AppForURIDoesNotExistException(uri);
+			throw new AppForURIDoesNotExistException(appName);
 		}
 		return AppResponse.create(app);
 	}
