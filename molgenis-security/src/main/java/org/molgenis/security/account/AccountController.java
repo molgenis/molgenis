@@ -46,6 +46,7 @@ public class AccountController
 	private static final Logger LOG = LoggerFactory.getLogger(AccountController.class);
 
 	public static final String URI = "/account";
+	@SuppressWarnings("squid:S2068") // this is not a hardcoded password
 	private static final String CHANGE_PASSWORD_RELATIVE_URI = "/password/change";
 	public static final String CHANGE_PASSWORD_URI = URI + CHANGE_PASSWORD_RELATIVE_URI;
 
@@ -123,7 +124,9 @@ public class AccountController
 	@PostMapping(value = "/register", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws Exception
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request)
+			throws BindException, CaptchaException, UsernameAlreadyExistsException, EmailAlreadyExistsException,
+			NoPermissionException
 	{
 		if (authenticationSettings.getSignUp())
 		{
@@ -136,7 +139,7 @@ public class AccountController
 				throw new CaptchaException("invalid captcha answer");
 			}
 			User user = toUser(registerRequest);
-			String activationUri = null;
+			String activationUri;
 			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 			{
 				activationUri = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -193,12 +196,14 @@ public class AccountController
 	@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 	private void handleMolgenisDataAccessException(MolgenisDataAccessException e)
 	{
+		// only needs to set the proper response status
 	}
 
 	@ExceptionHandler(CaptchaException.class)
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	private void handleCaptchaException(CaptchaException e)
 	{
+		// only needs to set the proper response status
 	}
 
 	@ExceptionHandler(MolgenisUserException.class)

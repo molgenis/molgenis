@@ -1,7 +1,6 @@
 package org.molgenis.app.manager.controller;
 
 import net.lingala.zip4j.exception.ZipException;
-import org.molgenis.app.manager.exception.CouldNotDeleteAppException;
 import org.molgenis.app.manager.exception.CouldNotUploadAppException;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
@@ -64,14 +63,14 @@ public class AppManagerController extends PluginController
 
 	@ResponseStatus(HttpStatus.OK)
 	@DeleteMapping("/delete/{id}")
-	public void deleteApp(@PathVariable("id") String id) throws CouldNotDeleteAppException
+	public void deleteApp(@PathVariable("id") String id)
 	{
 		appManagerService.deleteApp(id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping("/upload")
-	public void uploadApp(@RequestParam("file") MultipartFile multipartFile) throws CouldNotUploadAppException
+	public void uploadApp(@RequestParam("file") MultipartFile multipartFile)
 	{
 		String filename = multipartFile.getOriginalFilename();
 		String formFieldName = multipartFile.getName();

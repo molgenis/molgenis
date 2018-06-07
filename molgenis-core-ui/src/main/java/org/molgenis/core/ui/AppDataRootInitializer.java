@@ -47,7 +47,7 @@ public class AppDataRootInitializer
 				throw new IOException(format("Application data root directory '%s' is not writable", appDataRoot));
 			}
 		}
-		LOG.info("Application data directory: {}", appDataRoot.toString());
+		LOG.info("Application data directory: {}", appDataRoot);
 		AppDataRootProvider.setAppDataRoot(appDataRoot);
 	}
 

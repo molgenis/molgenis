@@ -4,12 +4,14 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
-import static java.util.Arrays.asList;
+import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component
 public class UserMetaData extends SystemEntityType
@@ -19,12 +21,14 @@ public class UserMetaData extends SystemEntityType
 
 	public static final String USERNAME = "username";
 	public static final String SUPERUSER = "superuser";
-	public static final String PASSWORD_ = "password_";
+	@SuppressWarnings("squid:S2068") // this is not a hardcoded password
+	public static final String PASSWORD = "password_";
 	public static final String TWO_FACTOR_AUTHENTICATION = "use2fa";
 	public static final String EMAIL = "Email";
 	public static final String GOOGLEACCOUNTID = "googleAccountId";
 	public static final String ACTIVATIONCODE = "activationCode";
 	public static final String ACTIVE = "active";
+	@SuppressWarnings("squid:S2068") // this is not a hardcoded password
 	public static final String CHANGE_PASSWORD = "changePassword";
 	public static final String FIRSTNAME = "FirstName";
 	public static final String MIDDLENAMES = "MiddleNames";
@@ -65,29 +69,29 @@ public class UserMetaData extends SystemEntityType
 													   .setUnique(true)
 													   .setNillable(false)
 													   .setReadOnly(true);
-		addAttribute(PASSWORD_).setLabel("Password")
-							   .setDescription("This is the hashed password, enter a new plaintext password to update.")
-							   .setNillable(false);
+		addAttribute(PASSWORD).setLabel("Password")
+							  .setDescription("This is the hashed password, enter a new plaintext password to update.")
+							  .setNillable(false);
 		addAttribute(ACTIVATIONCODE).setLabel("Activation code")
 									.setNillable(true)
 									.setDescription(
 											"Used as alternative authentication mechanism to verify user email and/or if user has lost password.");
 		addAttribute(ACTIVE).setLabel("Active")
 							.setDataType(BOOL)
-							.setDefaultValue("false")
+							.setDefaultValue(FALSE.toString())
 							.setDescription("Boolean to indicate if this account can be used to login")
 							.setAggregatable(true)
 							.setNillable(false);
 		addAttribute(SUPERUSER).setLabel("Superuser")
 							   .setDataType(BOOL)
-							   .setDefaultValue("false")
+							   .setDefaultValue(FALSE.toString())
 							   .setAggregatable(true)
 							   .setNillable(false);
 		addAttribute(FIRSTNAME).setLabel("First name").setNillable(true);
 		addAttribute(MIDDLENAMES).setLabel("Middle names").setNillable(true);
 		addAttribute(LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true);
-		addAttribute(TITLE).setLabel("Title").setNillable(true).setDescription("An academic title, e.g. Prof.dr, PhD");
-		addAttribute(AFFILIATION).setLabel("Affiliation").setNillable(true);
+		addAttribute(TITLE).setLabel(TITLE).setNillable(true).setDescription("An academic title, e.g. Prof.dr, PhD");
+		addAttribute(AFFILIATION).setLabel(AFFILIATION).setNillable(true);
 		addAttribute(DEPARTMENT).setDescription(
 				"Added from the old definition of MolgenisUser. Department of this contact.").setNillable(true);
 		addAttribute(ROLE).setDescription("Indicate role of the contact, e.g. lab worker or PI.").setNillable(true);
@@ -109,21 +113,20 @@ public class UserMetaData extends SystemEntityType
 							 .setNillable(true);
 		addAttribute(CHANGE_PASSWORD).setLabel("Change password")
 									 .setDataType(BOOL)
-									 .setDefaultValue("false")
+									 .setDefaultValue(FALSE.toString())
 									 .setDescription(
 											 "If true the user must first change his password before he can proceed")
 									 .setAggregatable(true)
 									 .setNillable(false);
 		addAttribute(TWO_FACTOR_AUTHENTICATION).setLabel("Use two factor authentication")
 											   .setDataType(BOOL)
-											   .setDefaultValue("false")
+											   .setDefaultValue(FALSE.toString())
 											   .setDescription(
 													   "Enables two factor authentication for this user if the application supports it");
-		// TODO use LanguageService.getLanguageCodes() instead of hardcoded language list
 		addAttribute(LANGUAGECODE).setLabel("Language code")
 								  .setDescription("Selected language for this site.")
 								  .setDataType(ENUM)
-								  .setEnumOptions(asList("en", "nl", "de", "es", "it", "pt", "fr", "xx"))
+								  .setEnumOptions(getLanguageCodes().collect(toList()))
 								  .setNillable(true);
 		addAttribute(GOOGLEACCOUNTID).setLabel("Google account ID")
 									 .setDescription(

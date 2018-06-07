@@ -6,10 +6,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -52,10 +49,11 @@ public class MolgenisVersionServiceTest extends AbstractMockitoTest
 	{
 		Connection connection = mock(Connection.class);
 		when(dataSource.getConnection()).thenReturn(connection);
-		Statement statement = mock(Statement.class);
-		when(connection.createStatement()).thenReturn(statement);
+		PreparedStatement preparedStatement = mock(PreparedStatement.class);
+		when(connection.prepareStatement("UPDATE \"Version\" SET \"id\"=?")).thenReturn(preparedStatement);
 
 		molgenisVersionService.setSchemaVersion(30);
-		verify(statement).execute("UPDATE \"Version\" SET \"id\"=30");
+		verify(preparedStatement).setInt(1, 30);
+		verify(preparedStatement).execute();
 	}
 }

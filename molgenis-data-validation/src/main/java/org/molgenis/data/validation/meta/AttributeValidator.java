@@ -99,7 +99,6 @@ public class AttributeValidator
 					format("Attribute [%s] is not of type COMPOUND and can therefor not have children",
 							attr.getName()));
 		}
-
 	}
 
 	private static void validateAdd(Attribute newAttr)

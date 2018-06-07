@@ -26,7 +26,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 /**
  * Attribute data type validator.
  * <p>
- * Does not check if xref,mref, categorical values are present. That happens in the EntityValidator.
+ * Does not check if xref,mref, categorical values are present. That happens in the RepositoryValidationDecorator.
  */
 @Component
 public class EntityAttributesValidator
