@@ -63,7 +63,7 @@ public class AppController extends PluginController
 	public ModelAndView serveApp(@PathVariable String pluginId, Model model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity(pluginId);
+		PluginIdentity pluginIdentity = new PluginIdentity("app/" + pluginId + "/");
 		if (!userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN))
 		{
 			throw new PluginPermissionDeniedException(pluginId, VIEW_PLUGIN);

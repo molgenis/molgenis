@@ -136,14 +136,14 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@AfterMethod
 	public void afterMethod()
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
 	}
 
 	@Test
 	public void testServeApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri/"))
 			   .andExpect(status().isOk())
@@ -155,13 +155,15 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppNoPermissions() throws Exception
 	{
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
 		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testServeAppRedirectToApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri")).andExpect(status().is3xxRedirection());
 	}
@@ -169,12 +171,12 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppInactiveApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("uri");
+		when(app.getUri()).thenReturn("app/uri");
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.getAppVersion()).thenReturn("v1.0.0");
@@ -198,7 +200,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeResource() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("uri");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri/js/test.js"))
 			   .andExpect(status().isOk())
