@@ -11,6 +11,13 @@ import java.util.List;
 
 public interface AppManagerService
 {
+	String APPS_DIR = "apps";
+	String APPS_TMP_DIR = "apps_tmp";
+	String ZIP_FILE_PREFIX = "zip_file_";
+	String ZIP_INDEX_FILE = "index.html";
+	String ZIP_CONFIG_FILE = "config.json";
+	String APP_PLUGIN_ROOT = "app/";
+
 	/**
 	 * Retrieve a list of {@link AppResponse}s
 	 */
@@ -19,11 +26,11 @@ public interface AppManagerService
 	/**
 	 * Retrieve an {@link AppResponse} based a unique URI
 	 *
-	 * @param uri The URI of an App
+	 * @param appName The URI of an App
 	 * @return An {@link AppResponse}
 	 * @throws org.molgenis.app.manager.exception.AppForURIDoesNotExistException if there is no app with the requested URI
 	 */
-	AppResponse getAppByUri(String uri);
+	AppResponse getAppByName(String appName);
 
 	/**
 	 * Activate an App by App id

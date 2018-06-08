@@ -133,7 +133,7 @@ public class AppManagerServiceTest
 	{
 		Query<App> query = QueryImpl.EQ(APP_META_URI, "test");
 		when(dataService.findOne(APP_META_NAME, query, App.class)).thenReturn(app);
-		AppResponse actual = appManagerService.getAppByUri("test");
+		AppResponse actual = appManagerService.getAppByName("test");
 		AppResponse expected = AppResponse.create(app);
 
 		assertEquals(actual, expected);
@@ -182,7 +182,7 @@ public class AppManagerServiceTest
 		when(dataService.findOne(APP_META_NAME, query, App.class)).thenReturn(null);
 		try
 		{
-			appManagerService.getAppByUri("test");
+			appManagerService.getAppByName("test");
 			fail();
 		}
 		catch (AppForURIDoesNotExistException actual)
