@@ -9,6 +9,7 @@ import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
+import org.molgenis.util.file.ZipFileUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.file.util.FileExtensionUtils.findExtensionFromPossibilities;
-import static org.molgenis.util.file.ZipFileUtil.unzip;
 
 @Component
 public class OneClickImportJob
@@ -73,7 +73,7 @@ public class OneClickImportJob
 		}
 		else if (fileExtension.equals("zip"))
 		{
-			List<File> filesInZip = unzip(file);
+			List<File> filesInZip = ZipFileUtil.unzipSkipHidden(file);
 			for (File fileInZip : filesInZip)
 			{
 				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));

@@ -119,7 +119,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 				synonymRepository, ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository,
 				ONTOLOGY_TERM, ontologyTermRepository);
 
-		List<File> uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles = ZipFileUtil.unzipSkipHidden(file);
 		try
 		{
 			loader = new OntologyLoader(fileName, uploadedFiles.get(0));
