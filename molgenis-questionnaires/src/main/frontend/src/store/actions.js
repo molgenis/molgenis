@@ -4,6 +4,7 @@ import type { VuexContext } from '../flow.types.js'
 // $FlowFixMe
 import Vue from 'vue'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+import questionnaireService from '../services/questionnaireService'
 
 const handleError = (commit: Function, error: Error) => {
   commit('SET_ERROR', error)
@@ -48,7 +49,7 @@ const actions = {
       return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
         commit('SET_QUESTIONNAIRE', response)
 
-        const data = response.items.length > 0 ? response.items[0] : {}
+        const data = response.items.length > 0 ? response.items[0] : questionnaireService.buildFormDataObject(response)
         commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
 
         const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)

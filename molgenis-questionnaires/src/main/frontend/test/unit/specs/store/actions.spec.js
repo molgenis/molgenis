@@ -2,6 +2,7 @@ import actions from 'src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+import questionnaireService from '../../../../src/services/questionnaireService'
 import Vue from 'vue'
 
 const getters = {
@@ -195,6 +196,10 @@ describe('actions', () => {
       const generateForm = td.function('EntityToFormMapper.generateForm')
       td.when(generateForm(questionnaire.meta, {}, state.mapperOptions)).thenReturn(generatedForm)
       td.replace(EntityToFormMapper, 'generateForm', generateForm)
+
+      const buildFormDataObject = td.function('questionnaireService.buildFormDataObject')
+      td.when(buildFormDataObject(questionnaire)).thenReturn({})
+      td.replace(questionnaireService, 'buildFormDataObject', buildFormDataObject)
 
       const chapters = [{
         id: 'compound',

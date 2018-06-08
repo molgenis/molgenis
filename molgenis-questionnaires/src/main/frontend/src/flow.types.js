@@ -40,3 +40,26 @@ export type Chapter = {
   children?: Array<ChapterField | ChapterFieldGroup>
 }
 
+export type QuestionnaireEntityResponse = {
+  href: string,
+  items: Array,
+  meta: ResponseMeta,
+  num: number,
+  start: number,
+  total: number
+}
+
+export type ResponseMeta = {
+  attributes: Array<ResponseMetaAttribute>
+}
+
+export type ResponseMetaAttribute = {
+  attributes: Array<ResponseMetaAttribute>,
+  fieldType: EntityFieldType,
+  name: string
+}
+
+export type EntityFieldType = 'BOOL' | 'CATEGORICAL' | 'ENUM' | 'XREF' | 'MREF' | 'ONETOMANY' |
+  'INT' | 'DECIMAL' | 'LONG' | 'TEXT' | 'SCRIPT' | 'HTML' | 'DATE' | 'DATE_TIME' | 'CATEGORICAL_MREF' |
+  'STRING' | 'HYPERLINK' | 'EMAIL' | 'FILE' | 'ONE_TO_MANY' | 'COMPOUND'
+
