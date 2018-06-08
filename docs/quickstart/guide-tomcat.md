@@ -6,12 +6,12 @@ The components needed to run MOLGENIS locally or on a server are:
 You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
-* [Java Platform (JDK) 8u144](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [Java Platform (JDK) 8u171](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Apache Tomcat v8.5.x](http://tomcat.apache.org/)
-* [PostgreSQL v9.6.3](https://www.postgresql.org/download/)
-* [Elasticsearch v5.5.1](https://www.elastic.co/downloads/elasticsearch)
+* [PostgreSQL v9.6.x](https://www.postgresql.org/download/)
+* [Elasticsearch v5.5](https://www.elastic.co/downloads/elasticsearch)
 * Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
-* Optional: [Python 3.6.2](https://www.python.org/downloads/) (enables Python scripting feature)
+* Optional: [Python 3.6](https://www.python.org/downloads/) (enables Python scripting feature)
 * [MOLGENIS web application](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.molgenis%22%20AND%20a%3A%22molgenis-app%22) (Select 'war' in 'Download' column)
 
 
