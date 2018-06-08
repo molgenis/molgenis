@@ -76,12 +76,7 @@ public class ZipFileUtil
 		{
 			this(directory.toPath(), delegate);
 		}
-
-		private TrackingNameMapper(Path parentPath)
-		{
-			this(parentPath, name -> name);
-		}
-
+		
 		private TrackingNameMapper(Path parentPath, NameMapper delegate)
 		{
 			this.parentPath = requireNonNull(parentPath);

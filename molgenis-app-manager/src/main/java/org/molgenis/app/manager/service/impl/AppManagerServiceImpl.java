@@ -3,8 +3,6 @@ package org.molgenis.app.manager.service.impl;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.app.manager.exception.*;
 import org.molgenis.app.manager.meta.App;
@@ -20,6 +18,8 @@ import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
 import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.file.UnzipException;
+import org.molgenis.util.file.ZipFileUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +40,13 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 @Service
 public class AppManagerServiceImpl implements AppManagerService
 {
+	public static final String APPS_DIR = "apps";
+	public static final String ZIP_INDEX_FILE = "index.html";
+	public static final String ZIP_CONFIG_FILE = "config.json";
+	public static final String APP_PLUGIN_ROOT = "app/";
+
+	private static final String APPS_TMP_DIR = "apps_tmp";
+
 	private final AppFactory appFactory;
 	private final DataService dataService;
 	private final FileStore fileStore;
@@ -54,6 +61,9 @@ public class AppManagerServiceImpl implements AppManagerService
 		this.fileStore = requireNonNull(fileStore);
 		this.gson = requireNonNull(gson);
 		this.pluginFactory = requireNonNull(pluginFactory);
+
+		fileStore.createDirectory(APPS_DIR);
+		fileStore.createDirectory(APPS_TMP_DIR);
 	}
 
 	@Override
@@ -122,27 +132,24 @@ public class AppManagerServiceImpl implements AppManagerService
 	}
 
 	@Override
-	public String uploadApp(InputStream zipData, String zipFileName, String formFieldName)
-			throws IOException, ZipException
+	public String uploadApp(InputStream zipData, String zipFileName, String formFieldName) throws IOException
 	{
-		fileStore.createDirectory(APPS_TMP_DIR);
-		fileStore.createDirectory(APPS_DIR);
-
-		String tempAppArchiveName = APPS_TMP_DIR + separator + ZIP_FILE_PREFIX + zipFileName;
-		ZipFile tempAppArchive = new ZipFile(fileStore.store(zipData, tempAppArchiveName));
-
-		if (!tempAppArchive.isValidZipFile())
-		{
-			fileStore.delete(APPS_TMP_DIR);
-			throw new InvalidAppArchiveException(formFieldName);
-		}
-
 		String tempFilesDir = "extracted_" + zipFileName;
 		String tempAppDirectoryName = APPS_TMP_DIR + separator + tempFilesDir;
-		tempAppArchive.extractAll(fileStore.getStorageDir() + separator + tempAppDirectoryName);
 
-		List<String> missingRequiredFilesList = buildMissingRequiredFiles(
-				fileStore.getStorageDir() + separator + tempAppDirectoryName);
+		fileStore.createDirectory(tempAppDirectoryName);
+
+		try
+		{
+			ZipFileUtil.unzip(zipData, fileStore.getFile(tempAppDirectoryName));
+		}
+		catch (UnzipException unzipException)
+		{
+			fileStore.delete(tempAppDirectoryName);
+			throw new InvalidAppArchiveException(formFieldName, unzipException);
+		}
+
+		List<String> missingRequiredFilesList = buildMissingRequiredFiles(tempAppDirectoryName);
 		if (!missingRequiredFilesList.isEmpty())
 		{
 			fileStore.deleteDirectory(APPS_TMP_DIR);
@@ -265,13 +272,13 @@ public class AppManagerServiceImpl implements AppManagerService
 	{
 		List<String> missingFromArchive = newArrayList();
 
-		File indexFile = new File(appDirectoryName + separator + ZIP_INDEX_FILE);
+		File indexFile = fileStore.getFile(appDirectoryName + separator + ZIP_INDEX_FILE);
 		if (!indexFile.exists())
 		{
 			missingFromArchive.add(ZIP_INDEX_FILE);
 		}
 
-		File configFile = new File(appDirectoryName + separator + ZIP_CONFIG_FILE);
+		File configFile = fileStore.getFile(appDirectoryName + separator + ZIP_CONFIG_FILE);
 		if (!configFile.exists())
 		{
 			missingFromArchive.add(ZIP_CONFIG_FILE);
