@@ -2,6 +2,7 @@ package org.molgenis.oneclickimporter.job;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.data.file.CodedUnzipException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.Progress;
@@ -9,6 +10,7 @@ import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.*;
+import org.molgenis.util.file.UnzipException;
 import org.molgenis.util.file.ZipFileUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +75,16 @@ public class OneClickImportJob
 		}
 		else if (fileExtension.equals("zip"))
 		{
-			List<File> filesInZip = ZipFileUtil.unzipSkipHidden(file);
+			List<File> filesInZip;
+			try
+			{
+				filesInZip = ZipFileUtil.unzipSkipHidden(file);
+			}
+			catch (UnzipException zipException)
+			{
+				throw new CodedUnzipException(file.getName(), zipException);
+			}
+
 			for (File fileInZip : filesInZip)
 			{
 				String fileInZipExtension = findExtensionFromPossibilities(fileInZip.getName(), newHashSet("csv"));
