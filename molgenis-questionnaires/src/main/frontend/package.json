@@ -18,6 +18,7 @@
     "@molgenis/molgenis-i18n-js": "^0.1.1",
     "@molgenis/molgenis-ui-form": "^0.10.2",
     "font-awesome": "^4.7.0",
+    "jspdf": "^1.4.1",
     "moment": "^2.20.1",
     "vue": "^2.5.15",
     "vue-flatpickr": "^2.3.0",

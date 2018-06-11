@@ -1,5 +1,5 @@
 import type { QuestionnaireEntityResponse } from '../flow.types.js'
-import {ResponseMetaAttribute} from '../flow.types'
+import {OverView, OverViewAnswer, OverViewChapter, OverViewSection, ResponseMetaAttribute} from '../flow.types'
 
 const compoundFields = (compound) => {
   return compound.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
@@ -27,5 +27,85 @@ export default {
       }
       return accum
     }, {})
+  },
+
+  /**
+   * Takes a filled in questionnaire entity response and transforms it to a OverView object containing the
+   * questions and answers ordered into chapters, sections and subsections
+   * @param questionnaireResp QuestionnaireEntityResponse
+   * @param translations Objects containing local spesific translations for "True" and "False"
+   * @returns OverView
+   */
+  buildOverViewObject: function (questionnaireResp: QuestionnaireEntityResponse, translations): OverView {
+    const answers = questionnaireResp.items[0]
+
+    const buildAnswerLabel = function (attribute: ResponseMetaAttribute): ?string {
+      let answerLabel: string
+      if (answers.hasOwnProperty(attribute.name)) {
+        const questionId = attribute.name
+        const answerType = attribute.fieldType
+        const refLabelAttribute = attribute.refEntity ? attribute.refEntity.labelAttribute : undefined
+        const answer = answers[questionId]
+        switch (answerType) {
+          case 'MREF':
+          case 'CATEGORICAL_MREF':
+            answerLabel = answer.map(a => a[refLabelAttribute]).join(', ')
+            break
+          case 'BOOL':
+            answerLabel = answer ? translations.trueLabel : translations.falseLabel
+            break
+          case 'ENUM':
+            answerLabel = answer.join(', ')
+            break
+          case 'XREF':
+          case 'CATEGORICAL':
+            answerLabel = answer[refLabelAttribute]
+            break
+          case 'INT':
+          case 'DECIMAL':
+          case 'LONG':
+            answerLabel = answer.toString()
+            break
+          default:
+            answerLabel = answer
+        }
+      }
+      return answerLabel !== '' ? answerLabel : undefined
+    }
+
+    const buildChapterSection = function (attribute: ResponseMetaAttribute): OverViewAnswer | OverViewSection {
+      if (attribute.fieldType === 'COMPOUND') {
+        // noinspection UnnecessaryLocalVariableJS
+        const section: OverViewSection = {
+          title: attribute.label,
+          chapterSections: attribute.attributes.map(buildChapterSection)
+        }
+        return section
+      } else {
+        // noinspection UnnecessaryLocalVariableJS
+        const answer: OverViewAnswer = {
+          questionId: attribute.name,
+          questionLabel: attribute.label,
+          answerLabel: buildAnswerLabel(attribute)
+        }
+        return answer
+      }
+    }
+
+    const chapters = questionnaireResp.meta.attributes.reduce((chapters: Array<OverViewChapter>, attribute: ResponseMetaAttribute): OverView => {
+      if (attribute.fieldType === 'COMPOUND') {
+        chapters.push({
+          id: attribute.name,
+          title: attribute.label,
+          chapterSections: attribute.attributes.map(buildChapterSection)
+        })
+      }
+      return chapters
+    }, [])
+
+    return {
+      title: 'title',
+      chapters
+    }
   }
 }
