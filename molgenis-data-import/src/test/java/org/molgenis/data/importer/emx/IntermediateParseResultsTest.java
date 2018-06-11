@@ -1,7 +1,6 @@
 package org.molgenis.data.importer.emx;
 
 import org.mockito.Mock;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.AbstractMockitoTest;
@@ -16,8 +15,6 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest
 	private IntermediateParseResults intermediateParseResults;
 	@Mock
 	private EntityTypeFactory entityTypeFactory;
-	@Mock
-	private DefaultPackage defaultPackage;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

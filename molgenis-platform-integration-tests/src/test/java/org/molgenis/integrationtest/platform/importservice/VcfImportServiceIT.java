@@ -6,7 +6,6 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.PermissionService;
@@ -23,7 +22,6 @@ import java.util.Map;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
@@ -63,7 +61,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(entityTypeId, 10), ImmutableSet.of(entityTypeId));
 
 		assertVariants(entityTypeId, false);
@@ -91,7 +89,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(entityTypeId, 10, entityTypeId + "Sample", 10),
 				ImmutableSet.of(entityTypeId, entityTypeId + "Sample"));
 
@@ -120,7 +118,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport,
 				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
 				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
@@ -227,7 +225,6 @@ public class VcfImportServiceIT extends ImportServiceIT
 		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
-		permissionMap.put(new PackageIdentity(PACKAGE_DEFAULT), PermissionSet.WRITEMETA);
 
 		testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
 	}

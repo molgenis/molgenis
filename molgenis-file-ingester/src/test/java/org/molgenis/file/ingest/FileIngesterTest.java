@@ -27,7 +27,6 @@ import java.io.File;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 @ContextConfiguration(classes = { FileIngesterTest.Config.class })
 public class FileIngesterTest extends AbstractMolgenisSpringTest
@@ -73,7 +72,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
 				fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT)).thenReturn(
+		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, null)).thenReturn(
 				report);
 		when(progress.getJobExecution()).thenReturn(mock(FileIngestJobExecution.class));
 

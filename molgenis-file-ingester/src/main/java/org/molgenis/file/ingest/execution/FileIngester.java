@@ -19,7 +19,6 @@ import java.io.File;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 /**
  * Imports a file from a remote url.
@@ -64,7 +63,7 @@ public class FileIngester
 		progress.progress(1, "Importing...");
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport report = importService.doImport(repoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
+		EntityImportReport report = importService.doImport(repoCollection, ADD_UPDATE_EXISTING, null);
 
 		progress.status("Ingestion of url '" + url + "' done.");
 		Integer count = report.getNrImportedEntitiesMap().get(entityTypeId);

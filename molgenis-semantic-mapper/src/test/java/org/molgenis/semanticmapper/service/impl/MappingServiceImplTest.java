@@ -5,7 +5,6 @@ import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -53,7 +52,7 @@ import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class,
-		EntityBaseTestConfig.class, DefaultPackage.class })
+		EntityBaseTestConfig.class })
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
