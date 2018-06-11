@@ -1,9 +1,9 @@
 import type { QuestionnaireEntityResponse } from '../flow.types.js'
-import {ResponseMetaAttribute} from "../flow.types"
+import {ResponseMetaAttribute} from '../flow.types'
 
 const compoundFields = (compound) => {
   return compound.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
-    if(attribute.fieldType !== 'COMPOUND') {
+    if (attribute.fieldType !== 'COMPOUND') {
       accum[attribute.name] = []
     } else {
       accum = {...accum, ...compoundFields(attribute)}
@@ -20,7 +20,7 @@ export default {
    */
   buildFormDataObject: function (questionnaireResp: QuestionnaireEntityResponse) {
     return questionnaireResp.meta.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
-      if(attribute.fieldType !== 'COMPOUND') {
+      if (attribute.fieldType !== 'COMPOUND') {
         accum[attribute.name] = []
       } else {
         accum = {...accum, ...compoundFields(attribute)}

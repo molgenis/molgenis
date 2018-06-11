@@ -3,7 +3,6 @@ import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
 import questionnaireService from '../../../../src/services/questionnaireService'
-import Vue from 'vue'
 
 const getters = {
   getQuestionnaireId: 'test_quest'
