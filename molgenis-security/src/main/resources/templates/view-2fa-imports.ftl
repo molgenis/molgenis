@@ -36,15 +36,5 @@
             $('.text-error', modal).remove()
             $('.alert', modal).remove()
         })
-    )
     })
 </script>
-
-
-
-
-
-
-
-
-
