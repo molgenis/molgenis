@@ -23,18 +23,14 @@
         });
 
         $(container).on('click', '#reset-loggers-btn', function () {
-            $.post(molgenis.getContextUrl() + '/loggers/reset').success(function () {
-                renderLoggerTable();
-            });
+            $.post(molgenis.getContextUrl() + '/loggers/reset').then(renderLoggerTable)
         });
 
         $('form[name="create-logger-form"]').submit(function (e) {
             e.preventDefault();
             if ($(this).valid()) {
                 var name = $('#logger-name').val();
-                $.post(molgenis.getContextUrl() + '/logger/' + name + '/DEBUG').success(function () {
-                    renderLoggerTable();
-                });
+                $.post(molgenis.getContextUrl() + '/logger/' + name + '/DEBUG').then(renderLoggerTable)
             }
         });
     });
