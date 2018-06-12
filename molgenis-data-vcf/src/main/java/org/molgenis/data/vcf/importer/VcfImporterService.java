@@ -57,10 +57,15 @@ public class VcfImporterService implements ImportService
 		{
 			throw new IllegalArgumentException("Only ADD is supported");
 		}
-		Package importPackage = metaDataService.getPackage(packageId);
-		if (importPackage == null)
+
+		Package importPackage = null;
+		if (packageId != null)
 		{
-			throw new UnknownEntityException(PACKAGE, packageId);
+			importPackage = metaDataService.getPackage(packageId);
+			if (importPackage == null)
+			{
+				throw new UnknownEntityException(PACKAGE, packageId);
+			}
 		}
 
 		List<EntityType> addedEntities = new ArrayList<>();
