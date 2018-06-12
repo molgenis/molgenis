@@ -107,6 +107,19 @@ public class RestTestUtils
 		}
 	}
 
+	public static void createPackage(String adminToken, String packageId)
+	{
+		JSONObject createPackageBody = new JSONObject();
+		createPackageBody.put("id", packageId);
+		createPackageBody.put("label", packageId);
+
+		given().header(X_MOLGENIS_TOKEN, adminToken)
+			   .contentType(APPLICATION_JSON)
+			   .body(createPackageBody.toJSONString())
+			   .when()
+			   .post("api/v1/sys_md_Package");
+	}
+
 	/**
 	 * Import emx file using add/update.
 	 * <p>
