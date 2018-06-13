@@ -76,6 +76,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
 		public static final String PORT = "port";
 		public static final String PROTOCOL = "protocol";
 		public static final String USERNAME = "username";
+		@SuppressWarnings("squid:S2068") // not a hard-coded password
 		public static final String PASSWORD = "password";
 		public static final String DEFAULT_ENCODING = "defaultEncoding";
 		public static final String JAVA_MAIL_PROPS = "props";
