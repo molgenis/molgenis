@@ -73,23 +73,27 @@ export default {
       return answerLabel !== '' ? answerLabel : undefined
     }
 
-    const buildChapterSection = function (attribute: ResponseMetaAttribute): OverViewAnswer | OverViewSection {
+    const buildChapterSection = function (sections: Array<OverViewAnswer | OverViewSection>, attribute: ResponseMetaAttribute): OverViewAnswer | OverViewSection {
       if (attribute.fieldType === 'COMPOUND') {
-        // noinspection UnnecessaryLocalVariableJS
-        const section: OverViewSection = {
-          title: attribute.label,
-          chapterSections: attribute.attributes.map(buildChapterSection)
+        const subSections = attribute.attributes.reduce(buildChapterSection, [])
+        if (subSections.length > 0) {
+          sections.push({
+            title: attribute.label,
+            chapterSections: subSections
+          })
         }
-        return section
       } else {
-        // noinspection UnnecessaryLocalVariableJS
-        const answer: OverViewAnswer = {
-          questionId: attribute.name,
-          questionLabel: attribute.label,
-          answerLabel: buildAnswerLabel(attribute)
+        const answerLabel = buildAnswerLabel(attribute)
+        if (answerLabel !== undefined) {
+          sections.push({
+            questionId: attribute.name,
+            questionLabel: attribute.label,
+            answerLabel: answerLabel
+          })
         }
-        return answer
       }
+
+      return sections
     }
 
     const chapters = questionnaireResp.meta.attributes.reduce((chapters: Array<OverViewChapter>, attribute: ResponseMetaAttribute): OverView => {
@@ -97,7 +101,7 @@ export default {
         chapters.push({
           id: attribute.name,
           title: attribute.label,
-          chapterSections: attribute.attributes.map(buildChapterSection)
+          chapterSections: attribute.attributes.reduce(buildChapterSection, [])
         })
       }
       return chapters
