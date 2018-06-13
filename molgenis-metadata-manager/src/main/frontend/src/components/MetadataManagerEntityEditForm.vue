@@ -72,7 +72,9 @@
         <div class="form-group row">
           <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
           <div class="col">
-            <multiselect v-model="labelAttribute" :options="attributes" label="label"
+            <multiselect v-model="labelAttribute" @select="selectLabelAttribute"
+                         :options="['CLEAR_SELECTION', ...attributes]"
+                         label="label"
                          selectLabel="" deselectLabel=""
                          :placeholder="$t('entity-edit-form-label-attribute-placeholder')"></multiselect>
           </div>
@@ -131,8 +133,11 @@
       saveEntityType () {
         if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
           this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'ID attribute can not be empty'})
-        } else if (this.editorEntityType.labelAttribute === null || this.editorEntityType.labelAttribute === undefined) {
-          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'Label attribute can not be empty'})
+        } else if (!this.idAttribute.visible && !this.editorEntityType.labelAttribute) {
+          this.$store.commit(CREATE_ALERT, {
+            type: 'warning',
+            message: 'Label attribute can not be empty because the ID attribute is not visible'
+          })
         } else {
           this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
         }
@@ -148,7 +153,8 @@
       ...mapGetters({
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes',
-        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited'
+        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited',
+        idAttribute: 'getEditorEntityTypeIdAttribute'
       }),
       entityTypeParent: {
         get () {
@@ -203,7 +209,11 @@
           return this.$store.state.editorEntityType.labelAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
+          if (!value || value === 'CLEAR_SELECTION') {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: null})
+          } else {
+            this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelAttribute', value: value})
+          }
         }
       },
       lookupAttributes: {

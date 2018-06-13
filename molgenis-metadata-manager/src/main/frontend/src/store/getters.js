@@ -49,6 +49,8 @@ export default {
   getAbstractEntities: state => state.entityTypes && state.entityTypes.filter(function (entityType) {
     return entityType.isAbstract
   }),
+
+  getEditorEntityTypeIdAttribute: (state, getters) => getters.getEditorEntityTypeAttributes && getters.getEditorEntityTypeAttributes.find(attribute => attribute.name === state.editorEntityType.id),
   /**
    * Return a tree which is constructed using the attributes found in the editorEntityType
    */
