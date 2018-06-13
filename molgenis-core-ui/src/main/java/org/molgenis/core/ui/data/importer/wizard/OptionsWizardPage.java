@@ -28,6 +28,7 @@ import java.util.*;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 @Component
@@ -173,7 +174,10 @@ public class OptionsWizardPage extends AbstractWizardPage
 	{
 		for (String packageName : packages)
 		{
-			if (entityTypeId.toLowerCase().startsWith(packageName.toLowerCase())) return false;
+			if (entityTypeId.toLowerCase().startsWith(packageName.toLowerCase() + PACKAGE_SEPARATOR))
+			{
+				return false;
+			}
 		}
 
 		return true;
