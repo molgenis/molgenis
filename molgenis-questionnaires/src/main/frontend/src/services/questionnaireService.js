@@ -98,11 +98,14 @@ export default {
 
     const chapters = questionnaireResp.meta.attributes.reduce((chapters: Array<OverViewChapter>, attribute: ResponseMetaAttribute): OverView => {
       if (attribute.fieldType === 'COMPOUND') {
-        chapters.push({
-          id: attribute.name,
-          title: attribute.label,
-          chapterSections: attribute.attributes.reduce(buildChapterSection, [])
-        })
+        const chapterSections = attribute.attributes.reduce(buildChapterSection, [])
+        if (chapterSections.length > 0) {
+          chapters.push({
+            id: attribute.name,
+            title: attribute.label,
+            chapterSections: chapterSections
+          })
+        }
       }
       return chapters
     }, [])
