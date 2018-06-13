@@ -333,7 +333,7 @@
                     // If the generated algorithm is empty
                     if (selectedAttributes.length === 0) {
                         $('#result-container').css('display', 'none');
-                        $('.nav-tabs a[href=#script]').tab('show');
+                        $('.nav-tabs a[href=\\#script]').tab('show');
                         $('#map-tab').hide();
                     } else {
                         // on selection of an attribute, show all fields
@@ -652,11 +652,11 @@
 
         // when the map tab is selected, load its contents
         // loading on page load will fail because bootstrap tab blocks it
-        $('a[href=#map]').on('shown.bs.tab', function () {
+        $('a[href=\\#map]').on('shown.bs.tab', function () {
             loadMappingEditor(aceEditor.getSession().getValue());
         });
 
-        $('a[href=#script]').on('shown.bs.tab', function () {
+        $('a[href=\\#script]').on('shown.bs.tab', function () {
             // when users switch back to the script tab, the value in the editor is not updated
             // until the editor is clicked. A workaround is to move the page by calling the method to
             // flush the changes.
