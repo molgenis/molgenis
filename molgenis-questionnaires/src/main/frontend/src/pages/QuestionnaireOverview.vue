@@ -13,7 +13,7 @@
         <template v-else>
           <div id="pdf-container">
             <h1 class="display-3">{{ 'questionnaires_overview_title' | i18n }}</h1>
-            <button @click="testBuild" type="button" class="btn btn-primary">Download</button>
+            <button @click="printOverView" type="button" class="btn btn-primary">Download</button>
             <hr>
 
             <questionnaire-overview-entry
@@ -29,13 +29,9 @@
 </template>
 
 <script>
-  import type { OverViewAnswer, OverViewSection } from '../flow.types'
-
   import LoadingSpinner from '../components/LoadingSpinner'
   import QuestionnaireOverviewEntry from '../components/QuestionnaireOverviewEntry'
   import questionnaireService from '../services/questionnaireService'
-  import pdfMake from 'pdfmake/build/pdfmake'
-  import pdfFonts from 'pdfmake/build/vfs_fonts'
 
   export default {
     name: 'QuestionnaireOverview',
@@ -47,74 +43,14 @@
       getQuestionnaireData () {
         return this.$store.state.questionnaire.items[0]
       },
-      testBuild () {
+      printOverView () {
         const translations = {
           trueLabel: this.$t('questionnaire_boolean_true'),
           falseLabel: this.$t('questionnaire_boolean_false')
         }
         const overView = questionnaireService.buildOverViewObject(this.$store.state.questionnaire, translations)
-        console.log(overView)
-
-        let content = []
-        const styles = {
-          chapterTitle: {
-            fontSize: 16,
-            bold: true,
-            margin: [0, 20, 0, 10]
-          },
-          sectionTitle: {
-            fontSize: 14,
-            margin: [0, 10, 0, 5]
-          },
-          questionLabel: {
-            fontSize: 10,
-            margin: [0, 5]
-          },
-          answerLabel: {
-            fontSize: 10,
-            italics: true,
-            margin: [0, 0, 0, 10]
-          }
-        }
-
-        const printQuestionAndAnswer = (question: OverViewAnswer) => {
-          content.push({
-            text: question.questionLabel, style: 'questionLabel'
-          })
-          const answerLabel = question.answerLabel === undefined ? 'empty' : question.answerLabel
-          content.push({
-            text: answerLabel, style: 'answerLabel'
-          })
-        }
-
-        const printSection = (section: OverViewAnswer | OverViewSection) => {
-          if (section.hasOwnProperty('title')) {
-            content.push({text: section.title, style: 'sectionTitle'})
-            section.chapterSections.forEach(printSection)
-          } else {
-            printQuestionAndAnswer(section)
-          }
-        }
-
-        const printChapter = (chapter) => {
-          content.push({text: chapter.title, style: 'chapterTitle'})
-        }
-
-        overView.chapters.forEach((chapter, index) => {
-          printChapter(chapter)
-          chapter.chapterSections.forEach(printSection)
-        })
-
-        let docDefinition = {
-          info: {
-            title: 'questionnaire-overview'
-          },
-          content,
-          styles
-        }
-        const {vfs} = pdfFonts.pdfMake
-        pdfMake.vfs = vfs
-        pdfMake.createPdf(docDefinition).download(overView.title)
+        const pfdContent = questionnaireService.buildPdfContent(overView)
+        questionnaireService.printContent(overView.title, pfdContent)
       }
     },
     computed: {

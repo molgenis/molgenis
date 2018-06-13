@@ -89,3 +89,13 @@ export type OverView = {
   title: string,
   chapters: Array<OverViewChapter>
 }
+
+export type Translation = {
+  trueLabel: string,
+  falseLabel: string
+}
+
+export type PdfSection = {
+  text: string,
+  style?: string
+}

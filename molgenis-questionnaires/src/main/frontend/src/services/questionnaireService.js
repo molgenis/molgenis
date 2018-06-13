@@ -1,5 +1,18 @@
-import type { QuestionnaireEntityResponse } from '../flow.types.js'
-import {OverView, OverViewAnswer, OverViewChapter, OverViewSection, ResponseMetaAttribute} from '../flow.types'
+// @flow
+import {
+  OverView,
+  OverViewAnswer,
+  OverViewChapter,
+  OverViewSection,
+  ResponseMetaAttribute,
+  QuestionnaireEntityResponse,
+  Translation,
+  PdfSection
+} from '../flow.types'
+// $FlowFixMe
+import pdfMake from 'pdfmake/build/pdfmake'
+// $FlowFixMe
+import pdfFonts from 'pdfmake/build/vfs_fonts'
 
 const compoundFields = (compound) => {
   return compound.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
@@ -36,11 +49,11 @@ export default {
    * @param translations Objects containing local spesific translations for "True" and "False"
    * @returns OverView
    */
-  buildOverViewObject: function (questionnaireResp: QuestionnaireEntityResponse, translations): OverView {
+  buildOverViewObject: function (questionnaireResp: QuestionnaireEntityResponse, translations: Translation): OverView {
     const answers = questionnaireResp.items[0]
 
     const buildAnswerLabel = function (attribute: ResponseMetaAttribute): ?string {
-      let answerLabel: string
+      let answerLabel
       if (answers.hasOwnProperty(attribute.name)) {
         const questionId = attribute.name
         const answerType = attribute.fieldType
@@ -114,5 +127,70 @@ export default {
       title: questionnaireResp.meta.label,
       chapters
     }
+  },
+
+  buildPdfContent: function (questionnaire: OverView): Array<PdfSection> {
+    let content = []
+
+    const printQuestionAndAnswer = (question: OverViewAnswer) => {
+      content.push({
+        text: question.questionLabel, style: 'questionLabel'
+      })
+      content.push({
+        text: question.answerLabel, style: 'answerLabel'
+      })
+    }
+
+    const printSection = (section: OverViewAnswer | OverViewSection) => {
+      if (section.hasOwnProperty('title')) {
+        content.push({text: section.title, style: 'sectionTitle'})
+        section.chapterSections.forEach(printSection)
+      } else {
+        printQuestionAndAnswer(section)
+      }
+    }
+
+    const printChapter = (chapter) => {
+      content.push({text: chapter.title, style: 'chapterTitle'})
+    }
+
+    questionnaire.chapters.forEach((chapter) => {
+      printChapter(chapter)
+      chapter.chapterSections.forEach(printSection)
+    })
+
+    return content
+  },
+
+  printContent: function (docTitle: string, content: Object) {
+    let docDefinition = {
+      info: {
+        title: 'questionnaire-overview'
+      },
+      content,
+      styles: {
+        chapterTitle: {
+          fontSize: 16,
+          bold: true,
+          margin: [0, 20, 0, 10]
+        },
+        sectionTitle: {
+          fontSize: 14,
+          margin: [0, 10, 0, 5]
+        },
+        questionLabel: {
+          fontSize: 10,
+          margin: [0, 5]
+        },
+        answerLabel: {
+          fontSize: 10,
+          italics: true,
+          margin: [0, 0, 0, 10]
+        }
+      }
+    }
+    const {vfs} = pdfFonts.pdfMake
+    pdfMake.vfs = vfs
+    pdfMake.createPdf(docDefinition).download(docTitle)
   }
 }
