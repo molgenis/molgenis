@@ -72,7 +72,8 @@
           },
           answerLabel: {
             fontSize: 10,
-            italics: true
+            italics: true,
+            margin: [0, 0, 0, 10]
           }
         }
 
@@ -113,7 +114,7 @@
         }
         const {vfs} = pdfFonts.pdfMake
         pdfMake.vfs = vfs
-        pdfMake.createPdf(docDefinition).download()
+        pdfMake.createPdf(docDefinition).download(overView.title)
       }
     },
     computed: {

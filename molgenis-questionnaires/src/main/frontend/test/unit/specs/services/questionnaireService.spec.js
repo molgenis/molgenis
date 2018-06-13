@@ -56,6 +56,7 @@ describe('Questionniare service', () => {
         qDeepSub: 'deepSub'
       }],
       meta: {
+        label: 'test questionnaire',
         attributes: [
           {
             fieldType: 'COMPOUND',
@@ -180,7 +181,7 @@ describe('Questionniare service', () => {
       const overView = questionnaireService.buildOverViewObject(response, translations)
 
       const expected = {
-        title: "title",
+        title: "test questionnaire",
         chapters:
           [{
             id: "Chapter1",

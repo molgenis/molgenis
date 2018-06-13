@@ -111,7 +111,7 @@ export default {
     }, [])
 
     return {
-      title: 'title',
+      title: questionnaireResp.meta.label,
       chapters
     }
   }

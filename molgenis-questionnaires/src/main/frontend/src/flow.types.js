@@ -55,6 +55,7 @@ export type ResponseMetaAttribute = {
 }
 
 export type ResponseMeta = {
+  label: string,
   attributes: Array<ResponseMetaAttribute>
 }
 
