@@ -13,7 +13,7 @@
         <template v-else>
           <div id="pdf-container">
             <h1 class="display-3">{{ 'questionnaires_overview_title' | i18n }}</h1>
-            <button @click="printOverView" type="button" class="btn btn-primary">Download</button>
+            <button @click="printOverView" type="button" class="btn btn-primary"><i class="fa fa-download" aria-hidden="true"></i> {{ 'questionnaire_overview_download_btn_label' | i18n }}</button>
             <hr>
 
             <questionnaire-overview-entry
