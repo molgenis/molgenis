@@ -157,7 +157,8 @@ public class RestTestUtils
 	{
 		String importJobStatusUrl = given().multiPart(file)
 										   .param("file")
-										   .param("action", "ADD_UPDATE_EXISTING").param("packageId", "base")
+										   .param("action", "ADD_UPDATE_EXISTING")
+										   .param("packageId", "base")
 										   .header(X_MOLGENIS_TOKEN, adminToken)
 										   .post("plugin/importwizard/importFile")
 										   .then()
@@ -391,7 +392,7 @@ public class RestTestUtils
 	 * Sets user permissions on repositories. Existing repository permissions will be removed.
 	 *
 	 * @param adminToken  the token to use for authentication
-	 * @param username      the id of the user to grant the permissions to
+	 * @param username    the id of the user to grant the permissions to
 	 * @param permissions Map mapping entity type ID to permission to grant
 	 */
 	public static void setGrantedPackagePermissions(String adminToken, String username,
