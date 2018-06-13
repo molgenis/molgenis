@@ -60,11 +60,11 @@
           chapterTitle: {
             fontSize: 16,
             bold: true,
-            margin: [0, 20]
+            margin: [0, 20, 0, 10]
           },
           sectionTitle: {
             fontSize: 14,
-            margin: [5, 10]
+            margin: [0, 10, 0, 5]
           },
           questionLabel: {
             fontSize: 10,
