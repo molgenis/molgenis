@@ -15,11 +15,15 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.login;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
+/**
+ * Regression test that should be run on the build server.
+ */
 public class ImportPublicDataIT
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ImportPublicDataIT.class);
@@ -69,22 +73,27 @@ public class ImportPublicDataIT
 		testUrls = Arrays.asList(testUrlList.split("\\s*,\\s*"));
 
 		String importStatus = "PENDING";
-		if(uploadFile.endsWith(".xlsx"))
+		if (uploadFile.endsWith(".xlsx"))
 		{
 			importStatus = RestTestUtils.uploadEMX(adminToken, uploadFolder, uploadFile);
-		} else if(uploadFile.endsWith(".vcf")){
+		}
+		else if (uploadFile.endsWith(".vcf"))
+		{
 			importStatus = RestTestUtils.uploadVCF(adminToken, uploadFolder, uploadFile);
-		} else {
+		}
+		else
+		{
 			assertTrue("Import failed, import test template does not support give file type, " + uploadFile, false);
 		}
 
-		assertEquals("File import failed, file: "+ uploadFile,"FINISHED", importStatus);
+		assertEquals("File import failed, file: " + uploadFile, "FINISHED", importStatus);
 	}
 
 	private String getExpectedEnvVariable(String envName)
 	{
 		String envVariable = System.getenv(envName);
-		assertFalse("Expected enviroment variable '" + envName + "' not found.",
+		assertFalse("Expected enviroment variable '" + envName
+						+ "' not found. This test should be run on the build server, are you trying to run it locally?",
 				Strings.isNullOrEmpty(envVariable));
 		LOG.info("Test upload " + envName + ": " + envVariable);
 		return envVariable;

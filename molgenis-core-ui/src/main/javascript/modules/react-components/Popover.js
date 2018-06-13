@@ -12,7 +12,7 @@ var Popover = React.createClass({
     propTypes: {
         value: React.PropTypes.string.isRequired,
         popoverValue: React.PropTypes.string.isRequired,
-        animation: React.PropTypes.boolean,
+        animation: React.PropTypes.bool,
         container: React.PropTypes.oneOfType(React.PropTypes.string, React.PropTypes.bool),
         delay: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.object]),
         html: React.PropTypes.bool,

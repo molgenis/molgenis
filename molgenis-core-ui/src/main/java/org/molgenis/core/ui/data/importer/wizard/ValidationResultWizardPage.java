@@ -27,19 +27,19 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOG = LoggerFactory.getLogger(ValidationResultWizardPage.class);
 
-	private final ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
+	private final transient ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
 
 	@Autowired
-	private ImportServiceFactory importServiceFactory;
+	private transient ImportServiceFactory importServiceFactory;
 
 	@Autowired
-	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+	private transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	private ImportRunService importRunService;
+	private transient ImportRunService importRunService;
 
 	@Autowired
-	UserAccountService userAccountService;
+	transient UserAccountService userAccountService;
 
 	@Autowired
 	transient UserService userService;
