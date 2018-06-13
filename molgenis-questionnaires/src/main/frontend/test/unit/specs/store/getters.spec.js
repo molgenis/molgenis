@@ -229,7 +229,9 @@ describe('getters', () => {
               {
                 id: 'chapter-1-field-1',
                 type: 'text',
-                visible: (data) => { throw new Error('This can\'t be happening!') }
+                visible: (data) => {
+                  throw new Error('This can\'t be happening!')
+                }
               }
             ]
           }
@@ -318,7 +320,4 @@ describe('getters', () => {
       expect(() => getters.getQuestionLabel(state)(questionId)).to.throw()
     })
   })
-
-
-
 })
