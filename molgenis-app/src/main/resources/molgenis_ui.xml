@@ -13,7 +13,6 @@
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
             <plugin id="sorta" name="SORTA" url="sorta"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
-            <plugin id="ontologymanager" name="Ontology manager" url="ontologymanager"/>
 		</menu>
         <menu label="Plugins" name="plugins">
             <plugin id="searchAll" name="Search all data" url="searchAll"/>
