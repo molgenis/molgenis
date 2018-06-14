@@ -76,17 +76,19 @@ describe('getters', () => {
     it('Should return the selected ID attribute for the editorEntityType present in the state', () => {
       const state = {
         editorEntityType: {
-          id: 'attribute1',
           attributes: [
-            {id: '1', name: 'attribute1'},
-            {id: '2', name: 'attribute2'},
-            {id: '3', name: 'attribute3'}
+            {id: '1'},
+            {id: '2'},
+            {id: '3'}
           ]
         }
       }
 
-      const actual = getters.getEditorEntityTypeIdAttribute(state, {getEditorEntityTypeAttributes: state.editorEntityType.attributes})
-      const expected = {id: '1', name: 'attribute1'}
+      const actual = getters.getEditorEntityTypeIdAttribute(state, {
+        getIdAttributeId: '1',
+        getEditorEntityTypeAttributes: state.editorEntityType.attributes
+      })
+      const expected = {id: '1'}
 
       expect(actual).to.deep.equal(expected)
     })

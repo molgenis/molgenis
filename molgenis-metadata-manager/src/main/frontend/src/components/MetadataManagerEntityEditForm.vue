@@ -151,8 +151,7 @@
       ...mapGetters({
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes',
-        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited',
-        idAttribute: 'getEditorEntityTypeIdAttribute'
+        isEntityTypeEdited: 'getEditorEntityTypeHasBeenEdited'
       }),
       entityTypeParent: {
         get () {
@@ -196,7 +195,7 @@
       },
       idAttribute: {
         get () {
-          return this.$store.state.editorEntityType.idAttribute
+          return this.$store.getters.getEditorEntityTypeIdAttribute
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'idAttribute', value: value})
