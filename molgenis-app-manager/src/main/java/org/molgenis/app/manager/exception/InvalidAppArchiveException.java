@@ -15,6 +15,12 @@ public class InvalidAppArchiveException extends CodedRuntimeException
 		this.archiveName = requireNonNull(archiveName);
 	}
 
+	public InvalidAppArchiveException(String archiveName, Exception cause)
+	{
+		super(ERROR_CODE, cause);
+		this.archiveName = requireNonNull(archiveName);
+	}
+
 	@Override
 	protected Object[] getLocalizedMessageArguments()
 	{

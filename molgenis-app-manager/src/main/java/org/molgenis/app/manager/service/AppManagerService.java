@@ -1,7 +1,7 @@
 package org.molgenis.app.manager.service;
 
-import net.lingala.zip4j.exception.ZipException;
 import org.molgenis.app.manager.exception.CouldNotDeleteAppException;
+import org.molgenis.app.manager.exception.InvalidAppArchiveException;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 
@@ -11,13 +11,6 @@ import java.util.List;
 
 public interface AppManagerService
 {
-	String APPS_DIR = "apps";
-	String APPS_TMP_DIR = "apps_tmp";
-	String ZIP_FILE_PREFIX = "zip_file_";
-	String ZIP_INDEX_FILE = "index.html";
-	String ZIP_CONFIG_FILE = "config.json";
-	String APP_PLUGIN_ROOT = "app/";
-
 	/**
 	 * Retrieve a list of {@link AppResponse}s
 	 */
@@ -63,9 +56,9 @@ public interface AppManagerService
 	 * @param formFieldName the value of the name field in the form
 	 * @return temporary directory for app
 	 * @throws IOException
-	 * @throws ZipException
+	 * @throws InvalidAppArchiveException if the zipData cannot be unzipped
 	 */
-	String uploadApp(InputStream zipData, String zipFileName, String formFieldName) throws IOException, ZipException;
+	String uploadApp(InputStream zipData, String zipFileName, String formFieldName) throws IOException;
 
 	/**
 	 * Check the app-configuration and obtain the {@link AppConfig}

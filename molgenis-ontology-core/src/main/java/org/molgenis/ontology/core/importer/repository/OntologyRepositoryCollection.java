@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.file.CodedUnzipException;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.model.EntityType;
@@ -15,6 +16,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.core.utils.OWLClassContainer;
 import org.molgenis.ontology.core.utils.OntologyLoader;
+import org.molgenis.util.file.UnzipException;
 import org.molgenis.util.file.ZipFileUtil;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -119,7 +121,15 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 				synonymRepository, ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository,
 				ONTOLOGY_TERM, ontologyTermRepository);
 
-		List<File> uploadedFiles = ZipFileUtil.unzip(file);
+		List<File> uploadedFiles;
+		try
+		{
+			uploadedFiles = ZipFileUtil.unzipSkipHidden(file);
+		}
+		catch (UnzipException unzipException)
+		{
+			throw new CodedUnzipException(file.getName(), unzipException);
+		}
 		try
 		{
 			loader = new OntologyLoader(fileName, uploadedFiles.get(0));
