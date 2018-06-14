@@ -994,7 +994,6 @@
         <module>molgenis-dataexplorer</module>
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
-        <module>molgenis-gavin</module>
         <module>molgenis-genomebrowser</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>
