@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import io.restassured.internal.ValidatableResponseImpl;
 import io.restassured.response.ValidatableResponse;
 import org.molgenis.api.tests.rest.v2.RestControllerV2APIIT;
+import org.molgenis.api.tests.utils.RestTestUtils;
 import org.molgenis.oneclickimporter.controller.OneClickImporterController;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
@@ -73,6 +74,8 @@ public class OneClickImporterControllerAPIIT
 
 		adminToken = login(adminUserName, adminPassword);
 
+		RestTestUtils.createPackage(adminToken, "base");
+
 		oneClickImporterTestUsername = "one_click_importer_test_user" + System.currentTimeMillis();
 		createUser(adminToken, oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
 
@@ -86,7 +89,7 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_job_OneClickImportJobExecution", READ)
 														  .build());
 		setGrantedPackagePermissions(adminToken, oneClickImporterTestUsername,
-				ImmutableMap.<String, Permission>builder().put("base_upload", WRITEMETA).build());
+				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
 		setGrantedPluginPermissions(adminToken, oneClickImporterTestUsername, "one-click-importer");
 
 		testUserToken = login(oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
@@ -128,7 +131,7 @@ public class OneClickImporterControllerAPIIT
 								  .all()
 								  .header(X_MOLGENIS_TOKEN, testUserToken)
 								  .get(jobUrl)
-								  .then()
+								  .then().log().all()
 								  .statusCode(OKE)
 								  .extract()
 								  .path("status");

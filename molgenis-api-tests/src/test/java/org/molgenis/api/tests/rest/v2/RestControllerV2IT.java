@@ -68,6 +68,8 @@ public class RestControllerV2IT
 		removeEntities(adminToken, testEntities);
 		LOG.info("Cleaned up existing test entities.");
 
+		RestTestUtils.createPackage(adminToken, "base");
+
 		LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
 		uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
 		LOG.info("Importing Done");

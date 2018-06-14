@@ -12,6 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -84,6 +85,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest
 
 		RepositoryCollection repositoryCollection = mock(RepositoryCollection.class);
 		when(repositoryCollection.hasRepository("EntityTypeId")).thenReturn(true);
+		when(emxImportJob.getPackageId()).thenReturn(Optional.of("base"));
 		when(emxImportJob.getSource()).thenReturn(repositoryCollection);
 
 		assertTrue(emxDataProvider.hasEntities(entityType));
@@ -126,6 +128,7 @@ public class EmxDataProviderTest extends AbstractMockitoTest
 		Repository<Entity> repository = mock(Repository.class);
 		when(repository.spliterator()).thenReturn(Collections.<Entity>emptyList().spliterator());
 		when(repositoryCollection.getRepository("EntityTypeId")).thenReturn(repository);
+		when(emxImportJob.getPackageId()).thenReturn(Optional.of("base"));
 		when(emxImportJob.getSource()).thenReturn(repositoryCollection);
 		assertEquals(emxDataProvider.getEntities(entityType).collect(toList()), emptyList());
 

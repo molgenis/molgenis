@@ -5,6 +5,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.springframework.core.Ordered;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Set;
 
 public interface ImportService extends Ordered
 {
-	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId);
+	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, @Nullable String packageId);
 
 	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 

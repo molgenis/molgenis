@@ -41,7 +41,6 @@ import java.util.concurrent.Executors;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.core.ui.data.importer.wizard.ImportWizardController.URI;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Controller
@@ -157,7 +156,6 @@ public class ImportWizardController extends AbstractWizardController
 									 .contentType(TEXT_PLAIN)
 									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
-			if (packageId == null) packageId = PACKAGE_DEFAULT;
 			importRun = importFile(request, tmpFile, action, notify, packageId);
 		}
 		catch (Exception e)
@@ -203,7 +201,6 @@ public class ImportWizardController extends AbstractWizardController
 									 .contentType(TEXT_PLAIN)
 									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
-			if (packageId == null) packageId = PACKAGE_DEFAULT;
 
 			importRun = importFile(request, tmpFile, action, notify, packageId);
 		}

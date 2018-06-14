@@ -50,7 +50,7 @@ public class GavinAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "Gavin";
 	public static final String RESOURCE = "gavin";
-	public static final String RESOURCE_ENTITY_NAME = "base_gavin";
+	public static final String RESOURCE_ENTITY_NAME = "gavin";
 
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";

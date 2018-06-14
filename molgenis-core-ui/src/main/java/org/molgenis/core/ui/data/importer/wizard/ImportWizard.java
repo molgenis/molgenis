@@ -25,7 +25,7 @@ public class ImportWizard extends Wizard
 	private List<DatabaseAction> supportedDatabaseActions;
 	private boolean mustChangeEntityName;
 	private List<String> entityTypeIds;
-	private List<String> packages;
+	private Map<String, String> packageSelection;
 	private List<String> entitiesInDefaultPackage;
 	private String selectedPackage;
 
@@ -163,14 +163,14 @@ public class ImportWizard extends Wizard
 		return this.entityTypeIds;
 	}
 
-	public List<String> getPackages()
+	public Map<String, String> getPackages()
 	{
-		return packages;
+		return packageSelection;
 	}
 
-	public void setPackages(List<String> packages)
+	public void setPackages(Map<String, String> packageSelection)
 	{
-		this.packages = packages;
+		this.packageSelection = packageSelection;
 	}
 
 	public List<String> getEntitiesInDefaultPackage()
