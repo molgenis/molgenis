@@ -168,7 +168,7 @@ public class EntityTypeValidator
 			if (ownAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label attribute [%s] of entity type [%s] is not a non-nillable attribute",
+						format("Label attribute [%s] of entity type [%s] cannot be nillable.",
 								ownLabelAttr.getName(), entityType.getId())));
 			}
 		}
