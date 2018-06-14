@@ -971,7 +971,6 @@
         <module>molgenis-bootstrap</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
-        <module>molgenis-data-annotators</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
         <module>molgenis-data-elasticsearch</module>

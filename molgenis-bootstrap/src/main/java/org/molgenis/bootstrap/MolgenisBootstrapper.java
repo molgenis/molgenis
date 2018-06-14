@@ -3,7 +3,6 @@ package org.molgenis.bootstrap;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
-import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.event.BootstrappingEventPublisher;
 import org.molgenis.data.index.bootstrap.IndexBootstrapper;
 import org.molgenis.data.migrate.bootstrap.MolgenisUpgradeBootstrapper;
@@ -42,7 +41,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final RepositoryPopulator repositoryPopulator;
 	private final PermissionPopulator systemPermissionPopulator;
 	private final JobBootstrapper jobBootstrapper;
-	private final AnnotatorBootstrapper annotatorBootstrapper;
 	private final IndexBootstrapper indexBootstrapper;
 	private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 	private final BootstrapThemePopulator bootstrapThemePopulator;
@@ -53,7 +51,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
 			RegistryBootstrapper registryBootstrapper, SystemEntityTypeBootstrapper systemEntityTypeBootstrapper,
 			RepositoryPopulator repositoryPopulator, PermissionPopulator systemPermissionPopulator,
-			JobBootstrapper jobBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			JobBootstrapper jobBootstrapper,
 			IndexBootstrapper indexBootstrapper, EntityTypeRegistryPopulator entityTypeRegistryPopulator,
 			BootstrapThemePopulator bootstrapThemePopulator,BootstrappingEventPublisher bootstrappingEventPublisher)
 	{
@@ -65,7 +63,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
 		this.systemPermissionPopulator = requireNonNull(systemPermissionPopulator);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
-		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 		this.indexBootstrapper = requireNonNull(indexBootstrapper);
 		this.entityTypeRegistryPopulator = requireNonNull(entityTypeRegistryPopulator);
 		this.bootstrapThemePopulator = requireNonNull(bootstrapThemePopulator);
@@ -114,10 +111,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping jobs ...");
 		jobBootstrapper.bootstrap();
 		LOG.debug("Bootstrapped jobs");
-
-		LOG.trace("Bootstrapping annotators ...");
-		annotatorBootstrapper.bootstrap(event);
-		LOG.debug("Bootstrapped annotators");
 
 		LOG.trace("Bootstrapping index ...");
 		indexBootstrapper.bootstrap();
