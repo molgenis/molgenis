@@ -2,7 +2,6 @@ import type {QuestionnaireEntityResponse} from '../../../../src/flow.types'
 import questionnaireService from '../../../../src/services/questionnaireService'
 
 describe('Questionniare service', () => {
-
   const questionnaireOverView = {
     title: 'test questionnaire',
     chapters:
@@ -47,27 +46,27 @@ describe('Questionniare service', () => {
           }
         ]
       },
-        {
-          id: 'Chapter2',
-          title: 'Other questions',
-          chapterSections: [
-            {
-              title: 'Sub section',
-              chapterSections: [
-                {
-                  title: 'Sub sub section',
-                  chapterSections: [
-                    {
-                      questionId: 'qDeepSub',
-                      questionLabel: 'What is deep question',
-                      answerLabel: 'deepSub'
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }]
+      {
+        id: 'Chapter2',
+        title: 'Other questions',
+        chapterSections: [
+          {
+            title: 'Sub section',
+            chapterSections: [
+              {
+                title: 'Sub sub section',
+                chapterSections: [
+                  {
+                    questionId: 'qDeepSub',
+                    questionLabel: 'What is deep question',
+                    answerLabel: 'deepSub'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }]
   }
 
   describe('buildFormDataObject', () => {
@@ -110,13 +109,13 @@ describe('Questionniare service', () => {
       href: 'http://foo.bar',
       items: [{
         qMref: [{
-          label: 'MREF answer',
+          label: 'MREF answer'
         }],
         qBoolTrue: true,
         qBoolFalse: false,
         qEnum: ['Red', 'Green'],
         qXRef: {
-          label: 'XREF answer',
+          label: 'XREF answer'
         },
         qNumber: 42,
         qDefault: 'John Doe',
@@ -253,9 +252,7 @@ describe('Questionniare service', () => {
   })
 
   describe('buildPdfContent', () => {
-
     it('should build a content object describing the pdf content', () => {
-
       const pdfContent = questionnaireService.buildPdfContent(questionnaireOverView)
       const expectedPdfContent = [
         {
