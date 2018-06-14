@@ -106,20 +106,6 @@ public class AttributeTest
 	}
 
 	@Test
-	public void setLabelAttributeTrue()
-	{
-		attribute.setLabelAttribute(true);
-		assertFalse(attribute.isNillable());
-	}
-
-	@Test
-	public void setLabelAttributeFalse()
-	{
-		attribute.setLabelAttribute(false);
-		assertTrue(attribute.isNillable());
-	}
-
-	@Test
 	public void testIdValidationExpression()
 	{
 		String expression = getIdAttributeValidationExpression();

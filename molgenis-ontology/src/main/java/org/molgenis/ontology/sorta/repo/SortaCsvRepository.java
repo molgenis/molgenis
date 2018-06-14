@@ -66,6 +66,7 @@ public class SortaCsvRepository extends AbstractRepository
 			if (nameAttribute != null)
 			{
 				nameAttribute.setLabelAttribute(true);
+				nameAttribute.setNillable(false);
 			}
 		}
 		return entityType;
