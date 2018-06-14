@@ -5,7 +5,6 @@ import org.mockito.*;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.*;
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -51,9 +50,10 @@ import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 @ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingServiceImpl.class,
-		EntityBaseTestConfig.class, DefaultPackage.class })
+		EntityBaseTestConfig.class })
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
@@ -276,8 +276,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "target id", null, null, null);
 		assertEquals(targetMetadata.getId(), "target id");
 		assertEquals(targetMetadata.getLabel(), "target id");
-		assertEquals(targetMetadata.getPackage().getId(), "base");
-		Assert.assertNull(targetMetadata.getAttribute(SOURCE));
+		assertNull(targetMetadata.getPackage());
+		assertNull(targetMetadata.getAttribute(SOURCE));
 	}
 
 	@Test

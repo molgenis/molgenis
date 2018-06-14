@@ -2,7 +2,6 @@ package org.molgenis.semanticmapper.service.impl;
 
 import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -49,19 +48,17 @@ public class MappingServiceImpl implements MappingService
 	private final MappingProjectRepository mappingProjectRepository;
 	private final PermissionSystemService permissionSystemService;
 	private final AttributeFactory attrMetaFactory;
-	private final DefaultPackage defaultPackage;
 	private final EntityManager entityManager;
 
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
 			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
-			AttributeFactory attrMetaFactory, DefaultPackage defaultPackage, EntityManager entityManager)
+			AttributeFactory attrMetaFactory, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.defaultPackage = requireNonNull(defaultPackage);
 		this.entityManager = requireNonNull(entityManager);
 	}
 
@@ -199,14 +196,7 @@ public class MappingServiceImpl implements MappingService
 			targetMetadata.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
-		if (packageId == null)
-		{
-			targetMetadata.setPackage(defaultPackage);
-		}
-		else
-		{
-			targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
-		}
+		targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
 
 		return targetMetadata;
 	}

@@ -5,6 +5,9 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ParsedMetaData;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 /**
  * Parameter object for the import job.
  */
@@ -17,9 +20,10 @@ public class EmxImportJob
 	final ParsedMetaData parsedMetaData;
 
 	public final EntityImportReport report = new EntityImportReport();
-	public final String packageId;
+	private final String packageId;
 
-	EmxImportJob(DatabaseAction dbAction, RepositoryCollection source, ParsedMetaData parsedMetaData, String packageId)
+	EmxImportJob(DatabaseAction dbAction, RepositoryCollection source, ParsedMetaData parsedMetaData,
+			@Nullable String packageId)
 	{
 		this.dbAction = dbAction;
 		this.source = source;
@@ -35,5 +39,10 @@ public class EmxImportJob
 	ParsedMetaData getParsedMetaData()
 	{
 		return parsedMetaData;
+	}
+
+	public Optional<String> getPackageId()
+	{
+		return packageId != null ? Optional.of(packageId) : Optional.empty();
 	}
 }

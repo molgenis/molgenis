@@ -5,7 +5,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
@@ -13,6 +12,7 @@ import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.impl.EntityServiceImpl;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -62,6 +62,9 @@ public class EntityServiceImplTest
 	@Mock
 	private PermissionSystemService permissionSystemService;
 
+	@Mock
+	private UserPermissionEvaluator userPermissionEvaluator;
+
 	private EntityService entityService;
 
 	@BeforeClass
@@ -79,9 +82,6 @@ public class EntityServiceImplTest
 		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
 				Column.create("super power", 1, superPowers));
 		DataCollection dataCollection = DataCollection.create(tableName, columns);
-
-		//mock parent package
-		UploadPackage upload = mock(UploadPackage.class);
 
 		// mock auto id
 		String generatedId = "id_0";
@@ -136,7 +136,7 @@ public class EntityServiceImplTest
 
 		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
 				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				oneClickImporterNamingService, packageFactory, permissionSystemService, upload);
+				oneClickImporterNamingService, packageFactory, permissionSystemService, userPermissionEvaluator);
 
 		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
 		assertEquals(entityType.getId(), generatedId);

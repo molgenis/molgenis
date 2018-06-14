@@ -4,13 +4,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -30,7 +26,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.PermissionSet.READ;
-import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 
 @Component
@@ -59,12 +54,6 @@ public class PermissionRegistryImpl implements PermissionRegistry
 		{
 			ObjectIdentity entityTypeIdentity = new EntityTypeIdentity(entityType);
 			mapBuilder.putAll(entityTypeIdentity, new Pair<>(READ, userRoleSid));
-		});
-
-		dataService.findAll(PackageMetadata.PACKAGE, Stream.of(UploadPackage.UPLOAD), Package.class).forEach(pack ->
-		{
-			ObjectIdentity packageIdentity = new PackageIdentity(pack);
-			mapBuilder.putAll(packageIdentity, new Pair<>(WRITEMETA, userRoleSid));
 		});
 
 		return mapBuilder.build();

@@ -17,7 +17,6 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.testng.Assert.*;
 
 public class EntityTypeUtilsTest
@@ -101,13 +100,6 @@ public class EntityTypeUtilsTest
 	{
 		Package package_ = when(mock(Package.class).getId()).thenReturn("my_first_package").getMock();
 		assertEquals(EntityTypeUtils.buildFullName(package_, "simpleName"), "my_first_package_simpleName");
-	}
-
-	@Test
-	public void buildFullNamePackageDefault()
-	{
-		Package defaultPackage = when(mock(Package.class).getId()).thenReturn(PACKAGE_DEFAULT).getMock();
-		assertEquals(EntityTypeUtils.buildFullName(defaultPackage, "simpleName"), PACKAGE_DEFAULT + "_simpleName");
 	}
 
 	@Test

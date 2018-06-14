@@ -12,7 +12,10 @@ import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.NoWritablePackageException;
+import org.molgenis.data.security.PackagePermissionUtils;
 import org.molgenis.data.validation.meta.NameValidator;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,12 +24,12 @@ import org.springframework.validation.ObjectError;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 @Component
 public class OptionsWizardPage extends AbstractWizardPage
@@ -37,13 +40,16 @@ public class OptionsWizardPage extends AbstractWizardPage
 	private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final transient ImportServiceFactory importServiceFactory;
 	private transient DataService dataService;
+	private final transient UserPermissionEvaluator userPermissionEvaluator;
 
 	public OptionsWizardPage(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
-			ImportServiceFactory importServiceFactory, DataService dataService)
+			ImportServiceFactory importServiceFactory, DataService dataService,
+			UserPermissionEvaluator userPermissionEvaluator)
 	{
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importServiceFactory = importServiceFactory;
 		this.dataService = dataService;
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	@Override
@@ -126,7 +132,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
 
 		Set<String> allPackages = new HashSet<>(validationReport.getPackages());
-		for (Package p : dataService.getMeta().getPackages())
+		List<Package> packages = dataService.getMeta().getPackages();
+		for (Package p : packages)
 		{
 			allPackages.add(p.getId());
 		}
@@ -141,9 +148,12 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
 
-		List<String> packages = new ArrayList<>(validationReport.getPackages());
-		packages.add(0, PACKAGE_DEFAULT);
-		wizard.setPackages(packages);
+		Map<String, String> packageSelection = getPackageSelection(packages);
+		if (packageSelection.isEmpty())
+		{
+			throw new NoWritablePackageException();
+		}
+		wizard.setPackages(packageSelection);
 
 		String msg = null;
 		if (validationReport.valid())
@@ -164,9 +174,35 @@ public class OptionsWizardPage extends AbstractWizardPage
 	{
 		for (String packageName : packages)
 		{
-			if (entityTypeId.toLowerCase().startsWith(packageName.toLowerCase())) return false;
+			if (entityTypeId.toLowerCase().startsWith(packageName.toLowerCase() + PACKAGE_SEPARATOR))
+			{
+				return false;
+			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * @return sorted map of writable packages ids to package path label
+	 */
+	private Map<String, String> getPackageSelection(List<Package> packages)
+	{
+		return packages.stream()
+					   .filter(this::isWritablePackage)
+					   .sorted(comparing(this::getPackagePathLabel))
+					   .collect(toLinkedMap(Package::getId, this::getPackagePathLabel));
+	}
+
+	private String getPackagePathLabel(Package aPackage)
+	{
+		String packageLabel = aPackage.getLabel();
+		Package parentPackage = aPackage.getParent();
+		return parentPackage == null ? packageLabel : getPackagePathLabel(parentPackage) + " / " + packageLabel;
+	}
+
+	private boolean isWritablePackage(Package aPackage)
+	{
+		return PackagePermissionUtils.isWritablePackage(aPackage, userPermissionEvaluator);
 	}
 }

@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -64,7 +63,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		File file = getFile("/obo/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport,
 				ImmutableMap.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
 						"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
@@ -119,7 +118,7 @@ public class OntologyImportServiceIT extends ImportServiceIT
 		File file = getFile("/owl/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport,
 				ImmutableMap.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
 						"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),

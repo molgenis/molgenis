@@ -128,7 +128,7 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 		verify(executorService).execute(importJobArgumentCaptor.capture());
 		assertEquals(importJobArgumentCaptor.getValue(),
 				new ImportJob(importService, SecurityContextHolder.getContext(), null, databaseAction, importRunIdValue,
-						importRunService, httpSession, "base"));
+						importRunService, httpSession, null));
 	}
 
 	@Test

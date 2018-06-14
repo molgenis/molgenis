@@ -7,9 +7,9 @@ import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.UploadPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.vcf.VcfFileExtensions;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 @Service
@@ -36,25 +38,37 @@ public class VcfImporterService implements ImportService
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final MetaDataService metaDataService;
-	private final UploadPackage uploadPackage;
 
 	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
-			MetaDataService metaDataService, UploadPackage uploadPackage)
+			MetaDataService metaDataService)
 
 	{
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.uploadPackage = requireNonNull(uploadPackage);
 	}
 
 	@Transactional
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			@Nullable String packageId)
 	{
-		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
+		if (databaseAction != DatabaseAction.ADD)
+		{
+			throw new IllegalArgumentException("Only ADD is supported");
+		}
 
-		List<EntityType> addedEntities = Lists.newArrayList();
+		Package importPackage = null;
+		if (packageId != null)
+		{
+			importPackage = metaDataService.getPackage(packageId);
+			if (importPackage == null)
+			{
+				throw new UnknownEntityException(PACKAGE, packageId);
+			}
+		}
+
+		List<EntityType> addedEntities = new ArrayList<>();
 		EntityImportReport report;
 
 		Iterator<String> it = source.getEntityTypeIds().iterator();
@@ -62,11 +76,10 @@ public class VcfImporterService implements ImportService
 		{
 			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				report = importVcf(repo, addedEntities);
+				report = importVcf(repo, addedEntities, importPackage);
 			}
 			catch (IOException e)
 			{
-				LOG.error("", e);
 				throw new MolgenisDataException(e);
 			}
 		}
@@ -134,8 +147,8 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities)
-			throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityType> addedEntities,
+			Package importPackage) throws IOException
 	{
 
 		EntityImportReport report = new EntityImportReport();
@@ -149,9 +162,9 @@ public class VcfImporterService implements ImportService
 
 		EntityType entityType = inRepository.getEntityType();
 		entityType.setBackend(metaDataService.getDefaultBackend().getName());
-		entityType.setPackage(uploadPackage);
+		entityType.setPackage(importPackage);
 
-		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType);
+		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType, importPackage);
 
 		Iterator<Entity> inIterator = inRepository.iterator();
 		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
@@ -222,7 +235,8 @@ public class VcfImporterService implements ImportService
 		return sampleEntityCount;
 	}
 
-	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType)
+	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType,
+			Package samplePackage)
 	{
 		Repository<Entity> sampleRepository;
 		Attribute sampleAttribute = entityType.getAttribute(VcfAttributes.SAMPLES);
@@ -230,7 +244,7 @@ public class VcfImporterService implements ImportService
 		{
 			EntityType samplesEntityType = sampleAttribute.getRefEntity();
 			samplesEntityType.setBackend(metaDataService.getDefaultBackend().getName());
-			samplesEntityType.setPackage(uploadPackage);
+			samplesEntityType.setPackage(samplePackage);
 			sampleRepository = dataService.getMeta().createRepository(samplesEntityType);
 			permissionSystemService.giveUserWriteMetaPermissions(samplesEntityType);
 			addedEntities.add(sampleAttribute.getRefEntity());

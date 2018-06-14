@@ -15,8 +15,8 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -36,7 +36,6 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.DatabaseAction.ADD;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
@@ -80,7 +79,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		File file = getFile("/csv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
 				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
 		verifyFirstAndLastRows(CSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
@@ -108,7 +107,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		File file = getFile("/tsv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(TSV_HOSPITAL, 3, TSV_PATIENTS, 3),
 				ImmutableSet.of(TSV_HOSPITAL, TSV_PATIENTS));
 		verifyFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
@@ -261,7 +260,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 		entityValidationMethod.run();
@@ -332,14 +331,14 @@ public class EmxImportServiceIT extends ImportServiceIT
 		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 				file);
 		ImportService addImportService = importServiceFactory.getImportService(file, addRepoCollection);
-		addImportService.doImport(addRepoCollection, ADD, PACKAGE_DEFAULT);
+		addImportService.doImport(addRepoCollection, ADD, null);
 
 		FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 				addUpdateFile);
 		ImportService addUpdateImportService = importServiceFactory.getImportService(addUpdateFile,
 				addUpdateRepoCollection);
 		EntityImportReport importReport = addUpdateImportService.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING,
-				PACKAGE_DEFAULT);
+				null);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 		entityValidationMethod.run();

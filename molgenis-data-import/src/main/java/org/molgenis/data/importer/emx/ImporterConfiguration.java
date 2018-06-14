@@ -7,7 +7,6 @@ import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.importer.DataPersister;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.MetaDataParser;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -72,9 +71,6 @@ public class ImporterConfiguration
 	private EntityTypeDependencyResolver entityTypeDependencyResolver;
 
 	@Autowired
-	private DefaultPackage defaultPackage;
-
-	@Autowired
 	private DataPersister dataPersister;
 
 	@Bean
@@ -95,6 +91,6 @@ public class ImporterConfiguration
 	{
 		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityTypeFactory, tagFactory,
 				languageFactory, l10nStringFactory, entityTypeValidator, attributeValidator, tagValidator,
-				entityTypeDependencyResolver, defaultPackage);
+				entityTypeDependencyResolver);
 	}
 }

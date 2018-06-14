@@ -13,7 +13,6 @@ import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
@@ -26,6 +25,7 @@ import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.i18n.LanguageService;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.google.common.collect.ImmutableMap.builder;
@@ -170,7 +170,6 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final AttributeValidator attributeValidator;
 	private final TagValidator tagValidator;
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final DefaultPackage defaultPackage;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, EntityTypeDependencyResolver entityTypeDependencyResolver)
@@ -186,14 +185,13 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = null;
 		this.tagValidator = null;
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.defaultPackage = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory, AttributeFactory attrMetaFactory,
 			EntityTypeFactory entityTypeFactory, TagFactory tagFactory, LanguageFactory languageFactory,
 			L10nStringFactory l10nStringFactory, EntityTypeValidator entityTypeValidator,
 			AttributeValidator attributeValidator, TagValidator tagValidator,
-			EntityTypeDependencyResolver entityTypeDependencyResolver, DefaultPackage defaultPackage)
+			EntityTypeDependencyResolver entityTypeDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
@@ -206,12 +204,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attributeValidator = requireNonNull(attributeValidator);
 		this.tagValidator = requireNonNull(tagValidator);
 		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.defaultPackage = requireNonNull(defaultPackage);
 	}
 
 	@Override
 	//FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
-	public ParsedMetaData parse(final RepositoryCollection source, String packageId)
+	public ParsedMetaData parse(final RepositoryCollection source, @Nullable String packageId)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
 		{
@@ -408,8 +405,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory,
-				defaultPackage);
+		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tagEntity : tagRepository)
@@ -1192,6 +1188,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (entityType.getPackage() == null)
 			{
+				entityType.setId(defaultPackageId + PACKAGE_SEPARATOR + entityType.getId());
 				entityType.setPackage(p);
 			}
 			entities.add(entityType);

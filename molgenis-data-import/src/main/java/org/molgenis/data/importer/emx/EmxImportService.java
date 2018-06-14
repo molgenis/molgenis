@@ -13,6 +13,7 @@ import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public class EmxImportService implements ImportService
 
 	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction,
-			String packageId)
+			@Nullable String packageId)
 	{
 		ParsedMetaData parsedMetaData = parser.parse(source, packageId);
 

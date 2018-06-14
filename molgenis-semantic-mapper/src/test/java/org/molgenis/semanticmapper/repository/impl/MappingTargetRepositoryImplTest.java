@@ -6,7 +6,6 @@ import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -190,12 +189,5 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		{
 			return Mockito.mock(IdGenerator.class);
 		}
-
-		@Bean
-		DefaultPackage defaultPackage()
-		{
-			return Mockito.mock(DefaultPackage.class);
-		}
-
 	}
 }
