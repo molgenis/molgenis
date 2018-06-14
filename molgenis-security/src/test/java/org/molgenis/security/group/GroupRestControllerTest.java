@@ -2,6 +2,9 @@ package org.molgenis.security.group;
 
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
+import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
@@ -15,7 +18,14 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = GroupRestControllerTest.Config.class)
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
@@ -26,13 +36,16 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	private GroupService groupService;
 	@Mock
 	private RoleMembershipService roleMembershipService;
+	@Mock
+	private DataService dataService;
 
 	private GroupRestController groupRestController;
+
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService);
+		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService, dataService);
 	}
 
 	@Test
@@ -47,6 +60,16 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		verify(groupService).persist(groupValue);
 		verify(groupService).grantPermissions(groupValue);
 		verify(roleMembershipService).addUserToRole("user", "NAME_MANAGER");
+	}
+
+	@Test
+	public void testGetGroup()
+	{
+		Group redGroup = mock(Group.class);
+		Group greenGroup = mock(Group.class);
+		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(redGroup, greenGroup));
+		List<GroupViewAdapter> groups = groupRestController.getGroups();
+		assertEquals(groups.size(), 2);
 	}
 
 	@Configuration
