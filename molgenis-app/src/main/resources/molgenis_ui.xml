@@ -19,7 +19,6 @@
             <plugin id="swagger" name="API documentation" url="swagger"/>
             <plugin id="appmanager" name="App manager" url="appmanager"/>
 			<plugin id="feedback" name="Feedback" url="feedback"/>
-			<plugin id="gavin-app" name="Gavin" url="gavin-app"/>
             <plugin id="jobs" name="Job overview" url="jobs" />
 			<plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
