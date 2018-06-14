@@ -10,8 +10,8 @@
     <packaging>jar</packaging>
 
     <name>ontology</name>
-    <description>Plugin module containing ontology manager and SORTA (system for ontology-based re-coding and technical
-        annotation) plugins.
+    <description>Plugin module containing SORTA (system for ontology-based re-coding and technical annotation)
+        plugins.
     </description>
 
     <build>

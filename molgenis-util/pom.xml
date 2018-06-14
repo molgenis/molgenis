@@ -37,11 +37,20 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

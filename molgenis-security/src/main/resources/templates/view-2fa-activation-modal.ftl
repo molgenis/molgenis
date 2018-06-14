@@ -60,14 +60,14 @@
                                            name="verificationCode"
                                            required/>
                                     <script>
-                                        $('#verification-code-field').pincodeInput({
+                                        var pincodeInput = $('#verification-code-field').pincodeInput({
                                             inputs: 6,
                                             hidedigits: false,
-                                            complete: function (value, e) {
+                                            complete: function () {
                                                 $('#activation-form').submit()
                                             }
-                                        })
-                                        $('input.pincode-input-text.first').attr('autofocus', 'autofocus')
+                                        }).data('plugin_pincodeInput')
+                                        setTimeout(pincodeInput.focus, 1000)
                                     </script>
                                     <input type="hidden" name="secretKey" value="${secretKey}"/>
                                 </div>

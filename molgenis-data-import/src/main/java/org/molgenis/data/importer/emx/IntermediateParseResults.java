@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.emx.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
@@ -43,12 +42,10 @@ public final class IntermediateParseResults
 	 */
 	private final Map<String, L10nString> l10nStrings;
 	private final EntityTypeFactory entityTypeFactory;
-	private final DefaultPackage defaultPackage;
 
-	public IntermediateParseResults(EntityTypeFactory entityTypeFactory, DefaultPackage defaultPackage)
+	public IntermediateParseResults(EntityTypeFactory entityTypeFactory)
 	{
 		this.entityTypeFactory = entityTypeFactory;
-		this.defaultPackage = defaultPackage;
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
 		this.packages = new LinkedHashMap<>();
@@ -145,19 +142,7 @@ public final class IntermediateParseResults
 				pack = p;
 			}
 		}
-
-		String entityTypeId;
-		if (pack == null)
-		{
-			pack = this.defaultPackage;
-			entityTypeId = DefaultPackage.PACKAGE_DEFAULT + Package.PACKAGE_SEPARATOR + fullyQualifiedName;
-		}
-		else
-		{
-			entityTypeId = fullyQualifiedName;
-		}
-
-		EntityType emd = entityTypeFactory.create(entityTypeId).setLabel(entityTypeLabel).setPackage(pack);
+		EntityType emd = entityTypeFactory.create(fullyQualifiedName).setLabel(entityTypeLabel).setPackage(pack);
 		entities.put(fullyQualifiedName, emd);
 		return emd;
 	}

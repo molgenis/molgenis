@@ -41,14 +41,14 @@
                                 <input id="verification-code-field" type="text"
                                        class="form-control" name="verificationCode">
                                 <script>
-                                    $('#verification-code-field').pincodeInput({
+                                    var pincodeInput = $('#verification-code-field').pincodeInput({
                                         inputs: 6,
                                         hidedigits: false,
-                                        complete: function (value, e) {
+                                        complete: function () {
                                             $('#verification-form').submit()
                                         }
-                                    })
-                                    $('input.pincode-input-text.first').attr('autofocus', 'autofocus')
+                                    }).data('plugin_pincodeInput')
+                                    setTimeout(pincodeInput.focus, 1000)
                                 </script>
                             </div>
                         </form>

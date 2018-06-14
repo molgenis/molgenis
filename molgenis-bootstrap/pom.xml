@@ -22,11 +22,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-annotators</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-platform</artifactId>
             <version>${project.version}</version>
         </dependency>

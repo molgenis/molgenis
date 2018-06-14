@@ -25,14 +25,12 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 @ContextConfiguration(classes = { AmazonBucketIngesterTest.Config.class })
 public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
@@ -64,7 +62,7 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void ingest() throws FileNotFoundException
+	public void ingest()
 	{
 		Map<String, Integer> imported = new HashMap<>();
 		imported.put("test", 1);
@@ -72,13 +70,13 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
 				fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService("test_data_only.xlsx")).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT))).thenReturn(report);
+		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null))).thenReturn(report);
 		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
 		amazonBucketIngester.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", null, "test", "test",
 				"region1", true, progress);
 		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
-		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(PACKAGE_DEFAULT));
+		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null));
 	}
 
 	@Configuration
@@ -125,8 +123,8 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 			AmazonS3Client client = mock(AmazonS3Client.class);
 
 			AmazonBucketClient amazonBucketClient = mock(AmazonBucketClient.class);
-				File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
-				when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
+			File file = ResourceUtils.getFile(getClass(), "/test_data_only.xlsx");
+			when(amazonBucketClient.getClient("test", "test", "region1")).thenReturn(client);
 			try
 			{
 				when(amazonBucketClient.downloadFile(any(), any(), eq("jobExecutionID"), eq("bucket"), eq("key(.*)"),

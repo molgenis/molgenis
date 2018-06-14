@@ -2,7 +2,6 @@ package org.molgenis.semanticmapper.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.populate.IdGenerator;
@@ -71,16 +70,13 @@ public class MappingConfig
 	JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
 	@Autowired
-	DefaultPackage defaultPackage;
-
-	@Autowired
 	SystemPackageRegistry systemPackageRegistry;
 
 	@Bean
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory, defaultPackage, entityManager);
+				permissionSystemService, attrMetaFactory, entityManager);
 	}
 
 	@Bean

@@ -1,6 +1,5 @@
 package org.molgenis.app.manager.controller;
 
-import net.lingala.zip4j.exception.ZipException;
 import org.molgenis.app.manager.exception.CouldNotUploadAppException;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
@@ -83,7 +82,7 @@ public class AppManagerController extends PluginController
 					ZIP_INDEX_FILE);
 			appManagerService.configureApp(appConfig, htmlTemplate);
 		}
-		catch (IOException | ZipException err)
+		catch (IOException err)
 		{
 			throw new CouldNotUploadAppException(filename);
 		}

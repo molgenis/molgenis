@@ -53,7 +53,6 @@
     - Backend  
       - [Security](developer_documentation/security.md)
       - [Data Backend](developer_documentation/backend.md)
-      - [Annotators](developer_documentation/annotators.md)
       - [Services](developer_documentation/service.md)
       - [Jobs](developer_documentation/jobs.md)
       - [Dynamic Decorators](developer_documentation/dynamic-decorators.md)

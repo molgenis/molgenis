@@ -75,7 +75,7 @@ public class AmazonBucketIngester
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 					renamed);
 			EntityImportReport report = importService.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING,
-					"base");
+					null);
 			progress.status("Download and import from Amazon Bucket done.");
 			progress.progress(3,
 					"Successfully imported " + report.getNrImportedEntitiesMap().keySet().toString() + " entities.");

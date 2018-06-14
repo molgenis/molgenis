@@ -69,6 +69,7 @@ public class RestControllerV1APIIT
 		adminToken = login(adminUserName, adminPassword);
 
 		LOG.info("Importing Test data");
+		RestTestUtils.createPackage(adminToken, "base");
 		RestTestUtils.uploadEMX(adminToken, V1_TEST_FILE);
 		RestTestUtils.uploadEMX(adminToken, V1_DELETE_TEST_FILE);
 		RestTestUtils.uploadEMX(adminToken, V1_FILE_ATTRIBUTE_TEST_FILE);

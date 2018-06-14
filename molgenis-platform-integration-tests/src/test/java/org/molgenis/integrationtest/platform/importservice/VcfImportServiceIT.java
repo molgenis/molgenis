@@ -5,15 +5,19 @@ import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -23,14 +27,25 @@ import java.util.Map;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DatabaseAction.ADD;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.meta.UploadPackage.UPLOAD;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 public class VcfImportServiceIT extends ImportServiceIT
 {
 	private static final String USERNAME = "vcf_user";
+	private static final String VCF_PACKAGE_ID = "vcf";
+
+	@Autowired
+	private PackageFactory packageFactory;
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		super.beforeClass();
+		Package vcfPackage = packageFactory.create(VCF_PACKAGE_ID);
+		RunAsSystemAspect.runAsSystem(() -> dataService.add(PACKAGE, vcfPackage));
+	}
 
 	@Override
 	User getTestUser()
@@ -64,7 +79,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, UPLOAD);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, VCF_PACKAGE_ID);
 		validateImportReport(importReport, ImmutableMap.of(entityTypeId, 10), ImmutableSet.of(entityTypeId));
 
 		assertVariants(entityTypeId, false);
@@ -92,7 +107,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, PACKAGE_DEFAULT);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, VCF_PACKAGE_ID);
 		validateImportReport(importReport, ImmutableMap.of(entityTypeId, 10, entityTypeId + "Sample", 10),
 				ImmutableSet.of(entityTypeId, entityTypeId + "Sample"));
 
@@ -121,7 +136,7 @@ public class VcfImportServiceIT extends ImportServiceIT
 		File file = getFile("/vcf/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, UPLOAD);
+		EntityImportReport importReport = importService.doImport(repoCollection, ADD, VCF_PACKAGE_ID);
 		validateImportReport(importReport,
 				ImmutableMap.of("variantsWithSamplesGz", 10, "variantsWithSamplesGzSample", 10),
 				ImmutableSet.of("variantsWithSamplesGz", "variantsWithSamplesGzSample"));
@@ -225,10 +240,10 @@ public class VcfImportServiceIT extends ImportServiceIT
 	{
 		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
 		permissionMap.put(new EntityTypeIdentity("sys_md_Package"), PermissionSet.WRITE);
+		permissionMap.put(new PackageIdentity(VCF_PACKAGE_ID), PermissionSet.WRITEMETA);
 		permissionMap.put(new EntityTypeIdentity("sys_md_EntityType"), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
-		permissionMap.put(new PackageIdentity(UPLOAD), PermissionSet.WRITEMETA);
 
 		testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
 	}

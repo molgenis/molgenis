@@ -1,7 +1,6 @@
 package org.molgenis.data.importer.emx;
 
 import org.mockito.Mock;
-import org.molgenis.data.meta.DefaultPackage;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.AbstractMockitoTest;
@@ -16,23 +15,21 @@ public class IntermediateParseResultsTest extends AbstractMockitoTest
 	private IntermediateParseResults intermediateParseResults;
 	@Mock
 	private EntityTypeFactory entityTypeFactory;
-	@Mock
-	private DefaultPackage defaultPackage;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		intermediateParseResults = new IntermediateParseResults(entityTypeFactory, defaultPackage);
+		intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
 	}
 
 	@Test
-	public void testAddEntityType() throws Exception
+	public void testAddEntityType()
 	{
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.setLabel(any())).thenReturn(entityType);
 		when(entityType.setPackage(any())).thenReturn(entityType);
 
-		when(entityTypeFactory.create("base_entityType")).thenReturn(entityType);
+		when(entityTypeFactory.create("entityType")).thenReturn(entityType);
 
 		assertEquals(intermediateParseResults.addEntityType("entityType"), entityType);
 		verify(entityType).setLabel("entityType");

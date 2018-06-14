@@ -140,20 +140,6 @@ Now, let's click the red garbage bin icon in front of a line to delete this line
 
 TODO: add figure
 
-# Annotators
-
-The annotator module of the data explorer is the user interface to use the MOLGENIS annotator framework, which can also be used from the command-line.
-The annotator framework is a system to add data from other resources to your genomic entities. For example pathogenicity prediction, allele frequencies and phenotype information.
-
-![Dataexplorer annotators](../images/dataexplorer/annotators.png?raw=true, "dataexplorer/annotators")
-
-The screen shows a list of available annotators that can be used. Clicking the title of the annotator will result in a popup with additional information, such as a general description and a listing of the attributes that will be added by this annotator.
-Using the checkboxes, multiple annotators can be selected for one run, which is started by clicking the "annotate" button. If preferred, a copy of the dataset can be created with the annotations added to this copy, leaving the original entity as it is.
-Annotated fields will be added to the entity in a compound attribute.
-
-On the right hand side of the screen, a list of unavailable annotators is shown. The reason why they are unavailable is shown in this list. This can for example be due to a resource being unavailable, or when an attribute needed to map the entity and resource to each other is missing.
-The gear icon trailing every annotator in the list, can be used to configure the settings for this annotator.
-
 # Aggregation
 
 The aggregation module allows you to produce aggregated counts for queries on the data.

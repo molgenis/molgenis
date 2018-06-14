@@ -31,6 +31,7 @@ import java.io.InputStream;
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppController.URI;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.APP_PLUGIN_ROOT;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
@@ -63,7 +64,7 @@ public class AppController extends PluginController
 	public ModelAndView serveApp(@PathVariable String appName, Model model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity(AppManagerService.APP_PLUGIN_ROOT + appName + "/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PLUGIN_ROOT + appName + "/");
 		if (!userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN))
 		{
 			throw new PluginPermissionDeniedException(appName, VIEW_PLUGIN);

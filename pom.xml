@@ -128,6 +128,7 @@
         <it_db_password>molgenis</it_db_password>
         <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
         <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
+        <zt-zip.version>1.13</zt-zip.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
     </properties>
 
@@ -630,6 +631,8 @@
                                 <bannedDependencies>
                                     <excludes>
                                         <exclude>commons-logging:commons-logging</exclude>
+                                        <!-- Because Zipflip -->
+                                        <exclude>net.lingala.zip4j:zip4j</exclude>
                                         <exclude>org.apache.logging.log4j:log4j</exclude>
                                         <!-- Use spring-jcl as logging bridge -->
                                         <exclude>org.slf4j:jcl-over-slf4j</exclude>
@@ -932,6 +935,11 @@
                 <artifactId>zip4j</artifactId>
                 <version>${zip4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.zeroturnaround</groupId>
+                <artifactId>zt-zip</artifactId>
+                <version>${zt-zip.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -963,7 +971,6 @@
         <module>molgenis-bootstrap</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
-        <module>molgenis-data-annotators</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
         <module>molgenis-data-elasticsearch</module>
@@ -986,7 +993,6 @@
         <module>molgenis-dataexplorer</module>
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
-        <module>molgenis-gavin</module>
         <module>molgenis-genomebrowser</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>

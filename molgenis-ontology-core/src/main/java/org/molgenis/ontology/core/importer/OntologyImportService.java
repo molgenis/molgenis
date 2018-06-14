@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -39,7 +40,8 @@ public class OntologyImportService implements ImportService
 
 	@Override
 	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String packageId)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			@Nullable String packageId)
 	{
 		if (databaseAction != DatabaseAction.ADD)
 		{
