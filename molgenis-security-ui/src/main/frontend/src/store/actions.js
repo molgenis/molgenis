@@ -1,7 +1,7 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
 
-const SECURITY_API_ROUTE = 'api/plugin/security'
+const SECURITY_API_ROUTE = '/api/plugin/security'
 const SECURITY_API_VERSION = ''
 
 const actions = {

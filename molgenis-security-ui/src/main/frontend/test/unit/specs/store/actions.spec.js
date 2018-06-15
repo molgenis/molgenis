@@ -13,7 +13,7 @@ describe('actions', () => {
       const groupList = ['groups']
 
       const get = td.function('api.get')
-      td.when(get('api/plugin/security/group')).thenResolve(groupList)
+      td.when(get('/api/plugin/security/group')).thenResolve(groupList)
       td.replace(api, 'get', get)
 
       const options = {
@@ -29,7 +29,7 @@ describe('actions', () => {
       const error = 'error'
 
       const get = td.function('api.get')
-      td.when(get('api/plugin/security/group')).thenReject(error)
+      td.when(get('/api/plugin/security/group')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
