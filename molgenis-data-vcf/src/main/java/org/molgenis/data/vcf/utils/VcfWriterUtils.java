@@ -37,6 +37,10 @@ public class VcfWriterUtils
 			Arrays.asList(CHROM, POS, ID, REF, ALT, QUAL, FILTER));
 	private static final char PIPE_SEPARATOR = '|';
 
+	private VcfWriterUtils()
+	{
+	}
+
 	/**
 	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
 	 * attributesToInclude is empty

@@ -16,6 +16,10 @@ public class AlgorithmGeneratorHelper
 {
 	private static final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
 
+	private AlgorithmGeneratorHelper()
+	{
+	}
+
 	public static Set<Attribute> extractSourceAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType)
 	{
 		if (StringUtils.isNotBlank(algorithm))

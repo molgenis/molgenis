@@ -33,6 +33,10 @@ public class RDFMediaType
 
 	}
 
+	private RDFMediaType()
+	{
+	}
+
 	public static boolean isRDFMediaType(MediaType mediaType)
 	{
 		return rdfMediaTypes.contains(mediaType);

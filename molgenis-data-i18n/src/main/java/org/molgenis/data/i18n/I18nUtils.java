@@ -2,6 +2,10 @@ package org.molgenis.data.i18n;
 
 public class I18nUtils
 {
+	private I18nUtils()
+	{
+	}
+
 	/**
 	 * Check is a name is suffixed with a language code
 	 */

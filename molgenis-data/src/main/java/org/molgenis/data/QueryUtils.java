@@ -15,6 +15,10 @@ public class QueryUtils
 {
 	private static final char NESTED_ATTRIBUTE_SEPARATOR = '.';
 
+	private QueryUtils()
+	{
+	}
+
 	public static boolean containsOperator(Query<Entity> q, Operator operator)
 	{
 		return containsAnyOperator(q, EnumSet.of(operator));

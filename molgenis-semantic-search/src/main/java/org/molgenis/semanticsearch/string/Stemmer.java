@@ -10,6 +10,10 @@ public class Stemmer
 {
 	private static final String ILLEGAL_REGEX_PATTERN = "[^a-zA-Z0-9 ]";
 
+	private Stemmer()
+	{
+	}
+
 	/**
 	 * Remove illegal characters from the string and stem each single word
 	 *

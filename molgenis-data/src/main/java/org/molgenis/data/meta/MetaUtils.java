@@ -9,6 +9,10 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class MetaUtils
 {
+	private MetaUtils()
+	{
+	}
+
 	public static Fetch getEntityTypeFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)

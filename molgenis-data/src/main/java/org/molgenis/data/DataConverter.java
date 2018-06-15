@@ -26,6 +26,10 @@ public class DataConverter
 {
 	private static ConversionService conversionService;
 
+	private DataConverter()
+	{
+	}
+
 	public static boolean canConvert(Object source, Class<?> targetType)
 	{
 		try
