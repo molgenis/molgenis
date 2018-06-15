@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CategoryMatchQuality.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class CategoryMatchQuality<T> implements Comparable<CategoryMatchQuality<T>>
 {
 	public abstract boolean isRuleApplied();

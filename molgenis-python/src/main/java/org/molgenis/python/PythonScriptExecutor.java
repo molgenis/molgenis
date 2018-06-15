@@ -60,7 +60,7 @@ public class PythonScriptExecutor
 			String tempScriptFilePath = tempFile.toAbsolutePath().toString();
 
 			// Create r process
-			LOG.info("Running python script [" + tempScriptFilePath + "]");
+			LOG.info("Running python script [{}]", tempScriptFilePath);
 			Process process = Runtime.getRuntime().exec(pythonScriptExecutable + " " + tempScriptFilePath);
 
 			// Capture the error output
@@ -85,7 +85,7 @@ public class PythonScriptExecutor
 				throw new MolgenisPythonException("Error running [" + tempScriptFilePath + "]." + sb.toString());
 			}
 
-			LOG.info("Script [" + tempScriptFilePath + "] done");
+			LOG.info("Script [{}] done", tempScriptFilePath);
 		}
 		catch (IOException e)
 		{

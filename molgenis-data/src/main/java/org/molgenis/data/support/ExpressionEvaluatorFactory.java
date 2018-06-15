@@ -6,6 +6,10 @@ import org.molgenis.data.meta.model.EntityType;
 
 public class ExpressionEvaluatorFactory
 {
+	private ExpressionEvaluatorFactory()
+	{
+	}
+
 	public static ExpressionEvaluator createExpressionEvaluator(Attribute attribute, EntityType entityType)
 	{
 		Object expressionJson = new Gson().fromJson(attribute.getExpression(), Object.class);

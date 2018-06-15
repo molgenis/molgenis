@@ -21,13 +21,13 @@ public class PackageMapper
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public EditorPackageIdentifier toEditorPackage(Package package_)
+	public EditorPackageIdentifier toEditorPackage(Package aPackage)
 	{
-		if (package_ == null)
+		if (aPackage == null)
 		{
 			return null;
 		}
-		return EditorPackageIdentifier.create(package_.getId(), package_.getLabel());
+		return EditorPackageIdentifier.create(aPackage.getId(), aPackage.getLabel());
 	}
 
 	Package toPackageReference(EditorPackageIdentifier editorPackageIdentifier)

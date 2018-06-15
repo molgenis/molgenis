@@ -71,6 +71,10 @@ public class CategoryMapperUtil
 		WORD_TO_NUMBER_MAP.put("twice", 2);
 	}
 
+	private CategoryMapperUtil()
+	{
+	}
+
 	public static boolean containNegativeAdjectives(String description)
 	{
 		String lowerCase = description.toLowerCase();

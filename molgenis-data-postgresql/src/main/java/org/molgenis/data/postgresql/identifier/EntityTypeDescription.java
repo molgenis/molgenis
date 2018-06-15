@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EntityTypeDescription
 {
 	public abstract String getId();

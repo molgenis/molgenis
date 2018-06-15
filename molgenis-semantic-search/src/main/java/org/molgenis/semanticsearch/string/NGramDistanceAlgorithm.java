@@ -53,6 +53,10 @@ public class NGramDistanceAlgorithm
 				"you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "many", ")", "(");
 	}
 
+	private NGramDistanceAlgorithm()
+	{
+	}
+
 	public static double stringMatching(String queryOne, String queryTwo)
 	{
 		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), true),

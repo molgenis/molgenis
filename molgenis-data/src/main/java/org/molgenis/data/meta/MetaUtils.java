@@ -9,6 +9,10 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class MetaUtils
 {
+	private MetaUtils()
+	{
+	}
+
 	public static Fetch getEntityTypeFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
@@ -27,19 +31,19 @@ public class MetaUtils
 	 * Returns whether the given package is a system package, i.e. it is the root system package or a descendent of the
 	 * root system package.
 	 *
-	 * @param package_ package
+	 * @param aPackage package
 	 * @return whether package is a system package
 	 */
-	public static boolean isSystemPackage(Package package_)
+	public static boolean isSystemPackage(Package aPackage)
 	{
-		return package_.getId().equals(PACKAGE_SYSTEM) || (package_.getRootPackage() != null
-				&& package_.getRootPackage().getId().equals(PACKAGE_SYSTEM));
+		return aPackage.getId().equals(PACKAGE_SYSTEM) || (aPackage.getRootPackage() != null
+				&& aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM));
 	}
 
-	public static String getFullyQualyfiedName(Package package_)
+	public static String getFullyQualyfiedName(Package aPackage)
 	{
-		String packageId = package_.getId();
-		Package parentPackage = package_.getParent();
+		String packageId = aPackage.getId();
+		Package parentPackage = aPackage.getParent();
 		return parentPackage == null ? packageId : getFullyQualyfiedName(parentPackage) + PACKAGE_SEPARATOR + packageId;
 	}
 }

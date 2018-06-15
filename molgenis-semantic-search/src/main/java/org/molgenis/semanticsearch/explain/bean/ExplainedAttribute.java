@@ -13,6 +13,7 @@ import java.util.Set;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ExplainedAttribute.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class ExplainedAttribute
 {
 	public static ExplainedAttribute create(Attribute attribute)

@@ -7,6 +7,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Mapping
 {
 	public abstract String getType();

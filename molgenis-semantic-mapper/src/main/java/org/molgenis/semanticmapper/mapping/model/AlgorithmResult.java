@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
  * Result of applying algorithm to one source entity row
  */
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class AlgorithmResult
 {
 	@Nullable

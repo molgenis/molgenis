@@ -22,6 +22,10 @@ public class ExcelUtils
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEntity.class);
 
+	private ExcelUtils()
+	{
+	}
+
 	static String toValue(Cell cell)
 	{
 		return toValue(cell, null);

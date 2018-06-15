@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
  * Value object to store the impact of changes.
  */
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Impact
 {
 	public abstract String getEntityTypeId();

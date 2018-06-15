@@ -58,7 +58,7 @@ import static org.testng.Assert.assertEquals;
 @Rollback
 public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringContextTests
 {
-	private final static Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImportServiceIT.class);
 
 	static final String ROLE_SU = "SU";
 

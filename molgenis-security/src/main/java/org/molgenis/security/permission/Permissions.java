@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 @AutoValue
-@SuppressWarnings("squid:S1610") // autovalue requires an abstract base class
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Permissions
 {
 	public abstract Set<String> getIds();

@@ -5,6 +5,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Sort
 {
 	public abstract List<SortOrder> getOrders();

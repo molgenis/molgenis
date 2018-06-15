@@ -8,6 +8,7 @@ import java.util.List;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorEntityTypeParent.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EditorEntityTypeParent
 {
 	public abstract String getId();

@@ -15,6 +15,10 @@ import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
  */
 public class AttributeFilterToFetchConverter
 {
+	private AttributeFilterToFetchConverter()
+	{
+	}
+
 	/**
 	 * Converts {@link AttributeFilter} to {@link Fetch} based on {@link EntityType}.
 	 *

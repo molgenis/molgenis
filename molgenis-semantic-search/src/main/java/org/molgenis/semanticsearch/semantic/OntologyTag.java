@@ -7,6 +7,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTag.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class OntologyTag
 {
 	public abstract OntologyTerm getOntologyTerm();

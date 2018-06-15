@@ -262,7 +262,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	{
 		String description = attribute.getDescription() == null ? attribute.getLabel() : attribute.getDescription();
 		Set<String> searchTerms = splitIntoTerms(description);
-		Stemmer stemmer = new Stemmer();
 
 		if (LOG.isDebugEnabled())
 		{
@@ -278,8 +277,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		List<Hit<OntologyTerm>> hits = candidates.stream()
 												 .filter(ontologyTerm -> filterOntologyTerm(
-														 splitIntoTerms(Stemmer.stemAndJoin(searchTerms)), ontologyTerm,
-														 stemmer))
+														 splitIntoTerms(Stemmer.stemAndJoin(searchTerms)),
+														 ontologyTerm))
 												 .map(ontolgoyTerm -> Hit.create(ontolgoyTerm,
 														 bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
 												 .sorted(Ordering.natural().reverse())
@@ -306,7 +305,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 						splitIntoTerms(bestMatchingSynonymForHit));
 				String joinedSynonyms = termJoiner.join(jointTerms);
 				Hit<OntologyTerm> joinedHit = Hit.create(OntologyTerm.and(result.getResult(), hit.getResult()),
-						distanceFrom(joinedSynonyms, searchTerms, stemmer));
+						distanceFrom(joinedSynonyms, searchTerms));
 				if (joinedHit.compareTo(result) > 0)
 				{
 					result = joinedHit;
@@ -330,7 +329,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return null;
 	}
 
-	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ontologyTerm, Stemmer stemmer)
+	private boolean filterOntologyTerm(Set<String> keywordsFromAttribute, OntologyTerm ontologyTerm)
 	{
 		Set<String> ontologyTermSynonyms = semanticSearchServiceHelper.getOtLabelAndSynonyms(ontologyTerm);
 
@@ -354,16 +353,15 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 */
 	public Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms)
 	{
-		Stemmer stemmer = new Stemmer();
 		Optional<Hit<String>> bestSynonym = ontologyTerm.getSynonyms()
 														.stream()
 														.map(synonym -> Hit.create(synonym,
-																distanceFrom(synonym, searchTerms, stemmer)))
+																distanceFrom(synonym, searchTerms)))
 														.max(Comparator.naturalOrder());
 		return bestSynonym.get();
 	}
 
-	float distanceFrom(String synonym, Set<String> searchTerms, Stemmer stemmer)
+	float distanceFrom(String synonym, Set<String> searchTerms)
 	{
 		String s1 = Stemmer.stemAndJoin(splitIntoTerms(synonym));
 		String s2 = Stemmer.stemAndJoin(searchTerms);

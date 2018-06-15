@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GenomeBrowserTrack
 {
 	public static GenomeBrowserTrack create(String id, String label, String labelAttr, EntityType entity,

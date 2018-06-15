@@ -36,7 +36,7 @@ public class Href
 	public static String concatAttributeHref(String baseUri, String qualifiedEntityName, Object entityIdValue,
 			String attributeName)
 	{
-		return String.format(baseUri + "/%s/%s/%s", encodePathSegment(qualifiedEntityName),
+		return String.format("%s/%s/%s/%s", baseUri, encodePathSegment(qualifiedEntityName),
 				encodePathSegment(DataConverter.toString(entityIdValue)), encodePathSegment(attributeName));
 	}
 
@@ -45,7 +45,7 @@ public class Href
 	 */
 	public static String concatMetaAttributeHref(String baseUri, String entityParentName, String attributeName)
 	{
-		return String.format(baseUri + "/%s/meta/%s", encodePathSegment(entityParentName),
+		return String.format("%s/%s/meta/%s", baseUri, encodePathSegment(entityParentName),
 				encodePathSegment(attributeName));
 	}
 
@@ -64,7 +64,7 @@ public class Href
 			qualifiedEntityName = "";
 		}
 
-		return String.format(baseUri + "/%s/%s", encodePathSegment(qualifiedEntityName),
+		return String.format("%s/%s/%s", baseUri, encodePathSegment(qualifiedEntityName),
 				encodePathSegment(DataConverter.toString(entityIdValue)));
 	}
 
@@ -73,12 +73,12 @@ public class Href
 	 */
 	public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName)
 	{
-		return String.format(baseUri + "/%s/meta", encodePathSegment(qualifiedEntityName));
+		return String.format("%s/%s/meta", baseUri, encodePathSegment(qualifiedEntityName));
 	}
 
 	public static String concatMetaEntityHrefV2(String baseUri, String qualifiedEntityName)
 	{
-		return String.format(baseUri + "/%s", encodePathSegment(qualifiedEntityName));
+		return String.format("%s/%s", baseUri, encodePathSegment(qualifiedEntityName));
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class Href
 	{
 		String ids;
 		ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
-		return String.format(baseUri + "/%s?q=%s=in=(%s)", encodePathSegment(qualifiedEntityName),
+		return String.format("%s/%s?q=%s=in=(%s)", baseUri, encodePathSegment(qualifiedEntityName),
 				encodePathSegment(qualifiedIdAttributeName), ids);
 	}
 
