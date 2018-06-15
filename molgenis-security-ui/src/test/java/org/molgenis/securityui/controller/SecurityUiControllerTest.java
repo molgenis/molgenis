@@ -23,6 +23,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @EnableWebMvc
 public class SecurityUiControllerTest
 {
+	private static final String MENU_PATH_SECURITY_UI = "/menu/path/security-ui";
+	public static final String DEFAULT_LANG = "en";
 	private MockMvc mockMvc;
 
 	@Mock
@@ -41,10 +43,12 @@ public class SecurityUiControllerTest
 
 		Menu menu = mock(Menu.class);
 		when(menuReaderService.getMenu()).thenReturn(menu);
-		when(appSettings.getLanguageCode()).thenReturn("en");
+		when(appSettings.getLanguageCode()).thenReturn(DEFAULT_LANG);
 		User user = mock(User.class);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 		when(user.isSuperuser()).thenReturn(false);
+		when(menu.findMenuItemPath(SecurityUiController.ID)).thenReturn(MENU_PATH_SECURITY_UI);
+		when(menuReaderService.getMenu()).thenReturn(menu);
 
 		SecurityUiController securityUiController = new SecurityUiController(menuReaderService, appSettings,
 				userAccountService);
@@ -57,9 +61,9 @@ public class SecurityUiControllerTest
 		mockMvc.perform(get(SecurityUiController.URI))
 			   .andExpect(status().isOk())
 			   .andExpect(view().name(SecurityUiController.VIEW_TEMPLATE))
-			   .andExpect(model().attribute("baseUrl", "/plugin/security-ui"))
-			   .andExpect(model().attribute("lng", "en"))
-			   .andExpect(model().attribute("fallbackLng", "en"));
+			   .andExpect(model().attribute("baseUrl", MENU_PATH_SECURITY_UI))
+			   .andExpect(model().attribute("lng", DEFAULT_LANG))
+			   .andExpect(model().attribute("fallbackLng", DEFAULT_LANG));
 	}
 
 }

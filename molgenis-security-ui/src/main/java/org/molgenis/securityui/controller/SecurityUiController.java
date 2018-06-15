@@ -34,9 +34,7 @@ public class SecurityUiController extends VuePluginController
 	@GetMapping("/**")
 	public String init(Model model)
 	{
-		model.addAttribute("baseUrl", URI);
-		model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
-		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
+		super.init(model, ID);
 		return VIEW_TEMPLATE;
 	}
 }

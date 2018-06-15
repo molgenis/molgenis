@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import App from './App'
+import SecurityApp from './SecurityApp'
 import GroupOverview from './components/GroupOverview'
 import i18n from '@molgenis/molgenis-i18n-js'
 
@@ -29,8 +29,8 @@ Vue.use(i18n, {
     new Vue({
       el: '#security-ui-plugin',
       router,
-      template: '<App />',
-      components: {App}
+      template: '<SecurityApp />',
+      components: {SecurityApp}
     })
   }
 })

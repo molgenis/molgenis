@@ -3,7 +3,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign js = []>
-<#assign css = ["security-ui/app.css"]>
+<#--<#assign css = ["security-ui/app.css"]>-->
 <#assign version = 2>
 
 <@header css js version/>
