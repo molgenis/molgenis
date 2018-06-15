@@ -168,8 +168,8 @@ public class EntityTypeValidator
 			if (ownAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label attribute [%s] of entity type [%s] cannot be nillable.",
-								ownLabelAttr.getName(), entityType.getId())));
+						format("Label attribute [%s] of entity type [%s] cannot be nillable", ownLabelAttr.getName(),
+								entityType.getId())));
 			}
 		}
 	}
@@ -216,7 +216,7 @@ public class EntityTypeValidator
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("EntityType [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
+						format("EntityType [%s] ID attribute [%s] cannot be nillable", entityType.getId(),
 								ownIdAttr.getName())));
 			}
 		}
