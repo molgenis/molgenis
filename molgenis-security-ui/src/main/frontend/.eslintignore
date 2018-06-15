@@ -1,0 +1,5 @@
+/src/main/frontend/src/build/
+/src/main/frontend/src/config/
+/dist/
+/*.js
+/src/main/frontend/test/unit/coverage/

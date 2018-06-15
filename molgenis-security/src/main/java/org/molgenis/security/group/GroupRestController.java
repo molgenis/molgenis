@@ -1,6 +1,9 @@
 package org.molgenis.security.group;
 
 import io.swagger.annotations.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupService;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
@@ -9,12 +12,13 @@ import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
@@ -29,13 +33,15 @@ public class GroupRestController
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
+	private final DataService dataService;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			RoleMembershipService roleMembershipService)
+			RoleMembershipService roleMembershipService, DataService dataService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@PostMapping("api/plugin/group")
@@ -60,6 +66,15 @@ public class GroupRestController
 		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
 		return groupValue.getName();
+	}
+
+	@GetMapping("api/plugin/group")
+	@ResponseBody
+	public List<GroupViewAdapter> getGroups()
+	{
+		return dataService.findAll(GroupMetadata.GROUP, Group.class)
+						  .map(GroupViewAdapter::fromEntity)
+						  .collect(Collectors.toList());
 	}
 
 	private String getManagerRoleName(GroupValue groupValue)
