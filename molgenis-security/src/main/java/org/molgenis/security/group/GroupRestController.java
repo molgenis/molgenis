@@ -30,6 +30,11 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 @Api("Group")
 public class GroupRestController
 {
+	public final static String SECURITY_URI = "api/plugin/security";
+	public final static String GROUP = "/group";
+
+	public final static String SECURITY_GROUP_END_POINT = SECURITY_URI + GROUP;
+
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
@@ -68,7 +73,7 @@ public class GroupRestController
 		return groupValue.getName();
 	}
 
-	@GetMapping("api/plugin/group")
+	@GetMapping(SECURITY_GROUP_END_POINT)
 	@ResponseBody
 	public List<GroupViewAdapter> getGroups()
 	{
