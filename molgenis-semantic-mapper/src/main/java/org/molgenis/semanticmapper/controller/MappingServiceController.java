@@ -553,12 +553,12 @@ public class MappingServiceController extends PluginController
 			}
 			if (packageId != null)
 			{
-				Package package_ = dataService.getMeta().getPackage(packageId);
-				if (package_ == null)
+				Package aPackage = dataService.getMeta().getPackage(packageId);
+				if (aPackage == null)
 				{
 					throw new MolgenisDataException("No package found with ID " + packageId);
 				}
-				if (isSystemPackage(package_))
+				if (isSystemPackage(aPackage))
 				{
 					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
 				}

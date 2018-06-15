@@ -7,13 +7,13 @@ public class PackageIdentity extends ObjectIdentityImpl
 {
 	public static final String TYPE = "package";
 
-	public PackageIdentity(Package package_)
+	public PackageIdentity(Package aPackage)
 	{
-		this(package_.getId());
+		this(aPackage.getId());
 	}
 
-	public PackageIdentity(String package_)
+	public PackageIdentity(String packageId)
 	{
-		super(TYPE, package_);
+		super(TYPE, packageId);
 	}
 }

@@ -157,8 +157,8 @@ public class SortaServiceImpl implements SortaService
 					rulesForOntologyTermFieldsNGram, relevantEntities);
 		}
 
-		relevantEntities.sort((entity_1, entity_2) -> entity_2.getDouble(COMBINED_SCORE)
-															  .compareTo(entity_1.getDouble(COMBINED_SCORE)));
+		relevantEntities.sort(
+				(entity1, entity2) -> entity2.getDouble(COMBINED_SCORE).compareTo(entity1.getDouble(COMBINED_SCORE)));
 
 		return relevantEntities;
 	}
@@ -286,7 +286,7 @@ public class SortaServiceImpl implements SortaService
 						ontologyTermSynonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
 				mapEntity.set(SCORE, NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
 				return mapEntity;
-			}).toSortedList((entity_1, entity_2) -> entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE)));
+			}).toSortedList((entity1, entity2) -> entity2.getDouble(SCORE).compareTo(entity1.getDouble(SCORE)));
 
 			Entity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, ontologyTermSynonymFactory.create());
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);

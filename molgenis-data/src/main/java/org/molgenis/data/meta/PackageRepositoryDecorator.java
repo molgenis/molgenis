@@ -54,25 +54,25 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 		forEach(this::deletePackage);
 	}
 
-	private void deletePackage(Package package_)
+	private void deletePackage(Package aPackage)
 	{
-		deleteEntityTypesInPackageAndSubPackages(package_);
+		deleteEntityTypesInPackageAndSubPackages(aPackage);
 
 		// delete rows from package table
-		delegate().delete(getPackageTreeTraversal(package_));
+		delegate().delete(getPackageTreeTraversal(aPackage));
 	}
 
-	private void deleteEntityTypesInPackageAndSubPackages(Package package_)
+	private void deleteEntityTypesInPackageAndSubPackages(Package aPackage)
 	{
 		Repository<EntityType> entityRepo = getEntityRepository();
-		Stream<EntityType> entityTypesToDelete = getPackageTreeTraversal(package_).flatMap(
+		Stream<EntityType> entityTypesToDelete = getPackageTreeTraversal(aPackage).flatMap(
 				p -> stream(p.getEntityTypes().spliterator(), false));
 		entityRepo.delete(entityTypesToDelete);
 	}
 
-	private static Stream<Package> getPackageTreeTraversal(Package package_)
+	private static Stream<Package> getPackageTreeTraversal(Package aPackage)
 	{
-		return stream(new PackageTreeTraverser().postOrderTraversal(package_).spliterator(), false);
+		return stream(new PackageTreeTraverser().postOrderTraversal(aPackage).spliterator(), false);
 	}
 
 	private Repository<EntityType> getEntityRepository()

@@ -26,25 +26,25 @@ public class PackageValidator
 		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
 	}
 
-	public void validate(Package package_)
+	public void validate(Package aPackage)
 	{
-		validatePackageAllowed(package_);
-		validatePackageName(package_);
+		validatePackageAllowed(aPackage);
+		validatePackageName(aPackage);
 	}
 
-	private void validatePackageAllowed(Package package_)
+	private void validatePackageAllowed(Package aPackage)
 	{
-		if (MetaUtils.isSystemPackage(package_) && !systemPackageRegistry.containsPackage(package_))
+		if (MetaUtils.isSystemPackage(aPackage) && !systemPackageRegistry.containsPackage(aPackage))
 		{
 			LOG.error(
 					"validatePackageAllowed, the system package registry does not contain package with id {} and label {}",
-					package_.getId(), package_.getLabel());
+					aPackage.getId(), aPackage.getLabel());
 			throw new MolgenisValidationException(new ConstraintViolation("Modifying system packages is not allowed"));
 		}
 	}
 
-	private static void validatePackageName(Package package_)
+	private static void validatePackageName(Package aPackage)
 	{
-		NameValidator.validatePackageId(package_.getId());
+		NameValidator.validatePackageId(aPackage.getId());
 	}
 }

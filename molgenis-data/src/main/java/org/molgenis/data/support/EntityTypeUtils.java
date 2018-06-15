@@ -306,11 +306,11 @@ public class EntityTypeUtils
 	 *
 	 * @return String entity full name
 	 */
-	public static String buildFullName(Package package_, String simpleName)
+	public static String buildFullName(Package aPackage, String simpleName)
 	{
-		if (package_ != null)
+		if (aPackage != null)
 		{
-			String sb = package_.getId() + PACKAGE_SEPARATOR + simpleName;
+			String sb = aPackage.getId() + PACKAGE_SEPARATOR + simpleName;
 			return sb;
 		}
 		else
