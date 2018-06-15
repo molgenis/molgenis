@@ -2,7 +2,6 @@ package org.molgenis.security.group;
 
 import io.swagger.annotations.*;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupService;
@@ -13,10 +12,7 @@ import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
@@ -72,7 +68,8 @@ public class GroupRestController
 		return groupValue.getName();
 	}
 
-	@GetMapping("api/security/group")
+	@GetMapping("api/plugin/group")
+	@ResponseBody
 	public List<GroupViewAdapter> getGroups()
 	{
 		return dataService.findAll(GroupMetadata.GROUP, Group.class)
