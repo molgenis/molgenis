@@ -130,7 +130,7 @@ public class EntityTypeMapperTest
 		verifyNoMoreInteractions(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID attribute for EntityType \\[test\\] can not be null")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "ID attribute for EntityType \\[test\\] cannot be null")
 	public void testToEntityTypeWithoutIdAttribute()
 	{
 		EditorEntityType editorEntityType = mock(EditorEntityType.class);

@@ -75,10 +75,10 @@ public class EntityTypeMapper
 
 	public EntityType toEntityType(EditorEntityType editorEntityType)
 	{
-		if (editorEntityType.getIdAttribute() == null)
+		if (!editorEntityType.isAbstract() && editorEntityType.getIdAttribute() == null)
 		{
 			throw new MolgenisDataException(
-					"ID attribute for EntityType [" + editorEntityType.getLabel() + "] can not be null");
+					"ID attribute for EntityType [" + editorEntityType.getLabel() + "] cannot be null");
 		}
 
 		EntityType entityType = entityTypeFactory.create();
