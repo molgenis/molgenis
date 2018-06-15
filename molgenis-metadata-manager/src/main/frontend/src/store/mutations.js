@@ -106,6 +106,13 @@ export default {
       const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
       state.editorEntityType.attributes[index] = update.value
     }
+    if (update.key === 'labelAttribute') {
+      update.value.nullable = false
+      update.value.visible = true
+
+      const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
+      state.editorEntityType.attributes[index] = update.value
+    }
     state.editorEntityType[update.key] = update.value
   },
   /**
