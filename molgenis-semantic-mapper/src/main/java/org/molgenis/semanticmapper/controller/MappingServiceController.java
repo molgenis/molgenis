@@ -911,7 +911,7 @@ public class MappingServiceController extends PluginController
 	private List<EntityType> getNewSources(MappingTarget target)
 	{
 		return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
-							.filter((name) -> isValidSource(target, name))
+							.filter(name -> isValidSource(target, name))
 							.map(dataService::getEntityType)
 							.collect(Collectors.toList());
 	}
