@@ -17,10 +17,10 @@ import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 public class OntologyTermSynonymMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "OntologyTermSynonym";
-	public final static String ONTOLOGY_TERM_SYNONYM = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ONTOLOGY_TERM_SYNONYM = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ID = "id";
-	public final static String ONTOLOGY_TERM_SYNONYM_ATTR = "ontologyTermSynonym";
+	public static final String ID = "id";
+	public static final String ONTOLOGY_TERM_SYNONYM_ATTR = "ontologyTermSynonym";
 	public static final String SCORE = "Score";
 	public static final String COMBINED_SCORE = "Combined_Score";
 

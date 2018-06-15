@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class Stemmer
 {
-	private final static String ILLEGAL_REGEX_PATTERN = "[^a-zA-Z0-9 ]";
+	private static final String ILLEGAL_REGEX_PATTERN = "[^a-zA-Z0-9 ]";
 
 	/**
 	 * Remove illegal characters from the string and stem each single word

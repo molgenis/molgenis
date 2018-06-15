@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class AlgorithmGeneratorHelper
 {
-	private final static Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
+	private static final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
 
 	public static Set<Attribute> extractSourceAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType)
 	{

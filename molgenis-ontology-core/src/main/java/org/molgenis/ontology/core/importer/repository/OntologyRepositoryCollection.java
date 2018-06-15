@@ -46,7 +46,7 @@ import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLO
 public class OntologyRepositoryCollection extends FileRepositoryCollection
 {
 	private static final String PSEUDO_ROOT_CLASS_NODEPATH = "0[0]";
-	private final static String PSEUDO_ROOT_CLASS_LABEL = "top";
+	private static final String PSEUDO_ROOT_CLASS_LABEL = "top";
 
 	private final File file;
 	private final String fileName;

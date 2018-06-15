@@ -28,7 +28,7 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 @Component
 public class PlatformBootstrapper
 {
-	private final static Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
 
 	private final DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
 	private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;

@@ -7,8 +7,8 @@ import javax.measure.unit.NonSI;
 
 public class DailyAmountConvertor extends AmountConvertor
 {
-	private final static String CRITERIA = "daily";
-	private final static Amount<?> AMOUNT = Amount.valueOf((double) 1, NonSI.DAY.inverse()).to(STANDARD_PER_WEEK_UNIT);
+	private static final String CRITERIA = "daily";
+	private static final Amount<?> AMOUNT = Amount.valueOf((double) 1, NonSI.DAY.inverse()).to(STANDARD_PER_WEEK_UNIT);
 
 	public boolean matchCriteria(String description)
 	{

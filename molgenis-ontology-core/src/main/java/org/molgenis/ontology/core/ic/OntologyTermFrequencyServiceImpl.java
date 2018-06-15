@@ -17,7 +17,7 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
 
 public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 {
-	private final static int BATCH_SIZE = 10000;
+	private static final int BATCH_SIZE = 10000;
 	private final PubMedTermFrequencyService pubMedTermFrequencyService = new PubMedTermFrequencyService();
 	private final DataService dataService;
 

@@ -19,7 +19,7 @@ public class PackageValidator
 {
 	private final SystemPackageRegistry systemPackageRegistry;
 
-	private final static Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
 
 	public PackageValidator(SystemPackageRegistry systemPackageRegistry)
 	{
