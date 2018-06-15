@@ -6,13 +6,19 @@ import java.util.Objects;
 
 public class GroupViewAdapter
 {
+	/**
+	 * Used as unique url-identifier for name in group
+ 	 */
 	private String name;
-	private String summary;
+	/**
+	 * Used as human readable name describing the group
+	 */
+	private String label;
 
-	public GroupViewAdapter(String name, String summary)
+	public GroupViewAdapter(String name, String label)
 	{
 		this.name = name;
-		this.summary = summary;
+		this.label = label;
 	}
 
 	public String getName()
@@ -20,9 +26,9 @@ public class GroupViewAdapter
 		return name;
 	}
 
-	public String getSummary()
+	public String getLabel()
 	{
-		return summary;
+		return label;
 	}
 
 	@Override
@@ -31,17 +37,17 @@ public class GroupViewAdapter
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		GroupViewAdapter that = (GroupViewAdapter) o;
-		return Objects.equals(name, that.name) && Objects.equals(summary, that.summary);
+		return Objects.equals(name, that.name) && Objects.equals(label, that.label);
 	}
 
 	@Override
 	public int hashCode()
 	{
 
-		return Objects.hash(name, summary);
+		return Objects.hash(name, label);
 	}
 
 	static GroupViewAdapter fromEntity(Group groupEntity) {
-		return new GroupViewAdapter(groupEntity.getName(), groupEntity.getDescription());
+		return new GroupViewAdapter(groupEntity.getName(), groupEntity.getLabel());
 	}
 }

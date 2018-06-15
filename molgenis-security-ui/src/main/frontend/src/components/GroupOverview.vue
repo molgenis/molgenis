@@ -1,21 +1,22 @@
 <template>
   <div>
 
-    <h1>Hello Security UI</h1>
+    <toast></toast>
+
+    <h1>{{ 'security-ui-group-title' | i18n }}</h1>
     <ul v-if="groups.length > 0">
       <li v-for="group in groups">
-        <span>{{group.name}}</span>
-        <span v-if="group.description">{{group.description}}</span>
+        <span v-if="group.label">{{group.label}}</span>
       </li>
     </ul>
-    <p v-else>No groups available</p>
-
+    <p v-else>{{ 'security-ui-no-groups' | i18n }}</p>
 
   </div>
 </template>
 
 <script>
   import { mapGetters } from 'vuex'
+  import Toast from './Toast'
 
   export default {
     name: 'GroupOverview',
@@ -25,9 +26,10 @@
       ])
     },
     components: {
+      Toast
     },
     created () {
-      this.$store.dispatch('FETCH_GROUPS')
+      this.$store.dispatch('fetchGroups')
     }
   }
 </script>
