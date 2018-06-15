@@ -200,7 +200,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateOwnIdAttribute(entityType, ImmutableMap.of(idAttributeIdentifier, idAttr));
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] ID attribute \\[id\\] is not a non-nillable attribute")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] ID attribute \\[id\\] cannot be nillable.")
 	public void testValidateOwnIdAttributeNillable()
 	{
 		when(entityType.getId()).thenReturn("entity");
@@ -282,7 +282,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, ImmutableMap.of(labelAttributeId, labelAttr));
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] of entity type \\[entity\\] is not a non-nillable attribute")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] of entity type \\[entity\\] cannot be nillable.")
 	public void testValidateOwnLabelAttributeNillable()
 	{
 		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
