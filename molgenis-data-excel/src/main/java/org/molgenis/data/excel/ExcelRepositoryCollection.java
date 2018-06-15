@@ -32,7 +32,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 {
 	private static final String REPOSITORY_COLLECTION_NAME = "EXCEL";
 
-	private final String name;
+	private final String fileName;
 	private final Workbook workbook;
 
 	private EntityTypeFactory entityTypeFactory;
@@ -53,7 +53,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			throws IOException, MolgenisInvalidFormatException
 	{
 		super(ExcelFileExtensions.getExcel(), cellProcessors);
-		this.name = name;
+		this.fileName = name;
 		try
 		{
 			workbook = WorkbookFactory.create(in);
@@ -114,7 +114,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
+		return new ExcelRepository(fileName, poiSheet, entityTypeFactory, attributeFactory, cellProcessors);
 	}
 
 	public ExcelSheetWriter createWritable(String entityTypeId, List<Attribute> attributes,
