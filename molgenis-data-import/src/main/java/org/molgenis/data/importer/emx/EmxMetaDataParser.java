@@ -367,6 +367,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						if (!ownAttr.isNillable() && ownAttr.isVisible() && !EntityTypeUtils.isReferenceType(ownAttr))
 						{
 							ownAttr.setLabelAttribute(true);
+							ownAttr.setNillable(false);
 							break;
 						}
 					}

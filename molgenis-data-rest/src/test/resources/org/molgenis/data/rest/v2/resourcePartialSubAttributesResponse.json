@@ -41,7 +41,7 @@
               "attributes": [],
               "maxLength": 255,
               "auto": false,
-              "nillable": true,
+              "nillable": false,
               "readOnly": false,
               "labelAttribute": true,
               "unique": false,

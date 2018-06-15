@@ -3,7 +3,6 @@ package org.molgenis.data.validation.meta;
 import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -23,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -37,7 +37,7 @@ public class EntityTypeValidator
 	private final DataService dataService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
-	public EntityTypeValidator(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
+	EntityTypeValidator(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
@@ -60,7 +60,7 @@ public class EntityTypeValidator
 		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
 				toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
 				{
-					throw new IllegalStateException(String.format("Duplicate key %s", u));
+					throw new IllegalStateException(format("Duplicate key %s", u));
 				}, LinkedHashMap::new));
 
 		validateOwnIdAttribute(entityType, ownAllAttrMap);
@@ -70,10 +70,24 @@ public class EntityTypeValidator
 		validateBackend(entityType);
 	}
 
+	/**
+	 * Validates that the label attribute of this EntityType:
+	 * 1) Is visible.
+	 * 2) Is not null if the id attribute is hidden.
+	 *
+	 * @param entityType entity metadata
+	 */
 	static void validateLabelAttribute(EntityType entityType)
 	{
-		if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible()
-				&& entityType.getLabelAttribute() == null)
+		if (entityType.getLabelAttribute() != null && !entityType.getLabelAttribute().isVisible())
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Label attribute [%s] of EntityType [%s] must be visible.",
+							entityType.getLabelAttribute().getName(), entityType.getId())));
+		}
+
+		if (!entityType.isAbstract() && !entityType.getIdAttribute().isVisible() && (entityType.getLabelAttribute()
+				== null))
 		{
 			throw new MolgenisValidationException(new ConstraintViolation(
 					format("EntityType [%s] must define a label attribute because the identifier is hidden",
@@ -146,8 +160,16 @@ public class EntityTypeValidator
 			if (ownAttr == null)
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Label attribute [%s] is not is not one of the attributes of entity [%s]",
+						format("Label attribute [%s] is not one of the attributes of entity [%s]",
 								ownLabelAttr.getName(), entityType.getId())));
+			}
+
+			// Validate that the label attribute is not nillable
+			if (ownAttr.isNillable())
+			{
+				throw new MolgenisValidationException(new ConstraintViolation(
+						format("Label attribute [%s] of entity type [%s] cannot be nillable", ownLabelAttr.getName(),
+								entityType.getId())));
 			}
 		}
 	}
@@ -194,7 +216,7 @@ public class EntityTypeValidator
 			if (ownIdAttr.isNillable())
 			{
 				throw new MolgenisValidationException(new ConstraintViolation(
-						format("EntityType [%s] ID attribute [%s] is not a non-nillable attribute", entityType.getId(),
+						format("EntityType [%s] ID attribute [%s] cannot be nillable", entityType.getId(),
 								ownIdAttr.getName())));
 			}
 		}
@@ -318,16 +340,12 @@ public class EntityTypeValidator
 	 */
 	void validatePackage(EntityType entityType)
 	{
-		Package package_ = entityType.getPackage();
-		if (package_ != null)
+		Package pack = entityType.getPackage();
+		if (pack != null && isSystemPackage(pack) && !systemEntityTypeRegistry.hasSystemEntityType(entityType.getId()))
 		{
-			if (MetaUtils.isSystemPackage(package_) && !systemEntityTypeRegistry.hasSystemEntityType(
-					entityType.getId()))
-			{
-				throw new MolgenisValidationException(new ConstraintViolation(
-						format("Adding entity [%s] to system package [%s] is not allowed", entityType.getId(),
-								entityType.getPackage().getId())));
-			}
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Adding entity [%s] to system package [%s] is not allowed", entityType.getId(),
+							entityType.getPackage().getId())));
 		}
 	}
 }

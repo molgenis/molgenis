@@ -16,10 +16,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.stream;
-import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toMap;
@@ -308,37 +306,10 @@ public class RestTestUtils
 	}
 
 	/**
-	 * Get the id for a given entity.
-	 *
-	 * @param adminToken token for signin
-	 * @param attribute  the field to filter on
-	 * @param value      the value the filter should match
-	 * @param entityName the entity name
-	 * @return the id of the given entity
-	 */
-	private static String getEntityId(String adminToken, String attribute, String value, String entityName)
-	{
-		Map<String, Object> query = of("q",
-				singletonList(of("field", attribute, "operator", "EQUALS", "value", value)));
-		JSONObject body = new JSONObject(query);
-
-		return given().header(X_MOLGENIS_TOKEN, adminToken)
-					  .contentType(APPLICATION_JSON)
-					  .queryParam("_method", "GET")
-					  .body(body.toJSONString())
-					  .when()
-					  .post("api/v1/" + entityName)
-					  .then()
-					  .extract()
-					  .path("items[0].id");
-
-	}
-
-	/**
 	 * Grant user read rights on given plugins
 	 *
 	 * @param adminToken the token to use for signin
-	 * @param userId     the ID (not the name) of the user that needs to get the rights
+	 * @param username   the ID (not the name) of the user that needs to get the rights
 	 * @param plugins    the IDs of the plugins the user should be able to read
 	 */
 	public static void setGrantedPluginPermissions(String adminToken, String username, String... plugins)

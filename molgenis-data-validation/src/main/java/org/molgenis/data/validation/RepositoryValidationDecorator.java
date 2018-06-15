@@ -467,7 +467,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 	 */
 	private static class ValidationResource implements AutoCloseable
 	{
-		private AtomicInteger rowNr = new AtomicInteger();
+		private AtomicInteger rowNr;
 		private List<Attribute> requiredValueAttrs;
 		private List<Attribute> refAttrs;
 		private Map<String, HugeSet<Object>> refEntitiesIds;
@@ -477,7 +477,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 		private boolean selfReferencing;
 		private Set<ConstraintViolation> violations;
 
-		public ValidationResource()
+		ValidationResource()
 		{
 			rowNr = new AtomicInteger();
 		}
@@ -487,42 +487,42 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			return rowNr.get();
 		}
 
-		public void incrementRow()
+		void incrementRow()
 		{
 			rowNr.incrementAndGet();
 		}
 
-		public List<Attribute> getRequiredValueAttrs()
+		List<Attribute> getRequiredValueAttrs()
 		{
 			return requiredValueAttrs != null ? unmodifiableList(requiredValueAttrs) : emptyList();
 		}
 
-		public void setRequiredValueAttrs(List<Attribute> requiredValueAttrs)
+		void setRequiredValueAttrs(List<Attribute> requiredValueAttrs)
 		{
 			this.requiredValueAttrs = requiredValueAttrs;
 		}
 
-		public List<Attribute> getRefAttrs()
+		List<Attribute> getRefAttrs()
 		{
 			return unmodifiableList(refAttrs);
 		}
 
-		public void setRefAttrs(List<Attribute> refAttrs)
+		void setRefAttrs(List<Attribute> refAttrs)
 		{
 			this.refAttrs = refAttrs;
 		}
 
-		public Map<String, HugeSet<Object>> getRefEntitiesIds()
+		Map<String, HugeSet<Object>> getRefEntitiesIds()
 		{
 			return refEntitiesIds != null ? unmodifiableMap(refEntitiesIds) : emptyMap();
 		}
 
-		public void setRefEntitiesIds(Map<String, HugeSet<Object>> refEntitiesIds)
+		void setRefEntitiesIds(Map<String, HugeSet<Object>> refEntitiesIds)
 		{
 			this.refEntitiesIds = refEntitiesIds;
 		}
 
-		public void addRefEntityId(String name, Object idValue)
+		void addRefEntityId(String name, Object idValue)
 		{
 			HugeSet<Object> refEntityIds = refEntitiesIds.get(name);
 			// only add entity id if this validation run requires entity
@@ -532,52 +532,52 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
 			}
 		}
 
-		public List<Attribute> getUniqueAttrs()
+		List<Attribute> getUniqueAttrs()
 		{
 			return uniqueAttrs != null ? unmodifiableList(uniqueAttrs) : emptyList();
 		}
 
-		public void setUniqueAttrs(List<Attribute> uniqueAttrs)
+		void setUniqueAttrs(List<Attribute> uniqueAttrs)
 		{
 			this.uniqueAttrs = uniqueAttrs;
 		}
 
-		public Map<String, HugeMap<Object, Object>> getUniqueAttrsValues()
+		Map<String, HugeMap<Object, Object>> getUniqueAttrsValues()
 		{
 			return uniqueAttrsValues != null ? unmodifiableMap(uniqueAttrsValues) : emptyMap();
 		}
 
-		public void setUniqueAttrsValues(Map<String, HugeMap<Object, Object>> uniqueAttrsValues)
+		void setUniqueAttrsValues(Map<String, HugeMap<Object, Object>> uniqueAttrsValues)
 		{
 			this.uniqueAttrsValues = uniqueAttrsValues;
 		}
 
-		public List<Attribute> getReadonlyAttrs()
+		List<Attribute> getReadonlyAttrs()
 		{
 			return readonlyAttrs != null ? unmodifiableList(readonlyAttrs) : emptyList();
 		}
 
-		public void setReadonlyAttrs(List<Attribute> readonlyAttrs)
+		void setReadonlyAttrs(List<Attribute> readonlyAttrs)
 		{
 			this.readonlyAttrs = readonlyAttrs;
 		}
 
-		public void setSelfReferencing(boolean selfReferencing)
+		void setSelfReferencing(boolean selfReferencing)
 		{
 			this.selfReferencing = selfReferencing;
 		}
 
-		public boolean isSelfReferencing()
+		boolean isSelfReferencing()
 		{
 			return selfReferencing;
 		}
 
-		public boolean hasViolations()
+		boolean hasViolations()
 		{
 			return violations != null && !violations.isEmpty();
 		}
 
-		public void addViolation(ConstraintViolation constraintViolation)
+		void addViolation(ConstraintViolation constraintViolation)
 		{
 			if (violations == null)
 			{

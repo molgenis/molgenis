@@ -32,7 +32,7 @@ import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
  */
 public class Attribute extends StaticEntity implements Labeled
 {
-	private transient AttributeType cachedDataType;
+	private AttributeType cachedDataType;
 
 	public Attribute(Entity entity)
 	{

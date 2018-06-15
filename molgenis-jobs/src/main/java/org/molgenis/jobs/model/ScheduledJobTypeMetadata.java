@@ -38,7 +38,7 @@ public class ScheduledJobTypeMetadata extends SystemEntityType
 		setLabel("Scheduled Job Type");
 		setPackage(jobPackage);
 		addAttribute(NAME, ROLE_ID).setLabel("Name");
-		addAttribute(LABEL, ROLE_LABEL).setDataType(STRING).setLabel("Label").setNillable(true);
+		addAttribute(LABEL, ROLE_LABEL).setDataType(STRING).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 		addAttribute(JOB_EXECUTION_TYPE).setDataType(XREF).setRefEntity(entityTypeMetadata).setNillable(false);
 		addAttribute(SCHEMA).setDataType(TEXT).setLabel("JSON Schema for the job parameters").setNillable(true);

@@ -85,7 +85,6 @@ public class VcfToEntity
 	private EntityType createEntityType(String entityTypeId, VcfMeta vcfMeta)
 	{
 		Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
-		idAttribute.setVisible(false);
 
 		EntityType entityType = entityTypeFactory.create(entityTypeId);
 		entityType.setLabel(entityTypeId);

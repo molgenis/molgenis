@@ -200,7 +200,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateOwnIdAttribute(entityType, ImmutableMap.of(idAttributeIdentifier, idAttr));
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] ID attribute \\[id\\] is not a non-nillable attribute")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] ID attribute \\[id\\] cannot be nillable")
 	public void testValidateOwnIdAttributeNillable()
 	{
 		when(entityType.getId()).thenReturn("entity");
@@ -245,6 +245,16 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, emptyMap());
 	}
 
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[labelAttr\\] of EntityType \\[entity\\] must be visible.")
+	public void testValidateLabelAttributeHidden()
+	{
+		when(entityType.getLabelAttribute()).thenReturn(labelAttr);
+		when(labelAttr.isVisible()).thenReturn(false);
+		when(entityType.getId()).thenReturn("entity");
+		when(labelAttr.getName()).thenReturn("labelAttr");
+		EntityTypeValidator.validateLabelAttribute(entityType);
+	}
+
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[entity\\] must define a label attribute because the identifier is hidden")
 	public void testValidateLabelAttributeNullIdAttributeInvisible()
 	{
@@ -254,7 +264,7 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		EntityTypeValidator.validateLabelAttribute(entityType);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] is not is not one of the attributes of entity \\[entity\\]")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] is not one of the attributes of entity \\[entity\\]")
 	public void testValidateOwnLabelAttributeNotInAttributeMap()
 	{
 		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
@@ -270,6 +280,17 @@ public class EntityTypeValidatorTest extends AbstractMockitoTest
 		String labelAttributeId = "bcdef";
 		when(labelAttr.getIdentifier()).thenReturn(labelAttributeId);
 		EntityTypeValidator.validateOwnLabelAttribute(entityType, ImmutableMap.of(labelAttributeId, labelAttr));
+	}
+
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[label\\] of entity type \\[entity\\] cannot be nillable")
+	public void testValidateOwnLabelAttributeNillable()
+	{
+		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
+		when(entityType.getId()).thenReturn("entity");
+		when(labelAttr.isNillable()).thenReturn(true);
+		when(labelAttr.getIdentifier()).thenReturn("label");
+		when(labelAttr.getName()).thenReturn("label");
+		EntityTypeValidator.validateOwnLabelAttribute(entityType, ImmutableMap.of("label", labelAttr));
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "EntityType \\[package_name\\] must define a label attribute because the identifier is hidden")

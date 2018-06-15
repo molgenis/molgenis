@@ -6,8 +6,8 @@ get executed once.
 **Scheduled jobs** are jobs that are scheduled to run one or more times when a
 certain trigger fires.
 
-An example of an ordinary job is annotating an entity with four different annotators.
-It gets configured by the user on the annotator screen in the data explorer and it gets
+An example of an ordinary job is running a script from the user interface.
+It gets configured by the user on the scripts screen and it gets
 executed immediately and asynchronously when the user clicks a button.
 The job gets executed once.
 
