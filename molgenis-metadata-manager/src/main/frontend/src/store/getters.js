@@ -50,14 +50,6 @@ export default {
     return entityType.isAbstract
   }),
   /**
-   * Get the id of the id attribute or undefined if non selected
-   */
-  getIdAttributeId: state => state.editorEntityType.idAttribute && state.editorEntityType.idAttribute.id,
-  /**
-   * Return the complete id attribute with all its fields
-   */
-  getEditorEntityTypeIdAttribute: (state, getters) => getters.getEditorEntityTypeAttributes && getters.getEditorEntityTypeAttributes.find(attribute => attribute.id === getters.getIdAttributeId),
-  /**
    * Return a tree which is constructed using the attributes found in the editorEntityType
    */
   getAttributeTree: (state, getters) => {
@@ -77,7 +69,6 @@ export default {
   getMappedByAttributes: state => {
     return state.initialEditorEntityType.referringAttributes
   },
-
   /**
    * Return a list of compound attributes present in the currently selected editorEntityType
    */

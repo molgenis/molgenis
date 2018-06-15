@@ -72,28 +72,6 @@ describe('getters', () => {
     })
   })
 
-  describe('getEditorEntityTypeIdAttribute', () => {
-    it('Should return the selected ID attribute for the editorEntityType present in the state', () => {
-      const state = {
-        editorEntityType: {
-          attributes: [
-            {id: '1'},
-            {id: '2'},
-            {id: '3'}
-          ]
-        }
-      }
-
-      const actual = getters.getEditorEntityTypeIdAttribute(state, {
-        getIdAttributeId: '1',
-        getEditorEntityTypeAttributes: state.editorEntityType.attributes
-      })
-      const expected = {id: '1'}
-
-      expect(actual).to.deep.equal(expected)
-    })
-  })
-
   describe('getAbstractEntities', () => {
     it('Should filter a list of entityTypes and only return those that are abstract', () => {
       const state = {

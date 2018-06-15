@@ -118,7 +118,7 @@
 
 <script>
   import { mapState, mapGetters } from 'vuex'
-  import { UPDATE_EDITOR_ENTITY_TYPE, CREATE_ALERT } from '../store/mutations'
+  import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
   import { SAVE_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
   import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
@@ -129,16 +129,7 @@
     name: 'metadata-manager-entity-edit-form',
     methods: {
       saveEntityType () {
-        if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
-          this.$store.commit(CREATE_ALERT, {type: 'warning', message: this.$t('toast-id-required')})
-        } else if (!this.idAttribute.visible && !this.editorEntityType.labelAttribute) {
-          this.$store.commit(CREATE_ALERT, {
-            type: 'warning',
-            message: this.$t('toast-label-required-id-hidden')
-          })
-        } else {
-          this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
-        }
+        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId, this.$t)).then(() => {
@@ -195,7 +186,7 @@
       },
       idAttribute: {
         get () {
-          return this.$store.getters.getEditorEntityTypeIdAttribute
+          return this.$store.state.editorEntityType.idAttribute
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'idAttribute', value: value})
