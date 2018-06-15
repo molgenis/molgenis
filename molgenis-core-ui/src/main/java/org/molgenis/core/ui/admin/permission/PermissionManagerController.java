@@ -3,6 +3,8 @@ package org.molgenis.core.ui.admin.permission;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.molgenis.core.ui.admin.permission.exception.UnexpectedPermissionException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -19,6 +21,7 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.acl.MutableAclClassService;
+import org.molgenis.security.core.PermissionRegistry;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.permission.Permissions;
 import org.molgenis.web.PluginController;
@@ -41,6 +44,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -53,6 +57,7 @@ import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 
 @Controller
+@Api("PermissionManager")
 @RequestMapping(URI)
 public class PermissionManagerController extends PluginController
 {
@@ -65,15 +70,18 @@ public class PermissionManagerController extends PluginController
 	private final MutableAclService mutableAclService;
 	private final MutableAclClassService mutableAclClassService;
 	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private final PermissionRegistry permissionRegistry;
 
 	public PermissionManagerController(DataService dataService, MutableAclService mutableAclService,
-			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry)
+			MutableAclClassService mutableAclClassService, SystemEntityTypeRegistry systemEntityTypeRegistry,
+			PermissionRegistry permissionRegistry)
 	{
 		super(URI);
 		this.dataService = requireNonNull(dataService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+		this.permissionRegistry = requireNonNull(permissionRegistry);
 	}
 
 	@GetMapping
@@ -274,6 +282,19 @@ public class PermissionManagerController extends PluginController
 				mutableAclClassService.deleteAclClass(aclClassType);
 			}
 		}
+	}
+
+	@ApiOperation(value = "Get all permission sets", response = PermissionSetResponse.class, responseContainer = "List")
+	@GetMapping("/permissionSets")
+	@ResponseBody
+	public List<PermissionSetResponse> getPermissionSets()
+	{
+		return permissionRegistry.getPermissionSets()
+								 .entrySet()
+								 .stream()
+								 .map(entry -> PermissionSetResponse.create(entry.getKey(), entry.getValue()))
+								 .sorted(comparing(PermissionSetResponse::getPermissions, comparingInt(List::size)))
+								 .collect(toList());
 	}
 
 	private static PermissionSet paramValueToPermissionSet(String paramValue)

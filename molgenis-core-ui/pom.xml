@@ -200,6 +200,7 @@
                             <locations>
                                 <location>org.molgenis.core.ui.admin.user</location>
                                 <location>org.molgenis.core.ui.admin.usermanager</location>
+                                <location>org.molgenis.core.ui.admin.permission</location>
                             </locations>
                             <swaggerDirectory>${project.build.directory}/generated-resources/swagger</swaggerDirectory>
                             <swaggerFileName>${project.name}-swagger</swaggerFileName>
