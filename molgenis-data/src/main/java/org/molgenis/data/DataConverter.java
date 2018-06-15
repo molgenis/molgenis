@@ -153,6 +153,10 @@ public class DataConverter
 		return convert(source, Long.class);
 	}
 
+	/**
+	 * @return true, false or null
+	 */
+	@SuppressWarnings("squid:S2447") // null is a valid return value
 	public static Boolean toBoolean(Object source)
 	{
 		if (source == null) return null;
