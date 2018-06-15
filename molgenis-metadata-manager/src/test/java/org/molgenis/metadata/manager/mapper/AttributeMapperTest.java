@@ -47,7 +47,7 @@ public class AttributeMapperTest
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
-	public void testAttributeMapper() throws Exception
+	public void testAttributeMapper()
 	{
 		new AttributeMapper(null, null, null, null, null);
 	}
@@ -78,6 +78,7 @@ public class AttributeMapperTest
 						null, null, null, null, sequenceNumber));
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	public void testToAttributes()
 	{
@@ -88,8 +89,7 @@ public class AttributeMapperTest
 		EditorAttributeIdentifier editorParentAttributeIdentifier = EditorAttributeIdentifier.create(parentId, "label");
 		String refEntityTypeId = "refId";
 		EditorEntityTypeIdentifier editorRefEntityType = EditorEntityTypeIdentifier.create(refEntityTypeId, "label");
-		EditorAttributeIdentifier editorMappedByAttribute = EditorAttributeIdentifier.create("mappedBy",
-				"mappedByLabel");
+		EditorAttributeIdentifier editorMappedByAttribute = EditorAttributeIdentifier.create("mappedBy", "mappedByLabel");
 		EditorSort editorSort = mock(EditorSort.class);
 		String expression = "expression";
 		boolean nullable = false;
@@ -117,8 +117,7 @@ public class AttributeMapperTest
 		Integer sequenceNumber = 1;
 
 		Attribute parentAttribute = mock(Attribute.class);
-		when(attributeReferenceMapper.toAttributeReference(editorParentAttributeIdentifier)).thenReturn(
-				parentAttribute);
+		when(attributeReferenceMapper.toAttributeReference(editorParentAttributeIdentifier)).thenReturn(parentAttribute);
 		EntityType refEntityType = mock(EntityType.class);
 		when(entityTypeReferenceMapper.toEntityTypeReference(refEntityTypeId)).thenReturn(refEntityType);
 		Attribute mappedByAttribute = mock(Attribute.class);
@@ -148,8 +147,7 @@ public class AttributeMapperTest
 				sequenceNumber);
 		EditorAttribute editorParentAttribute = EditorAttribute.create(parentId, name, type, null, editorRefEntityType,
 				editorMappedByAttribute, editorSort, expression, nullable, auto, visible, label, i18nLabel, description,
-				i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique,
-				editorTagIdentifiers, nullableExpression, visibleExpression, validationExpression, defaultValue,
+				i18nDescription, aggregatable, of("option0"), rangeMin, rangeMax, readonly, unique, editorTagIdentifiers, nullableExpression, visibleExpression, validationExpression, defaultValue,
 				sequenceNumber);
 		ImmutableList<Attribute> attributes = copyOf(
 				attributeMapper.toAttributes(of(editorAttribute, editorParentAttribute), editorEntityType));
@@ -205,6 +203,7 @@ public class AttributeMapperTest
 		verifyNoMoreInteractions(attribute);
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	public void testToEditorAttributes()
 	{
@@ -254,8 +253,7 @@ public class AttributeMapperTest
 		when(attribute.getString(getI18nAttributeName(AttributeMetadata.LABEL, i18nLabelLangEn))).thenReturn(
 				i18nLabelValue);
 		when(attribute.getDescription()).thenReturn(description);
-		when(attribute.getString(
-				getI18nAttributeName(AttributeMetadata.DESCRIPTION, i18nDescriptionLangEn))).thenReturn(
+		when(attribute.getString(getI18nAttributeName(AttributeMetadata.DESCRIPTION, i18nDescriptionLangEn))).thenReturn(
 				i18nDescriptionValue);
 		when(attribute.isAggregatable()).thenReturn(aggregatable);
 		when(attribute.getEnumOptions()).thenReturn(of("option0"));
@@ -277,8 +275,7 @@ public class AttributeMapperTest
 		EditorEntityTypeIdentifier editorRefEntityType = mock(EditorEntityTypeIdentifier.class);
 		when(entityTypeReferenceMapper.toEditorEntityTypeIdentifier(refEntityType)).thenReturn(editorRefEntityType);
 		EditorAttributeIdentifier editorMappedByAttribute = mock(EditorAttributeIdentifier.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifier(mappedByAttribute)).thenReturn(
-				editorMappedByAttribute);
+		when(attributeReferenceMapper.toEditorAttributeIdentifier(mappedByAttribute)).thenReturn(editorMappedByAttribute);
 		EditorSort editorSort = mock(EditorSort.class);
 		when(sortMapper.toEditorSort(sort)).thenReturn(editorSort);
 		@SuppressWarnings("unchecked")

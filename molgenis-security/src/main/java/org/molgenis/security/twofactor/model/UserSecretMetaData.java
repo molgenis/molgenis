@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 
@@ -40,7 +41,7 @@ public class UserSecretMetaData extends SystemEntityType
 		setDescription("Secret that is used to authenticate user with 2 factor authentication");
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifer");
-		addAttribute(USER_ID).setNillable(false).setUnique(true).setLabel("User identifier");
+		addAttribute(USER_ID, ROLE_LABEL).setNillable(false).setUnique(true).setLabel("User identifier");
 		addAttribute(SECRET).setNillable(false).setLabel("Secret");
 		addAttribute(LAST_FAILED_AUTHENICATION).setDataType(AttributeType.DATE_TIME)
 											   .setNillable(true)

@@ -69,7 +69,6 @@ export default {
   getMappedByAttributes: state => {
     return state.initialEditorEntityType.referringAttributes
   },
-
   /**
    * Return a list of compound attributes present in the currently selected editorEntityType
    */

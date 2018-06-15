@@ -56,7 +56,7 @@ public class MembershipInvitationMetadata extends SystemEntityType
 		setLabel(SIMPLE_NAME);
 		setDescription("An Invitation for a User to join a Group in a certain Role.");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
+		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(TOKEN).setNillable(false)
 						   .setLabel("Token")
 						   .setDescription("The token used when responding to this invitation.");

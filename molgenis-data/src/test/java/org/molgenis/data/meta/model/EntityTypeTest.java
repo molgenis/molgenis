@@ -12,6 +12,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
 import static org.testng.Assert.*;
 
@@ -92,7 +93,6 @@ public class EntityTypeTest
 	public void setLabelNull()
 	{
 		EntityType entityType = new EntityType(createEntityTypeMeta());
-		String simpleName = "label";
 		assertNull(entityType.getLabel());
 		assertNull(entityType.getString(LABEL));
 	}
@@ -159,7 +159,7 @@ public class EntityTypeTest
 		assertSame(ownLookAttrsCopy.get(0), attrId);
 		assertSame(ownLookAttrsCopy.get(1), attrLabel);
 
-		assertEquals(entityTypeCopy.isAbstract(), false);
+		assertFalse(entityTypeCopy.isAbstract());
 		assertSame(entityTypeCopy.getExtends(), extendsEntityType);
 
 		List<Tag> tagsCopy = newArrayList(entityTypeCopy.getTags());
@@ -199,5 +199,16 @@ public class EntityTypeTest
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
 		when(entityTypeMeta.getAttribute(EntityTypeMetadata.INDEXING_DEPTH)).thenReturn(intAttr);
 		return entityTypeMeta;
+	}
+
+	@Test
+	public void addLabelAttributeSetsNillableFalse()
+	{
+		EntityType entityType = new EntityType(createEntityTypeMeta());
+		Attribute attr = mock(Attribute.class);
+
+		entityType.setAttributeRoles(attr, ROLE_LABEL);
+
+		verify(attr).setNillable(false);
 	}
 }
