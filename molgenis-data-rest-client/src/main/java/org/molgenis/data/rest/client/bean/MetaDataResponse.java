@@ -7,6 +7,7 @@ import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MetaDataResponse.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class MetaDataResponse
 {
 	public static MetaDataResponse create(String href, String name, String label,
@@ -27,6 +28,7 @@ public abstract class MetaDataResponse
 
 	@AutoValue
 	@AutoGson(autoValueClass = AutoValue_MetaDataResponse_Attribute.class)
+	@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 	public static abstract class Attribute
 	{
 		public static Attribute create(String href)

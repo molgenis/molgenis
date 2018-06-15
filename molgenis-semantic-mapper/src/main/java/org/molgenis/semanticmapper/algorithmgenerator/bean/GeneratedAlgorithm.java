@@ -10,6 +10,7 @@ import java.util.Set;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_GeneratedAlgorithm.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GeneratedAlgorithm
 {
 	public abstract String getAlgorithm();

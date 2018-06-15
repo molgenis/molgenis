@@ -7,8 +7,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-@AutoGson(autoValueClass = AutoValue_QueryResponse.class)
 @AutoValue
+@AutoGson(autoValueClass = AutoValue_QueryResponse.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class QueryResponse
 {
 	public static QueryResponse create(String href, int start, int num, int total, String prevHref, String nextHref,

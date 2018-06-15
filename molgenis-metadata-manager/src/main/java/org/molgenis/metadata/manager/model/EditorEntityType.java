@@ -9,6 +9,7 @@ import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorEntityType.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EditorEntityType
 {
 	public abstract String getId();

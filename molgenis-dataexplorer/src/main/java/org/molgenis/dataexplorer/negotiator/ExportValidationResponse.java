@@ -9,6 +9,7 @@ import static java.util.Collections.emptyList;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ExportValidationResponse.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class ExportValidationResponse
 {
 	public abstract boolean isValid();

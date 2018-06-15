@@ -5,6 +5,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_FirstAttributeMappingInfo.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class FirstAttributeMappingInfo
 {
 	public abstract String getMappingProjectId();
