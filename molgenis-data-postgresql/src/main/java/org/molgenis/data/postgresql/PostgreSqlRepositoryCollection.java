@@ -872,7 +872,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Changing data type of entity [{}] attribute [{}] to [{}]", entityType.getId(), attr.getName(),
-					attr.getDataType().toString());
+					attr.getDataType());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlSetDataType);

@@ -84,7 +84,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping,
 			Attribute targetAttribute)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= {}", targetAttribute.getName());
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityType,
 				targetAttribute);
 

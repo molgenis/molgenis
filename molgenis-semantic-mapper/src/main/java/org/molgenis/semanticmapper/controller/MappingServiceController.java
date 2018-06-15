@@ -148,7 +148,7 @@ public class MappingServiceController extends PluginController
 	public String deleteMappingProject(@RequestParam() String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		LOG.info("Deleting mappingProject " + project.getName());
+		LOG.info("Deleting mappingProject {}", project.getName());
 		mappingService.deleteMappingProject(mappingProjectId);
 		return "redirect:" + getMappingServiceMenuUrl();
 	}

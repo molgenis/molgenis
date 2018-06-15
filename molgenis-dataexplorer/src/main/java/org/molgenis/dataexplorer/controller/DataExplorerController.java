@@ -307,7 +307,7 @@ public class DataExplorerController extends PluginController
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
-		LOG.info("Download request: [" + dataRequestStr + "]");
+		LOG.info("Download request: [{}]", dataRequestStr);
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
 		final String fileName = getDownloadFilename(dataRequest.getEntityName(), LocalDateTime.now(),
