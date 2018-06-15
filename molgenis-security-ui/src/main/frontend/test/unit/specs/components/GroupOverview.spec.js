@@ -1,5 +1,5 @@
 import GroupOverview from '../../../../src/components/GroupOverview'
-import { createLocalVue, shallow } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Vuex from 'vuex'
 
 const $t = (key) => {
@@ -32,7 +32,7 @@ describe('GroupOverview component', () => {
   const stubs = ['router-link', 'router-view']
 
   it('should return the chapterNavigationList via a getter', () => {
-    const wrapper = shallow(GroupOverview, {store, stubs, localVue})
+    const wrapper = shallowMount(GroupOverview, {store, stubs, localVue})
     expect(wrapper.vm.groups).to.deep.equal(groups)
   })
 })

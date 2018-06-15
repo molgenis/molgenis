@@ -10,5 +10,5 @@ export type Group = {
 
 export type SecurityModel = {
   groups: Array<Group>,
-  toast: Toast
+  toast: ?Toast
 }

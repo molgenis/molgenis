@@ -3,7 +3,6 @@ import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import testUtils from '@molgenis/molgenis-vue-test-utils'
 
-
 describe('actions', () => {
   beforeEach(() => {
     td.reset()

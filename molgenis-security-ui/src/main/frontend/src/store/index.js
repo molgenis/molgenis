@@ -9,7 +9,7 @@ import type {SecurityModel} from '../flow.type'
 
 const state: SecurityModel = {
   groups: [],
-  toast: {}
+  toast: null
 }
 
 Vue.use(Vuex)
