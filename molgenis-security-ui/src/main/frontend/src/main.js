@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import store from './store'
 import SecurityApp from './SecurityApp'
 import GroupOverview from './components/GroupOverview'
+import GroupCreate from './components/GroupCreate'
 import i18n from '@molgenis/molgenis-i18n-js'
 
 Vue.use(Router)
@@ -14,8 +15,17 @@ const router = new Router({
   base: baseUrl,
   routes: [
     {
-      path: '/',
+      path: '/group',
+      name: 'groupOverView',
       component: GroupOverview
+    },
+    {
+      path: '/group/create',
+      component: GroupCreate
+    },
+    {
+      path: '/',
+      redirect: '/group'
     }
   ]
 })

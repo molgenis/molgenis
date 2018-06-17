@@ -18,7 +18,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -68,7 +67,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		Group redGroup = mock(Group.class);
 		Group greenGroup = mock(Group.class);
 		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(redGroup, greenGroup));
-		List<GroupViewAdapter> groups = groupRestController.getGroups();
+		List<GroupResponse> groups = groupRestController.getGroups();
 		assertEquals(groups.size(), 2);
 	}
 

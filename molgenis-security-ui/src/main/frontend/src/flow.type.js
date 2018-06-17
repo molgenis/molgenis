@@ -8,6 +8,11 @@ export type Group = {
   label: string
 }
 
+export type CreateGroupCommand = {
+  groupIdentifier: string,
+  name: string
+}
+
 export type SecurityModel = {
   groups: Array<Group>,
   toast: ?Toast

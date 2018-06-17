@@ -10,13 +10,16 @@ import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.web.ErrorMessageResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +33,10 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 @Api("Group")
 public class GroupRestController
 {
-	public final static String SECURITY_URI = "api/plugin/security";
+	public final static String SECURITY_API_PATH = "api/plugin/security";
 	public final static String GROUP = "/group";
 
-	public final static String SECURITY_GROUP_END_POINT = SECURITY_URI + GROUP;
+	public final static String GROUP_END_POINT = SECURITY_API_PATH + GROUP;
 
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
@@ -73,12 +76,29 @@ public class GroupRestController
 		return groupValue.getName();
 	}
 
-	@GetMapping(SECURITY_GROUP_END_POINT)
+	@PostMapping(GROUP_END_POINT)
+	@Transactional
+	public ResponseEntity createGroup(@RequestBody GroupCommand group)
+	{
+		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES.keySet());
+
+		groupService.persist(groupValue);
+		groupService.grantPermissions(groupValue);
+		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
+
+		URI location = ServletUriComponentsBuilder
+				.fromCurrentRequest().path("/{name}")
+				.buildAndExpand(groupValue.getName()).toUri();
+
+		return ResponseEntity.created(location).build();
+	}
+
+	@GetMapping(GROUP_END_POINT)
 	@ResponseBody
-	public List<GroupViewAdapter> getGroups()
+	public List<GroupResponse> getGroups()
 	{
 		return dataService.findAll(GroupMetadata.GROUP, Group.class)
-						  .map(GroupViewAdapter::fromEntity)
+						  .map(GroupResponse::fromEntity)
 						  .collect(Collectors.toList());
 	}
 
