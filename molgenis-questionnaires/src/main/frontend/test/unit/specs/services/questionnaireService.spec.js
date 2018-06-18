@@ -1,51 +1,50 @@
-import type {QuestionnaireEntityResponse} from '../../../../src/flow.types'
+import type { QuestionnaireEntityResponse } from '../../../../src/flow.types'
 import questionnaireService from '../../../../src/services/questionnaireService'
 
 describe('Questionniare service', () => {
   const questionnaireOverView = {
     title: 'test questionnaire',
-    chapters:
-      [{
-        id: 'Chapter1',
-        title: 'General questions',
-        chapterSections: [
-          {
-            questionId: 'qMref',
-            questionLabel: 'mref type question',
-            answerLabel: 'MREF answer'
-          },
-          {
-            questionId: 'qBoolTrue',
-            questionLabel: 'Please answer yes or no',
-            answerLabel: 'ja'
-          },
-          {
-            questionId: 'qBoolFalse',
-            questionLabel: 'Please answer no',
-            answerLabel: 'nee'
-          },
-          {
-            questionId: 'qEnum',
-            questionLabel: 'Please choose',
-            answerLabel: 'Red, Green'
-          },
-          {
-            questionId: 'qXRef',
-            questionLabel: 'Please choose one',
-            answerLabel: 'XREF answer'
-          },
-          {
-            questionId: 'qNumber',
-            questionLabel: 'What is the answer to life the universe and everything',
-            answerLabel: '42'
-          },
-          {
-            questionId: 'qDefault',
-            questionLabel: 'What\'s my name',
-            answerLabel: 'John Doe'
-          }
-        ]
-      },
+    chapters: [{
+      id: 'Chapter1',
+      title: 'General questions',
+      chapterSections: [
+        {
+          questionId: 'qMref',
+          questionLabel: 'mref type question',
+          answerLabel: 'MREF answer'
+        },
+        {
+          questionId: 'qBoolTrue',
+          questionLabel: 'Please answer yes or no',
+          answerLabel: 'ja'
+        },
+        {
+          questionId: 'qBoolFalse',
+          questionLabel: 'Please answer no',
+          answerLabel: 'nee'
+        },
+        {
+          questionId: 'qEnum',
+          questionLabel: 'Please choose',
+          answerLabel: 'Red, Green'
+        },
+        {
+          questionId: 'qXRef',
+          questionLabel: 'Please choose one',
+          answerLabel: 'XREF answer'
+        },
+        {
+          questionId: 'qNumber',
+          questionLabel: 'What is the answer to life the universe and everything',
+          answerLabel: '42'
+        },
+        {
+          questionId: 'qDefault',
+          questionLabel: 'What\'s my name',
+          answerLabel: 'John Doe'
+        }
+      ]
+    },
       {
         id: 'Chapter2',
         title: 'Other questions',
@@ -69,22 +68,38 @@ describe('Questionniare service', () => {
       }]
   }
 
-  describe('buildFormDataObject', () => {
+  describe.only('buildFormDataObject', () => {
     const response: QuestionnaireEntityResponse = {
       href: 'http://foo.bar',
       items: [],
       meta: {
         attributes: [
           {
-            attributes: [],
-            fieldType: 'BOOL',
-            name: 'question1'
+            fieldType: 'STRING',
+            name: 'id'
+          },
+          {
+            fieldType: 'STRING',
+            name: 'owner'
+          },
+          {
+            fieldType: 'ENUM',
+            name: 'status'
+          },
+          {
+            fieldType: 'DATE',
+            name: 'submitDate'
           },
           {
             attributes: [
               {
                 attributes: [],
                 fieldType: 'STRING',
+                name: 'question1'
+              },
+              {
+                attributes: [],
+                fieldType: 'BOOL',
                 name: 'question2'
               }
             ],
@@ -100,7 +115,7 @@ describe('Questionniare service', () => {
 
     it('should build the empty formData object', () => {
       const formData = questionnaireService.buildFormDataObject(response)
-      expect(formData).to.deep.equal({question1: [], question2: []})
+      expect(formData).to.deep.equal({question1: null, question2: null})
     })
   })
 
@@ -336,8 +351,6 @@ describe('Questionniare service', () => {
           'style': 'answerLabel'
         }
       ]
-
-      // console.log(JSON.stringify(expectedPdfContent, null, 2))
 
       expect(pdfContent).to.deep.equal(expectedPdfContent)
     })
