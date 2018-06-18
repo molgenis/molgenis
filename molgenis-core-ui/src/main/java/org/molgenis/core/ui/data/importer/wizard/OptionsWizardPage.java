@@ -149,7 +149,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
 
 		Map<String, String> packageSelection = getPackageSelection(packages);
-		if (packageSelection.isEmpty())
+		if (!entitiesInDefaultPackage.isEmpty() && packageSelection.isEmpty())
 		{
 			throw new NoWritablePackageException();
 		}
