@@ -58,7 +58,7 @@
       }
     },
     created () {
-      this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
+      // this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
       if (!this.$store.state.mapperOptions.booleanLabels) {
         const mapperOptions = {
           booleanLabels: {

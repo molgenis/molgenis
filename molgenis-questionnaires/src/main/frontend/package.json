@@ -19,6 +19,7 @@
     "@molgenis/molgenis-ui-form": "^0.10.2",
     "font-awesome": "^4.7.0",
     "moment": "^2.20.1",
+    "pdfmake": "^0.1.36",
     "vue": "^2.5.15",
     "vue-flatpickr": "^2.3.0",
     "vue-router": "^3.0.1",

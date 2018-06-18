@@ -27,12 +27,12 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit}: VuexContext, questionnaireId: string) : Promise<any> {
+  'START_QUESTIONNAIRE' ({commit, dispatch}: VuexContext, questionnaireId: string) : Promise<any> {
     return new Promise((resolve, reject) => {
       cleanScreen(commit)
       api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(response => {
         commit('SET_QUESTIONNAIRE_ROW_ID', response.id)
-        commit('SET_LOADING', false)
+        dispatch('GET_QUESTIONNAIRE', questionnaireId)
         resolve(response.id)
       }, error => {
         handleError(commit, error)
@@ -41,31 +41,42 @@ const actions = {
     })
   },
 
-  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string) {
+  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string):any {
     cleanScreen(commit)
+    return new Promise((resolve, reject) =>  {
+      const currentQuestionnaireId = getters.getQuestionnaireId
+      if (currentQuestionnaireId !== questionnaireId) {
+        return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
+          commit('SET_QUESTIONNAIRE', response)
 
-    const currentQuestionnaireId = getters.getQuestionnaireId
-    if (currentQuestionnaireId !== questionnaireId) {
-      return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
-        commit('SET_QUESTIONNAIRE', response)
+          //let data
+          // if (response.items.length > 0) {
+          const data = response.items[0]
+          // commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
+          // } else {
+          //   data = questionnaireService.buildFormDataObject(response)
+          //   console.log(state.questionnaireRowId)
+          //   data[response.meta.idAttribute] = state.questionnaireRowId
+          // }
 
-        const data = response.items.length > 0 ? response.items[0] : questionnaireService.buildFormDataObject(response)
-        commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
 
-        const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
-        commit('SET_FORM_DATA', form.formData)
+          const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
+          commit('SET_FORM_DATA', form.formData)
 
-        const chapters = form.formFields.filter(field => field.type === 'field-group')
-        commit('SET_CHAPTER_FIELDS', chapters)
-        // Set state to submitted to have the form validate required fields
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
+          const chapters = form.formFields.filter(field => field.type === 'field-group')
+          commit('SET_CHAPTER_FIELDS', chapters)
+          // Set state to submitted to have the form validate required fields
+          commit('UPDATE_FORM_STATUS', 'SUBMITTED')
 
-        commit('SET_LOADING', false)
-      }, error => {
-        handleError(commit, error)
-      })
-    }
-    commit('SET_LOADING', false)
+          commit('SET_LOADING', false)
+          resolve()
+        }, error => {
+          handleError(commit, error)
+          reject()
+        })
+      }
+      commit('SET_LOADING', false)
+    })
   },
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
