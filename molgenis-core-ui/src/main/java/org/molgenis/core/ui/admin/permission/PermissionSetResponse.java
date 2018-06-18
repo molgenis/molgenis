@@ -18,6 +18,11 @@ public abstract class PermissionSetResponse
 
 	public abstract List<PermissionResponse> getPermissions();
 
+	public static PermissionSetResponse create(String name, List<PermissionResponse> permissions)
+	{
+		return new AutoValue_PermissionSetResponse(name, permissions);
+	}
+
 	public static PermissionSetResponse create(PermissionSet permissionSet, Set<Permission> permissions)
 	{
 		List<PermissionResponse> permissionsGranted = permissions.stream()

@@ -1,5 +1,7 @@
 package org.molgenis.core.ui.admin.permission;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.mockito.Mock;
@@ -42,12 +44,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.*;
@@ -100,6 +100,17 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	private Permission permissionRead;
 	@Mock
 	private Permission permissionCount;
+
+	private enum TestPermission implements org.molgenis.security.core.Permission
+	{
+		READ, UPDATE, DELETE;
+
+		@Override
+		public String getDefaultDescription()
+		{
+			return "Description of " + toString();
+		}
+	}
 
 	@Configuration
 	public static class Config extends WebMvcConfigurerAdapter
@@ -180,6 +191,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 	@Autowired
 	private MutableAclClassService mutableAclClassService;
+
+	@Autowired
+	private PermissionRegistry permissionRegistry;
 
 	@BeforeMethod
 	public void setUp()
@@ -736,5 +750,22 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(systemEntityTypeRegistry.hasSystemEntityType("entityTypeId")).thenReturn(true);
 		EntityTypeRlsRequest entityTypeRlsRequest = new EntityTypeRlsRequest("entityTypeId", true);
 		permissionManagerController.updateEntityClassRls(entityTypeRlsRequest);
+	}
+
+	@Test
+	public void testGetPermissionSets()
+	{
+		when(permissionRegistry.getPermissionSets()).thenReturn(
+				ImmutableMap.of(PermissionSet.READ, singleton(TestPermission.READ), PermissionSet.WRITE,
+						ImmutableSet.of(TestPermission.READ, TestPermission.UPDATE, TestPermission.DELETE)));
+
+		List<PermissionSetResponse> actual = permissionManagerController.getPermissionSets();
+		List<PermissionSetResponse> expected = ImmutableList.of(PermissionSetResponse.create("Read",
+				ImmutableList.of(PermissionResponse.create("TestPermission", "READ", "Description of READ"))),
+				PermissionSetResponse.create("Write",
+						ImmutableList.of(PermissionResponse.create("TestPermission", "READ", "Description of READ"),
+								PermissionResponse.create("TestPermission", "UPDATE", "Description of UPDATE"),
+								PermissionResponse.create("TestPermission", "DELETE", "Description of DELETE"))));
+		assertEquals(actual, expected);
 	}
 }

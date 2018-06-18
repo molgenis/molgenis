@@ -13,6 +13,11 @@ public abstract class PermissionResponse
 
 	public abstract String getDescription();
 
+	public static PermissionResponse create(String type, String name, String description)
+	{
+		return new AutoValue_PermissionResponse(type, name, description);
+	}
+
 	public static PermissionResponse create(Permission permission)
 	{
 		return new AutoValue_PermissionResponse(permission.getType(), permission.name(),
