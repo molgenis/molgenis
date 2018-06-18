@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 
 public class MolgenisUiUtils
 {
+	private MolgenisUiUtils()
+	{
+	}
+
 	/**
 	 * Gets the uri which is currently visible in the browser.
 	 * <p>

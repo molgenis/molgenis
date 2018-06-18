@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MenuItem.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class MenuItem
 {
 	public static MenuItem create(String id, String label, String href, UiMenuItemType type,

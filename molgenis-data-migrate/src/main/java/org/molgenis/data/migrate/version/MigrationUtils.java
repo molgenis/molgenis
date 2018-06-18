@@ -18,6 +18,10 @@ public class MigrationUtils
 
 	static File propertiesFile;
 
+	private MigrationUtils()
+	{
+	}
+
 	private static String getServerProperty(String key)
 	{
 		return getMolgenisServerProperties().getProperty(key);

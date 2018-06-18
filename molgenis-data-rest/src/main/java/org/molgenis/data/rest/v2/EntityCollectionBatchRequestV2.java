@@ -11,6 +11,7 @@ import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EntityCollectionBatchRequestV2.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EntityCollectionBatchRequestV2
 {
 	@Nullable // See #3897. If hashCode fails, the validation throws an exception

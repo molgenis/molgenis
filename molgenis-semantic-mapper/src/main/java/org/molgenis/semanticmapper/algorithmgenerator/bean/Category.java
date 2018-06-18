@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_Category.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class Category
 {
 	public abstract String getCode();

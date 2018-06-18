@@ -413,9 +413,9 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addPackage(Package package_)
+	public void addPackage(Package aPackage)
 	{
-		dataService.add(PACKAGE, package_);
+		dataService.add(PACKAGE, aPackage);
 	}
 
 	@Transactional
@@ -836,9 +836,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setPackage(Package package_)
+		public EntityType setPackage(Package aPackage)
 		{
-			return entityType.setPackage(package_);
+			return entityType.setPackage(aPackage);
 		}
 
 		@Override
@@ -902,9 +902,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setAbstract(boolean abstract_)
+		public EntityType setAbstract(boolean isAbstract)
 		{
-			return entityType.setAbstract(abstract_);
+			return entityType.setAbstract(isAbstract);
 		}
 
 		@Override
@@ -914,9 +914,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		@Override
-		public EntityType setExtends(EntityType extends_)
+		public EntityType setExtends(EntityType extendsEntityType)
 		{
-			return entityType.setExtends(extends_);
+			return entityType.setExtends(extendsEntityType);
 		}
 
 		@Override

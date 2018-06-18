@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class CategoryMapping<S, T>
 {
 	private static Gson gson = new GsonBuilder().serializeNulls().create();

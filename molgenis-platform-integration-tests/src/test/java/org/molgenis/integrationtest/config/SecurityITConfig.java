@@ -36,8 +36,8 @@ import static org.mockito.Mockito.when;
 		AuthenticationAuthoritiesUpdaterImpl.class })
 public class SecurityITConfig
 {
-	public final static String SUPERUSER_NAME = "admin";
-	public final static String TOKEN_DESCRIPTION = "REST token";
+	public static final String SUPERUSER_NAME = "admin";
+	public static final String TOKEN_DESCRIPTION = "REST token";
 
 	@Bean
 	public RoleHierarchy roleHierarchy()

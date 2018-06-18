@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("squid:S1610")
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GroupValue
 {
 	public abstract String getName();

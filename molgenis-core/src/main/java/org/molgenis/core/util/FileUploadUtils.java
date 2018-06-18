@@ -11,6 +11,9 @@ import java.io.IOException;
 
 public class FileUploadUtils
 {
+	private FileUploadUtils()
+	{
+	}
 
 	/**
 	 * Saves an uploaded file to a tempfile with prefix 'molgenis-', keeps the original file extension

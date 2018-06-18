@@ -17,7 +17,6 @@ import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.service.OntologyTagService;
-import org.molgenis.semanticsearch.string.Stemmer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -148,13 +147,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testDistanceFrom()
 	{
-		Stemmer stemmer = new Stemmer();
-		Assert.assertEquals(
-				semanticSearchService.distanceFrom("Hypertension", ImmutableSet.of("history", "hypertens"), stemmer),
+		Assert.assertEquals(semanticSearchService.distanceFrom("Hypertension", ImmutableSet.of("history", "hypertens")),
 				.6923, 0.0001, "String distance should be equal");
 		Assert.assertEquals(
-				semanticSearchService.distanceFrom("Maternal Hypertension", ImmutableSet.of("history", "hypertens"),
-						stemmer), .5454, 0.0001, "String distance should be equal");
+				semanticSearchService.distanceFrom("Maternal Hypertension", ImmutableSet.of("history", "hypertens")),
+				.5454, 0.0001, "String distance should be equal");
 	}
 
 	@Test

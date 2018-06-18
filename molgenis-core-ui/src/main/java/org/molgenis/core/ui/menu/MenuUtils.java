@@ -9,6 +9,10 @@ import java.util.Stack;
 
 public class MenuUtils
 {
+	private MenuUtils()
+	{
+	}
+
 	public static MenuItem findMenuItem(String id, List<MenuItem> menu)
 	{
 		for (MenuItem item : menu)

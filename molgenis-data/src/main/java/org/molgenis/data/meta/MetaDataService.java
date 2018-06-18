@@ -138,9 +138,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Adds a new Package
 	 *
-	 * @param pack package
+	 * @param aPackage package
 	 */
-	void addPackage(Package pack);
+	void addPackage(Package aPackage);
 
 	/**
 	 * Add or update packages

@@ -18,10 +18,10 @@ public class SortaJobExecutionMetaData extends SystemEntityType
 
 	public static final String ONTOLOGY_IRI = "ontologyIri";
 	public static final String NAME = "name";
-	public final static String DELETE_URL = "deleteUrl";
-	public final static String SOURCE_ENTITY = "sourceEntity";
-	public final static String RESULT_ENTITY = "resultEntity";
-	public final static String THRESHOLD = "Threshold";
+	public static final String DELETE_URL = "deleteUrl";
+	public static final String SOURCE_ENTITY = "sourceEntity";
+	public static final String RESULT_ENTITY = "resultEntity";
+	public static final String THRESHOLD = "Threshold";
 
 	public static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 

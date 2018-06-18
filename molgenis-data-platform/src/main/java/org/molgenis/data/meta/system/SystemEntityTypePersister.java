@@ -132,9 +132,9 @@ public class SystemEntityTypePersister
 		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getId());
 	}
 
-	private boolean isNotExists(Package package_)
+	private boolean isNotExists(Package aPackage)
 	{
-		return !systemPackageRegistry.containsPackage(package_);
+		return !systemPackageRegistry.containsPackage(aPackage);
 	}
 
 	private void injectExistingPackageIdentifiers(List<Package> systemPackages)

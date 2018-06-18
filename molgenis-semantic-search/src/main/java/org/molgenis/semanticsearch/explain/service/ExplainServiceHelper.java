@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class ExplainServiceHelper
 {
-	public final static Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
+	public static final Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
 	private final Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 
 	public enum Options

@@ -15,8 +15,8 @@ public class RDFMediaType
 	public static final MediaType TEXT_RDF_N3 = new MediaType("text", "rdf+n3");
 	public static final MediaType APPLICATION_JSON = new MediaType("application", "json");
 	public static final MediaType APPLICATION_TRIG = new MediaType("application", "trig");
-	public final static String APPLICATION_TRIG_VALUE = "application/trig";
-	public final static String TEXT_TURTLE_VALUE = "text/turtle";
+	public static final String APPLICATION_TRIG_VALUE = "application/trig";
+	public static final String TEXT_TURTLE_VALUE = "text/turtle";
 
 	public static final MediaType APPLICATION_JSONLD = new MediaType("application", "ld+json");
 	public static final MediaType APPLICATION_NQUADS = new MediaType("application", "n-quads");
@@ -31,6 +31,10 @@ public class RDFMediaType
 						APPLICATION_TRIG, APPLICATION_JSONLD, APPLICATION_NQUADS }));
 		rdfMediaTypes = Collections.unmodifiableSet(types);
 
+	}
+
+	private RDFMediaType()
+	{
 	}
 
 	public static boolean isRDFMediaType(MediaType mediaType)

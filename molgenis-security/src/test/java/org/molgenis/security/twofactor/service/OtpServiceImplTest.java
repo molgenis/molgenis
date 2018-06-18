@@ -21,8 +21,8 @@ import static org.testng.Assert.assertFalse;
 public class OtpServiceImplTest extends AbstractTestNGSpringContextTests
 {
 
-	private final static String USERNAME = "molgenisUser";
-	private final static String ROLE_SU = "SU";
+	private static final String USERNAME = "molgenisUser";
+	private static final String ROLE_SU = "SU";
 
 	@Autowired
 	private OtpService otpService;
