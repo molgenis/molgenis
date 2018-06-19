@@ -16,7 +16,6 @@ public abstract class VuePluginController extends PluginController
 	private UserAccountService userAccountService;
 
 	private String languageCode;
-	private String fallbackLng;
 
 	public VuePluginController(String uri, MenuReaderService menuReaderService, AppSettings appSettings,
 			UserAccountService userAccountService)

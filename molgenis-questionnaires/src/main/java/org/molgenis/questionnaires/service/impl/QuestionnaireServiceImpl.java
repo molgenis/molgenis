@@ -10,25 +10,21 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
-import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
-import static org.molgenis.questionnaires.meta.QuestionnaireStatus.NOT_STARTED;
 import static org.molgenis.questionnaires.meta.QuestionnaireStatus.OPEN;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
