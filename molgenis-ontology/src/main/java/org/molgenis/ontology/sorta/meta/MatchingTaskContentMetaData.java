@@ -17,11 +17,11 @@ public class MatchingTaskContentMetaData extends SystemEntityType
 	public static final String SIMPLE_NAME = "MatchingTaskContent";
 	public static final String MATCHING_TASK_CONTENT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String IDENTIFIER = "identifier";
-	public final static String INPUT_TERM = "inputTerm";
-	public final static String MATCHED_TERM = "matchTerm";
-	public final static String SCORE = "score";
-	public final static String VALIDATED = "validated";
+	public static final String IDENTIFIER = "identifier";
+	public static final String INPUT_TERM = "inputTerm";
+	public static final String MATCHED_TERM = "matchTerm";
+	public static final String SCORE = "score";
+	public static final String VALIDATED = "validated";
 
 	private final OntologyPackage ontologyPackage;
 

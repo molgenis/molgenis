@@ -118,7 +118,7 @@
 
 <script>
   import { mapState, mapGetters } from 'vuex'
-  import { UPDATE_EDITOR_ENTITY_TYPE, CREATE_ALERT } from '../store/mutations'
+  import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
   import { SAVE_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
   import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
@@ -129,13 +129,7 @@
     name: 'metadata-manager-entity-edit-form',
     methods: {
       saveEntityType () {
-        if (this.editorEntityType.idAttribute === null || this.editorEntityType.idAttribute === undefined) {
-          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'ID attribute can not be empty'})
-        } else if (this.editorEntityType.labelAttribute === null || this.editorEntityType.labelAttribute === undefined) {
-          this.$store.commit(CREATE_ALERT, {type: 'warning', message: 'Label attribute can not be empty'})
-        } else {
-          this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
-        }
+        this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId, this.$t)).then(() => {

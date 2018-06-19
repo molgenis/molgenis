@@ -8,6 +8,10 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 public class FileExtensionUtils
 {
+	private FileExtensionUtils()
+	{
+	}
+
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();

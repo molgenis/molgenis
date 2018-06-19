@@ -1,7 +1,7 @@
 import _ from "underscore";
 import $ from "jquery";
 import {htmlEscape} from "../utils/HtmlUtils";
-import {createRsqlQuery, createRsqlAggregateQuery, encodeRsqlValue} from "./rsql";
+import {createRsqlAggregateQuery, createRsqlQuery, encodeRsqlValue} from "./rsql";
 
 const apiBaseUri = '/api/v2/';
 
@@ -90,7 +90,7 @@ export default class RestClientV2 {
     remove(name, id) {
         return $.ajax({
             type: 'DELETE',
-            url: apiBaseUri + encodeURI(name) + '/' + encodeURI(id)
+            url: apiBaseUri + encodeURIComponent(name) + '/' + encodeURIComponent(id)
         });
     };
 }

@@ -205,6 +205,34 @@ describe('mutations', () => {
       mutations.__UPDATE_EDITOR_ENTITY_TYPE__(state, update)
       expect(state).to.deep.equal(expected)
     })
+
+    it('should update the labelAttribute of the EditorEntityType', () => {
+      const state = {
+        editorEntityType: {
+          labelAttribute: null,
+          attributes: [
+            {id: '1'}
+          ]
+        }
+      }
+
+      const update = {
+        key: 'labelAttribute',
+        value: {id: '1', label: 'labelAttribute'}
+      }
+
+      const expected = {
+        editorEntityType: {
+          labelAttribute: {id: '1', label: 'labelAttribute', visible: true, nullable: false},
+          attributes: [
+            {id: '1', label: 'labelAttribute', visible: true, nullable: false}
+          ]
+        }
+      }
+
+      mutations.__UPDATE_EDITOR_ENTITY_TYPE__(state, update)
+      expect(state).to.deep.equal(expected)
+    })
   })
 
   describe('Testing mutation UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE', () => {

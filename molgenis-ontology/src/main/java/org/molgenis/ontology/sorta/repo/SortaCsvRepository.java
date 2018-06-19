@@ -29,8 +29,8 @@ public class SortaCsvRepository extends AbstractRepository
 	private final CsvRepository csvRepository;
 	private final String entityTypeId;
 	private final String entityLabel;
-	public final static String ALLOWED_IDENTIFIER = "Identifier";
-	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
+	public static final String ALLOWED_IDENTIFIER = "Identifier";
+	private static final List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
 			new TrimProcessor());
 
 	public SortaCsvRepository(File file, EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
@@ -66,6 +66,7 @@ public class SortaCsvRepository extends AbstractRepository
 			if (nameAttribute != null)
 			{
 				nameAttribute.setLabelAttribute(true);
+				nameAttribute.setNillable(false);
 			}
 		}
 		return entityType;

@@ -37,8 +37,8 @@ import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
  */
 public class EntityType extends StaticEntity implements Labeled
 {
-	private transient Map<String, Attribute> cachedOwnAttrs;
-	private transient Boolean cachedHasAttrWithExpression;
+	private Map<String, Attribute> cachedOwnAttrs;
+	private Boolean cachedHasAttrWithExpression;
 
 	public EntityType(Entity entity)
 	{
@@ -260,9 +260,9 @@ public class EntityType extends StaticEntity implements Labeled
 		return getEntity(PACKAGE, Package.class);
 	}
 
-	public EntityType setPackage(Package package_)
+	public EntityType setPackage(Package pack)
 	{
-		set(PACKAGE, package_);
+		set(PACKAGE, pack);
 		return this;
 	}
 
@@ -276,10 +276,10 @@ public class EntityType extends StaticEntity implements Labeled
 		Attribute idAttr = getOwnIdAttribute();
 		if (idAttr == null)
 		{
-			EntityType extends_ = getExtends();
-			if (extends_ != null)
+			EntityType extend = getExtends();
+			if (extend != null)
 			{
-				idAttr = extends_.getIdAttribute();
+				idAttr = extend.getIdAttribute();
 			}
 		}
 		return idAttr;
@@ -312,10 +312,10 @@ public class EntityType extends StaticEntity implements Labeled
 		Attribute labelAttr = getOwnLabelAttribute();
 		if (labelAttr == null)
 		{
-			EntityType extends_ = getExtends();
-			if (extends_ != null)
+			EntityType extend = getExtends();
+			if (extend != null)
 			{
-				labelAttr = extends_.getLabelAttribute();
+				labelAttr = extend.getLabelAttribute();
 			}
 		}
 		return labelAttr;
@@ -386,10 +386,10 @@ public class EntityType extends StaticEntity implements Labeled
 	public Iterable<Attribute> getLookupAttributes()
 	{
 		Iterable<Attribute> lookupAttributes = getOwnLookupAttributes();
-		EntityType extends_ = getExtends();
-		if (extends_ != null)
+		EntityType extend = getExtends();
+		if (extend != null)
 		{
-			lookupAttributes = concat(lookupAttributes, extends_.getLookupAttributes());
+			lookupAttributes = concat(lookupAttributes, extend.getLookupAttributes());
 		}
 		return lookupAttributes;
 	}
@@ -418,13 +418,13 @@ public class EntityType extends StaticEntity implements Labeled
 	 */
 	public boolean isAbstract()
 	{
-		Boolean abstract_ = getBoolean(IS_ABSTRACT);
-		return abstract_ != null ? abstract_ : false;
+		Boolean isAbstract = getBoolean(IS_ABSTRACT);
+		return isAbstract != null ? isAbstract : false;
 	}
 
-	public EntityType setAbstract(boolean abstract_)
+	public EntityType setAbstract(boolean isAbstract)
 	{
-		set(IS_ABSTRACT, abstract_);
+		set(IS_ABSTRACT, isAbstract);
 		return this;
 	}
 
@@ -439,9 +439,9 @@ public class EntityType extends StaticEntity implements Labeled
 		return getEntity(EXTENDS, EntityType.class);
 	}
 
-	public EntityType setExtends(EntityType extends_)
+	public EntityType setExtends(EntityType extend)
 	{
-		set(EXTENDS, extends_);
+		set(EXTENDS, extend);
 		return this;
 	}
 
@@ -477,10 +477,10 @@ public class EntityType extends StaticEntity implements Labeled
 	public Iterable<Attribute> getAttributes()
 	{
 		Iterable<Attribute> attrs = getOwnAttributes();
-		EntityType extends_ = getExtends();
-		if (extends_ != null)
+		EntityType extend = getExtends();
+		if (extend != null)
 		{
-			attrs = concat(attrs, extends_.getAttributes());
+			attrs = concat(attrs, extend.getAttributes());
 		}
 		return attrs;
 	}
@@ -497,10 +497,10 @@ public class EntityType extends StaticEntity implements Labeled
 	public Iterable<Attribute> getAtomicAttributes()
 	{
 		Iterable<Attribute> atomicAttrs = getOwnAtomicAttributes();
-		EntityType extends_ = getExtends();
-		if (extends_ != null)
+		EntityType extend = getExtends();
+		if (extend != null)
 		{
-			atomicAttrs = concat(atomicAttrs, extends_.getAtomicAttributes());
+			atomicAttrs = concat(atomicAttrs, extend.getAtomicAttributes());
 		}
 		return atomicAttrs;
 	}
@@ -508,10 +508,10 @@ public class EntityType extends StaticEntity implements Labeled
 	public Iterable<Attribute> getAllAttributes()
 	{
 		Iterable<Attribute> allAttrs = getOwnAllAttributes();
-		EntityType extends_ = getExtends();
-		if (extends_ != null)
+		EntityType extend = getExtends();
+		if (extend != null)
 		{
-			allAttrs = concat(allAttrs, extends_.getAllAttributes());
+			allAttrs = concat(allAttrs, extend.getAllAttributes());
 		}
 		return allAttrs;
 	}
@@ -558,7 +558,7 @@ public class EntityType extends StaticEntity implements Labeled
 		});
 
 		attr.setEntity(this);
-		this.addSequenceNumber(attr, attrs);
+		addSequenceNumber(attr, attrs);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 
 		setAttributeRoles(attr, attrTypes);
@@ -616,6 +616,7 @@ public class EntityType extends StaticEntity implements Labeled
 							currentLabelAttr.setLabelAttribute(false);
 						}
 						attr.setLabelAttribute(true);
+						attr.setNillable(false);
 						break;
 					case ROLE_LOOKUP:
 						attr.setLookupAttributeIndex(0); // FIXME assign unique lookup attribute index
@@ -649,9 +650,9 @@ public class EntityType extends StaticEntity implements Labeled
 
 	public void removeAttribute(Attribute attr)
 	{
-		Map<String, Attribute> cachedOwnAttrs = getCachedOwnAttrs();
-		cachedOwnAttrs.remove(attr.getName());
-		set(ATTRIBUTES, cachedOwnAttrs.values());
+		Map<String, Attribute> cachedOwnAttributes = getCachedOwnAttrs();
+		cachedOwnAttributes.remove(attr.getName());
+		set(ATTRIBUTES, cachedOwnAttributes.values());
 	}
 
 	/**
@@ -698,10 +699,9 @@ public class EntityType extends StaticEntity implements Labeled
 		set(TAGS, tag);
 	}
 
-	public EntityType setIndexingDepth(int indexingDepth)
+	public void setIndexingDepth(int indexingDepth)
 	{
 		set(INDEXING_DEPTH, indexingDepth);
-		return this;
 	}
 
 	public int getIndexingDepth()
@@ -757,13 +757,9 @@ public class EntityType extends StaticEntity implements Labeled
 	public void set(String attributeName, Object value)
 	{
 		super.set(attributeName, value);
-		switch (attributeName)
+		if (ATTRIBUTES.equals(attributeName))
 		{
-			case ATTRIBUTES:
-				invalidateCachedOwnAttrs();
-				break;
-			default:
-				break;
+			invalidateCachedOwnAttrs();
 		}
 	}
 

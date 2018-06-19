@@ -114,7 +114,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler
 			}
 			else
 			{
-				LOG.warn(IndexJobExecutionMeta.INDEX_JOB_EXECUTION + " does not exist");
+				LOG.warn("{} does not exist", IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
 			}
 		});
 	}

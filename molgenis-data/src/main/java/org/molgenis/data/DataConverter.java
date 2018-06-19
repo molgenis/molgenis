@@ -26,6 +26,10 @@ public class DataConverter
 {
 	private static ConversionService conversionService;
 
+	private DataConverter()
+	{
+	}
+
 	public static boolean canConvert(Object source, Class<?> targetType)
 	{
 		try
@@ -149,6 +153,10 @@ public class DataConverter
 		return convert(source, Long.class);
 	}
 
+	/**
+	 * @return true, false or null
+	 */
+	@SuppressWarnings("squid:S2447") // null is a valid return value
 	public static Boolean toBoolean(Object source)
 	{
 		if (source == null) return null;

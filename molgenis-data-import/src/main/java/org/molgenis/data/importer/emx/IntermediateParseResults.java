@@ -90,9 +90,19 @@ public final class IntermediateParseResults
 			entityType.addAttribute(attr);
 
 			// set attribute roles
-			if (emxAttr.isIdAttr()) attr.setIdAttribute(true);
-			if (emxAttr.isLabelAttr()) attr.setLabelAttribute(true);
-			if (emxAttr.isLookupAttr()) attr.setLookupAttributeIndex(lookupAttributeIndex++);
+			if (emxAttr.isIdAttr())
+			{
+				attr.setIdAttribute(true);
+			}
+			if (emxAttr.isLabelAttr())
+			{
+				attr.setLabelAttribute(true);
+				attr.setNillable(false);
+			}
+			if (emxAttr.isLookupAttr())
+			{
+				attr.setLookupAttributeIndex(lookupAttributeIndex++);
+			}
 		}
 
 		if (entityType.getLabelAttribute() == null)

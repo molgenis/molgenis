@@ -24,10 +24,10 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	}
 
 	@Override
-	public void add(Package package_)
+	public void add(Package aPackage)
 	{
-		packageValidator.validate(package_);
-		delegate().add(package_);
+		packageValidator.validate(aPackage);
+		delegate().add(aPackage);
 	}
 
 	@Override
@@ -41,10 +41,10 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	}
 
 	@Override
-	public void update(Package package_)
+	public void update(Package aPackage)
 	{
-		packageValidator.validate(package_);
-		delegate().update(package_);
+		packageValidator.validate(aPackage);
+		delegate().update(aPackage);
 	}
 
 	@Override
@@ -58,18 +58,18 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	}
 
 	@Override
-	public void delete(Package package_)
+	public void delete(Package aPackage)
 	{
-		packageValidator.validate(package_);
-		super.delete(package_);
+		packageValidator.validate(aPackage);
+		super.delete(aPackage);
 	}
 
 	@Override
 	public void delete(Stream<Package> packageStream)
 	{
-		delegate().delete(packageStream.filter(package_ ->
+		delegate().delete(packageStream.filter(aPackage ->
 		{
-			packageValidator.validate(package_);
+			packageValidator.validate(aPackage);
 			return true;
 		}));
 	}
@@ -77,12 +77,12 @@ public class PackageRepositoryValidationDecorator extends AbstractRepositoryDeco
 	@Override
 	public void deleteById(Object id)
 	{
-		Package package_ = findOneById(id);
-		if (package_ == null)
+		Package aPackage = findOneById(id);
+		if (aPackage == null)
 		{
 			throw new UnknownEntityException(getEntityType(), id);
 		}
-		packageValidator.validate(package_);
+		packageValidator.validate(aPackage);
 		super.deleteById(id);
 	}
 

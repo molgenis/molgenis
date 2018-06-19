@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_RemoveTagRequest.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class RemoveTagRequest
 {
 	@NotNull

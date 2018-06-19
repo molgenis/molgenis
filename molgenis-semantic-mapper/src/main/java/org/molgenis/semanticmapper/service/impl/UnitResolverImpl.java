@@ -129,7 +129,7 @@ public class UnitResolverImpl implements UnitResolver
 		}
 		else
 		{
-			LOG.warn("Unit resolver is missing required unit ontology [" + UNIT_ONTOLOGY_IRI + "]");
+			LOG.warn("Unit resolver is missing required unit ontology [{}]", UNIT_ONTOLOGY_IRI);
 			unitOntologyTerm = null;
 		}
 		return unitOntologyTerm;

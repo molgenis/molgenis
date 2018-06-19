@@ -44,7 +44,7 @@ public class RepositoryTemplateLoader implements TemplateLoader
 			return null;
 		}
 		TemplateSource templateSource = new TemplateSource(template);
-		LOG.debug("Created " + templateSource);
+		LOG.debug("Created {}", templateSource);
 		return templateSource;
 	}
 

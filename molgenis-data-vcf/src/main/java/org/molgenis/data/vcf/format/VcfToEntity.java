@@ -85,7 +85,6 @@ public class VcfToEntity
 	private EntityType createEntityType(String entityTypeId, VcfMeta vcfMeta)
 	{
 		Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
-		idAttribute.setVisible(false);
 
 		EntityType entityType = entityTypeFactory.create(entityTypeId);
 		entityType.setLabel(entityTypeId);
@@ -338,9 +337,9 @@ public class VcfToEntity
 
 				// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 				// jquery.molgenis.table.js line 152
-				String original_name = sampleNameIterator.next();
-				sampleEntity.set(NAME, entityPosAlt + "_" + original_name);
-				sampleEntity.set(ORIGINAL_NAME, original_name);
+				String originalName = sampleNameIterator.next();
+				sampleEntity.set(NAME, entityPosAlt + "_" + originalName);
+				sampleEntity.set(ORIGINAL_NAME, originalName);
 				samples.add(sampleEntity);
 			}
 		}

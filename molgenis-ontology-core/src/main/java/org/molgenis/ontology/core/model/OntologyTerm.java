@@ -13,6 +13,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTerm.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class OntologyTerm
 {
 	public abstract String getIRI();

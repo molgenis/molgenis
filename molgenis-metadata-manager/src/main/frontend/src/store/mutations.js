@@ -98,10 +98,17 @@ export default {
    * In case of an idAttribute update, extra parameters are set
    */
   [UPDATE_EDITOR_ENTITY_TYPE] (state: State, update: Update) {
-    if (update.key === 'idAttribute') {
+    if (update.value && update.key === 'idAttribute') {
       update.value.readonly = true
       update.value.unique = true
       update.value.nullable = false
+
+      const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
+      state.editorEntityType.attributes[index] = update.value
+    }
+    if (update.value && update.key === 'labelAttribute') {
+      update.value.nullable = false
+      update.value.visible = true
 
       const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === update.value.id)
       state.editorEntityType.attributes[index] = update.value

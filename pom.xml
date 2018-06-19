@@ -971,7 +971,6 @@
         <module>molgenis-bootstrap</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-core</module>
-        <module>molgenis-data-annotators</module>
         <module>molgenis-data-cache</module>
         <module>molgenis-data-csv</module>
         <module>molgenis-data-elasticsearch</module>
@@ -994,7 +993,6 @@
         <module>molgenis-dataexplorer</module>
         <module>molgenis-fair</module>
         <module>molgenis-file-ingester</module>
-        <module>molgenis-gavin</module>
         <module>molgenis-genomebrowser</module>
         <module>molgenis-jobs</module>
         <module>molgenis-js</module>

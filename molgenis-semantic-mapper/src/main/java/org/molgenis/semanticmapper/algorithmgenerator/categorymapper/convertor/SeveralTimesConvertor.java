@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public class SeveralTimesConvertor extends AmountConvertor
 {
-	private final static Set<String> CRITERIA = Sets.newHashSet("several times", "several");
+	private static final Set<String> CRITERIA = Sets.newHashSet("several times", "several");
 
 	public boolean matchCriteria(String description)
 	{

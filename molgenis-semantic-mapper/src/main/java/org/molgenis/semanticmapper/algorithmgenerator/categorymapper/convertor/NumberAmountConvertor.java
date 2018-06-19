@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class NumberAmountConvertor extends AmountConvertor
 {
-	private final static int DEFAULT_NUMBER = 0;
+	private static final int DEFAULT_NUMBER = 0;
 
 	public boolean matchCriteria(String description)
 	{

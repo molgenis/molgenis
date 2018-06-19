@@ -14,11 +14,11 @@ import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 public class OntologyMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "Ontology";
-	public final static String ONTOLOGY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ONTOLOGY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ID = "id";
-	public final static String ONTOLOGY_IRI = "ontologyIRI";
-	public final static String ONTOLOGY_NAME = "ontologyName";
+	public static final String ID = "id";
+	public static final String ONTOLOGY_IRI = "ontologyIRI";
+	public static final String ONTOLOGY_NAME = "ontologyName";
 
 	private final OntologyPackage ontologyPackage;
 

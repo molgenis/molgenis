@@ -33,8 +33,8 @@ import static org.testng.AssertJUnit.assertTrue;
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	private final static String USERNAME = "molgenisUser";
-	private final static String ROLE_SU = "SU";
+	private static final String USERNAME = "molgenisUser";
+	private static final String ROLE_SU = "SU";
 	@Autowired
 	private DataService dataService;
 	@Autowired

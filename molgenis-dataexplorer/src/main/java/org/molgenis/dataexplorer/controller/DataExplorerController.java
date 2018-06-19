@@ -4,23 +4,21 @@ import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.data.*;
-import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
-import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.EntityTypeUtils;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 import org.molgenis.genomebrowser.service.GenomeBrowserService;
-import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
@@ -46,7 +44,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
@@ -63,7 +60,6 @@ public class DataExplorerController extends PluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final String MOD_ANNOTATORS = "annotators";
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
 	public static final String NAVIGATOR = "navigator";
@@ -220,20 +216,6 @@ public class DataExplorerController extends PluginController
 				model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
 				model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
 				break;
-			case MOD_ANNOTATORS:
-				// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
-				// self-explanatory
-				if (!permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-						EntityTypePermission.UPDATE_METADATA))
-				{
-					throw new EntityTypePermissionDeniedException(EntityTypePermission.UPDATE_METADATA, entityTypeId);
-				}
-				Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
-						new QueryImpl<>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityTypeId)
-										 .sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
-				model.addAttribute("annotationRun", annotationRun);
-				model.addAttribute("entityTypeId", entityTypeId);
-				break;
 		}
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -255,7 +237,6 @@ public class DataExplorerController extends PluginController
 	public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId)
 	{
 		boolean modAggregates = dataExplorerSettings.getModAggregates();
-		boolean modAnnotators = dataExplorerSettings.getModAnnotators();
 		boolean modData = dataExplorerSettings.getModData();
 		boolean modReports = dataExplorerSettings.getModReports();
 
@@ -272,11 +253,6 @@ public class DataExplorerController extends PluginController
 				EntityTypePermission.AGGREGATE_DATA))
 		{
 			modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
-		}
-		if (modAnnotators && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.UPDATE_DATA))
-		{
-			modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
 		}
 		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
 				EntityTypePermission.READ_DATA) && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
@@ -331,7 +307,7 @@ public class DataExplorerController extends PluginController
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
-		LOG.info("Download request: [" + dataRequestStr + "]");
+		LOG.info("Download request: [{}]", dataRequestStr);
 		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
 		final String fileName = getDownloadFilename(dataRequest.getEntityName(), LocalDateTime.now(),
