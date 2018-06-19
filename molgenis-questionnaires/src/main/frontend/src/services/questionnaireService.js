@@ -7,8 +7,7 @@ import {
   ResponseMetaAttribute,
   QuestionnaireEntityResponse,
   Translation,
-  PdfSection,
-  EntityFieldType
+  PdfSection
 } from '../flow.types'
 // $FlowFixMe
 import pdfMake from 'pdfmake/build/pdfmake'
