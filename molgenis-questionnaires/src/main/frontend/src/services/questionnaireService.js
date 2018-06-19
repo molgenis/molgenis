@@ -15,26 +15,6 @@ import pdfMake from 'pdfmake/build/pdfmake'
 // $FlowFixMe
 import pdfFonts from 'pdfmake/build/vfs_fonts'
 
-const compoundFields = (compound) => {
-  return compound.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
-    if (attribute.fieldType !== 'COMPOUND') {
-      accum[attribute.name] = getEmptyAnswerSlot(attribute.fieldType)
-    } else {
-      accum = {...accum, ...compoundFields(attribute)}
-    }
-    return accum
-  }, {})
-}
-const getEmptyAnswerSlot = (fieldType: EntityFieldType): [] | null => {
-  switch (fieldType) {
-    case 'MREF':
-    case 'CATEGORICAL_MREF':
-      return []
-    default:
-      return null
-  }
-}
-
 export default {
   /**
    * Takes a filled in questionnaire entity response and transforms it to a OverView object containing the
