@@ -1,108 +1,72 @@
-import type {QuestionnaireEntityResponse} from '../../../../src/flow.types'
+import type { QuestionnaireEntityResponse } from '../../../../src/flow.types'
 import questionnaireService from '../../../../src/services/questionnaireService'
 
 describe('Questionniare service', () => {
   const questionnaireOverView = {
     title: 'test questionnaire',
-    chapters:
-      [{
-        id: 'Chapter1',
-        title: 'General questions',
-        chapterSections: [
-          {
-            questionId: 'qMref',
-            questionLabel: 'mref type question',
-            answerLabel: 'MREF answer'
-          },
-          {
-            questionId: 'qBoolTrue',
-            questionLabel: 'Please answer yes or no',
-            answerLabel: 'ja'
-          },
-          {
-            questionId: 'qBoolFalse',
-            questionLabel: 'Please answer no',
-            answerLabel: 'nee'
-          },
-          {
-            questionId: 'qEnum',
-            questionLabel: 'Please choose',
-            answerLabel: 'Red, Green'
-          },
-          {
-            questionId: 'qXRef',
-            questionLabel: 'Please choose one',
-            answerLabel: 'XREF answer'
-          },
-          {
-            questionId: 'qNumber',
-            questionLabel: 'What is the answer to life the universe and everything',
-            answerLabel: '42'
-          },
-          {
-            questionId: 'qDefault',
-            questionLabel: 'What\'s my name',
-            answerLabel: 'John Doe'
-          }
-        ]
-      },
-      {
-        id: 'Chapter2',
-        title: 'Other questions',
-        chapterSections: [
-          {
-            title: 'Sub section',
-            chapterSections: [
-              {
-                title: 'Sub sub section',
-                chapterSections: [
-                  {
-                    questionId: 'qDeepSub',
-                    questionLabel: 'What is deep question',
-                    answerLabel: 'deepSub'
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }]
+    chapters: [{
+      id: 'Chapter1',
+      title: 'General questions',
+      chapterSections: [
+        {
+          questionId: 'qMref',
+          questionLabel: 'mref type question',
+          answerLabel: 'MREF answer'
+        },
+        {
+          questionId: 'qBoolTrue',
+          questionLabel: 'Please answer yes or no',
+          answerLabel: 'ja'
+        },
+        {
+          questionId: 'qBoolFalse',
+          questionLabel: 'Please answer no',
+          answerLabel: 'nee'
+        },
+        {
+          questionId: 'qEnum',
+          questionLabel: 'Please choose',
+          answerLabel: 'Red, Green'
+        },
+        {
+          questionId: 'qXRef',
+          questionLabel: 'Please choose one',
+          answerLabel: 'XREF answer'
+        },
+        {
+          questionId: 'qNumber',
+          questionLabel: 'What is the answer to life the universe and everything',
+          answerLabel: '42'
+        },
+        {
+          questionId: 'qDefault',
+          questionLabel: 'What\'s my name',
+          answerLabel: 'John Doe'
+        }
+      ]
+    },
+    {
+      id: 'Chapter2',
+      title: 'Other questions',
+      chapterSections: [
+        {
+          title: 'Sub section',
+          chapterSections: [
+            {
+              title: 'Sub sub section',
+              chapterSections: [
+                {
+                  questionId: 'qDeepSub',
+                  questionLabel: 'What is deep question',
+                  answerLabel: 'deepSub'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }]
   }
-
-  describe('buildFormDataObject', () => {
-    const response: QuestionnaireEntityResponse = {
-      href: 'http://foo.bar',
-      items: [],
-      meta: {
-        attributes: [
-          {
-            attributes: [],
-            fieldType: 'BOOL',
-            name: 'question1'
-          },
-          {
-            attributes: [
-              {
-                attributes: [],
-                fieldType: 'STRING',
-                name: 'question2'
-              }
-            ],
-            fieldType: 'COMPOUND',
-            name: 'section1'
-          }
-        ]
-      },
-      num: 0,
-      start: 0,
-      total: 100
-    }
-
-    it('should build the empty formData object', () => {
-      const formData = questionnaireService.buildFormDataObject(response)
-      expect(formData).to.deep.equal({question1: [], question2: []})
-    })
-  })
 
   describe('buildOverViewObject', () => {
     const response: QuestionnaireEntityResponse = {
@@ -336,8 +300,6 @@ describe('Questionniare service', () => {
           'style': 'answerLabel'
         }
       ]
-
-      // console.log(JSON.stringify(expectedPdfContent, null, 2))
 
       expect(pdfContent).to.deep.equal(expectedPdfContent)
     })

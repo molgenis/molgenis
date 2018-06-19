@@ -51,14 +51,19 @@
         return this.$store.state.error
       },
       questionnaireDescription () {
-        return this.$store.getters.getQuestionnaireDescription
+        return this.$store.getters.getQuestionnaireDescription(this.questionnaireId)
       },
       questionnaireLabel () {
-        return this.$store.getters.getQuestionnaireLabel
+        return this.$store.getters.getQuestionnaireLabel(this.questionnaireId)
+      },
+      questionnaireList () {
+        return this.$store.state.questionnaireList
       }
     },
     created () {
-      this.$store.dispatch('GET_QUESTIONNAIRE', this.questionnaireId)
+      if (this.questionnaireList.length < 1) {
+        this.$store.dispatch('GET_QUESTIONNAIRE_LIST')
+      }
       if (!this.$store.state.mapperOptions.booleanLabels) {
         const mapperOptions = {
           booleanLabels: {

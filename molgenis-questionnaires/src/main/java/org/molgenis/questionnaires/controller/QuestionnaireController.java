@@ -2,6 +2,9 @@ package org.molgenis.questionnaires.controller;
 
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.questionnaires.meta.Questionnaire;
+import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
@@ -12,8 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.questionnaires.meta.QuestionnaireStatus.NOT_STARTED;
 import static org.springframework.http.HttpStatus.OK;
 
 @Controller
@@ -54,7 +59,9 @@ public class QuestionnaireController extends VuePluginController
 	@GetMapping(value = "/list")
 	public List<QuestionnaireResponse> getQuestionnaires()
 	{
-		return questionnaireService.getQuestionnaires();
+		return questionnaireService.getQuestionnaires()
+								   .map(this::createQuestionnaireResponse)
+								   .collect(Collectors.toList());
 	}
 
 	/**
@@ -82,5 +89,28 @@ public class QuestionnaireController extends VuePluginController
 	public String getQuestionnaireSubmissionText(@PathVariable("id") String id)
 	{
 		return questionnaireService.getQuestionnaireSubmissionText(id);
+	}
+
+	/**
+	 * Create a {@link QuestionnaireResponse} based on an {@link EntityType}
+	 * Will set status to {@link QuestionnaireStatus}.OPEN if there is a data entry for the current user.
+	 *
+	 * @param entityType A Questionnaire EntityType
+	 * @return A {@link QuestionnaireResponse}
+	 */
+	private QuestionnaireResponse createQuestionnaireResponse(EntityType entityType)
+	{
+		String entityTypeId = entityType.getId();
+
+		QuestionnaireStatus status = NOT_STARTED;
+		Questionnaire questionnaireEntity = questionnaireService.findQuestionnaireEntity(entityTypeId);
+		if (questionnaireEntity != null)
+		{
+			status = questionnaireEntity.getStatus();
+		}
+
+		String lng = this.getLanguageCode();
+
+		return QuestionnaireResponse.create(entityTypeId, entityType.getLabel(lng), entityType.getDescription(lng), status);
 	}
 }

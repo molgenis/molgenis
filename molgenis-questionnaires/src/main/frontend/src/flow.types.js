@@ -19,6 +19,16 @@ export type Chapter = {
   children?: Array<ChapterField | ChapterFieldGroup>
 }
 
+export type QuestionnaireStatus = 'NOT_STARTED' | 'OPEN' | 'SUBMITTED'
+
+export type QuestionnaireType = {
+  id: string,
+  label: string,
+  description? : string,
+  status: QuestionnaireStatus
+
+}
+
 export type QuestionnaireState = {
   chapters: Array<Chapter>,
   error: string,

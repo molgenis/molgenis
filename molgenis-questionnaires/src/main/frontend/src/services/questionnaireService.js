@@ -7,7 +7,8 @@ import {
   ResponseMetaAttribute,
   QuestionnaireEntityResponse,
   Translation,
-  PdfSection
+  PdfSection,
+  EntityFieldType
 } from '../flow.types'
 // $FlowFixMe
 import pdfMake from 'pdfmake/build/pdfmake'
@@ -17,31 +18,24 @@ import pdfFonts from 'pdfmake/build/vfs_fonts'
 const compoundFields = (compound) => {
   return compound.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
     if (attribute.fieldType !== 'COMPOUND') {
-      accum[attribute.name] = []
+      accum[attribute.name] = getEmptyAnswerSlot(attribute.fieldType)
     } else {
       accum = {...accum, ...compoundFields(attribute)}
     }
     return accum
   }, {})
 }
+const getEmptyAnswerSlot = (fieldType: EntityFieldType): [] | null => {
+  switch (fieldType) {
+    case 'MREF':
+    case 'CATEGORICAL_MREF':
+      return []
+    default:
+      return null
+  }
+}
 
 export default {
-  /**
-   * Build a object to hold the questionnaire answers in, based on the questionnaire's metadata structure
-   * @param questionnaireResp
-   * @returns Object key values map with question ids as key and empty values
-   */
-  buildFormDataObject: function (questionnaireResp: QuestionnaireEntityResponse) {
-    return questionnaireResp.meta.attributes.reduce((accum, attribute: ResponseMetaAttribute) => {
-      if (attribute.fieldType !== 'COMPOUND') {
-        accum[attribute.name] = []
-      } else {
-        accum = {...accum, ...compoundFields(attribute)}
-      }
-      return accum
-    }, {})
-  },
-
   /**
    * Takes a filled in questionnaire entity response and transforms it to a OverView object containing the
    * questions and answers ordered into chapters, sections and subsections
