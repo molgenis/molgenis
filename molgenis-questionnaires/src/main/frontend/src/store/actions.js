@@ -1,10 +1,9 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
-import type { VuexContext } from '../flow.types.js'
+import type { VuexContext, QuestionnaireType } from '../flow.types.js'
 // $FlowFixMe
 import Vue from 'vue'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
-import questionnaireService from '../services/questionnaireService'
 
 const handleError = (commit: Function, error: Error) => {
   commit('SET_ERROR', error)
@@ -19,7 +18,7 @@ const cleanScreen = (commit: Function) => {
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}: VuexContext) {
     cleanScreen(commit)
-    return api.get('/menu/plugins/questionnaires/list').then(response => {
+    return api.get('/menu/plugins/questionnaires/list').then((response:QuestionnaireType) => {
       commit('SET_QUESTIONNAIRE_LIST', response)
       commit('SET_LOADING', false)
     }, error => {
@@ -41,40 +40,29 @@ const actions = {
     })
   },
 
-  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string):any {
+  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string): any {
     cleanScreen(commit)
-    return new Promise((resolve, reject) =>  {
+    return new Promise((resolve, reject) => {
       const currentQuestionnaireId = getters.getQuestionnaireId
+
       if (currentQuestionnaireId !== questionnaireId) {
         return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
           commit('SET_QUESTIONNAIRE', response)
-
-          //let data
-          // if (response.items.length > 0) {
           const data = response.items[0]
-          // commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
-          // } else {
-          //   data = questionnaireService.buildFormDataObject(response)
-          //   console.log(state.questionnaireRowId)
-          //   data[response.meta.idAttribute] = state.questionnaireRowId
-          // }
-
-
           const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
           commit('SET_FORM_DATA', form.formData)
-
           const chapters = form.formFields.filter(field => field.type === 'field-group')
           commit('SET_CHAPTER_FIELDS', chapters)
           // Set state to submitted to have the form validate required fields
           commit('UPDATE_FORM_STATUS', 'SUBMITTED')
-
           commit('SET_LOADING', false)
           resolve()
         }, error => {
           handleError(commit, error)
-          reject()
+          reject(error)
         })
       }
+
       commit('SET_LOADING', false)
     })
   },

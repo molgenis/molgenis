@@ -19,7 +19,10 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -91,12 +94,9 @@ public class QuestionnaireServiceTest
 		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
 
 		// =========== Test ===========
-		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
-				"description", OPEN);
-		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
-
-		assertEquals(actual, expected);
+		List<EntityType> questionnaires = questionnaireService.getQuestionnaires().collect(Collectors.toList());
+		List<EntityType> entityTypes = Collections.singletonList(entityType);
+		assertEquals(questionnaires, entityTypes);
 	}
 
 	@Test
@@ -124,12 +124,9 @@ public class QuestionnaireServiceTest
 		when(questionnaireFactory.create(entity)).thenReturn(null);
 
 		// =========== Test ===========
-		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
-				"description", NOT_STARTED);
-		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
-
-		assertEquals(actual, expected);
+		List<EntityType> questionnaires = questionnaireService.getQuestionnaires().collect(Collectors.toList());
+		List<EntityType> entityTypes = Collections.singletonList(entityType);
+		assertEquals(questionnaires, entityTypes);
 	}
 
 	@Test

@@ -37,28 +37,6 @@ const getEmptyAnswerSlot = (fieldType: EntityFieldType): [] | null => {
 
 export default {
   /**
-   * Build a object to hold the questionnaire answers in, based on the questionnaire's metadata structure
-   * @param questionnaireResp
-   * @returns Object key values map with question ids as key and empty values
-   */
-  buildFormDataObject: function (questionnaireResp: QuestionnaireEntityResponse) {
-    return questionnaireResp.meta.attributes
-      .reduce((accum, attribute: ResponseMetaAttribute) => {
-        if (!['id', 'owner', 'submitDate', 'status'].includes(attribute.name)){
-
-          if (attribute.fieldType !== 'COMPOUND') {
-            accum[attribute.name] = getEmptyAnswerSlot(attribute.fieldType)
-          } else
-          {
-            accum = {...accum, ...compoundFields(attribute)}
-          }
-        }
-        return accum
-
-      }, {})
-  },
-
-  /**
    * Takes a filled in questionnaire entity response and transforms it to a OverView object containing the
    * questions and answers ordered into chapters, sections and subsections
    * @param questionnaireResp QuestionnaireEntityResponse

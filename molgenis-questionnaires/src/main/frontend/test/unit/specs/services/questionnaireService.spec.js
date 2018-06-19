@@ -68,57 +68,6 @@ describe('Questionniare service', () => {
       }]
   }
 
-  describe.only('buildFormDataObject', () => {
-    const response: QuestionnaireEntityResponse = {
-      href: 'http://foo.bar',
-      items: [],
-      meta: {
-        attributes: [
-          {
-            fieldType: 'STRING',
-            name: 'id'
-          },
-          {
-            fieldType: 'STRING',
-            name: 'owner'
-          },
-          {
-            fieldType: 'ENUM',
-            name: 'status'
-          },
-          {
-            fieldType: 'DATE',
-            name: 'submitDate'
-          },
-          {
-            attributes: [
-              {
-                attributes: [],
-                fieldType: 'STRING',
-                name: 'question1'
-              },
-              {
-                attributes: [],
-                fieldType: 'BOOL',
-                name: 'question2'
-              }
-            ],
-            fieldType: 'COMPOUND',
-            name: 'section1'
-          }
-        ]
-      },
-      num: 0,
-      start: 0,
-      total: 100
-    }
-
-    it('should build the empty formData object', () => {
-      const formData = questionnaireService.buildFormDataObject(response)
-      expect(formData).to.deep.equal({question1: null, question2: null})
-    })
-  })
-
   describe('buildOverViewObject', () => {
     const response: QuestionnaireEntityResponse = {
       href: 'http://foo.bar',

@@ -161,16 +161,16 @@ const getters = {
     }, {})
   },
 
-  getQuestionnaireDescription: (state: QuestionnaireState): string => {
-    return state.questionnaire.meta && state.questionnaire.meta.description
+  getQuestionnaireDescription: (state: QuestionnaireState): Function => (questionnaireId: string): string => {
+    return state.questionnaireList.find((questionnaire) => questionnaire.id === questionnaireId).description
   },
 
   getQuestionnaireId: (state: QuestionnaireState): string => {
     return state.questionnaire.meta && state.questionnaire.meta.name
   },
 
-  getQuestionnaireLabel: (state: QuestionnaireState): string => {
-    return state.questionnaire.meta && state.questionnaire.meta.label
+  getQuestionnaireLabel: (state: QuestionnaireState): Function => (questionnaireId: string): string => {
+    return state.questionnaireList.find((questionnaire) => questionnaire.id === questionnaireId).label
   },
 
   getTotalNumberOfChapters: (state: QuestionnaireState): number => {
