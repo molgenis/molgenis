@@ -10,7 +10,7 @@
     </div>
 
     <div class="row">
-      <div class="col ">
+      <div class="col" v-if="{ isSuperUser }">
         <router-link to="/group/create">
           <a href="#" class="btn btn-primary float-right" role="button"><i class="fa fa-plus"></i> Add Group</a>
         </router-link>
@@ -43,6 +43,11 @@
 
   export default {
     name: 'GroupOverview',
+    data () {
+      return {
+        isSuperUser: this.$store.state.isSuperUser
+      }
+    },
     computed: {
       ...mapGetters([
         'groups'
