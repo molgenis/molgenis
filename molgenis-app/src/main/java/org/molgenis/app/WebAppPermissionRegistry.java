@@ -11,11 +11,11 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.PermissionSet.READ;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 /**
  * Registry of permissions specific for this web application.
@@ -29,7 +29,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		ObjectIdentity homeController = new PluginIdentity(HomeController.ID);
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
 		builder.putAll(homeController, new Pair<>(READ, createUserSid(ANONYMOUS_USERNAME)),
-				new Pair<>(READ, createRoleSid(ROLE_USER)));
+				new Pair<>(READ, createAuthoritySid(AUTHORITY_USER)));
 		return builder.build();
 	}
 }

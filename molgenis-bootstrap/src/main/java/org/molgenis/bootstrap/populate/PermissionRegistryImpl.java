@@ -24,9 +24,9 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.security.account.AccountService.ROLE_USER;
 import static org.molgenis.security.core.PermissionSet.READ;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.createAuthoritySid;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 @Component
 public class PermissionRegistryImpl implements PermissionRegistry
@@ -43,7 +43,7 @@ public class PermissionRegistryImpl implements PermissionRegistry
 	{
 		ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> mapBuilder = new ImmutableMultimap.Builder<>();
 
-		Sid userRoleSid = createRoleSid(ROLE_USER);
+		Sid userRoleSid = createAuthoritySid(AUTHORITY_USER);
 
 		ObjectIdentity pluginIdentity = new PluginIdentity(UserAccountController.ID);
 		mapBuilder.putAll(pluginIdentity, new Pair<>(READ, userRoleSid));

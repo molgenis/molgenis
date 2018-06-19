@@ -95,4 +95,14 @@ public class Role extends StaticEntity
 	{
 		return getEntity(GROUP, Group.class);
 	}
+
+	public Iterable<Role> getIncludes()
+	{
+		return getEntities(INCLUDES, Role.class);
+	}
+
+	public void setIncludes(Iterable<Role> roles)
+	{
+		set(INCLUDES, roles);
+	}
 }

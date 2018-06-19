@@ -12,6 +12,9 @@ import org.springframework.security.acls.model.Sid;
  */
 public class SidUtils
 {
+
+	public static final String ROLE_PREFIX = "ROLE_";
+
 	private SidUtils()
 	{
 	}
@@ -30,13 +33,26 @@ public class SidUtils
 
 	public static Sid createRoleSid(String rolename)
 	{
-		String roleAuthority = createRoleAuthority(rolename);
-		return new GrantedAuthoritySid(roleAuthority);
+		return createAuthoritySid(createRoleAuthority(rolename));
+	}
+
+	public static Sid createAuthoritySid(String authority)
+	{
+		return new GrantedAuthoritySid(authority);
 	}
 
 	public static String createRoleAuthority(String roleName)
 	{
-		return "ROLE" + '_' + roleName;
+		return ROLE_PREFIX + roleName;
+	}
+
+	public static String getRoleName(String authority)
+	{
+		if (!authority.startsWith(ROLE_PREFIX))
+		{
+			throw new IllegalArgumentException("Not an authority: " + authority);
+		}
+		return authority.substring(ROLE_PREFIX.length());
 	}
 
 	private static Sid createAnonymousSid()

@@ -1,5 +1,6 @@
 package org.molgenis.bootstrap.populate;
 
+import com.google.common.collect.ImmutableList;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleFactory;
@@ -16,10 +17,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.auth.GroupService.*;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.security.account.AccountService.ROLE_USER;
-import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.SidUtils.getRoleName;
+import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Service
 public class UsersRolesPopulatorImpl implements UsersRolesPopulator
@@ -79,7 +81,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator
 
 		// create user role
 		Role userRole = roleFactory.create();
-		userRole.setName(ROLE_USER);
+		userRole.setName(getRoleName(AUTHORITY_USER));
 		userRole.setLabel("User");
 		userRole.setLabel("en", "User");
 		userRole.setLabel("nl", "Gebruiker");
@@ -87,8 +89,50 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator
 		userRole.setDescription("en", "All authenticated users are a member of this role.");
 		userRole.setDescription("nl", "Alle geauthenticeerde gebruikers hebben deze rol.");
 
+		Role viewer = roleFactory.create();
+		viewer.setName(getRoleName(AUTHORITY_VIEWER));
+		viewer.setLabel("Viewer");
+		viewer.setDescription(
+				"Role containing permissions needed to view data. This role is included in all group viewer roles.");
+
+		Role editor = roleFactory.create();
+		editor.setName(getRoleName(AUTHORITY_EDITOR));
+		editor.setLabel("Editor");
+		editor.setDescription(
+				"Role containing permissions needed to edit data. This role is included in all group editor roles.");
+		editor.setIncludes(ImmutableList.of(viewer));
+
+		Role manager = roleFactory.create();
+		manager.setName(getRoleName(AUTHORITY_MANAGER));
+		manager.setLabel("Manager");
+		manager.setDescription(
+				"Role containing permissions needed to manage groups. This role is included in all group manager roles.");
+		manager.setIncludes(ImmutableList.of(editor));
+
+		Role aclTakeOwnership = roleFactory.create();
+		aclTakeOwnership.setName(getRoleName(ROLE_ACL_TAKE_OWNERSHIP));
+		aclTakeOwnership.setLabel("Take resource ownership");
+		aclTakeOwnership.setDescription("Role granting the permission to change resource ownership.");
+
+		Role aclModifyAuditing = roleFactory.create();
+		aclModifyAuditing.setName(getRoleName(ROLE_ACL_MODIFY_AUDITING));
+		aclModifyAuditing.setLabel("Modify access control auditing");
+		aclModifyAuditing.setDescription("Role granting the permission to modify auditing details.");
+
+		Role aclGeneralChanges = roleFactory.create();
+		aclGeneralChanges.setName(getRoleName(ROLE_ACL_GENERAL_CHANGES));
+		aclGeneralChanges.setLabel("General access control changes");
+		aclGeneralChanges.setDescription("Role granting the permission to make general access control list changes.");
+
+		Role su = roleFactory.create();
+		su.setName(getRoleName(AUTHORITY_SU));
+		su.setLabel("Superuser");
+		su.setDescription("Role granted to superusers.");
+		su.setIncludes(ImmutableList.of(aclTakeOwnership, aclModifyAuditing, aclGeneralChanges));
+
 		// persist entities
 		dataService.add(USER, Stream.of(userAdmin, anonymousUser));
-		dataService.add(ROLE, userRole);
+		dataService.add(ROLE, Stream.of(userRole, aclTakeOwnership, aclModifyAuditing, aclGeneralChanges, viewer,
+						editor, manager, su));
 	}
 }
