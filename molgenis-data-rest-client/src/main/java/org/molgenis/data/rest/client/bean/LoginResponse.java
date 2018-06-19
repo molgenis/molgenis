@@ -5,8 +5,9 @@ import org.molgenis.util.AutoGson;
 
 import javax.annotation.Nullable;
 
-@AutoGson(autoValueClass = AutoValue_LoginResponse.class)
 @AutoValue
+@AutoGson(autoValueClass = AutoValue_LoginResponse.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class LoginResponse
 {
 	public static LoginResponse create(String token, String username, String firstname, String lastname)

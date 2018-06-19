@@ -6,6 +6,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_NumericQuality.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class NumericQuality extends Quality<Double>
 {
 	public abstract Double getQualityIndicator();

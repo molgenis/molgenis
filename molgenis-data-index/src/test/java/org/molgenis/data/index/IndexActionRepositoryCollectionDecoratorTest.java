@@ -12,7 +12,7 @@ import static org.mockito.Mockito.*;
 
 public class IndexActionRepositoryCollectionDecoratorTest
 {
-	private final static String REPOSITORY_NAME = "repo";
+	private static final String REPOSITORY_NAME = "repo";
 	private RepositoryCollection decoratedRepositoryCollection;
 	private EntityType entityType;
 	private IndexActionRegisterService indexActionRegisterService;

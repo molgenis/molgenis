@@ -21,6 +21,10 @@ public class SecurityUtils
 	public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
 	public static final String ROLE_ACL_GENERAL_CHANGES = "ROLE_ACL_GENERAL_CHANGES";
 
+	private SecurityUtils()
+	{
+	}
+
 	public static String getCurrentUsername()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

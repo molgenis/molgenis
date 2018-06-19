@@ -14,12 +14,12 @@ import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 public class OntologyTermDynamicAnnotationMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "OntologyTermDynamicAnnotation";
-	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ID = "id";
-	public final static String NAME = "name";
-	public final static String VALUE = "value";
-	public final static String LABEL = "label";
+	public static final String ID = "id";
+	public static final String NAME = "name";
+	public static final String VALUE = "value";
+	public static final String LABEL = "label";
 
 	private final OntologyPackage ontologyPackage;
 

@@ -163,7 +163,7 @@ public final class EntityListenersService
 		{
 			if (!entityListeners.containsKey(requireNonNull(repoFullName)))
 			{
-				LOG.error("Repository [" + repoFullName + "] is not registered in the entity listeners service");
+				LOG.error("Repository [{}] is not registered in the entity listeners service", repoFullName);
 				throw new MolgenisDataException(
 						"Repository [" + repoFullName + "] is not registered, please contact your administrator");
 			}

@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.generator.model;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class IndexSettings
 {
 	private static final int DEFAULT_NUMBER_OF_SHARDS = 1;

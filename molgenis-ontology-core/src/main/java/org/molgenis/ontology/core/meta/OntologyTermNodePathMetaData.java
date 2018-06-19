@@ -17,11 +17,11 @@ import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 public class OntologyTermNodePathMetaData extends SystemEntityType
 {
 	public static final String SIMPLE_NAME = "OntologyTermNodePath";
-	public final static String ONTOLOGY_TERM_NODE_PATH = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String ONTOLOGY_TERM_NODE_PATH = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ID = "id";
-	public final static String NODE_PATH = "nodePath";
-	public final static String ROOT = "root";
+	public static final String ID = "id";
+	public static final String NODE_PATH = "nodePath";
+	public static final String ROOT = "root";
 
 	private OntologyPackage ontologyPackage;
 

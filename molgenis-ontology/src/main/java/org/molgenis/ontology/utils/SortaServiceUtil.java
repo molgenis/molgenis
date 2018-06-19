@@ -6,6 +6,10 @@ import java.util.*;
 
 public class SortaServiceUtil
 {
+	private SortaServiceUtil()
+	{
+	}
+
 	public static List<Map<String, Object>> getEntityAsMap(Iterable<? extends Entity> entities)
 	{
 		List<Map<String, Object>> docs = new ArrayList<>();

@@ -550,7 +550,8 @@ public class ClientFacade implements Closeable
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Explained doc with id '{}' in index '{}' for query.", searchHit.getId(), searchHit.getIndex(),
+			LOG.debug("Explained doc with id '{}' in index '{}' for query '{}'.", searchHit.getId(),
+					searchHit.getIndex(),
 					query);
 		}
 		return explainResponse.getExplanation();

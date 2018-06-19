@@ -94,7 +94,7 @@ public class FeedbackController extends AbstractStaticContentController
 		}
 		try
 		{
-			LOG.info("Sending feedback:" + form);
+			LOG.info("Sending feedback:{}", form);
 			SimpleMailMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
@@ -116,6 +116,7 @@ public class FeedbackController extends AbstractStaticContentController
 	/**
 	 * Creates a MimeMessage based on a FeedbackForm.
 	 */
+	@SuppressWarnings("squid:S3457") // do not use platform specific line ending
 	private SimpleMailMessage createFeedbackMessage(FeedbackForm form)
 	{
 		SimpleMailMessage message = new SimpleMailMessage();

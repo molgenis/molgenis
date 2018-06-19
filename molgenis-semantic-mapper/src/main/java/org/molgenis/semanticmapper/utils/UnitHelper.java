@@ -2,6 +2,10 @@ package org.molgenis.semanticmapper.utils;
 
 public class UnitHelper
 {
+	private UnitHelper()
+	{
+	}
+
 	public static String superscriptToNumber(String str)
 	{
 		str = str.replaceAll("⁰", "0");
