@@ -138,7 +138,11 @@ describe('getters', () => {
         label: 'label',
         description: 'description'
       }
-    }
+    },
+    questionnaireList: [
+      {id: 'q1', label: 'questionaire1', description: 'desc1', status: 'OPEN'},
+      {id: 'q2', label: 'questionaire2', description: 'desc2', status: 'OPEN'}
+    ]
   }
 
   describe('getChapterByIndex', () => {
@@ -269,8 +273,8 @@ describe('getters', () => {
 
   describe('getQuestionnaireLabel', () => {
     it('should return the questionnaire label', () => {
-      const actual = getters.getQuestionnaireLabel(state)
-      const expected = 'label'
+      const actual = getters.getQuestionnaireLabel(state)(state.questionnaireList[0].id)
+      const expected = state.questionnaireList[0].label
 
       expect(actual).to.equal(expected)
     })
@@ -278,8 +282,8 @@ describe('getters', () => {
 
   describe('getQuestionnaireDescription', () => {
     it('should return the questionnaire description', () => {
-      const actual = getters.getQuestionnaireDescription(state)
-      const expected = 'description'
+      const actual = getters.getQuestionnaireDescription(state)(state.questionnaireList[0].id)
+      const expected = state.questionnaireList[0].description
 
       expect(actual).to.equal(expected)
     })

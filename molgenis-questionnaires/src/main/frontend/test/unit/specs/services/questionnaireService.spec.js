@@ -45,27 +45,27 @@ describe('Questionniare service', () => {
         }
       ]
     },
-      {
-        id: 'Chapter2',
-        title: 'Other questions',
-        chapterSections: [
-          {
-            title: 'Sub section',
-            chapterSections: [
-              {
-                title: 'Sub sub section',
-                chapterSections: [
-                  {
-                    questionId: 'qDeepSub',
-                    questionLabel: 'What is deep question',
-                    answerLabel: 'deepSub'
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }]
+    {
+      id: 'Chapter2',
+      title: 'Other questions',
+      chapterSections: [
+        {
+          title: 'Sub section',
+          chapterSections: [
+            {
+              title: 'Sub sub section',
+              chapterSections: [
+                {
+                  questionId: 'qDeepSub',
+                  questionLabel: 'What is deep question',
+                  answerLabel: 'deepSub'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }]
   }
 
   describe('buildOverViewObject', () => {
