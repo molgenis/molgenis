@@ -40,7 +40,7 @@ public class BeaconMetadata extends SystemEntityType
 	@Override
 	protected void init()
 	{
-		setLabel("Beacon");
+		setLabel(SIMPLE_NAME);
 		setPackage(beaconPackage);
 		setDescription("A Beacon based on ga4gh beacon API. See https://github.com/ga4gh for more information");
 		addAttribute(ID, ROLE_ID).setDataType(STRING)

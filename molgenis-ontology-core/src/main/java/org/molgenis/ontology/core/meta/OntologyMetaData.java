@@ -31,7 +31,7 @@ public class OntologyMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Ontology");
+		setLabel(SIMPLE_NAME);
 		setPackage(ontologyPackage);
 
 		addAttribute(ID, ROLE_ID).setVisible(false);

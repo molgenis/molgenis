@@ -36,7 +36,7 @@ public class TokenMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Token");
+		setLabel(SIMPLE_NAME);
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
