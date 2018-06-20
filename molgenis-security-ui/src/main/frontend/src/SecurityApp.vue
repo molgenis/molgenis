@@ -3,5 +3,7 @@
 </template>
 
 <script>
-  export default { name: 'SecurityApp' }
+  export default {
+    name: 'SecurityApp'
+  }
 </script>

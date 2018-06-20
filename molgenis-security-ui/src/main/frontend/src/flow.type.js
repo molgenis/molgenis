@@ -14,6 +14,7 @@ export type CreateGroupCommand = {
 }
 
 export type SecurityModel = {
+  isSuperUser: boolean,
   groups: Array<Group>,
   toast: ?Toast
 }
