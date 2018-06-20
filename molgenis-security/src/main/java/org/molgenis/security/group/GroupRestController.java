@@ -11,6 +11,7 @@ import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -80,6 +81,7 @@ public class GroupRestController
 	@Transactional
 	public ResponseEntity createGroup(@RequestBody GroupCommand group)
 	{
+
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES.keySet());
 
 		groupService.persist(groupValue);

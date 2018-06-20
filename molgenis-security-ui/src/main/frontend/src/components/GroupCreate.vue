@@ -78,7 +78,11 @@
         this.isCreating = !this.isCreating
         const createGroupCommand = {groupIdentifier: this.groupIdentifier, name: this.groupName}
         this.$store.dispatch('createGroup', createGroupCommand)
-          .then(() => this.$router.push({name: 'groupOverView'}))
+          .then(() => {
+            this.$router.push({name: 'groupOverView'})
+          }, () => {
+            this.isCreating = !this.isCreating
+          })
       },
       slugify (text) {
         text = text.toString().toLowerCase().trim()

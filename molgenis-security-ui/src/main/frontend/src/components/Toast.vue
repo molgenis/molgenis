@@ -2,7 +2,7 @@
 
   <div class="row">
     <div class="col-md-12">
-      <div id="alert-message" v-if="toast" :class="'alert alert-' + toast.type" role="alert">
+      <div id="alert-message fade" v-if="toast" :class="'alert alert-' + toast.type" role="alert">
         <button @click="clearToast()" type="button" class="close">
           <span aria-hidden="true">&times;</span>
         </button>
