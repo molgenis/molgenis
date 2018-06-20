@@ -7,6 +7,8 @@ import org.molgenis.data.security.user.UserService;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
@@ -53,5 +55,16 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 		roleMembership.setRole(role);
 
 		dataService.add(ROLE_MEMBERSHIP, roleMembership);
+	}
+
+	@Override
+	public Collection<RoleMembership> getMemberships(Collection<Role> roles)
+	{
+		return dataService
+				.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+				.in(RoleMembershipMetadata.ROLE, roles)
+				.findAll()
+				.filter(RoleMembership::isCurrent)
+				.collect(Collectors.toList());
 	}
 }

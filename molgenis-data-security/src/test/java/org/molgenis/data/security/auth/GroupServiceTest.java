@@ -39,6 +39,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private DataService dataService;
 	@Mock
 	private PermissionService permissionService;
+	@Mock
+	private GroupMetadata groupMetadata;
 
 	@Mock
 	private Group group;
@@ -69,7 +71,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 											   .setDescription("description");
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
-		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService);
+		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
+				groupMetadata);
 	}
 
 	@Test

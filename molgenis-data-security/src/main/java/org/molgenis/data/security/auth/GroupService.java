@@ -2,6 +2,7 @@ package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.PackageIdentity;
@@ -30,6 +31,7 @@ public class GroupService
 	private final GroupFactory groupFactory;
 	private final RoleFactory roleFactory;
 	private final PackageFactory packageFactory;
+	private final GroupMetadata groupMetadata;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -39,13 +41,14 @@ public class GroupService
 			VIEWER, READ);
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
-			DataService dataService, PermissionService permissionService)
+			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
+		this.groupMetadata = requireNonNull(groupMetadata);
 	}
 
 	/**
@@ -81,5 +84,15 @@ public class GroupService
 				  .forEach(
 						  roleValue -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(roleValue.getLabel()),
 								  createRoleSid(roleValue.getName())));
+	}
+
+	public Group getGroup(String groupName)
+	{
+		Group group = dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, groupName).findOne();
+		if (group == null)
+		{
+			throw new UnknownEntityException(groupMetadata, groupMetadata.getAttribute(GroupMetadata.NAME), groupName);
+		}
+		return group;
 	}
 }

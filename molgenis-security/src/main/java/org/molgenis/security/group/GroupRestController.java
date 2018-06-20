@@ -1,10 +1,9 @@
 package org.molgenis.security.group;
 
+import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
 import org.molgenis.data.DataService;
-import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.GroupMetadata;
-import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
@@ -21,6 +20,8 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,12 +56,12 @@ public class GroupRestController
 
 	@PostMapping("api/plugin/group")
 	@ApiOperation(value = "Create a new Group", response = String.class)
-	@Transactional
 	@ApiResponses({
 			@ApiResponse(code = 400, message = "When the request is incorrect", response = ErrorMessageResponse.class),
 			@ApiResponse(code = 401, message = "When authentication information is missing", response = ErrorMessageResponse.class),
 			@ApiResponse(code = 403, message = "When the authenticated user has insufficient permissions", response = ErrorMessageResponse.class),
 			@ApiResponse(code = 200, message = "The name of the newly created group", response = String.class) })
+	@Transactional
 	public String createGroup(
 			@ApiParam("Alphanumeric name for the group") @Pattern(regexp = "^[a-z][a-z0-9]*(-[a-z0-9]+)*$") @RequestParam(name = "name", value = "name") String name,
 			@ApiParam("Label for the group") @RequestParam("label") String label,
@@ -102,6 +103,18 @@ public class GroupRestController
 		return dataService.findAll(GroupMetadata.GROUP, Group.class)
 						  .map(GroupResponse::fromEntity)
 						  .collect(Collectors.toList());
+	}
+
+	@GetMapping(GROUP_END_POINT + "/{groupName}/member")
+	@ResponseBody
+	public Collection<GroupMemberResponse> getMembers(@PathVariable(value = "groupName") String groupName)
+	{
+		Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
+		return roleMembershipService.getMemberships(Lists.newArrayList(roles))
+							 .stream()
+							 .map(GroupMemberResponse::fromEntity)
+							 .collect(Collectors.toList());
+
 	}
 
 	private String getManagerRoleName(GroupValue groupValue)
