@@ -10,6 +10,7 @@ public class Wizard implements Serializable
 	private static final String PREVIOUS_BUTTON_ID = "wizard-previous-button";
 	private static final String FINISH_BUTTON_ID = "wizard-finish-button";
 	private static final String NEXT_BUTTON_ID = "wizard-next-button";
+	private static final String NO_WIZARD_PAGES_DEFINED_MSG = "No wizard pages defined";
 	private static final long serialVersionUID = 1L;
 	private final List<WizardPage> pages = new LinkedList<>();
 	private int currentPageIndex = 0;
@@ -28,7 +29,7 @@ public class Wizard implements Serializable
 	{
 		if (pages.isEmpty())
 		{
-			throw new IllegalStateException("No wizard pages defined");
+			throw new IllegalStateException(NO_WIZARD_PAGES_DEFINED_MSG);
 		}
 
 		return pages.get(currentPageIndex);
@@ -38,7 +39,7 @@ public class Wizard implements Serializable
 	{
 		if (pages.isEmpty())
 		{
-			throw new IllegalStateException("No wizard pages defined");
+			throw new IllegalStateException(NO_WIZARD_PAGES_DEFINED_MSG);
 		}
 
 		return currentPageIndex == pages.size() - 1;
@@ -48,7 +49,7 @@ public class Wizard implements Serializable
 	{
 		if (pages.isEmpty())
 		{
-			throw new IllegalStateException("No wizard pages defined");
+			throw new IllegalStateException(NO_WIZARD_PAGES_DEFINED_MSG);
 		}
 
 		return currentPageIndex == 0;
