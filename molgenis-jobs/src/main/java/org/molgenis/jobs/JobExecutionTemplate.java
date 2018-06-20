@@ -78,7 +78,7 @@ class JobExecutionTemplate
 	{
 		try
 		{
-			return transactionOperations.execute((status) -> tryCall(job, progress));
+			return transactionOperations.execute(status -> tryCall(job, progress));
 		}
 		catch (TransactionException te)
 		{

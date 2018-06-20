@@ -5,6 +5,7 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorTagIdentifier.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EditorTagIdentifier
 {
 	public abstract String getId();

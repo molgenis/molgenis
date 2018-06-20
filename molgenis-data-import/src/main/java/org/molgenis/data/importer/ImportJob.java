@@ -64,7 +64,7 @@ public class ImportJob implements Runnable
 					StringUtils.join(importReport.getNewEntities(), ','));
 
 			long t = System.currentTimeMillis();
-			LOG.info("Import finished in " + (t - t0) + " msec.");
+			LOG.info("Import finished in {} msec.", t - t0);
 		}
 		catch (Exception e)
 		{

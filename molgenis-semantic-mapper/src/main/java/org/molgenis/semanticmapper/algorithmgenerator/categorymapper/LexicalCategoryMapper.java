@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class LexicalCategoryMapper extends CategoryMapper
 {
-	private final static double DEFAULT_THRESHOLD = 50.0f;
+	private static final double DEFAULT_THRESHOLD = 50.0f;
 
 	public LexicalCategoryMapper(List<CategoryRule> rules)
 	{

@@ -152,7 +152,7 @@ public class EntityHydration
 				throw new UnexpectedEnumException(type);
 		}
 
-		LOG.trace("Dehydrating attribute '{}' of type [{}] resulted in value: {}", name, type.toString(), value);
+		LOG.trace("Dehydrating attribute '{}' of type [{}] resulted in value: {}", name, type, value);
 		return value;
 	}
 }

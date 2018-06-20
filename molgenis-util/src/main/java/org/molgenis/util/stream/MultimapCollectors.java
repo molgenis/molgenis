@@ -18,6 +18,10 @@ import java.util.stream.Collectors;
  */
 public class MultimapCollectors
 {
+	private MultimapCollectors()
+	{
+	}
+
 	public static <K, V, E> Collector<E, ArrayListMultimap<K, V>, ArrayListMultimap<K, V>> toArrayListMultimap(
 			Function<E, K> keyGenerator, Function<E, V> valueGenerator)
 	{

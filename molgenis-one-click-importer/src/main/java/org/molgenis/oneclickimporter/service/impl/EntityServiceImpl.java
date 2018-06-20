@@ -76,16 +76,16 @@ public class EntityServiceImpl implements EntityService
 		// Create a dataTable
 		EntityType entityType = entityTypeFactory.create();
 
-		org.molgenis.data.meta.model.Package package_ = metaDataService.getPackage(packageName);
-		if (package_ == null)
+		Package aPackage = metaDataService.getPackage(packageName);
+		if (aPackage == null)
 		{
-			package_ = packageFactory.create(packageName);
-			package_.setLabel(packageName);
-			package_.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
-			metaDataService.addPackage(package_);
+			aPackage = packageFactory.create(packageName);
+			aPackage.setLabel(packageName);
+			aPackage.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
+			metaDataService.addPackage(aPackage);
 		}
 
-		entityType.setPackage(package_);
+		entityType.setPackage(aPackage);
 		entityType.setId(entityTypeId);
 		entityType.setLabel(oneClickImporterNamingService.getLabelWithPostFix(dataCollection.getName()));
 

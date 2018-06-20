@@ -104,7 +104,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Entity entity = findEntity(entityType);
 		if (entity == null)
 		{
-			LOG.warn("No known entity with name " + entityType.getId() + ".");
+			LOG.warn("No known entity with name {}.", entityType.getId());
 		}
 		else
 		{

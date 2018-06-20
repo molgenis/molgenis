@@ -96,6 +96,8 @@ public class ImportRunService
 	 * @param importRun the ImportRun to describe, it should have non-null start and end dates.
 	 * @return String containing the mail message.
 	 */
+	@SuppressWarnings("squid:S3457")
+	// do not use platform specific line ending
 	String createEnglishMailText(ImportRun importRun, ZoneId zone)
 	{
 		ZonedDateTime start = importRun.getStartDate().atZone(zone);

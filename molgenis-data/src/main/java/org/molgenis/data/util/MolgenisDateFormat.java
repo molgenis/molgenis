@@ -12,6 +12,10 @@ public class MolgenisDateFormat
 	public static final String FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE = "Failed to parse attribute [%s] value [%s] as datetime. Valid datetime format is [YYYY-MM-DDThh:mm:ssZ]";
 	private static final String LOOSE_PARSER_FORMAT = "[yyyy-MM-dd]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']";
 
+	private MolgenisDateFormat()
+	{
+	}
+
 	/**
 	 * Tries to parse a value representing a LocalDate.
 	 * Tries many formats, but does require that the date month and year are provided in yyyy-mm-dd form.

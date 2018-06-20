@@ -148,7 +148,7 @@ public class MappingServiceController extends PluginController
 	public String deleteMappingProject(@RequestParam() String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
-		LOG.info("Deleting mappingProject " + project.getName());
+		LOG.info("Deleting mappingProject {}", project.getName());
 		mappingService.deleteMappingProject(mappingProjectId);
 		return "redirect:" + getMappingServiceMenuUrl();
 	}
@@ -553,12 +553,12 @@ public class MappingServiceController extends PluginController
 			}
 			if (packageId != null)
 			{
-				Package package_ = dataService.getMeta().getPackage(packageId);
-				if (package_ == null)
+				Package aPackage = dataService.getMeta().getPackage(packageId);
+				if (aPackage == null)
 				{
 					throw new MolgenisDataException("No package found with ID " + packageId);
 				}
-				if (isSystemPackage(package_))
+				if (isSystemPackage(aPackage))
 				{
 					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
 				}
@@ -911,7 +911,7 @@ public class MappingServiceController extends PluginController
 	private List<EntityType> getNewSources(MappingTarget target)
 	{
 		return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
-							.filter((name) -> isValidSource(target, name))
+							.filter(name -> isValidSource(target, name))
 							.map(dataService::getEntityType)
 							.collect(Collectors.toList());
 	}

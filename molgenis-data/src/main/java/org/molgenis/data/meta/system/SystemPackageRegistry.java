@@ -32,11 +32,11 @@ public class SystemPackageRegistry
 		systemPackages.add(systemPackage);
 	}
 
-	public boolean containsPackage(Package package_)
+	public boolean containsPackage(Package aPackage)
 	{
 		for (SystemPackage systemPackage : systemPackages)
 		{
-			if (systemPackage.getId().equals(package_.getId())) return true;
+			if (systemPackage.getId().equals(aPackage.getId())) return true;
 		}
 		return false;
 	}

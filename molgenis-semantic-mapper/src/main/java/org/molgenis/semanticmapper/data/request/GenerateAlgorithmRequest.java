@@ -9,6 +9,7 @@ import java.util.List;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_GenerateAlgorithmRequest.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GenerateAlgorithmRequest
 {
 	@NotNull

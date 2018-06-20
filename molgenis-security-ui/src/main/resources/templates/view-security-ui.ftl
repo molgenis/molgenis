@@ -14,7 +14,8 @@
     window.__INITIAL_STATE__ = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
-        fallbackLng: '${fallbackLng}'
+        fallbackLng: '${fallbackLng}',
+        isSuperUser: ${isSuperUser?c}
     }
 </script>
 

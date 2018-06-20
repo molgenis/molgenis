@@ -52,18 +52,18 @@ public class Package extends StaticEntity
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityType)})
 	 *
-	 * @param package_ package
+	 * @param aPackage package
 	 * @return deep copy of package
 	 */
-	public static Package newInstance(Package package_)
+	public static Package newInstance(Package aPackage)
 	{
-		Package packageCopy = new Package(package_.getEntityType());
-		packageCopy.setId(package_.getId());
-		packageCopy.setLabel(package_.getLabel());
-		packageCopy.setDescription(package_.getDescription());
-		Package parent = package_.getParent();
+		Package packageCopy = new Package(aPackage.getEntityType());
+		packageCopy.setId(aPackage.getId());
+		packageCopy.setLabel(aPackage.getLabel());
+		packageCopy.setDescription(aPackage.getDescription());
+		Package parent = aPackage.getParent();
 		packageCopy.setParent(parent != null ? Package.newInstance(parent) : null);
-		Iterable<Tag> tags = package_.getTags();
+		Iterable<Tag> tags = aPackage.getTags();
 		packageCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
 		return packageCopy;
 	}
@@ -196,12 +196,12 @@ public class Package extends StaticEntity
 	 */
 	public Package getRootPackage()
 	{
-		Package package_ = this;
-		while (package_.getParent() != null)
+		Package aPackage = this;
+		while (aPackage.getParent() != null)
 		{
-			package_ = package_.getParent();
+			aPackage = aPackage.getParent();
 		}
-		return package_;
+		return aPackage;
 	}
 
 	/**

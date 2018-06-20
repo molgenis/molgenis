@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_NavigatorLink.class)
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class NavigatorLink
 {
 	public abstract String getHref();

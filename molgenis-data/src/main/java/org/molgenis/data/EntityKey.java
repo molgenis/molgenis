@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
  * Value object to store Entity name / Entity ID combinations for a single entity instance.
  */
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class EntityKey
 {
 	public abstract String getEntityTypeId();

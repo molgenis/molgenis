@@ -291,8 +291,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values()
 				   .stream()
 				   .map(EntityType::getPackage)
-				   .filter(Objects::nonNull)
-				   .forEach(package_ -> package_.getTags().forEach(tagValidator::validate));
+				   .filter(Objects::nonNull).forEach(aPackage -> aPackage.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
@@ -441,14 +440,14 @@ public class EmxMetaDataParser implements MetaDataParser
 			String name = packageEntity.getString(EMX_PACKAGE_NAME);
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + rowIndex);
 
-			Package package_ = packageFactory.create(name);
-			package_.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
+			Package aPackage = packageFactory.create(name);
+			aPackage.setDescription(packageEntity.getString(EMX_PACKAGE_DESCRIPTION));
 			String label = packageEntity.getString(EMX_PACKAGE_LABEL);
 			if (label == null)
 			{
 				label = name;
 			}
-			package_.setLabel(label);
+			aPackage.setLabel(label);
 
 			// Set parent package
 			String parentName = packageEntity.getString(EMX_PACKAGE_PARENT);
@@ -457,7 +456,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (!name.toLowerCase().startsWith(parentName.toLowerCase())) throw new MolgenisDataException(
 						"Inconsistent package structure. Package: '" + name + "', parent: '" + parentName + '\'');
 
-				package_.setParent(intermediateResults.getPackage(parentName));
+				aPackage.setParent(intermediateResults.getPackage(parentName));
 			}
 
 			// Set package tags
@@ -465,11 +464,11 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (tagIdentifiers != null && !tagIdentifiers.isEmpty())
 			{
 				List<Tag> tags = toTags(intermediateResults, tagIdentifiers);
-				package_.setTags(tags);
+				aPackage.setTags(tags);
 			}
 
 			// Add the complete package to the parse results
-			intermediateResults.addPackage(name, package_);
+			intermediateResults.addPackage(name, aPackage);
 		}
 	}
 
@@ -1113,20 +1112,20 @@ public class EmxMetaDataParser implements MetaDataParser
 	private void reiterateToMapRefEntity(Repository<Entity> attributeRepo, IntermediateParseResults intermediateResults)
 	{
 		int rowIndex = 1;
-		for (Entity attribute : attributeRepo)
+		for (Entity attributeEntity : attributeRepo)
 		{
-			final String entityTypeId = attribute.getString(EMX_ATTRIBUTES_ENTITY);
-			final String attributeName = attribute.getString(EMX_ATTRIBUTES_NAME);
-			final String refEntityName = (String) attribute.get(EMX_ATTRIBUTES_REF_ENTITY);
-			final String mappedByAttrName = (String) attribute.get(EMX_ATTRIBUTES_MAPPED_BY);
-			EntityType EntityType = intermediateResults.getEntityType(entityTypeId);
-			Attribute Attribute = EntityType.getAttribute(attributeName);
+			final String entityTypeId = attributeEntity.getString(EMX_ATTRIBUTES_ENTITY);
+			final String attributeName = attributeEntity.getString(EMX_ATTRIBUTES_NAME);
+			final String refEntityName = (String) attributeEntity.get(EMX_ATTRIBUTES_REF_ENTITY);
+			final String mappedByAttrName = (String) attributeEntity.get(EMX_ATTRIBUTES_MAPPED_BY);
+			EntityType entityType = intermediateResults.getEntityType(entityTypeId);
+			Attribute attribute = entityType.getAttribute(attributeName);
 
-			if (Attribute.getDataType().equals(FILE))
+			if (attribute.getDataType().equals(FILE))
 			{
 				// If attribute is of type file, set refEntity to file meta and continue to the next attribute
 				requireNonNull(dataService, format("Can't set %s if dataService is null", FILE_META));
-				Attribute.setRefEntity(dataService.getEntityType(FILE_META));
+				attribute.setRefEntity(dataService.getEntityType(FILE_META));
 				continue;
 			}
 
@@ -1150,7 +1149,7 @@ public class EmxMetaDataParser implements MetaDataParser
 											+ " unknown");
 						}
 					}
-					Attribute.setRefEntity(refEntityType);
+					attribute.setRefEntity(refEntityType);
 
 					if (mappedByAttrName != null)
 					{
@@ -1161,12 +1160,12 @@ public class EmxMetaDataParser implements MetaDataParser
 									"attributes.mappedBy error on line " + rowIndex + ": " + mappedByAttrName
 											+ " unknown");
 						}
-						Attribute.setMappedBy(mappedByAttr);
+						attribute.setMappedBy(mappedByAttr);
 					}
 				}
 				else
 				{
-					Attribute.setRefEntity(intermediateResults.getEntityType(refEntityName));
+					attribute.setRefEntity(intermediateResults.getEntityType(refEntityName));
 				}
 			}
 		}
@@ -1206,12 +1205,12 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private Package getPackage(IntermediateParseResults intermediateResults, String packageId)
 	{
-		Package package_ = intermediateResults.getPackage(packageId);
-		if (package_ == null && dataService != null)
+		Package aPackage = intermediateResults.getPackage(packageId);
+		if (aPackage == null && dataService != null)
 		{
-			package_ = dataService.findOneById(PackageMetadata.PACKAGE, packageId, Package.class);
+			aPackage = dataService.findOneById(PackageMetadata.PACKAGE, packageId, Package.class);
 		}
-		return package_;
+		return aPackage;
 	}
 
 	private static ImmutableMap<String, EntityType> getEntityTypeFromDataService(DataService dataService,

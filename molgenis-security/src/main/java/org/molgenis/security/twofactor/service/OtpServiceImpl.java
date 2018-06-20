@@ -16,7 +16,7 @@ import java.net.URLEncoder;
 public class OtpServiceImpl implements OtpService
 {
 
-	private final static Logger LOG = LoggerFactory.getLogger(OtpServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(OtpServiceImpl.class);
 
 	private final AppSettings appSettings;
 

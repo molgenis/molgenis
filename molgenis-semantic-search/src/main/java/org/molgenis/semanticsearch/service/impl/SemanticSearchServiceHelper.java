@@ -34,13 +34,13 @@ public class SemanticSearchServiceHelper
 
 	private final OntologyService ontologyService;
 
-	public final static int MAX_NUM_TAGS = 3;
+	public static final int MAX_NUM_TAGS = 3;
 
-	private final static char SPACE_CHAR = ' ';
-	private final static String COMMA_CHAR = ",";
-	private final static String CARET_CHARACTER = "^";
-	private final static String ESCAPED_CARET_CHARACTER = "\\^";
-	private final static String ILLEGAL_CHARS_REGEX = "[^\\p{L}'a-zA-Z0-9\\.~]+";
+	private static final char SPACE_CHAR = ' ';
+	private static final String COMMA_CHAR = ",";
+	private static final String CARET_CHARACTER = "^";
+	private static final String ESCAPED_CARET_CHARACTER = "\\^";
+	private static final String ILLEGAL_CHARS_REGEX = "[^\\p{L}'a-zA-Z0-9\\.~]+";
 
 	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
 			TermFrequencyService termFrequencyService)
@@ -211,15 +211,15 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> getAttributeIdentifiers(EntityType sourceEntityType)
 	{
-		Entity EntityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
+		Entity entityTypeEntity = dataService.findOne(ENTITY_TYPE_META_DATA,
 				new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
-		if (EntityTypeEntity == null) throw new MolgenisDataAccessException(
+		if (entityTypeEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
 
 		List<String> attributeIdentifiers = new ArrayList<>();
 
-		recursivelyCollectAttributeIdentifiers(EntityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
+		recursivelyCollectAttributeIdentifiers(entityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
 				attributeIdentifiers);
 
 		return attributeIdentifiers;

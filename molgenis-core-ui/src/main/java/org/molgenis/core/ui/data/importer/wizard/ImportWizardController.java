@@ -71,26 +71,9 @@ public class ImportWizardController extends AbstractWizardController
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService)
 	{
-		super(URI, "importWizard");
-		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
-		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
-		if (validationResultWizardPage == null)
-		{
-			throw new IllegalArgumentException("ValidationResultWizardPage is null");
-		}
-		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
-		this.uploadWizardPage = uploadWizardPage;
-		this.optionsWizardPage = optionsWizardPage;
-		this.validationResultWizardPage = validationResultWizardPage;
-		this.importResultsWizardPage = importResultsWizardPage;
-		this.packageWizardPage = packageWizardPage;
-		this.dataService = dataService;
-		this.importServiceFactory = importServiceFactory;
-		this.fileStore = fileStore;
-		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-		this.importRunService = importRunService;
-		this.dataService = dataService;
-		this.asyncImportJobs = Executors.newSingleThreadExecutor();
+		this(uploadWizardPage, optionsWizardPage, packageWizardPage, validationResultWizardPage,
+				importResultsWizardPage, dataService, importServiceFactory, fileStore, fileRepositoryCollectionFactory,
+				importRunService, Executors.newSingleThreadExecutor());
 	}
 
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,

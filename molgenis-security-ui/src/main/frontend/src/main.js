@@ -21,6 +21,7 @@ const router = new Router({
     },
     {
       path: '/group/create',
+      name: 'createGroup',
       component: GroupCreate
     },
     {

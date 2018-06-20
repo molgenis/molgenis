@@ -10,10 +10,8 @@
     </div>
 
     <div class="row">
-      <div class="col ">
-        <router-link to="/group/create">
-          <a href="#" class="btn btn-primary float-right" role="button"><i class="fa fa-plus"></i> Add Group</a>
-        </router-link>
+      <div class="col" v-if="isSuperUser">
+          <button @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
         <h5 class="mt-2">Groups</h5>
       </div>
     </div>
@@ -38,17 +36,27 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import Toast from './Toast'
 
   export default {
     name: 'GroupOverview',
     computed: {
       ...mapGetters([
-        'groups'
+        'groups',
+        'isSuperUser'
       ]),
       sortedGroups () {
         return [...this.groups].sort((a, b) => a.label.localeCompare(b.label))
+      }
+    },
+    methods: {
+      ...mapMutations([
+        'clearToast'
+      ]),
+      addGroup () {
+        this.clearToast()
+        this.$router.push({name: 'createGroup'})
       }
     },
     components: {

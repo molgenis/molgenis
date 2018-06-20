@@ -4,8 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("squid:S1610")
 @AutoValue
+@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class RoleValue
 {
 	public abstract String getName();

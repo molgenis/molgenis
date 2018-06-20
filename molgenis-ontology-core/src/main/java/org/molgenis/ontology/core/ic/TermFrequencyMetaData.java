@@ -16,10 +16,10 @@ public class TermFrequencyMetaData extends SystemEntityType
 	public static final String SIMPLE_NAME = "TermFrequency";
 	public static final String TERM_FREQUENCY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public final static String ID = "id";
-	public final static String TERM = "term";
-	public final static String FREQUENCY = "frequency";
-	public final static String OCCURRENCE = "occurrence";
+	public static final String ID = "id";
+	public static final String TERM = "term";
+	public static final String FREQUENCY = "frequency";
+	public static final String OCCURRENCE = "occurrence";
 
 	private final OntologyPackage ontologyPackage;
 

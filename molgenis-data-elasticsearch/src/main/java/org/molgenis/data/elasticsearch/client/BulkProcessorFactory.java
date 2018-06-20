@@ -29,7 +29,7 @@ class BulkProcessorFactory
 			{
 				if (response.hasFailures())
 				{
-					LOG.error("Error executing bulk: " + response.buildFailureMessage());
+					LOG.error("Error executing bulk: {}", response.buildFailureMessage());
 				}
 				LOG.trace("Executed bulk composed of {} actions", request.numberOfActions());
 			}

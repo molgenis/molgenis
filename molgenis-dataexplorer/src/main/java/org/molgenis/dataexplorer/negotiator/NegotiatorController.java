@@ -191,7 +191,7 @@ public class NegotiatorController extends PluginController
 			LOG.trace("NEGOTIATOR_URL: [{}]", config.getNegotiatorURL());
 			String redirectURL = restTemplate.postForLocation(config.getNegotiatorURL(), queryHttpEntity)
 											 .toASCIIString();
-			LOG.trace("Redirecting to %s", redirectURL);
+			LOG.trace("Redirecting to {}", redirectURL);
 			return redirectURL;
 		}
 		catch (RestClientException e)

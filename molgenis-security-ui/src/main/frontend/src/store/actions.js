@@ -25,6 +25,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       api.post(GROUP_ENDPOINT, payload).then(response => {
         commit('setGroups', response)
+        commit('setToast', { type: 'success', message: 'Created ' + createGroupCmd.name + ' group' })
         resolve()
       }, (error) => {
         commit('setToast', { type: 'danger', message: 'Unable to create group; ' + error })
