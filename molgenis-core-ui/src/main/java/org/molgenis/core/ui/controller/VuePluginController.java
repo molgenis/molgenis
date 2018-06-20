@@ -15,6 +15,8 @@ public abstract class VuePluginController extends PluginController
 	private AppSettings appSettings;
 	private UserAccountService userAccountService;
 
+	private String languageCode;
+
 	public VuePluginController(String uri, MenuReaderService menuReaderService, AppSettings appSettings,
 			UserAccountService userAccountService)
 	{
@@ -26,8 +28,11 @@ public abstract class VuePluginController extends PluginController
 
 	protected void init(Model model, final String pluginId)
 	{
+
+		languageCode = LocaleContextHolder.getLocale().getLanguage();
+
 		model.addAttribute("baseUrl", getBaseUrl(pluginId));
-		model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
+		model.addAttribute("lng", this.languageCode);
 		model.addAttribute("fallbackLng", appSettings.getLanguageCode());
 		model.addAttribute("isSuperUser", userAccountService.getCurrentUser().isSuperuser());
 	}
@@ -35,5 +40,9 @@ public abstract class VuePluginController extends PluginController
 	protected String getBaseUrl(final String pluginId)
 	{
 		return menuReaderService.getMenu().findMenuItemPath(pluginId);
+	}
+
+	protected String getLanguageCode() {
+		return this.languageCode == null ? appSettings.getLanguageCode() : this.languageCode;
 	}
 }

@@ -32,18 +32,20 @@ describe('QuestionnaireStart component', () => {
     localVue.filter('i18n', $t)
 
     getters = {
-      getQuestionnaireLabel: () => 'label',
-      getQuestionnaireDescription: () => 'description'
+      getQuestionnaireLabel: () => () => 'label',
+      getQuestionnaireDescription: () => () => 'description',
+      questionnaireList: () => []
     }
 
     state = {
       mapperOptions: {},
       error: 'error',
-      loading: true
+      loading: true,
+      questionnaireList: []
     }
 
     actions = {
-      GET_QUESTIONNAIRE: td.function(),
+      GET_QUESTIONNAIRE_LIST: td.function(),
       START_QUESTIONNAIRE: td.function()
     }
 
@@ -58,9 +60,9 @@ describe('QuestionnaireStart component', () => {
   const mocks = {$t: $t}
   const propsData = {questionnaireId: 'test_quest'}
 
-  it('should dispatch the [GET_QUESTIONNAIRE] action on created', () => {
+  it('should dispatch the [GET_QUESTIONNAIRE_LIST] action on created is list is empty', () => {
     shallow(QuestionnaireStart, {propsData, store, stubs, localVue, mocks})
-    td.verify(actions.GET_QUESTIONNAIRE(td.matchers.anything(), 'test_quest', undefined))
+    td.verify(actions.GET_QUESTIONNAIRE_LIST(td.matchers.anything(), undefined, undefined))
   })
 
   it('should dispatch a mutation to set mapperOptions', () => {
