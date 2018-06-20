@@ -1,9 +1,5 @@
 package org.molgenis.data.vcf;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
@@ -14,17 +10,20 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.VcfReader;
-import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.meta.VcfMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import static com.google.common.collect.Iterators.partition;
+import static com.google.common.collect.Iterators.transform;
+import static com.google.common.collect.Streams.stream;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -34,86 +33,56 @@ import static java.util.Objects.requireNonNull;
  */
 public class VcfRepository extends AbstractRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 	public static final String DEFAULT_ATTRIBUTE_DESCRIPTION = "Description not provided";
 
 	public static final String NAME = "NAME";
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
-	private final VcfReaderFactory vcfReaderFactory;
+	public static final int BATCH_SIZE = 1000;
 	private final String entityTypeId;
 	private final VcfAttributes vcfAttributes;
 	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeFactory attrMetaFactory;
-	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
+	private VcfToEntity vcfToEntity;
+	private final File file;
 
-	public VcfRepository(File file, String entityTypeId, VcfAttributes vcfAttributes,
-			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
+	VcfRepository(File file, String entityTypeId, VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory,
+			AttributeFactory attrMetaFactory)
 	{
-		this(new VcfReaderFactoryImpl(file), entityTypeId, vcfAttributes, entityTypeFactory, attrMetaFactory);
-	}
-
-	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityTypeId, VcfAttributes vcfAttributes,
-			EntityTypeFactory entityTypeFactory, AttributeFactory attrMetaFactory)
-	{
-		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
+		this.file = requireNonNull(file);
 		this.entityTypeId = requireNonNull(entityTypeId);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
+		parseVcfMeta();
 	}
 
-	private VcfToEntity parseVcfMeta()
+	private void parseVcfMeta()
 	{
-		VcfReader reader = vcfReaderFactory.get();
-		try
-		{
-			VcfMeta vcfMeta = reader.getVcfMeta();
-			return new VcfToEntity(entityTypeId, vcfMeta, vcfAttributes, entityTypeFactory, attrMetaFactory);
-		}
-		catch (IOException | RuntimeException e)
-		{
-			throw new MolgenisDataException("Failed to read VCF Metadata from file", e);
-		}
-		finally
+		withReader(reader ->
 		{
 			try
 			{
-				reader.close();
+				VcfMeta vcfMeta = reader.getVcfMeta();
+				vcfToEntity = new VcfToEntity(entityTypeId, vcfMeta, vcfAttributes, entityTypeFactory, attrMetaFactory);
 			}
-			catch (IOException e)
+			catch (IOException | RuntimeException e)
 			{
-				LOG.info("Failed to close VcfReader", e);
+				throw new MolgenisDataException("Failed to read VCF Metadata from file", e);
 			}
-		}
+		});
 	}
 
-	/**
-	 * Returns an iterator for this repository.
-	 * <p>
-	 * Use with caution! Multiple iterators will all point to the same line in the VCF file, leading to unpredictable
-	 * behaviour. If you want to get the EntityType of this repository and you can't access getEntityType(),
-	 * convert the iterator to a PeekingIterator and peek the first Entity.
-	 */
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Iterator<VcfRecord> vcfRecordIterator = Iterators.unmodifiableIterator(vcfReaderFactory.get().iterator());
-		VcfToEntity vcfToEntity = vcfToEntitySupplier.get();
-		return Iterators.transform(vcfRecordIterator, vcfToEntity::toEntity);
+		throw new UnsupportedOperationException("Use forEachBatched instead of iterator");
 	}
 
 	public EntityType getEntityType()
 	{
-		return vcfToEntitySupplier.get().getEntityType();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		vcfReaderFactory.close();
+		return vcfToEntity.getEntityType();
 	}
 
 	@Override
@@ -125,7 +94,58 @@ public class VcfRepository extends AbstractRepository
 	@Override
 	public long count()
 	{
-		return Iterables.size(this);
+		AtomicInteger counter = new AtomicInteger(0);
+		forEachBatched(batch -> counter.addAndGet(batch.size()), BATCH_SIZE);
+		return counter.get();
 	}
 
+	@Override
+	public void forEachBatched(Consumer<List<Entity>> consumer, int batchSize)
+	{
+		withReader(reader -> stream(partition(transform(reader.iterator(), vcfToEntity::toEntity), batchSize)).forEach(
+				consumer));
+	}
+
+	private void withReader(Consumer<VcfReader> consumer)
+	{
+		withInputStream(inputStream ->
+		{
+			try (VcfReader reader = new VcfReader(new InputStreamReader(inputStream, UTF_8)))
+			{
+				consumer.accept(reader);
+			}
+			catch (IOException e)
+			{
+				throw new MolgenisDataException("Failed to create VCF Reader for file" + file.getAbsolutePath(), e);
+			}
+		});
+	}
+
+	private void withInputStream(Consumer<InputStream> consumer)
+	{
+		try
+		{
+			if (file.getName().endsWith(".gz"))
+			{
+				consumer.accept(new GZIPInputStream(new FileInputStream(file)));
+			}
+			else if (file.getName().endsWith(".zip"))
+			{
+				try (ZipFile zipFile = new ZipFile(file.getPath()))
+				{
+					Enumeration<? extends ZipEntry> e = zipFile.entries();
+					ZipEntry entry = e.nextElement(); // your only file
+					consumer.accept(zipFile.getInputStream(entry));
+				}
+			}
+			else
+			{
+				consumer.accept(new FileInputStream(file));
+			}
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException("Failed to create InputStream for file" + file.getAbsolutePath(), e);
+		}
+	}
 }
