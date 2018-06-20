@@ -45,16 +45,14 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public Iterator<E> iterator()
 	{
 		Iterable<E> iterable = () -> delegate().iterator();
-		return stream(iterable.spliterator(), false).filter(entity -> isActionPermitted(entity, READ))
-													.iterator();
+		return stream(iterable.spliterator(), false).filter(entity -> isActionPermitted(entity, READ)).iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize)
 	{
 		delegate().forEachBatched(fetch, entities -> consumer.accept(
-				entities.stream().filter(entity -> isActionPermitted(entity, READ)).collect(toList())),
-				batchSize);
+				entities.stream().filter(entity -> isActionPermitted(entity, READ)).collect(toList())), batchSize);
 	}
 
 	@Override
@@ -144,12 +142,15 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		delegate().update(entities.filter((E entity) ->
 		{
-			boolean result = isActionPermitted(entity, UPDATE);
-			if (result)
+			if (isActionPermitted(entity, UPDATE))
 			{
 				updateAcl(entity);
 			}
-			return result;
+			else
+			{
+				throwPermissionException(entity, UPDATE);
+			}
+			return true;
 		}));
 	}
 
