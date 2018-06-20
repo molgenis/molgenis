@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.vcf.VcfFileExtensions;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,7 +188,7 @@ public class VcfImporterService implements ImportService
 			{
 				outRepository.add(rowBatch.stream());
 				vcfEntityCount.addAndGet(rowBatch.size());
-			}, 1000);
+			}, VcfRepository.BATCH_SIZE);
 
 			if (vcfEntityCount.get() > 0)
 			{

@@ -39,6 +39,7 @@ public class VcfRepository extends AbstractRepository
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
+	public static int BATCH_SIZE = 1000;
 	private final String entityTypeId;
 	private final VcfAttributes vcfAttributes;
 	private final EntityTypeFactory entityTypeFactory;
@@ -94,7 +95,7 @@ public class VcfRepository extends AbstractRepository
 	public long count()
 	{
 		AtomicInteger counter = new AtomicInteger(0);
-		forEachBatched(batch -> counter.addAndGet(batch.size()), 1000);
+		forEachBatched(batch -> counter.addAndGet(batch.size()), BATCH_SIZE);
 		return counter.get();
 	}
 
