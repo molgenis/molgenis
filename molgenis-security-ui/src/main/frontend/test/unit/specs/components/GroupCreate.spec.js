@@ -15,6 +15,16 @@ describe('GroupCreate component', () => {
   let state
   let store
 
+  let pushedRoute = {}
+  const $router = {
+    push: function (pushed) {
+      pushedRoute = pushed
+    }
+  }
+  const $route = {
+    path: '/group'
+  }
+
   const user = {
     name: 'admin',
     isSuperUser: true
@@ -50,7 +60,7 @@ describe('GroupCreate component', () => {
     expect(groupIdentifier.element.value).to.equal('test-group')
   })
   it('should create a new group', () => {
-    const wrapper = shallowMount(GroupCreate, { store, stubs, localVue})
+    const wrapper = shallowMount(GroupCreate, {mocks: {$router, $route}, store, stubs, localVue})
     wrapper.find('#groupNameInput').setValue('test group')
     wrapper.find('#create-btn').trigger('click')
     td.verify(actions.createGroup(td.matchers.anything(), {
