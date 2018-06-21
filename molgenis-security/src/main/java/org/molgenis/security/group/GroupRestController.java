@@ -1,36 +1,31 @@
 package org.molgenis.security.group;
 
 import com.google.common.collect.Lists;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
-import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.Pattern;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @RestController

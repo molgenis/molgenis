@@ -3,7 +3,7 @@ export type Toast = {
   message: string
 }
 
-export type User = {
+export type LoginUser = {
   name: string,
   isSuperUser: boolean
 }
@@ -20,10 +20,22 @@ export type GroupMember = {
   roleLabel: string
 }
 
+export type GroupRole = {
+  roleName: string,
+  roleLabel: string
+}
+
+export type User = {
+  id: string,
+  username: string
+}
+
 export type SecurityModel = {
-  user: User,
+  loginUser: LoginUser,
   groups: Array<Group>,
   groupMembers: { [string]: Array<GroupMember> }
+  groupRoles: { [string]: Array<GroupRole> }
+  users: Array<User>,
   toast: ?Toast
 }
 

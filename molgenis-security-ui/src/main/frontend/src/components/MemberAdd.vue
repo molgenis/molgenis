@@ -16,14 +16,16 @@
           <div class="form-group">
             <label for="userSelect">User</label>
             <select id="userSelect" v-model="userId" class="form-control">
-              <option value="abc">ABC</option>
+              <option value="">- Please select a user -</option>
+              <option v-for="user in sortedUsers" :value="user.id">{{user.username}}</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="roleSelect">Role in group</label>
-            <select id="roleSelect" v-model="roleId" class="form-control">
-              <option value="abc">ABC</option>
+            <select id="roleSelect" v-model="roleName" class="form-control">
+              <option value="">- Please select a role -</option>
+              <option v-for="role in sortedRoles" :value="role.roleName">{{role.roleLabel}}</option>
             </select>
           </div>
 
@@ -37,7 +39,7 @@
             class="btn btn-success"
             type="submit"
             @click.prevent="onSubmit"
-            :disabled="!userId && !roleId">
+            :disabled="!userId || !roleName">
             Add Member
           </button>
 
@@ -60,6 +62,7 @@
 
 <script>
   import Toast from './Toast'
+  import { mapGetters } from 'vuex'
 
   export default {
     name: 'MemberAdd',
@@ -72,23 +75,38 @@
     data () {
       return {
         userId: '',
-        roleId: '',
+        roleName: '',
         isAdding: false
       }
     },
     computed: {
+      ...mapGetters([
+        'groupRoles',
+        'users'
+      ]),
+      sortedRoles () {
+        const roles = this.groupRoles[this.groupName] || []
+        return [...roles].sort((a, b) => a.roleLabel.localeCompare(b.roleLabel))
+      },
+      sortedUsers () {
+        return [...this.users].sort((a, b) => a.username.localeCompare(b.username))
+      }
     },
     methods: {
       onSubmit () {
         this.isAdding = !this.isAdding
-        const addMemberCommand = { groupIdentifier: this.groupName, userId: this.userId, roleId: this.roleId }
-        this.$store.dispatch('addMember', addMemberCommand)
+        const addMemberCommand = { userId: this.userId, roleName: this.roleName }
+        this.$store.dispatch('addMember', {group: this.groupName, addMemberCommand})
           .then(() => {
             this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
           }, () => {
             this.isAdding = !this.isAdding
           })
       }
+    },
+    created () {
+      this.$store.dispatch('tempFetchUsers')
+      this.$store.dispatch('fetchGroupRoles', this.groupName)
     },
     components: {
       Toast

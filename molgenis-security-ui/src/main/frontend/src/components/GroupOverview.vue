@@ -10,7 +10,7 @@
     </div>
 
     <div class="row">
-      <div class="col" v-if="getUser.isSuperUser">
+      <div class="col" v-if="getLoginUser.isSuperUser">
           <button id="add-group-btn" @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
         <h3 class="mt-2">Groups</h3>
       </div>
@@ -52,7 +52,7 @@
     computed: {
       ...mapGetters([
         'groups',
-        'getUser'
+        'getLoginUser'
       ]),
       sortedGroups () {
         return [...this.groups].sort((a, b) => a.label.localeCompare(b.label))

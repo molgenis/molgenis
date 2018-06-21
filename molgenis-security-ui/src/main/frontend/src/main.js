@@ -59,6 +59,6 @@ Vue.use(i18n, {
       template: '<SecurityApp />',
       components: {SecurityApp}
     })
-    store.commit('setUser', { name: 'admin', isSuperUser: isSuperUser })
+    store.commit('setLoginUser', { name: 'admin', isSuperUser: isSuperUser })
   }
 })

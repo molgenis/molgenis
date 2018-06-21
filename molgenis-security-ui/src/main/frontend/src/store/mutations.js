@@ -1,16 +1,22 @@
 // @flow
-import type {Toast, User, Group, SecurityModel} from '../flow.type'
+import type {Toast, LoginUser, Group, SecurityModel, User} from '../flow.type'
 import Vue from 'vue'
 
 const mutations = {
-  setUser (state: SecurityModel, user: User) {
-    state.user = user
+  setLoginUser (state: SecurityModel, loginUser: LoginUser) {
+    state.loginUser = loginUser
   },
   setGroups (state: SecurityModel, groups: Array<Group>) {
     state.groups = groups
   },
+  setUsers (state: SecurityModel, users: Array<User>) {
+    state.users = users
+  },
   setGroupMembers (state: SecurityModel, { groupName, groupMembers }) {
     Vue.set(state.groupMembers, groupName, groupMembers)
+  },
+  setGroupRoles (state: SecurityModel, { groupName, groupRoles }) {
+    Vue.set(state.groupRoles, groupName, groupRoles)
   },
   clearToast (state: SecurityModel) {
     state.toast = null
