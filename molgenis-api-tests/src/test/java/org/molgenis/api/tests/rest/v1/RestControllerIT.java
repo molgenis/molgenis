@@ -73,10 +73,10 @@ public class RestControllerIT
 		// @formatter:off
 		ValidatableResponse response;
 
-		response = getWithoutToken("sys_FreemarkerTemplate");
+		response = getWithoutToken("sys_md_EntityType");
 		response.statusCode(UNAUTHORIZED)
 				.body("errors.message[0]",
-						equalTo("No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
+						equalTo("No 'Read metadata' permission on entity type 'Entity type' with id 'sys_md_EntityType'."));
 
 		response = getWithoutToken("sys_scr_ScriptType");
 		response.statusCode(UNAUTHORIZED)
@@ -161,24 +161,24 @@ public class RestControllerIT
 			   .method()
 			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
-			   .get(PATH + "sys_FreemarkerTemplate")
+			   .get(PATH + "sys_md_EntityType")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.code[0]", equalTo("DS04"))
 			   .body("errors.message[0]", equalTo(
-					   "No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
+					   "No 'Read metadata' permission on entity type 'Entity type' with id 'sys_md_EntityType'."));
 
 		given().log()
 			   .uri()
 			   .log()
 			   .method()
 			   .when()
-			   .get(PATH + "sys_FreemarkerTemplate")
+			   .get(PATH + "sys_md_EntityType")
 			   .then()
 			   .statusCode(UNAUTHORIZED)
 			   .body("errors.code[0]", equalTo("DS04"))
 			   .body("errors.message[0]", equalTo(
-					   "No 'Read metadata' permission on entity type 'Freemarker template' with id 'sys_FreemarkerTemplate'."));
+					   "No 'Read metadata' permission on entity type 'Entity type' with id 'sys_md_EntityType'."));
 		// @formatter:on
 
 		// clean up after test
