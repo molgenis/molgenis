@@ -1,7 +1,10 @@
 // @flow
-import type {Toast, Group, SecurityModel} from '../flow.type'
+import type {Toast, User, Group, SecurityModel} from '../flow.type'
 
 const mutations = {
+  setUser (state: SecurityModel, user: User) {
+    state.user = user
+  },
   setGroups (state: SecurityModel, groups: Array<Group>) {
     state.groups = groups
   },

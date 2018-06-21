@@ -1,9 +1,9 @@
 // @flow
-import type { Group, SecurityModel, Toast } from '../flow.type'
+import type { Group, SecurityModel, Toast, User } from '../flow.type'
 
 const getters = {
-  isSuperUser: (state: SecurityModel): boolean => {
-    return state.isSuperUser
+  getUser: (state: SecurityModel): User => {
+    return state.user
   },
   groups: (state: SecurityModel): Array<Group> => {
     return state.groups
