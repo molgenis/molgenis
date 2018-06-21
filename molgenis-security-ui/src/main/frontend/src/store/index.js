@@ -10,6 +10,7 @@ import type {SecurityModel} from '../flow.type'
 const state: SecurityModel = {
   user: {},
   groups: [],
+  groupMembers: {},
   toast: null
 }
 

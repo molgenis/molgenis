@@ -12,23 +12,31 @@
     <div class="row">
       <div class="col" v-if="getUser.isSuperUser">
           <button id="add-group-btn" @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
-        <h5 class="mt-2">Groups</h5>
+        <h3 class="mt-2">Groups</h3>
       </div>
     </div>
 
     <div class="row groups-listing mt-1">
       <div class="col">
-        <ul v-if="groups.length > 0" class="list-group">
-          <li v-for="group in sortedGroups" class="list-group-item">
-            <span v-if="group.label" class="font-weight-bold">{{group.label}}</span>
-          </li>
-        </ul>
+
+        <div v-if="groups.length > 0" class="list-group">
+          <h5 class="text-capitalize">
+            <router-link
+              v-for="group in sortedGroups"
+              :key="group.name"
+              :to="{ name: 'groupDetail', params: { name: group.name } }"
+              class="list-group-item list-group-item-action">
+              {{group.label}}
+            </router-link>
+          </h5>
+        </div>
+
         <ul v-else class="list-group">
           <li class="list-group-item">
             <span>{{ 'security-ui-no-groups-found' | i18n }}</span>
           </li>
-
         </ul>
+
       </div>
     </div>
 

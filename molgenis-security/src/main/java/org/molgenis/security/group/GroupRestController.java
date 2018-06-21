@@ -86,6 +86,7 @@ public class GroupRestController
 	}
 
 	@GetMapping(GROUP_END_POINT + "/{groupName}/member")
+	@ApiOperation(value = "Get group members", response = Collection.class)
 	@ResponseBody
 	public Collection<GroupMemberResponse> getMembers(@PathVariable(value = "groupName") String groupName)
 	{

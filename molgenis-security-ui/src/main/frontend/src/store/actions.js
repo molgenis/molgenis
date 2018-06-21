@@ -1,15 +1,34 @@
 // @flow
-import type { CreateGroupCommand } from '../flow.type'
+import type {CreateGroupCommand, GroupMember} from '../flow.type'
 import api from '@molgenis/molgenis-api-client'
 
 const SECURITY_API_ROUTE = '/api/plugin/security'
 const SECURITY_API_VERSION = ''
 const GROUP_ENDPOINT = SECURITY_API_ROUTE + SECURITY_API_VERSION + '/group'
 
+const toGroupMember = (response): GroupMember => {
+  return {
+    userId: response.user.id,
+    username: response.user.username,
+    roleName: response.role.roleName,
+    roleLabel: response.role.roleLabel
+  }
+}
+
 const actions = {
   'fetchGroups' ({commit}: { commit: Function }) {
     return api.get(GROUP_ENDPOINT).then(response => {
       commit('setGroups', response)
+    }, () => {
+      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    })
+  },
+
+  'fetchGroupMembers' ({commit}: { commit: Function }, groupName: String) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member'
+    return api.get(url).then(response => {
+      const groupMembers = response.map(toGroupMember)
+      commit('setGroupMembers', {groupName, groupMembers})
     }, () => {
       commit('setToast', { type: 'danger', message: 'Error when calling backend' })
     })
