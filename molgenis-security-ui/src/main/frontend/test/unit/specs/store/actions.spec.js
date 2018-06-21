@@ -41,4 +41,67 @@ describe('actions', () => {
       testUtils.testAction(actions.fetchGroups, options, done)
     })
   })
+  describe('createGroup', () => {
+    it('should create a group and displays toast', done => {
+      const createGroupCommand = {
+        groupIdentifier: 'test',
+        name: 'test group'
+      }
+
+      const generatedPayload = {
+        body: JSON.stringify({
+          name: 'test',
+          label: 'test group'
+        })
+      }
+
+      const response = {
+        name: 'test',
+        label: 'test group'
+      }
+
+      const post = td.function('api.post')
+      td.when(post('/api/plugin/security/group', generatedPayload)).thenResolve(response)
+      td.replace(api, 'post', post)
+
+      const options = {
+        payload: createGroupCommand,
+        expectedMutations: [
+          {type: 'setGroups', payload: response},
+          {type: 'setToast', payload: { type: 'success', message: 'Created test group group' }}
+        ]
+      }
+
+      testUtils.testAction(actions.createGroup, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const createGroupCommand = {
+        groupIdentifier: 'test',
+        name: 'test group'
+      }
+
+      const generatedPayload = {
+        body: JSON.stringify({
+          name: 'test',
+          label: 'test group'
+        })
+      }
+
+      const error = 'error'
+
+      const post = td.function('api.post')
+      td.when(post('/api/plugin/security/group', generatedPayload)).thenReject(error)
+      td.replace(api, 'post', post)
+
+      const options = {
+        payload: createGroupCommand,
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'danger', message: 'Unable to create group; ' + error }}
+        ]
+      }
+
+      testUtils.testAction(actions.createGroup, options, done)
+    })
+  })
 })

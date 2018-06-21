@@ -8,7 +8,7 @@ import i18n from '@molgenis/molgenis-i18n-js'
 
 Vue.use(Router)
 
-const {lng, fallbackLng, baseUrl} = window.__INITIAL_STATE__
+const {lng, fallbackLng, baseUrl, isSuperUser} = window.__INITIAL_STATE__
 
 const router = new Router({
   mode: 'history',
@@ -45,5 +45,6 @@ Vue.use(i18n, {
       template: '<SecurityApp />',
       components: {SecurityApp}
     })
+    store.commit('setUser', { name: 'admin', isSuperUser: isSuperUser })
   }
 })

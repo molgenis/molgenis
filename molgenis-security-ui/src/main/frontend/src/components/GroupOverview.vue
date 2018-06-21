@@ -10,8 +10,8 @@
     </div>
 
     <div class="row">
-      <div class="col" v-if="isSuperUser">
-          <button @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
+      <div class="col" v-if="getUser.isSuperUser">
+          <button id="add-group-btn" @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
         <h5 class="mt-2">Groups</h5>
       </div>
     </div>
@@ -44,7 +44,7 @@
     computed: {
       ...mapGetters([
         'groups',
-        'isSuperUser'
+        'getUser'
       ]),
       sortedGroups () {
         return [...this.groups].sort((a, b) => a.label.localeCompare(b.label))

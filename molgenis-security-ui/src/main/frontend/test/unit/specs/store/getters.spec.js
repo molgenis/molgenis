@@ -20,4 +20,15 @@ describe('getters', () => {
       expect(getters.toast(state)).to.deep.equal(state.toast)
     })
   })
+  describe('getUser', () => {
+    it('should return a user', () => {
+      const state = {
+        user: {
+          name: 'admin',
+          isSuperUser: true
+        }
+      }
+      expect(getters.getUser(state)).to.deep.equal(state.user)
+    })
+  })
 })

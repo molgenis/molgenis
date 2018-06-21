@@ -8,7 +8,7 @@ import mutations from './mutations'
 import type {SecurityModel} from '../flow.type'
 
 const state: SecurityModel = {
-  isSuperUser: window && window.hasOwnProperty('__INITIAL_STATE__') && !!window.__INITIAL_STATE__.isSuperUser,
+  user: {},
   groups: [],
   toast: null
 }
