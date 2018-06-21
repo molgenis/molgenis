@@ -168,6 +168,10 @@ public class InformationContentService
 				double diff = entry.getValue() - averageIDFValue;
 				if (diff > 0)
 				{
+					if (totalDenominator == 0)
+					{
+						throw new IllegalStateException("totalDenominator is 0");
+					}
 					wordWeightedSimilarity.put(entry.getKey(), ((diff / totalDenominator) * totalContribution));
 				}
 			}

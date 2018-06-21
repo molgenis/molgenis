@@ -138,7 +138,14 @@ public class NGramDistanceAlgorithm
 			}
 		}
 
-		return 2.0 * numMatchedToken / totalToken * 100;
+		if (totalToken == 0)
+		{
+			return 0;
+		}
+		else
+		{
+			return 2.0 * numMatchedToken / totalToken * 100;
+		}
 	}
 
 	private static int getTotalNumTokens(Map<String, Integer> inputStringTokens)
