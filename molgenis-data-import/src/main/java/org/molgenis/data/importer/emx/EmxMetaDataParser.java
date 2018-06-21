@@ -291,7 +291,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		metaDataMap.values()
 				   .stream()
 				   .map(EntityType::getPackage)
-				   .filter(Objects::nonNull).forEach(aPackage -> aPackage.getTags().forEach(tagValidator::validate));
+				   .filter(Objects::nonNull)
+				   .forEach(aPackage -> aPackage.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().forEach(entityType -> entityType.getTags().forEach(tagValidator::validate));
 		metaDataMap.values().stream().map(EntityType::getAllAttributes).forEach(attributes -> attributes.forEach(attr ->
 		{
@@ -842,7 +843,8 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (emxAttrNillable != null)
 			{
-				if (emxAttrNillable.equalsIgnoreCase("true") || emxAttrNillable.equalsIgnoreCase("false"))
+				if (emxAttrNillable.equalsIgnoreCase(TRUE.toString()) || emxAttrNillable.equalsIgnoreCase(
+						FALSE.toString()))
 				{
 					attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, EMX_ATTRIBUTES_NILLABLE));
 				}
@@ -853,8 +855,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 			if (emxIdAttrValue != null)
 			{
-				if (!emxIdAttrValue.equalsIgnoreCase("true") && !emxIdAttrValue.equalsIgnoreCase("false")
-						&& !emxIdAttrValue.equalsIgnoreCase(AUTO))
+				if (!emxIdAttrValue.equalsIgnoreCase(TRUE.toString()) && !emxIdAttrValue.equalsIgnoreCase(
+						FALSE.toString()) && !emxIdAttrValue.equalsIgnoreCase(AUTO))
 				{
 					throw new IllegalArgumentException(
 							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
@@ -1051,25 +1053,23 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (emxCompoundAttribute == null)
 				{
 					throw new IllegalArgumentException(
-							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
-									+ entityTypeId + "] must refer to an existing compound attribute on line "
-									+ rowIndex);
+							format("partOfAttribute [%s] of attribute [%s] of entity [%s] must refer to an existing compound attribute on line %d",
+									partOfAttribute, attributeName, entityTypeId, rowIndex));
 				}
 				Attribute compoundAttribute = emxCompoundAttribute.getAttr();
 
 				if (compoundAttribute.getDataType() != COMPOUND)
 				{
 					throw new IllegalArgumentException(
-							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
-									+ entityTypeId + "] must refer to a attribute of type [" + COMPOUND + "] on line "
-									+ rowIndex);
+							format("partOfAttribute [%s] of attribute [%s] of entity [%s] must refer to a attribute of type [%s] on line %d",
+									partOfAttribute, attributeName, entityTypeId, COMPOUND, rowIndex));
 				}
 
 				if (attributeName.equals(partOfAttribute))
 				{
 					throw new IllegalArgumentException(
-							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
-									+ entityTypeId + "] cannot refer to itself on line " + rowIndex);
+							format("partOfAttribute [%s] of attribute [%s] of entity [%s] cannot refer to itself on line %d",
+									partOfAttribute, attributeName, entityTypeId, rowIndex));
 				}
 				attribute.setParent(compoundAttribute);
 			}

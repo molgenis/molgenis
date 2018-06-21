@@ -19,7 +19,10 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -51,6 +54,12 @@ public class QuestionnaireServiceTest
 	@Mock
 	private StaticContentService staticContentService;
 
+	@Mock
+	private Query<EntityType> typedQuery;
+
+	@Mock
+	private Query<EntityType> query;
+
 	private QuestionnaireService questionnaireService;
 
 	private static final String QUESTIONNAIRE_ID = "test_quest";
@@ -72,8 +81,6 @@ public class QuestionnaireServiceTest
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
 
-		Query<EntityType> typedQuery = mock(Query.class);
-		Query<EntityType> query = mock(Query.class);
 		when(typedQuery.eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)).thenReturn(query);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(typedQuery);
 
@@ -91,12 +98,9 @@ public class QuestionnaireServiceTest
 		when(questionnaireFactory.create(entity)).thenReturn(questionnaire);
 
 		// =========== Test ===========
-		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
-				"description", OPEN);
-		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
-
-		assertEquals(actual, expected);
+		List<EntityType> questionnaires = questionnaireService.getQuestionnaires().collect(Collectors.toList());
+		List<EntityType> entityTypes = Collections.singletonList(entityType);
+		assertEquals(questionnaires, entityTypes);
 	}
 
 	@Test
@@ -108,8 +112,6 @@ public class QuestionnaireServiceTest
 		when(entityType.getLabel()).thenReturn("label");
 		when(entityType.getDescription()).thenReturn("description");
 
-		Query<EntityType> typedQuery = mock(Query.class);
-		Query<EntityType> query = mock(Query.class);
 		when(typedQuery.eq(EntityTypeMetadata.EXTENDS, QUESTIONNAIRE)).thenReturn(query);
 		when(dataService.query(ENTITY_TYPE_META_DATA, EntityType.class)).thenReturn(typedQuery);
 
@@ -119,27 +121,16 @@ public class QuestionnaireServiceTest
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(QUESTIONNAIRE_ID),
 				EntityTypePermission.UPDATE_DATA)).thenReturn(true);
 
-		Entity entity = null;
-		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
-		when(questionnaireFactory.create(entity)).thenReturn(null);
-
 		// =========== Test ===========
-		List<QuestionnaireResponse> actual = questionnaireService.getQuestionnaires();
-		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label",
-				"description", NOT_STARTED);
-		List<QuestionnaireResponse> expected = newArrayList(questionnaireResponse);
-
-		assertEquals(actual, expected);
+		List<EntityType> questionnaires = questionnaireService.getQuestionnaires().collect(Collectors.toList());
+		List<EntityType> entityTypes = Collections.singletonList(entityType);
+		assertEquals(questionnaires, entityTypes);
 	}
 
 	@Test
 	public void testStartQuestionnaire()
 	{
 		// =========== Setup ===========
-		Entity entity = null;
-		when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
-		when(questionnaireFactory.create(entity)).thenReturn(null);
-
 		EntityType entityType = mock(EntityType.class);
 		when(entityType.getId()).thenReturn(QUESTIONNAIRE_ID);
 		when(dataService.getEntityType(QUESTIONNAIRE_ID)).thenReturn(entityType);

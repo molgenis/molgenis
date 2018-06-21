@@ -4,6 +4,7 @@ import org.hamcrest.Matchers;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
@@ -20,10 +21,12 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -80,6 +83,8 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 
 		QuestionnaireController questionnaireController = new QuestionnaireController(questionnaireService,
 				menuReaderService, appSettings, userAccountService);
+		Model model = mock(Model.class);
+		questionnaireController.initView(model);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(questionnaireController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -102,9 +107,12 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void testGetQuestionnaireList() throws Exception
 	{
-		QuestionnaireResponse questionnaireResponse = QuestionnaireResponse.create(QUESTIONNAIRE_ID, "label", "description", NOT_STARTED);
-		List<QuestionnaireResponse> questionnaires = newArrayList(questionnaireResponse);
-		when(questionnaireService.getQuestionnaires()).thenReturn(questionnaires);
+		EntityType questionnaire = mock(EntityType.class);
+		when(questionnaire.getId()).thenReturn("test_quest");
+		when(questionnaire.getLabel("en")).thenReturn("label");
+		when(questionnaire.getDescription("en")).thenReturn("description");
+		List<EntityType> questionnaires = Arrays.asList(questionnaire);
+		when(questionnaireService.getQuestionnaires()).thenReturn(questionnaires.stream());
 
 		MvcResult result = mockMvc.perform(get(QuestionnaireController.URI + "/list"))
 								  .andExpect(status().isOk())

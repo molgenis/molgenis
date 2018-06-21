@@ -15,17 +15,17 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {
-      // '/login': {
-      //   target: 'http://localhost:8080'
-      // },
-      // '/api': {
-      //   target: 'http://localhost:8080'
-      // },
-      // '/menu/plugins/questionnaires': {
-      //   target: 'http://localhost:8080'
-      // }
-    },
+    // proxyTable: {
+    //   '/login': {
+    //     target: 'http://localhost:8080'
+    //   },
+    //   '/api': {
+    //     target: 'http://localhost:8080'
+    //   },
+    //   '/menu/plugins/questionnaires': {
+    //     target: 'http://localhost:8080'
+    //   }
+    // },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

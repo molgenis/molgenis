@@ -1,6 +1,9 @@
 package org.molgenis.data.vcf;
 
-import org.apache.commons.io.FileUtils;
+import com.google.common.collect.ImmutableList;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -10,24 +13,32 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.config.VcfTestConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.vcf.VcfReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileCopyUtils;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import static java.nio.file.Files.createTempFile;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { VcfRepositoryTest.Config.class })
 public class VcfRepositoryTest extends AbstractMolgenisSpringTest
@@ -41,69 +52,73 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private AttributeFactory attrMetaFactory;
 
+	@Mock
+	private Consumer<List<Entity>> batchConsumer;
+
+	@Captor
+	private ArgumentCaptor<List<Entity>> entityListCaptor;
+
 	private static File testData;
 	private static File testNoData;
+	private static File testEmptyFile;
 
 	@BeforeClass
-	public static void beforeClass() throws IOException
+	public void beforeClass() throws IOException
 	{
-		InputStream in_data = VcfRepositoryTest.class.getResourceAsStream("/testdata.vcf");
-		testData = new File(FileUtils.getTempDirectory(), "testdata.vcf");
-		FileCopyUtils.copy(in_data, new FileOutputStream(testData));
+		testData = createTempFile("testdata", "vcf").toFile();
+		FileCopyUtils.copy(getClass().getResourceAsStream("/testdata.vcf"), new FileOutputStream(testData));
 
-		InputStream in_no_data = VcfRepositoryTest.class.getResourceAsStream("/testnodata.vcf");
-		testNoData = new File(FileUtils.getTempDirectory(), "testnodata.vcf");
-		FileCopyUtils.copy(in_no_data, new FileOutputStream(testNoData));
+		testNoData = createTempFile("testnodata", "vcf").toFile();
+		FileCopyUtils.copy(getClass().getResourceAsStream("/testnodata.vcf"), new FileOutputStream(testNoData));
+
+		testEmptyFile = createTempFile("empty", "vcf").toFile();
+	}
+
+	@AfterClass
+	public void afterClass()
+	{
+		testData.delete();
+		testNoData.delete();
+		testEmptyFile.delete();
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6528
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: error processing source")
-	public void testGetEntityType() throws IOException
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers")
+	public void testCreateRepositoryForEmptyFile()
 	{
-		VcfReaderFactory vcfReaderFactory = mock(VcfReaderFactory.class);
-		VcfReader vcfReader = mock(VcfReader.class);
-		doThrow(new IOException("error processing source")).when(vcfReader).getVcfMeta();
-		when(vcfReaderFactory.get()).thenReturn(vcfReader);
-
-		String entityTypeId = "entityTypeId";
-		VcfAttributes vcfAttributes = mock(VcfAttributes.class);
-		EntityTypeFactory entityTypeFactory = mock(EntityTypeFactory.class);
-		AttributeFactory attrMetaFactory = mock(AttributeFactory.class);
-		VcfRepository vcfRepository = new VcfRepository(vcfReaderFactory, entityTypeId, vcfAttributes,
-				entityTypeFactory, attrMetaFactory);
-		vcfRepository.getEntityType();
+		new VcfRepository(testEmptyFile, "test", vcfAttrs, entityTypeFactory, attrMetaFactory);
 	}
 
 	@Test
-	public void metaData() throws IOException
+	public void metaData()
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory))
-		{
-			assertEquals(vcfRepository.getName(), "testData");
-			Iterator<Attribute> it = vcfRepository.getEntityType().getAttributes().iterator();
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.CHROM, STRING);
-			assertTrue(it.hasNext());
-			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfAttributes.ALT, TEXT);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.POS, INT);
-			assertTrue(it.hasNext());
-			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfAttributes.REF, TEXT);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.FILTER, STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.QUAL, STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.ID, STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.INTERNAL_ID, STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.INFO, COMPOUND);
-			assertTrue(it.hasNext());
-		}
+		VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
+				attrMetaFactory);
+
+		assertEquals(vcfRepository.getName(), "testData");
+		Iterator<Attribute> it = vcfRepository.getEntityType().getAttributes().iterator();
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.CHROM, STRING);
+		assertTrue(it.hasNext());
+		// TEXT to handle large insertions/deletions
+		testAttribute(it.next(), VcfAttributes.ALT, TEXT);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), POS, INT);
+		assertTrue(it.hasNext());
+		// TEXT to handle large insertions/deletions
+		testAttribute(it.next(), VcfAttributes.REF, TEXT);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.FILTER, STRING);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.QUAL, STRING);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.ID, STRING);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.INTERNAL_ID, STRING);
+		assertTrue(it.hasNext());
+		testAttribute(it.next(), VcfAttributes.INFO, COMPOUND);
+		assertTrue(it.hasNext());
+
 	}
 
 	private static void testAttribute(Attribute metadata, String name, AttributeType type)
@@ -113,63 +128,42 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void iterator() throws IOException
+	public void testForEachBatched()
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory))
-		{
-			Iterator<Entity> it = vcfRepository.iterator();
+		VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
+				attrMetaFactory);
 
-			assertTrue(it.hasNext());
-			Entity entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 565286);
+		// stream the file in batches to the batchConsumer
+		vcfRepository.forEachBatched(batchConsumer, 5);
 
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 2243618);
-			assertTrue(it.hasNext());
+		// verify that the batchConsumer was called with two batches and send the batches to the captor
+		verify(batchConsumer, times(2)).accept(entityListCaptor.capture());
 
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 3171929);
-			assertTrue(it.hasNext());
+		// get the batch values from the captor
+		List<List<Entity>> allValues = entityListCaptor.getAllValues();
 
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 3172062);
+		List<List<Integer>> positions = allValues.stream()
+												 .map(batch -> batch.stream()
+																	.map(entity -> entity.getInt(POS))
+																	.collect(Collectors.toList()))
+												 .collect(Collectors.toList());
+		assertEquals(positions, ImmutableList.of(ImmutableList.of(565286, 2243618, 3171929, 3172062, 3172273),
+				ImmutableList.of(6097450, 7569187)));
 
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 3172273);
-
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 6097450);
-
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfAttributes.CHROM), "1");
-			assertEquals(entity.get(VcfAttributes.POS), 7569187);
-
-			assertFalse(it.hasNext());
-		}
+		Set<String> chroms = allValues.stream()
+									  .flatMap(batch -> batch.stream().map(entity -> entity.getString(CHROM)))
+									  .collect(Collectors.toSet());
+		assertEquals(chroms, singleton("1"));
 	}
 
 	@Test
-	public void iterator_noValues() throws IOException
+	public void iterator_noValues()
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory))
-		{
-			Iterator<Entity> it = vcfRepository.iterator();
-			assertFalse(it.hasNext());
-		}
+		VcfRepository vcfRepository = new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory,
+				attrMetaFactory);
+		vcfRepository.forEachBatched(batchConsumer, 1000);
+
+		verifyZeroInteractions(batchConsumer);
 	}
 
 	@Configuration
@@ -178,4 +172,5 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	{
 
 	}
+
 }
