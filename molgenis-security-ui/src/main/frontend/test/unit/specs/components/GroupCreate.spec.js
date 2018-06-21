@@ -15,11 +15,8 @@ describe('GroupCreate component', () => {
   let state
   let store
 
-  let pushedRoute = {}
   const $router = {
-    push: function (pushed) {
-      pushedRoute = pushed
-    }
+    push: function (pushed) {}
   }
   const $route = {
     path: '/group'
