@@ -6,12 +6,15 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.questionnaires.exception.QuestionnaireNotRowLevelSecuredException;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireFactory;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 import org.molgenis.questionnaires.service.QuestionnaireService;
+import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.stereotype.Service;
 
@@ -38,16 +41,18 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final QuestionnaireFactory questionnaireFactory;
 	private final StaticContentService staticContentService;
+	private final MutableAclClassService mutableAclClassService;
 
 	public QuestionnaireServiceImpl(DataService dataService, EntityManager entityManager,
 			UserPermissionEvaluator userPermissionEvaluator, QuestionnaireFactory questionnaireFactory,
-			StaticContentService staticContentService)
+			StaticContentService staticContentService, MutableAclClassService mutableAclClassService)
 	{
 		this.dataService = Objects.requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 		this.questionnaireFactory = requireNonNull(questionnaireFactory);
 		this.staticContentService = requireNonNull(staticContentService);
+		this.mutableAclClassService = requireNonNull(mutableAclClassService);
 	}
 
 	@Override
@@ -69,6 +74,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService
 		if (questionnaire == null)
 		{
 			EntityType questionnaireEntityType = dataService.getEntityType(entityTypeId);
+			boolean rlsEnabled = mutableAclClassService.getAclClassTypes()
+													   .contains(EntityIdentityUtils.toType(questionnaireEntityType));
+			if (!rlsEnabled)
+			{
+				throw new QuestionnaireNotRowLevelSecuredException(questionnaireEntityType);
+			}
+
 			questionnaire = questionnaireFactory.create(entityManager.create(questionnaireEntityType, POPULATE));
 			questionnaire.setOwner(getCurrentUsername());
 			questionnaire.setStatus(OPEN);

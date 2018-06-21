@@ -2,6 +2,9 @@
 import type { QuestionnaireState, Chapter, QuestionnaireType } from '../flow.types.js'
 
 const mutations = {
+  'SET_USERNAME' (state: QuestionnaireState, username: string) {
+    state.username = username
+  },
   'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
     state.navigationBlocked = block
   },

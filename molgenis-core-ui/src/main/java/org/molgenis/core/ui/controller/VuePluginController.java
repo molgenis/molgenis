@@ -13,7 +13,7 @@ public abstract class VuePluginController extends PluginController
 {
 	protected MenuReaderService menuReaderService;
 	private AppSettings appSettings;
-	private UserAccountService userAccountService;
+	protected UserAccountService userAccountService;
 
 	private String languageCode;
 
@@ -28,7 +28,6 @@ public abstract class VuePluginController extends PluginController
 
 	protected void init(Model model, final String pluginId)
 	{
-
 		languageCode = LocaleContextHolder.getLocale().getLanguage();
 
 		model.addAttribute("baseUrl", getBaseUrl(pluginId));

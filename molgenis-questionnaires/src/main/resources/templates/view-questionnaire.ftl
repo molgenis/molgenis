@@ -14,7 +14,8 @@
     window.QUESTIONNAIRE_STATE = {
         baseUrl: '${baseUrl}',
         lng: '${lng}',
-        fallbackLng: '${fallbackLng}'
+        fallbackLng: '${fallbackLng}',
+        username: '${username}'
     }
 </script>
 
