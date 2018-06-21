@@ -1,6 +1,7 @@
 package org.molgenis.security.group;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Group;
@@ -10,23 +11,31 @@ import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.molgenis.web.converter.GsonConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ContextConfiguration(classes = GroupRestControllerTest.Config.class)
+@ContextConfiguration(classes = { GroupRestControllerTest.Config.class, GsonConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
@@ -40,21 +49,33 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 
 	private GroupRestController groupRestController;
 
+	private MockMvc mockMvc;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService, dataService);
+		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService,
+				dataService);
+		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
+								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
+								 .build();
 	}
 
 	@Test
 	@WithMockUser
-	public void testCreateGroup()
+	public void testCreateGroup() throws Exception
 	{
-		GroupValue groupValue = groupValueFactory.createGroup("name", "Label", "Description of the group", true,
+		GroupValue groupValue = groupValueFactory.createGroup("name", "Label", null, true,
 				ImmutableSet.of("Manager", "Editor", "Viewer"));
 
-		groupRestController.createGroup("name", "Label", "Description of the group", true);
+		GroupCommand groupCommand = new GroupCommand("name", "Label");
+
+		mockMvc.perform(post("/api/plugin/security/group").contentType(MediaType.APPLICATION_JSON_UTF8)
+														  .content(new Gson().toJson(groupCommand)))
+			   .andExpect(status().isCreated());
 
 		verify(groupService).persist(groupValue);
 		verify(groupService).grantPermissions(groupValue);
@@ -62,13 +83,16 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	public void testGetGroup()
+	@WithMockUser
+	public void testGetGroup() throws Exception
 	{
 		Group redGroup = mock(Group.class);
 		Group greenGroup = mock(Group.class);
 		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(redGroup, greenGroup));
-		List<GroupResponse> groups = groupRestController.getGroups();
-		assertEquals(groups.size(), 2);
+
+		mockMvc.perform(get("/api/plugin/security/group"))
+			   .andExpect(status().isOk())
+			   .andExpect(jsonPath("$", hasSize(2)));
 	}
 
 	@Configuration

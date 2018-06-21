@@ -3,6 +3,11 @@ export type Toast = {
   message: string
 }
 
+export type User = {
+  name: string,
+  isSuperUser: boolean
+}
+
 export type Group = {
   name: string,
   label: string
@@ -14,7 +19,7 @@ export type CreateGroupCommand = {
 }
 
 export type SecurityModel = {
-  isSuperUser: boolean,
+  user: User,
   groups: Array<Group>,
   toast: ?Toast
 }

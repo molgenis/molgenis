@@ -46,4 +46,19 @@ describe('mutations', () => {
       expect(state.toast).to.deep.equal(payload)
     })
   })
+  describe('setUser', () => {
+    it('should set the user in the store', () => {
+      const state = {
+        user: {}
+      }
+
+      const payload = [
+        {name: 'admin', isSuperUSer: true}
+      ]
+
+      mutations.setUser(state, payload)
+
+      expect(state.user).to.deep.equal(payload)
+    })
+  })
 })

@@ -53,32 +53,10 @@ public class GroupRestController
 		this.dataService = requireNonNull(dataService);
 	}
 
-	@PostMapping("api/plugin/group")
-	@ApiOperation(value = "Create a new Group", response = String.class)
-	@Transactional
-	@ApiResponses({
-			@ApiResponse(code = 400, message = "When the request is incorrect", response = ErrorMessageResponse.class),
-			@ApiResponse(code = 401, message = "When authentication information is missing", response = ErrorMessageResponse.class),
-			@ApiResponse(code = 403, message = "When the authenticated user has insufficient permissions", response = ErrorMessageResponse.class),
-			@ApiResponse(code = 200, message = "The name of the newly created group", response = String.class) })
-	public String createGroup(
-			@ApiParam("Alphanumeric name for the group") @Pattern(regexp = "^[a-z][a-z0-9]*(-[a-z0-9]+)*$") @RequestParam(name = "name", value = "name") String name,
-			@ApiParam("Label for the group") @RequestParam("label") String label,
-			@ApiParam("Description for the group") @RequestParam(value = "description", required = false) @Nullable String description,
-			@ApiParam(value = "Indication if this group should be publicly visible (not yet implemented!)", defaultValue = "true") @RequestParam(value = "public", required = false, defaultValue = "true") boolean publiclyVisible)
-	{
-		GroupValue groupValue = groupValueFactory.createGroup(name, label, description, publiclyVisible,
-				DEFAULT_ROLES.keySet());
-
-		groupService.persist(groupValue);
-		groupService.grantPermissions(groupValue);
-		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
-
-		return groupValue.getName();
-	}
-
 	@PostMapping(GROUP_END_POINT)
+	@ApiOperation(value = "Create a new group", response = ResponseEntity.class)
 	@Transactional
+	@ApiResponses({ @ApiResponse(code = 201, message = "New group created", response = ResponseEntity.class) })
 	public ResponseEntity createGroup(@RequestBody GroupCommand group)
 	{
 
@@ -96,6 +74,8 @@ public class GroupRestController
 	}
 
 	@GetMapping(GROUP_END_POINT)
+	@ApiOperation(value = "Get list with groups", response = ResponseEntity.class)
+	@ApiResponses({ @ApiResponse(code = 200, message = "List of groupResponse object available to user", response = List.class) })
 	@ResponseBody
 	public List<GroupResponse> getGroups()
 	{
