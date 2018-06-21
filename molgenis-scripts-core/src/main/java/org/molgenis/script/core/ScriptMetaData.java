@@ -17,15 +17,31 @@ public class ScriptMetaData extends SystemEntityType
 	public static final String SCRIPT = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";
-	public static final String TYPE = "type";// The ScriptType like r
-	public static final String CONTENT = "content";// The freemarker code
-	public static final String GENERATE_TOKEN = "generateToken";// If true a security token is generated for the script
-	// (available as ${molgenisToken})
-	public static final String RESULT_FILE_EXTENSION = "resultFileExtension"; // If the script generates an outputfile,
-	// this is it's file extension
-	// (outputfile available as
-	// ${outputFile})
-	public static final String PARAMETERS = "parameters";// The names of the parameters required by this script
+
+	/**
+	 * The ScriptType like r
+	 */
+	public static final String TYPE = "type";
+
+	/**
+	 * The freemarker code
+	 */
+	public static final String CONTENT = "content";
+
+	/**
+	 * If true a security token is generated for the script. (available as ${molgenisToken})
+	 */
+	public static final String GENERATE_TOKEN = "generateToken";
+
+	/**
+	 * If the script generates an outputfile, this is it's file extension (outputfile available as ${outputFile})
+	 */
+	public static final String RESULT_FILE_EXTENSION = "resultFileExtension";
+
+	/**
+	 * The names of the parameters required by this script
+	 */
+	public static final String PARAMETERS = "parameters";
 
 	private final ScriptPackage scriptPackage;
 	private final ScriptParameterMetaData scriptParameterMetaData;
@@ -43,7 +59,7 @@ public class ScriptMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Script");
+		setLabel(SIMPLE_NAME);
 		setPackage(scriptPackage);
 
 		addAttribute(NAME, ROLE_ID).setNillable(false).setLabel("Name");

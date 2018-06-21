@@ -17,8 +17,8 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 @Component
 public class PackageMetadata extends SystemEntityType
 {
-	private static final String SIMPLE_NAME_ = "Package";
-	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
+	private static final String SIMPLE_NAME = "Package";
+	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
@@ -33,14 +33,14 @@ public class PackageMetadata extends SystemEntityType
 
 	public PackageMetadata()
 	{
-		super(SIMPLE_NAME_, PACKAGE_META);
+		super(SIMPLE_NAME, PACKAGE_META);
 	}
 
 	@Override
 	public void init()
 	{
 		setId(PACKAGE);
-		setLabel("Package");
+		setLabel(SIMPLE_NAME);
 		setDescription("Grouping of related entities");
 
 		setIndexingDepth(2);

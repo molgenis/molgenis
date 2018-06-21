@@ -105,9 +105,8 @@ class PostgreSqlUtils
 				case BOOL:
 					if (queryValue != null && !(queryValue instanceof Boolean))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Boolean.class.getSimpleName()));
+						return throwExceptionUnexpectedQueryValueType(attrName, queryValue,
+								Boolean.class.getSimpleName());
 					}
 					return queryValue;
 				case CATEGORICAL:
@@ -133,9 +132,7 @@ class PostgreSqlUtils
 				case DATE:
 					if (queryValue != null && !(queryValue instanceof LocalDate))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), LocalDate.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, LocalDate.class.getSimpleName());
 					}
 					return queryValue;
 				case DATE_TIME:
@@ -145,17 +142,13 @@ class PostgreSqlUtils
 					}
 					if (!(queryValue instanceof Instant))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Instant.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, Instant.class.getSimpleName());
 					}
 					return ((Instant) queryValue).atOffset(UTC);
 				case DECIMAL:
 					if (queryValue != null && !(queryValue instanceof Double))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Double.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, Double.class.getSimpleName());
 					}
 					return queryValue;
 				case ENUM:
@@ -190,25 +183,19 @@ class PostgreSqlUtils
 				case TEXT:
 					if (queryValue != null && !(queryValue instanceof String))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), String.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, String.class.getSimpleName());
 					}
 					return queryValue;
 				case INT:
 					if (queryValue != null && !(queryValue instanceof Integer))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Integer.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, Integer.class.getSimpleName());
 					}
 					return queryValue;
 				case LONG:
 					if (queryValue != null && !(queryValue instanceof Long))
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-										queryValue.getClass().getSimpleName(), Long.class.getSimpleName()));
+						throwExceptionUnexpectedQueryValueType(attrName, queryValue, Long.class.getSimpleName());
 					}
 					return queryValue;
 				case COMPOUND:
@@ -217,5 +204,12 @@ class PostgreSqlUtils
 					throw new UnexpectedEnumException(attrType);
 			}
 		}
+	}
+
+	private static Object throwExceptionUnexpectedQueryValueType(String attrName, Object actualType,
+			String expectedType)
+	{
+		throw new MolgenisDataException(format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+				actualType.getClass().getSimpleName(), expectedType));
 	}
 }

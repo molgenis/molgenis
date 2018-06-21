@@ -37,6 +37,6 @@ public class FreemarkerTemplateMetaData extends SystemEntityType
 									  .setNillable(false)
 									  .setUnique(true)
 									  .setValidationExpression("$('" + NAME + "').matches(" + REGEX_NAME + ").value()");
-		addAttribute(VALUE).setLabel("Value").setDataType(SCRIPT).setNillable(false);
+		addAttribute(VALUE).setLabel(VALUE).setDataType(SCRIPT).setNillable(false);
 	}
 }

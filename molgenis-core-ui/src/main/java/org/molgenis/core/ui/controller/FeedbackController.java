@@ -44,6 +44,7 @@ public class FeedbackController extends AbstractStaticContentController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
+	private static final String VIEW_FEEDBACK = "view-feedback";
 
 	private final UserService userService;
 	private final AppSettings appSettings;
@@ -75,7 +76,7 @@ public class FeedbackController extends AbstractStaticContentController
 			model.addAttribute("userName", getFormattedName(currentUser));
 			model.addAttribute("userEmail", currentUser.getEmail());
 		}
-		return "view-feedback";
+		return VIEW_FEEDBACK;
 	}
 
 	/**
@@ -90,7 +91,7 @@ public class FeedbackController extends AbstractStaticContentController
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
 			form.setErrorMessage("Invalid captcha.");
-			return "view-feedback";
+			return VIEW_FEEDBACK;
 		}
 		try
 		{
@@ -110,7 +111,7 @@ public class FeedbackController extends AbstractStaticContentController
 			LOG.error("Error sending mail", e);
 			form.setErrorMessage(MAIL_SEND_EXCEPTION_MESSAGE);
 		}
-		return "view-feedback";
+		return VIEW_FEEDBACK;
 	}
 
 	/**

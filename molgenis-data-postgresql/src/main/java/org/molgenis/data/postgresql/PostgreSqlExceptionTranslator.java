@@ -42,6 +42,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 	static final String VALUE_TOO_LONG_MSG = "One of the values being added is too long.";
 
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlExceptionTranslator.class);
+	private static final String ERROR_TRANSLATING_POSTGRES_EXC_MSG = "Error translating postgres exception: ";
+	private static final String ERROR_TRANSLATING_EXCEPTION_MSG = "Error translating exception";
 	private final EntityTypeRegistry entityTypeRegistry;
 
 	PostgreSqlExceptionTranslator(DataSource dataSource, EntityTypeRegistry entityTypeRegistry)
@@ -152,8 +154,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
-			throw new RuntimeException("Error translating exception", pSqlException);
+			LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 		String colName = matcher.group(1);
 		String tableName = matcher.group(2);
@@ -192,8 +194,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 
 		if (entityTypeDependencyMap.isEmpty()) // no matches
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
-			throw new RuntimeException("Error translating exception", pSqlException);
+			LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 
 		Set<ConstraintViolation> constraintViolations = entityTypeDependencyMap.entrySet().stream().map(entry ->
@@ -229,7 +231,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
-			throw new RuntimeException("Error translating exception", pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 		String postgreSqlType = matcher.group(1);
 
@@ -297,7 +299,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			matches = matcher.matches();
 			if (!matches)
 			{
-				throw new RuntimeException("Error translating exception", pSqlException);
+				throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 			}
 			String columnName = matcher.group(1);
 
@@ -322,14 +324,14 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 		Matcher m = Pattern.compile("\\((.*?)\\)").matcher(detailMessage);
 		if (!m.find())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
-			throw new RuntimeException("Error translating exception", pSqlException);
+			LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 		String colName = m.group(1);
 		if (!m.find())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
-			throw new RuntimeException("Error translating exception", pSqlException);
+			LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 		String value = m.group(1);
 
@@ -363,8 +365,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 										.matcher(serverErrorMessage.getMessage());
 		if (!messageMatcher.matches())
 		{
-			LOG.error("Error translating postgres exception: ", pSqlException);
-			throw new RuntimeException("Error translating exception", pSqlException);
+			LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+			throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 		}
 		return messageMatcher.group(1);
 	}
@@ -427,8 +429,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator i
 			}
 			else
 			{
-				LOG.error("Error translating postgres exception: ", pSqlException);
-				throw new RuntimeException("Error translating exception", pSqlException);
+				LOG.error(ERROR_TRANSLATING_POSTGRES_EXC_MSG, pSqlException);
+				throw new RuntimeException(ERROR_TRANSLATING_EXCEPTION_MSG, pSqlException);
 			}
 		}
 	}

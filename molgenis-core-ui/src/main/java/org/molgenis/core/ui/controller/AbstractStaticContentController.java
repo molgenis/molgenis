@@ -13,8 +13,9 @@ public abstract class AbstractStaticContentController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractStaticContentController.class);
 
-	private static final String ERRORMESSAGE_PAGE = "An error occurred trying loading this page.";
-	private static final String ERRORMESSAGE_SUBMIT = "An error occurred trying to save the content.";
+	private static final String ERROR_MESSAGE_PAGE = "An error occurred trying loading this page.";
+	private static final String ERROR_MESSAGE_SUBMIT = "An error occurred trying to save the content.";
+	private static final String ERROR_MESSAGE_ATTR = "errorMessage";
 
 	@Autowired
 	private StaticContentService staticContentService;
@@ -38,7 +39,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		catch (RuntimeException re)
 		{
 			LOG.error("", re);
-			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
+			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
 		}
 
 		return "view-staticcontent";
@@ -55,7 +56,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		catch (RuntimeException re)
 		{
 			LOG.error("", re);
-			model.addAttribute("errorMessage", ERRORMESSAGE_PAGE);
+			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_PAGE);
 		}
 
 		return "view-staticcontent-edit";
@@ -72,7 +73,7 @@ public abstract class AbstractStaticContentController extends PluginController
 		catch (RuntimeException re)
 		{
 			LOG.error("", re);
-			model.addAttribute("errorMessage", ERRORMESSAGE_SUBMIT);
+			model.addAttribute(ERROR_MESSAGE_ATTR, ERROR_MESSAGE_SUBMIT);
 		}
 		return this.initEditView(model);
 	}

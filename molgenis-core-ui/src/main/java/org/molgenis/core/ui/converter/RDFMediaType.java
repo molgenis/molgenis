@@ -10,16 +10,17 @@ import java.util.Set;
 public class RDFMediaType
 {
 	public static final MediaType TEXT_TURTLE = new MediaType("text", "turtle");
-	public static final MediaType APPLICATION_RDF_XML = new MediaType("application", "rdf+xml");
-	public static final MediaType APPLICATION_X_TURTLE = new MediaType("application", "x-turtle");
+	public static final String APPLICATION = "application";
+	public static final MediaType APPLICATION_RDF_XML = new MediaType(APPLICATION, "rdf+xml");
+	public static final MediaType APPLICATION_X_TURTLE = new MediaType(APPLICATION, "x-turtle");
 	public static final MediaType TEXT_RDF_N3 = new MediaType("text", "rdf+n3");
-	public static final MediaType APPLICATION_JSON = new MediaType("application", "json");
-	public static final MediaType APPLICATION_TRIG = new MediaType("application", "trig");
+	public static final MediaType APPLICATION_JSON = new MediaType(APPLICATION, "json");
+	public static final MediaType APPLICATION_TRIG = new MediaType(APPLICATION, "trig");
 	public static final String APPLICATION_TRIG_VALUE = "application/trig";
 	public static final String TEXT_TURTLE_VALUE = "text/turtle";
 
-	public static final MediaType APPLICATION_JSONLD = new MediaType("application", "ld+json");
-	public static final MediaType APPLICATION_NQUADS = new MediaType("application", "n-quads");
+	public static final MediaType APPLICATION_JSONLD = new MediaType(APPLICATION, "ld+json");
+	public static final MediaType APPLICATION_NQUADS = new MediaType(APPLICATION, "n-quads");
 
 	public static final Set<MediaType> rdfMediaTypes;
 

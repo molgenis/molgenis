@@ -82,7 +82,7 @@ public class AttributeMetadata extends SystemEntityType
 	public void init()
 	{
 		setId(ATTRIBUTE_META_DATA);
-		setLabel("Attribute");
+		setLabel(SIMPLE_NAME);
 		setDescription("Meta data for attributes");
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
