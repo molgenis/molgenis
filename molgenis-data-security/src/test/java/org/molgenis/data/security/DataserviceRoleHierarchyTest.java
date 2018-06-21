@@ -1,4 +1,4 @@
-package org.molgenis.security;
+package org.molgenis.data.security;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -7,7 +7,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
