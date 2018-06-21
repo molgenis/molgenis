@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
@@ -22,12 +23,14 @@ import javax.validation.constraints.Pattern;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 @RestController
@@ -37,8 +40,10 @@ public class GroupRestController
 {
 	public final static String SECURITY_API_PATH = "api/plugin/security";
 	public final static String GROUP = "/group";
+	public final static String USER = "/user";
 
 	public final static String GROUP_END_POINT = SECURITY_API_PATH + GROUP;
+	public final static String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
 
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
@@ -96,6 +101,28 @@ public class GroupRestController
 							 .map(GroupMemberResponse::fromEntity)
 							 .collect(Collectors.toList());
 
+	}
+
+	@GetMapping(GROUP_END_POINT + "/{groupName}/role")
+	@ApiOperation(value = "Get group roles", response = Collection.class)
+	@ResponseBody
+	public Collection<RoleResponse> getGroupRoles(@PathVariable(value = "groupName") String groupName)
+	{
+		Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
+		Collection<Role> roleCollection = new ArrayList<>();
+		roles.forEach(roleCollection::add);
+
+		return roleCollection.stream().map(RoleResponse::fromEntity).collect(Collectors.toList());
+	}
+
+	@GetMapping(TEMP_USER_END_POINT)
+	@ApiOperation(value = "Get all users", response = Collection.class)
+	@ResponseBody
+	public Collection<UserResponse> getUsers()
+	{
+		return dataService.findAll(UserMetaData.USER, User.class)
+				.map(UserResponse::fromEntity).
+				collect(Collectors.toList());
 	}
 
 	private String getManagerRoleName(GroupValue groupValue)
