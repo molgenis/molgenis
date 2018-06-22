@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.app.manager.controller.AppController;
 import org.molgenis.bootstrap.populate.PermissionRegistry;
+import org.molgenis.core.ui.admin.user.UserAccountController;
 import org.molgenis.core.ui.controller.FeedbackController;
 import org.molgenis.core.ui.controller.RedirectController;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
@@ -73,6 +74,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 
 		register(PLUGIN, HomeController.ID, anonymousUser, READ);
 		register(PLUGIN, HomeController.ID, user, READ);
+		register(PLUGIN, UserAccountController.ID, user, READ);
 		register(PLUGIN, AppController.ID, anonymousUser, READ);
 		register(PLUGIN, AppController.ID, user, READ);
 		register(PACKAGE, PACKAGE_BEACON, anonymousUser, READ);
