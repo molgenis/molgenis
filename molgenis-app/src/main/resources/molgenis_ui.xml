@@ -32,6 +32,7 @@
         	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
         	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
+			<plugin id="security-ui" name="Security Manager" url="security-ui"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>
