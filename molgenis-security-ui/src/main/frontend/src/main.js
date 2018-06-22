@@ -3,19 +3,30 @@ import Router from 'vue-router'
 import store from './store'
 import SecurityApp from './SecurityApp'
 import GroupOverview from './components/GroupOverview'
+import GroupCreate from './components/GroupCreate'
 import i18n from '@molgenis/molgenis-i18n-js'
 
 Vue.use(Router)
 
-const {lng, fallbackLng, baseUrl} = window.__INITIAL_STATE__
+const {lng, fallbackLng, baseUrl, isSuperUser} = window.__INITIAL_STATE__
 
 const router = new Router({
   mode: 'history',
   base: baseUrl,
   routes: [
     {
-      path: '/',
+      path: '/group',
+      name: 'groupOverView',
       component: GroupOverview
+    },
+    {
+      path: '/group/create',
+      name: 'createGroup',
+      component: GroupCreate
+    },
+    {
+      path: '/',
+      redirect: '/group'
     }
   ]
 })
@@ -34,5 +45,6 @@ Vue.use(i18n, {
       template: '<SecurityApp />',
       components: {SecurityApp}
     })
+    store.commit('setUser', { name: 'admin', isSuperUser: isSuperUser })
   }
 })

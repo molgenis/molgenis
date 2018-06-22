@@ -11,7 +11,7 @@ public class SecurityUiI18nConfig
 	public static final String NAMESPACE = "security-ui";
 
 	@Bean
-	public PropertiesMessageSource settingsMessageSource()
+	public PropertiesMessageSource securityUiMessageSource()
 	{
 		return new PropertiesMessageSource(NAMESPACE);
 	}

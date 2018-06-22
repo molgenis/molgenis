@@ -8,7 +8,9 @@ import mutations from './mutations'
 import type {SecurityModel} from '../flow.type'
 
 const state: SecurityModel = {
-  groups: []
+  user: {},
+  groups: [],
+  toast: null
 }
 
 Vue.use(Vuex)

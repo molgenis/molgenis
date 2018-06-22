@@ -34,6 +34,11 @@ public class GroupValueFactory
 		return groupBuilder.build();
 	}
 
+	public GroupValue createGroup(String groupName, String label, Collection<String> roleLabels)
+	{
+		return this.createGroup(groupName, label, null, true, roleLabels);
+	}
+
 	public static String createRoleName(String groupName, String roleLabel)
 	{
 		return (groupName + " " + roleLabel).replaceAll("[- ]+", "_").toUpperCase();

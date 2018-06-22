@@ -1,9 +1,18 @@
 // @flow
-import type {Group, SecurityModel} from '../flow.type'
+import type {Toast, User, Group, SecurityModel} from '../flow.type'
 
 const mutations = {
-  'SET_GROUPS' (state: SecurityModel, groups: Array<Group>) {
+  setUser (state: SecurityModel, user: User) {
+    state.user = user
+  },
+  setGroups (state: SecurityModel, groups: Array<Group>) {
     state.groups = groups
+  },
+  clearToast (state: SecurityModel) {
+    state.toast = null
+  },
+  setToast (state: SecurityModel, toast: Toast) {
+    state.toast = toast
   }
 }
 export default mutations

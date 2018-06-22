@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "yarn dev",
-    "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
+    "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run --browsers PhantomJS",
     "test": "yarn unit",
+    "debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --browsers Chrome",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
     "build": "node build/build.js"
   },
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@molgenis/molgenis-vue-test-utils": "^1.0.0",
+    "@vue/test-utils": "^1.0.0-beta.19",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.1.2",
@@ -95,7 +97,6 @@
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",
-    "vue-test-utils": "^1.0.0-beta.9",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",

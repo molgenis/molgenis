@@ -28,6 +28,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { InformationContentServiceTest.Config.class })
 public class InformationContentServiceTest extends AbstractMolgenisSpringTest
@@ -46,7 +47,7 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 		Set<String> expectedStemmedWordSet = Sets.newHashSet("hear", "impair", "ey", "ball");
 
 		Assert.assertEquals(actualStemmedWordSet.size(), expectedStemmedWordSet.size());
-		Assert.assertTrue(expectedStemmedWordSet.containsAll(actualStemmedWordSet));
+		assertTrue(expectedStemmedWordSet.containsAll(actualStemmedWordSet));
 	}
 
 	@Test
@@ -119,6 +120,52 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 				"hearing impairment", ontologyIri);
 		Assert.assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
 		Assert.assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
+	}
+
+	@Test
+	public void redistributedNGramScoreEmptyQuery()
+	{
+		String ontologyIri = "http://www.molgenis.org";
+
+		Entity ontologyEntity = ontologyFactory.create();
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+
+		when(dataService.findOne(ONTOLOGY,
+				new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+
+		when(dataService.count(ONTOLOGY_TERM,
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+
+		Map<String, Double> redistributedNGramScore = informationContentService.redistributedNGramScore("",
+				ontologyIri);
+		assertTrue(redistributedNGramScore.isEmpty());
+	}
+
+	@Test
+	public void redistributedNGramScoreSingleWord()
+	{
+		String ontologyIri = "http://www.molgenis.org";
+
+		Entity ontologyEntity = ontologyFactory.create();
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+
+		when(dataService.findOne(ONTOLOGY,
+				new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+
+		when(dataService.count(ONTOLOGY_TERM,
+				new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+
+		QueryRule queryRule = new QueryRule(
+				singletonList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
+		queryRule.setOperator(Operator.DIS_MAX);
+		QueryRule finalQuery = new QueryRule(
+				asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+						new QueryRule(Operator.AND), queryRule));
+		when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery))).thenReturn((long) 30);
+
+		Map<String, Double> redistributedNGramScore = informationContentService.redistributedNGramScore("hearing",
+				ontologyIri);
+		assertTrue(redistributedNGramScore.isEmpty());
 	}
 
 	@Configuration
