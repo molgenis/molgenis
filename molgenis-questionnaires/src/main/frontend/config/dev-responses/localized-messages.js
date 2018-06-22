@@ -36,7 +36,9 @@ module.exports = {
   questionnaire_submit: 'Submit',
   questionnaires_overview_title: 'Questionnaire overview',
   questionnaire_overview_loading_text: 'Loading Questionnaire overview',
+  questionnaire_overview_download_btn_label:'Download',
   questionnaire_back_to_questionnaire_list: 'Back to questionnaires list',
   questionnaire_forgotten_chapters: 'Incomplete chapters',
-  questionnaire_loading_chapter_text: 'Loading chapter data, one moment please...'
+  questionnaire_loading_chapter_text: 'Loading chapter data, one moment please...',
+  questionnaires_view_overview: 'Finished questionnaire overview'
 }

@@ -36,12 +36,12 @@ public class TokenMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Token");
+		setLabel(SIMPLE_NAME);
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(USER).setDataType(XREF).setRefEntity(userMetaData).setAggregatable(true).setNillable(false);
-		addAttribute(TOKEN_ATTR, ROLE_LABEL).setLabel("Token").setUnique(true).setNillable(false);
+		addAttribute(TOKEN_ATTR, ROLE_LABEL).setLabel(SIMPLE_NAME).setUnique(true).setNillable(false);
 		addAttribute(EXPIRATIONDATE).setDataType(DATE_TIME)
 									.setLabel("Expiration date")
 									.setNillable(true)

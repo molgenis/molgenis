@@ -23,7 +23,7 @@
       - [Scheduled Jobs](user_documentation/guide-schedule.md)
     - [Admin features](user_documentation/guide-admin.md)
       - [Customize your MOLGENIS](user_documentation/guide-customize.md)
-      - [Using the Appstore](user_documentation/guide-appstore.md)
+      - [Using the App manager](user_documentation/guide-app-manager.md)
       - [Authentication methods](user_documentation/guide-authentication.md)        
     - [Biobanks](user_documentation/biobanking.md)
       - [Biobank Directory](user_documentation/biobank-directory.md)
@@ -32,7 +32,6 @@
       - [R](user_documentation/guide-R.md)
       - [Python](user_documentation/guide-python.md)
 - Developer documentation
-    - [Start](developer_documentation/start.md)
     - [Architecture](developer_documentation/architecture.md)
     - [Technologies](developer_documentation/technologies.md)
     - API

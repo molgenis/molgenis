@@ -123,7 +123,7 @@ public class QueryValidator
 		}
 		catch (UnknownAttributeException e)
 		{
-			throw new MolgenisValidationException(new ConstraintViolation(e.getMessage()));
+			throw new MolgenisValidationException(new ConstraintViolation(e.getLocalizedMessage()));
 		}
 	}
 

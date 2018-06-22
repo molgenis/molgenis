@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -200,7 +201,7 @@ public class QueryRule
 		if (operator == Operator.AND || operator == Operator.OR)
 		{
 			throw new IllegalArgumentException(
-					"QueryRule(): Operator." + operator + " cannot be used with two arguments");
+					format("QueryRule(): Operator.%s cannot be used with two arguments", operator));
 		}
 		this.field = field;
 		this.operator = operator;
@@ -239,7 +240,7 @@ public class QueryRule
 		else
 		{
 			throw new IllegalArgumentException(
-					"QueryRule(): Operator." + operator + " cannot be used with one argument");
+					format("QueryRule(): Operator.%s cannot be used with one argument", operator));
 		}
 	}
 
@@ -253,7 +254,7 @@ public class QueryRule
 		else
 		{
 			throw new IllegalArgumentException(
-					"QueryRule(): Operator." + operator + " cannot be used with one argument");
+					format("QueryRule(): Operator.%s cannot be used with one argument", operator));
 		}
 	}
 
@@ -269,7 +270,7 @@ public class QueryRule
 		else
 		{
 			throw new IllegalArgumentException(
-					"QueryRule(): Operator '" + operator + "' cannot be used without arguments");
+					format("QueryRule(): Operator.%s cannot be used without arguments", operator));
 		}
 	}
 

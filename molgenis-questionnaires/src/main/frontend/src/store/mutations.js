@@ -1,7 +1,10 @@
 // @flow
-import type { QuestionnaireState, Chapter } from '../flow.types.js'
+import type { QuestionnaireState, Chapter, QuestionnaireType } from '../flow.types.js'
 
 const mutations = {
+  'SET_USERNAME' (state: QuestionnaireState, username: string) {
+    state.username = username
+  },
   'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
     state.navigationBlocked = block
   },
@@ -29,7 +32,7 @@ const mutations = {
     state.questionnaire = questionnaire
   },
 
-  'SET_QUESTIONNAIRE_LIST' (state: QuestionnaireState, questionnaireList: Array<*>) {
+  'SET_QUESTIONNAIRE_LIST' (state: QuestionnaireState, questionnaireList: Array<QuestionnaireType>) {
     state.questionnaireList = questionnaireList
   },
 

@@ -2,7 +2,6 @@ import actions from 'src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
-import questionnaireService from '../../../../src/services/questionnaireService'
 
 const getters = {
   getQuestionnaireId: 'test_quest'
@@ -119,47 +118,20 @@ describe('actions', () => {
     it('should call the start questionnaire uri', done => {
       const questionnaireId = 'test_quest'
       const mockResponse = {id: 'mockId'}
-      mockApiGetSuccess('/menu/plugins/questionnaires/start/test_quest', mockResponse)
 
-      const expectedMutations = [
-        {type: 'SET_ERROR', payload: ''},
-        {type: 'SET_LOADING', payload: true},
-        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id},
-        {type: 'SET_LOADING', payload: false}
-      ]
-
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
-    })
-
-    it('should commit any errors to the store', done => {
-      const questionnaireId = 'test_quest'
-      const error = 'error'
-      mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
-
-      const expectedMutations = [
-        {type: 'SET_ERROR', payload: ''},
-        {type: 'SET_LOADING', payload: true},
-        {type: 'SET_ERROR', payload: error},
-        {type: 'SET_LOADING', payload: false}
-      ]
-
-      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
-    })
-  })
-
-  describe('GET_QUESTIONNAIRE', () => {
-    it('should [GET] a questionnaire and store data in the state', done => {
-      const questionnaireId = 'other_test_quest'
-      const questionnaire = {
+      const get = td.function('api.get')
+      td.when(get('/menu/plugins/questionnaires/start/test_quest')).thenResolve(mockResponse)
+      td.when(get('/api/v2/other_test_quest?includeCategories=true')).thenResolve({
         meta: {
           label: 'Test Questionnaire',
           description: 'A questionnaire to test',
           idAttribute: 'id'
         },
-        items: []
-      }
-
-      mockApiGetSuccess('/api/v2/other_test_quest?includeCategories=true', questionnaire)
+        items: [{
+          id: 'id'
+        }]
+      })
+      td.replace(api, 'get', get)
 
       const generatedForm = {
         formFields: [
@@ -193,12 +165,99 @@ describe('actions', () => {
       }
 
       const generateForm = td.function('EntityToFormMapper.generateForm')
+      const questionnaire = {
+        meta: {
+          label: 'Test Questionnaire',
+          description: 'A questionnaire to test',
+          idAttribute: 'id'
+        },
+        items: [{
+          id: 'id'
+        }]
+      }
       td.when(generateForm(questionnaire.meta, {}, state.mapperOptions)).thenReturn(generatedForm)
       td.replace(EntityToFormMapper, 'generateForm', generateForm)
 
-      const buildFormDataObject = td.function('questionnaireService.buildFormDataObject')
-      td.when(buildFormDataObject(questionnaire)).thenReturn({})
-      td.replace(questionnaireService, 'buildFormDataObject', buildFormDataObject)
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: mockResponse.id}
+      ]
+
+      const expectedActions = [
+        {type: 'GET_QUESTIONNAIRE', payload: questionnaireId}
+      ]
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, state, expectedMutations, expectedActions, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const questionnaireId = 'test_quest'
+      const error = 'error'
+      mockApiGetError('/menu/plugins/questionnaires/start/test_quest', error)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_ERROR', payload: error},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.START_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
+    })
+  })
+
+  describe('GET_QUESTIONNAIRE', () => {
+    it('should [GET] a questionnaire and store data in the state', done => {
+      const questionnaireId = 'other_test_quest'
+      const questionnaire = {
+        meta: {
+          label: 'Test Questionnaire',
+          description: 'A questionnaire to test',
+          idAttribute: 'id'
+        },
+        items: [{
+          id: 'id'
+        }]
+      }
+
+      mockApiGetSuccess('/api/v2/other_test_quest?includeCategories=true&q=owner==testuser', questionnaire)
+
+      const generatedForm = {
+        formFields: [
+          {
+            id: 'id'
+          },
+          {
+            id: 'compound',
+            type: 'field-group',
+            children: [
+              {
+                id: 'field'
+              }
+            ]
+          }
+        ],
+        formData: {
+          id: 'id',
+          field: undefined
+        }
+      }
+
+      const state = {
+        mapperOptions: {
+          booleanLabels: {
+            trueLabel: 'Yes',
+            falseLabel: 'No',
+            nillLabel: 'No idea'
+          }
+        },
+        username: 'testuser'
+      }
+
+      const generateForm = td.function('EntityToFormMapper.generateForm')
+      td.when(generateForm(questionnaire.meta, questionnaire.items[0], state.mapperOptions)).thenReturn(generatedForm)
+      td.replace(EntityToFormMapper, 'generateForm', generateForm)
 
       const chapters = [{
         id: 'compound',
@@ -214,7 +273,6 @@ describe('actions', () => {
         {type: 'SET_ERROR', payload: ''},
         {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
-        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: 'id'},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
         {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
@@ -227,7 +285,10 @@ describe('actions', () => {
     it('should commit any errors to the store', done => {
       const questionnaireId = 'other_test_quest'
       const error = 'error'
-      mockApiGetError('/api/v2/other_test_quest?includeCategories=true', error)
+      const state = {
+        username: 'testuser'
+      }
+      mockApiGetError('/api/v2/other_test_quest?includeCategories=true&q=owner==testuser', error)
 
       const expectedMutations = [
         {type: 'SET_ERROR', payload: ''},
@@ -236,7 +297,7 @@ describe('actions', () => {
         {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
     })
   })
 

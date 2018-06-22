@@ -15,6 +15,8 @@ public class NgramDistanceAlgorithmTest
 				0.001);
 
 		assertEquals(NGramDistanceAlgorithm.stringMatching("hypertensive", "diabetes"), 0.0);
+
+		assertEquals(NGramDistanceAlgorithm.stringMatching("", ""), 0.0);
 	}
 
 	@Test

@@ -16,7 +16,7 @@ function InvalidQuestionIdException (questionId: string) {
 (InvalidQuestionIdException.prototype: any).toString = function () { return 'Unknown questionId (' + this.questionId + ')' }
 
 const isFilledInValue = (value): boolean => {
-  if (value === undefined) return false
+  if (value === undefined || value === null) return false
   if (Array.isArray(value) && value.length === 0) return false
   return value !== ''
 }
@@ -161,16 +161,16 @@ const getters = {
     }, {})
   },
 
-  getQuestionnaireDescription: (state: QuestionnaireState): string => {
-    return state.questionnaire.meta && state.questionnaire.meta.description
+  getQuestionnaireDescription: (state: QuestionnaireState): Function => (questionnaireId: string): string => {
+    return state.questionnaireList.find((questionnaire) => questionnaire.id === questionnaireId).description
   },
 
   getQuestionnaireId: (state: QuestionnaireState): string => {
     return state.questionnaire.meta && state.questionnaire.meta.name
   },
 
-  getQuestionnaireLabel: (state: QuestionnaireState): string => {
-    return state.questionnaire.meta && state.questionnaire.meta.label
+  getQuestionnaireLabel: (state: QuestionnaireState): Function => (questionnaireId: string): string => {
+    return state.questionnaireList.find((questionnaire) => questionnaire.id === questionnaireId).label
   },
 
   getTotalNumberOfChapters: (state: QuestionnaireState): number => {

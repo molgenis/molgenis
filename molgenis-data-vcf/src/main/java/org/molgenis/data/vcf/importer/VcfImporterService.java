@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.vcf.VcfFileExtensions;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -166,7 +166,6 @@ public class VcfImporterService implements ImportService
 
 		Repository<Entity> sampleRepository = createSampleRepository(addedEntities, entityType, importPackage);
 
-		Iterator<Entity> inIterator = inRepository.iterator();
 		try (Repository<Entity> outRepository = dataService.getMeta().createRepository(entityType))
 		{
 			permissionSystemService.giveUserWriteMetaPermissions(entityType);
@@ -175,7 +174,7 @@ public class VcfImporterService implements ImportService
 
 			if (sampleRepository != null)
 			{
-				int sampleEntityCount = addSampleEntities(sampleRepository, inIterator);
+				int sampleEntityCount = addSampleEntities(sampleRepository, inRepository);
 
 				report.addNewEntity(sampleRepository.getName());
 				if (sampleEntityCount > 0)
@@ -185,11 +184,12 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
+			inRepository.forEachBatched(rowBatch ->
 			{
-				vcfEntityCount.incrementAndGet();
-				return true;
-			}));
+				outRepository.add(rowBatch.stream());
+				vcfEntityCount.addAndGet(rowBatch.size());
+			}, VcfRepository.BATCH_SIZE);
+
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityTypeId, vcfEntityCount.get());
@@ -201,38 +201,38 @@ public class VcfImporterService implements ImportService
 		return report;
 	}
 
-	private int addSampleEntities(Repository<Entity> sampleRepository, Iterator<Entity> inIterator)
+	private int addSampleEntities(Repository<Entity> sampleRepository, Repository<Entity> inRepository)
 	{
-		int sampleEntityCount = 0;
-		List<Entity> batch = new ArrayList<>();
-		while (inIterator.hasNext())
+		final AtomicInteger sampleEntityCount = new AtomicInteger(0);
+		List<Entity> sampleBatch = new ArrayList<>();
+		inRepository.forEachBatched(rowBatch ->
 		{
-			Entity entity = inIterator.next();
-
-			Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
-			if (samples != null)
+			for (Entity entity : rowBatch)
 			{
-				for (Entity sample : samples)
+				Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
+				if (samples != null)
 				{
-					batch.add(sample);
-
-					if (batch.size() == BATCH_SIZE)
+					for (Entity sample : samples)
 					{
-						sampleRepository.add(batch.stream());
-						sampleEntityCount += batch.size();
-						batch.clear();
+						sampleBatch.add(sample);
+
+						if (sampleBatch.size() == BATCH_SIZE)
+						{
+							sampleRepository.add(sampleBatch.stream());
+							sampleEntityCount.addAndGet(sampleBatch.size());
+							sampleBatch.clear();
+						}
 					}
 				}
 			}
+		}, 1000);
 
-		}
-
-		if (!batch.isEmpty())
+		if (!sampleBatch.isEmpty())
 		{
-			sampleRepository.add(batch.stream());
-			sampleEntityCount += batch.size();
+			sampleRepository.add(sampleBatch.stream());
+			sampleEntityCount.addAndGet(sampleBatch.size());
 		}
-		return sampleEntityCount;
+		return sampleEntityCount.get();
 	}
 
 	private Repository<Entity> createSampleRepository(List<EntityType> addedEntities, EntityType entityType,

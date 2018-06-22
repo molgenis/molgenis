@@ -1,8 +1,12 @@
 package org.molgenis.questionnaires.service;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.response.QuestionnaireResponse;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface QuestionnaireService
 {
@@ -14,7 +18,7 @@ public interface QuestionnaireService
 	 *
 	 * @return A List of {@link QuestionnaireResponse}
 	 */
-	List<QuestionnaireResponse> getQuestionnaires();
+	Stream<EntityType> getQuestionnaires();
 
 	/**
 	 * Start a questionnaire based on ID.
@@ -38,4 +42,13 @@ public interface QuestionnaireService
 	 * @return A piece of text which can be shown after submission of a questionnaire
 	 */
 	String getQuestionnaireSubmissionText(String id);
+
+	/**
+	 * Find the single row in the Questionnaire table that belongs to the current user.
+	 * Returns null if no row is found, or the questionnaire ID does not exist.
+	 *
+	 * @param entityTypeId The ID of a questionnaire table
+	 * @return An {@link Entity} of type {@link Questionnaire} or Null
+	 */
+	Questionnaire findQuestionnaireEntity(String entityTypeId);
 }

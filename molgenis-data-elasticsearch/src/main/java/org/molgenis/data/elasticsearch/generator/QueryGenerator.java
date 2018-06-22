@@ -35,6 +35,9 @@ public class QueryGenerator
 {
 	static final String ATTRIBUTE_SEPARATOR = ".";
 
+	private static final String CANNOT_FILTER_DEEP_REFERENCE_MSG = "Can not filter on references deeper than 1.";
+	private static final String QUERY_VALUE_CANNOT_BE_NULL_MSG = "Query value cannot be null";
+
 	private final DocumentIdGenerator documentIdGenerator;
 
 	public QueryGenerator(DocumentIdGenerator documentIdGenerator)
@@ -227,7 +230,7 @@ public class QueryGenerator
 			case ONE_TO_MANY:
 				if (attributePath.size() > 1)
 				{
-					throw new MolgenisQueryException("Can not filter on references deeper than 1.");
+					throw new MolgenisQueryException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
 				}
 
 				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -277,7 +280,7 @@ public class QueryGenerator
 			case XREF:
 				if (attributePath.size() > 1)
 				{
-					throw new MolgenisQueryException("Can not filter on references deeper than 1.");
+					throw new MolgenisQueryException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
 				}
 
 				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -300,7 +303,7 @@ public class QueryGenerator
 		Object queryValue = queryRule.getValue();
 
 		QueryBuilder queryBuilder;
-		if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+		if (queryValue == null) throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 
 		if (queryField == null)
 		{
@@ -344,9 +347,8 @@ public class QueryGenerator
 					break;
 				case BOOL:
 				case COMPOUND:
-					throw new MolgenisQueryException(
-							"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.FUZZY_MATCH
-									+ "]");
+					throw new MolgenisQueryException(format("Illegal data type [%s] for operator [%s]", dataType,
+							QueryRule.Operator.FUZZY_MATCH));
 				default:
 					throw new UnexpectedEnumException(dataType);
 			}
@@ -360,7 +362,7 @@ public class QueryGenerator
 		Object queryValue = queryRule.getValue();
 
 		QueryBuilder queryBuilder;
-		if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+		if (queryValue == null) throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 
 		if (queryField == null)
 		{
@@ -415,7 +417,7 @@ public class QueryGenerator
 		Object queryRuleValue = queryRule.getValue();
 		if (queryRuleValue == null)
 		{
-			throw new MolgenisQueryException("Query value cannot be null");
+			throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 		}
 		if (!(queryRuleValue instanceof Iterable<?>))
 		{
@@ -460,7 +462,7 @@ public class QueryGenerator
 			case ONE_TO_MANY:
 				if (attributePath.size() > 1)
 				{
-					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+					throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
 				}
 
 				Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
@@ -475,7 +477,7 @@ public class QueryGenerator
 				break;
 			case COMPOUND:
 				throw new MolgenisQueryException(
-						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.IN + "]");
+						format("Illegal data type [%s] for operator [%s]", dataType, QueryRule.Operator.IN));
 			default:
 				throw new UnexpectedEnumException(dataType);
 		}
@@ -496,9 +498,10 @@ public class QueryGenerator
 			case ENUM:
 			case HYPERLINK:
 			case STRING:
-				return nestedQueryBuilder(attributePath,
-						QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue).maxExpansions(50).slop(10)
-									 .analyzer(DEFAULT_ANALYZER));
+				return nestedQueryBuilder(attributePath, QueryBuilders.matchPhrasePrefixQuery(fieldName, queryValue)
+																	  .maxExpansions(50)
+																	  .slop(10)
+																	  .analyzer(DEFAULT_ANALYZER));
 			case BOOL:
 			case COMPOUND:
 			case DATE:
@@ -543,7 +546,7 @@ public class QueryGenerator
 		Object queryValue = getQueryValue(attr, queryRule.getValue());
 		if (queryValue == null)
 		{
-			throw new MolgenisQueryException("Query value cannot be null");
+			throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 		}
 		if (!(queryValue instanceof Iterable<?>))
 		{
@@ -568,7 +571,7 @@ public class QueryGenerator
 		Object queryValue = getQueryValue(attr, queryRule.getValue());
 		if (queryValue == null)
 		{
-			throw new MolgenisQueryException("Query value cannot be null");
+			throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 		}
 
 		RangeQueryBuilder filterBuilder = QueryBuilders.rangeQuery(fieldName);
@@ -612,7 +615,7 @@ public class QueryGenerator
 	{
 		if (queryRule.getValue() == null)
 		{
-			throw new MolgenisQueryException("Query value cannot be null");
+			throw new MolgenisQueryException(QUERY_VALUE_CANNOT_BE_NULL_MSG);
 		}
 
 		if (queryRule.getField() == null)
@@ -661,7 +664,7 @@ public class QueryGenerator
 			case FILE:
 				if (attributePath.size() > 1)
 				{
-					throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+					throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
 				}
 				return QueryBuilders.nestedQuery(fieldName,
 						QueryBuilders.matchQuery(fieldName + '.' + "_all", queryValue), ScoreMode.Avg);
@@ -669,7 +672,7 @@ public class QueryGenerator
 				throw new MolgenisQueryException("Cannot execute search query on [" + dataType + "] attribute");
 			case COMPOUND:
 				throw new MolgenisQueryException(
-						"Illegal data type [" + dataType + "] for operator [" + QueryRule.Operator.SEARCH + "]");
+						format("Illegal data type [%s] for operator [%s]", dataType, QueryRule.Operator.SEARCH));
 			default:
 				throw new UnexpectedEnumException(dataType);
 		}
@@ -796,7 +799,7 @@ public class QueryGenerator
 		}
 		else
 		{
-			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+			throw new UnsupportedOperationException(CANNOT_FILTER_DEEP_REFERENCE_MSG);
 		}
 	}
 

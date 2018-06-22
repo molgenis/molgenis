@@ -36,7 +36,7 @@ public class StyleSheetMetadata extends SystemEntityType
 	@Override
 	protected void init()
 	{
-		setLabel("StyleSheet");
+		setLabel(SIMPLE_NAME);
 		setPackage(settingsPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);

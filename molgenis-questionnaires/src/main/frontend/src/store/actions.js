@@ -1,10 +1,9 @@
 // @flow
 import api from '@molgenis/molgenis-api-client'
-import type { VuexContext } from '../flow.types.js'
+import type { VuexContext, QuestionnaireType } from '../flow.types.js'
 // $FlowFixMe
 import Vue from 'vue'
 import { EntityToFormMapper } from '@molgenis/molgenis-ui-form'
-import questionnaireService from '../services/questionnaireService'
 
 const handleError = (commit: Function, error: Error) => {
   commit('SET_ERROR', error)
@@ -19,7 +18,7 @@ const cleanScreen = (commit: Function) => {
 const actions = {
   'GET_QUESTIONNAIRE_LIST' ({commit}: VuexContext) {
     cleanScreen(commit)
-    return api.get('/menu/plugins/questionnaires/list').then(response => {
+    return api.get('/menu/plugins/questionnaires/list').then((response:QuestionnaireType) => {
       commit('SET_QUESTIONNAIRE_LIST', response)
       commit('SET_LOADING', false)
     }, error => {
@@ -27,12 +26,12 @@ const actions = {
     })
   },
 
-  'START_QUESTIONNAIRE' ({commit}: VuexContext, questionnaireId: string) : Promise<any> {
+  'START_QUESTIONNAIRE' ({commit, dispatch}: VuexContext, questionnaireId: string) : Promise<any> {
     return new Promise((resolve, reject) => {
       cleanScreen(commit)
       api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(response => {
         commit('SET_QUESTIONNAIRE_ROW_ID', response.id)
-        commit('SET_LOADING', false)
+        dispatch('GET_QUESTIONNAIRE', questionnaireId)
         resolve(response.id)
       }, error => {
         handleError(commit, error)
@@ -41,31 +40,34 @@ const actions = {
     })
   },
 
-  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string) {
+  'GET_QUESTIONNAIRE' ({state, getters, commit}: VuexContext, questionnaireId: string): any {
     cleanScreen(commit)
+    return new Promise((resolve, reject) => {
+      const currentQuestionnaireId = getters.getQuestionnaireId
+      const encodedQuestionnaireId = encodeURIComponent(questionnaireId)
+      const encodedUserName = encodeURIComponent(state.username)
 
-    const currentQuestionnaireId = getters.getQuestionnaireId
-    if (currentQuestionnaireId !== questionnaireId) {
-      return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
-        commit('SET_QUESTIONNAIRE', response)
+      if (currentQuestionnaireId !== questionnaireId) {
+        const getUrl = `/api/v2/${encodedQuestionnaireId}?includeCategories=true&q=owner==${encodedUserName}`
+        return api.get(getUrl).then(response => {
+          commit('SET_QUESTIONNAIRE', response)
+          const data = response.items[0]
+          const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
+          commit('SET_FORM_DATA', form.formData)
+          const chapters = form.formFields.filter(field => field.type === 'field-group')
+          commit('SET_CHAPTER_FIELDS', chapters)
+          // Set state to submitted to have the form validate required fields
+          commit('UPDATE_FORM_STATUS', 'SUBMITTED')
+          commit('SET_LOADING', false)
+          resolve()
+        }, error => {
+          handleError(commit, error)
+          reject(error)
+        })
+      }
 
-        const data = response.items.length > 0 ? response.items[0] : questionnaireService.buildFormDataObject(response)
-        commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
-
-        const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
-        commit('SET_FORM_DATA', form.formData)
-
-        const chapters = form.formFields.filter(field => field.type === 'field-group')
-        commit('SET_CHAPTER_FIELDS', chapters)
-        // Set state to submitted to have the form validate required fields
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
-
-        commit('SET_LOADING', false)
-      }, error => {
-        handleError(commit, error)
-      })
-    }
-    commit('SET_LOADING', false)
+      commit('SET_LOADING', false)
+    })
   },
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {

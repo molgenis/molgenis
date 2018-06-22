@@ -26,7 +26,7 @@ public class LanguageMetadata extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setLabel("Language");
+		setLabel(SIMPLE_NAME);
 		setDescription("Web application languages");
 		// 2 or 3 characters, alphanumeric, lowercase
 		addAttribute(CODE, ROLE_ID).setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
