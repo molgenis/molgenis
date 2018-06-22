@@ -44,9 +44,12 @@ const actions = {
     cleanScreen(commit)
     return new Promise((resolve, reject) => {
       const currentQuestionnaireId = getters.getQuestionnaireId
+      const encodedQuestionnaireId = encodeURIComponent(questionnaireId)
+      const encodedUserName = encodeURIComponent(state.username)
 
       if (currentQuestionnaireId !== questionnaireId) {
-        return api.get(`/api/v2/${questionnaireId}?includeCategories=true`).then(response => {
+        const getUrl = `/api/v2/${encodedQuestionnaireId}?includeCategories=true&q=owner==${encodedUserName}`
+        return api.get(getUrl).then(response => {
           commit('SET_QUESTIONNAIRE', response)
           const data = response.items[0]
           const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)

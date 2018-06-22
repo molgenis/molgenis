@@ -221,7 +221,7 @@ describe('actions', () => {
         }]
       }
 
-      mockApiGetSuccess('/api/v2/other_test_quest?includeCategories=true', questionnaire)
+      mockApiGetSuccess('/api/v2/other_test_quest?includeCategories=true&q=owner==testuser', questionnaire)
 
       const generatedForm = {
         formFields: [
@@ -251,7 +251,8 @@ describe('actions', () => {
             falseLabel: 'No',
             nillLabel: 'No idea'
           }
-        }
+        },
+        username: 'testuser'
       }
 
       const generateForm = td.function('EntityToFormMapper.generateForm')
@@ -284,7 +285,10 @@ describe('actions', () => {
     it('should commit any errors to the store', done => {
       const questionnaireId = 'other_test_quest'
       const error = 'error'
-      mockApiGetError('/api/v2/other_test_quest?includeCategories=true', error)
+      const state = {
+        username: 'testuser'
+      }
+      mockApiGetError('/api/v2/other_test_quest?includeCategories=true&q=owner==testuser', error)
 
       const expectedMutations = [
         {type: 'SET_ERROR', payload: ''},
@@ -293,7 +297,7 @@ describe('actions', () => {
         {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, {}, expectedMutations, [], done)
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
     })
   })
 

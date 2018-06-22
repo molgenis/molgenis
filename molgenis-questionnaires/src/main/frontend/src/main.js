@@ -20,5 +20,7 @@ Vue.use(i18n, {
       template: '<QuestionnaireApp />',
       components: {QuestionnaireApp}
     })
+
+    store.commit('SET_USERNAME', window.QUESTIONNAIRE_STATE.username)
   }
 })
