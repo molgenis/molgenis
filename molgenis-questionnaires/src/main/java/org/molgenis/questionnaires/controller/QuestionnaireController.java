@@ -46,6 +46,7 @@ public class QuestionnaireController extends VuePluginController
 	public String initView(Model model)
 	{
 		super.init(model, ID);
+		model.addAttribute("username", super.userAccountService.getCurrentUser().getUsername());
 		return QUESTIONNAIRE_VIEW;
 	}
 

@@ -30,6 +30,7 @@ export type QuestionnaireType = {
 }
 
 export type QuestionnaireState = {
+  username: string,
   chapters: Array<Chapter>,
   error: string,
   formData: Object,
