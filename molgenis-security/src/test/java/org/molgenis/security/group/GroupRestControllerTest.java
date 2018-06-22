@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.*;
+import static org.molgenis.security.group.GroupRestController.GROUP_END_POINT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,8 +48,6 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private DataService dataService;
 
-	private GroupRestController groupRestController;
-
 	private MockMvc mockMvc;
 
 	@Autowired
@@ -57,7 +56,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService,
+		GroupRestController groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService,
 				dataService);
 		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
@@ -73,7 +72,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 
 		GroupCommand groupCommand = new GroupCommand("name", "Label");
 
-		mockMvc.perform(post("/api/plugin/security/group").contentType(MediaType.APPLICATION_JSON_UTF8)
+		mockMvc.perform(post(GROUP_END_POINT).contentType(MediaType.APPLICATION_JSON_UTF8)
 														  .content(new Gson().toJson(groupCommand)))
 			   .andExpect(status().isCreated());
 
@@ -90,7 +89,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		Group greenGroup = mock(Group.class);
 		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(redGroup, greenGroup));
 
-		mockMvc.perform(get("/api/plugin/security/group"))
+		mockMvc.perform(get(GROUP_END_POINT))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(2)));
 	}
