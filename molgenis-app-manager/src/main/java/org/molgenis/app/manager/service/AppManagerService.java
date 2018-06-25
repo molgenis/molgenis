@@ -72,7 +72,7 @@ public interface AppManagerService
 	AppConfig checkAndObtainConfig(String tempDir, String configContent) throws IOException;
 
 	/**
-	 * Configure app in database./§
+	 * Configure app in database.
 	 *
 	 * @param appConfig    app configuration object
 	 * @param htmlTemplate HTML template based on the packaged index.html

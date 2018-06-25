@@ -39,7 +39,7 @@ public class PluginPopulator
 
 		existingPluginMap.forEach((pluginId, plugin) ->
 		{
-			if (newOrChangedPluginMap.get(pluginId) == null && !pluginId.startsWith("app/"))
+			if (newOrChangedPluginMap.get(pluginId) == null && !pluginId.startsWith("app-"))
 			{
 				deletedPlugins.add(plugin);
 			}
@@ -67,6 +67,6 @@ public class PluginPopulator
 	private Plugin createPlugin(PluginController pluginController)
 	{
 		String pluginControllerId = pluginController.getId();
-		return pluginFactory.create(pluginControllerId).setLabel(pluginControllerId);
+		return pluginFactory.create(pluginControllerId).setLabel(pluginControllerId).setPath(pluginControllerId);
 	}
 }

@@ -92,6 +92,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		String pluginId = generatePluginId(app);
 		Plugin plugin = pluginFactory.create(pluginId);
 		plugin.setLabel(app.getLabel());
+		plugin.setPath(APP_PLUGIN_ROOT + app.getUri() + "/");
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
 	}
@@ -219,12 +220,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	private String generatePluginId(App app)
 	{
-		String pluginId = APP_PLUGIN_ROOT + app.getUri();
-		if (!pluginId.endsWith("/"))
-		{
-			pluginId = pluginId + "/";
-		}
-		return pluginId;
+		return "app-" + app.getUri();
 	}
 
 	private App getAppById(String id)

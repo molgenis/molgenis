@@ -1,5 +1,8 @@
 package org.molgenis.core.ui;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.plugin.model.Plugin;
+import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
@@ -21,7 +24,9 @@ import java.time.format.DateTimeFormatter;
 
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.MolgenisMenuController.URI;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 @Controller
@@ -39,10 +44,12 @@ public class MolgenisMenuController
 	private final Ui molgenisUi;
 	private final String molgenisVersion;
 	private final String molgenisBuildData;
+	private final DataService dataService;
 
 	public MolgenisMenuController(Ui molgenisUi, @Value("${molgenis.version}") String molgenisVersion,
-			@Value("${molgenis.build.date}") String molgenisBuildData)
+			@Value("${molgenis.build.date}") String molgenisBuildData, DataService dataService)
 	{
+		this.dataService = requireNonNull(dataService);
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildData == null) throw new IllegalArgumentException("molgenisBuildDate is null");
@@ -111,7 +118,8 @@ public class MolgenisMenuController
 	private String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginId);
+		String pluginPath = dataService.findOneById(PLUGIN, pluginId, Plugin.class).getString(PluginMetadata.PATH);
+		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginPath);
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}

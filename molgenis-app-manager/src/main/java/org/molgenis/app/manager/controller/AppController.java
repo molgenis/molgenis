@@ -135,7 +135,7 @@ public class AppController extends PluginController
 
 	private String findAppMenuURL(String appName)
 	{
-		return menuReaderService.getMenu().findMenuItemPath("app/" + appName + "/");
+		return menuReaderService.getMenu().findMenuItemPath("app-" + appName);
 	}
 
 	private static String guessMimeType(String fileName)
