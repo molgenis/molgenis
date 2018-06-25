@@ -365,7 +365,7 @@ describe('actions', () => {
     })
   })
 
-  describe('VALIDATE_FIELD', () => {
+  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
     const state = {
       questionnaire: {
         meta: {
@@ -376,56 +376,49 @@ describe('actions', () => {
         field1: 'value',
         field2: 'value'
       },
-      questionnaireRowId: 'test_row'
+      questionnaireRowId: 'test_row',
+      field1: {
+        $valid: () => true
+      }
     }
-    const payload = {formState: {}, formData: {field1: 'updated value'}}
+    const payload = {formState: state, formData: {field1: 'updated value'}}
+
+    const options = {
+      body: JSON.stringify('updated value'),
+      method: 'PUT'
+    }
 
     it('set the new value in the store', done => {
       const expectedMutations = [
         {type: 'SET_FORM_DATA', payload: payload.formData}
       ]
 
-      testAction(actions.VALIDATE_FIELD, payload, state, expectedMutations, [], done)
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
     })
-  })
-
-  describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    const payload = {updatedAttribute: 'field1', updatedValue: 'updated value'}
-
-    const state = {
-      questionnaire: {
-        meta: {
-          name: 'test_quest'
-        }
-      },
-      formData: {
-        field1: 'value',
-        field2: 'value'
-      },
-      questionnaireRowId: 'test_row'
-    }
-
-    const options = {
-      body: JSON.stringify(payload.updatedValue),
-      method: 'PUT'
-    }
 
     it('should post data for a single attribute', done => {
       mockApiPostSuccess('/api/v1/test_quest/test_row/field1', options, 'OK')
 
       const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData},
+        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
+        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
     })
+
     it('should post data for a single attribute and fail', done => {
       const error = 'error'
 
       mockApiPostError('/api/v1/test_quest/test_row/field1', options, error)
 
       const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData},
+        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
+        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false},
