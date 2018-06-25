@@ -1,7 +1,5 @@
 package org.molgenis.data.csv;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
@@ -11,14 +9,12 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import static org.mockito.Mockito.*;
@@ -48,35 +44,16 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public static void beforeClass() throws IOException
 	{
-		InputStream in = CsvRepositoryTest.class.getResourceAsStream("/test.csv");
-		test = new File(FileUtils.getTempDirectory(), "test.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(test));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/testdata.csv");
-		testdata = new File(FileUtils.getTempDirectory(), "testdata.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(testdata));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/novalues.csv");
-		novalues = new File(FileUtils.getTempDirectory(), "novalues.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(novalues));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/emptyvalues.csv");
-		emptyvalues = new File(FileUtils.getTempDirectory(), "emptyvalues.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(emptyvalues));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/test.tsv");
-		testtsv = new File(FileUtils.getTempDirectory(), "test.tsv");
-		FileCopyUtils.copy(in, new FileOutputStream(testtsv));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/emptylines.csv");
-		emptylines = new File(FileUtils.getTempDirectory(), "emptylines.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(emptylines));
-
-		in = CsvRepositoryTest.class.getResourceAsStream("/emptylinessinglecol.csv");
-		emptylinessinglecol = new File(FileUtils.getTempDirectory(), "emptylinessinglecol.csv");
-		FileCopyUtils.copy(in, new FileOutputStream(emptylinessinglecol));
+		test = new ClassPathResource("test.csv").getFile();
+		testdata = new ClassPathResource("testdata.csv").getFile();
+		novalues = new ClassPathResource("novalues.csv").getFile();
+		emptyvalues = new ClassPathResource("emptyvalues.csv").getFile();
+		testtsv = new ClassPathResource("test.tsv").getFile();
+		emptylines = new ClassPathResource("emptylines.csv").getFile();
+		emptylinessinglecol = new ClassPathResource("emptylinessinglecol.csv").getFile();
 	}
 
+	@SuppressWarnings("StatementWithEmptyBody")
 	@Test
 	public void addCellProcessor_header() throws IOException
 	{
@@ -95,6 +72,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		}
 	}
 
+	@SuppressWarnings("StatementWithEmptyBody")
 	@Test
 	public void addCellProcessor_data() throws IOException
 	{
@@ -113,10 +91,8 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void metaData() throws IOException
 	{
-		CsvRepository csvRepository = null;
-		try
+		try (CsvRepository csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null))
 		{
-			csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null);
 			assertEquals(csvRepository.getName(), "testdata");
 			Iterator<Attribute> it = csvRepository.getEntityType().getAttributes().iterator();
 			assertTrue(it.hasNext());
@@ -124,10 +100,6 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col2");
 			assertFalse(it.hasNext());
-		}
-		finally
-		{
-			IOUtils.closeQuietly(csvRepository);
 		}
 	}
 
@@ -137,10 +109,8 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator() throws IOException
 	{
-		CsvRepository csvRepository = null;
-		try
+		try (CsvRepository csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null))
 		{
-			csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null);
 			Iterator<Entity> it = csvRepository.iterator();
 
 			assertTrue(it.hasNext());
@@ -170,10 +140,6 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 			assertEquals(entity.get("col2"), ",,");
 
 			assertFalse(it.hasNext());
-		}
-		finally
-		{
-			IOUtils.closeQuietly(csvRepository);
 		}
 	}
 
