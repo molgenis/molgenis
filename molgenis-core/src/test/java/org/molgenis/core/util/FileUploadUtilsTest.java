@@ -34,7 +34,8 @@ public class FileUploadUtilsTest
 	{
 		//In internet explorer the filename part of the disposition contains the path
 		when(part.getHeader("content-disposition")).thenReturn(
-				"form-data; name=\"upload\"; filename=\"c:\\test\\path\\example.xls\"");
+				"form-data; name=\"upload\"; filename=\"c:" + File.separator + "test" + File.separator + "path"
+						+ File.separator + "example.xls\"");
 		String filename = FileUploadUtils.getOriginalFileName(part);
 		assertEquals(filename, "example.xls");
 	}
