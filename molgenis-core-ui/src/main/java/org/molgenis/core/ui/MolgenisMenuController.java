@@ -27,6 +27,7 @@ import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.MolgenisMenuController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 @Controller
@@ -116,8 +117,11 @@ public class MolgenisMenuController
 
 	private String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
+		// get plugin path with elevated permissions because the anonymous user can also request plugins
+		String pluginPath = runAsSystem(
+				() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class).getString(PluginMetadata.PATH));
+
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		String pluginPath = dataService.findOneById(PLUGIN, pluginId, Plugin.class).getString(PluginMetadata.PATH);
 		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginPath).append("/");
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();

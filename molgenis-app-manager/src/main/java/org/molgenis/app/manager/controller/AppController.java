@@ -31,8 +31,8 @@ import java.io.InputStream;
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.manager.controller.AppController.URI;
-import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.APP_PLUGIN_ROOT;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
+import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 @Controller
@@ -64,7 +64,7 @@ public class AppController extends PluginController
 	public ModelAndView serveApp(@PathVariable String appName, Model model, HttpServletRequest request,
 			HttpServletResponse response) throws IOException
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity(APP_PLUGIN_ROOT + appName + "/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + appName);
 		if (!userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN))
 		{
 			throw new PluginPermissionDeniedException(appName, VIEW_PLUGIN);
@@ -135,7 +135,7 @@ public class AppController extends PluginController
 
 	private String findAppMenuURL(String appName)
 	{
-		return menuReaderService.getMenu().findMenuItemPath("app-" + appName);
+		return menuReaderService.getMenu().findMenuItemPath(APP_PREFIX + appName);
 	}
 
 	private static String guessMimeType(String fileName)
