@@ -14,7 +14,7 @@ pipeline {
         stage('Run maven') {
             steps {
                 container('maven') {
-                    sh 'mvn verify --batch-mode --quiet -Dskip.js.build=true -DskipITs'
+                    sh 'mvn verify --batch-mode --quiet -DskipITs'
                 }
             }
         }
