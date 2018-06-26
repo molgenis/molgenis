@@ -69,6 +69,6 @@ public class AppRepositoryDecorator extends AbstractRepositoryDecorator<App>
 	@Override
 	public void update(Stream<App> apps)
 	{
-		apps.forEach(app -> update(app));
+		apps.forEach(this::update);
 	}
 }
