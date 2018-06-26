@@ -4,24 +4,17 @@ pipeline {
             label 'molgenis-maven'
             containerTemplate {
                 name 'maven'
-                image 'maven:3.3.9-jdk-8-alpine'
+                image 'maven:3.3.9'
                 ttyEnabled true
                 command 'cat'
             }
         }
     }
-    environment {
-        CONTAINER_ENV_VAR = 'container-env-var-value'
-    }
     stages {
         stage('Run maven') {
             steps {
-                sh 'set'
-                sh 'test -f /usr/bin/mvn' // checking backwards compatibility
-                sh "echo OUTSIDE_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}"
                 container('maven') {
-                    sh 'echo INSIDE_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}'
-                    sh 'mvn -version'
+                    sh 'mvn verify --batch-mode --quiet -Dskip.js.build=true -DskipITs'
                 }
             }
         }
