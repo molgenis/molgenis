@@ -30,6 +30,16 @@ public class FileUploadUtilsTest
 	}
 
 	@Test
+	public void getOriginalFileNameIE()
+	{
+		//In internet explorer the filename part of the disposition contains the path
+		when(part.getHeader("content-disposition")).thenReturn(
+				"form-data; name=\"upload\"; filename=\"c:\\test\\path\\example.xls\"");
+		String filename = FileUploadUtils.getOriginalFileName(part);
+		assertEquals(filename, "example.xls");
+	}
+
+	@Test
 	public void getOriginalFileNameWithMissingHeader()
 	{
 		when(part.getHeader("content-disposition")).thenReturn(null);
