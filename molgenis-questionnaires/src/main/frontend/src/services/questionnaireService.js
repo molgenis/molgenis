@@ -4,10 +4,10 @@ import {
   OverViewAnswer,
   OverViewChapter,
   OverViewSection,
-  ResponseMetaAttribute,
+  PdfSection,
   QuestionnaireEntityResponse,
-  Translation,
-  PdfSection
+  ResponseMetaAttribute,
+  Translation
 } from '../flow.types'
 // $FlowFixMe
 import pdfMake from 'pdfmake/build/pdfmake'
@@ -164,6 +164,6 @@ export default {
     }
     const {vfs} = pdfFonts.pdfMake
     pdfMake.vfs = vfs
-    pdfMake.createPdf(docDefinition).download(docTitle)
+    pdfMake.createPdf(docDefinition).download(docTitle + ".pdf")
   }
 }
