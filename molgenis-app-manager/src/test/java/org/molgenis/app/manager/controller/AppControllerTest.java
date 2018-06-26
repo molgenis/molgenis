@@ -28,7 +28,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.net.URI;
@@ -41,6 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
+import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -102,7 +106,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		initMocks(this);
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(AppController.ID + "/uri/")).thenReturn("/test/path");
+		when(menu.findMenuItemPath(APP_PREFIX + "uri")).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(appSettings.getLanguageCode()).thenReturn("en");
 		when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
@@ -136,7 +140,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "uri");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri/"))
 			   .andExpect(status().isOk())
@@ -148,7 +152,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppNoPermissions() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "uri");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
 		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().isUnauthorized());
 	}
@@ -156,7 +160,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppRedirectToApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "uri");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 		mockMvc.perform(get(AppController.URI + "/uri")).andExpect(status().is3xxRedirection());
 	}
@@ -164,7 +168,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppInactiveApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "uri");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 
 		App app = mock(App.class);

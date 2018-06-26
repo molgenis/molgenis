@@ -40,6 +40,7 @@ import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.APPS_DIR;
+import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -157,7 +158,7 @@ public class AppManagerServiceTest
 		app.setActive(true);
 
 		Plugin plugin = mock(Plugin.class);
-		when(pluginFactory.create("app/uri/")).thenReturn(plugin);
+		when(pluginFactory.create(APP_PREFIX + "uri")).thenReturn(plugin);
 		plugin.setLabel("label");
 		plugin.setDescription("description");
 
@@ -173,7 +174,7 @@ public class AppManagerServiceTest
 		app.setActive(false);
 
 		appManagerService.deactivateApp(app);
-		verify(dataService).deleteById(PLUGIN_META_NAME, "app/uri/");
+		verify(dataService).deleteById(PLUGIN_META_NAME, APP_PREFIX + "uri");
 	}
 
 	@Test
@@ -183,7 +184,7 @@ public class AppManagerServiceTest
 
 		appManagerService.deleteApp("test");
 
-		verify(dataService).deleteById(PLUGIN_META_NAME, "app/uri/");
+		verify(dataService).deleteById(PLUGIN_META_NAME, APP_PREFIX + "uri");
 	}
 
 	@Test

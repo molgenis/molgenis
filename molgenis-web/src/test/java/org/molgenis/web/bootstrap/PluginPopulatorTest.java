@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +39,11 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 	@Mock
 	private Repository<Plugin> pluginRepository;
 
+	private static final String NEW_PLUGIN = "newPlugin";
+	private static final String CHANGED_PLUGIN = "changedPlugin";
+	private static final String DELETED_PLUGIN = "deletedPlugin";
+	private static final String EXISTING_APP_PLUGIN = "app-existingAppPlugin";
+
 	private PluginPopulator pluginPopulator;
 
 	public PluginPopulatorTest()
@@ -48,33 +54,34 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(dataService.getRepository(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(pluginRepository);
 		pluginPopulator = new PluginPopulator(dataService, pluginFactory);
 	}
 
 	@Test
-	public void testPopulate() throws Exception
+	public void testPopulate()
 	{
-		PluginController pluginController0 = when(mock(PluginController.class).getId()).thenReturn("newPlugin")
+		PluginController pluginController0 = when(mock(PluginController.class).getId()).thenReturn(NEW_PLUGIN)
 																					   .getMock();
-		PluginController pluginController1 = when(mock(PluginController.class).getId()).thenReturn("changedPlugin")
+		PluginController pluginController1 = when(mock(PluginController.class).getId()).thenReturn(CHANGED_PLUGIN)
 																					   .getMock();
 
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansOfType(PluginController.class)).thenReturn(
-				ImmutableMap.of("newPlugin", pluginController0, "changedPlugin", pluginController1));
+				ImmutableMap.of(NEW_PLUGIN, pluginController0, CHANGED_PLUGIN, pluginController1));
 
-		Plugin newPlugin = when(mock(Plugin.class).getId()).thenReturn("newPlugin").getMock();
-		when(newPlugin.setLabel("newPlugin")).thenReturn(newPlugin);
-		Plugin changedPlugin = when(mock(Plugin.class).getId()).thenReturn("changedPlugin").getMock();
-		when(changedPlugin.setLabel("changedPlugin")).thenReturn(changedPlugin);
-		Plugin existingChangedPlugin = when(mock(Plugin.class).getId()).thenReturn("changedPlugin").getMock();
-		when(existingChangedPlugin.setLabel("oldChangedPlugin")).thenReturn(existingChangedPlugin);
-		Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn("deletedPlugin").getMock();
-		when(deletedPlugin.setLabel("deletedPlugin")).thenReturn(deletedPlugin);
+		Plugin newPlugin = when(mock(Plugin.class).getId()).thenReturn(NEW_PLUGIN).getMock();
+		when(newPlugin.setLabel(NEW_PLUGIN)).thenReturn(newPlugin);
+		when(newPlugin.setPath(NEW_PLUGIN)).thenReturn(newPlugin);
 
-		when(pluginFactory.create("newPlugin")).thenReturn(newPlugin);
-		when(pluginFactory.create("changedPlugin")).thenReturn(changedPlugin);
+		Plugin changedPlugin = when(mock(Plugin.class).getId()).thenReturn(CHANGED_PLUGIN).getMock();
+		when(changedPlugin.setLabel(CHANGED_PLUGIN)).thenReturn(changedPlugin);
+		when(changedPlugin.setPath(CHANGED_PLUGIN)).thenReturn(changedPlugin);
+
+		Plugin existingChangedPlugin = when(mock(Plugin.class).getId()).thenReturn(CHANGED_PLUGIN).getMock();
+		Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn(DELETED_PLUGIN).getMock();
+
+		when(pluginFactory.create(NEW_PLUGIN)).thenReturn(newPlugin);
+		when(pluginFactory.create(CHANGED_PLUGIN)).thenReturn(changedPlugin);
 		when(dataService.getRepository(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(pluginRepository);
 		when(dataService.findAll(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(
 				Stream.of(existingChangedPlugin, deletedPlugin));
@@ -85,5 +92,22 @@ public class PluginPopulatorTest extends AbstractMockitoTest
 		assertEquals(newHashSet(updateStreamArgumentCaptor.getValue()), newHashSet(newPlugin, changedPlugin));
 		verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
 		assertEquals(deleteStreamArgumentCaptor.getValue().collect(toList()), singletonList(deletedPlugin));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testPopulateDoNotRemoveExistingAppPlugin()
+	{
+		Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn(DELETED_PLUGIN).getMock();
+		Plugin existingAppPlugin = when(mock(Plugin.class).getId()).thenReturn(EXISTING_APP_PLUGIN).getMock();
+
+		when(dataService.findAll(PluginMetadata.PLUGIN, Plugin.class)).thenReturn(
+				Stream.of(existingAppPlugin, deletedPlugin));
+
+		pluginPopulator.populate(mock(ApplicationContext.class));
+
+		verify(pluginRepository, times(0)).upsertBatch(any(List.class));
+		verify(dataService).delete(eq(PluginMetadata.PLUGIN), deleteStreamArgumentCaptor.capture());
+		assertEquals(deleteStreamArgumentCaptor.getValue().collect(toList()), newArrayList(deletedPlugin));
 	}
 }
