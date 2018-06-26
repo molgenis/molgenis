@@ -20,6 +20,7 @@ import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.file.UnzipException;
 import org.molgenis.util.file.ZipFileUtil;
+import org.molgenis.web.bootstrap.PluginPopulator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,7 +93,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		String pluginId = generatePluginId(app);
 		Plugin plugin = pluginFactory.create(pluginId);
 		plugin.setLabel(app.getLabel());
-		plugin.setPath(APP_PLUGIN_ROOT + app.getUri() + "/");
+		plugin.setPath(APP_PLUGIN_ROOT + app.getUri());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
 	}
@@ -220,7 +221,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	private String generatePluginId(App app)
 	{
-		return "app-" + app.getUri();
+		return PluginPopulator.APP_PREFIX + app.getUri();
 	}
 
 	private App getAppById(String id)

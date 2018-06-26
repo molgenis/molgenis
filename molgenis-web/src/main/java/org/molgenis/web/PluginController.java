@@ -52,7 +52,8 @@ public abstract class PluginController
 	 *
 	 * @return entity or null
 	 */
-	Entity getPluginSettings()
+	@SuppressWarnings("WeakerAccess")
+	public Entity getPluginSettings()
 	{
 		String entityTypeId = DefaultSettingsEntityType.getSettingsEntityName(getId());
 		return RunAsSystemAspect.runAsSystem(() -> getPluginSettings(entityTypeId));

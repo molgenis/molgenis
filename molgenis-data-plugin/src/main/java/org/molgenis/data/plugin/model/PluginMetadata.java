@@ -30,7 +30,7 @@ public class PluginMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setUnique(true).setLabel("Label");
-		addAttribute(PATH).setNillable(false).setLabel("Path to the plugin");
+		addAttribute(PATH).setNillable(false).setUnique(true).setReadOnly(true).setLabel("Path to the plugin");
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setLabel("Description");
 	}
 }

@@ -50,11 +50,10 @@ public class MolgenisMenuController
 			@Value("${molgenis.build.date}") String molgenisBuildData, DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
-		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
-		if (molgenisBuildData == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		this.molgenisUi = molgenisUi;
-		this.molgenisVersion = molgenisVersion;
+		this.molgenisUi = requireNonNull(molgenisUi, "molgenisUi is null");
+		this.molgenisVersion = requireNonNull(molgenisVersion, "molgenisVersion is null");
+		requireNonNull(molgenisBuildData, "molgenisBuildDate is null");
+
 		// workaround for Eclipse bug: https://github.com/molgenis/molgenis/issues/2667
 		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ?
 				DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by Eclipse" : molgenisBuildData;
@@ -119,7 +118,7 @@ public class MolgenisMenuController
 	{
 		StringBuilder strBuilder = new StringBuilder("forward:");
 		String pluginPath = dataService.findOneById(PLUGIN, pluginId, Plugin.class).getString(PluginMetadata.PATH);
-		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginPath);
+		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginPath).append("/");
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}
