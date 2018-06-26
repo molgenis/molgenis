@@ -52,7 +52,7 @@ public abstract class PluginController
 	 *
 	 * @return entity or null
 	 */
-	public Entity getPluginSettings()
+	Entity getPluginSettings()
 	{
 		String entityTypeId = DefaultSettingsEntityType.getSettingsEntityName(getId());
 		return RunAsSystemAspect.runAsSystem(() -> getPluginSettings(entityTypeId));

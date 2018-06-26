@@ -37,9 +37,9 @@ public class MolgenisMenuController
 
 	public static final String URI = "/menu";
 
-	static final String KEY_MENU_ID = "menu_id";
-	static final String KEY_MOLGENIS_VERSION = "molgenis_version";
-	static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
+	private static final String KEY_MENU_ID = "menu_id";
+	private static final String KEY_MOLGENIS_VERSION = "molgenis_version";
+	private static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
 
 	private final Ui molgenisUi;
 	private final String molgenisVersion;
