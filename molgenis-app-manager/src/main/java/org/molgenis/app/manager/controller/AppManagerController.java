@@ -1,9 +1,12 @@
 package org.molgenis.app.manager.controller;
 
 import org.molgenis.app.manager.exception.CouldNotUploadAppException;
+import org.molgenis.app.manager.meta.App;
+import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
+import org.molgenis.data.DataService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -26,11 +29,13 @@ public class AppManagerController extends PluginController
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final AppManagerService appManagerService;
+	private final DataService dataService;
 
-	public AppManagerController(AppManagerService appManagerService)
+	public AppManagerController(AppManagerService appManagerService, DataService dataService)
 	{
 		super(URI);
 		this.appManagerService = requireNonNull(appManagerService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@GetMapping
@@ -50,21 +55,25 @@ public class AppManagerController extends PluginController
 	@PostMapping("/activate/{id}")
 	public void activateApp(@PathVariable(value = "id") String id)
 	{
-		appManagerService.activateApp(id);
+		App app = dataService.findOneById(AppMetadata.APP, id, App.class);
+		app.setActive(true);
+		dataService.update(AppMetadata.APP, app);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping("/deactivate/{id}")
 	public void deactivateApp(@PathVariable(value = "id") String id)
 	{
-		appManagerService.deactivateApp(id);
+		App app = dataService.findOneById(AppMetadata.APP, id, App.class);
+		app.setActive(false);
+		dataService.update(AppMetadata.APP, app);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@DeleteMapping("/delete/{id}")
 	public void deleteApp(@PathVariable("id") String id)
 	{
-		appManagerService.deleteApp(id);
+		dataService.deleteById(AppMetadata.APP, id);
 	}
 
 	@ResponseStatus(HttpStatus.OK)

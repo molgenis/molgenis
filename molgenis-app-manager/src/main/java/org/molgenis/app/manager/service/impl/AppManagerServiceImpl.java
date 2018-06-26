@@ -86,13 +86,8 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	@Override
 	@Transactional
-	public void activateApp(String id)
+	public void activateApp(App app)
 	{
-		// Set app to active
-		App app = getAppById(id);
-		app.setActive(true);
-		dataService.update(AppMetadata.APP, app);
-
 		// Add plugin to plugin table to enable permissions and menu management
 		String pluginId = generatePluginId(app);
 		Plugin plugin = pluginFactory.create(pluginId);
@@ -103,12 +98,8 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	@Override
 	@Transactional
-	public void deactivateApp(String id)
+	public void deactivateApp(App app)
 	{
-		App app = getAppById(id);
-		app.setActive(false);
-		dataService.update(AppMetadata.APP, app);
-
 		String pluginId = generatePluginId(app);
 		dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
 
@@ -120,6 +111,10 @@ public class AppManagerServiceImpl implements AppManagerService
 	public void deleteApp(String id)
 	{
 		App app = getAppById(id);
+		if (app.isActive())
+		{
+			deactivateApp(app);
+		}
 		try
 		{
 			deleteDirectory(fileStore.getFile(app.getResourceFolder()));
@@ -128,7 +123,6 @@ public class AppManagerServiceImpl implements AppManagerService
 		{
 			throw new CouldNotDeleteAppException(id);
 		}
-		dataService.deleteById(AppMetadata.APP, id);
 	}
 
 	@Override

@@ -3,9 +3,11 @@ package org.molgenis.app.manager.controller;
 import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.app.manager.meta.App;
+import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
+import org.molgenis.data.DataService;
 import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,9 @@ public class AppManagerControllerTest
 	@Mock
 	private AppManagerService appManagerService;
 
+	@Mock
+	private DataService dataService;
+
 	private AppResponse appResponse;
 
 	@BeforeMethod
@@ -49,7 +54,7 @@ public class AppManagerControllerTest
 		when(app.getResourceFolder()).thenReturn("resource-folder");
 		appResponse = AppResponse.create(app);
 
-		AppManagerController controller = new AppManagerController(appManagerService);
+		AppManagerController controller = new AppManagerController(appManagerService, dataService);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(new MolgenisGsonHttpMessageConverter(new Gson()))
 								 .build();
@@ -76,22 +81,28 @@ public class AppManagerControllerTest
 	@Test
 	public void testActivateApp() throws Exception
 	{
+		App app = mock(App.class);
+		when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
 		mockMvc.perform(post(AppManagerController.URI + "/activate/id")).andExpect(status().is(200));
-		verify(appManagerService).activateApp("id");
+		verify(app).setActive(true);
+		verify(dataService).update(AppMetadata.APP, app);
 	}
 
 	@Test
 	public void testDeactivateApp() throws Exception
 	{
+		App app = mock(App.class);
+		when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
 		mockMvc.perform(post(AppManagerController.URI + "/deactivate/id")).andExpect(status().is(200));
-		verify(appManagerService).deactivateApp("id");
+		verify(app).setActive(false);
+		verify(dataService).update(AppMetadata.APP, app);
 	}
 
 	@Test
 	public void testDeleteApp() throws Exception
 	{
 		mockMvc.perform(delete(AppManagerController.URI + "/delete/id")).andExpect(status().is(200));
-		verify(appManagerService).deleteApp("id");
+		verify(dataService).deleteById(AppMetadata.APP, "id");
 	}
 
 	@Test
