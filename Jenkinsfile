@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
   - name: maven
-    image: registry.molgenis.org/molgenis-ops-releases/molgenis-maven:latest
+    image: webhost12.service.rug.nl/molgenis/molgenis-maven:latest
     command:
     - cat
     tty: true
