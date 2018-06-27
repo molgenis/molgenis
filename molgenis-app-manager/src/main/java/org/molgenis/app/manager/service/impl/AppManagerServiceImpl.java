@@ -172,6 +172,12 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new AppConfigMissingParametersException(missingAppConfigParams);
 		}
 
+		if (appConfig.getName().contains("/"))
+		{
+			fileStore.deleteDirectory(APPS_TMP_DIR);
+			throw new IllegalAppNameException(appConfig.getName());
+		}
+
 		if (fileStore.getFile(APPS_DIR + separator + appConfig.getName()).exists())
 		{
 			fileStore.deleteDirectory(APPS_TMP_DIR);
