@@ -16,14 +16,13 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -65,24 +64,19 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		testData = createTempFile("testdata", "vcf").toFile();
-		FileCopyUtils.copy(getClass().getResourceAsStream("/testdata.vcf"), new FileOutputStream(testData));
-
-		testNoData = createTempFile("testnodata", "vcf").toFile();
-		FileCopyUtils.copy(getClass().getResourceAsStream("/testnodata.vcf"), new FileOutputStream(testNoData));
-
+		testData = new ClassPathResource("testdata.vcf").getFile();
+		testNoData = new ClassPathResource("testnodata.vcf").getFile();
 		testEmptyFile = createTempFile("empty", "vcf").toFile();
 	}
 
 	@AfterClass
 	public void afterClass()
 	{
-		testData.delete();
-		testNoData.delete();
 		testEmptyFile.delete();
 	}
 
 	// Regression test for https://github.com/molgenis/molgenis/issues/6528
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers")
 	public void testCreateRepositoryForEmptyFile()
 	{

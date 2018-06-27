@@ -90,7 +90,7 @@ const actions = {
     })
   },
 
-  'VALIDATE_FIELD' ({commit, state, dispatch}: VuexContext, payload: Object) {
+  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state, dispatch}: VuexContext, payload: Object) {
     const {formData, formState} = payload
 
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
@@ -104,26 +104,22 @@ const actions = {
       if (fieldState && fieldState.$valid) {
         // Set state to submitted to have the form validate required fields
         commit('UPDATE_FORM_STATUS', 'SUBMITTED')
-        dispatch('AUTO_SAVE_QUESTIONNAIRE', {updatedAttribute, updatedValue})
+        const options = {
+          body: JSON.stringify(updatedValue),
+          method: 'PUT'
+        }
+        commit('INCREMENT_SAVING_QUEUE')
+        const encodedTableId = encodeURIComponent(state.questionnaire.meta.name)
+        const encodedRowId = encodeURIComponent(state.questionnaireRowId)
+        const encodedColumnId = encodeURIComponent(updatedAttribute)
+        api.post(`/api/v1/${encodedTableId}/${encodedRowId}/${encodedColumnId}`, options).catch((error) => {
+          handleError(commit, error)
+        }).then(() => {
+          commit('DECREMENT_SAVING_QUEUE')
+        })
+      } else {
+        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
       }
-    })
-  },
-
-  'AUTO_SAVE_QUESTIONNAIRE' ({commit, state}: VuexContext, payload: Object) {
-    const options = {
-      body: JSON.stringify(payload.updatedValue),
-      method: 'PUT'
-    }
-
-    commit('INCREMENT_SAVING_QUEUE')
-
-    const encodedTableId = encodeURIComponent(state.questionnaire.meta.name)
-    const encodedRowId = encodeURIComponent(state.questionnaireRowId)
-    const encodedColumnId = encodeURIComponent(payload.updatedAttribute)
-    return api.post(`/api/v1/${encodedTableId}/${encodedRowId}/${encodedColumnId}`, options).catch((error) => {
-      handleError(commit, error)
-    }).then(() => {
-      commit('DECREMENT_SAVING_QUEUE')
     })
   },
 

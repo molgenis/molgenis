@@ -8,6 +8,8 @@ import javax.servlet.http.Part;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FileUploadUtils
 {
@@ -66,8 +68,9 @@ public class FileUploadUtils
 
 				if (cd.trim().startsWith("filename"))
 				{
-					String filename = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-					return StringUtils.hasText(filename) ? filename : null;
+					String path = cd.substring(cd.indexOf('=') + 1).replaceAll("\"", "").trim();
+					Path filename = Paths.get(path).getFileName();
+					return StringUtils.hasText(filename.toString()) ? filename.toString() : null;
 				}
 			}
 		}

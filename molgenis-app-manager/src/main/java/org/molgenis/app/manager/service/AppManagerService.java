@@ -2,6 +2,7 @@ package org.molgenis.app.manager.service;
 
 import org.molgenis.app.manager.exception.CouldNotDeleteAppException;
 import org.molgenis.app.manager.exception.InvalidAppArchiveException;
+import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 
@@ -28,16 +29,16 @@ public interface AppManagerService
 	/**
 	 * Activate an App by App id
 	 *
-	 * @param id The id of an App
+	 * @param app The  App
 	 */
-	void activateApp(String id);
+	void activateApp(App app);
 
 	/**
 	 * Deactivate an App by App id
 	 *
-	 * @param id The id of an App
+	 * @param app The App
 	 */
-	void deactivateApp(String id);
+	void deactivateApp(App app);
 
 	/**
 	 * Delete an existing App

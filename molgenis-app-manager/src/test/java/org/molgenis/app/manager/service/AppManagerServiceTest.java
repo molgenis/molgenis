@@ -161,8 +161,8 @@ public class AppManagerServiceTest
 		plugin.setLabel("label");
 		plugin.setDescription("description");
 
-		appManagerService.activateApp("test");
-		verify(dataService).update(APP_META_NAME, app);
+		appManagerService.activateApp(app);
+
 		verify(dataService).add("sys_Plugin", plugin);
 	}
 
@@ -172,8 +172,7 @@ public class AppManagerServiceTest
 		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(app);
 		app.setActive(false);
 
-		appManagerService.deactivateApp("test");
-		verify(dataService).update(APP_META_NAME, app);
+		appManagerService.deactivateApp(app);
 		verify(dataService).deleteById(PLUGIN_META_NAME, "app/uri/");
 	}
 
@@ -183,7 +182,8 @@ public class AppManagerServiceTest
 		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(app);
 
 		appManagerService.deleteApp("test");
-		verify(dataService).deleteById(APP_META_NAME, "test");
+
+		verify(dataService).deleteById(PLUGIN_META_NAME, "app/uri/");
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class AppManagerServiceTest
 		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(null);
 		try
 		{
-			appManagerService.activateApp("test");
+			appManagerService.deleteApp("test");
 			fail();
 		}
 		catch (AppForIDDoesNotExistException actual)

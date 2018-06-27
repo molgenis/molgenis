@@ -145,7 +145,7 @@
             </div>
           </div>
 
-          <div v-else-if="isOneToManyType">
+          <div v-if="isOneToManyType">
             <div class="form-group row">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
               <div class="col">
@@ -305,7 +305,7 @@
         mappedByAttributes: 'getMappedByAttributes'
       }),
       isReferenceType: function () {
-        return ['file', 'xref', 'mref', 'categorical', 'categoricalmref'].includes(this.selectedAttribute.type)
+        return ['file', 'xref', 'mref', 'categorical', 'categoricalmref', 'onetomany'].includes(this.selectedAttribute.type)
       },
       isNumericType: function () {
         return ['int', 'long'].includes(this.selectedAttribute.type)

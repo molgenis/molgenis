@@ -168,7 +168,6 @@ public class EntityServiceImpl implements EntityService
 	{
 		Attribute idAttribute = attributeFactory.create();
 		idAttribute.setName(ID_ATTR_NAME);
-		idAttribute.setVisible(false);
 		idAttribute.setAuto(true);
 		idAttribute.setIdAttribute(true);
 		return idAttribute;

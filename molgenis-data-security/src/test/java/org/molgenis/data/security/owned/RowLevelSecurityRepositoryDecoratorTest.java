@@ -77,8 +77,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 
 		rowLevelSecurityRepositoryDecorator.add(entity);
 
-		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME),
-				true);
+		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME), true);
 		verify(delegateRepository).add(entity);
 	}
 
@@ -96,8 +95,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		ArgumentCaptor<Stream<Entity>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).add(entityStreamCaptor.capture());
 		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
-		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME),
-				true);
+		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME), true);
 	}
 
 	@Test
@@ -132,7 +130,7 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
 	}
 
-	@Test
+	@Test(expectedExceptions = EntityPermissionDeniedException.class, expectedExceptionsMessageRegExp = "permission:UPDATE entityTypeId:entityTypeId entityId:entityId")
 	public void testUpdateStreamPermissionDenied()
 	{
 		Entity entity = getEntityMock();
@@ -383,7 +381,8 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		Entity entity = getEntityMock();
 		when(delegateRepository.findAll(any(Stream.class))).thenAnswer(invocation -> Stream.of(entity));
 		when(userPermissionEvaluator.hasPermission(new EntityIdentity(entity), READ)).thenReturn(true);
-		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()), singletonList(entity));
+		assertEquals(rowLevelSecurityRepositoryDecorator.findAll(Stream.of(entityId)).collect(toList()),
+				singletonList(entity));
 	}
 
 	@SuppressWarnings("unchecked")
