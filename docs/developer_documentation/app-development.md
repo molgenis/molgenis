@@ -59,7 +59,7 @@ It contains the following parameters
 | description |string| yes | A description for your app. Useful for making your app more findable in the app manager |
 | version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
 | apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
-| uri | string |yes | the URL on which the app will be deployed once activated. Best if you make it a simple word without weird characters |
+| name | string |yes | The name of the app. May not contain '/'
 | includeMenuAndFooter | boolean |yes | If you want to use the MOLGENIS menu, you can this value to __true__ |
 | runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
@@ -73,7 +73,7 @@ _config.json_
 	"description": "This is an example app",
 	"version": "v1.0.0",
 	"apiDependency": "v2",
-	"uri": "example",
+	"name": "example",
 	"includeMenuAndFooter": true,
 	"runtimeOptions": {
 		"language": "en"
