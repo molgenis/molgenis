@@ -4,8 +4,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
@@ -23,6 +22,7 @@ public class RoleMetadata extends SystemEntityType
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String GROUP = "group";
+	public static final String INCLUDES = "includes";
 
 	private final SecurityPackage securityPackage;
 
@@ -60,5 +60,10 @@ public class RoleMetadata extends SystemEntityType
 						   .setDescription("Optional reference to the group in which this is a Role.")
 						   .setDataType(XREF)
 						   .setRefEntity(groupMetadata);
+		addAttribute(INCLUDES).setLabel("Includes")
+							  .setDescription("These roles are included with this role.")
+							  .setDataType(MREF)
+							  .setRefEntity(this)
+							  .setNillable(true);
 	}
 }

@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 @Component
 public class OneClickImportJobExecutionMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "OneClickImportJobExecution";
+	public static final String ONE_CLICK_IMPORT_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String FILE = "file";
 	public static final String ENTITY_TYPES = "entityTypes";

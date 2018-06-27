@@ -5,7 +5,7 @@ import org.springframework.security.acls.domain.ObjectIdentityImpl;
 
 public class EntityTypeIdentity extends ObjectIdentityImpl
 {
-	public static final String TYPE = "entityType";
+	public static final String ENTITY_TYPE = "entityType";
 
 	public EntityTypeIdentity(EntityType entityType)
 	{
@@ -14,6 +14,6 @@ public class EntityTypeIdentity extends ObjectIdentityImpl
 
 	public EntityTypeIdentity(String entityTypeId)
 	{
-		super(TYPE, entityTypeId);
+		super(ENTITY_TYPE, entityTypeId);
 	}
 }

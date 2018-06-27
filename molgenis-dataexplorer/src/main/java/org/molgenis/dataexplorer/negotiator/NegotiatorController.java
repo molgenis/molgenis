@@ -48,7 +48,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class NegotiatorController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(NegotiatorController.class);
-	private static final String ID = "directory";
+	public static final String ID = "directory";
 	static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final RestTemplate restTemplate;
