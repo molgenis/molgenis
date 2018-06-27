@@ -69,6 +69,21 @@ const actions = {
         reject(error)
       })
     })
+  },
+
+  'addMember' ({commit}: { commit: Function }, {groupName, addMemberCommand}) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member'
+    const payload = {body: JSON.stringify(addMemberCommand)}
+
+    return new Promise((resolve, reject) => {
+      api.post(url, payload).then(() => {
+        commit('setToast', {type: 'success', message: 'Added member'})
+        resolve()
+      }, (error) => {
+        commit('setToast', {type: 'danger', message: 'Unable to add member to group; ' + error})
+        reject(error)
+      })
+    })
   }
 }
 export default actions

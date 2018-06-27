@@ -33,8 +33,8 @@ export type User = {
 export type SecurityModel = {
   loginUser: LoginUser,
   groups: Array<Group>,
-  groupMembers: { [string]: Array<GroupMember> }
-  groupRoles: { [string]: Array<GroupRole> }
+  groupMembers: { [string]: Array<GroupMember> },
+  groupRoles: { [string]: Array<GroupRole> },
   users: Array<User>,
   toast: ?Toast
 }

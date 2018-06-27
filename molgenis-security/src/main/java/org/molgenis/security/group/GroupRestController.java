@@ -6,8 +6,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
@@ -38,20 +41,26 @@ public class GroupRestController
 	public final static String USER = "/user";
 
 	public final static String GROUP_END_POINT = SECURITY_API_PATH + GROUP;
+	public static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
 	public final static String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
 
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
 	private final DataService dataService;
+	private final RoleService roleService;
+	private final UserService userService;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			RoleMembershipService roleMembershipService, DataService dataService)
+			RoleMembershipService roleMembershipService, DataService dataService, RoleService roleService,
+			UserService userService)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.dataService = requireNonNull(dataService);
+		this.roleService = requireNonNull(roleService);
+		this.userService = userService;
 	}
 
 	@PostMapping(GROUP_END_POINT)
@@ -85,7 +94,7 @@ public class GroupRestController
 						  .collect(Collectors.toList());
 	}
 
-	@GetMapping(GROUP_END_POINT + "/{groupName}/member")
+	@GetMapping(GROUP_MEMBER_END_POINT)
 	@ApiOperation(value = "Get group members", response = Collection.class)
 	@ResponseBody
 	public Collection<GroupMemberResponse> getMembers(@PathVariable(value = "groupName") String groupName)
@@ -96,6 +105,29 @@ public class GroupRestController
 							 .map(GroupMemberResponse::fromEntity)
 							 .collect(Collectors.toList());
 
+	}
+
+	@PostMapping(GROUP_MEMBER_END_POINT)
+	@ApiOperation(value = "Add member to group", response = ResponseEntity.class)
+	@Transactional
+	@ApiResponses({ @ApiResponse(code = 201, message = "Member added to group", response = ResponseEntity.class) })
+	public ResponseEntity addMember(@PathVariable(value = "groupName") String groupName,
+			@RequestBody GroupMemberCommand groupMember)
+	{
+		final Group group = groupService.getGroup(groupName);
+		final String username = groupMember.getUsername();
+		final String roleName = groupMember.getRoleName();
+		final Role role = roleService.getRole(roleName);
+		final User user = userService.getUser(username);
+
+		groupService.addMember(group, user, role);
+
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+												  .path("/{group}/{member}")
+												  .buildAndExpand(groupName, username)
+												  .toUri();
+
+		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping(GROUP_END_POINT + "/{groupName}/role")

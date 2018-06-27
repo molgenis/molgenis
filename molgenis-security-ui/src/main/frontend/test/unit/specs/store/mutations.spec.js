@@ -49,16 +49,16 @@ describe('mutations', () => {
   describe('setUser', () => {
     it('should set the user in the store', () => {
       const state = {
-        user: {}
+        loginUser: {}
       }
 
       const payload = [
         {name: 'admin', isSuperUSer: true}
       ]
 
-      mutations.setUser(state, payload)
+      mutations.setLoginUser(state, payload)
 
-      expect(state.user).to.deep.equal(payload)
+      expect(state.loginUser).to.deep.equal(payload)
     })
   })
 })

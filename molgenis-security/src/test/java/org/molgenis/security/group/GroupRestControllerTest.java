@@ -7,7 +7,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Group;
 import org.molgenis.data.security.auth.GroupMetadata;
 import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.data.security.auth.RoleService;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.GroupValueFactory;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -47,6 +49,12 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private DataService dataService;
 
+	@Mock
+	private RoleService roleService;
+
+	@Mock
+	private UserService userService;
+
 	private GroupRestController groupRestController;
 
 	private MockMvc mockMvc;
@@ -58,7 +66,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	public void beforeMethod()
 	{
 		groupRestController = new GroupRestController(groupValueFactory, groupService, roleMembershipService,
-				dataService);
+				dataService, roleService, userService);
 		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
 								 .build();

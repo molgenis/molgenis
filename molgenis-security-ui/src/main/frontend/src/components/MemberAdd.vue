@@ -95,8 +95,8 @@
     methods: {
       onSubmit () {
         this.isAdding = !this.isAdding
-        const addMemberCommand = { userId: this.userId, roleName: this.roleName }
-        this.$store.dispatch('addMember', {group: this.groupName, addMemberCommand})
+        const addMemberCommand = { username: this.userId, roleName: this.roleName }
+        this.$store.dispatch('addMember', {groupName: this.groupName, addMemberCommand})
           .then(() => {
             this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
           }, () => {

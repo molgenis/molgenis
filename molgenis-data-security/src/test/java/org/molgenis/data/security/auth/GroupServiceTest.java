@@ -8,6 +8,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
@@ -41,6 +43,10 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private PermissionService permissionService;
 	@Mock
 	private GroupMetadata groupMetadata;
+	@Mock
+	private RoleMembershipService roleMembershipService;
+	@Mock
+	private UserService userService;
 
 	@Mock
 	private Group group;
@@ -72,7 +78,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				groupMetadata);
+				groupMetadata, roleMembershipService, userService);
 	}
 
 	@Test

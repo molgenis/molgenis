@@ -2,19 +2,23 @@ package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.exception.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
+import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,9 +27,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.RoleMetadata.NAME;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
@@ -41,6 +42,7 @@ public class GroupService
 	private final PackageFactory packageFactory;
 	private final GroupMetadata groupMetadata;
 	private final RoleMembershipService roleMembershipService;
+	private final UserService userService;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -51,7 +53,7 @@ public class GroupService
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
-			RoleMembershipService roleMembershipService)
+			RoleMembershipService roleMembershipService, UserService userService)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -60,6 +62,7 @@ public class GroupService
 		this.permissionService = requireNonNull(permissionService);
 		this.groupMetadata = requireNonNull(groupMetadata);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
+		this.userService = requireNonNull(userService);
 	}
 
 	/**
@@ -127,21 +130,31 @@ public class GroupService
 	public void addMember(final Group group, final User user, final Role role )
 	{
 		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
+		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
+
+		final User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
+		final String MANAGER_ROLE = MANAGER.toUpperCase();
+		final boolean isGroupManager = memberships.stream()
+									 .filter(m -> m.getRole().getName().endsWith(MANAGER_ROLE))
+									 .anyMatch(m -> m.getUser().equals(currentUser));
+
+		if(!isGroupManager && !currentUser.isSuperuser())
+		{
+			throw new AddingMemberNotAllowedException(currentUser, group);
+		}
 
 		boolean isGroupRole = groupRoles.contains(role);
 
 		if(!isGroupRole)
 		{
-			throw new CannotAddMemberToNonGroupRole();
+			throw new NotAValidGroupRoleException(role, group);
 		}
-
-		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 
 		boolean isMember = memberships.stream().parallel().anyMatch(m -> m.getUser().equals(user));
 
 		if(isMember)
 		{
-			throw new CannotAddMultipleRolesToGroupMember();
+			throw new IsAlreadyMemberException(user, group);
 		}
 
 		roleMembershipService.addUserToRole(user, role);

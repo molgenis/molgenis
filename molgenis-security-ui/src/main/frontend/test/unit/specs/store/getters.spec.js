@@ -12,6 +12,7 @@ describe('getters', () => {
       expect(getters.groups(state)).to.deep.equal(state.groups)
     })
   })
+
   describe('toast', () => {
     it('should return the toast object', () => {
       const state = {
@@ -20,15 +21,16 @@ describe('getters', () => {
       expect(getters.toast(state)).to.deep.equal(state.toast)
     })
   })
-  describe('getUser', () => {
+
+  describe('getLoginUser', () => {
     it('should return a user', () => {
       const state = {
-        user: {
+        loginUser: {
           name: 'admin',
           isSuperUser: true
         }
       }
-      expect(getters.getUser(state)).to.deep.equal(state.user)
+      expect(getters.getLoginUser(state)).to.deep.equal(state.loginUser)
     })
   })
 })
