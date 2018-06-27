@@ -35,22 +35,28 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 	}
 
 	@Override
-	public void addUserToRole(String username, String rolename)
+	public void addUserToRole(String username, String roleName)
 	{
-		User groupCreator = userService.getUser(username);
-		if (groupCreator == null)
+		User user = userService.getUser(username);
+		if (user == null)
 		{
 			throw new UnknownEntityException(userMetaData, userMetaData.getAttribute(USERNAME), username);
 		}
 
-		Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(NAME, rolename).findOne();
+		Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(NAME, roleName).findOne();
 		if (role == null)
 		{
-			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), rolename);
+			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), roleName);
 		}
 
+		this.addUserToRole(user, role);
+	}
+
+	@Override
+	public void addUserToRole(final User user, final Role role)
+	{
 		RoleMembership roleMembership = roleMembershipFactory.create();
-		roleMembership.setUser(groupCreator);
+		roleMembership.setUser(user);
 		roleMembership.setFrom(Instant.now());
 		roleMembership.setRole(role);
 

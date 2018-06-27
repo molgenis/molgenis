@@ -1,23 +1,31 @@
 package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
@@ -32,6 +40,7 @@ public class GroupService
 	private final RoleFactory roleFactory;
 	private final PackageFactory packageFactory;
 	private final GroupMetadata groupMetadata;
+	private final RoleMembershipService roleMembershipService;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -41,7 +50,8 @@ public class GroupService
 			VIEWER, READ);
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
-			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata)
+			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
+			RoleMembershipService roleMembershipService)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -49,6 +59,7 @@ public class GroupService
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.groupMetadata = requireNonNull(groupMetadata);
+		this.roleMembershipService = requireNonNull(roleMembershipService);
 	}
 
 	/**
@@ -86,6 +97,13 @@ public class GroupService
 								  createRoleSid(roleValue.getName())));
 	}
 
+	/**
+	 * Get the group entity by its unique name.
+	 *
+	 * @param groupName unique group name
+	 * @return group with given name
+	 * @throws UnknownEntityException in case no group with given name can be retrieved
+	 */
 	public Group getGroup(String groupName)
 	{
 		Group group = dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, groupName).findOne();
@@ -94,5 +112,38 @@ public class GroupService
 			throw new UnknownEntityException(groupMetadata, groupMetadata.getAttribute(GroupMetadata.NAME), groupName);
 		}
 		return group;
+	}
+
+	/**
+	 * Add member to group.
+	 * User can only be added to a role that belongs to the group.
+	 * The user can only have a single role within the group
+	 *
+	 * @param group group to add the user to in the given role
+	 * @param user user to be added in the given role to the given group
+	 * @param role role in which the given user is to be added to given group
+	 */
+	@Transactional
+	public void addMember(final Group group, final User user, final Role role )
+	{
+		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
+
+		boolean isGroupRole = groupRoles.contains(role);
+
+		if(!isGroupRole)
+		{
+			throw new CannotAddMemberToNonGroupRole();
+		}
+
+		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
+
+		boolean isMember = memberships.stream().parallel().anyMatch(m -> m.getUser().equals(user));
+
+		if(isMember)
+		{
+			throw new CannotAddMultipleRolesToGroupMember();
+		}
+
+		roleMembershipService.addUserToRole(user, role);
 	}
 }
