@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Run maven') {
             steps {
-                container('maven') {
+                container('molgenis-maven') {
                     sh 'docker -v'
                     sh 'mvn verify --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -DskipITs -DskipTests'
                 }
