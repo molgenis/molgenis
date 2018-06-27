@@ -1,8 +1,8 @@
 package org.molgenis.core.ui;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownPluginException;
 import org.molgenis.data.plugin.model.Plugin;
-import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
@@ -115,14 +115,17 @@ public class MolgenisMenuController
 		return getForwardPluginUri(pluginId, remainder);
 	}
 
-	private String getForwardPluginUri(String pluginId, String pathRemainder)
+	String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
 		// get plugin path with elevated permissions because the anonymous user can also request plugins
-		String pluginPath = runAsSystem(
-				() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class).getString(PluginMetadata.PATH));
+		Plugin plugin = runAsSystem(() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class));
+		if (plugin == null)
+		{
+			throw new UnknownPluginException(pluginId);
+		}
 
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginPath).append("/");
+		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath()).append("/");
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}

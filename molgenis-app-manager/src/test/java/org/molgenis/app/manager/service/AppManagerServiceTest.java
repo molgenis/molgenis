@@ -64,8 +64,6 @@ public class AppManagerServiceTest
 	@Mock
 	private PluginFactory pluginFactory;
 
-	private Gson gson;
-
 	private App app;
 
 	private File tempDir;
@@ -111,7 +109,7 @@ public class AppManagerServiceTest
 		File appDir = mock(File.class);
 		when(fileStore.getFile("folder")).thenReturn(appDir);
 
-		gson = new Gson();
+		Gson gson = new Gson();
 		appManagerService = new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, pluginFactory);
 	}
 
@@ -267,7 +265,7 @@ public class AppManagerServiceTest
 	}
 
 	@Test(expectedExceptions = AppArchiveMissingFilesException.class, expectedExceptionsMessageRegExp = "missingFromArchive:\\[config.json\\]")
-	public void testUploadAppMissingRequiredConfigFile() throws URISyntaxException, IOException
+	public void testUploadAppMissingRequiredConfigFile() throws IOException
 	{
 		InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
 		String fileName = "app.zip";
