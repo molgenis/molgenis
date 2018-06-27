@@ -31,7 +31,10 @@ import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticmapper.service.impl.AlgorithmEvaluation;
+import org.molgenis.semanticsearch.explain.bean.AttributeSearchResults;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttributeDto;
+import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.PluginController;
@@ -189,12 +192,10 @@ public class MappingServiceController extends PluginController
 		EntityType sourceEntityType = dataService.getEntityType(source);
 		EntityType targetEntityType = dataService.getEntityType(target);
 
-		Iterable<Attribute> attributes = targetEntityType.getAtomicAttributes();
-
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		EntityMapping mapping = project.getMappingTarget(target).addSource(sourceEntityType);
 		mappingService.updateMappingProject(project);
-		autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, attributes, project);
+		autoGenerateAlgorithms(mapping, sourceEntityType, targetEntityType, project);
 
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
 	}
@@ -429,7 +430,7 @@ public class MappingServiceController extends PluginController
 	 */
 	@PostMapping(value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<ExplainedAttribute> getSemanticSearchAttributeMapping(@RequestBody Map<String, String> requestBody)
+	public List<ExplainedAttributeDto> getSemanticSearchAttributeMapping(@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
@@ -453,20 +454,24 @@ public class MappingServiceController extends PluginController
 
 		Attribute targetAttribute = entityMapping.getTargetEntityType().getAttribute(targetAttributeName);
 
-		// Find relevant attributes base on tags
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				entityMapping.getTargetEntityType(), targetAttribute);
-
-		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService.decisionTreeToFindRelevantAttributes(
-				entityMapping.getSourceEntityType(), targetAttribute, tagsForAttribute.values(), searchTerms);
+		AttributeSearchResults attributeSearchResults = semanticSearchService.findAttributes(
+				entityMapping.getSourceEntityType(), entityMapping.getTargetEntityType(), targetAttribute, searchTerms);
 
 		// If no relevant attributes are found, return all source attributes
-		if (relevantAttributes.isEmpty())
+		if (attributeSearchResults.getHits().iterator().hasNext())
 		{
 			return stream(entityMapping.getSourceEntityType().getAtomicAttributes()).filter(
-					attribute -> attribute.getDataType() != COMPOUND).map(ExplainedAttribute::create).collect(toList());
+					attribute -> attribute.getDataType() != COMPOUND).map(ExplainedAttributeDto::create).collect(toList());
 		}
-		return newArrayList(relevantAttributes.values());
+		return stream(attributeSearchResults.getHits()).map(Hit::getResult)
+													   .map(this::toExplainedAttributeDto)
+													   .collect(toList());
+	}
+
+	private ExplainedAttributeDto toExplainedAttributeDto(ExplainedAttribute attributeSearchHit)
+	{
+		return ExplainedAttributeDto.create(attributeSearchHit.getAttribute(),
+				attributeSearchHit.getExplainedQueryStrings(), attributeSearchHit.isHighQuality());
 	}
 
 	@PostMapping(value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
@@ -898,13 +903,11 @@ public class MappingServiceController extends PluginController
 	 * <p>
 	 * protected for testablity
 	 */
-	protected void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
-			EntityType targetEntityType, Iterable<Attribute> attributes, MappingProject project)
+	private void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
+			EntityType targetEntityType,
+			 MappingProject project)
 	{
-		StreamSupport.stream(attributes.spliterator(), false)
-					 .filter(attribute -> attribute.getExpression() == null)
-					 .forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType,
-							 mapping, attribute));
+		algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping);
 		mappingService.updateMappingProject(project);
 	}
 

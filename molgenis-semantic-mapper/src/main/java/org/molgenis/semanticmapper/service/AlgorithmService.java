@@ -40,8 +40,7 @@ public interface AlgorithmService
 	/**
 	 * Creates an attribute mapping after the semantic search service finds one
 	 */
-	void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping,
-			Attribute targetAttribute);
+	void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping);
 
 	/**
 	 * Generates the algorithm based on the given targetAttribute and sourceAttribute

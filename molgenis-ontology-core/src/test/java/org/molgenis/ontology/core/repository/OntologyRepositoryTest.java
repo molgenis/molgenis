@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.repository;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,11 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,12 +33,12 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private OntologyRepository ontologyRepository;
 
-	private Entity ontologyEntity;
+	private org.molgenis.ontology.core.meta.Ontology ontologyEntity;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		ontologyEntity = mock(Entity.class);
+		ontologyEntity = mock(org.molgenis.ontology.core.meta.Ontology.class);
 		when(ontologyEntity.getString(ID)).thenReturn("1");
 		when(ontologyEntity.getString(ONTOLOGY_IRI)).thenReturn("http://www.ontology.com/test");
 		when(ontologyEntity.getString(ONTOLOGY_NAME)).thenReturn("testOntology");
@@ -48,8 +49,19 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testGetOntologies()
 	{
 		when(dataService.findAll(eq(ONTOLOGY))).thenReturn(Stream.of(ontologyEntity));
-		List<Ontology> ontologies = ontologyRepository.getOntologies().collect(Collectors.toList());
+		List<Ontology> ontologies = ontologyRepository.getOntologies().collect(toList());
 		assertEquals(ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
+	}
+
+	@Test
+	public void testGetOntologiesList()
+	{
+		ArgumentCaptor<Stream<Object>> idCaptor = ArgumentCaptor.forClass(Stream.class);
+		when(dataService.findAll(eq(ONTOLOGY), idCaptor.capture(),
+				eq(org.molgenis.ontology.core.meta.Ontology.class))).thenReturn(Stream.of(ontologyEntity));
+		List<Ontology> ontologies = ontologyRepository.getOntologies(singletonList("1")).collect(toList());
+		assertEquals(ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
+		assertEquals(idCaptor.getValue().collect(toList()), singletonList("1"));
 	}
 
 	@Test

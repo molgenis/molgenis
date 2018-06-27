@@ -6,6 +6,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
@@ -24,6 +26,15 @@ public class OntologyRepository
 	public Stream<Ontology> getOntologies()
 	{
 		return dataService.findAll(ONTOLOGY).map(OntologyRepository::toOntology);
+	}
+
+	/**
+	 * Retrieves all {@link Ontology}s.
+	 */
+	public Stream<Ontology> getOntologies(List<String> ontologyIds)
+	{
+		return dataService.findAll(ONTOLOGY, new ArrayList<Object>(ontologyIds).stream(),
+				org.molgenis.ontology.core.meta.Ontology.class).map(OntologyRepository::toOntology);
 	}
 
 	/**

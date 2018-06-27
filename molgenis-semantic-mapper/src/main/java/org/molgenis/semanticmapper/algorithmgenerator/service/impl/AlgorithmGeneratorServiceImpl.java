@@ -18,13 +18,12 @@ import org.molgenis.semanticmapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.semanticmapper.utils.AlgorithmGeneratorHelper;
 import org.molgenis.semanticmapper.utils.MagmaUnitConverter;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
+import org.molgenis.semanticsearch.semantic.Hits;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -94,7 +93,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	}
 
 	@Override
-	public GeneratedAlgorithm generate(Attribute targetAttribute, Map<Attribute, ExplainedAttribute> sourceAttributes,
+	public GeneratedAlgorithm generate(Attribute targetAttribute, Hits<ExplainedAttribute> sourceAttributes,
 			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		if (targetAttribute.hasExpression())
@@ -107,7 +106,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		AlgorithmState algorithmState = null;
 		Set<Attribute> mappedSourceAttributes = null;
 
-		if (sourceAttributes.size() > 0)
+		if (sourceAttributes.getHits().size() > 0)
 		{
 			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(sourceAttributes)
 																		  .findFirst()
@@ -123,16 +122,13 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			}
 			else
 			{
-				Entry<Attribute, ExplainedAttribute> firstEntry = sourceAttributes.entrySet()
-																				  .stream()
-																				  .findFirst()
-																				  .get();
-				Attribute sourceAttribute = firstEntry.getKey();
+				ExplainedAttribute attributeSearchHit = sourceAttributes.getHits().iterator().next().getResult();
+				Attribute sourceAttribute = attributeSearchHit.getAttribute();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
 						sourceEntityType);
 				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
 						sourceEntityType);
-				algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
+				algorithmState = attributeSearchHit.isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 			}
 		}
 

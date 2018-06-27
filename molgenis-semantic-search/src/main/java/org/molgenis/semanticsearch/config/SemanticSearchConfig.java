@@ -66,8 +66,8 @@ public class SemanticSearchConfig
 	@Bean
 	public SemanticSearchService semanticSearchService()
 	{
-		return new SemanticSearchServiceImpl(dataService, ontologyService, metaDataService,
-				semanticSearchServiceHelper(), elasticSearchExplainService());
+		return new SemanticSearchServiceImpl(dataService, ontologyService, semanticSearchServiceHelper(),
+				elasticSearchExplainService(), ontologyTagService());
 	}
 
 	@Bean

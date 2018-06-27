@@ -15,6 +15,7 @@ import org.molgenis.ontology.core.ic.TermFrequencyService;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticsearch.explain.service.ElasticSearchExplainService;
+import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,10 +274,16 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
+		OntologyTagService ontologyTagService()
+		{
+			return mock(OntologyTagService.class);
+		}
+
+		@Bean
 		SemanticSearchService semanticSearchService()
 		{
-			return new SemanticSearchServiceImpl(dataService(), ontologyService(), metaDataService(),
-					semanticSearchServiceHelper(), elasticSearchExplainService());
+			return new SemanticSearchServiceImpl(dataService(), ontologyService(), semanticSearchServiceHelper(),
+					elasticSearchExplainService(), ontologyTagService());
 		}
 
 		@Bean

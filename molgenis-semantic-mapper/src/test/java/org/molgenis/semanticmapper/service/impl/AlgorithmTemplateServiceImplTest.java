@@ -16,6 +16,8 @@ import org.molgenis.script.core.config.ScriptTestConfig;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.semanticsearch.semantic.Hit;
+import org.molgenis.semanticsearch.semantic.Hits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +26,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
@@ -73,7 +75,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		script0 = scriptFactory.create();
 		script0.setName("name");
 		script0.setContent(String.format("$('%s'),$('%s')", param0, param1));
-		script0.set(ScriptMetaData.PARAMETERS, Arrays.asList(param0, param1));
+		script0.set(ScriptMetaData.PARAMETERS, asList(param0, param1));
 
 		Query<Script> q = new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME);
 		when(dataService.findAll(SCRIPT, q, Script.class)).thenReturn(Stream.of(script0));
@@ -93,9 +95,12 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		sourceEntityMeta.addAttribute(sourceAttr1);
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<Attribute, ExplainedAttribute> attrResults = Maps.newHashMap();
-		attrResults.put(sourceAttr0, ExplainedAttribute.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
-		attrResults.put(sourceAttr1, ExplainedAttribute.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
+		Hits<ExplainedAttribute> attrResults = Hits.
+														   create(asList(Hit.create(
+																   ExplainedAttribute.create(sourceAttr0,
+																		   singleton(sourceAttr0Explain), false), 1f),
+																   Hit.create(ExplainedAttribute.create(sourceAttr1,
+																		   singleton(sourceAttr1Explain), false), 1f)));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 
