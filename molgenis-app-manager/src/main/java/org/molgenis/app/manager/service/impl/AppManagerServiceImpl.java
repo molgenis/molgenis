@@ -76,7 +76,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Override
 	public AppResponse getAppByName(String appName)
 	{
-		Query<App> query = QueryImpl.EQ(AppMetadata.URI, appName);
+		Query<App> query = QueryImpl.EQ(AppMetadata.NAME, appName);
 		App app = dataService.findOne(AppMetadata.APP, query, App.class);
 		if (app == null)
 		{
@@ -93,7 +93,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		String pluginId = generatePluginId(app);
 		Plugin plugin = pluginFactory.create(pluginId);
 		plugin.setLabel(app.getLabel());
-		plugin.setPath(APP_PLUGIN_ROOT + app.getUri());
+		plugin.setPath(APP_PLUGIN_ROOT + app.getName());
 		plugin.setDescription(app.getDescription());
 		dataService.add(PluginMetadata.PLUGIN, plugin);
 	}
@@ -172,13 +172,13 @@ public class AppManagerServiceImpl implements AppManagerService
 			throw new AppConfigMissingParametersException(missingAppConfigParams);
 		}
 
-		if (fileStore.getFile(APPS_DIR + separator + appConfig.getUri()).exists())
+		if (fileStore.getFile(APPS_DIR + separator + appConfig.getName()).exists())
 		{
 			fileStore.deleteDirectory(APPS_TMP_DIR);
-			throw new AppAlreadyExistsException(appConfig.getUri());
+			throw new AppAlreadyExistsException(appConfig.getName());
 		}
 
-		fileStore.move(tempDir, APPS_DIR + separator + appConfig.getUri());
+		fileStore.move(tempDir, APPS_DIR + separator + appConfig.getName());
 		fileStore.deleteDirectory(APPS_TMP_DIR);
 
 		return appConfig;
@@ -188,7 +188,7 @@ public class AppManagerServiceImpl implements AppManagerService
 	@Transactional
 	public void configureApp(AppConfig appConfig, String htmlTemplate)
 	{
-		String appDirName = APPS_DIR + separator + appConfig.getUri();
+		String appDirName = APPS_DIR + separator + appConfig.getName();
 
 		// If provided config does not include runtimeOptions, set an empty map
 		Map<String, Object> runtimeOptions = appConfig.getRuntimeOptions();
@@ -207,7 +207,7 @@ public class AppManagerServiceImpl implements AppManagerService
 		newApp.setIncludeMenuAndFooter(appConfig.getIncludeMenuAndFooter());
 		newApp.setResourceFolder(appDirName);
 		newApp.setAppConfig(gson.toJson(runtimeOptions));
-		newApp.setUri(appConfig.getUri());
+		newApp.setName(appConfig.getName());
 
 		dataService.add(AppMetadata.APP, newApp);
 	}
@@ -221,7 +221,7 @@ public class AppManagerServiceImpl implements AppManagerService
 
 	private String generatePluginId(App app)
 	{
-		return PluginPopulator.APP_PREFIX + app.getUri();
+		return PluginPopulator.APP_PREFIX + app.getName();
 	}
 
 	private App getAppById(String id)
@@ -297,9 +297,9 @@ public class AppManagerServiceImpl implements AppManagerService
 			missingConfigParameters.add("includeMenuAndFooter");
 		}
 
-		if (appConfig.getUri() == null)
+		if (appConfig.getName() == null)
 		{
-			missingConfigParameters.add("uri");
+			missingConfigParameters.add("name");
 		}
 
 		if (appConfig.getVersion() == null)

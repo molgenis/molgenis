@@ -19,6 +19,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
+import org.molgenis.data.plugin.model.PluginMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
@@ -46,10 +47,6 @@ import static org.testng.Assert.fail;
 
 public class AppManagerServiceTest
 {
-	private static final String APP_META_NAME = "sys_App";
-	private static final String APP_META_URI = "uri";
-	private static final String PLUGIN_META_NAME = "sys_Plugin";
-
 	private AppManagerService appManagerService;
 
 	@Mock
@@ -96,7 +93,7 @@ public class AppManagerServiceTest
 
 		app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("uri");
+		when(app.getName()).thenReturn("app1");
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.isActive()).thenReturn(true);
@@ -131,7 +128,7 @@ public class AppManagerServiceTest
 	{
 		AppResponse appResponse = AppResponse.create(app);
 
-		when(dataService.findAll(APP_META_NAME, App.class)).thenReturn(newArrayList(app).stream());
+		when(dataService.findAll(AppMetadata.APP, App.class)).thenReturn(newArrayList(app).stream());
 		List<AppResponse> actual = appManagerService.getApps();
 		List<AppResponse> expected = newArrayList(appResponse);
 
@@ -141,8 +138,8 @@ public class AppManagerServiceTest
 	@Test
 	public void testGetAppByUri()
 	{
-		Query<App> query = QueryImpl.EQ(APP_META_URI, "test");
-		when(dataService.findOne(APP_META_NAME, query, App.class)).thenReturn(app);
+		Query<App> query = QueryImpl.EQ(AppMetadata.NAME, "test");
+		when(dataService.findOne(AppMetadata.APP, query, App.class)).thenReturn(app);
 		AppResponse actual = appManagerService.getAppByName("test");
 		AppResponse expected = AppResponse.create(app);
 
@@ -152,11 +149,11 @@ public class AppManagerServiceTest
 	@Test
 	public void testActivateApp()
 	{
-		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(app);
+		when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(app);
 		app.setActive(true);
 
 		Plugin plugin = mock(Plugin.class);
-		when(pluginFactory.create(APP_PREFIX + "uri")).thenReturn(plugin);
+		when(pluginFactory.create(APP_PREFIX + "app1")).thenReturn(plugin);
 		plugin.setLabel("label");
 		plugin.setDescription("description");
 
@@ -168,28 +165,28 @@ public class AppManagerServiceTest
 	@Test
 	public void testDeactivateApp()
 	{
-		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(app);
+		when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(app);
 		app.setActive(false);
 
 		appManagerService.deactivateApp(app);
-		verify(dataService).deleteById(PLUGIN_META_NAME, APP_PREFIX + "uri");
+		verify(dataService).deleteById(PluginMetadata.PLUGIN, APP_PREFIX + "app1");
 	}
 
 	@Test
 	public void testDeleteApp()
 	{
-		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(app);
+		when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(app);
 
 		appManagerService.deleteApp("test");
 
-		verify(dataService).deleteById(PLUGIN_META_NAME, APP_PREFIX + "uri");
+		verify(dataService).deleteById(PluginMetadata.PLUGIN, APP_PREFIX + "app1");
 	}
 
 	@Test
 	public void testAppUriDoesNotExist()
 	{
-		Query<App> query = QueryImpl.EQ(APP_META_URI, "test");
-		when(dataService.findOne(APP_META_NAME, query, App.class)).thenReturn(null);
+		Query<App> query = QueryImpl.EQ(AppMetadata.NAME, "test");
+		when(dataService.findOne(AppMetadata.APP, query, App.class)).thenReturn(null);
 		try
 		{
 			appManagerService.getAppByName("test");
@@ -204,7 +201,7 @@ public class AppManagerServiceTest
 	@Test
 	public void testAppIdDoesNotExist()
 	{
-		when(dataService.findOneById(APP_META_NAME, "test", App.class)).thenReturn(null);
+		when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(null);
 		try
 		{
 			appManagerService.deleteApp("test");
@@ -307,7 +304,7 @@ public class AppManagerServiceTest
 		appManagerService.checkAndObtainConfig("tempDir", "");
 	}
 
-	@Test(expectedExceptions = AppConfigMissingParametersException.class, expectedExceptionsMessageRegExp = "missingConfigParameters:\\[label, description, includeMenuAndFooter, uri, version\\]")
+	@Test(expectedExceptions = AppConfigMissingParametersException.class, expectedExceptionsMessageRegExp = "missingConfigParameters:\\[label, description, includeMenuAndFooter, name, version\\]")
 	public void testCheckAndObtainConfigMissingRequiredConfigParameters() throws IOException
 	{
 		InputStream is = AppManagerServiceTest.class.getResourceAsStream("/config-missing-keys.json");
@@ -343,7 +340,7 @@ public class AppManagerServiceTest
 		when(appConfig.getDescription()).thenReturn("Test app description");
 		when(appConfig.getIncludeMenuAndFooter()).thenReturn(true);
 		when(appConfig.getVersion()).thenReturn("1.0");
-		when(appConfig.getUri()).thenReturn("test-app-uri");
+		when(appConfig.getName()).thenReturn("app1");
 		when(appConfig.getApiDependency()).thenReturn("v2.0");
 
 		appManagerService.configureApp(appConfig, "<h1>Test</h1>");

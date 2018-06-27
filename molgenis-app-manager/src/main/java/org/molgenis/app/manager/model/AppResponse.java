@@ -13,7 +13,7 @@ public abstract class AppResponse
 {
 	public abstract String getId();
 
-	public abstract String getUri();
+	public abstract String getName();
 
 	public abstract String getLabel();
 
@@ -34,7 +34,7 @@ public abstract class AppResponse
 
 	public static AppResponse create(App app)
 	{
-		return new AutoValue_AppResponse(app.getId(), app.getUri(), app.getLabel(), app.getDescription(),
+		return new AutoValue_AppResponse(app.getId(), app.getName(), app.getLabel(), app.getDescription(),
 				app.isActive(), app.includeMenuAndFooter(), app.getTemplateContent(), app.getAppVersion(),
 				app.getResourceFolder(), app.getAppConfig());
 	}
