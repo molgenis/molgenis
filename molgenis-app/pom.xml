@@ -40,8 +40,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- for now, must replace with registry.molgenis.org -->
-                    <repository>fdlk/molgenis-app</repository>
+                    <repository>registry.molgenis.org/molgenis/molgenis-app</repository>
                     <buildArgs>
                         <WAR_FILE>target/${project.build.finalName}.war</WAR_FILE>
                     </buildArgs>
