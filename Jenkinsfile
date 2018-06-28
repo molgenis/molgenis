@@ -39,7 +39,7 @@ pipeline {
             }
             steps {
                 container('alpine') {
-                    sh "curl -s https://codecov.io/bash | bash -s - -t ${env.CODECOV_TOKEN} -c -F unit"
+                    sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -v -K"
                 }
             }
         }
