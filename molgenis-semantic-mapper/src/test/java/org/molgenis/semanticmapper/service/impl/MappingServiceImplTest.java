@@ -42,6 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -59,9 +60,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
 	private static final String SOURCE_GENE_ENTITY = "Gene";
 	private static final String SOURCE_EXON_ENTITY = "Exon";
-
-	@Autowired
-	private DataService dataService;
 
 	@Autowired
 	private AlgorithmService algorithmService;
@@ -104,6 +102,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private MetaDataService metaDataService;
 
+	@Mock(answer = RETURNS_DEEP_STUBS)
+	private DataService dataService;
+
 	private EntityType hopMetaData;
 	private EntityType geneMetaData;
 
@@ -129,6 +130,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		package_ = packageFactory.create("package");
 
 		hopMetaData = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		hopMetaData.setPackage(package_);
 		hopMetaData.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
 		hopMetaData.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 
@@ -273,10 +275,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
 		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
+		when(dataService.hasRepository("target id")).thenReturn(true);
+		when(dataService.getMeta().getEntityType("target id").getPackage()).thenReturn(package_);
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "target id", null, null, null);
 		assertEquals(targetMetadata.getId(), "target id");
 		assertEquals(targetMetadata.getLabel(), "target id");
-		assertNull(targetMetadata.getPackage());
+		assertEquals(targetMetadata.getPackage(), package_);
 		assertNull(targetMetadata.getAttribute(SOURCE));
 	}
 
