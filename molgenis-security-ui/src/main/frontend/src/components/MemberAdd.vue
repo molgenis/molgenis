@@ -15,9 +15,9 @@
 
           <div class="form-group">
             <label for="userSelect">User</label>
-            <select id="userSelect" v-model="userId" class="form-control">
+            <select id="userSelect" v-model="username" class="form-control">
               <option value="">- Please select a user -</option>
-              <option v-for="user in sortedUsers" :value="user.id">{{user.username}}</option>
+              <option v-for="user in sortedUsers" :value="user.username">{{user.username}}</option>
             </select>
           </div>
 
@@ -39,7 +39,7 @@
             class="btn btn-success"
             type="submit"
             @click.prevent="onSubmit"
-            :disabled="!userId || !roleName">
+            :disabled="!username || !roleName">
             Add Member
           </button>
 
@@ -74,7 +74,7 @@
     },
     data () {
       return {
-        userId: '',
+        username: '',
         roleName: '',
         isAdding: false
       }
@@ -95,7 +95,7 @@
     methods: {
       onSubmit () {
         this.isAdding = !this.isAdding
-        const addMemberCommand = { username: this.userId, roleName: this.roleName }
+        const addMemberCommand = { username: this.username, roleName: this.roleName }
         this.$store.dispatch('addMember', {groupName: this.groupName, addMemberCommand})
           .then(() => {
             this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })

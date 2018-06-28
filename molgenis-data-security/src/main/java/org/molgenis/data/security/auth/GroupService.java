@@ -176,7 +176,7 @@ public class GroupService
 			throw new AddingMemberNotAllowedException(currentUser, group);
 		}
 
-		boolean isGroupRole = groupRoles.contains(role);
+		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(role.getName()));
 
 		if(!isGroupRole)
 		{
