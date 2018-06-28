@@ -15,7 +15,7 @@ pipeline {
             }
             environment {
                 //PR-1234-231
-                TAG = "$CHANGE_ID-$BUILD_NUMBER"
+                TAG = "PR-$CHANGE_ID-$BUILD_NUMBER"
                 //0.0.0-SNAPSHOT-PR-1234-231
                 PREVIEW_VERSION = "0.0.0-SNAPSHOT-$TAG"
             }
