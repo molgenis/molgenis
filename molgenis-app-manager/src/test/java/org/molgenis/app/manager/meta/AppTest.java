@@ -95,9 +95,9 @@ public class AppTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testUri()
 	{
-		assertNull(app.getUri());
-		app.setUri("not-an-uri!");
-		assertEquals(app.getUri(), "not-an-uri!");
+		assertNull(app.getName());
+		app.setName("app1");
+		assertEquals(app.getName(), "app1");
 	}
 
 	@Test

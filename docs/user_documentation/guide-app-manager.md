@@ -68,5 +68,5 @@ Toggle our example to inactive, and delete!
 
 ![am08 - delete app](../images/app-manager/am08-delete-app.png?raw=true, "am07-delete-app")
 
-You are now free to make changes to the config, descriptions, uri paths, and resources.
+You are now free to make changes to the config, descriptions, name, and resources.
 After making your changes you can upload the archive again and use the app as you see fit!

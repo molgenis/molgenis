@@ -87,7 +87,7 @@ public class AppManagerController extends PluginController
 			String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
 			String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
 			AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
-			String htmlTemplate = appManagerService.extractFileContent(APPS_DIR + separator + appConfig.getUri(),
+			String htmlTemplate = appManagerService.extractFileContent(APPS_DIR + separator + appConfig.getName(),
 					ZIP_INDEX_FILE);
 			appManagerService.configureApp(appConfig, htmlTemplate);
 		}

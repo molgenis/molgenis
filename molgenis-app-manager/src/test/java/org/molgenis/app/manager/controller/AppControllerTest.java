@@ -28,7 +28,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.net.URI;
@@ -41,6 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
+import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -102,14 +106,15 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		initMocks(this);
 
 		Menu menu = mock(Menu.class);
-		when(menu.findMenuItemPath(AppController.ID + "/uri/")).thenReturn("/test/path");
+		String appName = "app1";
+		when(menu.findMenuItemPath(APP_PREFIX + appName)).thenReturn("/test/path");
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(appSettings.getLanguageCode()).thenReturn("en");
 		when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
 
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("uri");
+		when(app.getName()).thenReturn(appName);
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.isActive()).thenReturn(true);
@@ -124,7 +129,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
 
 		appResponse = AppResponse.create(app);
-		when(appManagerService.getAppByName("uri")).thenReturn(appResponse);
+		when(appManagerService.getAppByName(appName)).thenReturn(appResponse);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(appController)
 								 .setControllerAdvice(globalControllerExceptionHandler, fallbackExceptionHandler,
@@ -136,9 +141,9 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
-		mockMvc.perform(get(AppController.URI + "/uri/"))
+		mockMvc.perform(get(AppController.URI + "/app1/"))
 			   .andExpect(status().isOk())
 			   .andExpect(model().attribute("app", appResponse))
 			   .andExpect(model().attribute("baseUrl", "/test/path"))
@@ -148,28 +153,28 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testServeAppNoPermissions() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(false);
-		mockMvc.perform(get(AppController.URI + "/uri/")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get(AppController.URI + "/app1/")).andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testServeAppRedirectToApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
-		mockMvc.perform(get(AppController.URI + "/uri")).andExpect(status().is3xxRedirection());
+		mockMvc.perform(get(AppController.URI + "/app1")).andExpect(status().is3xxRedirection());
 	}
 
 	@Test
 	public void testServeAppInactiveApp() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity(APP_PREFIX + "app1");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
 
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("uri");
+		when(app.getName()).thenReturn("app1");
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.getAppVersion()).thenReturn("v1.0.0");
@@ -181,21 +186,21 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests
 		when(app.isActive()).thenReturn(false);
 
 		AppResponse appResponse = AppResponse.create(app);
-		when(appManagerService.getAppByName("uri")).thenReturn(appResponse);
+		when(appManagerService.getAppByName("app1")).thenReturn(appResponse);
 
-		mockMvc.perform(get(AppController.URI + "/uri/"))
+		mockMvc.perform(get(AppController.URI + "/app1/"))
 			   .andExpect(status().is4xxClientError())
 			   .andExpect(model().attribute("errorMessageResponse",
-					   ErrorMessageResponse.create("Access denied for inactive app at location /app/uri", "AM07")))
+					   ErrorMessageResponse.create("Access denied for inactive app at location /app/app1", "AM07")))
 			   .andExpect(view().name("view-exception"));
 	}
 
 	@Test
 	public void testServeResource() throws Exception
 	{
-		PluginIdentity pluginIdentity = new PluginIdentity("app/uri/");
+		PluginIdentity pluginIdentity = new PluginIdentity("app/app1/");
 		when(userPermissionEvaluator.hasPermission(pluginIdentity, VIEW_PLUGIN)).thenReturn(true);
-		mockMvc.perform(get(AppController.URI + "/uri/js/test.js"))
+		mockMvc.perform(get(AppController.URI + "/app1/js/test.js"))
 			   .andExpect(status().isOk())
 			   .andReturn()
 			   .getResponse();

@@ -36,14 +36,14 @@ public class App extends StaticEntity
 		set(ID, id);
 	}
 
-	public String getUri()
+	public String getName()
 	{
-		return getString(URI);
+		return getString(NAME);
 	}
 
-	public void setUri(String uri)
+	public void setName(String name)
 	{
-		set(URI, uri);
+		set(NAME, name);
 	}
 
 	public String getLabel()
