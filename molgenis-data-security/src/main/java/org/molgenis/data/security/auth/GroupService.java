@@ -5,12 +5,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
@@ -23,14 +26,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.SidUtils.createRoleAuthority;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
 
 @Service
 public class GroupService
@@ -43,10 +49,16 @@ public class GroupService
 	private final GroupMetadata groupMetadata;
 	private final RoleMembershipService roleMembershipService;
 	private final UserService userService;
+	private final RoleMetadata roleMetadata;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
 	private static final String VIEWER = "Viewer";
+
+	public static final String AUTHORITY_MANAGER = createRoleAuthority(MANAGER.toUpperCase());
+	public static final String AUTHORITY_EDITOR = createRoleAuthority(EDITOR.toUpperCase());
+	public static final String AUTHORITY_VIEWER = createRoleAuthority(VIEWER.toUpperCase());
+
 
 	public static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of(MANAGER, WRITEMETA, EDITOR, WRITE,
 			VIEWER, READ);
@@ -54,6 +66,7 @@ public class GroupService
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
 			RoleMembershipService roleMembershipService, UserService userService)
+			DataService dataService, PermissionService permissionService, RoleMetadata roleMetadata)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -63,6 +76,7 @@ public class GroupService
 		this.groupMetadata = requireNonNull(groupMetadata);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.userService = requireNonNull(userService);
+		this.roleMetadata = requireNonNull(roleMetadata);
 	}
 
 	/**
@@ -74,7 +88,11 @@ public class GroupService
 	public void persist(GroupValue groupValue)
 	{
 		Package rootPackage = packageFactory.create(groupValue.getRootPackage());
-		List<Role> roles = groupValue.getRoles().stream().map(roleFactory::create).collect(Collectors.toList());
+
+		List<Role> roles = groupValue.getRoles()
+									 .stream()
+									 .map(roleFactory::create)
+									 .map(this::addIncludedRole).collect(toList());
 
 		Group group = groupFactory.create(groupValue);
 		group.setRootPackage(rootPackage.getId());
@@ -84,6 +102,23 @@ public class GroupService
 		dataService.add(GROUP, group);
 		roles.forEach(role -> role.setGroup(group));
 		dataService.add(ROLE, roles.stream());
+	}
+
+	private Role addIncludedRole(Role role)
+	{
+		role.setIncludes(singletonList(findRoleNamed(role.getLabel().toUpperCase())));
+		return role;
+	}
+
+	private Role findRoleNamed(String rolename)
+	{
+		Query<Role> query = QueryImpl.EQ(RoleMetadata.NAME, rolename);
+		Role result = dataService.findOne(ROLE, query, Role.class);
+		if (result == null)
+		{
+			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), rolename);
+		}
+		return result;
 	}
 
 	/**

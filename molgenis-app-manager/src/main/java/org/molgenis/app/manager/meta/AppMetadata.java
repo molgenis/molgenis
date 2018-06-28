@@ -8,6 +8,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+@SuppressWarnings("WeakerAccess")
 @Component
 public class AppMetadata extends SystemEntityType
 {
@@ -24,10 +25,9 @@ public class AppMetadata extends SystemEntityType
 	public static final String TEMPLATE_CONTENT = "templateContent";
 	public static final String RESOURCE_FOLDER = "resourceFolder";
 
-	public static final String URI = "uri";
+	public static final String NAME = "name";
 	public static final String APP_CONFIG = "appConfig";
 	public static final String INCLUDE_MENU_AND_FOOTER = "includeMenuAndFooter";
-
 
 	public AppMetadata()
 	{
@@ -43,10 +43,7 @@ public class AppMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setLabel("Label").setNillable(false);
 		addAttribute(DESCRIPTION, ROLE_LOOKUP).setDataType(TEXT).setNillable(true).setLabel("Description");
-		addAttribute(IS_ACTIVE).setDataType(BOOL)
-							   .setLabel("Active")
-							   .setNillable(false)
-							   .setDefaultValue(Boolean.FALSE.toString());
+		addAttribute(IS_ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false).setDefaultValue(Boolean.FALSE.toString());
 
 		// App resources
 		addAttribute(APP_VERSION).setNillable(true).setLabel("App version");
@@ -55,10 +52,10 @@ public class AppMetadata extends SystemEntityType
 		addAttribute(RESOURCE_FOLDER).setNillable(false).setLabel("Resource folder");
 
 		// App configuration
-		addAttribute(URI, ROLE_LOOKUP).setLabel("URI")
-									  .setDescription("The URI used to point at this app. I.e. /app/{uri}")
-									  .setNillable(false)
-									  .setUnique(true);
+		addAttribute(NAME, ROLE_LOOKUP).setLabel("Name")
+									   .setDescription("The name of this app")
+									   .setNillable(false)
+									   .setUnique(true);
 		addAttribute(APP_CONFIG).setDataType(TEXT).setNillable(true).setLabel("Runtime Application configuration");
 		addAttribute(INCLUDE_MENU_AND_FOOTER).setDataType(BOOL)
 											 .setLabel("Include a menu above your app and a footer below")

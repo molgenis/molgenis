@@ -43,7 +43,7 @@ public class AppManagerControllerTest
 
 		App app = mock(App.class);
 		when(app.getId()).thenReturn("id");
-		when(app.getUri()).thenReturn("uri");
+		when(app.getName()).thenReturn("app1");
 		when(app.getLabel()).thenReturn("label");
 		when(app.getDescription()).thenReturn("description");
 		when(app.isActive()).thenReturn(true);
@@ -75,7 +75,7 @@ public class AppManagerControllerTest
 		mockMvc.perform(get(AppManagerController.URI + "/apps"))
 			   .andExpect(status().is(200))
 			   .andExpect(content().string(
-					   "[{\"id\":\"id\",\"uri\":\"uri\",\"label\":\"label\",\"description\":\"description\",\"isActive\":true,\"includeMenuAndFooter\":true,\"templateContent\":\"\\u003ch1\\u003eTest\\u003c/h1\\u003e\",\"version\":\"v1.0.0\",\"resourceFolder\":\"resource-folder\",\"appConfig\":\"{\\u0027config\\u0027: \\u0027test\\u0027}\"}]"));
+					   "[{\"id\":\"id\",\"name\":\"app1\",\"label\":\"label\",\"description\":\"description\",\"isActive\":true,\"includeMenuAndFooter\":true,\"templateContent\":\"\\u003ch1\\u003eTest\\u003c/h1\\u003e\",\"version\":\"v1.0.0\",\"resourceFolder\":\"resource-folder\",\"appConfig\":\"{\\u0027config\\u0027: \\u0027test\\u0027}\"}]"));
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class AppManagerControllerTest
 	public void testUploadApp() throws Exception
 	{
 		AppConfig appConfig = mock(AppConfig.class);
-		when(appConfig.getUri()).thenReturn("");
+		when(appConfig.getName()).thenReturn("");
 		when(appManagerService.checkAndObtainConfig(null, null)).thenReturn(appConfig);
 		String testFile = AppManagerControllerTest.class.getResource("/test-app.zip").getFile();
 		mockMvc.perform(multipart(AppManagerController.URI + "/upload").file("file", testFile.getBytes()))

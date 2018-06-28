@@ -1,7 +1,8 @@
 package org.molgenis.app;
 
 import org.molgenis.core.ui.security.MolgenisAccessDecisionVoter;
-import org.molgenis.security.MolgenisRoleHierarchy;
+import org.molgenis.data.DataService;
+import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Autowired
 	private RoleVoter roleVoter;
 
+	@Autowired
+	private DataService dataService;
+
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
@@ -51,7 +55,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 	@Override
 	public RoleHierarchy roleHierarchy()
 	{
-		return new MolgenisRoleHierarchy();
+		return new DataserviceRoleHierarchy(dataService);
 	}
 
 	@Bean

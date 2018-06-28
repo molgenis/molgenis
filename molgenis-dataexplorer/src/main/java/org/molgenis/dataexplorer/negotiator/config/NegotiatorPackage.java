@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-class NegotiatorPackage extends SystemPackage
+public class NegotiatorPackage extends SystemPackage
 {
 	private static final String SIMPLE_NAME = "negotiator";
 	public static final String PACKAGE_NEGOTIATOR = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

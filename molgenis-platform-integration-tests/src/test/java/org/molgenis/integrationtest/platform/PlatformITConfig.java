@@ -14,6 +14,7 @@ import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.DatabaseConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
+import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
@@ -25,7 +26,6 @@ import org.molgenis.jobs.JobExecutionConfig;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
-import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
 import org.molgenis.security.acl.MutableAclClassServiceImpl;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
@@ -92,7 +92,8 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		org.molgenis.security.permission.PermissionSystemServiceImpl.class, PrincipalSecurityContextRegistryImpl.class,
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
-		UserPermissionEvaluatorImpl.class, MolgenisRoleHierarchy.class, SystemRepositoryDecoratorFactoryRegistrar.class,
+		UserPermissionEvaluatorImpl.class, DataserviceRoleHierarchy.class,
+		SystemRepositoryDecoratorFactoryRegistrar.class,
 		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
 		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
 		PermissionRegistry.class, DataPermissionConfig.class })

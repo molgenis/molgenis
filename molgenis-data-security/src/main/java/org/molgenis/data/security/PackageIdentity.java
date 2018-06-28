@@ -5,7 +5,7 @@ import org.springframework.security.acls.domain.ObjectIdentityImpl;
 
 public class PackageIdentity extends ObjectIdentityImpl
 {
-	public static final String TYPE = "package";
+	public static final String PACKAGE = "package";
 
 	public PackageIdentity(Package aPackage)
 	{
@@ -14,6 +14,6 @@ public class PackageIdentity extends ObjectIdentityImpl
 
 	public PackageIdentity(String packageId)
 	{
-		super(TYPE, packageId);
+		super(PACKAGE, packageId);
 	}
 }

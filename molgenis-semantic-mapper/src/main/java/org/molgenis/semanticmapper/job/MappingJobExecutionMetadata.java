@@ -15,7 +15,7 @@ import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 public class MappingJobExecutionMetadata extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "MappingJobExecution";
-	static final String MAPPING_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String MAPPING_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 	static final String MAPPING_JOB_TYPE = "mapping";
 
 	static final String MAPPING_PROJECT_ID = "mappingProjectId";

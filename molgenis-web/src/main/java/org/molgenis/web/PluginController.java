@@ -52,6 +52,7 @@ public abstract class PluginController
 	 *
 	 * @return entity or null
 	 */
+	@SuppressWarnings("WeakerAccess")
 	public Entity getPluginSettings()
 	{
 		String entityTypeId = DefaultSettingsEntityType.getSettingsEntityName(getId());

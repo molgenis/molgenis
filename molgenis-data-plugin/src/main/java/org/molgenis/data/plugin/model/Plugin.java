@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
+import static org.molgenis.data.plugin.model.PluginMetadata.PATH;
+
 public class Plugin extends StaticEntity
 {
 	public Plugin(Entity entity)
@@ -41,6 +43,17 @@ public class Plugin extends StaticEntity
 	public Plugin setLabel(String label)
 	{
 		set(PluginMetadata.LABEL, label);
+		return this;
+	}
+
+	public String getPath()
+	{
+		return getString(PATH);
+	}
+
+	public Plugin setPath(String path)
+	{
+		set(PATH, path);
 		return this;
 	}
 

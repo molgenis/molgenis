@@ -4,6 +4,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -18,15 +20,18 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA;
+import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.testng.Assert.assertEquals;
 
 public class GroupServiceTest extends AbstractMockitoTest
@@ -47,6 +52,10 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private RoleMembershipService roleMembershipService;
 	@Mock
 	private UserService userService;
+	@Mock
+	private RoleMetadata roleMetadata;
+	@Mock
+	private Attribute nameAttribute;
 
 	@Mock
 	private Group group;
@@ -54,6 +63,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private Role role;
 	@Mock
 	private Package aPackage;
+	@Mock
+	private Role roleManager;
 
 	@Captor
 	private ArgumentCaptor<Stream<Role>> roleCaptor;
@@ -79,6 +90,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 		groupValue = builder.build();
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
 				groupMetadata, roleMembershipService, userService);
+		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
+				roleMetadata);
 	}
 
 	@Test
@@ -87,14 +100,33 @@ public class GroupServiceTest extends AbstractMockitoTest
 		when(groupFactory.create(groupValue)).thenReturn(group);
 		when(roleFactory.create(roleValue)).thenReturn(role);
 		when(packageFactory.create(packageValue)).thenReturn(aPackage);
+		when(role.getLabel()).thenReturn("Manager");
+
+		when(dataService.findOne(ROLE, EQ(NAME, "MANAGER"), Role.class)).thenReturn(roleManager);
 
 		groupService.persist(groupValue);
 
 		verify(dataService).add(GroupMetadata.GROUP, group);
-		verify(dataService).add(eq(RoleMetadata.ROLE), roleCaptor.capture());
+		verify(dataService).add(eq(ROLE), roleCaptor.capture());
 		verify(dataService).add(PackageMetadata.PACKAGE, aPackage);
-		assertEquals(roleCaptor.getValue().collect(Collectors.toList()), Collections.singletonList(role));
+		assertEquals(roleCaptor.getValue().collect(toList()), singletonList(role));
+
 		verify(role).setGroup(group);
+		verify(role).setIncludes(singletonList(roleManager));
+	}
+
+	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_Role id:MANAGER attribute:name")
+	public void testPersistIncludedRoleNotFound()
+	{
+		when(roleFactory.create(roleValue)).thenReturn(role);
+		when(packageFactory.create(packageValue)).thenReturn(aPackage);
+		when(role.getLabel()).thenReturn("Manager");
+
+		when(roleMetadata.getId()).thenReturn(ROLE);
+		when(roleMetadata.getAttribute(NAME)).thenReturn(nameAttribute);
+		when(nameAttribute.getName()).thenReturn(NAME);
+
+		groupService.persist(groupValue);
 	}
 
 	@Test

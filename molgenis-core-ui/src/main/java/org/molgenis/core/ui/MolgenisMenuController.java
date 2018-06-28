@@ -1,5 +1,8 @@
 package org.molgenis.core.ui;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownPluginException;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.Ui;
 import org.molgenis.web.UiMenu;
@@ -21,7 +24,10 @@ import java.time.format.DateTimeFormatter;
 
 import static java.time.ZonedDateTime.now;
 import static java.time.format.FormatStyle.MEDIUM;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.MolgenisMenuController.URI;
+import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 @Controller
@@ -32,22 +38,23 @@ public class MolgenisMenuController
 
 	public static final String URI = "/menu";
 
-	static final String KEY_MENU_ID = "menu_id";
-	static final String KEY_MOLGENIS_VERSION = "molgenis_version";
-	static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
+	private static final String KEY_MENU_ID = "menu_id";
+	private static final String KEY_MOLGENIS_VERSION = "molgenis_version";
+	private static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
 
 	private final Ui molgenisUi;
 	private final String molgenisVersion;
 	private final String molgenisBuildData;
+	private final DataService dataService;
 
 	public MolgenisMenuController(Ui molgenisUi, @Value("${molgenis.version}") String molgenisVersion,
-			@Value("${molgenis.build.date}") String molgenisBuildData)
+			@Value("${molgenis.build.date}") String molgenisBuildData, DataService dataService)
 	{
-		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
-		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
-		if (molgenisBuildData == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		this.molgenisUi = molgenisUi;
-		this.molgenisVersion = molgenisVersion;
+		this.dataService = requireNonNull(dataService);
+		this.molgenisUi = requireNonNull(molgenisUi, "molgenisUi is null");
+		this.molgenisVersion = requireNonNull(molgenisVersion, "molgenisVersion is null");
+		requireNonNull(molgenisBuildData, "molgenisBuildDate is null");
+
 		// workaround for Eclipse bug: https://github.com/molgenis/molgenis/issues/2667
 		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ?
 				DateTimeFormatter.ofLocalizedDateTime(MEDIUM).format(now()) + " by Eclipse" : molgenisBuildData;
@@ -108,10 +115,17 @@ public class MolgenisMenuController
 		return getForwardPluginUri(pluginId, remainder);
 	}
 
-	private String getForwardPluginUri(String pluginId, String pathRemainder)
+	String getForwardPluginUri(String pluginId, String pathRemainder)
 	{
+		// get plugin path with elevated permissions because the anonymous user can also request plugins
+		Plugin plugin = runAsSystem(() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class));
+		if (plugin == null)
+		{
+			throw new UnknownPluginException(pluginId);
+		}
+
 		StringBuilder strBuilder = new StringBuilder("forward:");
-		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(pluginId);
+		strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath()).append("/");
 		if (pathRemainder != null) strBuilder.append(pathRemainder);
 		return strBuilder.toString();
 	}

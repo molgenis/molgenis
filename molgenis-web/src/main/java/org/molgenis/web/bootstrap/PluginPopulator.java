@@ -23,7 +23,9 @@ public class PluginPopulator
 	private final DataService dataService;
 	private final PluginFactory pluginFactory;
 
-	public PluginPopulator(DataService dataService, PluginFactory pluginFactory)
+	public static final String APP_PREFIX = "app-";
+
+	PluginPopulator(DataService dataService, PluginFactory pluginFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.pluginFactory = requireNonNull(pluginFactory);
@@ -39,7 +41,7 @@ public class PluginPopulator
 
 		existingPluginMap.forEach((pluginId, plugin) ->
 		{
-			if (newOrChangedPluginMap.get(pluginId) == null && !pluginId.startsWith("app/"))
+			if (newOrChangedPluginMap.get(pluginId) == null && !pluginId.startsWith(APP_PREFIX))
 			{
 				deletedPlugins.add(plugin);
 			}
@@ -67,6 +69,6 @@ public class PluginPopulator
 	private Plugin createPlugin(PluginController pluginController)
 	{
 		String pluginControllerId = pluginController.getId();
-		return pluginFactory.create(pluginControllerId).setLabel(pluginControllerId);
+		return pluginFactory.create(pluginControllerId).setLabel(pluginControllerId).setPath(pluginControllerId);
 	}
 }
