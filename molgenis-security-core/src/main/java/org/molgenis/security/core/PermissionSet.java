@@ -37,9 +37,18 @@ public class PermissionSet extends AbstractPermission
 		this.name = name;
 	}
 
+	public String name()
+	{
+		return name;
+	}
+
+	private String code()
+	{
+		return Stream.of("permission", getClass().getSimpleName(), name()).collect(joining("."));
+	}
+
 	public MessageSourceResolvable getName()
 	{
-		String code = Stream.of("permission", getClass().getSimpleName(), name).collect(joining("."));
-		return new DefaultMessageSourceResolvable(new String[] { code }, null, name);
+		return new DefaultMessageSourceResolvable(new String[] { code() }, null, name());
 	}
 }
