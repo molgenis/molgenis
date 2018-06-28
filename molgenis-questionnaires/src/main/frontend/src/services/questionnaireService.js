@@ -164,6 +164,6 @@ export default {
     }
     const {vfs} = pdfFonts.pdfMake
     pdfMake.vfs = vfs
-    pdfMake.createPdf(docDefinition).download(docTitle + ".pdf")
+    pdfMake.createPdf(docDefinition).download(docTitle + '.pdf')
   }
 }
