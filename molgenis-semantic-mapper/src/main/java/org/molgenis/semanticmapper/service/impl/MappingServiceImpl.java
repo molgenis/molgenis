@@ -170,9 +170,13 @@ public class MappingServiceImpl implements MappingService
 		progress.setProgressMax(calculateMaxProgress(mappingTarget));
 
 		progress.progress(0, format("Checking target repository [%s]...", entityTypeId));
-		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
-				addSourceAttribute);
-		Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
+		Repository<Entity> targetRepo = dataService.getRepository(entityTypeId);
+		if (targetRepo == null)
+		{
+			EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
+					addSourceAttribute);
+			targetRepo = getTargetRepository(entityTypeId, targetMetadata);
+		}
 		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
