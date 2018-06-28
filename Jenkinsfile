@@ -23,7 +23,7 @@ pipeline {
                 container('molgenis-maven') {
                     sh "git rev-parse HEAD"
                     sh "mvn -V -B versions:set -DnewVersion=$PREVIEW_VERSION -DgenerateBackupPoms=false"
-                    sh "mvn -V -B -T2 clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=$TAG"
+                    sh "mvn -V -B -T2 clean package dockerfile:push -Dmaven.test.redirectTestOutputToFile=true -Ddockerfile.tag=$TAG"
                 }
             }
             post {
