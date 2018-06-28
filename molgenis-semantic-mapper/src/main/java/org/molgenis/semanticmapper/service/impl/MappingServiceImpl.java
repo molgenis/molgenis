@@ -170,19 +170,16 @@ public class MappingServiceImpl implements MappingService
 		progress.setProgressMax(calculateMaxProgress(mappingTarget));
 
 		progress.progress(0, format("Checking target repository [%s]...", entityTypeId));
-		Repository<Entity> targetRepo = dataService.getRepository(entityTypeId);
-		if (targetRepo == null)
-		{
-			EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
-					addSourceAttribute);
-			targetRepo = getTargetRepository(entityTypeId, targetMetadata);
-		}
+		EntityType targetMetadata = createTargetMetadata(mappingTarget, entityTypeId, packageId, label,
+				addSourceAttribute);
+		Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
 		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
 	EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId, String label,
 			Boolean addSourceAttribute)
 	{
+
 		EntityType targetMetadata = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetadata.setId(entityTypeId);
 
@@ -200,7 +197,18 @@ public class MappingServiceImpl implements MappingService
 			targetMetadata.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
-		targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+		if (dataService.hasRepository(entityTypeId))
+		{
+			targetMetadata.setPackage(dataService.getMeta().getEntityType(entityTypeId).getPackage());
+		}
+		else if (packageId != null)
+		{
+			targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+		}
+		else
+		{
+			throw new MolgenisDataException("Package can't be null");
+		}
 
 		return targetMetadata;
 	}
