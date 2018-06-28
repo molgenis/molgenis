@@ -5,6 +5,19 @@
 
     <div class="row mb-3  ">
       <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <router-link :to="{ name: 'groupOverView' }">Groups</router-link>
+            </li>
+            <li class="breadcrumb-item active text-capitalize" aria-current="page">{{name}}</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="row mb-3  ">
+      <div class="col">
         <h1>{{ 'security-ui-members-page-title' | i18n }}</h1>
       </div>
     </div>
@@ -18,13 +31,15 @@
 
     <div class="row groups-listing mt-1">
       <div class="col">
-        <ul class="list-group">
-          <li v-for="member in sortedMembers" class="list-group-item flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="text-capitalize">{{member.username}}  <small class="font-weight-light text-uppercase"> ({{member.roleLabel}})</small></h5>
-            </div>
-          </li>
-        </ul>
+        <router-link
+          v-for="member in sortedMembers"
+          :key="member.username"
+          :to="{ name: 'memberDetail', params: { groupName: name, memberName: member.username } }"
+          class="list-group-item list-group-item-action">
+          <div>
+            <h5 class="text-capitalize">{{member.username}}  <small class="font-weight-light text-uppercase"> ({{member.roleLabel}})</small></h5>
+          </div>
+        </router-link>
       </div>
     </div>
 
@@ -48,8 +63,8 @@
         'groupMembers'
       ]),
       sortedMembers () {
-        const groupMember = this.groupMembers[this.name] || []
-        return [...groupMember].sort((a, b) => a.username.localeCompare(b.username))
+        const members = this.groupMembers[this.name] || []
+        return [...members].sort((a, b) => a.username.localeCompare(b.username))
       }
     },
     methods: {

@@ -6,6 +6,7 @@ import GroupOverview from './components/GroupOverview'
 import GroupCreate from './components/GroupCreate'
 import GroupDetail from './components/GroupDetail'
 import MemberAdd from './components/MemberAdd'
+import MemberDetail from './components/MemberDetail'
 import i18n from '@molgenis/molgenis-i18n-js'
 
 Vue.use(Router)
@@ -32,6 +33,12 @@ const router = new Router({
       name: 'addMember',
       props: true,
       component: MemberAdd
+    },
+    {
+      path: '/group/:groupName/member/:memberName',
+      name: 'memberDetail',
+      props: true,
+      component: MemberDetail
     },
     {
       path: '/group/create',
