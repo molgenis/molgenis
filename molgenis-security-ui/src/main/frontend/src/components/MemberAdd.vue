@@ -15,9 +15,10 @@
 
           <div class="form-group">
             <label for="userSelect">User</label>
-            <select id="userSelect" v-model="username" class="form-control">
-              <option value="">- Please select a user -</option>
-              <option v-for="user in sortedUsers" :value="user.username">{{user.username}}</option>
+            <select id="userSelect" v-model="username" class="form-control" :disabled="nonMemberUsers.length === 0">
+              <option v-if="nonMemberUsers.length > 0" value="">- Please select a user -</option>
+              <option v-else="nonMemberUsers.length > 0" value="" >No available users</option>
+              <option v-for="user in nonMemberUsers" :value="user.username">{{user.username}}</option>
             </select>
           </div>
 
@@ -82,14 +83,18 @@
     computed: {
       ...mapGetters([
         'groupRoles',
-        'users'
+        'users',
+        'groupMembers'
       ]),
       sortedRoles () {
         const roles = this.groupRoles[this.groupName] || []
         return [...roles].sort((a, b) => a.roleLabel.localeCompare(b.roleLabel))
       },
-      sortedUsers () {
-        return [...this.users].sort((a, b) => a.username.localeCompare(b.username))
+      nonMemberUsers () {
+        const currentMembers = this.groupMembers[this.groupName] || []
+        const currentMemberNames = currentMembers.map((cm) => cm.username)
+        const nonMemberUsers = this.users.filter((u) => !currentMemberNames.includes(u.username))
+        return [...nonMemberUsers].sort((a, b) => a.username.localeCompare(b.username))
       }
     },
     methods: {
