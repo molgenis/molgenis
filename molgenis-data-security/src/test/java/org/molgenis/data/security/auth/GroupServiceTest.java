@@ -89,9 +89,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				groupMetadata, roleMembershipService, userService);
-		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				roleMetadata);
+				groupMetadata, roleMembershipService, userService, roleMetadata);
 	}
 
 	@Test

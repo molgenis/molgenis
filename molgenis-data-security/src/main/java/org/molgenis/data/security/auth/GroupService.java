@@ -2,15 +2,15 @@ package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import org.molgenis.data.DataService;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.exception.*;
+import org.molgenis.data.security.exception.AddingMemberNotAllowedException;
+import org.molgenis.data.security.exception.IsAlreadyMemberException;
+import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
@@ -18,7 +18,6 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,8 +64,7 @@ public class GroupService
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
-			RoleMembershipService roleMembershipService, UserService userService)
-			DataService dataService, PermissionService permissionService, RoleMetadata roleMetadata)
+			RoleMembershipService roleMembershipService, UserService userService, RoleMetadata roleMetadata)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
