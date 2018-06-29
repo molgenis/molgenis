@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
@@ -122,7 +121,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
 		return getRepository(entityType);
@@ -134,7 +133,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
 		return getRepository(entityType, entityClass);

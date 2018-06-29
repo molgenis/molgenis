@@ -275,7 +275,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		verifyNoMoreInteractions(dataService);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = RepositoryCreationException.class)
 	public void createRepositoryAbstractEntityType()
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
@@ -311,7 +311,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		verifyNoMoreInteractions(dataService);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = RepositoryCreationException.class)
 	public void createRepositoryTypedAbstractEntityType()
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
