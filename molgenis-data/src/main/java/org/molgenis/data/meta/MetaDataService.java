@@ -230,13 +230,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addAttribute(Attribute attribute);
 
 	/**
-	 * Adds attributes to an EntityType
-	 *
-	 * @param attrs Stream <Attribute>
-	 */
-	void addAttributes(String entityTypeId, Stream<Attribute> attrs);
-
-	/**
 	 * Deletes an Attribute from an Entity
 	 */
 	void deleteAttributeById(Object id);

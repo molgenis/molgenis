@@ -367,21 +367,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
 
-	@Transactional
-	@Override
-	public void addAttributes(String entityTypeId, Stream<Attribute> attrs)
-	{
-		EntityType entityType = dataService.getEntityType(entityTypeId);
-		List<Attribute> attributes = attrs.collect(toList());
-		entityType.addAttributes(attributes);
-
-		// Update repository state
-		dataService.update(ENTITY_TYPE_META_DATA, entityType);
-
-		// Update administration
-		dataService.add(ATTRIBUTE_META_DATA, attributes.stream());
-	}
-
 	@Override
 	public boolean hasEntityType(String entityTypeId)
 	{
