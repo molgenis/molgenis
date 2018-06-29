@@ -14,6 +14,7 @@
 
     <properties>
         <owasp-check-format>HTML</owasp-check-format>
+        <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     </properties>
 
     <build>
@@ -24,6 +25,28 @@
             </resource>
         </resources>
         <plugins>
+            <!-- Docker image containing the warfile -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>tag</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>registry.molgenis.org/molgenis/molgenis-app</repository>
+                    <buildArgs>
+                        <WAR_FILE>target/${project.build.finalName}.war</WAR_FILE>
+                    </buildArgs>
+                    <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+                </configuration>
+            </plugin>
             <!-- Reserve network port for jetty -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -258,11 +281,11 @@
             <artifactId>molgenis-fair</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-settings</artifactId>
