@@ -60,7 +60,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @return true if non-abstract entity type exists for the given entity name
 	 */
-	boolean hasRepository(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
+	boolean hasRepository(String entityTypeId);
 
 	/**
 	 * Create a repository for the given entity type.
