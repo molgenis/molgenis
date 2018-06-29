@@ -397,20 +397,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 	}
 
-	@Override
-	public EntityType getEntityTypeById(String entityTypeId)
-	{
-		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
-		if (systemEntity != null)
-		{
-			return systemEntity;
-		}
-		else
-		{
-			return getEntityTypeBypassingRegistry(entityTypeId);
-		}
-	}
-
 	@Transactional
 	@Override
 	public void addPackage(Package aPackage)

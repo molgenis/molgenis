@@ -191,7 +191,7 @@ public class DataExplorerController extends PluginController
 		switch (moduleId)
 		{
 			case MOD_DATA:
-				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				//if multiple tracks are available we assume chrom and pos attribute are the same
@@ -207,7 +207,7 @@ public class DataExplorerController extends PluginController
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
-				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
