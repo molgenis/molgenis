@@ -66,36 +66,36 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			throw new UnknownEntityTypeException(entityTypeId);
 		}
-		return !entityType.isAbstract() ? Optional.of(getRepository(entityType)) : Optional.empty();
+		return !entityType.isAbstract() ? getRepository(entityType) : Optional.empty();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
+	public <E extends Entity> Optional<Repository<E>> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityTypeId).orElse(null);
+		return (Optional<Repository<E>>) (Optional<?>) getRepository(entityTypeId);
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityType entityType)
+	public Optional<Repository<Entity>> getRepository(EntityType entityType)
 	{
 		if (!entityType.isAbstract())
 		{
 			String backendName = entityType.getBackend();
 			RepositoryCollection backend = getBackend(backendName);
-			return backend.getRepository(entityType);
+			return Optional.of(backend.getRepository(entityType));
 		}
 		else
 		{
-			return null;
+			return Optional.empty();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass)
+	public <E extends Entity> Optional<Repository<E>> getRepository(EntityType entityType, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityType);
+		return (Optional<Repository<E>>) (Optional<?>) getRepository(entityType);
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
-		return getRepository(entityType);
+		return getRepository(entityType).orElseThrow(() -> new UnknownRepositoryException(entityType.getId()));
 	}
 
 	@Transactional
@@ -137,7 +137,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
-		return getRepository(entityType, entityClass);
+		return getRepository(entityType, entityClass).orElseThrow(
+				() -> new UnknownRepositoryException(entityType.getId()));
 	}
 
 	@Override
@@ -466,7 +467,9 @@ public class MetaDataServiceImpl implements MetaDataService
 						  .eq(IS_ABSTRACT, false)
 						  .fetch(getEntityTypeFetch())
 						  .findAll()
-						  .map(this::getRepository);
+						  .map(entityType -> this.getRepository(entityType)
+												 .orElseThrow(
+														 () -> new UnknownRepositoryException(entityType.getId())));
 	}
 
 	/**

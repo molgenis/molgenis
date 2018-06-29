@@ -26,22 +26,22 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Optional<Repository<Entity>> getRepository(String entityTypeId);
 
 	/**
-	 * Returns the typed repository for the given entity name.
+	 * Returns the typed repository for the given entity type identifier.
 	 *
 	 * @param entityClass entity class
 	 * @param <E>         entity type
-	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @return optional typed entity repository
 	 * @throws UnknownEntityTypeException if no entity with the given name exists
 	 */
-	<E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
+	<E extends Entity> Optional<Repository<E>> getRepository(String entityTypeId, Class<E> entityClass);
 
 	/**
 	 * Returns the repository for the given entity type
 	 *
 	 * @param entityType entity type
-	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @return optional entity repository
 	 */
-	Repository<Entity> getRepository(EntityType entityType);
+	Optional<Repository<Entity>> getRepository(EntityType entityType);
 
 	/**
 	 * Returns the typed repository for the given entity type
@@ -49,9 +49,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityType  entity type
 	 * @param entityClass entity class
 	 * @param <E>         entity type
-	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract).
+	 * @return optional typed entity repository
 	 */
-	<E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass);
+	<E extends Entity> Optional<Repository<E>> getRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.

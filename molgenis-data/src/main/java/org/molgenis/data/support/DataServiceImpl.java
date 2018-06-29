@@ -156,7 +156,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return metaDataService.getRepository(entityTypeId, entityClass);
+		return metaDataService.getRepository(entityTypeId, entityClass).orElse(null);
 	}
 
 	@Override

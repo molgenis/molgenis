@@ -18,13 +18,14 @@ import org.testng.annotations.Test;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
@@ -79,7 +80,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), Optional.of(repo));
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), of(repo));
 	}
 
 	@Test
@@ -89,7 +90,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(entityType);
-		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), Optional.empty());
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), empty());
 	}
 
 	@Test(expectedExceptions = UnknownEntityTypeException.class)
@@ -113,7 +114,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityTypeId, Package.class), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId, Package.class), of(repo));
 	}
 
 	@Test
@@ -123,7 +124,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(entityType);
-		assertNull(metaDataServiceImpl.getRepository(entityTypeId, Package.class));
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId, Package.class), empty());
 	}
 
 	@Test(expectedExceptions = UnknownEntityTypeException.class)
@@ -143,14 +144,14 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityType), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityType), of(repo));
 	}
 
 	@Test
 	public void getRepositoryEntityTypeAbstract()
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
-		assertNull(metaDataServiceImpl.getRepository(entityType));
+		assertEquals(metaDataServiceImpl.getRepository(entityType), empty());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -166,14 +167,14 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), of(repo));
 	}
 
 	@Test
 	public void getRepositoryTypedEntityTypeAbstract()
 	{
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
-		assertNull(metaDataServiceImpl.getRepository(entityType, Package.class));
+		assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), empty());
 	}
 
 	@Test
