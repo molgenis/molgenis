@@ -179,7 +179,6 @@ public class MappingServiceImpl implements MappingService
 	EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId, String label,
 			Boolean addSourceAttribute)
 	{
-
 		EntityType targetMetadata = EntityType.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS, attrMetaFactory);
 		targetMetadata.setId(entityTypeId);
 

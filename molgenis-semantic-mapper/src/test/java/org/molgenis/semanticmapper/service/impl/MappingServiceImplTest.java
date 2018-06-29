@@ -42,8 +42,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
@@ -60,6 +60,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private static final String TARGET_HOP_ENTITY = "HopEntity";
 	private static final String SOURCE_GENE_ENTITY = "Gene";
 	private static final String SOURCE_EXON_ENTITY = "Exon";
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private AlgorithmService algorithmService;
@@ -101,10 +104,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private ArgumentCaptor<List<Entity>> batchCaptor;
 
 	private MetaDataService metaDataService;
-
-	@Mock(answer = RETURNS_DEEP_STUBS)
-	private DataService dataService;
-
 	private EntityType hopMetaData;
 	private EntityType geneMetaData;
 
@@ -144,7 +143,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		exonMetaData.addAttribute(
 				attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
-		metaDataService = Mockito.mock(MetaDataService.class);
+		metaDataService = mock(MetaDataService.class);
 		when(metaDataService.createRepository(
 				argThat(obj -> obj != null && obj.getId().equals(geneMetaData.getId())))).thenReturn(geneRepo);
 		when(metaDataService.createRepository(
@@ -161,7 +160,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		when(dataService.getEntityType(hopMetaData.getId())).thenReturn(hopMetaData);
 		when(dataService.getRepository(TARGET_HOP_ENTITY)).thenReturn(hopRepo);
-		Query<Entity> hopQ = Mockito.mock(Query.class);
+		Query<Entity> hopQ = mock(Query.class);
 		when(hopRepo.query()).thenReturn(hopQ);
 		when(hopQ.eq("source", geneMetaData.getId())).thenReturn(hopQ);
 		when(hopQ.eq("source", SOURCE_EXON_ENTITY)).thenReturn(hopQ);
@@ -176,11 +175,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testApplyMappingToEntity()
 	{
-		EntityMapping entityMapping = Mockito.mock(EntityMapping.class);
-		Entity sourceEntity = Mockito.mock(Entity.class);
-		EntityType targetMetaData = Mockito.mock(EntityType.class);
+		EntityMapping entityMapping = mock(EntityMapping.class);
+		Entity sourceEntity = mock(Entity.class);
+		EntityType targetMetaData = mock(EntityType.class);
 
-		Entity mappedEntity = Mockito.mock(Entity.class);
+		Entity mappedEntity = mock(Entity.class);
 		when(entityManager.create(targetMetaData, EntityManager.CreationMode.POPULATE)).thenReturn(mappedEntity);
 
 		assertEquals(mappingService.applyMappingToEntity(entityMapping, sourceEntity, targetMetaData), mappedEntity);
@@ -213,14 +212,14 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		MappingProject expectedMappingProject = getManualMappingProject(mappingProjectIdentifier, projectName,
 				expectedMappingTarget);
 
-		Entity mappingTargetEntity = Mockito.mock(Entity.class);
+		Entity mappingTargetEntity = mock(Entity.class);
 		when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER)).thenReturn(mappingTargetIdentifier);
 		when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)).thenReturn(hopMetaData.getId());
 		when(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS)).thenReturn(null);
 		when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))).thenReturn(
 				hopMetaData);
 
-		Entity mappingProjectEntity = Mockito.mock(Entity.class);
+		Entity mappingProjectEntity = mock(Entity.class);
 		when(mappingProjectEntity.get(IDENTIFIER)).thenReturn(mappingProjectIdentifier);
 		when(mappingProjectEntity.get(NAME)).thenReturn(projectName);
 		when(mappingProjectEntity.getEntities(MAPPING_TARGETS)).thenReturn(singletonList(mappingTargetEntity));
@@ -236,7 +235,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCloneMappingProjectString()
 	{
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		when(mappingProjectRepo.getMappingProject("0")).thenReturn(mappingProject);
 		mappingService.cloneMappingProject("0");
 		Mockito.verify(mappingProject).removeIdentifiers();
@@ -246,7 +245,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testCloneMappingProjectStringString()
 	{
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		when(mappingProjectRepo.getMappingProject("0")).thenReturn(mappingProject);
 		mappingService.cloneMappingProject("0", "newName");
 		Mockito.verify(mappingProject).removeIdentifiers();
@@ -257,7 +256,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpdateMappingProject()
 	{
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		mappingService.updateMappingProject(mappingProject);
 		Mockito.verifyZeroInteractions(mappingProject);
 		Mockito.verify(mappingProjectRepo).update(mappingProject);
@@ -273,11 +272,19 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createMetaWithNullParameters()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		String targetRepositoryName = "target id";
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
-		when(dataService.hasRepository("target id")).thenReturn(true);
-		when(dataService.getMeta().getEntityType("target id").getPackage()).thenReturn(package_);
-		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "target id", null, null, null);
+		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		targetRepositoryMetaData.setPackage(package_);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+
+		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, targetRepositoryName, null, null,
+				null);
+
 		assertEquals(targetMetadata.getId(), "target id");
 		assertEquals(targetMetadata.getLabel(), "target id");
 		assertEquals(targetMetadata.getPackage(), package_);
@@ -287,10 +294,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createMetaWithNonNullParameters()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
 
-		Package targetPackage = Mockito.mock(Package.class);
+		Package targetPackage = mock(Package.class);
 		when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
 
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "test", "targetPackage",
@@ -310,7 +317,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String entityTypeId = "addEntity";
 		@SuppressWarnings("unchecked")
-		Repository<Entity> addEntityRepo = Mockito.mock(Repository.class);
+		Repository<Entity> addEntityRepo = mock(Repository.class);
 		when(addEntityRepo.getName()).thenReturn(entityTypeId);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
@@ -338,7 +345,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithMappings();
 
-		Entity mappedEntity = Mockito.mock(Entity.class);
+		Entity mappedEntity = mock(Entity.class);
 		when(entityManager.create(targetMeta, EntityManager.CreationMode.POPULATE)).thenReturn(mappedEntity);
 
 		// apply mapping again
@@ -370,7 +377,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String entityTypeId = "updateEntity";
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> updateEntityRepo = Mockito.mock(Repository.class);
+		Repository<Entity> updateEntityRepo = mock(Repository.class);
 		when(updateEntityRepo.getName()).thenReturn(entityTypeId);
 		EntityType targetMeta = entityTypeFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
 		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
@@ -378,6 +385,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
 		when(dataService.hasRepository(entityTypeId)).thenReturn(true);
 		when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
+		when(metaDataService.getEntityType(entityTypeId)).thenReturn(targetMeta);
 
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
 		when(metaDataService.createRepository(argThat(obj -> obj.getLabel().equals(entityTypeId)))).thenReturn(
@@ -427,27 +435,27 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@SuppressWarnings("unchecked")
 	public void testApplyMappingsToRepoAdd()
 	{
-		Repository<Entity> targetRepo = Mockito.mock(Repository.class);
-		Repository<Entity> sourceRepo = Mockito.mock(Repository.class);
-		EntityMapping sourceMapping = Mockito.mock(EntityMapping.class);
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
 		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
 		when(sourceMapping.getName()).thenReturn("sourceMappingID");
 
-		EntityType sourceEntityType = Mockito.mock(EntityType.class);
+		EntityType sourceEntityType = mock(EntityType.class);
 		when(sourceEntityType.getLabel()).thenReturn("test");
 		when(sourceRepo.getEntityType()).thenReturn(sourceEntityType);
 		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
 		when(targetRepo.count()).thenReturn(0L);
 
-		EntityType targetEntityType = Mockito.mock(EntityType.class);
+		EntityType targetEntityType = mock(EntityType.class);
 		when(targetEntityType.getId()).thenReturn("targetEntityType");
 		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
-		Attribute targetID = Mockito.mock(Attribute.class);
+		Attribute targetID = mock(Attribute.class);
 		when(targetID.getName()).thenReturn("targetID");
 		when(targetEntityType.getIdAttribute()).thenReturn(targetID);
 		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
 
-		List<Entity> batch = Lists.newArrayList(Mockito.mock(Entity.class));
+		List<Entity> batch = Lists.newArrayList(mock(Entity.class));
 		Mockito.doAnswer(invocationOnMock ->
 		{
 			Consumer<List<Entity>> consumer = (Consumer<List<Entity>>) invocationOnMock.<Consumer>getArgument(0);
@@ -473,24 +481,24 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@SuppressWarnings("unchecked")
 	public void testApplyMappingsToRepoUpsert()
 	{
-		Repository<Entity> targetRepo = Mockito.mock(Repository.class);
-		Repository<Entity> sourceRepo = Mockito.mock(Repository.class);
-		EntityMapping sourceMapping = Mockito.mock(EntityMapping.class);
+		Repository<Entity> targetRepo = mock(Repository.class);
+		Repository<Entity> sourceRepo = mock(Repository.class);
+		EntityMapping sourceMapping = mock(EntityMapping.class);
 		when(sourceMapping.getLabel()).thenReturn("sourceMappingLabel");
 		when(sourceMapping.getName()).thenReturn("sourceMappingID");
 
 		when(dataService.getRepository("sourceMappingID")).thenReturn(sourceRepo);
 		when(targetRepo.count()).thenReturn(3L);
 
-		EntityType targetEntityType = Mockito.mock(EntityType.class);
+		EntityType targetEntityType = mock(EntityType.class);
 		when(targetEntityType.getId()).thenReturn("targetEntityType");
 		when(targetEntityType.getAtomicAttributes()).thenReturn(newArrayList());
-		Attribute targetID = Mockito.mock(Attribute.class);
+		Attribute targetID = mock(Attribute.class);
 		when(targetID.getName()).thenReturn("targetID");
 		when(targetEntityType.getIdAttribute()).thenReturn(targetID);
 		when(targetRepo.getEntityType()).thenReturn(targetEntityType);
 
-		List<Entity> batch = newArrayList(Mockito.mock(Entity.class), Mockito.mock(Entity.class));
+		List<Entity> batch = newArrayList(mock(Entity.class), mock(Entity.class));
 
 		Mockito.doAnswer(invocationOnMock ->
 		{
@@ -517,7 +525,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String targetRepositoryName = "targetRepository";
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> targetRepository = Mockito.mock(Repository.class);
+		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
@@ -525,6 +533,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
@@ -533,7 +542,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		when(mappingProject.getMappingTargets()).thenReturn(newArrayList(mappingTarget));
 		when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
@@ -547,7 +556,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		String targetRepositoryName = "target_repository";
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> targetRepository = Mockito.mock(Repository.class);
+		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
@@ -556,6 +565,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+
+		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
 		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
@@ -563,7 +575,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		mappingTargetMetaData.setPackage(package_);
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		when(mappingProject.getMappingTargets()).thenReturn(newArrayList(mappingTarget));
 		when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
@@ -582,7 +594,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetRefEntity = entityTypeFactory.create(targetRepositoryRefEntityName);
 
 		@SuppressWarnings("unchecked")
-		Repository<Entity> targetRepository = Mockito.mock(Repository.class);
+		Repository<Entity> targetRepository = mock(Repository.class);
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.addAttribute(
@@ -592,6 +604,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+
 
 		EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName);
 
@@ -605,7 +619,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
 
-		MappingProject mappingProject = Mockito.mock(MappingProject.class);
+		MappingProject mappingProject = mock(MappingProject.class);
 		when(mappingProject.getMappingTargets()).thenReturn(newArrayList(mappingTarget));
 		when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
 		mappingService.applyMappings("TestRun", targetRepositoryName, false, "packageId", "label", progress);
@@ -622,7 +636,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMaxProgressOneSourceOneBatch()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		EntityMapping entityMapping = getMockEntityMapping("a", MAPPING_BATCH_SIZE - 1);
 		List<EntityMapping> mappings = singletonList(entityMapping);
 		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
@@ -633,7 +647,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMaxProgressOneSourceMultipleBatches()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
 		List<EntityMapping> mappings = singletonList(entityMapping);
 		when(mappingTarget.getEntityMappings()).thenReturn(mappings);
@@ -644,7 +658,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMaxProgressOneSourceMultipleBatchesSelfReferencing()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		EntityMapping entityMapping = getMockEntityMapping("a", (3 * MAPPING_BATCH_SIZE) + 1);
 		when(mappingTarget.hasSelfReferences()).thenReturn(true);
 		List<EntityMapping> mappings = singletonList(entityMapping);
@@ -656,7 +670,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMaxProgressMultipleSourcesSelfReferencing()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
 		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
 		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
@@ -669,7 +683,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testMaxProgressMultipleSources()
 	{
-		MappingTarget mappingTarget = Mockito.mock(MappingTarget.class);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
 		EntityMapping mapping1 = getMockEntityMapping("a", MAPPING_BATCH_SIZE);
 		EntityMapping mapping2 = getMockEntityMapping("b", MAPPING_BATCH_SIZE + 1);
 		List<EntityMapping> mappings = newArrayList(mapping1, mapping2);
@@ -680,8 +694,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 	private EntityMapping getMockEntityMapping(String id, long sourceRows)
 	{
-		EntityMapping entityMapping = Mockito.mock(EntityMapping.class);
-		EntityType sourceEntityType = Mockito.mock(EntityType.class);
+		EntityMapping entityMapping = mock(EntityMapping.class);
+		EntityType sourceEntityType = mock(EntityType.class);
 		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
 		when(sourceEntityType.getId()).thenReturn(id);
 		when(dataService.count(id)).thenReturn(sourceRows);
@@ -747,31 +761,31 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		EntityManager entityManager()
 		{
-			return Mockito.mock(EntityManager.class);
+			return mock(EntityManager.class);
 		}
 
 		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return Mockito.mock(AlgorithmService.class);
+			return mock(AlgorithmService.class);
 		}
 
 		@Bean
 		JsMagmaScriptEvaluator jsMagmaScriptEvaluator()
 		{
-			return Mockito.mock(JsMagmaScriptEvaluator.class);
+			return mock(JsMagmaScriptEvaluator.class);
 		}
 
 		@Bean
 		public MappingProjectRepository mappingProjectRepository()
 		{
-			return Mockito.mock(MappingProjectRepository.class);
+			return mock(MappingProjectRepository.class);
 		}
 
 		@Bean
 		public PermissionSystemService permissionSystemService()
 		{
-			return Mockito.mock(PermissionSystemService.class);
+			return mock(PermissionSystemService.class);
 		}
 
 	}
