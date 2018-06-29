@@ -153,10 +153,10 @@ public class DataServiceImpl implements DataService
 		return metaDataService.getRepository(entityTypeId);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityTypeId);
+		return metaDataService.getRepository(entityTypeId, entityClass);
 	}
 
 	@Override

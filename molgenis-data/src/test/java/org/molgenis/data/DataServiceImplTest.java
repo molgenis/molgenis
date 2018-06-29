@@ -126,6 +126,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Entity entity = mock(Entity.class);
 		when(repo1.findOneById(id, fetch)).thenReturn(entity);
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		// how to check return value? converting iterable can't be mocked.
 		dataService.findOneById("Entity1", id, fetch, clazz);
 		verify(repo1, times(1)).findOneById(id, fetch);
@@ -138,6 +139,7 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		assertNull(dataService.findOneById("Entity1", id, fetch, clazz));
 		verify(repo1, times(1)).findOneById(id, fetch);
 	}
@@ -161,6 +163,7 @@ public class DataServiceImplTest
 		Entity entity0 = mock(Entity.class);
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -186,6 +189,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Fetch fetch = new Fetch();
 		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -205,6 +209,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
 		when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		Stream<Entity> entities = dataService.findAll("Entity1", clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -228,6 +233,7 @@ public class DataServiceImplTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(repo1);
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
