@@ -218,7 +218,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Deletes an EntityType
 	 */
-	void deleteEntityType(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
+	void deleteEntityType(String entityTypeId);
 
 	/**
 	 * Deletes a collection of entity type.
