@@ -1,15 +1,20 @@
 version: "3.0"
 services:
-    app:
-      image: registry.molgenis.org/molgenis/molgenis-app:${TAG:latest}
+    molgenis:
+      image: registry.molgenis.org/molgenis/molgenis-app:${TAG}
       ports:
         - "8081:8080"
       environment:
+        - molgenis.home=/home/molgenis
         - opencpu.uri.host=opencpu
         - elasticsearch.transport.addresses=elasticsearch:9300
         - db_uri=jdbc:postgresql://postgres/molgenis
-      depends_on:
+        - db_user=molgenis
+        - db_password=molgenis
+      links:
         - elasticsearch
+        - postgres
+        - opencpu
 
     postgres:
       image: postgres:9.6-alpine
@@ -20,7 +25,6 @@ services:
 
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:5.5.1
-        container_name: elasticsearch
         environment:
           - cluster.name=molgenis
           - bootstrap.memory_lock=true
@@ -32,7 +36,6 @@ services:
             hard: -1
 
     opencpu:
-        build:
-          context: registry.molgenis.org/molgenis/opencpu:latest
+        image: registry.molgenis.org/molgenis/opencpu:latest
         ports:
           - 8004:8004
