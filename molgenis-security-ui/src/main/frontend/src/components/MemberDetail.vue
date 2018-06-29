@@ -37,16 +37,55 @@
     <div class="row">
       <div class="col-md-3">
         <h5 class="font-weight-light">Role</h5>
-        <h5 v-if="member" class="pl-3">{{member.roleLabel}}</h5>
+        <h5 v-if="member && !isEditRoleMode" class="pl-3">{{member.roleLabel}}</h5>
+        <form v-else-if="isEditRoleMode">
+
+          <div v-for="role in sortedRoles" class="form-check" >
+            <input class="form-check-input" type="radio" name="exampleRadios"
+                   :id="role.roleName" :value="role.roleName" v-model="selectedRole" >
+            <label class="form-check-label" :for="role.roleName">
+              {{role.roleLabel}}
+            </label>
+          </div>
+
+        </form>
       </div>
-      <div class="col-md-9 ">
+      <div v-if="!isEditRoleMode" class="col-md-9 ">
         <button
           id="edit-role-btn"
           class="btn btn-sm btn-outline-secondary"
           type="button"
-          @click.prevent="onUpdateMember">
+          @click.prevent="onEditRole">
           <i class="fa fa-edit"></i>
           Edit
+        </button>
+      </div>
+      <div v-else class="col-md-9 ">
+        <button
+          id="update-cancel-btn"
+          class="btn btn-sm btn-secondary"
+          type="button"
+          @click.prevent="isEditRoleMode = !isEditRoleMode">
+          Cancel
+        </button>
+
+        <button
+          v-if="!isUpdating"
+          id="update-btn"
+          class="btn btn-sm btn-primary"
+          type="button"
+          :disabled="selectedRole === member.roleName"
+          @click.prevent="onUpdateMember">
+          Update role
+        </button>
+
+        <button
+          v-else
+          id="update-btn-saving"
+          class="btn btn-sm btn-primary"
+          type="button"
+          disabled="disabled">
+          Updating role <i class="fa fa-spinner fa-spin "></i>
         </button>
       </div>
     </div>
@@ -58,7 +97,8 @@
       id="remove-btn"
       class="btn btn-danger"
       type="button"
-      @click.prevent="onRemoveMember">
+      @click.prevent="onRemoveMember"
+      :disabled="isEditRoleMode">
       Remove from group
     </button>
 
@@ -93,20 +133,33 @@
     data () {
       return {
         isRemoving: false,
-        isUpdating: false
+        isUpdating: false,
+        isEditRoleMode: false,
+        selectedRole: ''
       }
     },
     computed: {
       ...mapGetters([
+        'groupRoles',
         'groupMembers',
         'getLoginUser'
       ]),
       member () {
         const members = this.groupMembers[this.groupName] || []
         return members.find(m => m.username === this.memberName)
+      },
+      sortedRoles () {
+        if (!this.groupRoles || !this.groupRoles[this.groupName]) {
+          return []
+        }
+        return [...this.groupRoles[this.groupName]].sort((a, b) => a.roleLabel.localeCompare(b.roleLabel))
       }
     },
     methods: {
+      onEditRole () {
+        this.selectedRole = this.member.roleName
+        this.isEditRoleMode = !this.isEditRoleMode
+      },
       onRemoveMember () {
         this.isRemoving = !this.isRemoving
         this.$store.dispatch('removeMember', {groupName: this.groupName, memberName: this.memberName})
@@ -118,7 +171,7 @@
       },
       onUpdateMember () {
         this.isUpdating = !this.isUpdating
-        const updateMemberCommand = { roleName: this.roleName }
+        const updateMemberCommand = { roleName: this.selectedRole }
         this.$store.dispatch('updateMember', {groupName: this.groupName, memberName: this.memberName, updateMemberCommand})
           .then(() => {
             this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
@@ -131,6 +184,7 @@
       if (!this.groupMembers.length) {
         this.$store.dispatch('fetchGroupMembers', this.groupName)
       }
+      this.$store.dispatch('fetchGroupRoles', this.groupName)
     },
     components: {
       Toast
