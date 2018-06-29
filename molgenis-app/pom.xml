@@ -14,6 +14,7 @@
 
     <properties>
         <owasp-check-format>HTML</owasp-check-format>
+        <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     </properties>
 
     <build>
@@ -24,57 +25,33 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Reserve network port for jetty -->
+            <!-- Docker image containing the warfile -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
                 <executions>
                     <execution>
-                        <id>reserve-network-port</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <minPortNumber>8080</minPortNumber>
-                            <portNames>
-                                <portName>jetty.http.port</portName>
-                            </portNames>
-                            <randomPort>false</randomPort>
-                        </configuration>
+                        <id>default</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>tag</goal>
+                            <goal>push</goal>
+                        </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- servlet container -->
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty-maven-plugin.version}</version>
                 <configuration>
-                    <stopPort>8079</stopPort>
-                    <stopKey>jetty-stop</stopKey>
-                    <reload>manual</reload>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>molgenis.home</name>
-                            <value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-                        </systemProperty>
-                    </systemProperties>
-                    <webAppConfig>
-                        <contextPath>/</contextPath>
-                        <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-                            <resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-                        </baseResource>
-                        <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-                        </webInfIncludeJarPattern>
-                    </webAppConfig>
+                    <repository>registry.molgenis.org/molgenis/molgenis-app</repository>
+                    <buildArgs>
+                        <WAR_FILE>target/${project.build.finalName}.war</WAR_FILE>
+                    </buildArgs>
+                    <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                 </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
-                <!-- web server -->
-                <plugin>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                </plugin>
                 <!--
                     Checks (transitive) dependencies for known vulnerabilities.
                     > mvn org.owasp:dependency-check-maven:check
