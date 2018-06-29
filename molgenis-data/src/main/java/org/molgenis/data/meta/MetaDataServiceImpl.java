@@ -116,25 +116,25 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new MolgenisDataException(format("Can't create repository for abstract entity [%s]", entityType.getId()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType);
 	}
 
+	@Transactional
 	@Override
 	public <E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass)
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new MolgenisDataException(format("Can't create repository for abstract entity [%s]", entityType.getId()));
 		}
 		addEntityType(entityType);
 		return getRepository(entityType, entityClass);
@@ -197,7 +197,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		String backendName = entityType.getBackend() == null ? getDefaultBackend().getName() : entityType.getBackend();
 		RepositoryCollection backend = repoCollectionRegistry.getRepositoryCollection(backendName);
-		if (backend == null) throw new RuntimeException(format("Unknown backend [%s]", backendName));
+		if (backend == null)
+		{
+			throw new UnknownRepositoryCollectionException(backendName);
+		}
 
 		return backend;
 	}

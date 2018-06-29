@@ -336,6 +336,24 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	}
 
 	@Test
+	public void getBackendEntityType()
+	{
+		String backendName = "backend";
+		EntityType entityType = when(mock(EntityType.class).getBackend()).thenReturn(backendName).getMock();
+		RepositoryCollection repo = mock(RepositoryCollection.class);
+		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repo);
+		assertEquals(metaDataServiceImpl.getBackend(entityType), repo);
+	}
+
+	@Test(expectedExceptions = UnknownRepositoryCollectionException.class)
+	public void getBackendEntityTypeUnknownBackend()
+	{
+		String backendName = "backend";
+		EntityType entityType = when(mock(EntityType.class).getBackend()).thenReturn(backendName).getMock();
+		metaDataServiceImpl.getBackend(entityType);
+	}
+
+	@Test
 	public void hasBackendFalse()
 	{
 		String backendName = "backend";
