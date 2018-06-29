@@ -1,15 +1,12 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -67,7 +64,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param entityType entity type
 	 * @return repository
-	 * @throws org.molgenis.data.MolgenisDataException if entity type is abstract
+	 * @throws RepositoryCreationException if entity type is abstract
 	 */
 	Repository<Entity> createRepository(EntityType entityType);
 
@@ -78,7 +75,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed repository
-	 * @throws org.molgenis.data.MolgenisDataException if entity type is abstract
+	 * @throws RepositoryCreationException if entity type is abstract
 	 */
 	<E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass);
 
@@ -250,7 +247,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param repositoryCollection the new entities
 	 */
-	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
+	Map<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
 	 * Returns whether the given {@link EntityType} defines a meta entity such as {@link EntityTypeMetadata} or

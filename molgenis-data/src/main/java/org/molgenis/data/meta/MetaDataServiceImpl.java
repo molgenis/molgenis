@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
@@ -46,7 +47,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final PackagePersister packagePersister;
 
-	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
+	MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry,
 			EntityTypeDependencyResolver entityTypeDependencyResolver, PackagePersister packagePersister)
 	{
@@ -171,7 +172,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
 
-		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+		if (LOG.isInfoEnabled())
+		{
+			LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+		}
 	}
 
 	@Transactional
@@ -523,13 +527,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Iterator<RepositoryCollection> iterator()
+	public @Nonnull
+	Iterator<RepositoryCollection> iterator()
 	{
 		return repoCollectionRegistry.getRepositoryCollections().iterator();
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
+	public Map<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = Maps.newLinkedHashMap();
 		stream(repositoryCollection.getEntityTypeIds().spliterator(), false).forEach(id -> entitiesImportable.put(id,
