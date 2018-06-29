@@ -1,10 +1,15 @@
-# Run Docker
-You can run Docker with 
+# Run pull-requests and release candidates with Docker
+You can now functionally test pull-requests with docker / docker-compose.
 
+## Run only the MOLGENIS-image
+You can run only the image with your own local services
 
-## On MacBook
+```bash
+docker run registry.molgenis.org/molgenis/molgenis-app:#tag#
+```
 
-When build locally with 
+### On MacBook
+On mac you need to bind the service urls to you own host by adding *docker.for.mac.localhost*. 
 
 ```bash
 docker run \
@@ -14,8 +19,11 @@ docker run \
     #containerId#
 ```
 
+## Run the MOLGENIS-image with integrated services
 With docker-compose:
 
+Run specific tag:
+
 ```bash
-docker-compose run -e TAG=#pr-tag or branch-tag# molgenis
+TAG=#pr-tag or branch-tag# && docker-compose up
 ```
