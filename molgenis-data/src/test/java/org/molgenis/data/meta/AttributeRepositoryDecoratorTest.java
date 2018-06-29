@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
+import static java.util.Optional.of;
 import static org.mockito.Mockito.*;
 
 public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
@@ -48,8 +49,8 @@ public class AttributeRepositoryDecoratorTest extends AbstractMockitoTest
 		when(dataService.getMeta()).thenReturn(metadataService);
 		when(metadataService.getConcreteChildren(abstractEntityType)).thenReturn(
 				Stream.of(concreteEntityType1, concreteEntityType2));
-		doReturn(backend1).when(metadataService).getBackend(concreteEntityType1);
-		doReturn(backend2).when(metadataService).getBackend(concreteEntityType2);
+		doReturn(of(backend1)).when(metadataService).getBackend(concreteEntityType1);
+		doReturn(of(backend2)).when(metadataService).getBackend(concreteEntityType2);
 		String attributeId = "SDFSADFSDAF";
 		when(attribute.getIdentifier()).thenReturn(attributeId);
 

@@ -83,7 +83,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			String backendName = entityType.getBackend();
 			RepositoryCollection backend = getBackend(backendName);
-			return Optional.of(backend.getRepository(entityType));
+			Repository<Entity> repository = backend.getRepository(entityType);
+			return repository != null ? Optional.of(repository) : Optional.empty();
 		}
 		else
 		{
@@ -150,7 +151,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public RepositoryCollection getBackend(String backendName)
 	{
-		return repoCollectionRegistry.getRepositoryCollection(backendName);
+		RepositoryCollection repositoryCollection = repoCollectionRegistry.getRepositoryCollection(backendName);
+		if (repositoryCollection == null)
+		{
+			throw new UnknownRepositoryCollectionException(backendName);
+		}
+		return repositoryCollection;
 	}
 
 	@Transactional

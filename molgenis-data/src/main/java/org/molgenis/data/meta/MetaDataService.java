@@ -81,10 +81,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	<E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
-	 * Get a backend by name or null if it does not exists
+	 * Get a backend by name
 	 *
 	 * @param backendName repository collection name
-	 * @return repository collection, null if entity type is abstract
+	 * @return optional repository collection
+	 * @throws UnknownRepositoryCollectionException if no unknown repository collection exists for the given name
 	 */
 	RepositoryCollection getBackend(String backendName);
 
@@ -93,6 +94,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param entityType entity type
 	 * @return repository collection, null if entity type is abstract
+	 * @throws UnknownRepositoryCollectionException if no unknown repository collection exists for the given entity type
 	 */
 	RepositoryCollection getBackend(EntityType entityType);
 

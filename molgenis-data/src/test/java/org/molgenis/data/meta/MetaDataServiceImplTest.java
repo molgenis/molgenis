@@ -329,12 +329,12 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		assertEquals(metaDataServiceImpl.getBackend(backendName), repo);
 	}
 
-	@Test
+	@Test(expectedExceptions = UnknownRepositoryCollectionException.class)
 	public void getBackendUnknown()
 	{
 		String backendName = "backend";
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(null);
-		assertNull(metaDataServiceImpl.getBackend(backendName));
+		metaDataServiceImpl.getBackend(backendName);
 	}
 
 	@Test
