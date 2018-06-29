@@ -128,12 +128,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Iterable<Package> getRootPackages();
 
 	/**
-	 * Retrieves a package with a given name.
+	 * Gets the package for a given package identifier.
 	 *
-	 * @param name the name of the Package to retrieve
-	 * @return the Package, or null if the package does not exist.
+	 * @param packageId package identifier
+	 * @return the Package, or <tt>null</tt> if the package does not exist.
 	 */
-	Package getPackage(String name); // FIXME use entity type ids instead of entity type fqns
+	Package getPackage(String packageId);
 
 	/**
 	 * Adds a new Package
