@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -78,7 +79,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Repository<Entity> repo = mock(Repository.class);
 		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), Optional.of(repo));
 	}
 
 	@Test
@@ -88,7 +89,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(entityType);
-		assertNull(metaDataServiceImpl.getRepository(entityTypeId));
+		assertEquals(metaDataServiceImpl.getRepository(entityTypeId), Optional.empty());
 	}
 
 	@Test(expectedExceptions = UnknownEntityTypeException.class)

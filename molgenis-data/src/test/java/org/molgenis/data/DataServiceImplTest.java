@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -40,9 +41,9 @@ public class DataServiceImplTest
 		repoToRemove = when(mock(Repository.class).getName()).thenReturn("Entity3").getMock();
 
 		metaDataService = mock(MetaDataService.class);
-		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
-		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
-		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
+		when(metaDataService.getRepository("Entity1")).thenReturn(Optional.of(repo1));
+		when(metaDataService.getRepository("Entity2")).thenReturn(Optional.of(repo2));
+		when(metaDataService.getRepository("Entity3")).thenReturn(Optional.of(repoToRemove));
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn("Entity1").getMock();
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn("Entity2").getMock();
 		EntityType entityType3 = when(mock(EntityType.class).getId()).thenReturn("Entity3").getMock();

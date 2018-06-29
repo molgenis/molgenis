@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.Package;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -17,12 +18,12 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
 	/**
-	 * Returns the repository for the given entity name.
+	 * Returns the repository for the given entity type identifier.
 	 *
-	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
-	 * @throws UnknownEntityTypeException if no entity with the given name exists
+	 * @return optional entity repository
+	 * @throws UnknownEntityTypeException if no entity type with the given identifier exists
 	 */
-	Repository<Entity> getRepository(String entityTypeId);
+	Optional<Repository<Entity>> getRepository(String entityTypeId);
 
 	/**
 	 * Returns the typed repository for the given entity name.
