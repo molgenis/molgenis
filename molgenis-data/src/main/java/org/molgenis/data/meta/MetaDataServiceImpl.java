@@ -587,8 +587,12 @@ public class MetaDataServiceImpl implements MetaDataService
 						  .flatMap(this::getConcreteChildren);
 	}
 
-	@Override
-	public EntityType getEntityTypeBypassingRegistry(String entityTypeId)
+	/**
+	 * Retrieves EntityType, bypassing the {@link org.molgenis.data.meta.system.SystemEntityTypeRegistry}
+	 * <p>
+	 * package-private for testability
+	 */
+	EntityType getEntityTypeBypassingRegistry(String entityTypeId)
 	{
 		return entityTypeId != null ? dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(),
 				EntityType.class) : null;

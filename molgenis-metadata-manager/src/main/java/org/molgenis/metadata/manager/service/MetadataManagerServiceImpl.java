@@ -46,7 +46,7 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 	@Override
 	public EditorEntityTypeResponse getEditorEntityType(String entityTypeId)
 	{
-		EntityType entityType = metadataService.getEntityTypeBypassingRegistry(entityTypeId);
+		EntityType entityType = metadataService.getEntityType(entityTypeId);
 		if (entityType == null)
 		{
 			throw new UnknownEntityTypeException(entityTypeId);
@@ -91,7 +91,8 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 		return createEntityTypeResponse(editorEntityType);
 	}
 
-	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType, List<Attribute> referringAttributes)
+	private EditorEntityTypeResponse createEntityTypeResponse(EntityType entityType,
+			List<Attribute> referringAttributes)
 	{
 		EditorEntityType editorEntityType = entityTypeMapper.toEditorEntityType(entityType, referringAttributes);
 		return createEntityTypeResponse(editorEntityType);
