@@ -13,4 +13,8 @@ public interface RoleMembershipService
 	void addUserToRole(final User user, final Role role);
 
 	Collection<RoleMembership> getMemberships(Collection<Role> roles);
+
+	void removeMembership(final RoleMembership roleMembership);
+
+	void updateMembership(RoleMembership roleMembership, Role newRole);
 }

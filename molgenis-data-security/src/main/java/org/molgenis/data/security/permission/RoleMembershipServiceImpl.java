@@ -64,6 +64,25 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 	}
 
 	@Override
+	public void removeMembership(final RoleMembership roleMembership)
+	{
+		dataService.delete(ROLE_MEMBERSHIP, roleMembership);
+	}
+
+	@Override
+	public void updateMembership(RoleMembership roleMembership, Role newRole)
+	{
+		final RoleMembership membership = dataService.findOneById(RoleMembershipMetadata.ROLE_MEMBERSHIP,
+				roleMembership.getId(), RoleMembership.class);
+		if (membership == null)
+		{
+			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), roleMembership.getId());
+		}
+		membership.setRole(newRole);
+		dataService.update(RoleMembershipMetadata.ROLE_MEMBERSHIP, membership);
+	}
+
+	@Override
 	public Collection<RoleMembership> getMemberships(Collection<Role> roles)
 	{
 		return dataService

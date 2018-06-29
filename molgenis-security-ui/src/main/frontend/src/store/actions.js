@@ -65,7 +65,7 @@ const actions = {
         commit('setToast', { type: 'success', message: 'Created ' + createGroupCmd.name + ' group' })
         resolve()
       }, (error) => {
-        commit('setToast', { type: 'danger', message: 'Unable to create group; ' + error })
+        commit('setToast', { type: 'danger', message: error })
         reject(error)
       })
     })
@@ -80,7 +80,36 @@ const actions = {
         commit('setToast', {type: 'success', message: 'Added member'})
         resolve()
       }, (error) => {
-        commit('setToast', {type: 'danger', message: 'Unable to add member to group; ' + error})
+        commit('setToast', {type: 'danger', message: error})
+        reject(error)
+      })
+    })
+  },
+
+  'removeMember' ({commit}: { commit: Function }, {groupName, memberName}) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member/' + encodeURIComponent(memberName)
+
+    return new Promise((resolve, reject) => {
+      api.delete_(url).then(() => {
+        commit('setToast', {type: 'success', message: 'Member removed from group'})
+        resolve()
+      }, (error) => {
+        commit('setToast', {type: 'danger', message: error})
+        reject(error)
+      })
+    })
+  },
+
+  'updateMember' ({commit}: { commit: Function }, {groupName, memberName, updateMemberCommand}) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member'
+    const payload = {body: JSON.stringify(updateMemberCommand)}
+
+    return new Promise((resolve, reject) => {
+      api.put(url, payload).then(() => {
+        commit('setToast', {type: 'success', message: 'Member updated'})
+        resolve()
+      }, (error) => {
+        commit('setToast', {type: 'danger', message: error})
         reject(error)
       })
     })

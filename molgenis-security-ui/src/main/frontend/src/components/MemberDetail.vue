@@ -35,9 +35,19 @@
     <hr/>
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-3">
         <h5 class="font-weight-light">Role</h5>
         <h5 v-if="member" class="pl-3">{{member.roleLabel}}</h5>
+      </div>
+      <div class="col-md-9 ">
+        <button
+          id="edit-role-btn"
+          class="btn btn-sm btn-outline-secondary"
+          type="button"
+          @click.prevent="onUpdateMember">
+          <i class="fa fa-edit"></i>
+          Edit
+        </button>
       </div>
     </div>
 
@@ -47,8 +57,8 @@
       v-if="!isRemoving"
       id="remove-btn"
       class="btn btn-danger"
-      type="submit"
-      @click.prevent="onRemove">
+      type="button"
+      @click.prevent="onRemoveMember">
       Remove from group
     </button>
 
@@ -58,7 +68,7 @@
       class="btn btn-danger"
       type="button"
       disabled="disabled">
-      Create <i class="fa fa-spinner fa-spin "></i>
+      Removing <i class="fa fa-spinner fa-spin "></i>
     </button>
 
   </div>
@@ -82,7 +92,8 @@
     },
     data () {
       return {
-        isRemoving: false
+        isRemoving: false,
+        isUpdating: false
       }
     },
     computed: {
@@ -93,6 +104,27 @@
       member () {
         const members = this.groupMembers[this.groupName] || []
         return members.find(m => m.username === this.memberName)
+      }
+    },
+    methods: {
+      onRemoveMember () {
+        this.isRemoving = !this.isRemoving
+        this.$store.dispatch('removeMember', {groupName: this.groupName, memberName: this.memberName})
+          .then(() => {
+            this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
+          }, () => {
+            this.isRemoving = !this.isRemoving
+          })
+      },
+      onUpdateMember () {
+        this.isUpdating = !this.isUpdating
+        const updateMemberCommand = { roleName: this.roleName }
+        this.$store.dispatch('updateMember', {groupName: this.groupName, memberName: this.memberName, updateMemberCommand})
+          .then(() => {
+            this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
+          }, () => {
+            this.isUpdating = !this.isUpdating
+          })
       }
     },
     created () {
