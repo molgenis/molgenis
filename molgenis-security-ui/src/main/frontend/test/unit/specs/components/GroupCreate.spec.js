@@ -37,7 +37,7 @@ describe('GroupCreate component', () => {
     }
 
     getters = {
-      getLoginUser: () => user
+      getLoginUser: () => loginUser
     }
 
     actions = {

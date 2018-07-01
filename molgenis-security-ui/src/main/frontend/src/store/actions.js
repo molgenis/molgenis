@@ -1,6 +1,7 @@
 // @flow
 import type {CreateGroupCommand, GroupMember} from '../flow.type'
 import api from '@molgenis/molgenis-api-client'
+import asyncUtilService from '../service/asyncUtilService'
 
 const SECURITY_API_ROUTE = '/api/plugin/security'
 const SECURITY_API_VERSION = ''
@@ -14,6 +15,13 @@ const toGroupMember = (response): GroupMember => {
     roleName: response.role.roleName,
     roleLabel: response.role.roleLabel
   }
+}
+
+const handleSuccess = (commit: Function, message: string) => {
+  commit('setToast', {type: 'success', message})
+  asyncUtilService.callAfter(() => {
+    commit('clearToast')
+  }, 3000)
 }
 
 const actions = {
@@ -52,7 +60,7 @@ const actions = {
     })
   },
 
-  'createGroup' ({commit}: { commit: Function }, createGroupCmd: CreateGroupCommand) {
+  'createGroup' ({commit, dispatch}: { commit: Function, dispatch: Function }, createGroupCmd: CreateGroupCommand) {
     const payload = {
       body: JSON.stringify({
         name: createGroupCmd.groupIdentifier,
@@ -62,7 +70,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       api.post(GROUP_ENDPOINT, payload).then(response => {
         commit('setGroups', response)
-        commit('setToast', { type: 'success', message: 'Created ' + createGroupCmd.name + ' group' })
+        handleSuccess(commit, 'Created ' + createGroupCmd.name + ' group')
         resolve()
       }, (error) => {
         commit('setToast', { type: 'danger', message: error })
@@ -71,13 +79,13 @@ const actions = {
     })
   },
 
-  'addMember' ({commit}: { commit: Function }, {groupName, addMemberCommand}) {
+  'addMember' ({commit, dispatch}: { commit: Function, dispatch: Function }, {groupName, addMemberCommand}) {
     const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member'
     const payload = {body: JSON.stringify(addMemberCommand)}
 
     return new Promise((resolve, reject) => {
       api.post(url, payload).then(() => {
-        commit('setToast', {type: 'success', message: 'Added member'})
+        handleSuccess(commit, 'Added member')
         resolve()
       }, (error) => {
         commit('setToast', {type: 'danger', message: error})
@@ -86,12 +94,12 @@ const actions = {
     })
   },
 
-  'removeMember' ({commit}: { commit: Function }, {groupName, memberName}) {
+  'removeMember' ({commit, dispatch}: { commit: Function, dispatch: Function }, {groupName, memberName}) {
     const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member/' + encodeURIComponent(memberName)
 
     return new Promise((resolve, reject) => {
       api.delete_(url).then(() => {
-        commit('setToast', {type: 'success', message: 'Member removed from group'})
+        handleSuccess(commit, 'Member removed from group')
         resolve()
       }, (error) => {
         commit('setToast', {type: 'danger', message: error})
@@ -100,13 +108,13 @@ const actions = {
     })
   },
 
-  'updateMember' ({commit}: { commit: Function }, {groupName, memberName, updateMemberCommand}) {
+  'updateMember' ({commit, dispatch}: { commit: Function, dispatch: Function }, {groupName, memberName, updateMemberCommand}) {
     const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member/' + encodeURIComponent(memberName)
     const payload = {body: JSON.stringify(updateMemberCommand)}
 
     return new Promise((resolve, reject) => {
       api.put(url, payload).then(() => {
-        commit('setToast', {type: 'success', message: 'Member updated'})
+        handleSuccess(commit, 'Member updated')
         resolve()
       }, (error) => {
         commit('setToast', {type: 'danger', message: error})

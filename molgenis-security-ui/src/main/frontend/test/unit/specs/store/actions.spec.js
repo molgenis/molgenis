@@ -2,10 +2,12 @@ import actions from '../../../../src/store/actions'
 import td from 'testdouble'
 import api from '@molgenis/molgenis-api-client'
 import testUtils from '@molgenis/molgenis-vue-test-utils'
+import asyncUtilService from '../../../../src/service/asyncUtilService'
 
 describe('actions', () => {
   beforeEach(() => {
     td.reset()
+    td.replace(asyncUtilService, 'callAfter', (f) => f())
   })
 
   describe('fetchGroups', () => {
@@ -45,19 +47,19 @@ describe('actions', () => {
     it('should create a group and displays toast', done => {
       const createGroupCommand = {
         groupIdentifier: 'test',
-        name: 'test group'
+        name: 'test-name'
       }
 
       const generatedPayload = {
         body: JSON.stringify({
           name: 'test',
-          label: 'test group'
+          label: 'test-name'
         })
       }
 
       const response = {
         name: 'test',
-        label: 'test group'
+        label: 'test-name'
       }
 
       const post = td.function('api.post')
@@ -68,7 +70,8 @@ describe('actions', () => {
         payload: createGroupCommand,
         expectedMutations: [
           {type: 'setGroups', payload: response},
-          {type: 'setToast', payload: { type: 'success', message: 'Created test group group' }}
+          {type: 'setToast', payload: { type: 'success', message: 'Created test-name group' }},
+          {type: 'clearToast'}
         ]
       }
 
