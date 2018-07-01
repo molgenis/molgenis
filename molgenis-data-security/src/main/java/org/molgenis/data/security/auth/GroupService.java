@@ -196,7 +196,7 @@ public class GroupService
 	{
 		final User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
 
-		if(!isGroupManager(group, currentUser) && !currentUser.isSuperuser())
+		if (!isGroupManager(group, currentUser) && !currentUser.isSuperuser())
 		{
 			throw new UpdateMemberNotAllowedException(currentUser, member, group);
 		}
@@ -204,19 +204,21 @@ public class GroupService
 		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(newRole.getName()));
 
-		if(!isGroupRole)
+		if (!isGroupRole)
 		{
 			throw new NotAValidGroupRoleException(newRole, group);
 		}
 
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		final Optional<RoleMembership> roleMembership = memberships.stream()
-																   .filter(m -> m.getUser().equals(member))
+																   .filter(m -> m.getUser()
+																				 .getId()
+																				 .equals(member.getId()))
 																   .findFirst();
 
 		if (!roleMembership.isPresent())
 		{
-			throw new FailedToRemoveMemberException(group, member);
+			throw new FailedToUpdateMemberException(group, member);
 		}
 
 		roleMembershipService.updateMembership(roleMembership.get(), newRole);

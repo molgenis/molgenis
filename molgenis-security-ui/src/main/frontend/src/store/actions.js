@@ -101,7 +101,7 @@ const actions = {
   },
 
   'updateMember' ({commit}: { commit: Function }, {groupName, memberName, updateMemberCommand}) {
-    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member'
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/member/' + encodeURIComponent(memberName)
     const payload = {body: JSON.stringify(updateMemberCommand)}
 
     return new Promise((resolve, reject) => {

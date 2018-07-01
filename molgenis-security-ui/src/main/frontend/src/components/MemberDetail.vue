@@ -55,7 +55,7 @@
           id="edit-role-btn"
           class="btn btn-sm btn-outline-secondary"
           type="button"
-          @click.prevent="onEditRole">
+          @click="onEditRole">
           <i class="fa fa-edit"></i>
           Edit
         </button>
@@ -75,7 +75,7 @@
           class="btn btn-sm btn-primary"
           type="button"
           :disabled="selectedRole === member.roleName"
-          @click.prevent="onUpdateMember">
+          @click="onUpdateMember">
           Update role
         </button>
 
