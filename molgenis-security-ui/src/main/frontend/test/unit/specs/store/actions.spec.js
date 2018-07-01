@@ -97,7 +97,7 @@ describe('actions', () => {
       const options = {
         payload: createGroupCommand,
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: 'Unable to create group; ' + error }}
+          {type: 'setToast', payload: { type: 'danger', message: error }}
         ]
       }
 
