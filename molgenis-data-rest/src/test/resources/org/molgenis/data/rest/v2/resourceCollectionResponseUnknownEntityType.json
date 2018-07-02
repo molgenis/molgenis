@@ -1,7 +1,7 @@
 {
   "errors": [
     {
-      "message": "Unknown entity type 'unknown'.",
+      "message": "Onbekende entiteitsoort 'unknown'.",
       "code": "D01"
     }
   ]

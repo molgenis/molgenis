@@ -66,10 +66,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -82,14 +82,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": false,
@@ -139,10 +139,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -155,14 +155,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": false,
@@ -452,10 +452,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -468,14 +468,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": false,
@@ -563,10 +563,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -579,14 +579,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": false,
@@ -641,10 +641,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -657,14 +657,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": true,
@@ -714,10 +714,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -730,14 +730,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": true,
@@ -931,10 +931,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -947,14 +947,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": true,
@@ -1042,10 +1042,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-de",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-de",
+              "label": "value-de",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -1058,14 +1058,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-de",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "de"
         },
         "auto": false,
         "nillable": true,
@@ -1084,7 +1084,7 @@
     ],
     "isAbstract": false,
     "writable": false,
-    "languageCode": "en"
+    "languageCode": "de"
   },
   "start": 0,
   "num": 100,
