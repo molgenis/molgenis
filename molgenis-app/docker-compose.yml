@@ -33,6 +33,6 @@ services:
             hard: -1
 
     opencpu:
-        image: registry.molgenis.org/molgenis/opencpu:latest
+        image: molgenis/opencpu:latest
         ports:
           - 8004:8004

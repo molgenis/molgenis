@@ -20,11 +20,34 @@ docker run \
 ```
 
 ## Run the MOLGENIS-image with integrated services
+We support 2 operating systems at the moment.
+- Windows 8 (and beyond)
+- OSX or MacOS
+
+### For Mac users
 With docker-compose:
+
+*Example*
 
 Run specific tag:
 
 ```bash
-export TAG=#pr-tag or branch-tag#
-docker-compose up
+export TAG=PR-7492-3; docker-compose up
+```
+
+### For Windows users (from Windows 8 and forward)
+In powershell:
+
+*Example*:
+
+Run specific tag:
+
+```bash
+$env:TAG="PR-7492-3"; docker-compose up
+```
+
+In normal (IntelliJ or Windows `cmd`) prompt:
+
+```bash
+SET TAG=PR-7492-3 && docker-compose up
 ```
