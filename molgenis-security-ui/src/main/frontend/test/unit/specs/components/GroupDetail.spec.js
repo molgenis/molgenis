@@ -54,7 +54,12 @@ describe('GroupDetail component', () => {
     localVue.filter('i18n', $t)
 
     state = {
-      loginUser: loginUser
+      loginUser: loginUser,
+      groups: [],
+      groupMembers: groupMembers,
+      groupRoles: {},
+      users: [],
+      toast: null
     }
 
     actions = {
@@ -62,7 +67,7 @@ describe('GroupDetail component', () => {
     }
 
     getters = {
-      groupMembers: () => groupMembers,
+      groupMembers: () => groupMembers
     }
 
     mutations = {
@@ -74,22 +79,36 @@ describe('GroupDetail component', () => {
 
   const stubs = ['router-link', 'router-view']
 
-  it('should return the groupMembers via a getter', () => {
-    const wrapper = shallowMount(GroupDetail, { store, stubs, localVue })
-    expect(wrapper.vm.groupMembers).to.deep.equal(groupMembers)
-  })
-  it('should navigate to the group add page', () => {
-    const wrapper = shallowMount(GroupDetail, {
-      propsData: {
-        name: 'group1'
-      },
-      mocks: { $router, $route },
-      store,
-      stubs,
-      localVue
+  describe('When created', () => {
+    it('should return the groupMembers via a getter', () => {
+      const wrapper = shallowMount(GroupDetail, {
+        propsData: {
+          name: 'group1'
+        },
+        mocks: { $router, $route },
+        store,
+        stubs,
+        localVue
+      })
+      expect(wrapper.vm.groupMembers).to.deep.equal(groupMembers)
     })
-    wrapper.find('#add-member-btn').trigger('click')
-    expect(pushedRoute).to.deep.equal({name: 'addMember', params: { groupName: 'group1' }})
-    td.verify(mutations.clearToast(state, undefined))
+  })
+
+  describe('when the add member button is clicked', () => {
+    it('should navigate to the add member page', () => {
+      const wrapper = shallowMount(GroupDetail, {
+        propsData: {
+          name: 'group1'
+        },
+        mocks: { $router, $route },
+        store,
+        stubs,
+        localVue
+      })
+      wrapper.find('#add-member-btn').trigger('click')
+      expect(pushedRoute).to.deep.equal({name: 'addMember', params: {groupName: 'group1'}})
+      td.verify(mutations.clearToast(state, undefined))
+    })
+
   })
 })

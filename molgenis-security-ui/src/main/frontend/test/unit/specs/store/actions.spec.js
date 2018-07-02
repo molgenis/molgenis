@@ -36,7 +36,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: 'Error when calling backend' }}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -45,13 +45,12 @@ describe('actions', () => {
   })
 
   describe('fetchGroupRoles', () => {
-
     const groupName = 'my-group'
 
     it('should fetch a list of groups roles for a given group and commit them to the store', done => {
       const roles = [
-        { roleName: 'VIEWER', roleLabel: 'Viewer' },
-        { roleName: 'ADMIN', roleLabel: 'Admin' }
+        {roleName: 'VIEWER', roleLabel: 'Viewer'},
+        {roleName: 'ADMIN', roleLabel: 'Admin'}
       ]
 
       const get = td.function('api.get')
@@ -61,7 +60,7 @@ describe('actions', () => {
       const options = {
         payload: groupName,
         expectedMutations: [
-          { type: 'setGroupRoles', payload: { groupName, groupRoles: roles } }
+          {type: 'setGroupRoles', payload: {groupName, groupRoles: roles}}
         ]
       }
 
@@ -76,7 +75,7 @@ describe('actions', () => {
       const options = {
         payload: 'error-group',
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: 'Error when calling backend' }}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -85,11 +84,10 @@ describe('actions', () => {
   })
 
   describe('tempFetchUsers', () => {
-
     it('should fetch a list of all users ( until we have a invite system)', done => {
       const users = [
-        { id: 'dsds-34324-2', username: 'user1' },
-        { id: 'dsds-34324-3', username: 'user2' }
+        {id: 'dsds-34324-2', username: 'user1'},
+        {id: 'dsds-34324-3', username: 'user2'}
       ]
 
       const get = td.function('api.get')
@@ -98,7 +96,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          { type: 'setUsers', payload: users }
+          {type: 'setUsers', payload: users}
         ]
       }
 
@@ -112,7 +110,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: 'Error when calling backend' }}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -121,7 +119,6 @@ describe('actions', () => {
   })
 
   describe('fetchGroupMembers', () => {
-
     const groupName = 'my-group'
 
     it('should fetch a list of groups roles for a given group and commit them to the store', done => {
@@ -157,7 +154,7 @@ describe('actions', () => {
       const options = {
         payload: groupName,
         expectedMutations: [
-          { type: 'setGroupMembers', payload: { groupName, groupMembers } }
+          {type: 'setGroupMembers', payload: {groupName, groupMembers}}
         ]
       }
 
@@ -172,7 +169,7 @@ describe('actions', () => {
       const options = {
         payload: 'error-group',
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: 'Error when calling backend' }}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -207,7 +204,7 @@ describe('actions', () => {
         payload: createGroupCommand,
         expectedMutations: [
           {type: 'setGroups', payload: response},
-          {type: 'setToast', payload: { type: 'success', message: 'Created test-name group' }},
+          {type: 'setToast', payload: {type: 'success', message: 'Created test-name group'}},
           {type: 'clearToast'}
         ]
       }
@@ -237,7 +234,7 @@ describe('actions', () => {
       const options = {
         payload: createGroupCommand,
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: error }}
+          {type: 'setToast', payload: {type: 'danger', message: error}}
         ]
       }
 
@@ -246,11 +243,10 @@ describe('actions', () => {
   })
 
   describe('addMember', () => {
-
     const groupName = 'my-group'
 
     it('should add a member to the group and displays toast', done => {
-      const addMemberCommand =  { username: 'user1', roleName: 'VIEWER' }
+      const addMemberCommand = {username: 'user1', roleName: 'VIEWER'}
 
       const generatedPayload = {
         body: JSON.stringify(addMemberCommand)
@@ -261,9 +257,9 @@ describe('actions', () => {
       td.replace(api, 'post', post)
 
       const options = {
-        payload: { groupName, addMemberCommand },
+        payload: {groupName, addMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'success', message: 'Added member' }},
+          {type: 'setToast', payload: {type: 'success', message: 'Added member'}},
           {type: 'clearToast'}
         ]
       }
@@ -272,7 +268,7 @@ describe('actions', () => {
     })
 
     it('should commit any errors to the store', done => {
-      const addMemberCommand =  { username: 'user1', roleName: 'ERROR-ROLE' }
+      const addMemberCommand = {username: 'user1', roleName: 'ERROR-ROLE'}
 
       const generatedPayload = {
         body: JSON.stringify(addMemberCommand)
@@ -285,9 +281,9 @@ describe('actions', () => {
       td.replace(api, 'post', post)
 
       const options = {
-        payload: { groupName, addMemberCommand },
+        payload: {groupName, addMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: error }}
+          {type: 'setToast', payload: {type: 'danger', message: error}}
         ]
       }
 
@@ -296,20 +292,18 @@ describe('actions', () => {
   })
 
   describe('removeMember', () => {
-
     const groupName = 'my-group'
     const memberName = 'user1'
 
     it('should remove a member from the group and displays toast', done => {
-
       const delete_ = td.function('api.delete_')
       td.when(delete_('/api/plugin/security/group/my-group/member/user1')).thenResolve()
       td.replace(api, 'delete_', delete_)
 
       const options = {
-        payload: { groupName, memberName },
+        payload: {groupName, memberName},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'success', message: 'Member removed from group' }},
+          {type: 'setToast', payload: {type: 'success', message: 'Member removed from group'}},
           {type: 'clearToast'}
         ]
       }
@@ -325,9 +319,9 @@ describe('actions', () => {
       td.replace(api, 'delete_', delete_)
 
       const options = {
-        payload: { groupName, memberName },
+        payload: {groupName, memberName},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: error }}
+          {type: 'setToast', payload: {type: 'danger', message: error}}
         ]
       }
 
@@ -336,14 +330,12 @@ describe('actions', () => {
   })
 
   describe('updateMember', () => {
-
     const groupName = 'my-group'
     const memberName = 'user1'
 
-    const updateMemberCommand =  { roleName: 'NEW-ROLE' }
+    const updateMemberCommand = {roleName: 'NEW-ROLE'}
 
     it('should updateMember a member from the group and displays toast', done => {
-
       const generatedPayload = {
         body: JSON.stringify(updateMemberCommand)
       }
@@ -353,9 +345,9 @@ describe('actions', () => {
       td.replace(api, 'put', put)
 
       const options = {
-        payload: { groupName, memberName, updateMemberCommand },
+        payload: {groupName, memberName, updateMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'success', message: 'Member updated' }},
+          {type: 'setToast', payload: {type: 'success', message: 'Member updated'}},
           {type: 'clearToast'}
         ]
       }
@@ -375,9 +367,9 @@ describe('actions', () => {
       td.replace(api, 'put', put)
 
       const options = {
-        payload: { groupName, memberName, updateMemberCommand },
+        payload: {groupName, memberName, updateMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: { type: 'danger', message: error }}
+          {type: 'setToast', payload: {type: 'danger', message: error}}
         ]
       }
 
