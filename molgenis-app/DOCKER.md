@@ -25,5 +25,6 @@ With docker-compose:
 Run specific tag:
 
 ```bash
-TAG=#pr-tag or branch-tag# && docker-compose up
+export TAG=#pr-tag or branch-tag#
+docker-compose up
 ```
