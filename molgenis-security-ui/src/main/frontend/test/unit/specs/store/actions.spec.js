@@ -244,4 +244,144 @@ describe('actions', () => {
       testUtils.testAction(actions.createGroup, options, done)
     })
   })
+
+  describe('addMember', () => {
+
+    const groupName = 'my-group'
+
+    it('should add a member to the group and displays toast', done => {
+      const addMemberCommand =  { username: 'user1', roleName: 'VIEWER' }
+
+      const generatedPayload = {
+        body: JSON.stringify(addMemberCommand)
+      }
+
+      const post = td.function('api.post')
+      td.when(post('/api/plugin/security/group/my-group/member', generatedPayload)).thenResolve()
+      td.replace(api, 'post', post)
+
+      const options = {
+        payload: { groupName, addMemberCommand },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'success', message: 'Added member' }},
+          {type: 'clearToast'}
+        ]
+      }
+
+      testUtils.testAction(actions.addMember, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const addMemberCommand =  { username: 'user1', roleName: 'ERROR-ROLE' }
+
+      const generatedPayload = {
+        body: JSON.stringify(addMemberCommand)
+      }
+
+      const error = 'error'
+
+      const post = td.function('api.post')
+      td.when(post('/api/plugin/security/group/my-group/member', generatedPayload)).thenReject(error)
+      td.replace(api, 'post', post)
+
+      const options = {
+        payload: { groupName, addMemberCommand },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'danger', message: error }}
+        ]
+      }
+
+      testUtils.testAction(actions.addMember, options, done)
+    })
+  })
+
+  describe('removeMember', () => {
+
+    const groupName = 'my-group'
+    const memberName = 'user1'
+
+    it('should remove a member from the group and displays toast', done => {
+
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/api/plugin/security/group/my-group/member/user1')).thenResolve()
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        payload: { groupName, memberName },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'success', message: 'Member removed from group' }},
+          {type: 'clearToast'}
+        ]
+      }
+
+      testUtils.testAction(actions.removeMember, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const error = 'error'
+
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/api/plugin/security/group/my-group/member/user1')).thenReject(error)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        payload: { groupName, memberName },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'danger', message: error }}
+        ]
+      }
+
+      testUtils.testAction(actions.removeMember, options, done)
+    })
+  })
+
+  describe('updateMember', () => {
+
+    const groupName = 'my-group'
+    const memberName = 'user1'
+
+    const updateMemberCommand =  { roleName: 'NEW-ROLE' }
+
+    it('should updateMember a member from the group and displays toast', done => {
+
+      const generatedPayload = {
+        body: JSON.stringify(updateMemberCommand)
+      }
+
+      const put = td.function('api.put')
+      td.when(put('/api/plugin/security/group/my-group/member/user1', generatedPayload)).thenResolve()
+      td.replace(api, 'put', put)
+
+      const options = {
+        payload: { groupName, memberName, updateMemberCommand },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'success', message: 'Member updated' }},
+          {type: 'clearToast'}
+        ]
+      }
+
+      testUtils.testAction(actions.updateMember, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const error = 'error'
+
+      const generatedPayload = {
+        body: JSON.stringify(updateMemberCommand)
+      }
+
+      const put = td.function('api.put')
+      td.when(put('/api/plugin/security/group/my-group/member/user1', generatedPayload)).thenReject(error)
+      td.replace(api, 'put', put)
+
+      const options = {
+        payload: { groupName, memberName, updateMemberCommand },
+        expectedMutations: [
+          {type: 'setToast', payload: { type: 'danger', message: error }}
+        ]
+      }
+
+      testUtils.testAction(actions.updateMember, options, done)
+    })
+  })
 })
