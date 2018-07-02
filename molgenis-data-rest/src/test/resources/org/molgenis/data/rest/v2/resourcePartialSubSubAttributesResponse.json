@@ -46,10 +46,10 @@
                 "label": "refRefEntity",
                 "attributes": [
                   {
-                    "href": "/api/v2/refRefEntity/meta/value",
+                    "href": "/api/v2/refRefEntity/meta/value-nl",
                     "fieldType": "STRING",
-                    "name": "value",
-                    "label": "value",
+                    "name": "value-nl",
+                    "label": "value-nl",
                     "attributes": [],
                     "maxLength": 255,
                     "auto": false,
@@ -62,14 +62,14 @@
                     "isAggregatable": false
                   }
                 ],
-                "labelAttribute": "value",
+                "labelAttribute": "value-nl",
                 "idAttribute": "id",
                 "lookupAttributes": [
                   "id"
                 ],
                 "isAbstract": false,
                 "writable": false,
-                "languageCode": "en"
+                "languageCode": "nl"
               },
               "auto": false,
               "nillable": true,
@@ -81,14 +81,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -107,7 +107,7 @@
     ],
     "isAbstract": false,
     "writable": false,
-    "languageCode": "en"
+    "languageCode": "nl"
   },
   "_href": "/api/v2/entity/0",
   "xref": {
@@ -115,7 +115,7 @@
     "id": "ref0",
     "ref": {
       "_href": "/api/v2/refRefEntity/refRef0",
-      "value": "value"
+      "value-nl": "value in het Nederlands"
     }
   }
 }

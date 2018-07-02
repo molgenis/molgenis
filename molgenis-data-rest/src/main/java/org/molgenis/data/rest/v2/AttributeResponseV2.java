@@ -74,7 +74,8 @@ class AttributeResponseV2
 			if (includeCategories && (this.fieldType == AttributeType.CATEGORICAL
 					|| this.fieldType == AttributeType.CATEGORICAL_MREF))
 			{
-				this.categoricalOptions = CategoricalUtils.getCategoricalOptionsForRefEntity(dataService, refEntity);
+				this.categoricalOptions = CategoricalUtils.getCategoricalOptionsForRefEntity(dataService, refEntity,
+						getCurrentUserLanguageCode());
 			}
 		}
 		else
