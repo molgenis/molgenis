@@ -1,6 +1,22 @@
 import mutations from '../../../../src/store/mutations'
+import Vue from 'vue'
 
 describe('mutations', () => {
+  describe('setLoginUser', () => {
+    it('should set the loginUser in the store', () => {
+      const state = {
+        loginUser: {}
+      }
+
+      const payload = [
+        {name: 'admin', isSuperUSer: true}
+      ]
+
+      mutations.setLoginUser(state, payload)
+
+      expect(state.loginUser).to.deep.equal(payload)
+    })
+  })
   describe('setGroups', () => {
     it('should set an list of groups in the store', () => {
       const state = {
@@ -15,6 +31,68 @@ describe('mutations', () => {
       mutations.setGroups(state, payload)
 
       expect(state.groups).to.deep.equal(payload)
+    })
+  })
+  describe('setUsers', () => {
+    it('should set an list of users in the store', () => {
+      const state = {
+        users: []
+      }
+
+      const payload = [
+        {id: 'a', username: 'john'},
+        {id: 'b', username: 'paul'}
+      ]
+
+      mutations.setUsers(state, payload)
+
+      expect(state.users).to.deep.equal(payload)
+    })
+  })
+  describe('setGroupMembers', (done) => {
+    it('should set an list members in the groupsMembers map', () => {
+      const state = {
+        groupMembers: {}
+      }
+
+      const payload = {
+        groupsName: 'my-group',
+        groupsMembers: [
+          { userId: 'abc-123',
+            username: 'user1',
+            roleName: 'VIEWER',
+            roleLabel: 'Viewer'
+          }
+        ]
+      }
+
+      mutations.setGroupMembers(state, payload)
+      Vue.nextTick(() => {
+        expect(state.groupMembers[payload.groupsName]).to.deep.equal(payload.groupsMembers)
+        done()
+      })
+    })
+  })
+  describe('setGroupRoles', (done) => {
+    it('should set an list members in the groupsMembers map', () => {
+      const state = {
+        groupRoles: {}
+      }
+
+      const payload = {
+        groupsName: 'my-group',
+        groupsRoles: [
+          { roleName: 'role-name',
+            roleLabel: 'ROLE'
+          }
+        ]
+      }
+
+      mutations.setGroupRoles(state, payload)
+      Vue.nextTick(() => {
+        expect(state.groupRoles[payload.groupsName]).to.deep.equal(payload.groupsMembers)
+        done()
+      })
     })
   })
   describe('clearToast', () => {
@@ -44,21 +122,6 @@ describe('mutations', () => {
       mutations.setToast(state, payload)
 
       expect(state.toast).to.deep.equal(payload)
-    })
-  })
-  describe('setUser', () => {
-    it('should set the user in the store', () => {
-      const state = {
-        loginUser: {}
-      }
-
-      const payload = [
-        {name: 'admin', isSuperUSer: true}
-      ]
-
-      mutations.setLoginUser(state, payload)
-
-      expect(state.loginUser).to.deep.equal(payload)
     })
   })
 })
