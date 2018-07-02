@@ -41,7 +41,7 @@
         <form v-else-if="isEditRoleMode">
 
           <div v-for="role in sortedRoles" class="form-check" >
-            <input class="form-check-input" type="radio" name="exampleRadios"
+            <input class="form-check-input" type="radio" name="roleRadio"
                    :id="role.roleName" :value="role.roleName" v-model="selectedRole" >
             <label class="form-check-label" :for="role.roleName">
               {{role.roleLabel}}

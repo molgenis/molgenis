@@ -23,11 +23,15 @@
           </div>
 
           <div class="form-group">
-            <label for="roleSelect">Role in group</label>
-            <select id="roleSelect" v-model="roleName" class="form-control">
-              <option value="">- Please select a role -</option>
-              <option v-for="role in sortedRoles" :value="role.roleName">{{role.roleLabel}}</option>
-            </select>
+            <label>Role in group</label>
+            <div v-for="role in sortedRoles" class="form-check" >
+              <input class="form-check-input" type="radio" name="roleRadio"
+                     :id="role.roleName" :value="role.roleName" v-model="roleName" >
+              <label class="form-check-label" :for="role.roleName">
+                {{role.roleLabel}}
+              </label>
+            </div>
+
           </div>
 
           <router-link :to="{name: 'groupDetail', params: { name: groupName }}">
