@@ -73,8 +73,8 @@ describe('mutations', () => {
       })
     })
   })
-  describe('setGroupRoles', (done) => {
-    it('should set an list members in the groupsMembers map', () => {
+  describe('setGroupRoles', () => {
+    it('should set an list members in the groupsMembers map', (done) => {
       const state = {
         groupRoles: {}
       }
