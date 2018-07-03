@@ -19,6 +19,12 @@ import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
  */
 class MappingContentBuilder
 {
+	/**
+	 * Protect against Lucene’s term byte-length limit of 32766 bytes
+	 * 32766/4=8191 since UTF-8 characters may occupy at most 4 bytes
+	 */
+	private static final int IGNORE_ABOVE_VALUE = 8191;
+
 	private final XContentType xContentType;
 
 	MappingContentBuilder()
@@ -147,7 +153,7 @@ class MappingContentBuilder
 		XContentBuilder fieldsObject = contentBuilder.startObject("fields")
 													 .startObject(FIELD_NOT_ANALYZED)
 													 .field("type", "keyword")
-													 .field("index", true)
+													 .field("index", true).field("ignore_above", IGNORE_ABOVE_VALUE)
 													 .endObject();
 		fieldsObject.endObject();
 	}

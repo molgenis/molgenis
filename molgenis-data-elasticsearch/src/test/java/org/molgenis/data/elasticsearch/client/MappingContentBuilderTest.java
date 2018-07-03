@@ -76,6 +76,6 @@ public class MappingContentBuilderTest
 	private static final String JSON_DOUBLE = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"double\"}}}";
 	private static final String JSON_INTEGER = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"integer\",\"doc_values\":true}}}";
 	private static final String JSON_LONG = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"long\"}}}";
-	private static final String JSON_TEXT = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+	private static final String JSON_TEXT = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true,\"ignore_above\":8191}}}}}";
 	private static final String JSON_NESTED = "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"nested\",\"properties\":{\"nestedField\":{\"type\":\"boolean\"}}}}}";
 }
