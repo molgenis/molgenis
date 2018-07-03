@@ -196,7 +196,18 @@ public class MappingServiceImpl implements MappingService
 			targetMetadata.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
-		targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+		if (dataService.hasRepository(entityTypeId))
+		{
+			targetMetadata.setPackage(dataService.getMeta().getEntityType(entityTypeId).getPackage());
+		}
+		else if (packageId != null)
+		{
+			targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+		}
+		else
+		{
+			throw new MolgenisDataException("Package can't be null");
+		}
 
 		return targetMetadata;
 	}
