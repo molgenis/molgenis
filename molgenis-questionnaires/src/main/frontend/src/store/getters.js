@@ -27,7 +27,7 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
       return isChapterComplete(child, formData)
     }
 
-    const visible = child.visible(formData)
+    const visible = isVisible(child, formData)
     if (!visible) return true
 
     const value = formData[child.id]
