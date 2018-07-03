@@ -48,7 +48,7 @@
 
 <!--Table for Target and Source attribute metadata-->
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-10 attribute-mapping-table-container">
         <table id="attribute-mapping-table" class="table table-bordered">
             <thead>
             <tr>

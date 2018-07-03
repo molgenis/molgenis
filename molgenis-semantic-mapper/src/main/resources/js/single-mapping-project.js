@@ -36,8 +36,6 @@
             $bodyCells = $table.find('tbody tr:first').children(),
             colWidth;
 
-        $('#attribute-mapping-table').scrollTableBody({rowsToDisplay: 10});
-
         $('.ace.readonly').each(function () {
             var id = $(this).attr('id'),
                 editor = ace.edit(id);
