@@ -46,7 +46,6 @@ public class PackageRepositorySecurityDecorator extends AbstractRowLevelSecurity
 		else if (action == UPDATE)
 		{
 			permitted = isActionPermittedOnParent(pack, action) && internalIsActionPermitted(pack.getId(), action);
-			;
 		}
 		else
 		{
@@ -201,7 +200,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRowLevelSecurity
 		PackagePermission permission = getPermissionForAction(action);
 		if (parent == null)
 		{
-			if (!currentUserIsSuOrSystem())
+			if (isParentUpdated(action, pack) && !currentUserIsSuOrSystem())
 			{
 				isPermitted = false;
 			}

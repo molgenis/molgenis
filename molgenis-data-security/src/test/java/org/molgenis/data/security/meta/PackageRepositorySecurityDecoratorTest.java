@@ -115,6 +115,10 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		Package pack = mock(Package.class);
 		when(pack.getParent()).thenReturn(null);
 		MutableAcl acl1 = mock(MutableAcl.class);
+		Package oldPack = mock(Package.class);
+		Package oldParent = mock(Package.class);
+		when(oldPack.getParent()).thenReturn(oldParent);
+		when(delegateRepository.findOneById(pack.getId())).thenReturn(oldPack);
 
 		repo.update(pack);
 
