@@ -52,6 +52,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
 import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
@@ -461,8 +462,8 @@ public class MappingServiceController extends PluginController
 		// If no relevant attributes are found, return all source attributes
 		if (relevantAttributes.isEmpty())
 		{
-			return stream(entityMapping.getSourceEntityType().getAllAttributes()).map(ExplainedAttribute::create)
-																				 .collect(toList());
+			return stream(entityMapping.getSourceEntityType().getAtomicAttributes()).filter(
+					attribute -> attribute.getDataType() != COMPOUND).map(ExplainedAttribute::create).collect(toList());
 		}
 		return newArrayList(relevantAttributes.values());
 	}
