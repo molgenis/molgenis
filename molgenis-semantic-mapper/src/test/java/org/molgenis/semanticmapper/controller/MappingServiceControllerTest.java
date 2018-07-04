@@ -49,8 +49,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
@@ -203,7 +202,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		ageMapping.setAlgorithm("$('length').value()");
 		ageMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -235,7 +234,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		heightMapping.setAlgorithm("$('length').value()");
 		heightMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -258,7 +257,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
 		mappingTarget.addSource(lifeLines);
-		Mockito.verify(mappingService).updateMappingProject(expected);
+		verify(mappingService).updateMappingProject(expected);
 	}
 
 	@Test
@@ -312,7 +311,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		assertEquals(response.getContentAsString(), "true",
 				"When checking for a new entity type, the result should be the String \"true\"");
 		assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-		Mockito.verify(dataService).getEntityType("blah");
+		verify(dataService).getEntityType("blah");
 	}
 
 	@Test
@@ -426,15 +425,15 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 			   .andExpect(content().contentType("text/plain"))
 			   .andExpect(content().string("/api/v2/MappingJobExecution/abcde"));
 
-		Mockito.verify(jobExecutor).submit(mappingJobExecution);
-		Mockito.verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
-		Mockito.verify(mappingJobExecution).setLabel("label");
-		Mockito.verify(mappingJobExecution).setAddSourceAttribute(null);
-		Mockito.verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
-		Mockito.verify(mappingJobExecution).setPackageId("base");
-		Mockito.verify(mappingJobExecution).setUser(user);
-		Mockito.verify(mappingJobExecution).getEntityType();
-		Mockito.verify(mappingJobExecution).getIdValue();
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(user);
+		verify(mappingJobExecution).getEntityType();
+		verify(mappingJobExecution).getIdValue();
 		Mockito.verifyNoMoreInteractions(mappingJobExecution);
 	}
 
@@ -454,13 +453,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 			   .andExpect(status().isFound())
 			   .andExpect(header().string("Location", "/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000"));
 
-		Mockito.verify(jobExecutor).submit(mappingJobExecution);
-		Mockito.verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
-		Mockito.verify(mappingJobExecution).setLabel("label");
-		Mockito.verify(mappingJobExecution).setAddSourceAttribute(null);
-		Mockito.verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
-		Mockito.verify(mappingJobExecution).setPackageId("base");
-		Mockito.verify(mappingJobExecution).setUser(user);
+		verify(jobExecutor).submit(mappingJobExecution);
+		verify(mappingJobExecution).setMappingProjectId("mappingProjectId");
+		verify(mappingJobExecution).setLabel("label");
+		verify(mappingJobExecution).setAddSourceAttribute(null);
+		verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
+		verify(mappingJobExecution).setPackageId("base");
+		verify(mappingJobExecution).setUser(user);
 		Mockito.verifyNoMoreInteractions(mappingJobExecution);
 	}
 
@@ -489,13 +488,31 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		String view = controller.viewMappingProject("hop hop hop", model);
 
 		assertEquals(view, "view-single-mapping-project");
-		Mockito.verify(model).addAttribute("entityTypes", asList(target1, target2));
-		Mockito.verify(model).addAttribute("packages", singletonList(base));
-		Mockito.verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
-		Mockito.verify(model).addAttribute("selectedTarget", "HOP");
-		Mockito.verify(model).addAttribute("mappingProject", mappingProject);
-		Mockito.verify(model)
+		verify(model).addAttribute("entityTypes", asList(target1, target2));
+		verify(model).addAttribute("packages", singletonList(base));
+		verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
+		verify(model).addAttribute("selectedTarget", "HOP");
+		verify(model).addAttribute("mappingProject", mappingProject);
+		verify(model)
 			   .addAttribute("attributeTagMap", ImmutableMap.of("dob", singletonList(ontologyTermDateOfBirth), "age",
 					   singletonList(ontologyTermAge)));
+	}
+
+	@Test
+	public void testAutoGenerateAlgorithms()
+	{
+		EntityType test = entityTypeFactory.create("TEST");
+		Attribute idAttr = attrMetaFactory.create().setName("id").setDataType(INT);
+		test.addAttribute(idAttr);
+		Attribute computedAttr = attrMetaFactory.create()
+												.setName("computed")
+												.setDataType(INT)
+												.setExpression("Very expressive");
+		test.addAttribute(computedAttr);
+
+		controller.autoGenerateAlgorithms(null, test, test, test.getAttributes(), null);
+
+		verify(algorithmService).autoGenerateAlgorithm(test, test, null, idAttr);
+		verifyNoMoreInteractions(algorithmService);
 	}
 }

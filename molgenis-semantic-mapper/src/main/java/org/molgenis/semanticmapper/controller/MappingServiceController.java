@@ -893,13 +893,17 @@ public class MappingServiceController extends PluginController
 
 	/**
 	 * Generate algorithms based on semantic matches between attribute tags and descriptions
+	 *
+	 * protected for testablity
 	 */
-	private void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType, EntityType targetEntityType,
+	protected void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
+			EntityType targetEntityType,
 			Iterable<Attribute> attributes, MappingProject project)
 	{
-		attributes.forEach(
-				attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping,
-						attribute));
+		StreamSupport.stream(attributes.spliterator(), false)
+					 .filter(attribute -> attribute.getExpression() == null)
+					 .forEach(attribute -> algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType,
+							 mapping, attribute));
 		mappingService.updateMappingProject(project);
 	}
 
