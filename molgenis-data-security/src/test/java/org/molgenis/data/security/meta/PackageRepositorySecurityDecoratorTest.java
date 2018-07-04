@@ -356,6 +356,26 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		assertEquals(captor.getValue().collect(toList()), asList(package1, package2));
 	}
 
+	@Test
+	public void findOneByIdUserPermissionAllowed()
+	{
+		Package pack = mock(Package.class);
+		when(pack.getId()).thenReturn("1");
+		when(delegateRepository.findOneById("1")).thenReturn(pack);
+		when(userPermissionEvaluator.hasPermission(new PackageIdentity("1"), PackagePermission.VIEW)).thenReturn(true);
+		assertEquals(repo.findOneById("1"), pack);
+	}
+
+	@Test(expectedExceptions = PackagePermissionDeniedException.class)
+	public void findOneByIdUserPermissionDenied()
+	{
+		Package pack = mock(Package.class);
+		when(pack.getId()).thenReturn("1");
+		when(delegateRepository.findOneById("1")).thenReturn(pack);
+		when(userPermissionEvaluator.hasPermission(new PackageIdentity("1"), PackagePermission.VIEW)).thenReturn(false);
+		repo.findOneById("1");
+	}
+
 	static class Config
 	{
 
