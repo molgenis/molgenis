@@ -1,11 +1,20 @@
 import MemberDetail from '../../../../src/components/MemberDetail'
 import {createLocalVue, shallowMount} from '@vue/test-utils'
-import td from 'testdouble'
 import Vuex from 'vuex'
 
 const localVue = createLocalVue()
 
 localVue.use(Vuex)
+
+let pushedRoute = {}
+const $router = {
+  push: function (pushed) {
+    pushedRoute = pushed
+  }
+}
+const $route = {
+  path: '/group/my-group'
+}
 
 describe('MemberDetail component', () => {
   let getters
@@ -75,7 +84,6 @@ describe('MemberDetail component', () => {
     }
 
     beforeEach(() => {
-      td.reset()
       shallowMount(MemberDetail, {propsData, store, stubs, localVue})
     })
 
@@ -96,7 +104,6 @@ describe('MemberDetail component', () => {
     }
 
     beforeEach(() => {
-      td.reset()
       wrapper = shallowMount(MemberDetail, {propsData, store, stubs, localVue})
     })
 
@@ -119,8 +126,14 @@ describe('MemberDetail component', () => {
     }
 
     beforeEach(() => {
-      td.reset()
-      wrapper = shallowMount(MemberDetail, {propsData, store, stubs, localVue})
+      wrapper = shallowMount(MemberDetail,
+        {
+          propsData,
+          mocks: {$router, $route},
+          store,
+          stubs,
+          localVue
+        })
     })
 
     it('onEditRole should set the selected role and activate the edit mode', () => {
