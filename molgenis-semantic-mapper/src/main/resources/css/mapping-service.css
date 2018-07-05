@@ -1,3 +1,6 @@
+.attribute-mapping-table-container {
+    overflow-x: auto;
+}
 #edit-algorithm-container {
     top: 0;
     right: 0;

@@ -2,6 +2,7 @@ package org.molgenis.data.rest.v2;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
@@ -29,17 +30,18 @@ public class CategoricalUtils
 
 	@Deprecated
 	public static List<CategoricalOptionV2> getCategoricalOptionsForRefEntity(DataService dataService,
-			EntityType refEntity)
+			EntityType refEntity, String language)
 	{
-
 		Sort sortOrder = stream(refEntity.getAttributes()).filter(
 				attribute -> attribute.isVisible() && attribute.isUnique())
 														  .map(sortAttr -> new Sort(sortAttr.getName()))
 														  .findFirst()
 														  .orElse(null);
 
+		Attribute labelAttribute = refEntity.getLabelAttribute(language);
 		return dataService.findAll(refEntity.getId(), new QueryImpl<>().sort(sortOrder))
-						  .map(entity -> new CategoricalOptionV2(entity.getIdValue(), entity.getLabelValue()))
+						  .map(entity -> new CategoricalOptionV2(entity.getIdValue(),
+								  entity.getString(labelAttribute.getName())))
 						  .collect(Collectors.toList());
 	}
 

@@ -84,16 +84,19 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 	private static final String REF_ATTR_ID_NAME = "id";
 	private static final String REF_ATTR_VALUE_NAME = "value";
+	private static final String REF_ATTR_VALUE_NAME_NL = "value-nl";
 	private static final String REF_ATTR_REF_NAME = "ref";
 	private static final String REF_ATTR_SORT_NAME = "sort";
-	private static final String REF_REF_ATTR_VALUE_NAME = "value";
+	private static final String REF_REF_ATTR_VALUE_NAME_NL = "value-nl";
 	private static final String REF_REF_ATTR_ID_NAME = "id";
 
 	private static final String ENTITY_ID = "0";
 	private static final String REF_ENTITY0_ID = "ref0";
 	private static final String REF_ENTITY1_ID = "ref1";
 	private static final String REF_ENTITY0_LABEL = "label0";
+	private static final String REF_ENTITY0_LABEL_NL = "label0 in het Nederlands";
 	private static final String REF_ENTITY1_LABEL = "label1";
+	private static final String REF_ENTITY1_LABEL_NL = "label1 in het Nederlands";
 	private static final String REF_REF_ENTITY_ID = "refRef0";
 	private static final String HREF_ENTITY_COLLECTION = BASE_URI + '/' + ENTITY_NAME;
 	private static final String HREF_ENTITY_COLLECTION_INCLUDE_CATEGORIES_IS_TRUE =
@@ -184,7 +187,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 															   attributeFactory.create().setName(REF_REF_ATTR_ID_NAME),
 															   ROLE_ID, ROLE_LOOKUP)
 													   .addAttribute(attributeFactory.create()
-																					 .setName(REF_REF_ATTR_VALUE_NAME),
+																					 .setName(
+																							 REF_REF_ATTR_VALUE_NAME_NL),
 															   ROLE_LABEL);
 
 		EntityType selfRefEntityType = entityTypeFactory.create(SELF_REF_ENTITY_NAME)
@@ -206,6 +210,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 															ROLE_LOOKUP)
 													.addAttribute(
 															attributeFactory.create().setName(REF_ATTR_VALUE_NAME),
+															ROLE_LABEL)
+													.addAttribute(attributeFactory.create()
+																				  .setName(REF_ATTR_VALUE_NAME + "-nl"),
 															ROLE_LABEL)
 													.addAttribute(attributeFactory.create()
 																				  .setName(REF_ATTR_REF_NAME)
@@ -324,17 +331,19 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		Entity refRefEntity = new DynamicEntity(refRefEntityType);
 		refRefEntity.set(REF_REF_ATTR_ID_NAME, REF_REF_ENTITY_ID);
-		refRefEntity.set(REF_REF_ATTR_VALUE_NAME, "value");
+		refRefEntity.set(REF_REF_ATTR_VALUE_NAME_NL, "value in het Nederlands");
 
 		Entity refEntity0 = new DynamicEntity(refEntityType);
 		refEntity0.set(REF_ATTR_ID_NAME, REF_ENTITY0_ID);
 		refEntity0.set(REF_ATTR_VALUE_NAME, REF_ENTITY0_LABEL);
+		refEntity0.set(REF_ATTR_VALUE_NAME_NL, REF_ENTITY0_LABEL_NL);
 		refEntity0.set(REF_ATTR_REF_NAME, refRefEntity);
 		refEntity0.set(REF_ATTR_SORT_NAME, 0);
 
 		Entity refEntity1 = new DynamicEntity(refEntityType);
 		refEntity1.set(REF_ATTR_ID_NAME, REF_ENTITY1_ID);
 		refEntity1.set(REF_ATTR_VALUE_NAME, REF_ENTITY1_LABEL);
+		refEntity1.set(REF_ATTR_VALUE_NAME_NL, REF_ENTITY1_LABEL_NL);
 		refEntity1.set(REF_ATTR_REF_NAME, refRefEntity);
 		refEntity1.set(REF_ATTR_SORT_NAME, 1);
 
@@ -405,15 +414,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		assertEquals(entity.getIdValue(), ENTITY_ID);
 		assertEquals(refEntity0.getIdValue(), REF_ENTITY0_ID);
-		assertEquals(refEntity0.getLabelValue(), REF_ENTITY0_LABEL);
+		assertEquals(refEntity0.getLabelValue(), REF_ENTITY0_LABEL_NL);
 		assertEquals(refEntity1.getIdValue(), REF_ENTITY1_ID);
-		assertEquals(refEntity1.getLabelValue(), REF_ENTITY1_LABEL);
+		assertEquals(refEntity1.getLabelValue(), REF_ENTITY1_LABEL_NL);
 		assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
 		assertEquals(selfRefEntity.getIdValue(), "0");
 
 		when(entityManager.create(entityType, POPULATE)).thenAnswer(invocation -> new DynamicEntity(entityType));
 
-		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
+		when(localeResolver.resolveLocale(any())).thenReturn(Locale.forLanguageTag("nl"));
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
 								 .setLocaleResolver(localeResolver)
@@ -526,7 +535,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void retrieveResourcePartialResponseSubAttribute() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + REF_ATTR_VALUE_NAME + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + REF_ATTR_VALUE_NAME_NL + ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
@@ -537,7 +546,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void retrieveResourcePartialResponseSubAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
-				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_VALUE_NAME + ')'))
+				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_VALUE_NAME_NL + ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(content().json(
@@ -551,7 +560,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String expectedContent = readFile(
 				getClass().getResourceAsStream("resourcePartialSubSubAttributesResponse.json"));
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
-				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME + ')'
+				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME_NL + ')'
 						+ ')'))
 			   .andExpect(status().isOk())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
@@ -673,7 +682,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				post("/api/v2/copy/unknown").content("{newEntityName: 'newEntity'}").contentType(APPLICATION_JSON))
 			   .andExpect(status().isNotFound())
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'unknown'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Onbekende entiteitsoort 'unknown'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -709,8 +718,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(content().contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("DS04a")))
-			   .andExpect(
-					   jsonPath(FIRST_ERROR_MESSAGE, is("No 'Read data' permission on entity type with id 'entity'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Geen 'Lees data' rechten op entiteitssoort met id 'entity'.")));
 		verifyZeroInteractions(repoCopier);
 	}
 
@@ -790,7 +799,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 												.contentType(APPLICATION_JSON))
 			   .andExpect(status().isNotFound())
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Onbekende entiteitsoort 'entity2'.")));
 	}
 
 	/**
@@ -877,7 +886,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 													   .contentType(APPLICATION_JSON))
 			   .andExpect(status().isNotFound())
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Onbekende entiteitsoort 'entity2'.")));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -921,7 +930,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 																	   .contentType(APPLICATION_JSON))
 			   .andExpect(status().isNotFound())
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'entity2'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Onbekende entiteitsoort 'entity2'.")));
 	}
 
 	@Test
@@ -979,7 +988,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				delete("/api/v2/MyEntityType").contentType(APPLICATION_JSON).content("{\"entityIds\":[\"id0\"]}"))
 			   .andExpect(status().isNotFound())
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D01")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity type 'MyEntityType'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Onbekende entiteitsoort 'MyEntityType'.")));
 	}
 
 	@Test
@@ -1057,7 +1066,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				put(BASE_URI + "/entity/email").content("{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}")
 											   .contentType(APPLICATION_JSON))
 			   .andExpect(jsonPath(FIRST_ERROR_CODE, is("D02")))
-			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("Unknown entity with 'id' '4' of type 'entity'.")));
+			   .andExpect(jsonPath(FIRST_ERROR_MESSAGE,
+					   is("Onbekende entiteit met  'id' '4' van entiteitsoort 'entity'.")));
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()

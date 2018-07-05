@@ -18,10 +18,10 @@
           "label": "refEntity",
           "attributes": [
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -34,14 +34,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -60,11 +60,11 @@
     ],
     "isAbstract": false,
     "writable": false,
-    "languageCode": "en"
+    "languageCode": "nl"
   },
   "_href": "/api/v2/entity/0",
   "xref": {
     "_href": "/api/v2/refEntity/ref0",
-    "value": "label0"
+    "value-nl": "label0 in het Nederlands"
   }
 }

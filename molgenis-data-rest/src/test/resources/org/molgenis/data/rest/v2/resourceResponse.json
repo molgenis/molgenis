@@ -65,10 +65,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -81,14 +81,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -128,10 +128,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -144,14 +144,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -213,10 +213,10 @@
                   "isAggregatable": false
                 },
                 {
-                  "href": "/api/v2/refEntity/meta/value",
+                  "href": "/api/v2/refEntity/meta/value-nl",
                   "fieldType": "STRING",
-                  "name": "value",
-                  "label": "value",
+                  "name": "value-nl",
+                  "label": "value-nl",
                   "attributes": [],
                   "maxLength": 255,
                   "auto": false,
@@ -229,14 +229,14 @@
                   "isAggregatable": false
                 }
               ],
-              "labelAttribute": "value",
+              "labelAttribute": "value-nl",
               "idAttribute": "id",
               "lookupAttributes": [
                 "id"
               ],
               "isAbstract": false,
               "writable": false,
-              "languageCode": "en"
+              "languageCode": "nl"
             },
             "auto": false,
             "nillable": false,
@@ -494,10 +494,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -510,14 +510,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -605,10 +605,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -621,14 +621,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": false,
@@ -683,10 +683,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -699,14 +699,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": true,
@@ -746,10 +746,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -762,14 +762,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": true,
@@ -953,10 +953,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -969,14 +969,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": true,
@@ -1064,10 +1064,10 @@
               "isAggregatable": false
             },
             {
-              "href": "/api/v2/refEntity/meta/value",
+              "href": "/api/v2/refEntity/meta/value-nl",
               "fieldType": "STRING",
-              "name": "value",
-              "label": "value",
+              "name": "value-nl",
+              "label": "value-nl",
               "attributes": [],
               "maxLength": 255,
               "auto": false,
@@ -1080,14 +1080,14 @@
               "isAggregatable": false
             }
           ],
-          "labelAttribute": "value",
+          "labelAttribute": "value-nl",
           "idAttribute": "id",
           "lookupAttributes": [
             "id"
           ],
           "isAbstract": false,
           "writable": false,
-          "languageCode": "en"
+          "languageCode": "nl"
         },
         "auto": false,
         "nillable": true,
@@ -1106,7 +1106,7 @@
     ],
     "isAbstract": false,
     "writable": false,
-    "languageCode": "en"
+    "languageCode": "nl"
   },
   "_href": "/api/v2/entity/0",
   "id": "0",
