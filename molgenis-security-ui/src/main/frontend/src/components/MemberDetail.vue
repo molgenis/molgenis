@@ -141,8 +141,7 @@
     computed: {
       ...mapGetters([
         'groupRoles',
-        'groupMembers',
-        'getLoginUser'
+        'groupMembers'
       ]),
       member () {
         const members = this.groupMembers[this.groupName] || []
@@ -181,9 +180,7 @@
       }
     },
     created () {
-      if (!this.groupMembers.length) {
-        this.$store.dispatch('fetchGroupMembers', this.groupName)
-      }
+      this.$store.dispatch('fetchGroupMembers', this.groupName)
       this.$store.dispatch('fetchGroupRoles', this.groupName)
     },
     components: {
