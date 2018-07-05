@@ -109,6 +109,5 @@ describe('GroupDetail component', () => {
       expect(pushedRoute).to.deep.equal({name: 'addMember', params: {groupName: 'group1'}})
       td.verify(mutations.clearToast(state, undefined))
     })
-
   })
 })

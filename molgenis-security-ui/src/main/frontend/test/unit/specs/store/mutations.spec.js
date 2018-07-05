@@ -49,48 +49,56 @@ describe('mutations', () => {
       expect(state.users).to.deep.equal(payload)
     })
   })
-  describe('setGroupMembers', (done) => {
-    it('should set an list members in the groupsMembers map', () => {
-      const state = {
-        groupMembers: {}
-      }
+  describe('setGroupMembers', () => {
+    let state = {
+      groupMembers: {}
+    }
 
-      const payload = {
-        groupsName: 'my-group',
-        groupsMembers: [
-          { userId: 'abc-123',
-            username: 'user1',
-            roleName: 'VIEWER',
-            roleLabel: 'Viewer'
-          }
-        ]
-      }
+    const payload = {
+      groupName: 'my-group',
+      groupMembers: [
+        {
+          userId: 'abc-123',
+          username: 'user1',
+          roleName: 'VIEWER',
+          roleLabel: 'Viewer'
+        }
+      ]
+    }
 
+    beforeEach(function () {
       mutations.setGroupMembers(state, payload)
+    })
+
+    it('should set an list members in the groupsMembers map', (done) => {
       Vue.nextTick(() => {
-        expect(state.groupMembers[payload.groupsName]).to.deep.equal(payload.groupsMembers)
+        expect(state.groupMembers[payload.groupName]).to.deep.equal(payload.groupMembers)
         done()
       })
     })
   })
   describe('setGroupRoles', () => {
-    it('should set an list members in the groupsMembers map', (done) => {
-      const state = {
-        groupRoles: {}
-      }
+    let state = {
+      groupRoles: {}
+    }
 
-      const payload = {
-        groupsName: 'my-group',
-        groupsRoles: [
-          { roleName: 'role-name',
-            roleLabel: 'ROLE'
-          }
-        ]
-      }
+    const payload = {
+      groupName: 'my-group',
+      groupRoles: [
+        {
+          roleName: 'role-name',
+          roleLabel: 'ROLE'
+        }
+      ]
+    }
 
+    beforeEach(function () {
       mutations.setGroupRoles(state, payload)
+    })
+
+    it('should set an list of roles in the groupsRoles map', (done) => {
       Vue.nextTick(() => {
-        expect(state.groupRoles[payload.groupsName]).to.deep.equal(payload.groupsMembers)
+        expect(state.groupRoles[payload.groupName]).to.deep.equal(payload.groupRoles)
         done()
       })
     })
