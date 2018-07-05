@@ -132,7 +132,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					return algorithmResult.errorMessage(
 							"Applying an algorithm on a null source value caused an exception. Is the target attribute required?");
 				}
-				return algorithmResult.errorMessage(e.getMessage());
+				return algorithmResult.errorMessage(e.getLocalizedMessage());
 			}
 			return algorithmResult.value(derivedValue);
 		}).collect(toList());
