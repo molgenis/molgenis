@@ -28,7 +28,11 @@ import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
+import org.molgenis.semanticsearch.explain.bean.AttributeSearchResults;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttributeDto;
+import org.molgenis.semanticsearch.semantic.Hit;
+import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.converter.GsonConfig;
@@ -49,7 +53,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -536,14 +539,17 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		Attribute stringAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(stringAttribute.getName()).thenReturn("stringAttribute");
 		Attribute compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
 		when(sourceEntityType.getAtomicAttributes()).thenReturn(asList(stringAttribute, compoundAttribute));
 		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
 		when(mappingTarget.getMappingForSource("source0")).thenReturn(entityMapping);
 		when(mappingProject.getMappingTarget("target0")).thenReturn(mappingTarget);
 		Multimap<Relation, OntologyTerm> multiMap = ArrayListMultimap.create();
 		when(ontologyTagService.getTagsForAttribute(targetEntityType, null)).thenReturn(multiMap);
-		List<ExplainedAttribute> expectedExplainedAttributes = singletonList(
-				ExplainedAttribute.create(stringAttribute, emptySet(), false));
-		assertEquals(controller.getSemanticSearchAttributeMapping(requestBody), expectedExplainedAttributes);
+		when(semanticSearchService.findAttributes(sourceEntityType, targetEntityType, null, emptySet())).thenReturn(
+				AttributeSearchResults.create(stringAttribute,
+						Hits.create(Hit.create(ExplainedAttribute.create(stringAttribute, emptySet(), false), 1f))));
+		assertEquals(controller.getSemanticSearchAttributeMapping(requestBody),
+				singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
 	}
 }
