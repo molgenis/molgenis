@@ -7,7 +7,8 @@ public enum PackagePermission implements Permission
 	// @formatter:off
 	ADD_ENTITY_TYPE("Permission to add a child entity type to this package"),
 	ADD_PACKAGE("Permission to add a child package to this package"),
-	UPDATE("Permission to update this package");
+	UPDATE("Permission to update this package"),
+	VIEW("Permission to view this package");
 	// @formatter:on
 
 	private final String defaultDescription;
