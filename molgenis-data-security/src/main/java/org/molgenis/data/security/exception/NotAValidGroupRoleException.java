@@ -6,7 +6,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 public class NotAValidGroupRoleException extends CodedRuntimeException
 {
-	private static final String ERROR_CODE = "DS08";
+	private static final String ERROR_CODE = "DS15";
 
 	private final transient Role role;
 	private final transient Group group;
