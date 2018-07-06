@@ -6,10 +6,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.molgenis.data.DataService;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.exception.GroupPermissionDeniedException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.GroupValueFactory;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.auth.GroupPermission.*;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -47,17 +51,19 @@ public class GroupRestController
 	private final DataService dataService;
 	private final RoleService roleService;
 	private final UserService userService;
+	private final UserPermissionEvaluator permissionEvaluator;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
 			RoleMembershipService roleMembershipService, DataService dataService, RoleService roleService,
-			UserService userService)
+			UserService userService, UserPermissionEvaluator permissionEvaluator)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.dataService = requireNonNull(dataService);
 		this.roleService = requireNonNull(roleService);
-		this.userService = userService;
+		this.userService = requireNonNull(userService);
+		this.permissionEvaluator = requireNonNull(permissionEvaluator);
 	}
 
 	@PostMapping(GROUP_END_POINT)
@@ -66,7 +72,6 @@ public class GroupRestController
 	@ApiResponses({ @ApiResponse(code = 201, message = "New group created", response = ResponseEntity.class) })
 	public ResponseEntity createGroup(@RequestBody GroupCommand group)
 	{
-
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES.keySet());
 
 		groupService.persist(groupValue);
@@ -87,6 +92,7 @@ public class GroupRestController
 	public List<GroupResponse> getGroups()
 	{
 		return dataService.findAll(GroupMetadata.GROUP, Group.class)
+						  .filter(group -> permissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
 						  .map(GroupResponse::fromEntity)
 						  .collect(Collectors.toList());
 	}
@@ -96,6 +102,7 @@ public class GroupRestController
 	@ResponseBody
 	public Collection<GroupMemberResponse> getMembers(@PathVariable(value = "groupName") String groupName)
 	{
+		checkGroupPermission(groupName, VIEW_MEMBERSHIP);
 		Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
 		return roleMembershipService.getMemberships(Lists.newArrayList(roles))
 							 .stream()
@@ -111,6 +118,7 @@ public class GroupRestController
 	public ResponseEntity addMember(@PathVariable(value = "groupName") String groupName,
 			@RequestBody AddGroupMemberCommand addMemberCommand)
 	{
+		checkGroupPermission(groupName, ADD_MEMBERSHIP);
 		final Group group = groupService.getGroup(groupName);
 		final String username = addMemberCommand.getUsername();
 		final String roleName = addMemberCommand.getRoleName();
@@ -133,6 +141,7 @@ public class GroupRestController
 	@ApiResponses({ @ApiResponse(code = 204, message = "Member removed from group", response = ResponseEntity.class) })
 	public ResponseEntity removeMember(@PathVariable(value = "groupName") String groupName, @PathVariable(value = "memberName") String memberName)
 	{
+		checkGroupPermission(groupName, REMOVE_MEMBERSHIP);
 		final Group group = groupService.getGroup(groupName);
 		final User member = userService.getUser(memberName);
 
@@ -148,6 +157,7 @@ public class GroupRestController
 	public ResponseEntity updateMember(@PathVariable(value = "groupName") String groupName,  @PathVariable(value = "memberName") String memberName,
 			@RequestBody UpdateGroupMemberCommand groupMember)
 	{
+		checkGroupPermission(groupName, UPDATE_MEMBERSHIP);
 		final Group group = groupService.getGroup(groupName);
 		final User member = userService.getUser(memberName);
 
@@ -168,6 +178,7 @@ public class GroupRestController
 	@ResponseBody
 	public Collection<RoleResponse> getGroupRoles(@PathVariable(value = "groupName") String groupName)
 	{
+		checkGroupPermission(groupName, VIEW);
 		Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
 		Collection<Role> roleCollection = new ArrayList<>();
 		roles.forEach(roleCollection::add);
@@ -193,6 +204,14 @@ public class GroupRestController
 						 .map(RoleValue::getName)
 						 .findFirst()
 						 .orElseThrow(() -> new IllegalStateException("Manager role is missing"));
+	}
+
+	private void checkGroupPermission(@PathVariable(value = "groupName") String groupName, GroupPermission permission)
+	{
+		if (!permissionEvaluator.hasPermission(new GroupIdentity(groupName), permission))
+		{
+			throw new GroupPermissionDeniedException(permission, groupName);
+		}
 	}
 
 }

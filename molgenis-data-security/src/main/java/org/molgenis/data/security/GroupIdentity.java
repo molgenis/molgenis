@@ -7,8 +7,13 @@ public class GroupIdentity extends ObjectIdentityImpl
 {
 	public static final String GROUP = "group";
 
+	public GroupIdentity(String groupName)
+	{
+		super(GROUP, groupName);
+	}
+
 	public GroupIdentity(Group group)
 	{
-		super(GROUP, group.getName());
+		this(group.getName());
 	}
 }

@@ -8,10 +8,11 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings("squid:S1610")
 public abstract class AddGroupMemberCommand
 {
-	static AddGroupMemberCommand create(String username, String roleName) {
-		return new AutoValue_AddGroupMemberCommand(username, roleName);
-	}
-
 	public abstract String getUsername();
 	public abstract String getRoleName();
+
+	public static AddGroupMemberCommand addGroupMember(String user, String role)
+	{
+		return new AutoValue_AddGroupMemberCommand(user, role);
+	}
 }

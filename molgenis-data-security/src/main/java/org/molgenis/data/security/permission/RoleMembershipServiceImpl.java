@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -34,6 +35,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 		this.roleMetadata = requireNonNull(roleMetadata);
 	}
 
+	@RunAsSystem
 	@Override
 	public void addUserToRole(String username, String roleName)
 	{
@@ -52,6 +54,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 		this.addUserToRole(user, role);
 	}
 
+	@RunAsSystem
 	@Override
 	public void addUserToRole(final User user, final Role role)
 	{
@@ -63,12 +66,14 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 		dataService.add(ROLE_MEMBERSHIP, roleMembership);
 	}
 
+	@RunAsSystem
 	@Override
 	public void removeMembership(final RoleMembership roleMembership)
 	{
 		dataService.delete(ROLE_MEMBERSHIP, roleMembership);
 	}
 
+	@RunAsSystem
 	@Override
 	public void updateMembership(RoleMembership roleMembership, Role newRole)
 	{
@@ -82,14 +87,14 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 		dataService.update(RoleMembershipMetadata.ROLE_MEMBERSHIP, membership);
 	}
 
+	@RunAsSystem
 	@Override
 	public Collection<RoleMembership> getMemberships(Collection<Role> roles)
 	{
-		return dataService
-				.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-				.in(RoleMembershipMetadata.ROLE, roles)
-				.findAll()
-				.filter(RoleMembership::isCurrent)
-				.collect(Collectors.toList());
+		return dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+						  .in(RoleMembershipMetadata.ROLE, roles)
+						  .findAll()
+						  .filter(RoleMembership::isCurrent)
+						  .collect(Collectors.toList());
 	}
 }
