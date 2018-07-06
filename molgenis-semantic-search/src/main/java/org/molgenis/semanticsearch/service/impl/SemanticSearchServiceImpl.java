@@ -173,8 +173,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			Set<String> searchTerms)
 	{
 		List<AttributeSearchResults> attributeSearchResults = stream(
-				targetEntityType.getAtomicAttributes().spliterator(), false).map(
-				targetAttribute -> findAttributes(sourceEntityType, targetEntityType, targetAttribute, searchTerms))
+				targetEntityType.getAtomicAttributes().spliterator(), false).filter(
+				targetAttribute -> targetAttribute.getExpression() == null)
+																			.map(targetAttribute -> findAttributes(
+																					sourceEntityType, targetEntityType,
+																					targetAttribute, searchTerms))
 																			.collect(toList());
 		return EntityTypeSearchResults.create(targetEntityType, attributeSearchResults);
 	}

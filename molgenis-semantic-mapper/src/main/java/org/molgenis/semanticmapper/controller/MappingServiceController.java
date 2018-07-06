@@ -901,9 +901,9 @@ public class MappingServiceController extends PluginController
 	/**
 	 * Generate algorithms based on semantic matches between attribute tags and descriptions
 	 * <p>
-	 * protected for testablity
+	 * package-private for testablity
 	 */
-	private void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
+	void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
 			EntityType targetEntityType,
 			 MappingProject project)
 	{
