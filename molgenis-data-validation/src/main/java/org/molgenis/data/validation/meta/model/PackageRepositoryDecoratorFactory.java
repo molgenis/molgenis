@@ -42,8 +42,7 @@ public class PackageRepositoryDecoratorFactory
 	public Repository<Package> createDecoratedRepository(Repository<Package> repository)
 	{
 		repository = new PackageRepositoryDecorator(repository, dataService);
-		repository = new PackageRepositorySecurityDecorator(repository, mutableAclService, userPermissionEvaluator,
-				dataService);
+		repository = new PackageRepositorySecurityDecorator(repository, mutableAclService, userPermissionEvaluator);
 		return new PackageRepositoryValidationDecorator(repository, packageValidator);
 	}
 }

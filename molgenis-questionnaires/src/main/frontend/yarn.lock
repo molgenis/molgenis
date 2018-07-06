@@ -88,15 +88,15 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.0.tgz#b2825ec4c0600ce07fc85ffd0be13ace2daf41a6"
+"@molgenis/molgenis-ui-form@^0.11.1":
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.1.tgz#77ed7fddeef4ef6a13f9c3bc0a32b0b93cc3c953"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     debounce "^1.1.0"
     moment "^2.20.1"
     vue-code "^1.2.3"
-    vue-flatpickr-component "^7.0.0"
+    vue-flatpickr-component "^7.0.4"
     vue-form "^4.8.1"
     vue-select ConnorStroomberg/vue-select.git#release/patch-for-update-issue
 
@@ -1703,8 +1703,8 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
 codemirror@5.x:
-  version "5.36.0"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.36.0.tgz#1172ad9dc298056c06e0b34e5ccd23825ca15b40"
+  version "5.39.0"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.39.0.tgz#4654f7d2f7e525e04a62e72d9482348ccb37dce5"
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -3294,9 +3294,9 @@ flatpickr@^2.3.0-3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-2.6.3.tgz#457357532deb135f3da64b425bf4435737961564"
 
-flatpickr@^4.4.3:
-  version "4.4.4"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.4.4.tgz#fdeb083ca3d580eecb822a4080f67b06f0294fc7"
+flatpickr@^4.4.6:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.5.1.tgz#f65eaf54c07538f87d6f68a67b03cf816d7fb82f"
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -8016,11 +8016,11 @@ vue-eslint-parser@^2.0.3:
     esquery "^1.0.0"
     lodash "^4.17.4"
 
-vue-flatpickr-component@^7.0.0:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.1.tgz#5af4ab8acc6e3d509e581db85429eb396a435fa8"
+vue-flatpickr-component@^7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.4.tgz#29909596555f5160792a917f469f9e809e5e6c26"
   dependencies:
-    flatpickr "^4.4.3"
+    flatpickr "^4.4.6"
 
 vue-flatpickr@^2.3.0:
   version "2.3.0"

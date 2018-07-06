@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState, Chapter, ChapterField } from '../flow.types.js'
+import type { Chapter, ChapterField, QuestionnaireState } from '../flow.types.js'
 
 function InvalidChapterIdException (chapterId: string) {
   this.chapterId = chapterId
@@ -27,7 +27,7 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
       return isChapterComplete(child, formData)
     }
 
-    const visible = child.visible(formData)
+    const visible = isVisible(child, formData)
     if (!visible) return true
 
     const value = formData[child.id]
@@ -49,12 +49,7 @@ const isVisible = (field: ChapterField, formData: Object) => {
   try {
     visible = field.visible(formData)
   } catch (e) {
-    console.error(`Error in getters, during evaluation of function 'visible' for field ${field.id}.
-      Where visible expression is: 
-        '${field.visible.toString()}'
-      And formData is: 
-        '${JSON.stringify(formData)}'
-      The default value of visible is set to false`, e)
+    console.warn(`Setting ${field.id}.visible to false because expression evaluation threw an error.`)
   }
   return visible
 }
@@ -64,12 +59,7 @@ const isRequired = (field: ChapterField, formData: Object) => {
   try {
     required = field.required(formData)
   } catch (e) {
-    console.error(`Error in getters, during evaluation of function 'required' for field ${field.id}.
-      Where required expression is: 
-        '${field.required.toString()}'
-      And formData is: 
-        '${JSON.stringify(formData)}'
-      The default value of required is set to false`, e)
+    console.warn(`Setting ${field.id}.required to false because expression evaluation threw an error.`)
   }
   return required
 }
