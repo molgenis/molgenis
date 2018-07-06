@@ -269,7 +269,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 				newHashSet("targetAttribute"), emptyList());
 
 		Hits<ExplainedAttribute> termsExpected1 = Hits.create(
-				singletonList(Hit.create(ExplainedAttribute.create(attributeHeight, emptySet(), false), 1f)));
+				Hit.create(ExplainedAttribute.create(attributeHeight, emptySet(), false), 1f));
 
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
@@ -279,7 +279,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		Hits<ExplainedAttribute> termsActual2 = semanticSearchService.findAttributes(sourceEntityType,
 				newHashSet("targetAttribute"), emptyList());
 
-		Hits<ExplainedAttribute> termsExpected2 = Hits.create(emptyList());
+		Hits<ExplainedAttribute> termsExpected2 = Hits.create();
 
 		assertEquals(termsActual2, termsExpected2);
 

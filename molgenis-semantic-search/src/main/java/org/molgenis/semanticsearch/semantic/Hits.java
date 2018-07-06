@@ -1,6 +1,7 @@
 package org.molgenis.semanticsearch.semantic;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -26,6 +27,12 @@ public abstract class Hits<T> implements Iterable<Hit<T>>
 
 	public static <T> Hits<T> create(List<Hit<T>> hits)
 	{
-		return new AutoValue_Hits<>(hits);
+		return new AutoValue_Hits<>(ImmutableList.copyOf(hits));
+	}
+
+	@SafeVarargs
+	public static <T> Hits<T> create(Hit<T>... hits)
+	{
+		return new AutoValue_Hits<>(ImmutableList.copyOf(hits));
 	}
 }

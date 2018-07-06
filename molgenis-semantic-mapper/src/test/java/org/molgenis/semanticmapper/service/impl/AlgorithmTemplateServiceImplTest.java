@@ -96,11 +96,11 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
 		Hits<ExplainedAttribute> attrResults = Hits.
-														   create(asList(Hit.create(
+														   create(Hit.create(
 																   ExplainedAttribute.create(sourceAttr0,
 																		   singleton(sourceAttr0Explain), false), 1f),
 																   Hit.create(ExplainedAttribute.create(sourceAttr1,
-																		   singleton(sourceAttr1Explain), false), 1f)));
+																		   singleton(sourceAttr1Explain), false), 1f));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 

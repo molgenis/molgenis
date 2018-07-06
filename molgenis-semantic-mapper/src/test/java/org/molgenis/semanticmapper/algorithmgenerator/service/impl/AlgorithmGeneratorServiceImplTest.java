@@ -94,11 +94,11 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceEntityType.addAttribute(heightSourceAttribute);
 		sourceEntityType.addAttribute(weightSourceAttribute);
 
-		Hits<ExplainedAttribute> sourceAttributes = Hits.create(asList(Hit.create(
+		Hits<ExplainedAttribute> sourceAttributes = Hits.create(Hit.create(
 				ExplainedAttribute.create(heightSourceAttribute,
 						singleton(ExplainedQueryString.create("height", "height", "height", 100)), true), 1f),
 				Hit.create(ExplainedAttribute.create(weightSourceAttribute,
-						singleton(ExplainedQueryString.create("weight", "weight", "weight", 100)), true), 1f)));
+						singleton(ExplainedQueryString.create("weight", "weight", "weight", 100)), true), 1f));
 
 		Script script = mock(Script.class);
 		ScriptParameter heightParameter = mock(ScriptParameter.class);
@@ -155,7 +155,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 	public void testGenerateMapExpressedTargetAttribute()
 	{
 		Attribute targetAttribute = when(mock(Attribute.class).hasExpression()).thenReturn(true).getMock();
-		Hits<ExplainedAttribute> sourceAttributes = Hits.create(emptyList());
+		Hits<ExplainedAttribute> sourceAttributes = Hits.create();
 		EntityType targetEntityType = mock(EntityType.class);
 		EntityType sourceEntityType = mock(EntityType.class);
 		algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -275,7 +275,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	{
 		List<String> ontologyIds = ontologies.stream().map(Ontology::getId).collect(toList());
 		Hit<OntologyTerm> ontologyTermHit = findTags(attribute, ontologyIds);
-		return ontologyTermHit != null ? Hits.create(singletonList(ontologyTermHit)) : Hits.create(emptyList());
+		return ontologyTermHit != null ? Hits.create(ontologyTermHit) : Hits.create();
 	}
 
 	/**

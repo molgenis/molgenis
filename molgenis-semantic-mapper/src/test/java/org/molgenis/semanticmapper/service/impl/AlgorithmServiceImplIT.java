@@ -400,9 +400,9 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
-		Hits<ExplainedAttribute> matches = Hits.create(singletonList(Hit.create(
+		Hits<ExplainedAttribute> matches = Hits.create(Hit.create(
 				ExplainedAttribute.create(sourceAttribute,
-						singleton(ExplainedQueryString.create("height", "height", "height", 100)), false), 1f)));
+						singleton(ExplainedQueryString.create("height", "height", "height", 100)), false), 1f));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
@@ -468,11 +468,11 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
 		Hits<ExplainedAttribute> mappings = Hits.
-														create(asList(Hit.create(
+														create(Hit.create(
 																ExplainedAttribute.create(sourceAttribute1, emptySet(),
 																		false), 1f), Hit.create(
 																ExplainedAttribute.create(sourceAttribute2, emptySet(),
-																		false), 1f)));
+																		false), 1f));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
