@@ -1,6 +1,7 @@
 package org.molgenis.semanticsearch.explain.bean;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
@@ -16,6 +17,6 @@ public abstract class EntityTypeSearchResults
 	public static EntityTypeSearchResults create(EntityType entityType,
 			List<AttributeSearchResults> attributeSearchResults)
 	{
-		return new AutoValue_EntityTypeSearchResults(entityType, attributeSearchResults);
+		return new AutoValue_EntityTypeSearchResults(entityType, ImmutableList.copyOf(attributeSearchResults));
 	}
 }
