@@ -84,7 +84,7 @@
                         <#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
                             <td>
                                 <#list feedbackRow.value as row>
-                                    <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
+                                    <#if row?has_content>${row.idValue?html}<#if row?has_next>, </#if></#if>
                                 </#list>
                             </td>
                         <#elseif feedbackRow.value?is_boolean> <!-- its a boolean -->

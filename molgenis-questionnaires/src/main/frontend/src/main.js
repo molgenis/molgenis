@@ -7,6 +7,8 @@ import router from './router'
 import i18n from '@molgenis/molgenis-i18n-js'
 import 'font-awesome/css/font-awesome.min.css'
 
+store.commit('SET_USERNAME', window.QUESTIONNAIRE_STATE.username)
+
 Vue.use(i18n, {
   lng: window.QUESTIONNAIRE_STATE.lng,
   fallbackLng: window.QUESTIONNAIRE_STATE.fallbackLng,
@@ -20,7 +22,5 @@ Vue.use(i18n, {
       template: '<QuestionnaireApp />',
       components: {QuestionnaireApp}
     })
-
-    store.commit('SET_USERNAME', window.QUESTIONNAIRE_STATE.username)
   }
 })

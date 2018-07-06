@@ -1,14 +1,12 @@
 package org.molgenis.data.security.meta;
 
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
-import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action;
+import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.MutableAcl;
@@ -21,91 +19,110 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.*;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
-public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecorator<Package>
+public class PackageRepositorySecurityDecorator extends AbstractRowLevelSecurityRepositoryDecorator<Package>
 {
 	private final MutableAclService mutableAclService;
 	private final UserPermissionEvaluator userPermissionEvaluator;
-	private final DataService dataService;
 
 	public PackageRepositorySecurityDecorator(Repository<Package> delegateRepository,
-			MutableAclService mutableAclService, UserPermissionEvaluator userPermissionEvaluator,
-			DataService dataService)
+			MutableAclService mutableAclService, UserPermissionEvaluator userPermissionEvaluator)
 	{
-		super(delegateRepository);
+		super(delegateRepository, mutableAclService);
 		this.mutableAclService = requireNonNull(mutableAclService);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
-		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
-	public void update(Package pack)
+	public boolean isActionPermitted(Package pack, Action action)
 	{
-		checkParentPermission(pack, Action.UPDATE);
-		updateAcl(pack);
-		delegate().update(pack);
-	}
-
-	@Override
-	public void update(Stream<Package> packages)
-	{
-		super.update(packages.filter(pack ->
+		boolean permitted;
+		if (action == CREATE || action == DELETE)
 		{
-			checkParentPermission(pack, Action.UPDATE);
-			updateAcl(pack);
-			return true;
-		}));
-	}
-
-	@Override
-	public void delete(Package pack)
-	{
-		deleteAcl(pack);
-		delegate().delete(pack);
-	}
-
-	@Override
-	public void delete(Stream<Package> packages)
-	{
-		delegate().delete(packages.filter(pack ->
+			permitted = isActionPermittedOnParent(pack, action);
+		}
+		else if (action == UPDATE)
 		{
-			deleteAcl(pack);
-			return true;
-		}));
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		deleteAcl(id.toString());
-		delegate().deleteById(id);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		super.deleteAll(ids.filter(id ->
+			permitted = isActionPermittedOnParent(pack, action) && internalIsActionPermitted(pack.getId(), action);
+		}
+		else
 		{
-			deleteAcl(id.toString());
-			return true;
-		}));
+			permitted = internalIsActionPermitted(pack.getId(), action);
+		}
+		return permitted;
 	}
 
 	@Override
-	public void deleteAll()
+	public boolean isActionPermitted(Object id, Action action)
 	{
-		iterator().forEachRemaining(this::deleteAcl);
-		super.deleteAll();
+		boolean isPermitted = false;
+		Package pack = delegate().findOneById(id);
+		if (pack != null)
+		{
+			isPermitted = isActionPermitted(pack, action);
+		}
+		return isPermitted;
+	}
+
+	private boolean internalIsActionPermitted(Object id, Action action)
+	{
+		return userPermissionEvaluator.hasPermission(new PackageIdentity(id.toString()),
+				getPermissionForAction(action));
+	}
+
+	@Override
+	public void throwPermissionException(Package pack, Action action)
+	{
+		throw new PackagePermissionDeniedException(getPermissionForAction(action), pack);
+	}
+
+	@Override
+	public Package findOneById(Object id)
+	{
+		Package pack = delegate().findOneById(id);
+		if (pack != null && !isActionPermitted(id, READ))
+		{
+			throwPermissionException(pack, READ);
+		}
+		return pack;
 	}
 
 	@Override
 	public void add(Package pack)
 	{
-		checkParentPermission(pack, Action.CREATE);
-		createAcl(pack);
-		delegate().add(pack);
+		if (isActionPermitted(pack, CREATE))
+		{
+			createAcl(pack);
+			delegate().add(pack);
+		}
+		else
+		{
+			if (pack.getParent() == null)
+			{
+				throw new NullParentPackageNotSuException();
+			}
+			else
+			{
+				throw new PackagePermissionDeniedException(getPermissionForAction(CREATE), pack);
+			}
+		}
+	}
+
+	@Override
+	public void update(Package pack)
+	{
+		if (!isActionPermitted(pack, UPDATE))
+		{
+			if (pack.getParent() == null)
+			{
+				throw new NullParentPackageNotSuException();
+			}
+			throwPermissionException(pack, UPDATE);
+		}
+		delegate().update(pack);
+		updateAcl(pack);
 	}
 
 	@Override
@@ -113,12 +130,7 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 	{
 		LinkedList<Package> resolved = new LinkedList<>();
 		resolveDependencies(packages.collect(Collectors.toList()), resolved);
-		return super.add(resolved.stream().filter(pack ->
-		{
-			checkParentPermission(pack, Action.CREATE);
-			createAcl(pack);
-			return true;
-		}));
+		return super.add(resolved.stream());
 	}
 
 	private void resolveDependencies(List<Package> packages, LinkedList<Package> resolved)
@@ -137,7 +149,8 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 	}
 
-	private void createAcl(Package pack)
+	@Override
+	public void createAcl(Package pack)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(pack);
 		MutableAcl acl = mutableAclService.createAcl(packageIdentity);
@@ -150,18 +163,21 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 	}
 
-	private void deleteAcl(String id)
+	@Override
+	public void deleteAcl(Object id)
 	{
-		PackageIdentity packageIdentity = new PackageIdentity(id);
+		PackageIdentity packageIdentity = new PackageIdentity(id.toString());
 		mutableAclService.deleteAcl(packageIdentity, true);
 	}
 
-	private void deleteAcl(Package pack)
+	@Override
+	public void deleteAcl(Package pack)
 	{
 		deleteAcl(pack.getId());
 	}
 
-	private void updateAcl(Package pack)
+	@Override
+	public void updateAcl(Package pack)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(pack);
 		MutableAcl acl = (MutableAcl) mutableAclService.readAclById(packageIdentity);
@@ -177,37 +193,36 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 		}
 	}
 
-	private void checkParentPermission(Package newPackage, Action action)
+	private boolean isActionPermittedOnParent(Package pack, Action action)
 	{
-		Package parent = newPackage.getParent();
-		if (parent != null)
+		boolean isPermitted = true;
+		Package parent = pack.getParent();
+		PackagePermission permission = getPermissionForAction(action);
+		if (parent == null)
 		{
-			boolean checkPackage = isParentUpdated(action, newPackage);
-			if (checkPackage && !userPermissionEvaluator.hasPermission(new PackageIdentity(parent.getId()),
-					ADD_PACKAGE))
+			if (isParentUpdated(action, pack) && !currentUserIsSuOrSystem())
 			{
-				throw new PackagePermissionDeniedException(ADD_PACKAGE, parent);
+				isPermitted = false;
 			}
 		}
-		else
+		else if (isParentUpdated(action, pack) && !userPermissionEvaluator.hasPermission(
+				new PackageIdentity(parent.getId()), permission))
 		{
-			if (!currentUserIsSuOrSystem() && isParentUpdated(action, newPackage))
-			{
-				throw new NullParentPackageNotSuException();
-			}
+			isPermitted = false;
 		}
+		return isPermitted;
 	}
 
 	private boolean isParentUpdated(Action action, Package pack)
 	{
 		boolean updated;
-		if (action == Action.CREATE)
+		if (action == CREATE || action == DELETE)
 		{
 			updated = true;
 		}
 		else
 		{
-			Package currentPackage = dataService.findOneById(PackageMetadata.PACKAGE, pack.getId(), Package.class);
+			Package currentPackage = delegate().findOneById(pack.getId());
 			if (currentPackage.getParent() == null)
 			{
 				updated = pack.getParent() != null;
@@ -218,5 +233,28 @@ public class PackageRepositorySecurityDecorator extends AbstractRepositoryDecora
 			}
 		}
 		return updated;
+	}
+
+	private static PackagePermission getPermissionForAction(Action action)
+	{
+		//In case of delete and create the permission has to have been granted on the parent package
+		PackagePermission permission;
+		switch (action)
+		{
+			case COUNT:
+			case READ:
+				permission = PackagePermission.VIEW;
+				break;
+			case UPDATE:
+			case DELETE:
+				permission = PackagePermission.UPDATE;
+				break;
+			case CREATE:
+				permission = PackagePermission.ADD_PACKAGE;
+				break;
+			default:
+				throw new IllegalArgumentException("Illegal repository Action");
+		}
+		return permission;
 	}
 }

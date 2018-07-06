@@ -110,7 +110,7 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 			case CREATE:
 				throw new IllegalStateException("Shouldn't check entity types that you're creating");
 			default:
-				throw new IllegalArgumentException("Illegal repository ACtion");
+				throw new IllegalArgumentException("Illegal repository Action");
 		}
 		return permission;
 	}
