@@ -183,20 +183,6 @@ public class JsMagmaScriptEvaluatorTest
 	}
 
 	@Test
-	public void testValueForXref()
-	{
-		Entity gender = new DynamicEntity(genderEntityType);
-		gender.set("id", "1");
-		gender.set("label", "male");
-
-		Entity person = new DynamicEntity(personGenderEntityType);
-		person.set("gender", gender);
-
-		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person, 3);
-		assertEquals(result, "male");
-	}
-
-	@Test
 	public void testValueForXrefDefaultDepth()
 	{
 		Entity gender = new DynamicEntity(genderEntityType);
@@ -206,7 +192,7 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object result = jsMagmaScriptEvaluator.eval("$('gender.label').value()", person);
+		Object result = jsMagmaScriptEvaluator.eval("$('gender').attr('label').value()", person);
 		assertNull(result);
 	}
 
@@ -220,9 +206,10 @@ public class JsMagmaScriptEvaluatorTest
 		Entity person = new DynamicEntity(personGenderEntityType);
 		person.set("gender", gender);
 
-		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
+		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender').attr('xref').attr('label').value()",
+				person);
 		assertEquals(scriptExceptionObj.toString(),
-				"org.molgenis.script.core.ScriptException: <eval>:432 TypeError: Cannot read property \"label\" from undefined");
+				"org.molgenis.script.core.ScriptException: <eval>:48 TypeError: Cannot read property \"label\" from undefined");
 	}
 
 	@Test
