@@ -222,7 +222,7 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object scriptExceptionObj = jsMagmaScriptEvaluator.eval("$('gender.xref.label').value()", person);
 		assertEquals(scriptExceptionObj.toString(),
-				"org.molgenis.script.core.ScriptException: <eval>:430 TypeError: Cannot read property \"label\" from undefined");
+				"org.molgenis.script.core.ScriptException: <eval>:432 TypeError: Cannot read property \"label\" from undefined");
 	}
 
 	@Test
@@ -252,8 +252,8 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("trait", singletonList(trait));
 
 		Object result = jsMagmaScriptEvaluator.eval(
-				"var result = [];$('trait').map(function (entity) {result.push(entity.value().name)});result", person,
-				3);
+				"var result = [];$('trait').map(function (entity) {result.push(entity.attr('name').value())});result",
+				person, 3);
 		assertEquals(result, singletonList("Hello"));
 	}
 
@@ -269,7 +269,7 @@ public class JsMagmaScriptEvaluatorTest
 		person.set("trait", singletonList(trait));
 
 		Object result = jsMagmaScriptEvaluator.eval(
-				"$('trait').map(function (entity) {return entity.value().name}).value()", person, 3);
+				"$('trait').map(function (entity) {return entity.attr('name').value()}).value()", person, 3);
 		assertEquals(result, singletonList("Hello"));
 	}
 
@@ -301,6 +301,34 @@ public class JsMagmaScriptEvaluatorTest
 
 		Object weight = jsMagmaScriptEvaluator.eval("$('weight').unit('kg').toUnit('poundmass').value()", person, 3);
 		assertEquals(weight, 180.7790549915996);
+	}
+
+	@Test
+	public void testAttrValue()
+	{
+		Entity gender = new DynamicEntity(genderEntityType);
+		gender.set("id", "1");
+		gender.set("label", "male");
+
+		Entity person = new DynamicEntity(personGenderEntityType);
+		person.set("gender", gender);
+
+		Object weight = jsMagmaScriptEvaluator.eval("$('gender').attr('label').value()", person, 3);
+		assertEquals(weight, "male");
+	}
+
+	@Test
+	public void testCompareIdValue()
+	{
+		Entity gender = new DynamicEntity(genderEntityType);
+		gender.set("id", "1");
+		gender.set("label", "male");
+
+		Entity person = new DynamicEntity(personGenderEntityType);
+		person.set("gender", gender);
+
+		Object weight = jsMagmaScriptEvaluator.eval("$('gender').value() === '1'", person, 3);
+		assertEquals(weight, true);
 	}
 
 	@Test

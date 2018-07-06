@@ -6,22 +6,22 @@
  * @returns the evaluated script result
  */
 function evalScript (script, entity) {
-    // make functions available to the script in local scope
-    // noinspection JSUnusedLocalSymbols
-    var $ = MagmaScript.$.bind(entity) //NOSONAR
-    // noinspection JSUnusedLocalSymbols
-    var newValue = MagmaScript.newValue // NOSONAR
-    // noinspection JSUnusedLocalSymbols
-    var _isNull = MagmaScript._isNull // NOSONAR
-    return eval(script)
+  // make functions available to the script in local scope
+  // noinspection JSUnusedLocalSymbols
+  var $ = MagmaScript.$.bind(entity) //NOSONAR
+  // noinspection JSUnusedLocalSymbols
+  var newValue = MagmaScript.newValue // NOSONAR
+  // noinspection JSUnusedLocalSymbols
+  var _isNull = MagmaScript._isNull // NOSONAR
+  var value = eval(script)
+  return MagmaScript.toIdValue(value)
 }
 
 function MagmaScript (val) {
-    this.val = val
+  this.val = val
 }
 
 /**
- *
  * Gives you the value of the attribute specified between $('')
  * notation
  *
@@ -35,7 +35,17 @@ function MagmaScript (val) {
  *
  */
 MagmaScript.prototype.value = function () {
-    return this.val
+  return MagmaScript.toIdValue(this.val)
+}
+
+/**
+ * Returns the contents of an attribute.
+ *
+ * @memberOf MagmaScript
+ * @method attr
+ */
+MagmaScript.prototype.attr = function (attr) {
+  return MagmaScript.newValue(this.val[attr])
 }
 
 /**
@@ -43,13 +53,13 @@ MagmaScript.prototype.value = function () {
  * Returns false if not
  */
 MagmaScript.prototype.isValidJson = function () {
-    try {
-        JSON.parse(this.val)
-        this.val = true
-    } catch (e) {
-        this.val = false
-    }
-    return this
+  try {
+    JSON.parse(this.val)
+    this.val = true
+  } catch (e) {
+    this.val = false
+  }
+  return this
 }
 
 /**
@@ -58,14 +68,14 @@ MagmaScript.prototype.isValidJson = function () {
  * @param value: the number you want to add to the current value
  */
 MagmaScript.prototype.plus = function (value) {
-    if (!MagmaScript._isNull(value)) {
-        if (typeof value === 'object' || typeof value === 'function') {
-            this.val = this.val + value.value()
-        } else {
-            this.val = this.val + value
-        }
+  if (!MagmaScript._isNull(value)) {
+    if (typeof value === 'object' || typeof value === 'function') {
+      this.val = this.val + value.value()
+    } else {
+      this.val = this.val + value
     }
-    return this
+  }
+  return this
 }
 
 /**
@@ -81,11 +91,11 @@ MagmaScript.prototype.plus = function (value) {
  * @method pow
  */
 MagmaScript.prototype.pow = function (exp) {
-    if ((typeof denominator === 'object') && (typeof denominator.value === 'function')) {
-        exp = exp.value()
-    }
-    this.val = Math.pow(this.val, exp)
-    return this
+  if ((typeof denominator === 'object') && (typeof denominator.value === 'function')) {
+    exp = exp.value()
+  }
+  this.val = Math.pow(this.val, exp)
+  return this
 }
 
 /**
@@ -96,17 +106,17 @@ MagmaScript.prototype.pow = function (exp) {
  * height_value * 2
  *
  * @param factor :
-    *            The number you multiply by
+  *            The number you multiply by
  *
  * @memberof MagmaScript
  * @method div
  */
 MagmaScript.prototype.times = function (factor) {
-    if ((typeof factor === 'object') && (typeof factor.value === 'function')) {
-        factor = factor.value()
-    }
-    this.val = (this.val * factor)
-    return this
+  if ((typeof factor === 'object') && (typeof factor.value === 'function')) {
+    factor = factor.value()
+  }
+  this.val = (this.val * factor)
+  return this
 }
 
 /**
@@ -122,11 +132,11 @@ MagmaScript.prototype.times = function (factor) {
  * @method div
  */
 MagmaScript.prototype.div = function (denominator) {
-    if ((typeof denominator === 'object') && (typeof denominator.value === 'function')) {
-        denominator = denominator.value()
-    }
-    this.val = (this.val / denominator)
-    return this
+  if ((typeof denominator === 'object') && (typeof denominator.value === 'function')) {
+    denominator = denominator.value()
+  }
+  this.val = (this.val / denominator)
+  return this
 }
 
 /**
@@ -138,12 +148,12 @@ MagmaScript.prototype.div = function (denominator) {
  * @method age
  */
 MagmaScript.prototype.age = function () {
-    if (MagmaScript._isNull(this.val)) {
-        this.val = undefined
-    } else {
-        this.val = Math.floor((Date.now() - this.val) / (365.2425 * 24 * 60 * 60 * 1000))
-    }
-    return this
+  if (MagmaScript._isNull(this.val)) {
+    this.val = undefined
+  } else {
+    this.val = Math.floor((Date.now() - this.val) / (365.2425 * 24 * 60 * 60 * 1000))
+  }
+  return this
 }
 
 /**
@@ -160,29 +170,21 @@ MagmaScript.prototype.age = function () {
  * @method map
  */
 MagmaScript.prototype.map = function (categoryMapping, defaultValue, nullValue) {
-    function toIdValue (value) {
-        if (value === null) return null
-        if (value === undefined) return undefined
-        if (Array.isArray(value)) return value.map(toIdValue)
-        if (typeof value === 'object' && value['_idValue'] !== undefined) return value._idValue
-        return value
-    }
-
-    if (typeof categoryMapping === 'function') {
-        this.val = this.val.map(MagmaScript.newValue).map(categoryMapping)
+  if (typeof categoryMapping === 'function') {
+    this.val = this.val.map(MagmaScript.newValue).map(categoryMapping)
+  } else {
+    var idValue = MagmaScript.toIdValue(this.val)
+    if (idValue in categoryMapping) {
+      this.val = categoryMapping[idValue]
     } else {
-        var idValue = toIdValue(this.val)
-        if (idValue in categoryMapping) {
-            this.val = categoryMapping[idValue]
-        } else {
-            if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
-                this.val = nullValue
-            } else {
-                this.val = defaultValue
-            }
-        }
+      if (nullValue !== undefined && ((this.val === undefined) || (this.val === null))) {
+        this.val = nullValue
+      } else {
+        this.val = defaultValue
+      }
     }
-    return this
+  }
+  return this
 }
 
 /**
@@ -201,42 +203,42 @@ MagmaScript.prototype.map = function (categoryMapping, defaultValue, nullValue) 
  */
 MagmaScript.prototype.group = function (arrayOfBounds, arrayOfOutliers, nullValue) {
 
-    // Check if the the value is an outlier value
-    if (arrayOfOutliers && arrayOfOutliers.length > 0) {
-        for (var i = 0; i < arrayOfOutliers.length; i++) {
-            if (this.val === arrayOfOutliers[i]) {
-                return this
-            }
-        }
-    }
-    // find the ranges that the value fits into
-    if (arrayOfBounds && arrayOfBounds.length > 0) {
-        var originalValue = this.val
-        if (originalValue < arrayOfBounds[0]) {
-            this.val = '-' + arrayOfBounds[0]
-        } else if (originalValue >= arrayOfBounds[arrayOfBounds.length - 1]) {
-            this.val = arrayOfBounds[arrayOfBounds.length - 1] + '+'
-        }
-        if (arrayOfBounds.length > 1) {
-            for (var i = 1; i < arrayOfBounds.length; i++) {
-                var lowerBound = arrayOfBounds[i - 1]
-                var upperBound = arrayOfBounds[i]
-                //If lowerBound is bigger than upperBound, restore the original value and stop the function
-                if (lowerBound > upperBound) {
-                    this.val = nullValue ? nullValue : null
-                    break
-                }
-                if (originalValue >= lowerBound && originalValue < upperBound) {
-                    this.val = lowerBound + '-' + upperBound
-                    break
-                }
-            }
-        }
+  // Check if the the value is an outlier value
+  if (arrayOfOutliers && arrayOfOutliers.length > 0) {
+    for (var i = 0; i < arrayOfOutliers.length; i++) {
+      if (this.val === arrayOfOutliers[i]) {
         return this
+      }
     }
-
-    this.val = nullValue ? nullValue : null
+  }
+  // find the ranges that the value fits into
+  if (arrayOfBounds && arrayOfBounds.length > 0) {
+    var originalValue = this.val
+    if (originalValue < arrayOfBounds[0]) {
+      this.val = '-' + arrayOfBounds[0]
+    } else if (originalValue >= arrayOfBounds[arrayOfBounds.length - 1]) {
+      this.val = arrayOfBounds[arrayOfBounds.length - 1] + '+'
+    }
+    if (arrayOfBounds.length > 1) {
+      for (var i = 1; i < arrayOfBounds.length; i++) {
+        var lowerBound = arrayOfBounds[i - 1]
+        var upperBound = arrayOfBounds[i]
+        //If lowerBound is bigger than upperBound, restore the original value and stop the function
+        if (lowerBound > upperBound) {
+          this.val = nullValue ? nullValue : null
+          break
+        }
+        if (originalValue >= lowerBound && originalValue < upperBound) {
+          this.val = lowerBound + '-' + upperBound
+          break
+        }
+      }
+    }
     return this
+  }
+
+  this.val = nullValue ? nullValue : null
+  return this
 }
 
 /**
@@ -250,14 +252,14 @@ MagmaScript.prototype.group = function (arrayOfBounds, arrayOfOutliers, nullValu
  * @method eq
  */
 MagmaScript.prototype.eq = function (other) {
-    if (MagmaScript._isNull(this.val) && MagmaScript._isNull(other)) {
-        this.val = false
-    } else if (MagmaScript._isNull(this.val) && !MagmaScript._isNull(other)) {
-        this.val = false
-    } else {
-        this.val = (this.value() === other)
-    }
-    return this
+  if (MagmaScript._isNull(this.val) && MagmaScript._isNull(other)) {
+    this.val = false
+  } else if (MagmaScript._isNull(this.val) && !MagmaScript._isNull(other)) {
+    this.val = false
+  } else {
+    this.val = (this.value() === other)
+  }
+  return this
 }
 
 /**
@@ -266,8 +268,8 @@ MagmaScript.prototype.eq = function (other) {
  * Example: $('Username').matches(/^[a-z0-9_-]{6,18}$/).value()
  */
 MagmaScript.prototype.matches = function (regex) {
-    this.val = regex.test(this.val)
-    return this
+  this.val = regex.test(this.val)
+  return this
 }
 
 /**
@@ -279,8 +281,8 @@ MagmaScript.prototype.matches = function (regex) {
  * @method isNull
  */
 MagmaScript.prototype.isNull = function () {
-    this.val = MagmaScript._isNull(this.val)
-    return this
+  this.val = MagmaScript._isNull(this.val)
+  return this
 }
 
 /**
@@ -292,8 +294,8 @@ MagmaScript.prototype.isNull = function () {
  * @method not
  */
 MagmaScript.prototype.not = function () {
-    this.val = !this.val
-    return this
+  this.val = !this.val
+  return this
 }
 
 /**
@@ -307,8 +309,8 @@ MagmaScript.prototype.not = function () {
  * @method or
  */
 MagmaScript.prototype.or = function (other) {
-    this.val = (this.val || other.value())
-    return this
+  this.val = (this.val || other.value())
+  return this
 }
 
 /**
@@ -322,8 +324,8 @@ MagmaScript.prototype.or = function (other) {
  * @method and
  */
 MagmaScript.prototype.and = function (other) {
-    this.val = (this.val && other.value())
-    return this
+  this.val = (this.val && other.value())
+  return this
 }
 
 /**
@@ -337,8 +339,8 @@ MagmaScript.prototype.and = function (other) {
  * @method gt
  */
 MagmaScript.prototype.gt = function (value) {
-    this.val = MagmaScript._isNull(this.val) ? false : (this.value() > value)
-    return this
+  this.val = MagmaScript._isNull(this.val) ? false : (this.value() > value)
+  return this
 }
 
 /**
@@ -352,8 +354,8 @@ MagmaScript.prototype.gt = function (value) {
  * @method lt
  */
 MagmaScript.prototype.lt = function (value) {
-    this.val = MagmaScript._isNull(this.val) ? false : (this.value() < value)
-    return this
+  this.val = MagmaScript._isNull(this.val) ? false : (this.value() < value)
+  return this
 }
 /**
  * Returns true or false if Greater or equal then the submitted
@@ -367,8 +369,8 @@ MagmaScript.prototype.lt = function (value) {
  * @method ge
  */
 MagmaScript.prototype.ge = function (value) {
-    this.val = MagmaScript._isNull(this.val) ? false : (this.value() >= value)
-    return this
+  this.val = MagmaScript._isNull(this.val) ? false : (this.value() >= value)
+  return this
 }
 /**
  * Returns true or false if Less or equal then the submitted value
@@ -381,8 +383,8 @@ MagmaScript.prototype.ge = function (value) {
  * @method le
  */
 MagmaScript.prototype.le = function (value) {
-    this.val = MagmaScript._isNull(this.val) ? false : (this.value() <= value)
-    return this
+  this.val = MagmaScript._isNull(this.val) ? false : (this.value() <= value)
+  return this
 }
 /**
  * Sets the measurement unit of the current value to the specified
@@ -392,11 +394,11 @@ MagmaScript.prototype.le = function (value) {
  * @method unit
  */
 MagmaScript.prototype.unit = function (newUnit) {
-    if (!newUnit) {
-        return this.unit
-    }
-    this.unit = newUnit
-    return this
+  if (!newUnit) {
+    return this.unit
+  }
+  this.unit = newUnit
+  return this
 }
 
 /**
@@ -407,9 +409,9 @@ MagmaScript.prototype.unit = function (newUnit) {
  * @method toUnit
  */
 MagmaScript.prototype.toUnit = function (targetUnit) {
-    var unit = math.unit(this.val, this.unit)
-    this.val = unit.toNumber(targetUnit)
-    return this
+  var unit = math.unit(this.val, this.unit)
+  this.val = unit.toNumber(targetUnit)
+  return this
 }
 
 /**
@@ -423,21 +425,34 @@ MagmaScript.prototype.toUnit = function (targetUnit) {
  * @namespace MagmaScript
  */
 MagmaScript.$ = function (attr) {
-    var attributes = attr.split('\.')
-    var result = this // we expect the $ function be bound to the entity we're evaluating
+  var attributes = attr.split('\.')
+  var result = this // we expect the $ function be bound to the entity we're evaluating
 
-    for (var i = 0; i < attributes.length && result !== null; i++) {
-        result = result[attributes[i]]
-    }
-    return new MagmaScript(result)
+  for (var i = 0; i < attributes.length && result !== null; i++) {
+    result = result[attributes[i]]
+  }
+  return new MagmaScript(result)
 }
 
 MagmaScript._isNull = function (value) {
-    if (value === null || value === undefined)
-        return true
-    return (typeof value === 'string') && (value.length === 0)
+  if (value === null || value === undefined)
+    return true
+  return (typeof value === 'string') && (value.length === 0)
 }
 
 MagmaScript.newValue = function (value) {
-    return new MagmaScript(value)
+  return new MagmaScript(value)
+}
+
+/**
+ * Looks up the '_idValue' value in objects.
+ * @param value object or array of objects
+ * @returns {*} value with _idValue property replaced in objects
+ */
+MagmaScript.toIdValue = function (value) {
+  if (value === null) return null
+  if (value === undefined) return undefined
+  if (Array.isArray(value)) return value.map(MagmaScript.toIdValue)
+  if (typeof value === 'object' && value['_idValue'] !== undefined) return value._idValue
+  return value
 }
