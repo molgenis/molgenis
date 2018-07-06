@@ -29,7 +29,7 @@ public class OntologyRepository
 	}
 
 	/**
-	 * Retrieves all {@link Ontology}s.
+	 * Retrieves all {@link Ontology}s with the given ids.
 	 */
 	public Stream<Ontology> getOntologies(List<String> ontologyIds)
 	{
