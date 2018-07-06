@@ -25,7 +25,7 @@ public class DataPermissionConfig
 	public void registerPermissions()
 	{
 		permissionRegistry.addMapping(PackagePermission.ADD_PACKAGE, WRITEMETA);
-		permissionRegistry.addMapping(PackagePermission.ADD_ENTITY_TYPE, WRITE, WRITEMETA);
+		permissionRegistry.addMapping(PackagePermission.ADD_ENTITY_TYPE, WRITEMETA);
 		permissionRegistry.addMapping(PackagePermission.UPDATE, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(PackagePermission.VIEW, READ, WRITE, WRITEMETA);
 
