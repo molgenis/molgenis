@@ -2,20 +2,22 @@ package org.molgenis.data.security.meta;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,9 +31,11 @@ import static org.molgenis.data.security.PackagePermission.UPDATE;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PackageRepositorySecurityDecoratorTest.Config.class })
-@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestNGSpringContextTests
+public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpringTest
 {
+	private static final String USERNAME = "user";
+	private static final String ROLE_SU = "SU";
+
 	@Mock
 	private Repository<Package> delegateRepository;
 	@Mock
@@ -328,6 +332,19 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMockitoTestN
 		Package pack = mock(Package.class);
 		when(pack.getParent()).thenReturn(null);
 		repo.add(pack);
+	}
+
+	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
+	@Test(expectedExceptions = EntityAlreadyExistsException.class, expectedExceptionsMessageRegExp = "type:Package id:packageId")
+	public void testAddAlreadyExists()
+	{
+		Package aPackage = mock(Package.class);
+		when(aPackage.getId()).thenReturn("packageId");
+		when(aPackage.getIdValue()).thenReturn("packageId");
+		PackageMetadata packageMetadata = when(mock(PackageMetadata.class).getId()).thenReturn("Package").getMock();
+		when(aPackage.getEntityType()).thenReturn(packageMetadata);
+		when(mutableAclService.createAcl(new PackageIdentity(aPackage))).thenThrow(new AlreadyExistsException(""));
+		repo.add(aPackage);
 	}
 
 	@Test
