@@ -29,7 +29,7 @@ You can start performing these steps to configure MOLGENIS.
   
 - **Step 2: Add members**
   
-  When you have defined your group, you can add members to the group. You can add new user by reading this: [user management guide](guide-user-management.md).
+  When you have defined your group, you can add members to the group. You can add new user by reading this: [user management guide](guide-ref-user-management.md).
 
 - **Step 3: Add members to groups** 
 
@@ -47,5 +47,5 @@ You can start performing these steps to configure MOLGENIS.
   
     Can view all resources in a group (folders, tables)
 
-When you have setup this basic configuration you can start using MOLGENIS. When you want a detailed description to setup groups click [here](admin-features/guide-ref-security.md).
+When you have setup this basic configuration you can start using MOLGENIS. When you want a detailed description to setup groups click [here](guide-ref-security.md).
 
