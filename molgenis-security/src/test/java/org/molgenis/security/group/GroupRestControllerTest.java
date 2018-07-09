@@ -198,18 +198,18 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		when(memberShip.getUser()).thenReturn(user);
 		when(memberShip.getRole()).thenReturn(editor);
 
-		when(user.getUsername()).thenReturn("user");
+		when(user.getUsername()).thenReturn("henkie");
 		when(user.getId()).thenReturn("userId");
 
-		when(editor.getName()).thenReturn("editor");
-		when(editor.getLabel()).thenReturn("role 1 label");
+		when(editor.getName()).thenReturn("DEVS_EDITOR");
+		when(editor.getLabel()).thenReturn("Developers Editor");
 
 		mockMvc.perform(get(GROUP_END_POINT + "/" + "devs" + "/member"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].user.username", is("user")))
+			   .andExpect(jsonPath("$[0].user.username", is("henkie")))
 			   .andExpect(jsonPath("$[0].user.id", is("userId")))
-			   .andExpect(jsonPath("$[0].role.roleName", is("editor")))
+			   .andExpect(jsonPath("$[0].role.roleName", is("DEVS_EDITOR")))
 			   .andExpect(jsonPath("$[0].role.roleLabel", is("Developers Editor")));
 	}
 
