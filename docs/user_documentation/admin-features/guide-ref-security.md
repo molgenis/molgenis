@@ -1,23 +1,28 @@
 # Setup security in MOLGENIS
 To understand the security context of MOLGENIS you need to understand the follwoing concepts.
 
-**Groups**
-A number of people that work together.
+* **Groups**
+  
+  A number of people that work together.
 
-**Users**
-Is a person that can login to MOLGENIS.
+* **Users**
+  
+  Is a person that can login to MOLGENIS.
 
-**Roles**
-A role is a job function within the context of an group with certain permissions on resources. Examples of roles are:
-* Managers
-* Editors
-* Viewers
+* **Roles**
+  
+  A role is a job function within the context of an group with certain permissions on resources. Examples of roles are:
+  * Managers
+  * Editors
+  * Viewers
  
-**Resource**
-A resource can be tables or folders.
+* **Resource**
+  
+  A resource can be tables or folders.
 
-**Plugins**
-You can give rights to a plugins so a user can use the plugin.
+* **Plugins**
+  
+  You can give rights to a plugins so a user can use the plugin.
       
 ## Add groups
 *note: you need to be superuser*
