@@ -14,6 +14,9 @@ const getters = {
   groupRoles: (state: SecurityModel): Array<GroupRole> => {
     return state.groupRoles
   },
+  groupPermissions: (state: SecurityModel): Array<string> => {
+    return state.groupPermissions
+  },
   users: (state: SecurityModel): Array<User> => {
     return state.users
   },

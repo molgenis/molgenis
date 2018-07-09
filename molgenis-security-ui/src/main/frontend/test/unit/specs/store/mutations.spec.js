@@ -103,6 +103,29 @@ describe('mutations', () => {
       })
     })
   })
+  describe('setGroupPermissions', () => {
+    let state = {
+      groupPermissions: {}
+    }
+
+    const payload = {
+      groupName: 'my-group',
+      groupPermissions: [
+        ['ADD_MEMBERSHIP', 'REMOVE_MEMBERSHIP']
+      ]
+    }
+
+    beforeEach(function () {
+      mutations.setGroupPermissions(state, payload)
+    })
+
+    it('should set an list of permissions in the groupPermissions map', (done) => {
+      Vue.nextTick(() => {
+        expect(state.groupPermissions[payload.groupName]).to.deep.equal(payload.groupPermissions)
+        done()
+      })
+    })
+  })
   describe('clearToast', () => {
     it('should clears the toast message', () => {
       const state = {

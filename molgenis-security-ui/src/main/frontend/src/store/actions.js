@@ -60,6 +60,15 @@ const actions = {
     })
   },
 
+  'fetchGroupPermissions' ({commit}: { commit: Function }, groupName: String) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/permission'
+    return api.get(url).then(groupPermissions => {
+      commit('setGroupPermissions', { groupName, groupPermissions })
+    }, () => {
+      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    })
+  },
+
   'createGroup' ({commit, dispatch}: { commit: Function, dispatch: Function }, createGroupCmd: CreateGroupCommand) {
     const payload = {
       body: JSON.stringify({

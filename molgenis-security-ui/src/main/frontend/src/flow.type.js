@@ -35,6 +35,7 @@ export type SecurityModel = {
   groups: Array<Group>,
   groupMembers: { [string]: Array<GroupMember> },
   groupRoles: { [string]: Array<GroupRole> },
+  groupPermissions: { [string]: Array<string> },
   users: Array<User>,
   toast: ?Toast
 }

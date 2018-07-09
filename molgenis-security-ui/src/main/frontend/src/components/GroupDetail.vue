@@ -24,7 +24,7 @@
 
     <div class="row">
       <div class="col">
-        <button id="add-member-btn" @click="addMember" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Member</button>
+        <button id="add-member-btn" v-if="canAddMember" @click="addMember" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Member</button>
         <h3 class="mt-2">Members</h3>
       </div>
     </div>
@@ -60,11 +60,16 @@
     },
     computed: {
       ...mapGetters([
-        'groupMembers'
+        'groupMembers',
+        'groupPermissions'
       ]),
       sortedMembers () {
         const members = this.groupMembers[this.name] || []
         return [...members].sort((a, b) => a.username.localeCompare(b.username))
+      },
+      canAddMember () {
+        const permissions = this.groupPermissions[this.name] || []
+        return permissions.includes('ADD_MEMBERSHIP')
       }
     },
     methods: {
@@ -78,6 +83,7 @@
     },
     created () {
       this.$store.dispatch('fetchGroupMembers', this.name)
+      this.$store.dispatch('fetchGroupPermissions', this.name)
     },
     components: {
       Toast

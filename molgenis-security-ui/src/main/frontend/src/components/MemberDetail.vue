@@ -53,6 +53,7 @@
       <div v-if="!isEditRoleMode" class="col-md-9 ">
         <button
           id="edit-role-btn"
+          v-if="canUpdateMember"
           class="btn btn-sm btn-outline-secondary"
           type="button"
           @click="onEditRole">
@@ -141,7 +142,8 @@
     computed: {
       ...mapGetters([
         'groupRoles',
-        'groupMembers'
+        'groupMembers',
+        'groupPermissions'
       ]),
       member () {
         const members = this.groupMembers[this.groupName] || []
@@ -152,6 +154,14 @@
           return []
         }
         return [...this.groupRoles[this.groupName]].sort((a, b) => a.roleLabel.localeCompare(b.roleLabel))
+      },
+      canRemoveMember () {
+        const permissions = this.groupPermissions[this.groupName] || []
+        return permissions.includes('REMOVE_MEMBERSHIP')
+      },
+      canUpdateMember () {
+        const permissions = this.groupPermissions[this.groupName] || []
+        return permissions.includes('UPDATE_MEMBERSHIP')
       }
     },
     methods: {

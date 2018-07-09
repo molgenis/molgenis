@@ -177,6 +177,42 @@ describe('actions', () => {
     })
   })
 
+  describe('fetchGroupPermissions', () => {
+    const groupName = 'my-group'
+
+    it('should fetch a list of groups roles for a given group and commit them to the store', done => {
+      const groupPermissions = ['ADD_MEMBERSHIP', 'REMOVE_MEMBERSHIP']
+
+      const get = td.function('api.get')
+      td.when(get('/api/plugin/security/group/my-group/permission')).thenResolve(groupPermissions)
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: groupName,
+        expectedMutations: [
+          {type: 'setGroupPermissions', payload: {groupName, groupPermissions}}
+        ]
+      }
+
+      testUtils.testAction(actions.fetchGroupPermissions, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const get = td.function('api.get')
+      td.when(get('/api/plugin/security/group/error-group/permission')).thenReject()
+      td.replace(api, 'get', get)
+
+      const options = {
+        payload: 'error-group',
+        expectedMutations: [
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+        ]
+      }
+
+      testUtils.testAction(actions.fetchGroupPermissions, options, done)
+    })
+  })
+
   describe('createGroup', () => {
     it('should create a group and displays toast', done => {
       const createGroupCommand = {

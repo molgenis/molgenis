@@ -43,6 +43,10 @@ describe('GroupDetail component', () => {
     ]
   }
 
+  const groupPermissions = {
+    group1: ['ADD_MEMBERSHIP']
+  }
+
   const loginUser = {
     name: 'admin',
     isSuperUser: true
@@ -58,16 +62,19 @@ describe('GroupDetail component', () => {
       groups: [],
       groupMembers: groupMembers,
       groupRoles: {},
+      groupPermissions: {group1: ['ADD_MEMBERSHIP']},
       users: [],
       toast: null
     }
 
     actions = {
-      fetchGroupMembers: () => td.function()
+      fetchGroupMembers: () => td.function(),
+      fetchGroupPermissions: () => td.function()
     }
 
     getters = {
-      groupMembers: () => groupMembers
+      groupMembers: () => groupMembers,
+      groupPermissions: () => groupPermissions
     }
 
     mutations = {
@@ -91,6 +98,19 @@ describe('GroupDetail component', () => {
         localVue
       })
       expect(wrapper.vm.groupMembers).to.deep.equal(groupMembers)
+    })
+
+    it('should return determine if the user can add a member', () => {
+      const wrapper = shallowMount(GroupDetail, {
+        propsData: {
+          name: 'group1'
+        },
+        mocks: { $router, $route },
+        store,
+        stubs,
+        localVue
+      })
+      expect(wrapper.vm.canAddMember).to.deep.equal(true)
     })
   })
 

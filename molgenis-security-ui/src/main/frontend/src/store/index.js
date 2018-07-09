@@ -12,6 +12,7 @@ const state: SecurityModel = {
   groups: [],
   groupMembers: {},
   groupRoles: {},
+  groupPermissions: {},
   users: [],
   toast: null
 }

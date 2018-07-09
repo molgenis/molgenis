@@ -59,6 +59,17 @@ describe('getters', () => {
     })
   })
 
+  describe('groupPermissions', () => {
+    it('should return groupPermissions map from the store', () => {
+      const state = {
+        groupPermissions: {
+          myGroup: ['ADD_MEMBERSHIP', 'REMOVE_MEMBERSHIP']
+        }
+      }
+      expect(getters.groupPermissions(state)).to.deep.equal(state.groupPermissions)
+    })
+  })
+
   describe('users', () => {
     it('should return groups from the store', () => {
       const state = {

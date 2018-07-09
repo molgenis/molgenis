@@ -6,11 +6,8 @@ const localVue = createLocalVue()
 
 localVue.use(Vuex)
 
-let pushedRoute = {}
 const $router = {
-  push: function (pushed) {
-    pushedRoute = pushed
-  }
+  push: function () {}
 }
 const $route = {
   path: '/group/my-group'
@@ -59,18 +56,32 @@ describe('MemberDetail component', () => {
     ]
   }
 
-  state = {}
+  const groupPermissions = {
+    group1: ['REMOVE_MEMBERSHIP']
+  }
+
+  state = {
+    loginUser: {},
+    groups: [],
+    groupMembers: {},
+    groupRoles: {},
+    groupPermissions: groupPermissions,
+    users: [],
+    toast: null
+  }
 
   actions = {
     fetchGroupMembers: sinon.spy(),
     fetchGroupRoles: sinon.spy(),
+    fetchGroupPermissions: sinon.spy(),
     removeMember: sinon.spy(),
-    updateMember: sinon.spy(),
+    updateMember: sinon.spy()
   }
 
   getters = {
     groupRoles: () => groupRoles,
-    groupMembers: () => groupMembers
+    groupMembers: () => groupMembers,
+    groupPermissions: () => groupPermissions
   }
 
   mutations = {}
@@ -116,6 +127,14 @@ describe('MemberDetail component', () => {
       const expected = 'Editor'
       expect(actual).to.deep.equal(expected)
     })
+
+    it('should tell if the current user can remove members', () => {
+      expect(wrapper.vm.canRemoveMember).to.deep.equal(true)
+    })
+
+    it('should tell if the current user can update members', () => {
+      expect(wrapper.vm.canUpdateMember).to.deep.equal(false)
+    })
   })
 
   describe('methods', () => {
@@ -157,8 +176,5 @@ describe('MemberDetail component', () => {
       expect(wrapper.vm.isUpdating).to.equal(true)
       expect(actions.updateMember.called).to.equal(true)
     })
-
   })
-
-
 })
