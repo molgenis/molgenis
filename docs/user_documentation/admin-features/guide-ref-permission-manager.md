@@ -9,7 +9,7 @@ edit own account information.
 
 You can navigate to the permission module under the Admin menu, and then navigating to the Permission Manager.
 
-![Permission manager screen](../../images//permission_manager.png?raw=true, "permission manager")
+![Permission manager screen](../../images/permission_manager.png?raw=true, "permission manager")
 
 Here you can manage permissions for groups and users. Permissions can be set on datasets, packages and plugins. 
 Permissions on a package also grant permissions on datasets within this package.
