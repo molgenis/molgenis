@@ -1,5 +1,4 @@
-Quick import
-------------
+# Quick importer
 
 The Quick data import allows you to easily get your data into MOLGENIS, without the need of understanding the EMX format.
 There are some assumptions we make with regards file types and file contents.
@@ -12,8 +11,7 @@ There are some assumptions we make with regards file types and file contents.
 - __Files containing only a header can not be uploaded__
 - __To use the importer WRITEMETA permissions on the "base/upload" package are required__
 
-Metadata guessing
------------------
+## Metadata guessing
 
 The quick data import tries to guess what type your data is. 
 MOLGENIS supports multiple data types like booleans, date fields, numbers etc.
@@ -25,8 +23,7 @@ MOLGENIS supports multiple data types like booleans, date fields, numbers etc.
 5. To get __BOOLEAN__, submit strings in the format _TRUE_ or _FALSE_
 6. Other values are inserted into the database as __STRING__. If a piece of text is longer then 255 characters, we use __TEXT__
 
-Data placement
---------------
+## Data placement
 
 Data is imported into the MOLGENIS database as a single _data table_
 _Data tables_ are grouped within packages
@@ -35,8 +32,7 @@ _Data tables_ are grouped within packages
 2. In the case of a CSV, the file is used as the _package_ and the _data table_ name. The package will be created as child of the "base/upload" package.
 3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _data tables_. The package will be created as child of the "base/upload" package.
 
-How to use
-----------
+## How to use
 
 1. Click upload file
 2. Select a file

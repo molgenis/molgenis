@@ -1,53 +1,22 @@
 package org.molgenis.security.group;
 
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.security.auth.Group;
 
 import java.util.Objects;
 
-public class GroupResponse
+@AutoValue
+@SuppressWarnings("squid:S1610")
+public abstract class GroupResponse
 {
-	/**
-	 * Unique url-save name for group
- 	 */
-	private String name;
-	/**
-	 * Used as human readable name describing the group
-	 */
-	private String label;
+	public abstract String getName();
+	public abstract String getLabel();
 
-	public GroupResponse(String name, String label)
-	{
-		this.name = name;
-		this.label = label;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public String getLabel()
-	{
-		return label;
-	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		GroupResponse that = (GroupResponse) o;
-		return Objects.equals(name, that.name) && Objects.equals(label, that.label);
-	}
-
-	@Override
-	public int hashCode()
-	{
-
-		return Objects.hash(name, label);
+	static GroupResponse create(String name, String label) {
+		return new AutoValue_GroupResponse(name, label);
 	}
 
 	static GroupResponse fromEntity(Group groupEntity) {
-		return new GroupResponse(groupEntity.getName(), groupEntity.getLabel());
+		return GroupResponse.create(groupEntity.getName(), groupEntity.getLabel());
 	}
 }
