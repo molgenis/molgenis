@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -40,9 +41,9 @@ public class DataServiceImplTest
 		repoToRemove = when(mock(Repository.class).getName()).thenReturn("Entity3").getMock();
 
 		metaDataService = mock(MetaDataService.class);
-		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
-		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
-		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
+		when(metaDataService.getRepository("Entity1")).thenReturn(of(repo1));
+		when(metaDataService.getRepository("Entity2")).thenReturn(of(repo2));
+		when(metaDataService.getRepository("Entity3")).thenReturn(of(repoToRemove));
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn("Entity1").getMock();
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn("Entity2").getMock();
 		EntityType entityType3 = when(mock(EntityType.class).getId()).thenReturn("Entity3").getMock();
@@ -126,6 +127,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Entity entity = mock(Entity.class);
 		when(repo1.findOneById(id, fetch)).thenReturn(entity);
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		// how to check return value? converting iterable can't be mocked.
 		dataService.findOneById("Entity1", id, fetch, clazz);
 		verify(repo1, times(1)).findOneById(id, fetch);
@@ -138,6 +140,7 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		assertNull(dataService.findOneById("Entity1", id, fetch, clazz));
 		verify(repo1, times(1)).findOneById(id, fetch);
 	}
@@ -161,6 +164,7 @@ public class DataServiceImplTest
 		Entity entity0 = mock(Entity.class);
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -186,6 +190,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Fetch fetch = new Fetch();
 		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -205,6 +210,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
 		when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		Stream<Entity> entities = dataService.findAll("Entity1", clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
@@ -228,6 +234,7 @@ public class DataServiceImplTest
 		@SuppressWarnings("unchecked")
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
+		when(metaDataService.getRepository("Entity1", clazz)).thenReturn(of(repo1));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
 		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}

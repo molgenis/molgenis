@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
@@ -136,7 +136,7 @@ public class OntologyImportService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
+	public Map<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
 		return metaDataService.determineImportableEntities(repositoryCollection);
