@@ -3,8 +3,6 @@ package org.molgenis.security.group;
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.security.auth.Group;
 
-import java.util.Objects;
-
 @AutoValue
 @SuppressWarnings("squid:S1610")
 public abstract class GroupResponse

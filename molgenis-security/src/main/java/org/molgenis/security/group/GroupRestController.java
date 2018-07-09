@@ -12,6 +12,7 @@ import org.molgenis.data.security.exception.GroupPermissionDeniedException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.GroupValueFactory;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
@@ -43,6 +44,7 @@ public class GroupRestController
 
 	public static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
 	public static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
+	public static final String GROUP_PERMISSION_END_POINT = GROUP_END_POINT + "/{groupName}/permission";
 	public static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
 
 	private final GroupValueFactory groupValueFactory;
@@ -51,11 +53,11 @@ public class GroupRestController
 	private final DataService dataService;
 	private final RoleService roleService;
 	private final UserService userService;
-	private final UserPermissionEvaluator permissionEvaluator;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
 			RoleMembershipService roleMembershipService, DataService dataService, RoleService roleService,
-			UserService userService, UserPermissionEvaluator permissionEvaluator)
+			UserService userService, UserPermissionEvaluator userPermissionEvaluator)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
@@ -63,7 +65,7 @@ public class GroupRestController
 		this.dataService = requireNonNull(dataService);
 		this.roleService = requireNonNull(roleService);
 		this.userService = requireNonNull(userService);
-		this.permissionEvaluator = requireNonNull(permissionEvaluator);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	@PostMapping(GROUP_END_POINT)
@@ -92,7 +94,7 @@ public class GroupRestController
 	public List<GroupResponse> getGroups()
 	{
 		return dataService.findAll(GroupMetadata.GROUP, Group.class)
-						  .filter(group -> permissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
+						  .filter(group -> userPermissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
 						  .map(GroupResponse::fromEntity)
 						  .collect(Collectors.toList());
 	}
@@ -196,6 +198,14 @@ public class GroupRestController
 				collect(Collectors.toList());
 	}
 
+	@GetMapping(GROUP_PERMISSION_END_POINT)
+	@ApiOperation(value = "Get group permissions", response = Collection.class)
+	@ResponseBody
+	public Collection<Permission> getPermissions(@PathVariable(value = "groupName") String groupName)
+	{
+		return userPermissionEvaluator.getPermissions(new GroupIdentity(groupName), GroupPermission.values());
+	}
+
 	private String getManagerRoleName(GroupValue groupValue)
 	{
 		return groupValue.getRoles()
@@ -208,7 +218,7 @@ public class GroupRestController
 
 	private void checkGroupPermission(@PathVariable(value = "groupName") String groupName, GroupPermission permission)
 	{
-		if (!permissionEvaluator.hasPermission(new GroupIdentity(groupName), permission))
+		if (!userPermissionEvaluator.hasPermission(new GroupIdentity(groupName), permission))
 		{
 			throw new GroupPermissionDeniedException(permission, groupName);
 		}
