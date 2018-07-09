@@ -16,6 +16,7 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.GroupValueFactory;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -24,6 +25,7 @@ import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -39,6 +41,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.*;
+
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -47,6 +51,7 @@ import static org.molgenis.data.security.auth.GroupPermission.*;
 import static org.molgenis.security.group.AddGroupMemberCommand.addGroupMember;
 import static org.molgenis.security.group.GroupCommand.createGroup;
 import static org.molgenis.security.group.GroupRestController.GROUP_END_POINT;
+import static org.molgenis.security.group.GroupRestController.GROUP_PERMISSION_END_POINT;
 import static org.molgenis.security.group.GroupRestController.TEMP_USER_END_POINT;
 import static org.molgenis.security.group.UpdateGroupMemberCommand.updateGroupMember;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
@@ -509,6 +514,19 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 			   .andExpect(jsonPath("$", hasSize(1)))
 			   .andExpect(jsonPath("$[0].id", is("id")))
 			   .andExpect(jsonPath("$[0].username", is("name")));
+	}
+
+	@Test
+	public void testPermissions() throws Exception
+	{
+		Set<Permission> set = new HashSet<>(Collections.singletonList(GroupPermission.ADD_MEMBERSHIP));
+
+		when(userPermissionEvaluator.getPermissions(new GroupIdentity("devs"), GroupPermission.values())).thenReturn(set);
+
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/permission"))
+			   .andExpect(status().isOk())
+			   .andExpect(jsonPath("$", hasSize(1)))
+			   .andExpect(jsonPath("$[0]", is("ADD_MEMBERSHIP")));
 	}
 
 	@Configuration

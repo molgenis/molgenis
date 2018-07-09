@@ -196,6 +196,7 @@ public class GroupRestController
 
 	@GetMapping(GROUP_PERMISSION_END_POINT)
 	@ApiOperation(value = "Get group permissions", response = Collection.class)
+	@ApiResponses({ @ApiResponse(code = 200, message = "List of permissions for current user on group", response = Collection.class) })
 	@ResponseBody
 	public Collection<Permission> getPermissions(@PathVariable(value = "groupName") String groupName)
 	{
