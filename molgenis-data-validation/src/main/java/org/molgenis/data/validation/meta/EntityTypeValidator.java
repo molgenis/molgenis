@@ -13,20 +13,19 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.stream.MultimapCollectors;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.util.EntityUtils.asStream;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**
  * Entity metadata validator
@@ -58,10 +57,7 @@ public class EntityTypeValidator
 		validateOwnAttributes(entityType);
 
 		Map<String, Attribute> ownAllAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).collect(
-				toMap(Attribute::getIdentifier, Function.identity(), (u, v) ->
-				{
-					throw new IllegalStateException(format("Duplicate key %s", u));
-				}, LinkedHashMap::new));
+				toLinkedMap(Attribute::getIdentifier, Function.identity()));
 
 		validateOwnIdAttribute(entityType, ownAllAttrMap);
 		validateOwnLabelAttribute(entityType, ownAllAttrMap);

@@ -9,17 +9,16 @@ import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.metadata.manager.model.*;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 @Component
 public class AttributeMapper
@@ -52,12 +51,8 @@ public class AttributeMapper
 		Map<String, Attribute> attributeMap = IntStream.range(0, editorAttributes.size())
 													   .mapToObj(i -> toAttribute(i, editorAttributes.get(i),
 															   editorEntityType))
-													   .collect(toMap(Attribute::getIdentifier, Function.identity(),
-															   (u, v) ->
-															   {
-																   throw new IllegalStateException(
-																		   String.format("Duplicate key %s", u));
-															   }, LinkedHashMap::new));
+													   .collect(toLinkedMap(Attribute::getIdentifier,
+															   Function.identity()));
 		return injectAttributeParents(attributeMap, editorAttributes);
 	}
 
@@ -118,8 +113,7 @@ public class AttributeMapper
 		return EditorAttribute.create(id, name, type, parent, refEntityType, mappedByEntityType, orderBy, expression,
 				nullable, auto, visible, label, i18nLabel, description, i18nDescription, aggregatable, enumOptions,
 				rangeMin, rangeMax, readonly, unique, tags, nullableExpression, visibleExpression, validationExpression,
-				defaultValue,
-				sequenceNumber);
+				defaultValue, sequenceNumber);
 	}
 
 	private ImmutableMap<String, String> toI18nLabel(Attribute attribute)

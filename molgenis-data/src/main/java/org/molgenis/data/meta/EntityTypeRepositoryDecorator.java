@@ -6,7 +6,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -23,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**
  * Decorator for the entity meta data repository:
@@ -193,11 +193,10 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 																		concreteExistingEntityType, addedAttribute));
 	}
 
-	private LinkedHashMap<String, EntityType> resolveDependencies(List<EntityType> entityTypes)
+	private Map<String, EntityType> resolveDependencies(List<EntityType> entityTypes)
 	{
 		List<EntityType> resolvedEntityTypes = reverse(entityTypeDependencyResolver.resolve(entityTypes));
-		return resolvedEntityTypes.stream()
-								  .collect(toMap(EntityType::getId, identity(), (u, v) -> u, LinkedHashMap::new));
+		return resolvedEntityTypes.stream().collect(toLinkedMap(EntityType::getId, identity()));
 	}
 
 	/**
