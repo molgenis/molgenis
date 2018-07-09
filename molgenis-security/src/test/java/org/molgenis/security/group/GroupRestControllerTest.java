@@ -418,9 +418,9 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
 		when(groupService.getGroup("devs")).thenReturn(group);
 		when(userService.getUser("henkie")).thenReturn(user);
-		doThrow(new UnknownEntityException(groupMetadata, attribute, "DEVS_EDITOR")).when(roleService)
-																					.getRole("DEVS_EDITOR");
-		when(groupMetadata.getLabel("en")).thenReturn("Group");
+		doThrow(new UnknownEntityException(roleMetadata, attribute, "DEVS_EDITOR")).when(roleService)
+																				   .getRole("DEVS_EDITOR");
+		when(roleMetadata.getLabel("en")).thenReturn("Role");
 		when(attribute.getLabel("en")).thenReturn("Name");
 
 		mockMvc.perform(
