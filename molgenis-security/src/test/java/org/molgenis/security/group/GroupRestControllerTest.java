@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import org.mockito.Mock;
-import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.GroupIdentity;
@@ -63,11 +62,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private RoleMembershipService roleMembershipService;
 	@Mock
-	private DataService dataService;
-
-	@Mock
 	private RoleService roleService;
-
 	@Mock
 	private UserService userService;
 
@@ -83,7 +78,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private UserMetaData userMetadata;
 	@Mock
-	Attribute attribute;
+	private Attribute attribute;
 
 	@Mock
 	private User user;
@@ -97,9 +92,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	private Role manager;
 	@Mock
 	private LocaleResolver localeResolver;
-
 	@Mock
-	RoleMembership memberShip;
+	private RoleMembership memberShip;
 
 	private MockMvc mockMvc;
 
@@ -130,7 +124,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	public void beforeMethod()
 	{
 		GroupRestController groupRestController = new GroupRestController(groupValueFactory, groupService,
-				roleMembershipService, dataService, roleService, userService, userPermissionEvaluator);
+				roleMembershipService, roleService, userService, userPermissionEvaluator);
 		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
 								 .setLocaleResolver(localeResolver)
@@ -413,6 +407,24 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
+	public void testUpdateMembershipUnknownUser() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
+		when(groupService.getGroup("devs")).thenReturn(group);
+
+		doThrow(new UnknownEntityException(userMetadata, attribute, "henkie")).when(userService).getUser("henkie");
+		when(userMetadata.getLabel("en")).thenReturn("User");
+		when(attribute.getLabel("en")).thenReturn("Name");
+
+		mockMvc.perform(
+				put(GROUP_END_POINT + "/devs/member/henkie").content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
+															.contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value("Unknown entity with 'Name' 'henkie' of type 'User'."));
+	}
+
+	@Test
 	public void testUpdateMembershipUnknownRole() throws Exception
 	{
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
@@ -498,7 +510,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	public void testUsers() throws Exception
+	@WithMockUser(roles = { "MANAGER" })
+	public void testGetUsers() throws Exception
 	{
 		when(user.getId()).thenReturn("id");
 		when(user.getUsername()).thenReturn("name");

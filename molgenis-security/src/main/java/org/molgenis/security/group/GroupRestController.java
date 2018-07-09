@@ -5,7 +5,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.molgenis.data.DataService;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.exception.GroupPermissionDeniedException;
@@ -18,6 +17,7 @@ import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,30 +40,29 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 @Api("Group")
 public class GroupRestController
 {
-	public static final String SECURITY_API_PATH = "/api/plugin/security";
 	public static final String USER = "/user";
 
-	public static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
-	public static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
-	public static final String GROUP_PERMISSION_END_POINT = GROUP_END_POINT + "/{groupName}/permission";
-	public static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
+	private static final String SECURITY_API_PATH = "/api/plugin/security";
+	static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";
+	private static final String GROUP_MEMBER_END_POINT = GROUP_END_POINT + "/{groupName}/member";
+	private static final String GROUP_PERMISSION_END_POINT = GROUP_END_POINT + "/{groupName}/permission";
+	static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
+
 
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
-	private final DataService dataService;
 	private final RoleService roleService;
 	private final UserService userService;
 	private final UserPermissionEvaluator userPermissionEvaluator;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			RoleMembershipService roleMembershipService, DataService dataService, RoleService roleService,
+			RoleMembershipService roleMembershipService, RoleService roleService,
 			UserService userService, UserPermissionEvaluator userPermissionEvaluator)
 	{
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
-		this.dataService = requireNonNull(dataService);
 		this.roleService = requireNonNull(roleService);
 		this.userService = requireNonNull(userService);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
@@ -190,7 +189,6 @@ public class GroupRestController
 	@ResponseBody
 	public Collection<UserResponse> getUsers()
 	{
-
 		return userService.getUsers().stream().map(UserResponse::fromEntity).collect(Collectors.toList());
 	}
 
