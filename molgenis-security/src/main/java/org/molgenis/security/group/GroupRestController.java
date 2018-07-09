@@ -34,7 +34,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 @Api("Group")
 public class GroupRestController
 {
-	public static final String SECURITY_API_PATH = "api/plugin/security";
+	public static final String SECURITY_API_PATH = "/api/plugin/security";
 	public static final String USER = "/user";
 
 	public static final String GROUP_END_POINT = SECURITY_API_PATH + "/group";

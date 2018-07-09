@@ -1,7 +1,9 @@
 package org.molgenis.semanticmapper.controller;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
@@ -14,6 +16,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.data.semantic.Relation;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserAccountService;
@@ -25,6 +28,7 @@ import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.converter.GsonConfig;
@@ -45,14 +49,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.meta.AttributeType.DATE;
-import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
@@ -514,5 +519,31 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 		verify(algorithmService).autoGenerateAlgorithm(test, test, null, idAttr);
 		verifyNoMoreInteractions(algorithmService);
+	}
+
+	@Test
+	public void testGetSemanticSearchAttributeMappingNoRelevantAttributes()
+	{
+		Map<String, String> requestBody = ImmutableMap.of("mappingProjectId", "id0", "target", "target0", "source",
+				"source0");
+		MappingProject mappingProject = mock(MappingProject.class);
+		when(mappingService.getMappingProject("id0")).thenReturn(mappingProject);
+		MappingTarget mappingTarget = mock(MappingTarget.class);
+		EntityMapping entityMapping = mock(EntityMapping.class);
+		EntityType targetEntityType = mock(EntityType.class);
+		when(entityMapping.getTargetEntityType()).thenReturn(targetEntityType);
+		EntityType sourceEntityType = mock(EntityType.class);
+		Attribute stringAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
+		when(stringAttribute.getName()).thenReturn("stringAttribute");
+		Attribute compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		when(sourceEntityType.getAtomicAttributes()).thenReturn(asList(stringAttribute, compoundAttribute));
+		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
+		when(mappingTarget.getMappingForSource("source0")).thenReturn(entityMapping);
+		when(mappingProject.getMappingTarget("target0")).thenReturn(mappingTarget);
+		Multimap<Relation, OntologyTerm> multiMap = ArrayListMultimap.create();
+		when(ontologyTagService.getTagsForAttribute(targetEntityType, null)).thenReturn(multiMap);
+		List<ExplainedAttribute> expectedExplainedAttributes = singletonList(
+				ExplainedAttribute.create(stringAttribute));
+		assertEquals(controller.getSemanticSearchAttributeMapping(requestBody), expectedExplainedAttributes);
 	}
 }

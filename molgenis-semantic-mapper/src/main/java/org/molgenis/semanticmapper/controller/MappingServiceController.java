@@ -1,6 +1,9 @@
 package org.molgenis.semanticmapper.controller;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
 import org.molgenis.core.ui.jobs.JobsController;
@@ -52,6 +55,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.MetaUtils.isSystemPackage;
 import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
@@ -349,9 +353,7 @@ public class MappingServiceController extends PluginController
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = mappingProject.getMappingTarget(target);
 		List<String> sourceNames = mappingTarget.getEntityMappings()
-												.stream()
-												.map(i -> i.getSourceEntityType().getId())
-												.collect(Collectors.toList());
+												.stream().map(i -> i.getSourceEntityType().getId()).collect(toList());
 
 		EntityType targetEntityMeta = mappingTarget.getTarget();
 		for (Attribute attribute : targetEntityMeta.getAtomicAttributes())
@@ -461,8 +463,8 @@ public class MappingServiceController extends PluginController
 		// If no relevant attributes are found, return all source attributes
 		if (relevantAttributes.isEmpty())
 		{
-			return stream(entityMapping.getSourceEntityType().getAllAttributes()).map(ExplainedAttribute::create)
-																				 .collect(toList());
+			return stream(entityMapping.getSourceEntityType().getAtomicAttributes()).filter(
+					attribute -> attribute.getDataType() != COMPOUND).map(ExplainedAttribute::create).collect(toList());
 		}
 		return newArrayList(relevantAttributes.values());
 	}
@@ -480,7 +482,7 @@ public class MappingServiceController extends PluginController
 		List<Attribute> sourceAttributes = generateAlgorithmRequest.getSourceAttributes()
 																   .stream()
 																   .map(sourceEntityType::getAttribute)
-																   .collect(Collectors.toList());
+																   .collect(toList());
 
 		String generateAlgorithm = algorithmService.generateAlgorithm(targetAttribute, targetEntityType,
 				sourceAttributes, sourceEntityType);
@@ -675,7 +677,7 @@ public class MappingServiceController extends PluginController
 				{
 					EntityType sourceEntityType = entityMapping.getSourceEntityType();
 					return sourceEntityType.getAttribute(attributeName);
-				}).filter(Objects::nonNull).collect(Collectors.toList());
+				}).filter(Objects::nonNull).collect(toList());
 
 				model.addAttribute("sourceAttributes", sourceAttributes);
 			}
@@ -690,9 +692,9 @@ public class MappingServiceController extends PluginController
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityType(target).getAttribute(targetAttribute));
 
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(() -> dataService.findAll(source).iterator())
-															  .limit(10);
-		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(sourceEntity ->
+		Stream<Entity> sourceEntities = dataService.findAll(source).limit(10);
+
+		List<AlgorithmResult> algorithmResults = sourceEntities.map(sourceEntity ->
 		{
 			try
 			{
@@ -704,7 +706,7 @@ public class MappingServiceController extends PluginController
 			{
 				return AlgorithmResult.createFailure(e, sourceEntity);
 			}
-		}).toList();
+		}).collect(toList());
 		model.addAttribute("feedbackRows", algorithmResults);
 
 		long missing = algorithmResults.stream().filter(r -> r.isSuccess() && r.getValue() == null).count();
@@ -893,12 +895,11 @@ public class MappingServiceController extends PluginController
 
 	/**
 	 * Generate algorithms based on semantic matches between attribute tags and descriptions
-	 *
+	 * <p>
 	 * protected for testablity
 	 */
 	protected void autoGenerateAlgorithms(EntityMapping mapping, EntityType sourceEntityType,
-			EntityType targetEntityType,
-			Iterable<Attribute> attributes, MappingProject project)
+			EntityType targetEntityType, Iterable<Attribute> attributes, MappingProject project)
 	{
 		StreamSupport.stream(attributes.spliterator(), false)
 					 .filter(attribute -> attribute.getExpression() == null)
@@ -917,7 +918,7 @@ public class MappingServiceController extends PluginController
 		return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
 							.filter(name -> isValidSource(target, name))
 							.map(dataService::getEntityType)
-							.collect(Collectors.toList());
+							.collect(toList());
 	}
 
 	private static boolean isValidSource(MappingTarget target, String name)
@@ -935,8 +936,7 @@ public class MappingServiceController extends PluginController
 		return getEntityTypes().stream()
 							   .filter(emd -> !emd.isAbstract())
 							   .filter(emd -> dataService.getCapabilities(emd.getId())
-														 .contains(RepositoryCapability.WRITABLE))
-							   .collect(Collectors.toList());
+														 .contains(RepositoryCapability.WRITABLE)).collect(toList());
 	}
 
 	private Map<String, List<OntologyTerm>> getTagsForAttribute(String target, MappingProject project)
