@@ -483,7 +483,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	{
 		when(user.getId()).thenReturn("id");
 		when(user.getUsername()).thenReturn("name");
-		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user));
+		when(userService.getUsers()).thenReturn(singletonList(user));
 
 		mockMvc.perform(get(TEMP_USER_END_POINT))
 			   .andExpect(status().isOk())

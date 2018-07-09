@@ -194,9 +194,7 @@ public class GroupRestController
 	@ResponseBody
 	public Collection<UserResponse> getUsers()
 	{
-		return dataService.findAll(UserMetaData.USER, User.class)
-				.map(UserResponse::fromEntity).
-				collect(Collectors.toList());
+		return userService.getUsers().stream().map(UserResponse::fromEntity).collect(Collectors.toList());
 	}
 
 	@GetMapping(GROUP_PERMISSION_END_POINT)

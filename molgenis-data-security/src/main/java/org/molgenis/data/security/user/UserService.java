@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface UserService
 {
+	List<User> getUsers();
+
 	/**
 	 * Returns e-mail addresses of super users
 	 */
