@@ -75,7 +75,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		Attribute attr2 = mock(Attribute.class);
 		EditorEntityType editorEntityType = mock(EditorEntityType.class);
 
-		when(metaDataService.getEntityTypeBypassingRegistry("id_1")).thenReturn(entityType);
+		when(metaDataService.getEntityType("id_1")).thenReturn(entityType);
 		when(metaDataService.getReferringAttributes("id_1")).thenReturn(Stream.of(attr1, attr2));
 
 		when(attr1.getDataType()).thenReturn(MREF);

@@ -650,19 +650,9 @@ public class RestController
 	@Transactional
 	@DeleteMapping("/{entityTypeId}/{id}")
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
+	public void deleteDelete(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
-		EntityType entityType = dataService.getEntityType(entityTypeId);
-		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
-
-		if (ATTRIBUTE_META_DATA.equals(entityTypeId))
-		{
-			dataService.getMeta().deleteAttributeById(id);
-		}
-		else
-		{
-			dataService.deleteById(entityTypeId, id);
-		}
+		delete(entityTypeId, untypedId);
 	}
 
 	/**
@@ -675,6 +665,21 @@ public class RestController
 	public void deletePost(@PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId)
 	{
 		delete(entityTypeId, untypedId);
+	}
+
+	private void delete(String entityTypeId, String untypedId)
+	{
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
+
+		if (ATTRIBUTE_META_DATA.equals(entityTypeId))
+		{
+			dataService.getMeta().deleteAttributeById(id);
+		}
+		else
+		{
+			dataService.deleteById(entityTypeId, id);
+		}
 	}
 
 	/**

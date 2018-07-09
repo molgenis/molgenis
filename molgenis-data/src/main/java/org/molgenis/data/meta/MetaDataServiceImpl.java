@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
@@ -22,7 +23,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
@@ -47,7 +47,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 	private final PackagePersister packagePersister;
 
-	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
+	MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityTypeRegistry systemEntityTypeRegistry,
 			EntityTypeDependencyResolver entityTypeDependencyResolver, PackagePersister packagePersister)
 	{
@@ -59,43 +59,44 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Repository<Entity> getRepository(String entityTypeId)
+	public Optional<Repository<Entity>> getRepository(String entityTypeId)
 	{
 		EntityType entityType = getEntityType(entityTypeId);
 		if (entityType == null)
 		{
 			throw new UnknownEntityTypeException(entityTypeId);
 		}
-		return !entityType.isAbstract() ? getRepository(entityType) : null;
+		return !entityType.isAbstract() ? getRepository(entityType) : Optional.empty();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
+	public <E extends Entity> Optional<Repository<E>> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityTypeId);
+		return (Optional<Repository<E>>) (Optional<?>) getRepository(entityTypeId);
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityType entityType)
+	public Optional<Repository<Entity>> getRepository(EntityType entityType)
 	{
 		if (!entityType.isAbstract())
 		{
 			String backendName = entityType.getBackend();
 			RepositoryCollection backend = getBackend(backendName);
-			return backend.getRepository(entityType);
+			Repository<Entity> repository = backend.getRepository(entityType);
+			return repository != null ? Optional.of(repository) : Optional.empty();
 		}
 		else
 		{
-			return null;
+			return Optional.empty();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass)
+	public <E extends Entity> Optional<Repository<E>> getRepository(EntityType entityType, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityType);
+		return (Optional<Repository<E>>) (Optional<?>) getRepository(entityType);
 	}
 
 	@Override
@@ -116,28 +117,29 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> createRepository(EntityType entityType)
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
-		return getRepository(entityType);
+		return getRepository(entityType).orElseThrow(() -> new UnknownRepositoryException(entityType.getId()));
 	}
 
+	@Transactional
 	@Override
 	public <E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass)
 	{
 		if (entityType.isAbstract())
 		{
-			throw new MolgenisDataException(
-					format("Can't create repository for abstract entity [%s]", entityType.getId()));
+			throw new RepositoryCreationException(entityType);
 		}
 		addEntityType(entityType);
-		return getRepository(entityType, entityClass);
+		return getRepository(entityType, entityClass).orElseThrow(
+				() -> new UnknownRepositoryException(entityType.getId()));
 	}
 
 	@Override
@@ -149,7 +151,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public RepositoryCollection getBackend(String backendName)
 	{
-		return repoCollectionRegistry.getRepositoryCollection(backendName);
+		RepositoryCollection repositoryCollection = repoCollectionRegistry.getRepositoryCollection(backendName);
+		if (repositoryCollection == null)
+		{
+			throw new UnknownRepositoryCollectionException(backendName);
+		}
+		return repositoryCollection;
 	}
 
 	@Transactional
@@ -172,7 +179,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
 
-		LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+		if (LOG.isInfoEnabled())
+		{
+			LOG.info("Removed entities [{}]", entityTypes.stream().map(EntityType::getId).collect(joining(",")));
+		}
 	}
 
 	@Transactional
@@ -197,7 +207,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		String backendName = entityType.getBackend() == null ? getDefaultBackend().getName() : entityType.getBackend();
 		RepositoryCollection backend = repoCollectionRegistry.getRepositoryCollection(backendName);
-		if (backend == null) throw new RuntimeException(format("Unknown backend [%s]", backendName));
+		if (backend == null)
+		{
+			throw new UnknownRepositoryCollectionException(backendName);
+		}
 
 		return backend;
 	}
@@ -361,21 +374,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.add(ATTRIBUTE_META_DATA, attr);
 	}
 
-	@Transactional
-	@Override
-	public void addAttributes(String entityTypeId, Stream<Attribute> attrs)
-	{
-		EntityType entityType = dataService.getEntityType(entityTypeId);
-		List<Attribute> attributes = attrs.collect(toList());
-		entityType.addAttributes(attributes);
-
-		// Update repository state
-		dataService.update(ENTITY_TYPE_META_DATA, entityType);
-
-		// Update administration
-		dataService.add(ATTRIBUTE_META_DATA, attributes.stream());
-	}
-
 	@Override
 	public boolean hasEntityType(String entityTypeId)
 	{
@@ -385,20 +383,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Override
 	public EntityType getEntityType(String entityTypeId)
-	{
-		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
-		if (systemEntity != null)
-		{
-			return systemEntity;
-		}
-		else
-		{
-			return getEntityTypeBypassingRegistry(entityTypeId);
-		}
-	}
-
-	@Override
-	public EntityType getEntityTypeById(String entityTypeId)
 	{
 		EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
 		if (systemEntity != null)
@@ -426,9 +410,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Package getPackage(String fullyQualifiedPackageName)
+	public Package getPackage(String packageId)
 	{
-		return dataService.findOneById(PACKAGE, fullyQualifiedPackageName, Package.class);
+		return dataService.findOneById(PACKAGE, packageId, Package.class);
 	}
 
 	@Override
@@ -489,7 +473,9 @@ public class MetaDataServiceImpl implements MetaDataService
 						  .eq(IS_ABSTRACT, false)
 						  .fetch(getEntityTypeFetch())
 						  .findAll()
-						  .map(this::getRepository);
+						  .map(entityType -> this.getRepository(entityType)
+												 .orElseThrow(
+														 () -> new UnknownRepositoryException(entityType.getId())));
 	}
 
 	/**
@@ -535,13 +521,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Iterator<RepositoryCollection> iterator()
+	public @Nonnull
+	Iterator<RepositoryCollection> iterator()
 	{
 		return repoCollectionRegistry.getRepositoryCollections().iterator();
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
+	public Map<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = Maps.newLinkedHashMap();
 		stream(repositoryCollection.getEntityTypeIds().spliterator(), false).forEach(id -> entitiesImportable.put(id,
@@ -594,8 +581,12 @@ public class MetaDataServiceImpl implements MetaDataService
 						  .flatMap(this::getConcreteChildren);
 	}
 
-	@Override
-	public EntityType getEntityTypeBypassingRegistry(String entityTypeId)
+	/**
+	 * Retrieves EntityType, bypassing the {@link org.molgenis.data.meta.system.SystemEntityTypeRegistry}
+	 * <p>
+	 * package-private for testability
+	 */
+	EntityType getEntityTypeBypassingRegistry(String entityTypeId)
 	{
 		return entityTypeId != null ? dataService.findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(),
 				EntityType.class) : null;

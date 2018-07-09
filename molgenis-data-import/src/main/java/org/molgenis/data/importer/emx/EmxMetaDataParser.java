@@ -570,9 +570,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					if (emxEntityBackend != null)
 					{
-						if (dataService.getMeta().getBackend(emxEntityBackend) == null)
+						if (!dataService.getMeta().hasBackend(emxEntityBackend))
 						{
-							throw new MolgenisDataException("Unknown backend '" + emxEntityBackend + '\'');
+							throw new UnknownRepositoryCollectionException(emxEntityBackend);
 						}
 					}
 					else

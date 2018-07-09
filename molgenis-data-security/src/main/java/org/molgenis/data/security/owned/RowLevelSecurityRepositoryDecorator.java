@@ -1,6 +1,7 @@
 package org.molgenis.data.security.owned;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityPermission;
@@ -11,6 +12,7 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.Sid;
@@ -94,7 +96,15 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRowLevelSecurit
 	@Override
 	public void createAcl(Entity entity)
 	{
-		MutableAcl acl = mutableAclService.createAcl(new EntityIdentity(entity));
+		MutableAcl acl;
+		try
+		{
+			acl = mutableAclService.createAcl(new EntityIdentity(entity));
+		}
+		catch (AlreadyExistsException e)
+		{
+			throw new EntityAlreadyExistsException(entity, e);
+		}
 		Sid sid = new PrincipalSid(SecurityUtils.getCurrentUsername());
 		acl.insertAce(acl.getEntries().size(), PermissionSet.WRITE, sid, true);
 		mutableAclService.updateAcl(acl);

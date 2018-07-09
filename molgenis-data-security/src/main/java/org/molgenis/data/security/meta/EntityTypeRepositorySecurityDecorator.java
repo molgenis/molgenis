@@ -1,6 +1,7 @@
 package org.molgenis.data.security.meta;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -14,10 +15,7 @@ import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
@@ -118,7 +116,15 @@ public class EntityTypeRepositorySecurityDecorator extends AbstractRowLevelSecur
 	@Override
 	public void createAcl(EntityType entityType)
 	{
-		MutableAcl acl = mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
+		MutableAcl acl;
+		try
+		{
+			acl = mutableAclService.createAcl(new EntityTypeIdentity(entityType.getId()));
+		}
+		catch (AlreadyExistsException e)
+		{
+			throw new EntityAlreadyExistsException(entityType, e);
+		}
 		Package pack = entityType.getPackage();
 		if (pack != null)
 		{

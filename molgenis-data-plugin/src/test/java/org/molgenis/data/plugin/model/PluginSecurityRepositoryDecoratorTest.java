@@ -2,8 +2,10 @@ package org.molgenis.data.plugin.model;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAclService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -60,6 +62,18 @@ public class PluginSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		assertEquals(pluginCaptor.getValue().collect(toList()), asList(plugin0, plugin1));
 		verify(mutableAclService).createAcl(new PluginIdentity("plugin0"));
 		verify(mutableAclService).createAcl(new PluginIdentity("plugin1"));
+	}
+
+	@Test(expectedExceptions = EntityAlreadyExistsException.class, expectedExceptionsMessageRegExp = "type:Plugin id:pluginId")
+	public void testAddAlreadyExists()
+	{
+		Plugin plugin = mock(Plugin.class);
+		when(plugin.getId()).thenReturn("pluginId");
+		when(plugin.getIdValue()).thenReturn("pluginId");
+		PluginMetadata pluginMetadata = when(mock(PluginMetadata.class).getId()).thenReturn("Plugin").getMock();
+		when(plugin.getEntityType()).thenReturn(pluginMetadata);
+		when(mutableAclService.createAcl(new PluginIdentity(plugin))).thenThrow(new AlreadyExistsException(""));
+		pluginSecurityRepositoryDecorator.add(plugin);
 	}
 
 	@Test

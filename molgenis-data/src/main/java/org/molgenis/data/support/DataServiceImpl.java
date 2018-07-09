@@ -150,13 +150,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Repository<Entity> getRepository(String entityTypeId)
 	{
-		return metaDataService.getRepository(entityTypeId);
+		return metaDataService.getRepository(entityTypeId).orElse(null);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass)
 	{
-		return (Repository<E>) getRepository(entityTypeId);
+		return metaDataService.getRepository(entityTypeId, entityClass).orElse(null);
 	}
 
 	@Override
