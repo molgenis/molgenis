@@ -2,10 +2,7 @@ package org.molgenis.data.security.owned;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;
@@ -17,6 +14,7 @@ import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.springframework.security.acls.domain.PrincipalSid;
+import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -96,6 +94,16 @@ public class RowLevelSecurityRepositoryDecoratorTest extends AbstractMockitoTest
 		verify(delegateRepository).add(entityStreamCaptor.capture());
 		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(entity));
 		verify(acl).insertAce(0, PermissionSet.WRITE, new PrincipalSid(USERNAME), true);
+	}
+
+	@WithMockUser(username = USERNAME)
+	@Test(expectedExceptions = EntityAlreadyExistsException.class, expectedExceptionsMessageRegExp = "type:entityTypeId id:entityId")
+	public void testAddAlreadyExists()
+	{
+		Entity entity = getEntityMock();
+		when(mutableAclService.createAcl(new EntityIdentity(entity))).thenThrow(new AlreadyExistsException(""));
+
+		rowLevelSecurityRepositoryDecorator.add(entity);
 	}
 
 	@Test

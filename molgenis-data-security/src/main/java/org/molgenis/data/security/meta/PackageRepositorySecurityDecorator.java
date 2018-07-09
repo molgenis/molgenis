@@ -1,5 +1,6 @@
 package org.molgenis.data.security.meta;
 
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.PackageIdentity;
@@ -8,10 +9,7 @@ import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.security.acls.model.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -153,7 +151,15 @@ public class PackageRepositorySecurityDecorator extends AbstractRowLevelSecurity
 	public void createAcl(Package pack)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(pack);
-		MutableAcl acl = mutableAclService.createAcl(packageIdentity);
+		MutableAcl acl;
+		try
+		{
+			acl = mutableAclService.createAcl(packageIdentity);
+		}
+		catch (AlreadyExistsException e)
+		{
+			throw new EntityAlreadyExistsException(pack, e);
+		}
 		if (pack.getParent() != null)
 		{
 			ObjectIdentity parentIdentity = new PackageIdentity(pack.getParent());
