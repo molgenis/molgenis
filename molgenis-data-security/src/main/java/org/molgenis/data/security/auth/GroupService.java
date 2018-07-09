@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -120,6 +121,12 @@ public class GroupService
 		{
 			permissionService.grant(groupIdentity, READ, createAuthoritySid(AUTHORITY_USER));
 		}
+	}
+
+	@RunAsSystem
+	public Collection<Group> getGroups()
+	{
+		return dataService.findAll(GroupMetadata.GROUP, Group.class).collect(Collectors.toList());
 	}
 
 	/**

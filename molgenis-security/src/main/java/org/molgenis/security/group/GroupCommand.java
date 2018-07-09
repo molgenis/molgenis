@@ -8,11 +8,11 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings("squid:S1610")
 public abstract class GroupCommand
 {
-	static GroupCommand create(String name, String label) {
-		return new AutoValue_GroupCommand(name, label);
-	}
-
 	public abstract String getName();
 	public abstract String getLabel();
 
+	static GroupCommand createGroup(String name, String label)
+	{
+		return new AutoValue_GroupCommand(name, label);
+	}
 }
