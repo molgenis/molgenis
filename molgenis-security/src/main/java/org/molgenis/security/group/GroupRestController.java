@@ -93,10 +93,11 @@ public class GroupRestController
 	@ResponseBody
 	public List<GroupResponse> getGroups()
 	{
-		return dataService.findAll(GroupMetadata.GROUP, Group.class)
-						  .filter(group -> userPermissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
-						  .map(GroupResponse::fromEntity)
-						  .collect(Collectors.toList());
+		return groupService.getGroups()
+						   .stream()
+						   .filter(group -> userPermissionEvaluator.hasPermission(new GroupIdentity(group), VIEW))
+						   .map(GroupResponse::fromEntity)
+						   .collect(Collectors.toList());
 	}
 
 	@GetMapping(GROUP_MEMBER_END_POINT)
