@@ -9,6 +9,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.i18n.MessageSourceHolder;
@@ -45,8 +46,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.GroupPermission.*;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.security.group.AddGroupMemberCommand.addGroupMember;
+import static org.molgenis.security.group.GroupCommand.createGroup;
 import static org.molgenis.security.group.GroupRestController.GROUP_END_POINT;
 import static org.molgenis.security.group.GroupRestController.TEMP_USER_END_POINT;
 import static org.molgenis.security.group.UpdateGroupMemberCommand.updateGroupMember;
@@ -77,8 +78,13 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	private UserPermissionEvaluator userPermissionEvaluator;
 
 	@Mock
-	RoleMembershipMetadata roleMembershipMetadata;
-
+	private RoleMembershipMetadata roleMembershipMetadata;
+	@Mock
+	private RoleMetadata roleMetadata;
+	@Mock
+	private GroupMetadata groupMetadata;
+	@Mock
+	private UserMetaData userMetadata;
 	@Mock
 	Attribute attribute;
 
@@ -137,55 +143,46 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockUser("henkie")
 	public void testCreateGroup() throws Exception
 	{
-		GroupValue groupValue = groupValueFactory.createGroup("name", "Label", null, true,
-				ImmutableSet.of("Manager", "Editor", "Viewer"));
-
-		GroupCommand groupCommand = GroupCommand.create("name", "Label");
-
-		mockMvc.perform(
-				post(GROUP_END_POINT).contentType(APPLICATION_JSON_UTF8).content(new Gson().toJson(groupCommand)))
+		mockMvc.perform(post(GROUP_END_POINT).contentType(APPLICATION_JSON_UTF8)
+											 .content(new Gson().toJson(createGroup("devs", "Developers"))))
 			   .andExpect(status().isCreated());
 
+		GroupValue groupValue = groupValueFactory.createGroup("devs", "Developers", null, true,
+				ImmutableSet.of("Manager", "Editor", "Viewer"));
 		verify(groupService).persist(groupValue);
 		verify(groupService).grantPermissions(groupValue);
-		verify(roleMembershipService).addUserToRole("user", "NAME_MANAGER");
+		verify(roleMembershipService).addUserToRole("henkie", "DEVS_MANAGER");
 	}
 
 	@Test
-	@WithMockUser
-	public void testGetGroup() throws Exception
+	public void testGetGroups() throws Exception
 	{
-		when(group.getName()).thenReturn("group-name");
-		when(group.getLabel()).thenReturn("group-label");
-		doReturn(true).when(userPermissionEvaluator)
-					  .hasPermission(new GroupIdentity("group-name"), GroupPermission.VIEW);
-
-		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(group));
+		when(groupService.getGroups()).thenReturn(singletonList(group));
+		when(group.getName()).thenReturn("devs");
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(true);
+		when(group.getLabel()).thenReturn("Developers");
 
 		mockMvc.perform(get(GROUP_END_POINT))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].name", is("group-name")))
-			   .andExpect(jsonPath("$[0].label", is("group-label")));
+			   .andExpect(jsonPath("$[0].name", is("devs")))
+			   .andExpect(jsonPath("$[0].label", is("Developers")));
 	}
 
 	@Test
-	@WithMockUser
-	public void testGetGroupNoPermission() throws Exception
+	public void testGetGroupPermissionDenied() throws Exception
 	{
-		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(group));
-		when(group.getName()).thenReturn("group-name");
-		doReturn(false).when(userPermissionEvaluator)
-					   .hasPermission(new GroupIdentity("group-name"), GroupPermission.VIEW);
+		when(groupService.getGroups()).thenReturn(singletonList(group));
+		when(group.getName()).thenReturn("devs");
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(false);
 
 		mockMvc.perform(get(GROUP_END_POINT)).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 	}
 
 	@Test
-	@WithMockUser
 	public void testGetMembers() throws Exception
 	{
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP)).thenReturn(true);
@@ -204,7 +201,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		when(editor.getName()).thenReturn("DEVS_EDITOR");
 		when(editor.getLabel()).thenReturn("Developers Editor");
 
-		mockMvc.perform(get(GROUP_END_POINT + "/" + "devs" + "/member"))
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/member"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
 			   .andExpect(jsonPath("$[0].user.username", is("henkie")))
@@ -214,8 +211,32 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	@WithMockUser
-	public void testAddMember() throws Exception
+	public void testGetMembersPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP)).thenReturn(false);
+
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/member"))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'View Membership' permission on group 'devs'."));
+	}
+
+	@Test
+	public void testGetMembersUnknownGroup() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP)).thenReturn(true);
+		when(groupMetadata.getLabel("en")).thenReturn("Group");
+		when(attribute.getLabel("en")).thenReturn("Name");
+		doThrow(new UnknownEntityException(groupMetadata, attribute, "devs")).when(groupService).getGroup("devs");
+
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/member"))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value("Unknown entity with 'Name' 'devs' of type 'Group'."));
+	}
+
+	@Test
+	public void testAddMembership() throws Exception
 	{
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(true);
 		when(groupService.getGroup("devs")).thenReturn(group);
@@ -231,25 +252,70 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	public void testAddMemberPermissionDenied() throws Exception
+	public void testAddMembershipPermissionDenied() throws Exception
 	{
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(false);
 		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
-																	.content(gson.toJson(
-																			addGroupMember("user", "DEVS_EDITOR"))))
+															  .content(gson.toJson(
+																	  addGroupMember("user", "DEVS_EDITOR"))))
 			   .andExpect(status().isUnauthorized())
 			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
 			   .andExpect(jsonPath("$.errors[0].message").value("No 'Add Membership' permission on group 'devs'."));
 	}
 
 	@Test
-	public void testRemoveMembershipPermissionDenied() throws Exception
+	public void testAddMembershipUnknownGroup() throws Exception
 	{
-		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(false);
-		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie"))
-			   .andExpect(status().isUnauthorized())
-			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
-			   .andExpect(jsonPath("$.errors[0].message").value("No 'Remove Membership' permission on group 'devs'."));
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(true);
+
+		when(groupMetadata.getLabel("en")).thenReturn("Group");
+		when(attribute.getLabel("en")).thenReturn("Name");
+		doThrow(new UnknownEntityException(groupMetadata, attribute, "devs")).when(groupService).getGroup("devs");
+
+		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
+															  .content(gson.toJson(
+																	  addGroupMember("user", "DEVS_EDITOR"))))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value("Unknown entity with 'Name' 'devs' of type 'Group'."));
+	}
+
+	@Test
+	public void testAddMembershipUnknownRole() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(true);
+
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(roleMetadata.getLabel("en")).thenReturn("Role");
+		when(attribute.getLabel("en")).thenReturn("Name");
+		doThrow(new UnknownEntityException(roleMetadata, attribute, "DEVS_EDITOR")).when(roleService)
+																				   .getRole("DEVS_EDITOR");
+
+		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
+															  .content(gson.toJson(
+																	  addGroupMember("user", "DEVS_EDITOR"))))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value(
+					   "Unknown entity with 'Name' 'DEVS_EDITOR' of type 'Role'."));
+	}
+
+	@Test
+	public void testAddMembershipUnknownUser() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(true);
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+		when(userMetadata.getLabel("en")).thenReturn("User");
+		when(attribute.getLabel("en")).thenReturn("Name");
+		doThrow(new UnknownEntityException(userMetadata, attribute, "henkie")).when(userService).getUser("user");
+
+		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
+															  .content(gson.toJson(
+																	  addGroupMember("user", "DEVS_EDITOR"))))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value("Unknown entity with 'Name' 'henkie' of type 'User'."));
 	}
 
 	@Test
@@ -263,11 +329,27 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
+	public void testRemoveMembershipPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(false);
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie"))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'Remove Membership' permission on group 'devs'."));
+	}
+
+	@Test
 	public void testRemoveMembershipUnknownGroup() throws Exception
 	{
-		when(groupService.getGroup("devs")).thenThrow(new UnknownEntityException(GroupMetadata.GROUP, "devs"));
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
-		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie")).andExpect(status().isNotFound());
+		when(groupMetadata.getLabel("en")).thenReturn("Group");
+		when(attribute.getLabel("en")).thenReturn("Name");
+		doThrow(new UnknownEntityException(groupMetadata, attribute, "devs")).when(groupService).getGroup("devs");
+
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie"))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value("Unknown entity with 'Name' 'devs' of type 'Group'."));
 	}
 
 	@Test
@@ -286,9 +368,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		when(userService.getUser("henkie")).thenReturn(user);
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
 
-		when(roleMembershipMetadata.getId()).thenReturn(ROLE_MEMBERSHIP);
 		when(roleMembershipMetadata.getLabel("en")).thenReturn("Role Membership");
-		when(attribute.getName()).thenReturn(RoleMembershipMetadata.USER);
 		when(attribute.getLabel("en")).thenReturn("User");
 		doThrow(new UnknownEntityException(roleMembershipMetadata, attribute, "henkie")).when(groupService)
 																						.removeMember(group, user);
@@ -314,6 +394,22 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 															.contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(status().isCreated());
 
+		verify(groupService).updateMemberRole(group, user, editor);
+	}
+
+	@Test
+	@WithMockUser
+	public void testUpdateMembershipUnknownGroup() throws Exception
+	{
+		doThrow(new UnknownEntityException(groupMetadata, attribute, "devs")).when(groupService).getGroup("devs");
+		when(userService.getUser("henkie")).thenReturn(user);
+		when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
+
+		mockMvc.perform(put(GROUP_END_POINT + "/devs/member/henkie").content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
+																	.contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isCreated());
+
 		verify(groupService).updateMemberRole(any(), any(), any());
 	}
 
@@ -331,7 +427,29 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	}
 
 	@Test
-	@WithMockUser
+	public void testUpdateMembershipNotAValidGroupRole() throws Exception
+	{
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(userService.getUser("henkie")).thenReturn(user);
+		when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
+
+		doThrow(new NotAValidGroupRoleException(editor, group)).when(groupService)
+															   .updateMemberRole(group, user, editor);
+
+		when(group.getName()).thenReturn("devs");
+		when(editor.getName()).thenReturn("DEVS_EDITOR");
+
+		mockMvc.perform(
+				put(GROUP_END_POINT + "/devs/member/henkie").content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
+															.contentType(APPLICATION_JSON_UTF8))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS15"))
+			   .andExpect(jsonPath("$.errors[0].message").value(
+					   "Role 'DEVS_EDITOR' is not a valid group role for group 'devs'."));
+	}
+
+	@Test
 	public void testGetGroupRoles() throws Exception
 	{
 		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(true);
@@ -347,12 +465,20 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 			   .andExpect(jsonPath("$", hasSize(1)))
 			   .andExpect(jsonPath("$[0].roleName", is("role-name")))
 			   .andExpect(jsonPath("$[0].roleLabel", is("role-label")));
-
-		verify(groupService).getGroup("devs");
 	}
 
 	@Test
-	@WithMockUser
+	public void testGetGroupRolesPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(false);
+
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/role/"))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'View' permission on group 'devs'."));
+	}
+
+	@Test
 	public void testUsers() throws Exception
 	{
 		when(user.getId()).thenReturn("id");
@@ -364,8 +490,6 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 			   .andExpect(jsonPath("$", hasSize(1)))
 			   .andExpect(jsonPath("$[0].id", is("id")))
 			   .andExpect(jsonPath("$[0].username", is("name")));
-
-
 	}
 
 	@Configuration
