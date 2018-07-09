@@ -9,9 +9,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
@@ -51,8 +51,6 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Mock
 	private RoleMembershipService roleMembershipService;
 	@Mock
-	private UserService userService;
-	@Mock
 	private RoleMetadata roleMetadata;
 	@Mock
 	private Attribute nameAttribute;
@@ -65,6 +63,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private Package aPackage;
 	@Mock
 	private Role roleManager;
+	@Mock
+	private RoleMembershipMetadata roleMembershipMetadata;
 
 	@Captor
 	private ArgumentCaptor<Stream<Role>> roleCaptor;
@@ -89,7 +89,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				groupMetadata, roleMembershipService, userService, roleMetadata);
+				groupMetadata, roleMembershipService, roleMetadata, roleMembershipMetadata);
 	}
 
 	@Test
@@ -133,5 +133,6 @@ public class GroupServiceTest extends AbstractMockitoTest
 		groupService.grantPermissions(groupValue);
 
 		verify(permissionService).grant(new PackageIdentity("package"), WRITEMETA, createRoleSid("NAME_MANAGER"));
+		verify(permissionService).grant(new GroupIdentity("name"), WRITEMETA, createRoleSid("NAME_MANAGER"));
 	}
 }

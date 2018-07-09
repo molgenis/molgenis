@@ -7,15 +7,17 @@ import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.PackageIdentity;
-import org.molgenis.data.security.exception.*;
+import org.molgenis.data.security.exception.IsAlreadyMemberException;
+import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +31,8 @@ import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.PermissionSet.*;
-import static org.molgenis.security.core.SidUtils.createRoleAuthority;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
+import static org.molgenis.security.core.SidUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 
 @Service
 public class GroupService
@@ -42,8 +44,8 @@ public class GroupService
 	private final PackageFactory packageFactory;
 	private final GroupMetadata groupMetadata;
 	private final RoleMembershipService roleMembershipService;
-	private final UserService userService;
 	private final RoleMetadata roleMetadata;
+	private final RoleMembershipMetadata roleMembershipMetadata;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -59,7 +61,8 @@ public class GroupService
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
-			RoleMembershipService roleMembershipService, UserService userService, RoleMetadata roleMetadata)
+			RoleMembershipService roleMembershipService, RoleMetadata roleMetadata,
+			RoleMembershipMetadata roleMembershipMetadata)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -68,8 +71,8 @@ public class GroupService
 		this.permissionService = requireNonNull(permissionService);
 		this.groupMetadata = requireNonNull(groupMetadata);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
-		this.userService = requireNonNull(userService);
 		this.roleMetadata = requireNonNull(roleMetadata);
+		this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
 	}
 
 	/**
@@ -98,17 +101,25 @@ public class GroupService
 	}
 
 	/**
-	 * Grants default permissions on the root package to the roles of the group
+	 * Grants default permissions on the root package and group to the roles of the group
 	 *
 	 * @param groupValue details of the group for which the permissions will be granted
 	 */
 	public void grantPermissions(GroupValue groupValue)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
-		groupValue.getRoles()
-				  .forEach(
-						  roleValue -> permissionService.grant(packageIdentity, DEFAULT_ROLES.get(roleValue.getLabel()),
-								  createRoleSid(roleValue.getName())));
+		GroupIdentity groupIdentity = new GroupIdentity(groupValue.getName());
+		groupValue.getRoles().forEach(roleValue ->
+		{
+			PermissionSet permissionSet = DEFAULT_ROLES.get(roleValue.getLabel());
+			Sid roleSid = createRoleSid(roleValue.getName());
+			permissionService.grant(packageIdentity, permissionSet, roleSid);
+			permissionService.grant(groupIdentity, permissionSet, roleSid);
+		});
+		if (groupValue.isPublic())
+		{
+			permissionService.grant(groupIdentity, READ, createAuthoritySid(AUTHORITY_USER));
+		}
 	}
 
 	/**
@@ -118,6 +129,7 @@ public class GroupService
 	 * @return group with given name
 	 * @throws UnknownEntityException in case no group with given name can be retrieved
 	 */
+	@RunAsSystem
 	public Group getGroup(String groupName)
 	{
 		Group group = dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, groupName).findOne();
@@ -137,20 +149,11 @@ public class GroupService
 	 * @param user user to be added in the given role to the given group
 	 * @param role role in which the given user is to be added to given group
 	 */
+	@RunAsSystem
 	public void addMember(final Group group, final User user, final Role role)
 	{
 		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-
-		final User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
-		final Boolean isSuper = currentUser.isSuperuser();
-		final boolean isGroupManager = isGroupManager(group, currentUser);
-
-		if(!isGroupManager && !isSuper)
-		{
-			throw new AddingMemberNotAllowedException(currentUser, group);
-		}
-
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(role.getName()));
 
 		if(!isGroupRole)
@@ -168,15 +171,9 @@ public class GroupService
 		roleMembershipService.addUserToRole(user, role);
 	}
 
+	@RunAsSystem
 	public void removeMember(final Group group, final User user)
 	{
-		final User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
-
-		if(!isGroupManager(group, currentUser) && !currentUser.isSuperuser())
-		{
-			throw new RemoveMemberNotAllowedException(currentUser, group);
-		}
-
 		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 
@@ -186,21 +183,16 @@ public class GroupService
 
 		if (!member.isPresent())
 		{
-			throw new FailedToRemoveMemberException(group, user);
+			throw new UnknownEntityException(roleMembershipMetadata,
+					roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER), user.getUsername());
 		}
 
 		roleMembershipService.removeMembership(member.get());
 	}
 
+	@RunAsSystem
 	public void updateMemberRole(final Group group, final User member, final Role newRole)
 	{
-		final User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
-
-		if (!isGroupManager(group, currentUser) && !currentUser.isSuperuser())
-		{
-			throw new UpdateMemberNotAllowedException(currentUser, member, group);
-		}
-
 		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(newRole.getName()));
 
@@ -209,31 +201,20 @@ public class GroupService
 			throw new NotAValidGroupRoleException(newRole, group);
 		}
 
-		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-		final Optional<RoleMembership> roleMembership = memberships.stream()
-																   .filter(m -> m.getUser()
-																				 .getId()
-																				 .equals(member.getId()))
-																   .findFirst();
+		RoleMembership roleMembership = findRoleMembership(member, groupRoles);
 
-		if (!roleMembership.isPresent())
-		{
-			throw new FailedToUpdateMemberException(group, member);
-		}
-
-		roleMembershipService.updateMembership(roleMembership.get(), newRole);
+		roleMembershipService.updateMembership(roleMembership, newRole);
 	}
 
-	private boolean isGroupManager(final Group group, final User user)
+	private RoleMembership findRoleMembership(User member, ArrayList<Role> groupRoles)
 	{
-		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-
-		final String MANAGER_ROLE = MANAGER.toUpperCase();
 		return memberships.stream()
-						  .filter(m -> m.getRole().getName().endsWith(MANAGER_ROLE))
-						  .anyMatch(m -> m.getUser().equals(user));
-
+						  .filter(m -> m.getUser().getId().equals(member.getId()))
+						  .findFirst()
+						  .orElseThrow(() -> new UnknownEntityException(roleMembershipMetadata,
+								  roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER),
+								  member.getUsername()));
 	}
 
 	private Role addIncludedRole(Role role)

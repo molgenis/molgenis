@@ -2,6 +2,7 @@ package org.molgenis.data.security.auth;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.stereotype.Service;
 
 import static java.util.Objects.requireNonNull;
@@ -18,6 +19,7 @@ public class RoleService
 		this.roleMetadata = requireNonNull(roleMetadata);
 	}
 
+	@RunAsSystem
 	public Role getRole(String roleName)
 	{
 		Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, roleName).findOne();

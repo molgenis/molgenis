@@ -8,8 +8,10 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings("squid:S1610")
 public abstract class UpdateGroupMemberCommand
 {
-	static UpdateGroupMemberCommand create(String roleName) {
+	public abstract String getRoleName();
+
+	public static UpdateGroupMemberCommand updateGroupMember(String roleName)
+	{
 		return new AutoValue_UpdateGroupMemberCommand(roleName);
 	}
-	public abstract String getRoleName();
 }

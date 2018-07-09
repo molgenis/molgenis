@@ -1,19 +1,30 @@
 package org.molgenis.security.group;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.security.core.GroupValueFactory;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,21 +33,29 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.servlet.LocaleResolver;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
-import static org.hamcrest.Matchers.*;
+import static org.molgenis.data.security.auth.GroupPermission.*;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.security.group.AddGroupMemberCommand.addGroupMember;
 import static org.molgenis.security.group.GroupRestController.GROUP_END_POINT;
+import static org.molgenis.security.group.GroupRestController.TEMP_USER_END_POINT;
+import static org.molgenis.security.group.UpdateGroupMemberCommand.updateGroupMember;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ContextConfiguration(classes = { GsonConfig.class })
+@ContextConfiguration(classes = { GroupRestControllerTest.Config.class, GsonConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextTests
 {
@@ -54,18 +73,66 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private UserService userService;
 
+	@Mock
+	private UserPermissionEvaluator userPermissionEvaluator;
+
+	@Mock
+	RoleMembershipMetadata roleMembershipMetadata;
+
+	@Mock
+	Attribute attribute;
+
+	@Mock
+	private User user;
+	@Mock
+	private Group group;
+	@Mock
+	private Role viewer;
+	@Mock
+	private Role editor;
+	@Mock
+	private Role manager;
+	@Mock
+	private LocaleResolver localeResolver;
+
+	@Mock
+	RoleMembership memberShip;
+
 	private MockMvc mockMvc;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+	@Autowired
+	private FallbackExceptionHandler fallbackExceptionHandler;
+
+	@Autowired
+	private SpringExceptionHandler springExceptionHandler;
+
+	@Autowired
+	private GlobalControllerExceptionHandler globalControllerExceptionHandler;
+
+	@Autowired
+	private Gson gson;
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("data-security", "data", "security");
+		MessageSourceHolder.setMessageSource(messageSource);
+	}
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		GroupRestController groupRestController = new GroupRestController(groupValueFactory, groupService,
-				roleMembershipService, dataService, roleService, userService);
+				roleMembershipService, dataService, roleService, userService, userPermissionEvaluator);
 		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
+								 .setLocaleResolver(localeResolver)
+								 .setControllerAdvice(globalControllerExceptionHandler, fallbackExceptionHandler,
+										 springExceptionHandler)
 								 .build();
 	}
 
@@ -78,8 +145,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 
 		GroupCommand groupCommand = GroupCommand.create("name", "Label");
 
-		mockMvc.perform(post(GROUP_END_POINT).contentType(MediaType.APPLICATION_JSON_UTF8)
-														  .content(new Gson().toJson(groupCommand)))
+		mockMvc.perform(
+				post(GROUP_END_POINT).contentType(APPLICATION_JSON_UTF8).content(new Gson().toJson(groupCommand)))
 			   .andExpect(status().isCreated());
 
 		verify(groupService).persist(groupValue);
@@ -91,153 +158,236 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@WithMockUser
 	public void testGetGroup() throws Exception
 	{
-		Group group = mock(Group.class);
-		final String groupName = "group-name";
-		when(group.getName()).thenReturn(groupName);
-		final String groupLabel = "group-label";
-		when(group.getLabel()).thenReturn(groupLabel);
+		when(group.getName()).thenReturn("group-name");
+		when(group.getLabel()).thenReturn("group-label");
+		doReturn(true).when(userPermissionEvaluator)
+					  .hasPermission(new GroupIdentity("group-name"), GroupPermission.VIEW);
+
 		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(group));
 
 		mockMvc.perform(get(GROUP_END_POINT))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].name", is(groupName)))
-			   .andExpect(jsonPath("$[0].label", is(groupLabel)));
+			   .andExpect(jsonPath("$[0].name", is("group-name")))
+			   .andExpect(jsonPath("$[0].label", is("group-label")));
+	}
+
+	@Test
+	@WithMockUser
+	public void testGetGroupNoPermission() throws Exception
+	{
+		when(dataService.findAll(GroupMetadata.GROUP, Group.class)).thenReturn(Stream.of(group));
+		when(group.getName()).thenReturn("group-name");
+		doReturn(false).when(userPermissionEvaluator)
+					   .hasPermission(new GroupIdentity("group-name"), GroupPermission.VIEW);
+
+		mockMvc.perform(get(GROUP_END_POINT)).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 	}
 
 	@Test
 	@WithMockUser
 	public void testGetMembers() throws Exception
 	{
-		String groupName = "developers";
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW_MEMBERSHIP)).thenReturn(true);
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(group.getRoles()).thenReturn(ImmutableList.of(viewer, editor, manager));
 
-		Group group = mock(Group.class);
-		Role managerRole = mock(Role.class);
-		Iterable<Role> roles = Collections.singletonList(managerRole);
-		when(group.getRoles()).thenReturn(roles);
+		when(roleMembershipService.getMemberships(ImmutableList.of(viewer, editor, manager))).thenReturn(
+				singletonList(memberShip));
 
-		User user = mock(User.class);
-		when(user.getUsername()).thenReturn("user-1");
-		when(user.getId()).thenReturn("user-id-1");
-		Role role = mockRole("role-name-a", "role label a");
-
-		RoleMembership memberShip = mock(RoleMembership.class);
 		when(memberShip.getUser()).thenReturn(user);
-		when(memberShip.getRole()).thenReturn(role);
-		Collection<RoleMembership> groupMemberShips = Collections.singletonList(memberShip);
+		when(memberShip.getRole()).thenReturn(editor);
 
-		when(roleMembershipService.getMemberships(Lists.newArrayList(roles))).thenReturn(groupMemberShips);
-		when(groupService.getGroup(groupName)).thenReturn(group);
+		when(user.getUsername()).thenReturn("user");
+		when(user.getId()).thenReturn("userId");
 
-		mockMvc.perform(get(GROUP_END_POINT+ "/" + groupName + "/member"))
+		when(editor.getName()).thenReturn("editor");
+		when(editor.getLabel()).thenReturn("role 1 label");
+
+		mockMvc.perform(get(GROUP_END_POINT + "/" + "devs" + "/member"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].user.username", is("user-1")))
-			   .andExpect(jsonPath("$[0].user.id", is("user-id-1")))
-			   .andExpect(jsonPath("$[0].role.roleName", is("role-name-a")))
-			   .andExpect(jsonPath("$[0].role.roleLabel", is("role label a")));
+			   .andExpect(jsonPath("$[0].user.username", is("user")))
+			   .andExpect(jsonPath("$[0].user.id", is("userId")))
+			   .andExpect(jsonPath("$[0].role.roleName", is("editor")))
+			   .andExpect(jsonPath("$[0].role.roleLabel", is("Developers Editor")));
 	}
 
 	@Test
 	@WithMockUser
 	public void testAddMember() throws Exception
 	{
-		String groupName = "developers";
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(true);
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+		when(userService.getUser("user")).thenReturn(user);
 
-		String newMemberName = "new-member-name";
-		String newMemberRole = "new-menber-role";
-		AddGroupMemberCommand addGroupMemberCommand = AddGroupMemberCommand.create(newMemberName, newMemberRole);
-
-		mockMvc.perform(post(GROUP_END_POINT+ "/" + groupName + "/member").content(
-				new Gson().toJson(addGroupMemberCommand)).contentType(MediaType.APPLICATION_JSON_UTF8))
+		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
+															  .content(gson.toJson(
+																	  addGroupMember("user", "DEVS_EDITOR"))))
 			   .andExpect(status().isCreated());
 
-		verify(groupService).addMember(any(), any(), any());
+		verify(groupService).addMember(group, user, editor);
+	}
+
+	@Test
+	public void testAddMemberPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), ADD_MEMBERSHIP)).thenReturn(false);
+		mockMvc.perform(post(GROUP_END_POINT + "/devs/member").contentType(APPLICATION_JSON_UTF8)
+																	.content(gson.toJson(
+																			addGroupMember("user", "DEVS_EDITOR"))))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'Add Membership' permission on group 'devs'."));
+	}
+
+	@Test
+	public void testRemoveMembershipPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(false);
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie"))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'Remove Membership' permission on group 'devs'."));
+	}
+
+	@Test
+	public void testRemoveMembership() throws Exception
+	{
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(userService.getUser("henkie")).thenReturn(user);
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie")).andExpect(status().isNoContent());
+		verify(groupService).removeMember(group, user);
+	}
+
+	@Test
+	public void testRemoveMembershipUnknownGroup() throws Exception
+	{
+		when(groupService.getGroup("devs")).thenThrow(new UnknownEntityException(GroupMetadata.GROUP, "devs"));
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie")).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testRemoveMembershipUnknownUser() throws Exception
+	{
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(userService.getUser("henkie")).thenThrow(new UnknownEntityException(UserMetaData.USER, "henkie"));
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie")).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testRemoveMembershipNotAMember() throws Exception
+	{
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(userService.getUser("henkie")).thenReturn(user);
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP)).thenReturn(true);
+
+		when(roleMembershipMetadata.getId()).thenReturn(ROLE_MEMBERSHIP);
+		when(roleMembershipMetadata.getLabel("en")).thenReturn("Role Membership");
+		when(attribute.getName()).thenReturn(RoleMembershipMetadata.USER);
+		when(attribute.getLabel("en")).thenReturn("User");
+		doThrow(new UnknownEntityException(roleMembershipMetadata, attribute, "henkie")).when(groupService)
+																						.removeMember(group, user);
+
+		mockMvc.perform(delete("/api/plugin/security/group/devs/member/henkie"))
+			   .andExpect(status().isNotFound())
+			   .andExpect(jsonPath("$.errors[0].code").value("D02"))
+			   .andExpect(jsonPath("$.errors[0].message").value(
+					   "Unknown entity with 'User' 'henkie' of type 'Role Membership'."));
 	}
 
 	@Test
 	@WithMockUser
-	public void testRemoveMember() throws Exception
+	public void testUpdateMembership() throws Exception
 	{
-		String groupName = "developers";
-		String memberName = "member-1";
+		when(groupService.getGroup("devs")).thenReturn(group);
+		when(userService.getUser("henkie")).thenReturn(user);
+		when(roleService.getRole("DEVS_EDITOR")).thenReturn(editor);
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(true);
 
-		mockMvc.perform(delete(GROUP_END_POINT+ "/" + groupName + "/member/" + memberName))
-			   .andExpect(status().isNoContent());
-
-		verify(groupService).removeMember(any(), any());
-	}
-
-	@Test
-	@WithMockUser
-	public void testUpdateMember() throws Exception
-	{
-		String groupName = "developers";
-		String memberName = "member-1";
-		String newRoleName = "new-role-name";
-
-		UpdateGroupMemberCommand updateGroupMemberCommand = UpdateGroupMemberCommand.create(newRoleName);
-
-		mockMvc.perform(put(GROUP_END_POINT+ "/" + groupName + "/member/" + memberName).content(
-				new Gson().toJson(updateGroupMemberCommand)).contentType(MediaType.APPLICATION_JSON_UTF8))
+		mockMvc.perform(
+				put(GROUP_END_POINT + "/devs/member/henkie").content(gson.toJson(updateGroupMember("DEVS_EDITOR")))
+															.contentType(APPLICATION_JSON_UTF8))
 			   .andExpect(status().isCreated());
 
 		verify(groupService).updateMemberRole(any(), any(), any());
 	}
 
 	@Test
+	public void testUpdateMembershipPermissionDenied() throws Exception
+	{
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), UPDATE_MEMBERSHIP)).thenReturn(false);
+
+		mockMvc.perform(put(GROUP_END_POINT + "/devs/member/henkie").contentType(APPLICATION_JSON_UTF8)
+																	.content(gson.toJson(
+																			updateGroupMember("DEVS_MANAGER"))))
+			   .andExpect(status().isUnauthorized())
+			   .andExpect(jsonPath("$.errors[0].code").value("DS10"))
+			   .andExpect(jsonPath("$.errors[0].message").value("No 'Update Membership' permission on group 'devs'."));
+	}
+
+	@Test
 	@WithMockUser
 	public void testGetGroupRoles() throws Exception
 	{
-		String groupName = "developers";
+		when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), VIEW)).thenReturn(true);
 
-		Group group = mock(Group.class);
-		final String roleName = "role-name";
-		final String roleLabel = "role-label";
-		Role role = mockRole(roleName, roleLabel);
-		Iterable<Role> groupRoles = Collections.singletonList(role);
+		when(editor.getLabel()).thenReturn("role-label");
+		when(editor.getName()).thenReturn("role-name");
+		Iterable<Role> groupRoles = singletonList(editor);
 		when(group.getRoles()).thenReturn(groupRoles);
-		when(groupService.getGroup(groupName)).thenReturn(group);
+		when(groupService.getGroup("devs")).thenReturn(group);
 
-		mockMvc.perform(get(GROUP_END_POINT + "/" + groupName + "/role/"))
+		mockMvc.perform(get(GROUP_END_POINT + "/devs/role/"))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].roleName", is(roleName)))
-			   .andExpect(jsonPath("$[0].roleLabel", is(roleLabel)));
+			   .andExpect(jsonPath("$[0].roleName", is("role-name")))
+			   .andExpect(jsonPath("$[0].roleLabel", is("role-label")));
 
-		verify(groupService).getGroup(groupName);
+		verify(groupService).getGroup("devs");
 	}
 
 	@Test
 	@WithMockUser
 	public void testUsers() throws Exception
 	{
-		String userId = "user-id";
-		String username = "user-name";
-		User user = mockUser(userId, username);
-		Stream<User> users = Stream.of(user);
-		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(users);
+		when(user.getId()).thenReturn("id");
+		when(user.getUsername()).thenReturn("name");
+		when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user));
 
-		mockMvc.perform(get(GroupRestController.TEMP_USER_END_POINT))
+		mockMvc.perform(get(TEMP_USER_END_POINT))
 			   .andExpect(status().isOk())
 			   .andExpect(jsonPath("$", hasSize(1)))
-			   .andExpect(jsonPath("$[0].id", is(userId)))
-			   .andExpect(jsonPath("$[0].username", is(username)));
+			   .andExpect(jsonPath("$[0].id", is("id")))
+			   .andExpect(jsonPath("$[0].username", is("name")));
 
 
 	}
 
-	private Role mockRole(String roleName, String roleLabel) {
-		Role role = mock(Role.class);
-		when(role.getLabel()).thenReturn(roleLabel);
-		when(role.getName()).thenReturn(roleName);
-		return role;
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public GlobalControllerExceptionHandler globalControllerExceptionHandler()
+		{
+			return new GlobalControllerExceptionHandler();
+		}
+
+		@Bean
+		public FallbackExceptionHandler fallbackExceptionHandler()
+		{
+			return new FallbackExceptionHandler();
+		}
+
+		@Bean
+		public SpringExceptionHandler springExceptionHandler()
+		{
+			return new SpringExceptionHandler();
+		}
 	}
 
-	private User mockUser(String id, String username) {
-		User user = mock(User.class);
-		when(user.getId()).thenReturn(id);
-		when(user.getUsername()).thenReturn(username);
-		return user;
-	}
 }
