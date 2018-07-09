@@ -16,6 +16,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.RoleValue;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -156,8 +157,10 @@ public class GroupRestController
 	@PutMapping(GROUP_MEMBER_END_POINT + "/{memberName}")
 	@ApiOperation(value = "Change membership role", response = ResponseEntity.class)
 	@Transactional
-	@ApiResponses({ @ApiResponse(code = 201, message = "Updated membership role", response = ResponseEntity.class) })
-	public ResponseEntity updateMember(@PathVariable(value = "groupName") String groupName,  @PathVariable(value = "memberName") String memberName,
+	@ResponseStatus(HttpStatus.OK)
+	@ApiResponses({ @ApiResponse(code = 200, message = "Updated membership role", response = ResponseEntity.class) })
+	public void updateMember(@PathVariable(value = "groupName") String groupName,
+			@PathVariable(value = "memberName") String memberName,
 			@RequestBody UpdateGroupMemberCommand groupMember)
 	{
 		checkGroupPermission(groupName, UPDATE_MEMBERSHIP);
@@ -167,13 +170,6 @@ public class GroupRestController
 		final Role newRole = roleService.getRole(groupMember.getRoleName());
 
 		groupService.updateMemberRole(group, member, newRole);
-
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-												  .path("/{group}/member/{member}")
-												  .buildAndExpand(groupName, member)
-												  .toUri();
-
-		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping(GROUP_END_POINT + "/{groupName}/role")
@@ -194,6 +190,7 @@ public class GroupRestController
 	@ResponseBody
 	public Collection<UserResponse> getUsers()
 	{
+
 		return userService.getUsers().stream().map(UserResponse::fromEntity).collect(Collectors.toList());
 	}
 
