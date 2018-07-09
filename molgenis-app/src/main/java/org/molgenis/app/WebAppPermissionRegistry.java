@@ -79,7 +79,6 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, AppController.ID, user, READ);
 		register(PACKAGE, PACKAGE_BEACON, anonymousUser, READ);
 		register(PACKAGE, PACKAGE_BEACON, user, READ);
-		register(PLUGIN, FeedbackController.ID, anonymousUser, READ);
 		register(PLUGIN, FeedbackController.ID, user, READ);
 		register(PLUGIN, RedirectController.ID, anonymousUser, READ);
 		register(PLUGIN, RedirectController.ID, user, READ);
