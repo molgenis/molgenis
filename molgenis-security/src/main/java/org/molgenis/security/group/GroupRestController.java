@@ -187,6 +187,7 @@ public class GroupRestController
 	@GetMapping(TEMP_USER_END_POINT)
 	@ApiOperation(value = "Get all users", response = Collection.class)
 	@ResponseBody
+	@PreAuthorize("hasAnyRole('SU', 'MANAGER')")
 	public Collection<UserResponse> getUsers()
 	{
 		return userService.getUsers().stream().map(UserResponse::fromEntity).collect(Collectors.toList());
