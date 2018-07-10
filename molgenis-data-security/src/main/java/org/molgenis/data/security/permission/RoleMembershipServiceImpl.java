@@ -81,7 +81,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 				roleMembership.getId(), RoleMembership.class);
 		if (membership == null)
 		{
-			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), roleMembership.getId());
+			throw new UnknownEntityException(roleMetadata, roleMembership.getId());
 		}
 		membership.setRole(newRole);
 		dataService.update(RoleMembershipMetadata.ROLE_MEMBERSHIP, membership);
