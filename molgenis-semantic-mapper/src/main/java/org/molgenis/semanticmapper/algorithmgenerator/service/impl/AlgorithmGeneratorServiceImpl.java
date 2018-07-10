@@ -106,7 +106,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		AlgorithmState algorithmState = null;
 		Set<Attribute> mappedSourceAttributes = null;
 
-		if (sourceAttributes.getHits().size() > 0)
+		if (!sourceAttributes.getHits().isEmpty())
 		{
 			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(sourceAttributes)
 																		  .findFirst()
