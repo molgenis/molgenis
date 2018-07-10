@@ -42,11 +42,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**
  * Controller class for the data explorer.
@@ -121,9 +121,7 @@ public class DataExplorerController extends PluginController
 														  .filter(entityType -> currentUserIsSu
 																  || !EntityTypeUtils.isSystemEntity(entityType))
 														  .sorted(Comparator.comparing(EntityType::getLabel))
-														  .collect(Collectors.toMap(EntityType::getId,
-																  Function.identity(), (e1, e2) -> e2,
-																  LinkedHashMap::new));
+														  .collect(toLinkedMap(EntityType::getId, Function.identity()));
 
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
@@ -191,7 +189,7 @@ public class DataExplorerController extends PluginController
 		switch (moduleId)
 		{
 			case MOD_DATA:
-				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				//if multiple tracks are available we assume chrom and pos attribute are the same
@@ -207,7 +205,7 @@ public class DataExplorerController extends PluginController
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
-				selectedEntityType = dataService.getMeta().getEntityTypeById(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));

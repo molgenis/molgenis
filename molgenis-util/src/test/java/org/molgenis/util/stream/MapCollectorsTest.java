@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
 public class MapCollectorsTest
 {
 	@Test
-	public void testToLinkedMap() throws Exception
+	public void testToLinkedMap()
 	{
 		Map<String, Integer> expectedLinkedMap = new LinkedHashMap<>();
 		expectedLinkedMap.put("a", 1);
@@ -24,7 +24,7 @@ public class MapCollectorsTest
 	}
 
 	@Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Duplicate key detected with values '1' and '2'")
-	public void testToLinkedMapDuplicateKey() throws Exception
+	public void testToLinkedMapDuplicateKey()
 	{
 		//noinspection ResultOfMethodCallIgnored
 		Stream.of("a1", "a2").collect(MapCollectors.toLinkedMap(str -> str.charAt(0), str -> str.charAt(1)));

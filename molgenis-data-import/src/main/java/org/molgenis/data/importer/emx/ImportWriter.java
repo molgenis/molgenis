@@ -131,7 +131,7 @@ public class ImportWriter
 			Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
 			for (EntityType entityType : entities)
 			{
-				EntityType existing = metaDataService.getEntityTypeById(entityType.getId());
+				EntityType existing = metaDataService.getEntityType(entityType.getId());
 				if (existing != null)
 				{
 					existingEntityTypeMap.put(entityType.getId(), entityType);

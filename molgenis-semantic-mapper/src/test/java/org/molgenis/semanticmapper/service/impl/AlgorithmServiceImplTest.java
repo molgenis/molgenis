@@ -39,14 +39,14 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		algorithmServiceImpl = new AlgorithmServiceImpl(ontologyTagService, semanticSearhService,
+		algorithmServiceImpl = new AlgorithmServiceImpl(semanticSearhService,
 				algorithmGeneratorService, entityManager, jsMagmaScriptEvaluator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void testAlgorithmServiceImpl()
 	{
-		new AlgorithmServiceImpl(null, null, null, null, null);
+		new AlgorithmServiceImpl(null, null, null, null);
 	}
 
 	@Test(expectedExceptions = AlgorithmException.class, expectedExceptionsMessageRegExp = "'invalidDate' can't be converted to type 'DATE'")

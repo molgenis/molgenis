@@ -88,7 +88,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(ontologyTagService, semanticSearchService, algorithmGeneratorService(),
+		return new AlgorithmServiceImpl(semanticSearchService, algorithmGeneratorService(),
 				entityManager, jsMagmaScriptEvaluator);
 	}
 

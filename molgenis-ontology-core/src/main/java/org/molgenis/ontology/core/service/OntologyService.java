@@ -14,6 +14,11 @@ public interface OntologyService
 	List<Ontology> getOntologies();
 
 	/**
+	 * Retrieves ontologies with the given id.
+	 */
+	List<Ontology> getOntologies(List<String> ontologyIds);
+
+	/**
 	 * Retrieves a specific ontology
 	 *
 	 * @param iri IRI of the ontology to retrieve.

@@ -1,7 +1,9 @@
 package org.molgenis.data.plugin.model;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.EntityAlreadyExistsException;
 import org.molgenis.data.Repository;
+import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAclService;
 
 import java.util.stream.Stream;
@@ -79,7 +81,14 @@ public class PluginSecurityRepositoryDecorator extends AbstractRepositoryDecorat
 
 	private void createAcl(Plugin plugin)
 	{
-		mutableAclService.createAcl(new PluginIdentity(plugin.getId()));
+		try
+		{
+			mutableAclService.createAcl(new PluginIdentity(plugin.getId()));
+		}
+		catch (AlreadyExistsException e)
+		{
+			throw new EntityAlreadyExistsException(plugin, e);
+		}
 	}
 
 	private void deleteAcl(Plugin plugin)

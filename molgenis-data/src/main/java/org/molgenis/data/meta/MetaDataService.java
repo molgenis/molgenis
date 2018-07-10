@@ -1,15 +1,13 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -20,30 +18,30 @@ import static org.molgenis.data.meta.model.TagMetadata.TAG;
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
 	/**
-	 * Returns the repository for the given entity name.
+	 * Returns the repository for the given entity type identifier.
 	 *
-	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
-	 * @throws UnknownEntityTypeException if no entity with the given name exists
+	 * @return optional entity repository
+	 * @throws UnknownEntityTypeException if no entity type with the given identifier exists
 	 */
-	Repository<Entity> getRepository(String entityTypeId);
+	Optional<Repository<Entity>> getRepository(String entityTypeId);
 
 	/**
-	 * Returns the typed repository for the given entity name.
+	 * Returns the typed repository for the given entity type identifier.
 	 *
 	 * @param entityClass entity class
 	 * @param <E>         entity type
-	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @return optional typed entity repository
 	 * @throws UnknownEntityTypeException if no entity with the given name exists
 	 */
-	<E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
+	<E extends Entity> Optional<Repository<E>> getRepository(String entityTypeId, Class<E> entityClass);
 
 	/**
 	 * Returns the repository for the given entity type
 	 *
 	 * @param entityType entity type
-	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @return optional entity repository
 	 */
-	Repository<Entity> getRepository(EntityType entityType);
+	Optional<Repository<Entity>> getRepository(EntityType entityType);
 
 	/**
 	 * Returns the typed repository for the given entity type
@@ -51,23 +49,23 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityType  entity type
 	 * @param entityClass entity class
 	 * @param <E>         entity type
-	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract).
+	 * @return optional typed entity repository
 	 */
-	<E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass);
+	<E extends Entity> Optional<Repository<E>> getRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
 	 *
 	 * @return true if non-abstract entity type exists for the given entity name
 	 */
-	boolean hasRepository(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
+	boolean hasRepository(String entityTypeId);
 
 	/**
 	 * Create a repository for the given entity type.
 	 *
 	 * @param entityType entity type
 	 * @return repository
-	 * @throws org.molgenis.data.MolgenisDataException if entity type is abstract
+	 * @throws RepositoryCreationException if entity type is abstract
 	 */
 	Repository<Entity> createRepository(EntityType entityType);
 
@@ -78,15 +76,16 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed repository
-	 * @throws org.molgenis.data.MolgenisDataException if entity type is abstract
+	 * @throws RepositoryCreationException if entity type is abstract
 	 */
 	<E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
-	 * Get a backend by name or null if it does not exists
+	 * Get a backend by name
 	 *
 	 * @param backendName repository collection name
-	 * @return repository collection, null if entity type is abstract
+	 * @return optional repository collection
+	 * @throws UnknownRepositoryCollectionException if no unknown repository collection exists for the given name
 	 */
 	RepositoryCollection getBackend(String backendName);
 
@@ -95,6 +94,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param entityType entity type
 	 * @return repository collection, null if entity type is abstract
+	 * @throws UnknownRepositoryCollectionException if no unknown repository collection exists for the given entity type
 	 */
 	RepositoryCollection getBackend(EntityType entityType);
 
@@ -128,12 +128,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Iterable<Package> getRootPackages();
 
 	/**
-	 * Retrieves a package with a given name.
+	 * Gets the package for a given package identifier.
 	 *
-	 * @param name the name of the Package to retrieve
-	 * @return the Package, or null if the package does not exist.
+	 * @param packageId package identifier
+	 * @return the Package, or <tt>null</tt> if the package does not exist.
 	 */
-	Package getPackage(String name); // FIXME use entity type ids instead of entity type fqns
+	Package getPackage(String packageId);
 
 	/**
 	 * Adds a new Package
@@ -164,20 +164,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	boolean hasEntityType(String entityTypeId);
 
 	/**
-	 * Gets the entity type for a given entity.
+	 * Gets the entity type for a given entity type identifier.
 	 *
-	 * @param name the fullyQualifiedName of the entity
+	 * @param entityTypeId the identifier of the entity
 	 * @return EntityType of the entity, or null if the entity does not exist
 	 */
-	EntityType getEntityType(String name); // FIXME use entity type ids instead of entity type fqns
-
-	/**
-	 * Gets the entity type for a given entity.
-	 *
-	 * @param entityTypeId the id of the entity
-	 * @return EntityType of the entity, or null if the entity does not exist
-	 */
-	EntityType getEntityTypeById(String entityTypeId); // FIXME remove
+	EntityType getEntityType(String entityTypeId);
 
 	/**
 	 * Returns a stream of all {@link EntityType entity type}.
@@ -226,7 +218,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Deletes an EntityType
 	 */
-	void deleteEntityType(String entityTypeId); // FIXME use entity type ids instead of entity type fqns
+	void deleteEntityType(String entityTypeId);
 
 	/**
 	 * Deletes a collection of entity type.
@@ -241,13 +233,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addAttribute(Attribute attribute);
 
 	/**
-	 * Adds attributes to an EntityType
-	 *
-	 * @param attrs Stream <Attribute>
-	 */
-	void addAttributes(String entityTypeId, Stream<Attribute> attrs);
-
-	/**
 	 * Deletes an Attribute from an Entity
 	 */
 	void deleteAttributeById(Object id);
@@ -258,7 +243,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param repositoryCollection the new entities
 	 */
-	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
+	Map<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
 	 * Returns whether the given {@link EntityType} defines a meta entity such as {@link EntityTypeMetadata} or
@@ -294,17 +279,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return Stream containing all concrete children
 	 */
 	Stream<EntityType> getConcreteChildren(EntityType entityType);
-
-	/**
-	 * Retrieves EntityType, bypassing the {@link org.molgenis.data.meta.system.SystemEntityTypeRegistry}
-	 * This method is a workaround for those cases where {@link #getEntityType(String)} cannot be used
-	 * due to https://github.com/molgenis/molgenis/issues/5783
-	 *
-	 * @param entityTypeId ID of the EntityType
-	 * @return EntityType the retrieved EntityType
-	 * @TODO Remove this method when the issue is fixed
-	 */
-	EntityType getEntityTypeBypassingRegistry(String entityTypeId);
 
 	/**
 	 * Returns all {@link Attribute} that refer to a given {@link EntityType} as a refEntity
