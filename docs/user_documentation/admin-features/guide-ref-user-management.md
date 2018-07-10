@@ -24,7 +24,7 @@ To configure how to authenticate in MOLGENIS you can read [configure authenticat
 
 ## Permissions
  
-You can lso define more fine grained permissions to each user by setting the permission on users instead of 
+You can also define more fine grained permissions to each user by setting the permission on users instead of 
 
 ## Try it out
 To let you get a feel of how the user manager works, we will create a new user called molgenis_user.
