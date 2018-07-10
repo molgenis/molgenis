@@ -58,6 +58,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 | age      | -          | `$('dateOfBirth').age().value()`           | Returns the age based on the date of birth and the current year       |
 | map      | Object     | `$('data').map({0:1, 1:2}).value()`       | Maps categories to each other                                         |
 | group    | Array      | `$('age').group([18, 35, 50, 75]).value()` | Produces left-inclusive ranges with the given boundaries, i.e. `(-∞, 18), [18, 35), [35, 50), [50, 75), [75, +∞)` and then returns the interval that the attribute value is in, i.el '18-35'                |
+| attr     | String     | `$('person').attr('name').value()`      | Returns the value of an attribute of a reference
 
 ## Terminal operations
 | Operator | Parameters | Example             | Description      |
@@ -65,7 +66,7 @@ $('myIntAttributeName').gt(3).and($('myIntAttributeName').lt(6)).value()
 | value    | -          | `$('height').value()` | JavaScript value |
 
 # Special case: reference types
-If an attribute is a reference type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use dot notation, to access the values of different columns in the row being referenced. E.g. `$('cookie.name').value()` gives you the value of the name column inside the table being referenced by the cookie column. See below for a more detailed example.
+If an attribute is a reference type (MREF, XREF, CATEGORICAL, CATEGORICAL_MREF) you can use the 'attr' operation, to access the values of different columns in the row being referenced. E.g. `$('cookie').attr('name').value()` gives you the value of the name column inside the table being referenced by the cookie column. See below for a more detailed example.
 
 Imagine __table A__ referencing __table B__. 
 
@@ -92,9 +93,9 @@ Expressions allow you to do the following
 // Expressions are based on table A
 
 $('cookie').value() // results in '1'
-$('cookie.id').value() // results in '1'
-$('cookie.name').value() // results in 'Chocolate chip'
-$('cookie.tastiness').value() // results in '9/10'
+$('cookie').attr('id').value() // results in '1'
+$('cookie').attr('name').value() // results in 'Chocolate chip'
+$('cookie').attr('tastiness').value() // results in '9/10'
 ```
 
 In the following case, we have Table A which has multiple references to Table B e.g. an MREF
@@ -118,9 +119,9 @@ __Table B__
 
 $('cookies').map(function (cookie) {
     // Pick one of the following
-    return cookie.value()           // results in ['1', '2', '3']
-    return cookie.value().id        // results in ['1', '2', '3']
-    return cookie.value().name      // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
-    return cookie.value().tastiness // results in ['9/10', '10/10', '7/10']
+    return cookie.value()                   // results in ['1', '2', '3']
+    return cookie.attr('id').value()        // results in ['1', '2', '3']
+    return cookie.attr('name').value()      // results in ['Chocolate chip', 'Strawberry cookie', 'Banana cookie']
+    return cookie.attr('tastiness').value() // results in ['9/10', '10/10', '7/10']
 }).value()
 ```
