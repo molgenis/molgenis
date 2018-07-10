@@ -1,6 +1,5 @@
 package org.molgenis.semanticmapper.service.impl;
 
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -8,9 +7,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
-import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.GeneratedAlgorithm;
@@ -18,8 +15,9 @@ import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGenerator
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.service.AlgorithmService;
+import org.molgenis.semanticsearch.explain.bean.EntityTypeSearchResults;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
-import org.molgenis.semanticsearch.service.OntologyTagService;
+import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
@@ -31,7 +29,6 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,17 +51,15 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	private static final int ENTITY_REFERENCE_FETCHING_DEPTH = 3;
 
-	private final OntologyTagService ontologyTagService;
 	private final SemanticSearchService semanticSearchService;
 	private final AlgorithmGeneratorService algorithmGeneratorService;
 	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 	private final EntityManager entityManager;
 
-	public AlgorithmServiceImpl(OntologyTagService ontologyTagService, SemanticSearchService semanticSearchService,
+	public AlgorithmServiceImpl(SemanticSearchService semanticSearchService,
 			AlgorithmGeneratorService algorithmGeneratorService, EntityManager entityManager,
 			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
 	{
-		this.ontologyTagService = requireNonNull(ontologyTagService);
 		this.semanticSearchService = requireNonNull(semanticSearchService);
 		this.algorithmGeneratorService = requireNonNull(algorithmGeneratorService);
 		this.entityManager = requireNonNull(entityManager);
@@ -81,34 +76,36 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	@Override
 	@RunAsSystem
-	public void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping,
-			Attribute targetAttribute)
+	public void autoGenerateAlgorithm(EntityType sourceEntityType, EntityType targetEntityType, EntityMapping mapping)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= {}", targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityType,
-				targetAttribute);
-
-		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService.decisionTreeToFindRelevantAttributes(
-				sourceEntityType, targetAttribute, tagsForAttribute.values(), null);
-		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService.generate(targetAttribute, relevantAttributes,
-				targetEntityType, sourceEntityType);
-
-		if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
+		EntityTypeSearchResults entityTypeSearchResults = semanticSearchService.findAttributes(sourceEntityType,
+				targetEntityType);
+		entityTypeSearchResults.getAttributeSearchResults().forEach(attributeSearchResults ->
 		{
-			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
-			attributeMapping.getSourceAttributes().addAll(generatedAlgorithm.getSourceAttributes());
-			attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
-			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = "
-					+ generatedAlgorithm.getAlgorithm());
-		}
+			Attribute targetAttribute = attributeSearchResults.getAttribute();
+			LOG.debug("createAttributeMappingIfOnlyOneMatch: target= {}", targetAttribute.getName());
+			Hits<ExplainedAttribute> relevantAttributes = attributeSearchResults.getHits();
+			GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService.generate(targetAttribute,
+					relevantAttributes, targetEntityType, sourceEntityType);
+
+			if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
+			{
+				AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
+				attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
+				attributeMapping.getSourceAttributes().addAll(generatedAlgorithm.getSourceAttributes());
+				attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
+				LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = "
+						+ generatedAlgorithm.getAlgorithm());
+			}
+		});
 	}
 
 	@Override
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(Attribute targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
 	{
-		return stream(sourceEntities.spliterator(), false).map(entity -> {
+		return stream(sourceEntities.spliterator(), false).map(entity ->
+		{
 			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 			Object derivedValue;
 
