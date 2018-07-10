@@ -183,16 +183,8 @@ public class GroupService
 	public void removeMember(final Group group, final User user)
 	{
 		ArrayList<Role> groupRoles = newArrayList(group.getRoles());
-		final RoleMembership member = roleMembershipService.getMemberships(groupRoles)
-														   .stream()
-														   .filter(m -> m.getUser().getId().equals(user.getId()))
-														   .findFirst()
-														   .orElseThrow(() -> new UnknownEntityException(
-																   roleMembershipMetadata,
-																   roleMembershipMetadata.getAttribute(
-																		   RoleMembershipMetadata.USER),
-																   user.getUsername()));
-		roleMembershipService.removeMembership(member);
+		final RoleMembership membership = findRoleMembership(user, groupRoles);
+		roleMembershipService.removeMembership(membership);
 	}
 
 	@RunAsSystem
@@ -206,20 +198,22 @@ public class GroupService
 			throw new NotAValidGroupRoleException(newRole, group);
 		}
 
-		RoleMembership roleMembership = findRoleMembership(member, groupRoles);
-
+		final RoleMembership roleMembership = findRoleMembership(member, groupRoles);
 		roleMembershipService.updateMembership(roleMembership, newRole);
 	}
 
-	private RoleMembership findRoleMembership(User member, ArrayList<Role> groupRoles)
+	private UnknownEntityException unknownMembershipForUser(User user)
+	{
+		return new UnknownEntityException(roleMembershipMetadata,
+				roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER), user.getUsername());
+	}
+
+	private RoleMembership findRoleMembership(User member, List<Role> groupRoles)
 	{
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		return memberships.stream()
 						  .filter(m -> m.getUser().getId().equals(member.getId()))
-						  .findFirst()
-						  .orElseThrow(() -> new UnknownEntityException(roleMembershipMetadata,
-								  roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER),
-								  member.getUsername()));
+						  .findFirst().orElseThrow(() -> unknownMembershipForUser(member));
 	}
 
 	private Role addIncludedRole(Role role)
