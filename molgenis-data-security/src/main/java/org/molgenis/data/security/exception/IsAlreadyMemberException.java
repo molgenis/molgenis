@@ -1,7 +1,6 @@
 package org.molgenis.data.security.exception;
 
 import org.molgenis.data.security.auth.Group;
-import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.i18n.CodedRuntimeException;
 

@@ -1,9 +1,7 @@
 package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
@@ -12,7 +10,6 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
@@ -21,9 +18,13 @@ import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -159,7 +160,7 @@ public class GroupService
 	@RunAsSystem
 	public void addMember(final Group group, final User user, final Role role)
 	{
-		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
+		ArrayList<Role> groupRoles = newArrayList(group.getRoles());
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(role.getName()));
 
@@ -181,26 +182,23 @@ public class GroupService
 	@RunAsSystem
 	public void removeMember(final Group group, final User user)
 	{
-		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
-		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
-
-		final Optional<RoleMembership> member = memberships.stream()
+		ArrayList<Role> groupRoles = newArrayList(group.getRoles());
+		final RoleMembership member = roleMembershipService.getMemberships(groupRoles)
+														   .stream()
 														   .filter(m -> m.getUser().getId().equals(user.getId()))
-														   .findFirst();
-
-		if (!member.isPresent())
-		{
-			throw new UnknownEntityException(roleMembershipMetadata,
-					roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER), user.getUsername());
-		}
-
-		roleMembershipService.removeMembership(member.get());
+														   .findFirst()
+														   .orElseThrow(() -> new UnknownEntityException(
+																   roleMembershipMetadata,
+																   roleMembershipMetadata.getAttribute(
+																		   RoleMembershipMetadata.USER),
+																   user.getUsername()));
+		roleMembershipService.removeMembership(member);
 	}
 
 	@RunAsSystem
 	public void updateMemberRole(final Group group, final User member, final Role newRole)
 	{
-		ArrayList<Role> groupRoles = Lists.newArrayList(group.getRoles());
+		ArrayList<Role> groupRoles = newArrayList(group.getRoles());
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(newRole.getName()));
 
 		if (!isGroupRole)
@@ -232,8 +230,7 @@ public class GroupService
 
 	private Role findRoleNamed(String rolename)
 	{
-		Query<Role> query = QueryImpl.EQ(RoleMetadata.NAME, rolename);
-		Role result = dataService.findOne(ROLE, query, Role.class);
+		Role result = dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne();
 		if (result == null)
 		{
 			throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), rolename);
