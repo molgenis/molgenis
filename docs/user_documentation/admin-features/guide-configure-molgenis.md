@@ -25,11 +25,11 @@ You can start performing these steps to configure MOLGENIS.
 
 - **Step 1: Add a group**
   
-  You can add groups to MOLGENIS to structure user groups and data you want to manage. When you a group is added you get a folder to put your resources in.
+  You can add groups to MOLGENIS to structure user groups and data you want to share or manage. Every group gets a folder to put resources in.
   
 - **Step 2: Add members**
   
-  When you have defined your group, you can add members to the group. You can add new user by reading this: [user management guide](guide-ref-user-management.md).
+  When you have defined your group, you can add members to the group. Admins can also add new users, for more information see the [user management guide](guide-ref-user-management.md).
 
 - **Step 3: Add members to groups** 
 
