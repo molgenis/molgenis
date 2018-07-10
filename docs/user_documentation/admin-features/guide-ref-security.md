@@ -1,31 +1,31 @@
 # Setup security in MOLGENIS
-To understand the security context of MOLGENIS you need to understand the follwoing concepts.
+To understand the security context of MOLGENIS you need to understand the following concepts.
 
-* **Groups**
+* **Group**
   
   A number of people that work together.
 
-* **Users**
+* **User**
   
-  Is a person that can login to MOLGENIS.
+  A person that can login to MOLGENIS.
 
 * **Roles**
   
-  A role is a job function within the context of an group with certain permissions on resources. Examples of roles are:
+  A role is a job function within the context of a group with certain permissions on resources. Examples of roles are:
   * Managers
   * Editors
   * Viewers
  
 * **Resource**
   
-  A resource can be tables or folders.
+  Resources can be tables or folders.
 
-* **Plugins**
+* **Plugin**
   
-  You can give rights to a plugins so a user can use the plugin.
+  Plugins are specific modules within MOLGENIS that offer certain functionality. For example the [Data Explorer](../finding-data/guide-explore.md).
       
 ## Add groups
-*note: you need to be superuser*
+*note: you need to be superuser to add groups*
 
 You can add groups in MOLGENIS by navigating to **Admin --> Security Manager**. 
 
@@ -39,12 +39,12 @@ Fill out the necessary field and click on **Create**.
 
 ![Create a group](../../images/security/group_creation.png?raw=true, "Create a group")
 
-When you added a group a folder is created and the default roles are created for that group. The user which creates the group becomes manager of the group.
+When you've added the group a folder is created and the default roles are created for that group. The user who creates the group becomes manager of the group.
 
 ## Add members to group
-*note: you need to be superuser or group manager*
+*note: you need to be superuser or group manager to add members to a group*
 
-You can add members to groups via the security-manager. Navigate to **Admin --> Security Manager**. Click on a group
+You can add members to groups via the security manager. Navigate to **Admin --> Security Manager**. Click on a group
 
 ![Group overview](../../images/security/group_overview.png?raw=true, "Group overview")
 
@@ -56,8 +56,8 @@ Select a member from the **User-pulldown** and specify the **role**, for example
 
 ![Add membership](../../images/security/add_membership.png?raw=true, "Add membership")
 
-When a member is added to a group permissions are set according to the role he/her had been given.
-The default settings for membership to a group is:
+When a member is added to a group, permissions are set according to the role he/she has been given.
+The default permissions for these roles are as follows:
 
 **Manager**:
 * You can manage the memberships in the group
