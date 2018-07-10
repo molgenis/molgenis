@@ -3,7 +3,7 @@ When the system administrator has setup the global definition of groups and user
 **
 
 # Configure MOLGENIS
-When are using MOLGENIS you have to understand some basic concepts.
+When you are using MOLGENIS you have to understand some basic concepts.
 
 **Structure:**
 * **Groups**
@@ -18,7 +18,7 @@ When are using MOLGENIS you have to understand some basic concepts.
 * Tables
 
 **Plugins**
-Plugins are specific modules within MOLGENIS that offers certain functionality. For example the DataExplorer. 
+Plugins are specific modules within MOLGENIS that offer certain functionality. For example the [Data Explorer](../finding-data/guide-explore.md). 
 
 ## Basic setup
 You can start performing these steps to configure MOLGENIS.
@@ -33,7 +33,7 @@ You can start performing these steps to configure MOLGENIS.
 
 - **Step 3: Add members to groups** 
 
-  You can now determine how does what in your group. There are standard roles that you can use enable members to edit, view or manage your group content.
+  You can now determine who does what in your group. There are standard roles that you can use to enable members to edit, view or manage your group content.
   The available roles are:
   - **Manager**
     
@@ -41,11 +41,11 @@ You can start performing these steps to configure MOLGENIS.
     
   - **Editor**
   
-    Can manage all resources in a group (folders, tables)
+    Can edit all resources in a group (folders, tables)
     
   - **Viewer**
   
     Can view all resources in a group (folders, tables)
 
-When you have setup this basic configuration you can start using MOLGENIS. When you want a detailed description to setup groups click [here](guide-ref-security.md).
+When you have setup this basic configuration you can start using MOLGENIS. A detailed description on how to setup groups can be found [here](guide-ref-security.md).
 
