@@ -1,5 +1,5 @@
 # Apps in MOLGENIS
-To manage Apps in MOLGNEIS you can use the MOLGENIS App manager. It is a tool to upload, search, and manage your apps. With a an easy to use format we want
+To manage Apps in MOLGENIS you can use the MOLGENIS App manager. It is a tool to upload, search, and manage your apps. With a an easy to use format we want
 to facilitate rapid app development on top of your own data models. 
 
 How to create your own MOLGENIS app is described [here](../../developer_documentation/app-development.md)
