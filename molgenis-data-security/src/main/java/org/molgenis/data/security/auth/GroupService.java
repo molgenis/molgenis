@@ -107,7 +107,7 @@ public class GroupService
 	 *
 	 * @param groupValue details of the group for which the permissions will be granted
 	 */
-	public void grantPermissions(GroupValue groupValue)
+	public void grantDefaultPermissions(GroupValue groupValue)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
 		GroupIdentity groupIdentity = new GroupIdentity(groupValue.getName());

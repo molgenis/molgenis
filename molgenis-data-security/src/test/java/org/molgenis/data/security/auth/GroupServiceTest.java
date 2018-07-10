@@ -143,7 +143,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test
 	public void testGrantPermissions()
 	{
-		groupService.grantPermissions(groupValue);
+		groupService.grantDefaultPermissions(groupValue);
 
 		verify(permissionService).grant(new PackageIdentity("package"), WRITEMETA, createRoleSid("NAME_MANAGER"));
 		verify(permissionService).grant(new GroupIdentity("name"), WRITEMETA, createRoleSid("NAME_MANAGER"));
