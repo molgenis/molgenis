@@ -144,6 +144,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@WithMockUser("henkie")
 	public void testCreateGroup() throws Exception
 	{
+		when(groupService.isGroupNameAvailable(any())).thenReturn(true);
 		mockMvc.perform(post(GROUP_END_POINT).contentType(APPLICATION_JSON_UTF8)
 											 .content(gson.toJson(createGroup("devs", "Developers"))))
 			   .andExpect(status().isCreated());
@@ -153,6 +154,20 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		verify(groupService).persist(groupValue);
 		verify(groupPermissionService).grantDefaultPermissions(groupValue);
 		verify(roleMembershipService).addUserToRole("henkie", "DEVS_MANAGER");
+	}
+
+	@Test
+	@WithMockUser("henkie")
+	public void testCreateGroupUnavailableGroupName() throws Exception
+	{
+		when(groupService.isGroupNameAvailable(any())).thenReturn(false);
+		mockMvc.perform(post(GROUP_END_POINT).contentType(APPLICATION_JSON_UTF8)
+											 .content(gson.toJson(createGroup("devs", "Developers"))))
+			   .andExpect(status().isBadRequest());
+
+		verifyNoMoreInteractions(groupService);
+		verifyNoMoreInteractions(groupPermissionService);
+		verifyNoMoreInteractions(roleMembershipService);
 	}
 
 	@Test

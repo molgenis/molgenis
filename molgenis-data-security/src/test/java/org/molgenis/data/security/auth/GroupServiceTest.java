@@ -28,12 +28,14 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class GroupServiceTest extends AbstractMockitoTest
 {
@@ -270,5 +272,32 @@ public class GroupServiceTest extends AbstractMockitoTest
 		when(user.getUsername()).thenReturn("henkie");
 
 		groupService.updateMemberRole(group, user, editor);
+	}
+
+	@Test
+	public void testIsGroupNameAvailableReturnsTrueIfNameIsAvailable()
+	{
+		when(dataService.query(PACKAGE, Package.class)
+						 .eq(PackageMetadata.ID, "foo_bar")
+						 .findOne()).thenReturn(null);
+
+		PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
+		final GroupValue groupValue = GroupValue.builder().setRootPackage(rootPackage).setPublic(true).setName("foo-bar").setLabel("label").build();
+
+		assertTrue(groupService.isGroupNameAvailable(groupValue));
+	}
+
+	@Test
+	public void testIsGroupNameAvailableReturnsFalseIfNameIsNotAvailable()
+	{
+		Package mock = mock(Package.class);
+		when(dataService.query(PACKAGE, Package.class)
+						.eq(PackageMetadata.ID, "foo_bar")
+						.findOne()).thenReturn(mock);
+
+		PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
+		final GroupValue groupValue = GroupValue.builder().setRootPackage(rootPackage).setPublic(true).setName("foo-bar").setLabel("label").build();
+
+		assertFalse(groupService.isGroupNameAvailable(groupValue));
 	}
 }

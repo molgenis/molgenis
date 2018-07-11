@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.exception.GroupNameNotAvailableException;
 import org.molgenis.data.security.exception.GroupPermissionDeniedException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
@@ -74,18 +75,25 @@ public class GroupRestController
 	@PostMapping(GROUP_END_POINT)
 	@ApiOperation(value = "Create a new group", response = ResponseEntity.class)
 	@Transactional
-	@ApiResponses({ @ApiResponse(code = 201, message = "New group created", response = ResponseEntity.class) })
+	@ApiResponses({ @ApiResponse(code = 201, message = "New group created", response = ResponseEntity.class),
+			@ApiResponse(code = 400, message = "Group name not available", response = ResponseEntity.class) })
 	public ResponseEntity createGroup(@RequestBody GroupCommand group)
 	{
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES);
+
+		if (!groupService.isGroupNameAvailable(groupValue))
+		{
+			throw new GroupNameNotAvailableException(group.getName());
+		}
 
 		groupService.persist(groupValue);
 		groupPermissionService.grantDefaultPermissions(groupValue);
 		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
-		URI location = ServletUriComponentsBuilder
-				.fromCurrentRequest().path("/{name}")
-				.buildAndExpand(groupValue.getName()).toUri();
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+												  .path("/{name}")
+												  .buildAndExpand(groupValue.getName())
+												  .toUri();
 
 		return ResponseEntity.created(location).build();
 	}

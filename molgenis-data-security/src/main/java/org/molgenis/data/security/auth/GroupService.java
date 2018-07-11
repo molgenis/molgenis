@@ -6,6 +6,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
@@ -180,6 +181,16 @@ public class GroupService
 
 		final RoleMembership roleMembership = findRoleMembership(member, groupRoles);
 		roleMembershipService.updateMembership(roleMembership, newRole);
+	}
+
+	@RunAsSystem
+	public boolean isGroupNameAvailable(final GroupValue groupValue)
+	{
+		String rootPackageName = groupValue.getRootPackage().getName();
+		final Package existingPackage = dataService.query(PACKAGE, Package.class)
+												   .eq(PackageMetadata.ID, rootPackageName)
+												   .findOne();
+		return existingPackage == null;
 	}
 
 	private UnknownEntityException unknownMembershipForUser(User user)
