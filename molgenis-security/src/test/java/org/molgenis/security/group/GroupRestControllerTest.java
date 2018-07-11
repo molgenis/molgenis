@@ -24,7 +24,6 @@ import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -40,7 +39,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
@@ -50,7 +51,6 @@ import static org.molgenis.data.security.auth.GroupPermission.*;
 import static org.molgenis.security.group.AddGroupMemberCommand.addGroupMember;
 import static org.molgenis.security.group.GroupCommand.createGroup;
 import static org.molgenis.security.group.GroupRestController.GROUP_END_POINT;
-import static org.molgenis.security.group.GroupRestController.GROUP_PERMISSION_END_POINT;
 import static org.molgenis.security.group.GroupRestController.TEMP_USER_END_POINT;
 import static org.molgenis.security.group.UpdateGroupMemberCommand.updateGroupMember;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
