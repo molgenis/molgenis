@@ -1,6 +1,7 @@
 package org.molgenis.data.security.permission;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.*;
 import org.molgenis.data.security.user.UserService;
@@ -91,8 +92,16 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 	@Override
 	public Collection<RoleMembership> getMemberships(Collection<Role> roles)
 	{
+		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+		Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+		Fetch fetch = new Fetch().field(RoleMembershipMetadata.ROLE, roleFetch)
+								 .field(RoleMembershipMetadata.USER, userFetch)
+								 .field(RoleMembershipMetadata.FROM)
+								 .field(RoleMembershipMetadata.TO)
+								 .field(RoleMembershipMetadata.ID);
+
 		return dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-						  .in(RoleMembershipMetadata.ROLE, roles)
+						  .in(RoleMembershipMetadata.ROLE, roles).fetch(fetch)
 						  .findAll()
 						  .filter(RoleMembership::isCurrent)
 						  .collect(Collectors.toList());

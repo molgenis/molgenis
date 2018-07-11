@@ -10,17 +10,13 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.security.GroupIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.security.acls.model.MutableAclService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,8 +32,6 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.security.core.PermissionSet.WRITEMETA;
-import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.testng.Assert.assertEquals;
 
 public class GroupServiceTest extends AbstractMockitoTest
@@ -50,10 +44,6 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private PackageFactory packageFactory;
 	@Mock(answer = RETURNS_DEEP_STUBS)
 	private DataService dataService;
-	@Mock
-	private MutableAclService aclService;
-	@Mock
-	private PermissionService permissionService;
 	@Mock
 	private GroupMetadata groupMetadata;
 	@Mock
@@ -102,8 +92,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 											   .setDescription("description");
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
-		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				groupMetadata, roleMembershipService, roleMetadata, roleMembershipMetadata, aclService);
+		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, groupMetadata,
+				roleMembershipService, roleMetadata, roleMembershipMetadata);
 	}
 
 	@Test
@@ -141,16 +131,6 @@ public class GroupServiceTest extends AbstractMockitoTest
 		when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, "MANAGER").findOne()).thenReturn(null);
 
 		groupService.persist(groupValue);
-	}
-
-	@Test
-	public void testGrantPermissions()
-	{
-		groupService.grantDefaultPermissions(groupValue);
-
-		verify(permissionService).grant(new PackageIdentity("package"), WRITEMETA, createRoleSid("NAME_MANAGER"));
-		verify(aclService).createAcl(new GroupIdentity("name"));
-		verify(permissionService).grant(new GroupIdentity("name"), WRITEMETA, createRoleSid("NAME_MANAGER"));
 	}
 
 	@Test
