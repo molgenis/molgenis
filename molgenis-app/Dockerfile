@@ -14,7 +14,6 @@ ENV opencpu.uri.port=8004
 ENV opencpu.uri.path=/ocpu/
 
 # Database configuration
-ENV db_driver=org.postgresql.Driver
 ENV db_uri=jdbc:postgresql://127.0.0.1/molgenis
 ENV db_user=molgenis
 ENV db_password=molgenis
