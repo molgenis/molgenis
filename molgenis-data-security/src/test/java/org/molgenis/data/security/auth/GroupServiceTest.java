@@ -20,6 +20,7 @@ import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
 import org.molgenis.security.core.model.RoleValue;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.acls.model.MutableAclService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,6 +50,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private PackageFactory packageFactory;
 	@Mock(answer = RETURNS_DEEP_STUBS)
 	private DataService dataService;
+	@Mock
+	private MutableAclService aclService;
 	@Mock
 	private PermissionService permissionService;
 	@Mock
@@ -100,7 +103,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 		builder.rolesBuilder().add(roleValue);
 		groupValue = builder.build();
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, permissionService,
-				groupMetadata, roleMembershipService, roleMetadata, roleMembershipMetadata);
+				groupMetadata, roleMembershipService, roleMetadata, roleMembershipMetadata, aclService);
 	}
 
 	@Test
@@ -146,6 +149,7 @@ public class GroupServiceTest extends AbstractMockitoTest
 		groupService.grantDefaultPermissions(groupValue);
 
 		verify(permissionService).grant(new PackageIdentity("package"), WRITEMETA, createRoleSid("NAME_MANAGER"));
+		verify(aclService).createAcl(new GroupIdentity("name"));
 		verify(permissionService).grant(new GroupIdentity("name"), WRITEMETA, createRoleSid("NAME_MANAGER"));
 	}
 

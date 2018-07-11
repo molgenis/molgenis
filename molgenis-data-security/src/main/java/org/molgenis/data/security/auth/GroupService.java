@@ -14,6 +14,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,7 @@ public class GroupService
 	private final RoleMembershipService roleMembershipService;
 	private final RoleMetadata roleMetadata;
 	private final RoleMembershipMetadata roleMembershipMetadata;
+	private final MutableAclService aclService;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -64,7 +66,7 @@ public class GroupService
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
 			RoleMembershipService roleMembershipService, RoleMetadata roleMetadata,
-			RoleMembershipMetadata roleMembershipMetadata)
+			RoleMembershipMetadata roleMembershipMetadata, MutableAclService aclService)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -75,6 +77,7 @@ public class GroupService
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.roleMetadata = requireNonNull(roleMetadata);
 		this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
+		this.aclService = requireNonNull(aclService);
 	}
 
 	/**
@@ -99,6 +102,7 @@ public class GroupService
 		dataService.add(PACKAGE, rootPackage);
 		dataService.add(GROUP, group);
 		roles.forEach(role -> role.setGroup(group));
+
 		dataService.add(ROLE, roles.stream());
 	}
 
@@ -111,6 +115,7 @@ public class GroupService
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
 		GroupIdentity groupIdentity = new GroupIdentity(groupValue.getName());
+		aclService.createAcl(groupIdentity);
 		groupValue.getRoles().forEach(roleValue ->
 		{
 			PermissionSet permissionSet = DEFAULT_ROLES.get(roleValue.getLabel());
