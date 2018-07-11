@@ -2,6 +2,7 @@ package org.molgenis.data.security.auth;
 
 import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
@@ -107,7 +108,19 @@ public class GroupService
 	@RunAsSystem
 	public Group getGroup(String groupName)
 	{
-		Group group = dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, groupName).findOne();
+		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+		Fetch fetch = new Fetch().field(GroupMetadata.ROLES, roleFetch)
+								 .field(GroupMetadata.NAME)
+								 .field(GroupMetadata.LABEL)
+								 .field(GroupMetadata.DESCRIPTION)
+								 .field(GroupMetadata.ID)
+								 .field(GroupMetadata.PUBLIC)
+								 .field(GroupMetadata.ROOT_PACKAGE);
+
+		Group group = dataService.query(GroupMetadata.GROUP, Group.class)
+								 .eq(GroupMetadata.NAME, groupName)
+								 .fetch(fetch)
+								 .findOne();
 		if (group == null)
 		{
 			throw new UnknownEntityException(groupMetadata, groupMetadata.getAttribute(GroupMetadata.NAME), groupName);
