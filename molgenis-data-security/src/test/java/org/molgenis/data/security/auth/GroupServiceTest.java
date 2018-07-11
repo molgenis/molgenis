@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.Package;
@@ -143,18 +144,36 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test
 	public void testGetGroup()
 	{
-		when(dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, "devs").findOne()).thenReturn(
-				group);
+		Fetch fetch = buildGroupFetch();
+		when(dataService.query(GroupMetadata.GROUP, Group.class)
+						.eq(GroupMetadata.NAME, "devs")
+						.fetch(fetch)
+						.findOne()).thenReturn(group);
 		assertEquals(groupService.getGroup("devs"), group);
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void testGetGroupNotFound()
 	{
+		Fetch fetch = buildGroupFetch();
 		when(groupMetadata.getAttribute(GroupMetadata.NAME)).thenReturn(attribute);
-		when(dataService.query(GroupMetadata.GROUP, Group.class).eq(GroupMetadata.NAME, "devs").findOne()).thenReturn(
-				null);
+		when(dataService.query(GroupMetadata.GROUP, Group.class)
+						.eq(GroupMetadata.NAME, "devs")
+						.fetch(fetch)
+						.findOne()).thenReturn(null);
 		groupService.getGroup("devs");
+	}
+
+	private Fetch buildGroupFetch()
+	{
+		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+		return new Fetch().field(GroupMetadata.ROLES, roleFetch)
+								 .field(GroupMetadata.NAME)
+								 .field(GroupMetadata.LABEL)
+								 .field(GroupMetadata.DESCRIPTION)
+								 .field(GroupMetadata.ID)
+								 .field(GroupMetadata.PUBLIC)
+								 .field(GroupMetadata.ROOT_PACKAGE);
 	}
 
 	@Test

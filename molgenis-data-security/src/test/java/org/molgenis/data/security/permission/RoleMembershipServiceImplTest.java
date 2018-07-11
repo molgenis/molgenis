@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.auth.*;
@@ -152,8 +153,16 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 	@Test
 	public void testGetMemberships()
 	{
+		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+		Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+		Fetch fetch = new Fetch().field(RoleMembershipMetadata.ROLE, roleFetch)
+								 .field(RoleMembershipMetadata.USER, userFetch)
+								 .field(RoleMembershipMetadata.FROM)
+								 .field(RoleMembershipMetadata.TO)
+								 .field(RoleMembershipMetadata.ID);
 		when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
 						.in(RoleMembershipMetadata.ROLE, ImmutableList.of(editor, viewer))
+						.fetch(fetch)
 						.findAll()).thenReturn(Stream.of(oldRoleMembership, roleMembership));
 
 		when(roleMembership.isCurrent()).thenReturn(true);

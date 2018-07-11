@@ -101,7 +101,8 @@ public class RoleMembershipServiceImpl implements RoleMembershipService
 								 .field(RoleMembershipMetadata.ID);
 
 		return dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-						  .in(RoleMembershipMetadata.ROLE, roles).fetch(fetch)
+						  .in(RoleMembershipMetadata.ROLE, roles)
+						  .fetch(fetch)
 						  .findAll()
 						  .filter(RoleMembership::isCurrent)
 						  .collect(Collectors.toList());
