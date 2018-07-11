@@ -65,6 +65,8 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	@Mock
 	private GroupService groupService;
 	@Mock
+	private GroupPermissionService groupPermissionService;
+	@Mock
 	private RoleMembershipService roleMembershipService;
 	@Mock
 	private RoleService roleService;
@@ -129,7 +131,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	public void beforeMethod()
 	{
 		GroupRestController groupRestController = new GroupRestController(groupValueFactory, groupService,
-				roleMembershipService, roleService, userService, userPermissionEvaluator);
+				roleMembershipService, roleService, userService, userPermissionEvaluator, groupPermissionService);
 		mockMvc = MockMvcBuilders.standaloneSetup(groupRestController)
 								 .setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter)
 								 .setLocaleResolver(localeResolver)
@@ -149,7 +151,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 		GroupValue groupValue = groupValueFactory.createGroup("devs", "Developers", null, true,
 				ImmutableSet.of("Manager", "Editor", "Viewer"));
 		verify(groupService).persist(groupValue);
-		verify(groupService).grantDefaultPermissions(groupValue);
+		verify(groupPermissionService).grantDefaultPermissions(groupValue);
 		verify(roleMembershipService).addUserToRole("henkie", "DEVS_MANAGER");
 	}
 

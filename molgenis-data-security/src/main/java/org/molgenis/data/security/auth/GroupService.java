@@ -1,28 +1,22 @@
 package org.molgenis.data.security.auth;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
-import org.molgenis.data.security.GroupIdentity;
-import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.IsAlreadyMemberException;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
-import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -33,15 +27,12 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.security.core.PermissionSet.*;
-import static org.molgenis.security.core.SidUtils.*;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
+import static org.molgenis.security.core.SidUtils.createRoleAuthority;
 
 @Service
 public class GroupService
 {
 	private final DataService dataService;
-	private final PermissionService permissionService;
 	private final GroupFactory groupFactory;
 	private final RoleFactory roleFactory;
 	private final PackageFactory packageFactory;
@@ -49,35 +40,29 @@ public class GroupService
 	private final RoleMembershipService roleMembershipService;
 	private final RoleMetadata roleMetadata;
 	private final RoleMembershipMetadata roleMembershipMetadata;
-	private final MutableAclService aclService;
 
 	public static final String MANAGER = "Manager";
-	private static final String EDITOR = "Editor";
-	private static final String VIEWER = "Viewer";
+	public static final String EDITOR = "Editor";
+	public static final String VIEWER = "Viewer";
 
 	public static final String AUTHORITY_MANAGER = createRoleAuthority(MANAGER.toUpperCase());
 	public static final String AUTHORITY_EDITOR = createRoleAuthority(EDITOR.toUpperCase());
 	public static final String AUTHORITY_VIEWER = createRoleAuthority(VIEWER.toUpperCase());
 
-
-	public static final Map<String, PermissionSet> DEFAULT_ROLES = ImmutableMap.of(MANAGER, WRITEMETA, EDITOR, WRITE,
-			VIEWER, READ);
+	public static final Set<String> DEFAULT_ROLES = ImmutableSet.of(MANAGER, EDITOR, VIEWER);
 
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
-			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
-			RoleMembershipService roleMembershipService, RoleMetadata roleMetadata,
-			RoleMembershipMetadata roleMembershipMetadata, MutableAclService aclService)
+			DataService dataService, GroupMetadata groupMetadata, RoleMembershipService roleMembershipService,
+			RoleMetadata roleMetadata, RoleMembershipMetadata roleMembershipMetadata)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.dataService = requireNonNull(dataService);
-		this.permissionService = requireNonNull(permissionService);
 		this.groupMetadata = requireNonNull(groupMetadata);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.roleMetadata = requireNonNull(roleMetadata);
 		this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
-		this.aclService = requireNonNull(aclService);
 	}
 
 	/**
@@ -104,29 +89,6 @@ public class GroupService
 		roles.forEach(role -> role.setGroup(group));
 
 		dataService.add(ROLE, roles.stream());
-	}
-
-	/**
-	 * Grants default permissions on the root package and group to the roles of the group
-	 *
-	 * @param groupValue details of the group for which the permissions will be granted
-	 */
-	public void grantDefaultPermissions(GroupValue groupValue)
-	{
-		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
-		GroupIdentity groupIdentity = new GroupIdentity(groupValue.getName());
-		aclService.createAcl(groupIdentity);
-		groupValue.getRoles().forEach(roleValue ->
-		{
-			PermissionSet permissionSet = DEFAULT_ROLES.get(roleValue.getLabel());
-			Sid roleSid = createRoleSid(roleValue.getName());
-			permissionService.grant(packageIdentity, permissionSet, roleSid);
-			permissionService.grant(groupIdentity, permissionSet, roleSid);
-		});
-		if (groupValue.isPublic())
-		{
-			permissionService.grant(groupIdentity, READ, createAuthoritySid(AUTHORITY_USER));
-		}
 	}
 
 	@RunAsSystem

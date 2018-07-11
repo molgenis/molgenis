@@ -55,17 +55,20 @@ public class GroupRestController
 	private final RoleService roleService;
 	private final UserService userService;
 	private final UserPermissionEvaluator userPermissionEvaluator;
+	private final GroupPermissionService groupPermissionService;
 
 	GroupRestController(GroupValueFactory groupValueFactory, GroupService groupService,
-			RoleMembershipService roleMembershipService, RoleService roleService,
-			UserService userService, UserPermissionEvaluator userPermissionEvaluator)
+			RoleMembershipService roleMembershipService, RoleService roleService, UserService userService,
+			UserPermissionEvaluator userPermissionEvaluator, GroupPermissionService groupPermissionService)
 	{
+
 		this.groupValueFactory = requireNonNull(groupValueFactory);
 		this.groupService = requireNonNull(groupService);
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.roleService = requireNonNull(roleService);
 		this.userService = requireNonNull(userService);
 		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+		this.groupPermissionService = requireNonNull(groupPermissionService);
 	}
 
 	@PostMapping(GROUP_END_POINT)
@@ -74,10 +77,10 @@ public class GroupRestController
 	@ApiResponses({ @ApiResponse(code = 201, message = "New group created", response = ResponseEntity.class) })
 	public ResponseEntity createGroup(@RequestBody GroupCommand group)
 	{
-		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES.keySet());
+		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES);
 
 		groupService.persist(groupValue);
-		groupService.grantDefaultPermissions(groupValue);
+		groupPermissionService.grantDefaultPermissions(groupValue);
 		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
 		URI location = ServletUriComponentsBuilder
