@@ -9,14 +9,14 @@ docker run registry.molgenis.org/molgenis/molgenis-app:#tag#
 ```
 
 ### On MacBook
-On mac you need to bind the service urls to you own host by adding *docker.for.mac.localhost*. 
+On mac you need to bind the service urls to your own host by adding *docker.for.mac.localhost*. 
 
 ```bash
 docker run \
     -e db_uri=jdbc:postgresql://docker.for.mac.localhost/molgenis \
     -e elasticsearch.transport.addresses=docker.for.mac.localhost:9300 \
     -e opencpu.uri.host=docker.for.mac.localhost \
-    #containerId#
+    registry.molgenis.org/molgenis/molgenis-app:#tag#
 ```
 
 ## Run the MOLGENIS-image with integrated services
