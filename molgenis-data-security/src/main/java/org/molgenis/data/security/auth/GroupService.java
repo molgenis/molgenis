@@ -14,6 +14,7 @@ import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,7 @@ public class GroupService
 	private final RoleMembershipService roleMembershipService;
 	private final RoleMetadata roleMetadata;
 	private final RoleMembershipMetadata roleMembershipMetadata;
+	private final MutableAclService aclService;
 
 	public static final String MANAGER = "Manager";
 	private static final String EDITOR = "Editor";
@@ -64,7 +66,7 @@ public class GroupService
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, PermissionService permissionService, GroupMetadata groupMetadata,
 			RoleMembershipService roleMembershipService, RoleMetadata roleMetadata,
-			RoleMembershipMetadata roleMembershipMetadata)
+			RoleMembershipMetadata roleMembershipMetadata, MutableAclService aclService)
 	{
 		this.groupFactory = requireNonNull(groupFactory);
 		this.roleFactory = requireNonNull(roleFactory);
@@ -75,6 +77,7 @@ public class GroupService
 		this.roleMembershipService = requireNonNull(roleMembershipService);
 		this.roleMetadata = requireNonNull(roleMetadata);
 		this.roleMembershipMetadata = requireNonNull(roleMembershipMetadata);
+		this.aclService = requireNonNull(aclService);
 	}
 
 	/**
@@ -99,6 +102,7 @@ public class GroupService
 		dataService.add(PACKAGE, rootPackage);
 		dataService.add(GROUP, group);
 		roles.forEach(role -> role.setGroup(group));
+
 		dataService.add(ROLE, roles.stream());
 	}
 
@@ -107,10 +111,11 @@ public class GroupService
 	 *
 	 * @param groupValue details of the group for which the permissions will be granted
 	 */
-	public void grantPermissions(GroupValue groupValue)
+	public void grantDefaultPermissions(GroupValue groupValue)
 	{
 		PackageIdentity packageIdentity = new PackageIdentity(groupValue.getRootPackage().getName());
 		GroupIdentity groupIdentity = new GroupIdentity(groupValue.getName());
+		aclService.createAcl(groupIdentity);
 		groupValue.getRoles().forEach(roleValue ->
 		{
 			PermissionSet permissionSet = DEFAULT_ROLES.get(roleValue.getLabel());
@@ -183,16 +188,8 @@ public class GroupService
 	public void removeMember(final Group group, final User user)
 	{
 		ArrayList<Role> groupRoles = newArrayList(group.getRoles());
-		final RoleMembership member = roleMembershipService.getMemberships(groupRoles)
-														   .stream()
-														   .filter(m -> m.getUser().getId().equals(user.getId()))
-														   .findFirst()
-														   .orElseThrow(() -> new UnknownEntityException(
-																   roleMembershipMetadata,
-																   roleMembershipMetadata.getAttribute(
-																		   RoleMembershipMetadata.USER),
-																   user.getUsername()));
-		roleMembershipService.removeMembership(member);
+		final RoleMembership membership = findRoleMembership(user, groupRoles);
+		roleMembershipService.removeMembership(membership);
 	}
 
 	@RunAsSystem
@@ -206,20 +203,22 @@ public class GroupService
 			throw new NotAValidGroupRoleException(newRole, group);
 		}
 
-		RoleMembership roleMembership = findRoleMembership(member, groupRoles);
-
+		final RoleMembership roleMembership = findRoleMembership(member, groupRoles);
 		roleMembershipService.updateMembership(roleMembership, newRole);
 	}
 
-	private RoleMembership findRoleMembership(User member, ArrayList<Role> groupRoles)
+	private UnknownEntityException unknownMembershipForUser(User user)
+	{
+		return new UnknownEntityException(roleMembershipMetadata,
+				roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER), user.getUsername());
+	}
+
+	private RoleMembership findRoleMembership(User member, List<Role> groupRoles)
 	{
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		return memberships.stream()
 						  .filter(m -> m.getUser().getId().equals(member.getId()))
-						  .findFirst()
-						  .orElseThrow(() -> new UnknownEntityException(roleMembershipMetadata,
-								  roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER),
-								  member.getUsername()));
+						  .findFirst().orElseThrow(() -> unknownMembershipForUser(member));
 	}
 
 	private Role addIncludedRole(Role role)

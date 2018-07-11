@@ -77,7 +77,7 @@ public class GroupRestController
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES.keySet());
 
 		groupService.persist(groupValue);
-		groupService.grantPermissions(groupValue);
+		groupService.grantDefaultPermissions(groupValue);
 		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
 		URI location = ServletUriComponentsBuilder
