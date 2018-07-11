@@ -93,24 +93,27 @@
 
     <hr/>
 
-    <button
-      v-if="!isRemoving"
-      id="remove-btn"
-      class="btn btn-danger"
-      type="button"
-      @click.prevent="onRemoveMember"
-      :disabled="isEditRoleMode">
-      Remove from group
-    </button>
+    <template v-if="canRemoveMember">
+      <button
+        v-if="!isRemoving"
+        id="remove-btn"
+        class="btn btn-danger"
+        type="button"
+        @click.prevent="onRemoveMember"
+        :disabled="isEditRoleMode">
+        Remove from group
+      </button>
 
-    <button
-      v-else
-      id="remove-btn-removing"
-      class="btn btn-danger"
-      type="button"
-      disabled="disabled">
-      Removing <i class="fa fa-spinner fa-spin "></i>
-    </button>
+      <button
+        v-else
+        id="remove-btn-removing"
+        class="btn btn-danger"
+        type="button"
+        disabled="disabled">
+        Removing <i class="fa fa-spinner fa-spin "></i>
+      </button>
+    </template>
+
 
   </div>
 </template>
@@ -190,8 +193,15 @@
       }
     },
     created () {
-      this.$store.dispatch('fetchGroupMembers', this.groupName)
-      this.$store.dispatch('fetchGroupRoles', this.groupName)
+      if (!this.groupMembers[this.groupName]) {
+        this.$store.dispatch('fetchGroupMembers', this.groupName)
+      }
+      if (!this.groupRoles[this.groupName]) {
+        this.$store.dispatch('fetchGroupRoles', this.groupName)
+      }
+      if (!this.groupPermissions[this.groupName]) {
+        this.$store.dispatch('fetchGroupPermissions', this.groupName)
+      }
     },
     components: {
       Toast

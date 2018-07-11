@@ -88,7 +88,36 @@ describe('MemberDetail component', () => {
 
   store = new Vuex.Store({state, actions, getters, mutations})
 
-  describe('created', () => {
+  describe('created with empty store', () => {
+    let propsData = {
+      groupName: 'group1',
+      memberName: 'member1'
+    }
+
+    beforeEach(() => {
+      const emptyGetters = {
+        groupRoles: () => { return {} },
+        groupMembers: () => { return {} },
+        groupPermissions: () => { return {} }
+      }
+      const emptyStore = new Vuex.Store({state, actions, getters: emptyGetters, mutations})
+      shallowMount(MemberDetail, {propsData, store: emptyStore, stubs, localVue})
+    })
+
+    it('should fetch the group members', () => {
+      expect(actions.fetchGroupMembers.called).to.equal(true)
+    })
+
+    it('should fetch the group roles', () => {
+      expect(actions.fetchGroupRoles.called).to.equal(true)
+    })
+
+    it('should fetch the group permissions', () => {
+      expect(actions.fetchGroupPermissions.called).to.equal(true)
+    })
+  })
+
+  describe('created with filled up store', () => {
     let propsData = {
       groupName: 'group1',
       memberName: 'member1'
@@ -104,6 +133,10 @@ describe('MemberDetail component', () => {
 
     it('should fetch the group roles', () => {
       expect(actions.fetchGroupRoles.called).to.equal(true)
+    })
+
+    it('should fetch the group permissions', () => {
+      expect(actions.fetchGroupPermissions.called).to.equal(true)
     })
   })
 
