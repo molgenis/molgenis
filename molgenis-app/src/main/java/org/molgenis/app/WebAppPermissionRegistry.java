@@ -10,6 +10,7 @@ import org.molgenis.core.ui.controller.FeedbackController;
 import org.molgenis.core.ui.controller.RedirectController;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
 import org.molgenis.core.ui.jobs.JobsController;
+import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.datarowedit.controller.DataRowEditController;
@@ -18,6 +19,7 @@ import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.securityui.controller.SecurityUiController;
 import org.molgenis.semanticmapper.controller.MappingServiceController;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -116,6 +118,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, ONE_CLICK_IMPORTER, editor, READ);
 		register(ENTITY_TYPE, JOB_EXECUTION, editor, COUNT);
 		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
+		register(PACKAGE, RootSystemPackage.PACKAGE_SYSTEM, user, COUNT);
+		register(PLUGIN, SecurityUiController.ID, manager, READ);
 	}
 
 	@Override
