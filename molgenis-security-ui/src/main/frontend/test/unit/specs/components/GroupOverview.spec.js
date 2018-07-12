@@ -31,7 +31,7 @@ describe('GroupOverview component', () => {
     {name: 'group2', label: 'My group 2'}
   ]
 
-  const user = {
+  const loginUser = {
     name: 'admin',
     isSuperUser: true
   }
@@ -42,7 +42,7 @@ describe('GroupOverview component', () => {
     localVue.filter('i18n', $t)
 
     state = {
-      user: user
+      loginUser: loginUser
     }
 
     actions = {
@@ -51,7 +51,7 @@ describe('GroupOverview component', () => {
 
     getters = {
       groups: () => groups,
-      getUser: () => user
+      getLoginUser: () => loginUser
     }
 
     mutations = {

@@ -8,8 +8,12 @@ import mutations from './mutations'
 import type {SecurityModel} from '../flow.type'
 
 const state: SecurityModel = {
-  user: {},
+  loginUser: {},
   groups: [],
+  groupMembers: {},
+  groupRoles: {},
+  groupPermissions: {},
+  users: [],
   toast: null
 }
 

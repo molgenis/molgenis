@@ -22,7 +22,7 @@ describe('GroupCreate component', () => {
     path: '/group'
   }
 
-  const user = {
+  const loginUser = {
     name: 'admin',
     isSuperUser: true
   }
@@ -33,11 +33,11 @@ describe('GroupCreate component', () => {
     localVue.filter('i18n', $t)
 
     state = {
-      user: user
+      loginUser: loginUser
     }
 
     getters = {
-      getUser: () => user
+      getLoginUser: () => loginUser
     }
 
     actions = {

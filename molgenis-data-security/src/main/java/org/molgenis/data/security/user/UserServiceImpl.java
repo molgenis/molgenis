@@ -26,6 +26,13 @@ public class UserServiceImpl implements UserService
 
 	@Override
 	@RunAsSystem
+	public List<User> getUsers()
+	{
+		return dataService.findAll(USER, User.class).collect(toList());
+	}
+
+	@Override
+	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
 		Stream<User> superUsers = dataService.findAll(USER, new QueryImpl<User>().eq(UserMetaData.SUPERUSER, true),
