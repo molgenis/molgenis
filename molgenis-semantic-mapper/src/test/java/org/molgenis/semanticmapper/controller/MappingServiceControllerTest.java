@@ -17,6 +17,9 @@ import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.format.MessageFormatFactory;
+import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.user.UserAccountService;
@@ -36,6 +39,9 @@ import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.exception.FallbackExceptionHandler;
+import org.molgenis.web.exception.GlobalControllerExceptionHandler;
+import org.molgenis.web.exception.SpringExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -45,6 +51,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -184,9 +191,13 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 				semanticSearchService, menuReaderService, mappingJobExecutionFactory, userAccountService, jobExecutor,
 				jobsController);
 
+		GlobalControllerExceptionHandler globalControllerExceptionHandler = new GlobalControllerExceptionHandler();
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 								 .setMessageConverters(gsonHttpMessageConverter, new StringHttpMessageConverter())
+								 .setControllerAdvice(globalControllerExceptionHandler, new FallbackExceptionHandler(),
+										 new SpringExceptionHandler())
 								 .build();
+		ReflectionTestUtils.setField(globalControllerExceptionHandler, "environment", "development");
 	}
 
 	@Test
@@ -380,6 +391,10 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testScheduleMappingJobUnknownPackage() throws Exception
 	{
+		TestAllPropertiesMessageSource messageSource = new TestAllPropertiesMessageSource(new MessageFormatFactory());
+		messageSource.addMolgenisNamespaces("data");
+		MessageSourceHolder.setMessageSource(messageSource);
+
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
@@ -387,9 +402,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 										  .param("label", "label")
 										  .param("package", "sys")
 										  .accept("text/plain"))
-			   .andExpect(status().isBadRequest())
-			   .andExpect(content().contentType("text/plain"))
-			   .andExpect(content().string("No package found with ID sys"));
+			   .andExpect(status().isNotFound())
+			   .andExpect(content().string("Unknown entity 'sys' of type 'sys_md_Package'"));
 	}
 
 	@Test

@@ -209,9 +209,7 @@ public class MappingServiceImpl implements MappingService
 		}
 		else if (packageId != null)
 		{
-			Package aPackage = dataService.getMeta()
-										  .getPackage(packageId)
-										  .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
+			Package aPackage = dataService.getMeta().getPackage(packageId).orElse(null);
 			targetMetadata.setPackage(aPackage);
 		}
 		else
