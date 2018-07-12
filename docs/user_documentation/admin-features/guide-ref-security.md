@@ -107,6 +107,13 @@ You can switch between roles whenever you want by updating the role of the membe
 ![Update membership](../../images/security/update_membership.png?raw=true, "Update membershio")
 
 Click on "Edit" to update the role and click on "Update role".
-You can also remove a member from a group by clicking on "Remove from group"
 
 ![Update role membership](../../images/security/update_membershiprole.png?raw=true, "Update rolemembershio")
+
+You can no view the members of the group and see that the "test"-member has a Manager-role.
+
+![Membership overview with role change](../../images/security/membership_overview_with_rolechange.png?raw=true, "Membership overview with role change")
+
+You can also remove a member from a group. Click on a member ("test" in this example) and click on "Remove from group".
+
+![Remove member from group](../../images/security/remove_member_from_group.png?raw=true, "Remove member from group")
