@@ -1,0 +1,82 @@
+# Default values for molgenis.
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - molgenis.local
+  tls: []
+
+molgenis:
+  image:
+    repository: registry.molgenis.org/molgenis/molgenis-app
+    tag: 7.0.0-SNAPSHOT
+    pullPolicy: Always
+  adminPassword: admin
+  javaOpts: "-Xmx1g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+  resources:
+   limits:
+    cpu: 1
+    memory: 1250Mi
+   requests:
+    cpu: 200m
+    memory: 1Gi
+
+postgres:
+  image:
+    repository: postgres
+    tag: 9.6-alpine
+    pullPolicy: IfNotPresent
+  user: molgenis
+  password: molgenis
+  db: molgenis
+  resources:
+   limits:
+    cpu: 1
+    memory: 250Mi
+   requests:
+    cpu: 100m
+    memory: 250Mi
+
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: 5.5.3
+    pullPolicy: IfNotPresent
+  javaOpts: "-Xms512m -Xmx512m"
+  clusterName: molgenis
+  resources:
+   limits:
+    cpu: 1
+    memory: 1500Mi
+   requests:
+    cpu: 100m
+    memory: 1Gi
+
+opencpu:
+  image:
+    repository: molgenis/opencpu
+    tag: latest
+    pullPolicy: Always
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

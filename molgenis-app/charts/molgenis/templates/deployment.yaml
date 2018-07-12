@@ -1,0 +1,128 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "molgenis.fullname" . }}
+  labels:
+    app: {{ template "molgenis.name" . }}
+    chart: {{ template "molgenis.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "molgenis.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "molgenis.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: molgenis
+        {{- with .Values.molgenis }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+            - name: molgenis.home
+              value: /home/molgenis
+            - name: opencpu.uri.host
+              value: opencpu
+            - name: elasticsearch.transport.addresses
+              value: elasticsearch:9300
+            - name: elasticsearch.cluster.name
+              value: {{ $.Values.elasticsearch.clusterName }}
+            - name: db_uri
+              value: "jdbc:postgresql://postgres/{{ $.Values.postgres.db }}"
+            - name: db_user
+              value: {{ $.Values.postgres.user }}
+            - name: db_password
+              value: {{ $.Values.postgres.password }}
+            - name: admin.password
+              value: {{ .adminPassword }}
+            - name: CATALINA_OPTS
+              value: "{{ .javaOpts }}"
+          ports:
+            - containerPort: 8080
+          command: ["sh"]
+          args: ["-c", "cat"]
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v2/version
+              port: http
+          resources:
+{{ toYaml .resources | indent 12 }}
+        {{- end }}
+
+        - name: elasticsearch
+        {{- with .Values.elasticsearch }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+            - name: cluster.name
+              value: {{ .clusterName }}
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: ES_JAVA_OPTS
+              value: "{{ .javaOpts }}"
+            - name: xpack.security.enabled
+              value: "false"
+            - name: discovery.type
+              value: single-node
+          ports:
+            - containerPort: 9200
+            - containerPort: 9300
+          command: ["sh"]
+          args: ["-c", "cat"]
+          resources:
+{{ toYaml .resources | indent 12 }}
+        {{- end }}
+
+        - name: postgres
+        {{- with .Values.postgres }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+            - name: POSTGRES_USER
+              value: {{ .user }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .password }}
+            - name: POSTGRES_DB
+              value: {{ .db }}
+          ports:
+            - containerPort: 5432
+          command: ["sh"]
+          args: ["-c", "cat"]
+          resources:
+{{ toYaml .resources | indent 12 }}
+        {{- end }}
+
+        - name: opencpu
+        {{- with .Values.opencpu }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          ports:
+            - containerPort: 8004
+          command: ["sh"]
+          args: ["-c", "cat"]
+          resources:
+{{ toYaml .resources | indent 12 }}
+        {{- end }}
+
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
