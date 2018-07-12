@@ -407,7 +407,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Package package_ = mock(Package.class);
 		String packageId = "package";
 		when(dataService.findOneById(PACKAGE, packageId, Package.class)).thenReturn(package_);
-		assertEquals(metaDataServiceImpl.getPackage(packageId), package_);
+		assertEquals(metaDataServiceImpl.getPackage(packageId), of(package_));
 	}
 
 	@Test
@@ -415,7 +415,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	{
 		String packageName = "package";
 		when(dataService.findOneById(PACKAGE, packageName, Package.class)).thenReturn(null);
-		assertNull(metaDataServiceImpl.getPackage(packageName));
+		assertEquals(metaDataServiceImpl.getPackage(packageName), empty());
 	}
 
 	@Test

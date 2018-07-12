@@ -133,7 +133,7 @@ public class ImportWizardController extends AbstractWizardController
 		try
 		{
 			File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
-			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
+			if (packageId != null && !dataService.getMeta().getPackage(packageId).isPresent())
 			{
 				return ResponseEntity.badRequest()
 									 .contentType(TEXT_PLAIN)
@@ -178,7 +178,7 @@ public class ImportWizardController extends AbstractWizardController
 				tmpFile = fileStore.store(inputStream, filename);
 			}
 
-			if (packageId != null && dataService.getMeta().getPackage(packageId) == null)
+			if (packageId != null && !dataService.getMeta().getPackage(packageId).isPresent())
 			{
 				return ResponseEntity.badRequest()
 									 .contentType(TEXT_PLAIN)

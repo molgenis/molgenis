@@ -5,6 +5,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
@@ -34,6 +35,9 @@ import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.util.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 
@@ -202,7 +206,10 @@ public class MappingServiceImpl implements MappingService
 		}
 		else if (packageId != null)
 		{
-			targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+			Package aPackage = dataService.getMeta()
+										  .getPackage(packageId)
+										  .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
+			targetMetadata.setPackage(aPackage);
 		}
 		else
 		{

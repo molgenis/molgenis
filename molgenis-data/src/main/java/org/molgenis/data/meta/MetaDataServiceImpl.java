@@ -410,9 +410,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Package getPackage(String packageId)
+	public Optional<Package> getPackage(String packageId)
 	{
-		return dataService.findOneById(PACKAGE, packageId, Package.class);
+		Package aPackage = dataService.findOneById(PACKAGE, packageId, Package.class);
+		return aPackage != null ? Optional.of(aPackage) : Optional.empty();
 	}
 
 	@Override

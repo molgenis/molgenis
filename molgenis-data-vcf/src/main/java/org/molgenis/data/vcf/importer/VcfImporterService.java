@@ -61,11 +61,8 @@ public class VcfImporterService implements ImportService
 		Package importPackage = null;
 		if (packageId != null)
 		{
-			importPackage = metaDataService.getPackage(packageId);
-			if (importPackage == null)
-			{
-				throw new UnknownEntityException(PACKAGE, packageId);
-			}
+			importPackage = metaDataService.getPackage(packageId)
+										   .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
 		}
 
 		List<EntityType> addedEntities = new ArrayList<>();

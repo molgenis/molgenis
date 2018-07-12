@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Optional.of;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -112,7 +113,7 @@ public class EntityServiceImplTest
 
 		// mock package
 		Package package_ = mock(Package.class);
-		when(metaDataService.getPackage("package_")).thenReturn(package_);
+		when(metaDataService.getPackage("package_")).thenReturn(of(package_));
 
 		when(dataService.getMeta()).thenReturn(metaDataService);
 

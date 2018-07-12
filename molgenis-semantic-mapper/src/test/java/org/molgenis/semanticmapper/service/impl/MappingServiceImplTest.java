@@ -41,6 +41,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -298,7 +299,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
 
 		Package targetPackage = mock(Package.class);
-		when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
+		when(metaDataService.getPackage("targetPackage")).thenReturn(of(targetPackage));
 
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "test", "targetPackage",
 				"target label", true);

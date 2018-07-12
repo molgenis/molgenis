@@ -59,6 +59,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.meta.AttributeType.*;
@@ -397,7 +398,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getId()).thenReturn("sys");
-		when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
+		when(metaDataService.getPackage("sys")).thenReturn(of(systemPackage));
 
 		mockMvc.perform(post(URI + "/map").param("mappingProjectId", "mappingProjectId")
 										  .param("targetEntityTypeId", "targetEntityTypeId")
@@ -416,7 +417,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		Package aPackage = mock(Package.class);
 		when(aPackage.getId()).thenReturn("base");
 		when(aPackage.getRootPackage()).thenReturn(null);
-		when(metaDataService.getPackage("base")).thenReturn(aPackage);
+		when(metaDataService.getPackage("base")).thenReturn(of(aPackage));
 
 		when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
 		when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);

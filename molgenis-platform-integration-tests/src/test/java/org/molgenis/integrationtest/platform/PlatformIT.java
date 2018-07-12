@@ -46,6 +46,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.EntityTestHarness.*;
@@ -344,8 +345,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
 
 			dataService.deleteById(PACKAGE, "parent");
-			assertNull(metadataService.getPackage("parent"));
-			assertNull(metadataService.getPackage("parent_sub"));
+			assertEquals(metadataService.getPackage("parent"), empty());
+			assertEquals(metadataService.getPackage("parent_sub"), empty());
 			entities.forEach(this::assertNotPresent);
 			refEntities.forEach(this::assertNotPresent);
 		});
@@ -383,7 +384,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertPresent(refEntityType, newArrayList(refEntities));
 
 			dataService.deleteById(PACKAGE, "package_onetomany");
-			assertNull(metadataService.getPackage("package_onetomany"));
+			assertEquals(metadataService.getPackage("package_onetomany"), empty());
 			assertNull(dataService.getEntityType(entityType.getId()));
 			assertNull(dataService.getEntityType(refEntityType.getId()));
 			entities.forEach(this::assertNotPresent);

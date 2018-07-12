@@ -76,14 +76,7 @@ public class EntityServiceImpl implements EntityService
 		// Create a dataTable
 		EntityType entityType = entityTypeFactory.create();
 
-		Package aPackage = metaDataService.getPackage(packageName);
-		if (aPackage == null)
-		{
-			aPackage = packageFactory.create(packageName);
-			aPackage.setLabel(packageName);
-			aPackage.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
-			metaDataService.addPackage(aPackage);
-		}
+		Package aPackage = metaDataService.getPackage(packageName).orElse(createPackage(packageName));
 
 		entityType.setPackage(aPackage);
 		entityType.setId(entityTypeId);
@@ -137,6 +130,15 @@ public class EntityServiceImpl implements EntityService
 		dataService.add(entityType.getId(), rows.stream());
 
 		return entityType;
+	}
+
+	private Package createPackage(String packageName)
+	{
+		Package newPackage = packageFactory.create(packageName);
+		newPackage.setLabel(packageName);
+		newPackage.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
+		metaDataService.addPackage(newPackage);
+		return newPackage;
 	}
 
 	/**

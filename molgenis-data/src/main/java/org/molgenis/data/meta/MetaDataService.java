@@ -131,9 +131,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Gets the package for a given package identifier.
 	 *
 	 * @param packageId package identifier
-	 * @return the Package, or <tt>null</tt> if the package does not exist.
+	 * @return optional package
 	 */
-	Package getPackage(String packageId);
+	Optional<Package> getPackage(String packageId);
 
 	/**
 	 * Adds a new Package
