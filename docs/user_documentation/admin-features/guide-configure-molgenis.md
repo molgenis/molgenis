@@ -3,6 +3,8 @@ When the system administrator has setup the global definition of groups and user
 **
 
 # Configure MOLGENIS
+**note:** a detailed description on how to setup groups can be found [here](guide-ref-security.md).
+
 When you are using MOLGENIS you have to understand some basic concepts.
 
 **Structure:**
@@ -14,8 +16,8 @@ When you are using MOLGENIS you have to understand some basic concepts.
       * Viewers
   
 **Resources:**
-* Folders
-* Tables
+* Folders (also known as packages)
+* Tables (also known as entityTypes)
 
 **Plugins**
 Plugins are specific modules within MOLGENIS that offer certain functionality. For example the [Data Explorer](../finding-data/guide-explore.md). 
@@ -47,5 +49,5 @@ You can start performing these steps to configure MOLGENIS.
   
     Can view all resources in a group (folders, tables)
 
-When you have setup this basic configuration you can start using MOLGENIS. A detailed description on how to setup groups can be found [here](guide-ref-security.md).
+When you have setup this basic configuration you can start using MOLGENIS. 
 

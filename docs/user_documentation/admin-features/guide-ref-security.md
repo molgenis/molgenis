@@ -33,7 +33,7 @@ You can add groups in MOLGENIS by navigating to **Admin --> Security Manager**.
 
 Click on the **Add group**-button. 
 
-![Groups screen](../../images/security/groups.png?raw=true, "Groups")
+![Groups screen](../../images/security/group_overview_no_groups.png?raw=true, "Groups")
 
 Fill out the necessary field and click on **Create**.
 
@@ -50,7 +50,7 @@ You can add members to groups via the security manager. Navigate to **Admin --> 
 
 Click on **Add member**.
 
-![Membership overview](../../images/security/membership_overview.png?raw=true, "Membership overview")
+![Membership overview](../../images/security/membership_overview_only_admin.png?raw=true, "Membership overview")
 
 Select a member from the **User-pulldown** and specify the **role**, for example: Editor. Click on **Add member**.
 
@@ -99,4 +99,14 @@ The default permissions for these roles are as follows:
   * Plugins
     * Search all
     * Questionnaires
-   
+
+![Membership overview](../../images/security/membership_overview.png?raw=true, "Membershio overview")
+
+You can switch between roles whenever you want by updating the role of the member. Click on a member ("test" in this example).
+
+![Update membership](../../images/security/update_membership.png?raw=true, "Update membershio")
+
+Click on "Edit" to update the role and click on "Update role".
+You can also remove a member from a group by clicking on "Remove from group"
+
+![Update role membership](../../images/security/update_membershiprole.png?raw=true, "Update rolemembershio")
