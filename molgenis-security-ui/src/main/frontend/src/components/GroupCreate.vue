@@ -17,7 +17,8 @@
             <label for="groupNameInput">Group name</label>
             <input v-model="groupName" type="text" class="form-control" id="groupNameInput" aria-describedby="groupName"
                    placeholder="My group">
-            <small id="groupNameHelp" class="form-text text-muted">The group name as shown in the interface</small>
+            <small v-if="!isGroupNameAvailable" class="form-text text-danger ">This group name is not available any more, please choose a different name.</small>
+            <small v-else id="groupNameHelp" class="form-text text-muted">The group name as shown in the interface</small>
           </div>
 
           <div class="form-group">
@@ -37,7 +38,7 @@
             class="btn btn-success"
             type="submit"
             @click.prevent="onSubmit"
-            :disabled="!groupName">
+            :disabled="!groupName || !isGroupNameAvailable">
             Create
           </button>
 
@@ -61,18 +62,28 @@
 <script>
   import Toast from './Toast'
   import slugService from '../service/slugService'
+  import _ from 'lodash'
 
   export default {
     name: 'GroupCreate',
     data () {
       return {
         groupName: '',
-        isCreating: false
+        isCreating: false,
+        isGroupNameAvailable: true,
+        isCheckingGroupName: true
       }
     },
     computed: {
       groupIdentifier () {
         return slugService.slugify(this.groupName)
+      }
+    },
+    watch: {
+      groupName (newVal) {
+        if (newVal) {
+          this.checkGroupName()
+        }
       }
     },
     methods: {
@@ -85,7 +96,15 @@
           }, () => {
             this.isCreating = !this.isCreating
           })
-      }
+      },
+
+      checkGroupName: _.throttle(function () {
+        const pipesRegEx = '/-/g'
+        const packageName = this.groupIdentifier.replace(pipesRegEx, '_')
+        this.$store.dispatch('checkRootPackageExists', packageName).then((exists) => {
+          this.isGroupNameAvailable = !exists
+        })
+      }, 300)
     },
     components: {
       Toast

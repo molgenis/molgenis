@@ -23,6 +23,11 @@ const router = new Router({
       component: GroupOverview
     },
     {
+      path: '/group/create',
+      name: 'createGroup',
+      component: GroupCreate
+    },
+    {
       path: '/group/:name',
       name: 'groupDetail',
       props: true,
@@ -39,11 +44,6 @@ const router = new Router({
       name: 'memberDetail',
       props: true,
       component: MemberDetail
-    },
-    {
-      path: '/group/create',
-      name: 'createGroup',
-      component: GroupCreate
     },
     {
       path: '/',

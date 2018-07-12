@@ -130,6 +130,20 @@ const actions = {
         reject(error)
       })
     })
+  },
+
+  'checkRootPackageExists' ({commit, dispatch}: { commit: Function, dispatch: Function }, packageName) {
+    const url = '/api/v2/sys_md_Package?&num=1&q=label=="' + encodeURIComponent(packageName) + '";parent==""'
+
+    return new Promise((resolve, reject) => {
+      api.get(url).then((response) => {
+        const exists = response.items.length > 0
+        resolve(exists)
+      }, (error) => {
+        commit('setToast', {type: 'danger', message: 'Error calling backend'})
+        reject(error)
+      })
+    })
   }
 }
 export default actions

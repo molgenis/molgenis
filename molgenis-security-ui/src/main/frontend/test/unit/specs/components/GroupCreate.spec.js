@@ -42,7 +42,8 @@ describe('GroupCreate component', () => {
 
     actions = {
       createGroup: td.function(),
-      fetchGroups: td.function()
+      fetchGroups: td.function(),
+      checkRootPackageExists: td.function()
     }
 
     store = new Vuex.Store({state, actions, getters})
@@ -56,6 +57,7 @@ describe('GroupCreate component', () => {
     let groupIdentifier = wrapper.find('#groupIdentifierInput')
     expect(groupIdentifier.element.value).to.equal('test-group')
   })
+
   it('should create a new group', () => {
     const wrapper = shallowMount(GroupCreate, {mocks: {$router, $route}, store, stubs, localVue})
     wrapper.find('#groupNameInput').setValue('test group')
