@@ -164,7 +164,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		entityTypeDynamic = runAsSystem(() -> metaDataService.getEntityType(entityTypeDynamic.getId()));
+		entityTypeDynamic = runAsSystem(() -> metaDataService.getEntityType(entityTypeDynamic.getId())
+															 .orElseThrow(() -> new UnknownEntityTypeException(
+																	 entityTypeDynamic.getId())));
 	}
 
 	@AfterClass
@@ -227,15 +229,31 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		populateUserPermissions();
 
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getAttribute("labelEn").getName(),
-				"labelEn");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("en").getName(),
-				"label");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("pt").getName(),
-				"label");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute("nl").getName(),
-				"label");
-		assertEquals(dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(), "label");
+		assertEquals(dataService.getMeta()
+								.getEntityType(ENTITY_TYPE_META_DATA)
+								.orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+								.getAttribute("labelEn")
+								.getName(), "labelEn");
+		assertEquals(dataService.getMeta()
+								.getEntityType(ENTITY_TYPE_META_DATA)
+								.orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+								.getLabelAttribute("en")
+								.getName(), "label");
+		assertEquals(dataService.getMeta()
+								.getEntityType(ENTITY_TYPE_META_DATA)
+								.orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+								.getLabelAttribute("pt")
+								.getName(), "label");
+		assertEquals(dataService.getMeta()
+								.getEntityType(ENTITY_TYPE_META_DATA)
+								.orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+								.getLabelAttribute("nl")
+								.getName(), "label");
+		assertEquals(dataService.getMeta()
+								.getEntityType(ENTITY_TYPE_META_DATA)
+								.orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+								.getLabelAttribute()
+								.getName(), "label");
 
 		assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(LanguageService.getLanguageCodes().toArray(),

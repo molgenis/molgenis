@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -84,7 +85,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest
 				indexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
 		testEntityType = harness.createDynamicRefEntityType();
-		when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
+		when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(Optional.of(testEntityType));
 		toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
 		when(dataService.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
 		when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(toIndexEntity);

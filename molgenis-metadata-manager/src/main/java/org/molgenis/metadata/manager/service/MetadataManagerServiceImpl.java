@@ -46,11 +46,8 @@ public class MetadataManagerServiceImpl implements MetadataManagerService
 	@Override
 	public EditorEntityTypeResponse getEditorEntityType(String entityTypeId)
 	{
-		EntityType entityType = metadataService.getEntityType(entityTypeId);
-		if (entityType == null)
-		{
-			throw new UnknownEntityTypeException(entityTypeId);
-		}
+		EntityType entityType = metadataService.getEntityType(entityTypeId)
+											   .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
 		return createEntityTypeResponse(entityType, metadataService.getReferringAttributes(entityTypeId)
 																   .filter(EntityTypeUtils::isSingleReferenceType)
 																   .collect(toList()));

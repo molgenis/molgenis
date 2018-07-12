@@ -202,7 +202,10 @@ public class MappingServiceImpl implements MappingService
 
 		if (dataService.hasRepository(entityTypeId))
 		{
-			targetMetadata.setPackage(dataService.getMeta().getEntityType(entityTypeId).getPackage());
+			EntityType entityType = dataService.getMeta()
+											   .getEntityType(entityTypeId)
+											   .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
+			targetMetadata.setPackage(entityType.getPackage());
 		}
 		else if (packageId != null)
 		{

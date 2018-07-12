@@ -126,7 +126,7 @@ public class DataExplorerController extends PluginController
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityId != null && selectedEntityName == null)
 		{
-			EntityType entityType = dataService.getMeta().getEntityType(selectedEntityId);
+			EntityType entityType = dataService.getMeta().getEntityType(selectedEntityId).orElse(null);
 			if (entityType == null)
 			{
 				message.append("Entity does not exist or you do not have permission on this entity");
@@ -189,7 +189,7 @@ public class DataExplorerController extends PluginController
 		switch (moduleId)
 		{
 			case MOD_DATA:
-				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				//if multiple tracks are available we assume chrom and pos attribute are the same
@@ -205,7 +205,7 @@ public class DataExplorerController extends PluginController
 				break;
 			case MOD_ENTITIESREPORT:
 				//TODO: figure out if we need to know pos and chrom attrs here
-				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
+				selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
 				entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
 				model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
 				model.addAttribute("showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));

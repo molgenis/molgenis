@@ -1,9 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.*;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
@@ -17,8 +14,8 @@ import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.security.core.PermissionService;
-import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -105,7 +102,9 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntityType()
 	{
-		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+													  .orElseThrow(
+															  () -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		updatedEntityType.getAttribute(ATTR_STRING).setDataType(ENUM).setEnumOptions(asList("string0", "string1"));
 		updatedEntityType.getAttribute(ATTR_BOOL).setDataType(STRING);
 		updatedEntityType.getAttribute(ATTR_CATEGORICAL).setDataType(LONG).setRefEntity(null);
@@ -154,7 +153,9 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute data type update from \\[INT\\] to \\[DATE_TIME\\] not allowed, allowed types are \\[BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF\\]")
 	public void testUpdateEntityTypeNotAllowed()
 	{
-		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+													  .orElseThrow(
+															  () -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		updatedEntityType.getAttribute(ATTR_COMPOUND_CHILD_INT).setDataType(DATE_TIME);
 		metaDataService.updateEntityType(updatedEntityType);
 	}
@@ -215,12 +216,15 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(dependsOnMethods = { "testUpdateEntityType", "testUpdateEntityTypeNotAllowed" })
 	public void testAddAttribute()
 	{
-		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+											   .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		Attribute attribute = attributeFactory.create().setName("newAttribute");
 		attribute.setEntity(entityType);
 		metaDataService.addAttribute(attribute);
 
-		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+													  .orElseThrow(
+															  () -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
 	}
 
@@ -228,13 +232,16 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(dependsOnMethods = { "testAddAttribute" })
 	public void testUpdateAttribute()
 	{
-		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+											   .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		Attribute attribute = entityType.getAttribute("newAttribute");
 		attribute.setLabel("updated-label");
 		attribute.setEntity(entityType);
 		dataService.update(ATTRIBUTE_META_DATA, attribute);
 
-		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+													  .orElseThrow(
+															  () -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
 	}
 
@@ -242,11 +249,14 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests
 	@Test(dependsOnMethods = { "testUpdateAttribute" })
 	public void testDeleteAttribute()
 	{
-		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+											   .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		String attributeId = entityType.getAttribute("newAttribute").getIdentifier();
 		metaDataService.deleteAttributeById(attributeId);
 
-		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+		EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID)
+													  .orElseThrow(
+															  () -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
 		assertNull(updatedEntityType.getAttribute("newAttribute"));
 	}
 
