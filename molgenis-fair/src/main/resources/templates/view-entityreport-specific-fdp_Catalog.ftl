@@ -15,7 +15,7 @@
     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 </div>
 <script>
-    $.get('/fdp/${entity.get("identifier")}', function(data){
+    $.get('/api/fdp/${entity.get("identifier")}', function (data) {
         $('#rdf').text(data);
     });
 </script>

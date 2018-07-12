@@ -47,9 +47,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		listOfVoters.add(new MolgenisAccessDecisionVoter());
 		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
-		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
-
-									  .antMatchers("/fdp/**").permitAll();
+		expressionInterceptUrlRegistry.antMatchers("/").permitAll();
 	}
 
 	@Override

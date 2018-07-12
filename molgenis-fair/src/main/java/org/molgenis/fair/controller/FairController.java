@@ -75,6 +75,10 @@ public class FairController
 	{
 		String subjectIRI = getBaseUri().pathSegment(catalogID, datasetID).toUriString();
 		Entity subjectEntity = dataService.findOneById("fdp_Dataset", datasetID);
+		if (subjectEntity == null)
+		{
+			throw new UnknownEntityException("fdp_Dataset", datasetID);
+		}
 		return entityModelWriter.createRdfModel(subjectIRI, subjectEntity);
 	}
 
