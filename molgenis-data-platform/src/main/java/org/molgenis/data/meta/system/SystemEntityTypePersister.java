@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -120,8 +121,7 @@ public class SystemEntityTypePersister
 
 	private void removeNonExistingSystemPackages()
 	{
-		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class)
-													.filter(EntityUtils::isSystemPackage)
+		Stream<Package> systemPackages = dataService.findAll(PACKAGE, Package.class).filter(MetaUtils::isSystemPackage)
 													.filter(this::isNotExists);
 
 		dataService.delete(PACKAGE, systemPackages);

@@ -1,6 +1,7 @@
 package org.molgenis.searchall.service;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -43,8 +44,7 @@ public class SearchAllService
 												.map(entityType -> toEntityTypeResult(searchTerm, entityType, lang))
 												.filter(EntityTypeResult::isMatch)
 												.collect(toList()))
-					 .setPackages(dataService.findAll(PACKAGE, Package.class)
-											 .filter(not(EntityUtils::isSystemPackage))
+					 .setPackages(dataService.findAll(PACKAGE, Package.class).filter(not(MetaUtils::isSystemPackage))
 											 .map(PackageResult::create)
 											 .filter(packageResult -> packageResult.isLabelOrDescriptionMatch(
 													 searchTerm))
