@@ -24,7 +24,7 @@ public class WebAppPermissionRegistryTest
 	public void testGetPermissions()
 	{
 		Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> permissions = new WebAppPermissionRegistry().getPermissions();
-		assertEquals(permissions.size(), 44);
+		assertEquals(permissions.size(), 46);
 		Collection<Pair<PermissionSet, Sid>> pairs = permissions.get(new PluginIdentity(HomeController.ID));
 		assertEquals(copyOf(pairs), ImmutableSet.of(new Pair<>(READ, new GrantedAuthoritySid("ROLE_ANONYMOUS")),
 				new Pair<>(READ, new GrantedAuthoritySid("ROLE_USER"))));
