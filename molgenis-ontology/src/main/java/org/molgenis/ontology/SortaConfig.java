@@ -8,21 +8,26 @@ import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static java.util.Objects.requireNonNull;
 
 @Configuration
 public class SortaConfig
 {
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final OntologyTermHitMetaData ontologyTermHitMetaData;
+	private final OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
-	@Autowired
-	private OntologyTermHitMetaData ontologyTermHitMetaData;
-
-	@Autowired
-	private OntologyTermSynonymFactory ontologyTermSynonymFactory;
+	public SortaConfig(DataService dataService, OntologyTermHitMetaData ontologyTermHitMetaData,
+			OntologyTermSynonymFactory ontologyTermSynonymFactory)
+	{
+		System.setProperty("jdk.xml.entityExpansionLimit", "1280000");
+		this.dataService = requireNonNull(dataService);
+		this.ontologyTermHitMetaData = requireNonNull(ontologyTermHitMetaData);
+		this.ontologyTermSynonymFactory = requireNonNull(ontologyTermSynonymFactory);
+	}
 
 	@Bean
 	public TermFrequencyService termFrequencyService()
@@ -41,10 +46,5 @@ public class SortaConfig
 	public InformationContentService informationContentService()
 	{
 		return new InformationContentService(dataService);
-	}
-
-	public SortaConfig()
-	{
-		System.setProperty("jdk.xml.entityExpansionLimit", "1280000");
 	}
 }
