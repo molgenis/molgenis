@@ -5,7 +5,7 @@
 
     <div class="row mb-3  ">
       <div class="col">
-        <h1>Add member</h1>
+        <h1>{{ 'security-ui-add-member-title' | i18n }}</h1>
       </div>
     </div>
 
@@ -14,16 +14,17 @@
         <form>
 
           <div class="form-group">
-            <label for="userSelect">User</label>
+            <label for="userSelect">{{ 'security-ui-membership-attribute-user' | i18n }}</label>
             <select id="userSelect" v-model="username" class="form-control" :disabled="nonMemberUsers.length === 0">
-              <option v-if="nonMemberUsers.length > 0" value="">- Please select a user -</option>
-              <option v-else="nonMemberUsers.length > 0" value="" >No available users</option>
+              <option v-if="nonMemberUsers.length > 0" value="">- {{ 'security-ui-please-select-a-user' | i18n }} -
+              </option>
+              <option v-else="nonMemberUsers.length > 0" value="">{{ 'security-ui-no-available-users' | i18n }}</option>
               <option v-for="user in nonMemberUsers" :value="user.username">{{user.username}}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Role in group</label>
+            <label>{{ 'security-ui-membership-attribute-role' | i18n }}</label>
             <div v-for="role in sortedRoles" class="form-check" >
               <input class="form-check-input" type="radio" name="roleRadio"
                      :id="role.roleName" :value="role.roleName" v-model="roleName" >
@@ -35,7 +36,7 @@
           </div>
 
           <router-link :to="{name: 'groupDetail', params: { name: groupName }}">
-            <a href="#" class="btn btn-secondary" role="button">Cancel</a>
+            <a href="#" class="btn btn-secondary" role="button">{{ 'security-ui-btn-cancel' | i18n }}</a>
           </router-link>
 
           <button
@@ -45,7 +46,7 @@
             type="submit"
             @click.prevent="onSubmit"
             :disabled="!username || !roleName">
-            Add Member
+            {{ 'security-ui-btn-add-member' | i18n }}
           </button>
 
           <button
@@ -54,7 +55,7 @@
             class="btn btn-primary"
             type="button"
             disabled="disabled">
-            Create <i class="fa fa-spinner fa-spin "></i>
+            {{ 'security-ui-btn-adding-member' | i18n }} <i class="fa fa-spinner fa-spin "></i>
           </button>
 
         </form>

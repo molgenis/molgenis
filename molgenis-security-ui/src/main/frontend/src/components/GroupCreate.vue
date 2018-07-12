@@ -5,7 +5,7 @@
 
     <div class="row mb-3  ">
       <div class="col">
-        <h1>Create group</h1>
+        <h1>{{ 'security-ui-add-group-title' | i18n }}</h1>
       </div>
     </div>
 
@@ -14,22 +14,29 @@
         <form>
 
           <div class="form-group">
-            <label for="groupNameInput">Group name</label>
+            <label for="groupNameInput">{{'security-ui-group-attribute-label-name' | i18n}}</label>
             <input v-model="groupName" type="text" class="form-control" id="groupNameInput" aria-describedby="groupName"
-                   placeholder="My group">
-            <small v-if="!isGroupNameAvailable" class="form-text text-danger ">This group name is not available any more, please choose a different name.</small>
-            <small v-else id="groupNameHelp" class="form-text text-muted">The group name as shown in the interface</small>
+                   :placeholder="'security-ui-group-attribute-label-placeholder' | i18n">
+            <small v-if="!isGroupNameAvailable" class="form-text text-danger ">
+              {{'security-ui-group-attribute-name-taken-message' | i18n}}
+            </small>
+            <small v-else id="groupNameHelp" class="form-text text-muted">
+              {{'security-ui-group-attribute-label-description' |
+              i18n}}
+            </small>
           </div>
 
           <div class="form-group">
-            <label for="groupIdentifierInput">Group identifier</label>
+            <label for="groupIdentifierInput">{{'security-ui-group-attribute-name-name' | i18n}}</label>
             <input v-model="groupIdentifier" readonly type="text" class="form-control" id="groupIdentifierInput"
-                   placeholder="my-group">
-            <small id="groupIdentifierHelp" class="form-text text-muted">Name as used in URL</small>
+                   :placeholder="'security-ui-group-attribute-name-placeholder'|i18n">
+            <small id="groupIdentifierHelp" class="form-text text-muted">
+              {{'security-ui-group-attribute-name-description' | i18n}}
+            </small>
           </div>
 
           <router-link to="/">
-            <a href="#" class="btn btn-secondary" role="button">Cancel</a>
+            <a href="#" class="btn btn-secondary" role="button">{{'security-ui-btn-cancel' | i18n}}</a>
           </router-link>
 
           <button
@@ -39,7 +46,7 @@
             type="submit"
             @click.prevent="onSubmit"
             :disabled="!groupName || !isGroupNameAvailable">
-            Create
+            {{'security-ui-group-btn-create-group' | i18n}}
           </button>
 
           <button
@@ -48,7 +55,7 @@
             class="btn btn-primary"
             type="button"
             disabled="disabled">
-            Create <i class="fa fa-spinner fa-spin "></i>
+            {{'security-ui-group-btn-creating-group' | i18n}} <i class="fa fa-spinner fa-spin "></i>
           </button>
 
         </form>
