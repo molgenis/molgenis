@@ -98,6 +98,8 @@ export type OverViewChapter = {
 
 export type OverView = {
   title: string,
+  intoText?: string,
+  logoData?: string,
   chapters: Array<OverViewChapter>
 }
 
