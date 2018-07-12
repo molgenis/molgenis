@@ -53,6 +53,7 @@ public class GroupService
 
 	public static final Set<String> DEFAULT_ROLES = ImmutableSet.of(MANAGER, EDITOR, VIEWER);
 
+	@SuppressWarnings("squid:S00107")
 	GroupService(GroupFactory groupFactory, RoleFactory roleFactory, PackageFactory packageFactory,
 			DataService dataService, GroupMetadata groupMetadata, RoleMembershipService roleMembershipService,
 			RoleMetadata roleMetadata, RoleMembershipMetadata roleMembershipMetadata)
