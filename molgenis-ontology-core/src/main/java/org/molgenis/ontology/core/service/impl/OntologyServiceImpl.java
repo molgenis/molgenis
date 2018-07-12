@@ -32,6 +32,12 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
+	public List<Ontology> getOntologies(List<String> ontologyIds)
+	{
+		return ontologyRepository.getOntologies(ontologyIds).collect(toList());
+	}
+
+	@Override
 	public List<String> getAllOntologiesIds()
 	{
 		final List<String> allOntologiesIds = new ArrayList<>();

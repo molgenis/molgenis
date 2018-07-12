@@ -28,7 +28,11 @@ import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
+import org.molgenis.semanticsearch.explain.bean.AttributeSearchResults;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
+import org.molgenis.semanticsearch.explain.bean.ExplainedAttributeDto;
+import org.molgenis.semanticsearch.semantic.Hit;
+import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.converter.GsonConfig;
@@ -49,11 +53,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -498,9 +502,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		verify(model).addAttribute("compatibleTargetEntities", asList(lifeLines, target1, target2));
 		verify(model).addAttribute("selectedTarget", "HOP");
 		verify(model).addAttribute("mappingProject", mappingProject);
-		verify(model)
-			   .addAttribute("attributeTagMap", ImmutableMap.of("dob", singletonList(ontologyTermDateOfBirth), "age",
-					   singletonList(ontologyTermAge)));
+		verify(model).addAttribute("attributeTagMap",
+				ImmutableMap.of("dob", singletonList(ontologyTermDateOfBirth), "age", singletonList(ontologyTermAge)));
 	}
 
 	@Test
@@ -515,9 +518,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 												.setExpression("Very expressive");
 		test.addAttribute(computedAttr);
 
-		controller.autoGenerateAlgorithms(null, test, test, test.getAttributes(), null);
+		controller.autoGenerateAlgorithms(null, test, test, null);
 
-		verify(algorithmService).autoGenerateAlgorithm(test, test, null, idAttr);
+		verify(algorithmService).autoGenerateAlgorithm(test, test, null);
 		verifyNoMoreInteractions(algorithmService);
 	}
 
@@ -536,14 +539,17 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		Attribute stringAttribute = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(stringAttribute.getName()).thenReturn("stringAttribute");
 		Attribute compoundAttribute = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
+		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
 		when(sourceEntityType.getAtomicAttributes()).thenReturn(asList(stringAttribute, compoundAttribute));
 		when(entityMapping.getSourceEntityType()).thenReturn(sourceEntityType);
 		when(mappingTarget.getMappingForSource("source0")).thenReturn(entityMapping);
 		when(mappingProject.getMappingTarget("target0")).thenReturn(mappingTarget);
 		Multimap<Relation, OntologyTerm> multiMap = ArrayListMultimap.create();
 		when(ontologyTagService.getTagsForAttribute(targetEntityType, null)).thenReturn(multiMap);
-		List<ExplainedAttribute> expectedExplainedAttributes = singletonList(
-				ExplainedAttribute.create(stringAttribute));
-		assertEquals(controller.getSemanticSearchAttributeMapping(requestBody), expectedExplainedAttributes);
+		when(semanticSearchService.findAttributes(sourceEntityType, targetEntityType, null, emptySet())).thenReturn(
+				AttributeSearchResults.create(stringAttribute,
+						Hits.create(Hit.create(ExplainedAttribute.create(stringAttribute, emptySet(), false), 1f))));
+		assertEquals(controller.getSemanticSearchAttributeMapping(requestBody),
+				singletonList(ExplainedAttributeDto.create(stringAttribute, emptySet(), false)));
 	}
 }

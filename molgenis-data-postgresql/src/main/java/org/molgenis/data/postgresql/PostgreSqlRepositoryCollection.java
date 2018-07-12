@@ -24,7 +24,6 @@ import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
 import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
@@ -34,6 +33,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
 import static org.molgenis.data.support.EntityTypeUtils.*;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
@@ -532,11 +532,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 */
 	private void updateReadonly(EntityType entityType, Attribute attr, Attribute updatedAttr)
 	{
-		LinkedHashMap<String, Attribute> readonlyTableAttrs = getTableAttributesReadonly(entityType).collect(
-				toMap(Attribute::getName, Function.identity(), (u, v) ->
-				{
-					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				}, LinkedHashMap::new));
+		Map<String, Attribute> readonlyTableAttrs = getTableAttributesReadonly(entityType).collect(
+				toLinkedMap(Attribute::getName, Function.identity()));
 		if (!readonlyTableAttrs.isEmpty())
 		{
 			dropTableTriggers(entityType);
@@ -844,11 +841,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		if (attr.isReadOnly())
 		{
-			LinkedHashMap<String, Attribute> updatedReadonlyTableAttrs = getTableAttributesReadonly(entityType).collect(
-					toMap(Attribute::getName, Function.identity(), (u, v) ->
-					{
-						throw new IllegalStateException(String.format("Duplicate key %s", u));
-					}, LinkedHashMap::new));
+			Map<String, Attribute> updatedReadonlyTableAttrs = getTableAttributesReadonly(entityType).collect(
+					toLinkedMap(Attribute::getName, Function.identity()));
 			updatedReadonlyTableAttrs.remove(attr.getName());
 
 			updateTableTriggers(entityType, updatedReadonlyTableAttrs.values());

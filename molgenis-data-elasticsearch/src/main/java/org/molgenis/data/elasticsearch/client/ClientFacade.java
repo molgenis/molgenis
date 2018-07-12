@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -57,9 +56,11 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.elasticsearch.action.DocWriteRequest.OpType.INDEX;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZE;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**
  * Elasticsearch client facade:
@@ -134,10 +135,7 @@ public class ClientFacade implements Closeable
 	{
 		XContentBuilder settings = settingsBuilder.createSettings(indexSettings);
 		Map<String, XContentBuilder> mappings = mappingStream.collect(
-				toMap(Mapping::getType, mappingSourceBuilder::createMapping, (u, v) ->
-				{
-					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				}, LinkedHashMap::new));
+				toLinkedMap(Mapping::getType, mappingSourceBuilder::createMapping));
 
 		CreateIndexRequestBuilder createIndexRequest = client.admin().indices().prepareCreate(index.getName());
 		createIndexRequest.setSettings(settings);
@@ -551,8 +549,7 @@ public class ClientFacade implements Closeable
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Explained doc with id '{}' in index '{}' for query '{}'.", searchHit.getId(),
-					searchHit.getIndex(),
-					query);
+					searchHit.getIndex(), query);
 		}
 		return explainResponse.getExplanation();
 	}

@@ -9,7 +9,6 @@ import org.molgenis.util.UnexpectedEnumException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -21,7 +20,8 @@ import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
@@ -30,6 +30,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COP
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**
  * EntityType defines the structure and attributes of an Entity. Attributes are unique. Other software components
@@ -115,13 +116,15 @@ public class EntityType extends StaticEntity implements Labeled
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
 			// step #1: deep copy attributes
-			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityType.getOwnAllAttributes().spliterator(),
-					false).map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
-						  .map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
-						  .collect(toMap(Attribute::getName, Function.identity(), (u, v) ->
-						  {
-							  throw new IllegalStateException(String.format("Duplicate key %s", u));
-						  }, LinkedHashMap::new));
+			Map<String, Attribute> ownAttrMap = stream(entityType.getOwnAllAttributes().spliterator(), false).map(
+					attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
+																											 .map(attrCopy -> attrCopy
+																													 .setEntity(
+																															 entityTypeCopy))
+																											 .collect(
+																													 toLinkedMap(
+																															 Attribute::getName,
+																															 Function.identity()));
 
 			// step #2: update attribute.parent relations
 			ownAttrMap.forEach((attrName, ownAttr) ->
