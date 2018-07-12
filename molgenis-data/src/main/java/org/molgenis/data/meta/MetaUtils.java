@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.Package;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 public class MetaUtils
 {
@@ -36,8 +37,11 @@ public class MetaUtils
 	 */
 	public static boolean isSystemPackage(Package aPackage)
 	{
-		return aPackage.getId().equals(PACKAGE_SYSTEM) || (aPackage.getRootPackage() != null
-				&& aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM));
+		//Needs to run as system since you might not have permission to read the sys package
+		//Once we have READ_META permission checks on the packages this runAsSystem can be removed
+		//https://github.com/molgenis/molgenis/issues/7528
+		return runAsSystem(() -> aPackage.getId().equals(PACKAGE_SYSTEM) || (aPackage.getRootPackage() != null
+				&& aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM)));
 	}
 
 	public static String getFullyQualyfiedName(Package aPackage)
