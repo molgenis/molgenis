@@ -4,7 +4,6 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;

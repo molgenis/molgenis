@@ -1,17 +1,13 @@
 package org.molgenis.security.core.runas;
 
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static java.util.Collections.singletonList;
-import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
-import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_MODIFY_AUDITING;
-import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP;
+import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 /**
  * Authentication token for the SYSTEM user
