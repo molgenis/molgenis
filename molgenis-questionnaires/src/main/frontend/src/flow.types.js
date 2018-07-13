@@ -35,6 +35,7 @@ export type ReportHeaderData = {
 
 export type QuestionnaireState = {
   username: string,
+  language: string,
   chapters: Array<Chapter>,
   error: string,
   formData: Object,
@@ -46,7 +47,7 @@ export type QuestionnaireState = {
   questionnaireRowId: string,
   numberOfOutstandingCalls: number,
   submissionText: string,
-  reportData: ?ReportHeaderData
+  reportHeaderData: ?ReportHeaderData
 }
 
 export type VuexContext = {

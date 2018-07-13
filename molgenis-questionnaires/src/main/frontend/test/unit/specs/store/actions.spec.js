@@ -304,7 +304,7 @@ describe('actions', () => {
   describe('GET_QUESTIONNAIRE_OVERVIEW', () => {
     it('should return return a questionnaire', done => {
       const questionnaireId = 'test_quest'
-      const questionnaire = 'questionnaire'
+      const questionnaire = {items: [{label: 'label'}]}
       mockApiGetSuccess('/api/v2/test_quest', questionnaire)
 
       const expectedMutations = [
@@ -314,7 +314,9 @@ describe('actions', () => {
         {type: 'SET_LOADING', payload: false}
       ]
 
-      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, {}, expectedMutations, [], done)
+      const state = {}
+
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, state, expectedMutations, [], done)
     })
 
     it('should commit any errors to the store', done => {

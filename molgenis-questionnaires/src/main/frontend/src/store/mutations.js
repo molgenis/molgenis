@@ -5,6 +5,9 @@ const mutations = {
   'SET_USERNAME' (state: QuestionnaireState, username: string) {
     state.username = username
   },
+  'SET_LANGUAGE' (state: QuestionnaireState, language: string) {
+    state.language = language
+  },
   'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
     state.navigationBlocked = block
   },
@@ -68,8 +71,8 @@ const mutations = {
     state.formData.status = status
   },
 
-  'SET_QUESTIONNAIRE_REPORT_HEADER' (state: QuestionnaireState, reportData: ReportHeaderData) {
-    state.reportData = reportData
+  'SET_QUESTIONNAIRE_REPORT_HEADER' (state: QuestionnaireState, reportHeaderData: ReportHeaderData) {
+    state.reportHeaderData = reportHeaderData
   }
 }
 
