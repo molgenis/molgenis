@@ -46,6 +46,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -100,6 +101,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 	@Autowired
 	private UserAccountService userAccountService;
+
+	public MolgenisWebAppSecurityConfig()
+	{
+		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception

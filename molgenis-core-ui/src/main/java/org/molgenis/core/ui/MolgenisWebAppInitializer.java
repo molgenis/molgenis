@@ -10,8 +10,11 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import javax.servlet.*;
+import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import java.util.EnumSet;
 
 public class MolgenisWebAppInitializer
@@ -54,18 +57,18 @@ public class MolgenisWebAppInitializer
 		}
 		else
 		{
-			final long maxSize = (long) maxFileSize * MB;
+			dispatcherServletRegistration.setAsyncSupported(true);
 			dispatcherServletRegistration.addMapping("/");
-			dispatcherServletRegistration.setMultipartConfig(
-					new MultipartConfigElement(null, maxSize, maxSize, FILE_SIZE_THRESHOLD));
 		}
 
 		// add filters
 		Dynamic browserDetectionFiler = servletContext.addFilter("browserDetectionFilter",
 				BrowserDetectionFilter.class);
+		browserDetectionFiler.setAsyncSupported(true);
 		browserDetectionFiler.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
 
 		Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
+		etagFilter.setAsyncSupported(true);
 		etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
 
 		// enable use of request scoped beans in FrontController

@@ -15,10 +15,13 @@ import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.DataService;
+import org.molgenis.data.blob.BlobStore;
+import org.molgenis.data.blob.DiskBlobStore;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.platform.config.PlatformConfig;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.i18n.PropertiesMessageSource;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.freemarker.HasPermissionDirective;
@@ -42,15 +45,15 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
@@ -97,6 +100,26 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private IdGenerator idGenerator;
+
+	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer)
+	{
+		configurer.setDefaultTimeout(60 * 1000);
+		configurer.setTaskExecutor(asyncTaskExecutor());
+	}
+
+	@Bean
+	public AsyncTaskExecutor asyncTaskExecutor()
+	{
+		ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+		threadPoolTaskExecutor.setCorePoolSize(5);
+		threadPoolTaskExecutor.setMaxPoolSize(10);
+		threadPoolTaskExecutor.setQueueCapacity(25);
+		return threadPoolTaskExecutor;
+	}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry)
@@ -254,6 +277,24 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 		return pspc;
 	}
 
+	// TODO get rid of code duplication
+	// TODO move to own config class and include in platform config
+	@Bean
+	public BlobStore blobStore()
+	{
+		// get molgenis home directory
+		Path appDataRoot = AppDataRootProvider.getAppDataRoot();
+
+		// create molgenis store directory in molgenis data directory if not exists
+		String molgenisFileStoreDirStr = Paths.get(appDataRoot.toString(), "data", "blobstore").toString();
+		File molgenisDataDir = new File(molgenisFileStoreDirStr);
+		if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs())
+		{
+			throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
+		}
+		return new DiskBlobStore(Paths.get(molgenisFileStoreDirStr), idGenerator);
+	}
+
 	@Bean
 	public FileStore fileStore()
 	{
@@ -327,12 +368,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
 
-	}
-
-	@Bean
-	public MultipartResolver multipartResolver()
-	{
-		return new StandardServletMultipartResolver();
 	}
 
 	@Bean
