@@ -11,8 +11,10 @@
 
     <div class="row">
       <div class="col" v-if="getLoginUser.isSuperUser">
-          <button id="add-group-btn" @click="addGroup" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Group</button>
-        <h3 class="mt-2">Groups</h3>
+        <button id="add-group-btn" @click="addGroup" type="button" class="btn btn-primary float-right"><i
+          class="fa fa-plus"></i> {{'security-ui-add-group' | i18n}}
+        </button>
+        <h3 class="mt-2">{{'security-ui-groups-header' | i18n}}</h3>
       </div>
     </div>
 

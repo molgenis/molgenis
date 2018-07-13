@@ -8,7 +8,7 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">
-              <router-link :to="{ name: 'groupOverView' }">Groups</router-link>
+              <router-link :to="{ name: 'groupOverView' }">{{ 'security-ui-breadcrumb-groups' | i18n }}</router-link>
             </li>
             <li class="breadcrumb-item active text-capitalize" aria-current="page">{{name}}</li>
           </ol>
@@ -24,8 +24,10 @@
 
     <div class="row">
       <div class="col">
-        <button id="add-member-btn" v-if="canAddMember" @click="addMember" type="button" class="btn btn-primary float-right"><i class="fa fa-plus"></i> Add Member</button>
-        <h3 class="mt-2">Members</h3>
+        <button id="add-member-btn" v-if="canAddMember" @click="addMember" type="button"
+                class="btn btn-primary float-right"><i class="fa fa-plus"></i> {{'security-ui-add-member' | i18n}}
+        </button>
+        <h3 class="mt-2">{{'security-ui-members-header' | i18n}}</h3>
       </div>
     </div>
 
