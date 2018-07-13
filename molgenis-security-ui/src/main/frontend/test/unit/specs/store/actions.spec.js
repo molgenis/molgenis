@@ -28,7 +28,12 @@ describe('actions', () => {
     })
 
     it('should commit any errors to the store', done => {
-      const error = 'error'
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
 
       const get = td.function('api.get')
       td.when(get('/api/plugin/security/group')).thenReject(error)
@@ -69,7 +74,13 @@ describe('actions', () => {
 
     it('should commit any errors to the store', done => {
       const get = td.function('api.get')
-      td.when(get('/api/plugin/security/group/error-group/role')).thenReject()
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
+      td.when(get('/api/plugin/security/group/error-group/role')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -105,7 +116,13 @@ describe('actions', () => {
 
     it('should commit any errors to the store', done => {
       const get = td.function('api.get')
-      td.when(get('/api/plugin/security/user')).thenReject()
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
+      td.when(get('/api/plugin/security/user')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -163,7 +180,13 @@ describe('actions', () => {
 
     it('should commit any errors to the store', done => {
       const get = td.function('api.get')
-      td.when(get('/api/plugin/security/group/error-group/member')).thenReject()
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
+      td.when(get('/api/plugin/security/group/error-group/member')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -199,7 +222,13 @@ describe('actions', () => {
 
     it('should commit any errors to the store', done => {
       const get = td.function('api.get')
-      td.when(get('/api/plugin/security/group/error-group/permission')).thenReject()
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
+      td.when(get('/api/plugin/security/group/error-group/permission')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -261,7 +290,12 @@ describe('actions', () => {
         })
       }
 
-      const error = 'error'
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
 
       const post = td.function('api.post')
       td.when(post('/api/plugin/security/group', generatedPayload)).thenReject(error)
@@ -270,7 +304,7 @@ describe('actions', () => {
       const options = {
         payload: createGroupCommand,
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: error}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -310,7 +344,12 @@ describe('actions', () => {
         body: JSON.stringify(addMemberCommand)
       }
 
-      const error = 'error'
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
 
       const post = td.function('api.post')
       td.when(post('/api/plugin/security/group/my-group/member', generatedPayload)).thenReject(error)
@@ -319,7 +358,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, addMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: error}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -348,7 +387,12 @@ describe('actions', () => {
     })
 
     it('should commit any errors to the store', done => {
-      const error = 'error'
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
 
       const delete_ = td.function('api.delete_')
       td.when(delete_('/api/plugin/security/group/my-group/member/user1')).thenReject(error)
@@ -357,7 +401,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, memberName},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: error}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 
@@ -392,7 +436,12 @@ describe('actions', () => {
     })
 
     it('should commit any errors to the store', done => {
-      const error = 'error'
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
 
       const generatedPayload = {
         body: JSON.stringify(updateMemberCommand)
@@ -405,7 +454,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, memberName, updateMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: error}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
         ]
       }
 

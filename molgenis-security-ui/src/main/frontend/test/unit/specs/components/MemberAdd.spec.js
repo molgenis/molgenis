@@ -3,9 +3,15 @@ import {createLocalVue, shallowMount} from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
 
+const $t = (key) => {
+  const translations = {}
+  return translations[key]
+}
+
 const localVue = createLocalVue()
 
 localVue.use(Vuex)
+localVue.filter('i18n', $t)
 
 describe('MemberAdd component', () => {
   let getters

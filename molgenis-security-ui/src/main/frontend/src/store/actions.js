@@ -17,6 +17,17 @@ const toGroupMember = (response): GroupMember => {
   }
 }
 
+const buildErrorMessage = (response) => {
+  if (response.errors) {
+    return response.errors.map((error) => {
+      return error.message + ' ' + error.code
+    }).join(', ')
+  } else {
+    // fallback if error is not in expected format
+    return 'An error has occurred.'
+  }
+}
+
 const handleSuccess = (commit: Function, message: string) => {
   commit('setToast', {type: 'success', message})
   asyncUtilService.callAfter(() => {
@@ -28,8 +39,8 @@ const actions = {
   'fetchGroups' ({commit}: { commit: Function }) {
     return api.get(GROUP_ENDPOINT).then(response => {
       commit('setGroups', response)
-    }, () => {
-      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    }, (response) => {
+      commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
     })
   },
 
@@ -37,16 +48,16 @@ const actions = {
     const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/role'
     return api.get(url).then(response => {
       commit('setGroupRoles', {groupName, groupRoles: response})
-    }, () => {
-      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    }, (response) => {
+      commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
     })
   },
 
   'tempFetchUsers' ({commit}: { commit: Function }) {
     return api.get(TEMP_USER_ENDPOINT).then(response => {
       commit('setUsers', response)
-    }, () => {
-      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    }, (response) => {
+      commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
     })
   },
 
@@ -55,8 +66,8 @@ const actions = {
     return api.get(url).then(response => {
       const groupMembers = response.map(toGroupMember)
       commit('setGroupMembers', {groupName, groupMembers})
-    }, () => {
-      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    }, (response) => {
+      commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
     })
   },
 
@@ -64,8 +75,8 @@ const actions = {
     const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName) + '/permission'
     return api.get(url).then(groupPermissions => {
       commit('setGroupPermissions', { groupName, groupPermissions })
-    }, () => {
-      commit('setToast', { type: 'danger', message: 'Error when calling backend' })
+    }, (response) => {
+      commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
     })
   },
 
@@ -81,9 +92,9 @@ const actions = {
         commit('setGroups', response)
         handleSuccess(commit, 'Created ' + createGroupCmd.name + ' group')
         resolve()
-      }, (error) => {
-        commit('setToast', { type: 'danger', message: error })
-        reject(error)
+      }, (response) => {
+        commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
+        reject(response)
       })
     })
   },
@@ -96,9 +107,9 @@ const actions = {
       api.post(url, payload).then(() => {
         handleSuccess(commit, 'Added member')
         resolve()
-      }, (error) => {
-        commit('setToast', {type: 'danger', message: error})
-        reject(error)
+      }, (response) => {
+        commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
+        reject(response)
       })
     })
   },
@@ -110,9 +121,9 @@ const actions = {
       api.delete_(url).then(() => {
         handleSuccess(commit, 'Member removed from group')
         resolve()
-      }, (error) => {
-        commit('setToast', {type: 'danger', message: error})
-        reject(error)
+      }, (response) => {
+        commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
+        reject(response)
       })
     })
   },
@@ -125,9 +136,9 @@ const actions = {
       api.put(url, payload).then(() => {
         handleSuccess(commit, 'Member updated')
         resolve()
-      }, (error) => {
-        commit('setToast', {type: 'danger', message: error})
-        reject(error)
+      }, (response) => {
+        commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
+        reject(response)
       })
     })
   },
@@ -139,9 +150,9 @@ const actions = {
       api.get(url).then((response) => {
         const exists = response.items.length > 0
         resolve(exists)
-      }, (error) => {
-        commit('setToast', {type: 'danger', message: 'Error calling backend'})
-        reject(error)
+      }, (response) => {
+        commit('setToast', { type: 'danger', message: buildErrorMessage(response) })
+        reject(response)
       })
     })
   }

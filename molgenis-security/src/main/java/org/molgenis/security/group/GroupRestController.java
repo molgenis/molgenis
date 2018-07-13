@@ -81,21 +81,21 @@ public class GroupRestController
 	{
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES);
 
-		if (!groupService.isGroupNameAvailable(groupValue))
-		{
+//		if (!groupService.isGroupNameAvailable(groupValue))
+//		{
 			throw new GroupNameNotAvailableException(group.getName());
-		}
+//		}
 
-		groupService.persist(groupValue);
-		groupPermissionService.grantDefaultPermissions(groupValue);
-		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
+//		groupService.persist(groupValue);
+//		groupPermissionService.grantDefaultPermissions(groupValue);
+//		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-												  .path("/{name}")
-												  .buildAndExpand(groupValue.getName())
-												  .toUri();
-
-		return ResponseEntity.created(location).build();
+//		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+//												  .path("/{name}")
+//												  .buildAndExpand(groupValue.getName())
+//												  .toUri();
+//
+//		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping(GROUP_END_POINT)
