@@ -2,9 +2,15 @@ import MemberDetail from '../../../../src/components/MemberDetail'
 import {createLocalVue, shallowMount} from '@vue/test-utils'
 import Vuex from 'vuex'
 
+const $t = (key) => {
+  const translations = {}
+  return translations[key]
+}
+
 const localVue = createLocalVue()
 
 localVue.use(Vuex)
+localVue.filter('i18n', $t)
 
 const $router = {
   push: function () {}

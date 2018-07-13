@@ -8,7 +8,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">
-              <router-link :to="{ name: 'groupOverView' }" class="text-capitalize">Groups</router-link>
+              <router-link :to="{ name: 'groupOverView' }" class="text-capitalize">{{ 'security-ui-breadcrumb-groups' |
+                i18n }}
+              </router-link>
             </li>
             <li class="breadcrumb-item">
               <router-link :to="{ name: 'groupDetail', params: { name: groupName } }" class="text-capitalize">{{groupName}}</router-link>
@@ -21,13 +23,13 @@
 
     <div class="row mb-3  ">
       <div class="col">
-        <h1>Member details</h1>
+        <h1>{{'security-ui-member-details-header' | i18n}}</h1>
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-6">
-        <h5 class="font-weight-light">Username</h5>
+        <h5 class="font-weight-light">{{'security-ui-membership-attribute-user' | i18n}}</h5>
         <h5 v-if="member" class="pl-3">{{memberName}}</h5>
       </div>
     </div>
@@ -36,7 +38,7 @@
 
     <div class="row">
       <div class="col-md-3">
-        <h5 class="font-weight-light">Role</h5>
+        <h5 class="font-weight-light">{{'security-ui-membership-attribute-role' | i18n}}</h5>
         <h5 v-if="member && !isEditRoleMode" class="pl-3">{{member.roleLabel}}</h5>
         <form v-else-if="isEditRoleMode">
 
@@ -58,7 +60,7 @@
           type="button"
           @click="onEditRole">
           <i class="fa fa-edit"></i>
-          Edit
+          {{'security-ui-btn-edit' | i18n}}
         </button>
       </div>
       <div v-else class="col-md-9 ">
@@ -67,7 +69,7 @@
           class="btn btn-sm btn-secondary"
           type="button"
           @click.prevent="isEditRoleMode = !isEditRoleMode">
-          Cancel
+          {{'security-ui-btn-cancel' | i18n}}
         </button>
 
         <button
@@ -101,7 +103,7 @@
         type="button"
         @click.prevent="onRemoveMember"
         :disabled="isEditRoleMode">
-        Remove from group
+        {{'security-ui-member-remove' | i18n}}
       </button>
 
       <button
@@ -110,7 +112,7 @@
         class="btn btn-danger"
         type="button"
         disabled="disabled">
-        Removing <i class="fa fa-spinner fa-spin "></i>
+        {{'security-ui-member-removing' | i18n}} <i class="fa fa-spinner fa-spin "></i>
       </button>
     </template>
 
