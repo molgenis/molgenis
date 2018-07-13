@@ -154,4 +154,35 @@ describe('mutations', () => {
       expect(state.numberOfOutstandingCalls).to.equal(2)
     })
   })
+
+  describe('SET_QUESTIONNAIRE_REPORT_HEADER', () => {
+    it('should set the reportHeaderData on the state', () => {
+      state.reportHeaderData = {}
+      const data = {
+        logoDataUrl: 'daya:abc-123',
+        introText: 'introText'
+      };
+      mutations.SET_QUESTIONNAIRE_REPORT_HEADER(state, data)
+
+      expect(state.reportHeaderData).to.equal(data)
+    })
+  })
+
+  describe('SET_LANGUAGE', () => {
+    it('should set the language used on the state', () => {
+      const lng = 'lng';
+      mutations.SET_LANGUAGE(state, lng)
+
+      expect(state.language).to.equal(lng)
+    })
+  })
+
+  describe('SET_USERNAME', () => {
+    it('should set the username on the state', () => {
+      const user = 'user';
+      mutations.SET_USERNAME(state, user)
+
+      expect(state.username).to.equal(user)
+    })
+  })
 })

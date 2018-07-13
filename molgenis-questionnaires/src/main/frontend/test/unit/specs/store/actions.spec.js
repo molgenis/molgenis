@@ -302,7 +302,7 @@ describe('actions', () => {
   })
 
   describe('GET_QUESTIONNAIRE_OVERVIEW', () => {
-    it('should return return a questionnaire', done => {
+    it('should return a questionnaire', done => {
       const questionnaireId = 'test_quest'
       const questionnaire = {items: [{label: 'label'}]}
       mockApiGetSuccess('/api/v2/test_quest', questionnaire)
@@ -315,6 +315,45 @@ describe('actions', () => {
       ]
 
       const state = {}
+
+      testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, state, expectedMutations, [], done)
+    })
+
+    it('should a questionnaire and fetch report header data if set on questionnaire ', done => {
+      const questionnaireId = 'other_quest'
+      const questionnaire = {
+        items: [
+          {
+            label: 'label', report_header: {_href: '/api/v2/reportHeaderData'}
+          }
+        ]
+      }
+      const reportHeaderDataResp = {
+        logo: 'data:123-abc',
+        intro: 'intro',
+        'intro-en': 'intro-en',
+        'intro-fr': 'intro-fr'
+      }
+      const reportHeaderData = {
+        logoDataUrl: 'data:123-abc',
+        introText: 'intro-en'
+      }
+      const get = td.function('api.get')
+      td.when(get('/api/v2/other_quest')).thenResolve(questionnaire)
+      td.when(get('/api/v2/reportHeaderData')).thenResolve(reportHeaderDataResp)
+      td.replace(api, 'get', get)
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
+        {type: 'SET_QUESTIONNAIRE_REPORT_HEADER', payload: reportHeaderData},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      const state = {
+        language: 'en'
+      }
 
       testAction(actions.GET_QUESTIONNAIRE_OVERVIEW, questionnaireId, state, expectedMutations, [], done)
     })

@@ -307,5 +307,154 @@ describe('Questionniare service', () => {
 
       expect(pdfContent).to.deep.equal(expectedPdfContent)
     })
+
+    it('should include logo and intro text if these are passed', () => {
+      const smallQuestionnaireOverView= {
+        title: 'test questionnaire',
+        chapters: [{
+          id: 'Chapter1',
+          title: 'General questions',
+          chapterSections: [
+            {
+              questionId: 'qMref',
+              questionLabel: 'mref type question',
+              answerLabel: 'MREF answer'
+            }
+          ]
+        }]
+      }
+      const reportHeaderData = {
+        introText: 'introText',
+        logoDataUrl: 'logoDataUrl'
+      }
+      const pdfContent = questionnaireService.buildPdfContent(smallQuestionnaireOverView, reportHeaderData)
+      const expectedPdfContent = [
+        {
+          "text": "test questionnaire",
+          "style": "header"
+        },
+        {
+          "alignment": "justify",
+          "columns": [
+            {
+              "text": "introText",
+              "style": "introText"
+            },
+            {
+              "image": "logoDataUrl",
+              "alignment": "right"
+            }
+          ]
+        },
+        {
+          "text": "General questions",
+          "style": "chapterTitle"
+        },
+        {
+          "text": "mref type question",
+          "style": "questionLabel"
+        },
+        {
+          "text": "MREF answer",
+          "style": "answerLabel"
+        }
+      ]
+
+      expect(pdfContent).to.deep.equal(expectedPdfContent)
+    })
+
+    it('should include intro text if this is passed', () => {
+      const smallQuestionnaireOverView= {
+        title: 'test questionnaire',
+        chapters: [{
+          id: 'Chapter1',
+          title: 'General questions',
+          chapterSections: [
+            {
+              questionId: 'qMref',
+              questionLabel: 'mref type question',
+              answerLabel: 'MREF answer'
+            }
+          ]
+        }]
+      }
+      const reportHeaderData = {
+        introText: 'introText'
+      }
+      const pdfContent = questionnaireService.buildPdfContent(smallQuestionnaireOverView, reportHeaderData)
+
+      const expectedPdfContent = [
+        {
+          "text": "test questionnaire",
+          "style": "header"
+        },
+        {
+          "text": "introText",
+          "style": "introText"
+        },
+        {
+          "text": "General questions",
+          "style": "chapterTitle"
+        },
+        {
+          "text": "mref type question",
+          "style": "questionLabel"
+        },
+        {
+          "text": "MREF answer",
+          "style": "answerLabel"
+        }
+      ]
+
+      expect(pdfContent).to.deep.equal(expectedPdfContent)
+    })
+
+    it('should include logo if this is passed', () => {
+      const smallQuestionnaireOverView= {
+        title: 'test questionnaire',
+        chapters: [{
+          id: 'Chapter1',
+          title: 'General questions',
+          chapterSections: [
+            {
+              questionId: 'qMref',
+              questionLabel: 'mref type question',
+              answerLabel: 'MREF answer'
+            }
+          ]
+        }]
+      }
+      const reportHeaderData = {
+        logoDataUrl: 'logoDataUrl'
+      }
+      const pdfContent = questionnaireService.buildPdfContent(smallQuestionnaireOverView, reportHeaderData)
+
+      const expectedPdfContent = [
+        {
+          "text": "test questionnaire",
+          "style": "header"
+        },
+        {
+          "image": "logoDataUrl",
+          "alignment": "right"
+        },
+        {
+          "text": "General questions",
+          "style": "chapterTitle"
+        },
+        {
+          "text": "mref type question",
+          "style": "questionLabel"
+        },
+        {
+          "text": "MREF answer",
+          "style": "answerLabel"
+        }
+      ]
+
+      console.log(JSON.stringify(pdfContent))
+
+      expect(pdfContent).to.deep.equal(expectedPdfContent)
+    })
   })
 })
