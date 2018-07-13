@@ -4,7 +4,6 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Package;
 
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class MetaUtils
@@ -36,14 +35,11 @@ public class MetaUtils
 	 */
 	public static boolean isSystemPackage(Package aPackage)
 	{
+		if (aPackage == null)
+		{
+			return false;
+		}
 		return aPackage.getId().equals(PACKAGE_SYSTEM) || (aPackage.getRootPackage() != null
 				&& aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM));
-	}
-
-	public static String getFullyQualyfiedName(Package aPackage)
-	{
-		String packageId = aPackage.getId();
-		Package parentPackage = aPackage.getParent();
-		return parentPackage == null ? packageId : getFullyQualyfiedName(parentPackage) + PACKAGE_SEPARATOR + packageId;
 	}
 }
