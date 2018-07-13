@@ -20,6 +20,8 @@ docker run \
 ```
 
 ## Run the MOLGENIS-image with integrated services
+>note: make sure when you kill the docker-compose instance you also run ```docker-compose down``` to cleanup volumes and network layers! 
+
 We support 2 operating systems at the moment.
 - Windows 8 (and beyond)
 - OSX or MacOS
