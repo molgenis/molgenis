@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -537,7 +538,11 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
 	{
 		when(user.getId()).thenReturn("id");
 		when(user.getUsername()).thenReturn("name");
-		when(userService.getUsers()).thenReturn(singletonList(user));
+
+		User anonymousUser = mock(User.class);
+		when(anonymousUser.getUsername()).thenReturn("anonymous");
+
+		when(userService.getUsers()).thenReturn(Arrays.asList(user, anonymousUser));
 
 		mockMvc.perform(get(TEMP_USER_END_POINT))
 			   .andExpect(status().isOk())

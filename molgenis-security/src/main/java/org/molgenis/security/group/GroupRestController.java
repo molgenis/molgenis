@@ -201,7 +201,10 @@ public class GroupRestController
 	@PreAuthorize("hasAnyRole('SU', 'MANAGER')")
 	public Collection<UserResponse> getUsers()
 	{
-		return userService.getUsers().stream().map(UserResponse::fromEntity).collect(Collectors.toList());
+		return userService.getUsers().stream()
+						  .filter(u -> !u.getUsername().equals("anonymous"))
+						  .map(UserResponse::fromEntity)
+						  .collect(Collectors.toList());
 	}
 
 	@GetMapping(GROUP_PERMISSION_END_POINT)
