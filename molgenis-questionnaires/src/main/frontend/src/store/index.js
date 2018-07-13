@@ -63,7 +63,12 @@ const state: QuestionnaireState = {
   /**
    * Submission text shown after completing a questionnaire
    */
-  submissionText: ''
+  submissionText: '',
+
+  /**
+   * Data (text and logo) used in overview report header
+   */
+  reportData: {}
 }
 
 Vue.use(Vuex)

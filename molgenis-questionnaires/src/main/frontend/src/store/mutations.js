@@ -1,5 +1,5 @@
 // @flow
-import type { QuestionnaireState, Chapter, QuestionnaireType } from '../flow.types.js'
+import type { QuestionnaireState, Chapter, QuestionnaireType, ReportHeaderData } from '../flow.types.js'
 
 const mutations = {
   'SET_USERNAME' (state: QuestionnaireState, username: string) {
@@ -66,6 +66,10 @@ const mutations = {
 
   'UPDATE_FORM_STATUS' (state: QuestionnaireState, status: string) {
     state.formData.status = status
+  },
+
+  'SET_QUESTIONNAIRE_REPORT_HEADER' (state: QuestionnaireState, reportData: ReportHeaderData) {
+    state.reportData = reportData
   }
 }
 

@@ -15,17 +15,17 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    // proxyTable: {
-    //   '/login': {
-    //     target: 'http://localhost:8080'
-    //   },
-    //   '/api': {
-    //     target: 'http://localhost:8080'
-    //   },
-    //   '/menu/plugins/questionnaires': {
-    //     target: 'http://localhost:8080'
-    //   }
-    // },
+    proxyTable: {
+      '/login': {
+        target: 'http://localhost:8080'
+      },
+      '/api': {
+        target: 'http://localhost:8080'
+      },
+      '/menu/plugins/questionnaires': {
+        target: 'http://localhost:8080'
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -63,45 +63,45 @@ module.exports = {
      */
 
     before (app) {
-      app.get('/menu/plugins/questionnaires/list', function (req, res) {
-        res.json(questionnaireList)
-      })
-
-      app.get('/api/v2/i18n/questionnaire/en', function (req, res) {
-        res.json(localizedMessages)
-      })
-
-      app.get('/menu/plugins/questionnaires/start/questionnaire_1', function (req, res) {
-        res.json('OK')
-      })
-
-      app.get('/menu/plugins/questionnaires/start/questionnaire_2', function (req, res) {
-        res.json('OK')
-      })
-
-      app.get('/api/v2/questionnaire_1', function (req, res) {
-        res.json(firstQuestionnaireResponse)
-      })
-
-      app.get('/api/v2/questionnaire_2', function (req, res) {
-        res.json(secondQuestionnaireResponse)
-      })
-
-      app.get('/api/v2/questionnaire_3', function (req, res) {
-        res.json(thirdQuestionnaireResponse)
-      })
-
-      app.put('/api/v1/*', function (req, res) {
-        res.json('OK')
-      })
-
-      app.post('/api/v2/*', function (req, res) {
-        res.json('OK')
-      })
-
-      app.get('/menu/plugins/questionnaires/submission-text/*', function (req, res) {
-        res.json('<h1>Thank you</h1>')
-      })
+      // app.get('/menu/plugins/questionnaires/list', function (req, res) {
+      //   res.json(questionnaireList)
+      // })
+      //
+      // app.get('/api/v2/i18n/questionnaire/en', function (req, res) {
+      //   res.json(localizedMessages)
+      // })
+      //
+      // app.get('/menu/plugins/questionnaires/start/questionnaire_1', function (req, res) {
+      //   res.json('OK')
+      // })
+      //
+      // app.get('/menu/plugins/questionnaires/start/questionnaire_2', function (req, res) {
+      //   res.json('OK')
+      // })
+      //
+      // app.get('/api/v2/questionnaire_1', function (req, res) {
+      //   res.json(firstQuestionnaireResponse)
+      // })
+      //
+      // app.get('/api/v2/questionnaire_2', function (req, res) {
+      //   res.json(secondQuestionnaireResponse)
+      // })
+      //
+      // app.get('/api/v2/questionnaire_3', function (req, res) {
+      //   res.json(thirdQuestionnaireResponse)
+      // })
+      //
+      // app.put('/api/v1/*', function (req, res) {
+      //   res.json('OK')
+      // })
+      //
+      // app.post('/api/v2/*', function (req, res) {
+      //   res.json('OK')
+      // })
+      //
+      // app.get('/menu/plugins/questionnaires/submission-text/*', function (req, res) {
+      //   res.json('<h1>Thank you</h1>')
+      // })
     }
   },
 

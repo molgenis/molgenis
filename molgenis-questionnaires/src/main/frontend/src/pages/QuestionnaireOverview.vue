@@ -49,7 +49,8 @@
           falseLabel: this.$t('questionnaire_boolean_false')
         }
         const overView = questionnaireService.buildOverViewObject(this.$store.state.questionnaire, translations)
-        const pfdContent = questionnaireService.buildPdfContent(overView)
+        const reportData = this.$store.state.reportData
+        const pfdContent = questionnaireService.buildPdfContent(overView, reportData)
         questionnaireService.printContent(overView.title, pfdContent)
       }
     },

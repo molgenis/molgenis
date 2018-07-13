@@ -72,9 +72,26 @@ const actions = {
 
   'GET_QUESTIONNAIRE_OVERVIEW' ({commit}: VuexContext, questionnaireId: string) {
     cleanScreen(commit)
+    const lng = this._vm.$lng || this._vm.fallbackLng
     return api.get(`/api/v2/${questionnaireId}`).then(response => {
       commit('SET_QUESTIONNAIRE', response)
-      commit('SET_LOADING', false)
+
+      if (response.items[0].report_header) {
+        const reportDataEndPoint = response.items[0].report_header._href
+
+        api.get(reportDataEndPoint).then(reportDataResponse => {
+          const reportData = {
+            logoDataUrl: reportDataResponse.logo,
+            introText: reportDataResponse['intro-' + lng]
+          }
+          commit('SET_QUESTIONNAIRE_REPORT_HEADER', reportData)
+          commit('SET_LOADING', false)
+        }, error => {
+          handleError(commit, error)
+        })
+      } else {
+        commit('SET_LOADING', false)
+      }
     }, error => {
       handleError(commit, error)
     })

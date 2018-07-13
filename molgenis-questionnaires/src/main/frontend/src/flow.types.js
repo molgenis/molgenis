@@ -26,7 +26,11 @@ export type QuestionnaireType = {
   label: string,
   description? : string,
   status: QuestionnaireStatus
+}
 
+export type ReportHeaderData = {
+  introText?: string,
+  logoDataUrl?: string
 }
 
 export type QuestionnaireState = {
@@ -41,7 +45,8 @@ export type QuestionnaireState = {
   questionnaireList: Array<*>,
   questionnaireRowId: string,
   numberOfOutstandingCalls: number,
-  submissionText: string
+  submissionText: string,
+  reportData: ?ReportHeaderData
 }
 
 export type VuexContext = {
