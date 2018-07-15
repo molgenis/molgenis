@@ -4,10 +4,6 @@ pipeline {
             label 'molgenis'
         }
     }
-    environment {
-        ORG = 'molgenis'
-        APP_NAME = 'molgenis-app'
-    }
     stages {
         stage('Prepare') {
             steps {
@@ -61,126 +57,31 @@ pipeline {
             }
         }
 
-        stage('Run integration test') {
+        stage('Run platform integration tests') {
             agent {
                 kubernetes {
                     label 'molgenis-it'
-                    defaultContainer 'jnlp'
-                    yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    app: molgenis
-spec:
-  containers:
-  #Java agent, test executor
-  - name: jnlp
-    image: registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7:v3.9
-    command:
-    - /bin/sh
-    args:
-    - -c
-    - umask 0000; /usr/local/bin/run-jnlp-client $(JENKINS_SECRET) $(JENKINS_NAME)
-    resources:
-      limits:
-        memory: 512Mi
-    workingDir: /home/jenkins
-    env:
-    - name: JNLP_MAX_HEAP_UPPER_BOUND_MB
-      value: 64
-  #App under test
-  - name: molgenis
-    image: registry.molgenis.org/molgenis/molgenis-app:latest
-    resources:
-      limits:
-        memory: 512Mi
-    env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: k8sit
-    - name: SPRING_CLOUD_KUBERNETES_ENABLED
-      value: false
-  #DB
-  - name: mariadb
-    image: registry.access.redhat.com/rhscl/mariadb-102-rhel7:1
-    resources:
-      limits:
-        memory: 256Mi
-    env:
-    - name: MYSQL_USER
-      value: myuser
-    - name: MYSQL_PASSWORD
-      value: mypassword
-    - name: MYSQL_DATABASE
-      value: testdb
-    - name: MYSQL_ROOT_PASSWORD
-      value: secret
-    readinessProbe:
-      tcpSocket:
-        port: 3306
-      initialDelaySeconds: 5
-  #AMQ
-  - name: amq
-    image: registry.access.redhat.com/jboss-amq-6/amq63-openshift:1.3
-    resources:
-      limits:
-        memory: 256Mi
-    env:
-    - name: AMQ_USER
-      value: test
-    - name: AMQ_PASSWORD
-      value: secret
-    readinessProbe:
-      tcpSocket:
-        port: 61616
-      initialDelaySeconds: 5
-  #External API Third party (provided by mockserver)
-  - name: mockserver
-    image: jamesdbloom/mockserver:mockserver-5.3.0
-    resources:
-      limits:
-        memory: 256Mi
-    env:
-    - name: LOG_LEVEL
-      value: INFO
-    - name: JVM_OPTIONS
-      value: -Xmx128m
-    readinessProbe:
-      tcpSocket:
-        port: 1080
-      initialDelaySeconds: 5
-'''
                 }
-            }
-            environment {
-                //These env vars are used the tests to send message to users.in queue
-                AMQ_USER = 'test'
-                AMQ_PASSWORD = 'secret'
             }
             steps {
-                dir("integration-test") {
-                    container('mariadb') {
-                        //requires mysql
-                        sh 'sql/setup.sh'
-                    }
-
-                    // Default container 'jnlp'
-                    // this script requires curl and python.
-                    sh 'mockserver/setup.sh'
-
-                    //Run the tests.
-                    //Somehow simply "mvn ..." doesn't work here
-                    sh '/bin/bash -c "mvn -s ../configuration/settings.xml -B clean test"'
+                container('maven') {
+                    sh 'mvn verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis'
                 }
             }
-            post {
-                always {
-                    junit testResults: 'integration-test/target/surefire-reports/*.xml', allowEmptyResults: true
+        }
+
+        stage('Run api tests') {
+            agent {
+                kubernetes {
+                    label 'molgenis-it'
+                }
+            }
+            steps {
+                container('maven') {
+                    sh 'mvn verify -pl molgenis-api-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis'
                 }
             }
         }
 
     }
-
-}
 }
