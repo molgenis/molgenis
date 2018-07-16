@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component

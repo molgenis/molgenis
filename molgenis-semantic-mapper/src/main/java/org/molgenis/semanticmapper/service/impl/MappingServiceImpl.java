@@ -32,8 +32,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.support.EntityTypeUtils.hasSelfReferences;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.hasSelfReferences;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 

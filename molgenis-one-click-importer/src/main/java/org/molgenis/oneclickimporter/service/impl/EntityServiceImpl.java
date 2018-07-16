@@ -27,7 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
+import static org.molgenis.data.util.AttributeUtils.getValidIdAttributeTypes;
 
 @Component
 public class EntityServiceImpl implements EntityService

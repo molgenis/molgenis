@@ -5,7 +5,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.security.auth.RoleMetadata.*;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 public class Role extends StaticEntity
 {

@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.util.MetaUtils;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.mock;

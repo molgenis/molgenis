@@ -1,4 +1,4 @@
-package org.molgenis.data.support;
+package org.molgenis.data.util;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityReferenceCreator;
@@ -6,6 +6,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.EntityReference;
 import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 

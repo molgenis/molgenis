@@ -8,9 +8,9 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.AttributeUtils;
-import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.util.AttributeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlNameGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode.INCLUDE_DEFAULT_CONSTRAINT;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
-import static org.molgenis.data.support.EntityTypeUtils.*;
+import static org.molgenis.data.util.EntityTypeUtils.*;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}

@@ -8,7 +8,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.data.meta.AttributeType.FILE;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.

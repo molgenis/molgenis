@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 @Component

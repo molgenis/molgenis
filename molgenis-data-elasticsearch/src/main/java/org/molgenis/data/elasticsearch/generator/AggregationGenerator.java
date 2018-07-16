@@ -21,7 +21,7 @@ import java.util.List;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 /**
  * Generates Elasticsearch aggregation queries from MOLGENIS aggregation queries.
