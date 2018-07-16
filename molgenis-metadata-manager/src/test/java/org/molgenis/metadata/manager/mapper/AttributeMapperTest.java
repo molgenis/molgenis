@@ -20,7 +20,7 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.testng.Assert.assertEquals;
 
 public class AttributeMapperTest

@@ -5,7 +5,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.util.EntityUtils;
+import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.data.util.MetaUtils;
 import org.molgenis.searchall.model.AttributeResult;
 import org.molgenis.searchall.model.EntityTypeResult;
 import org.molgenis.searchall.model.PackageResult;
@@ -38,13 +39,12 @@ public class SearchAllService
 		final String lang = getCurrentUserLanguageCode();
 		return Result.builder()
 					 .setEntityTypes(dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-												.filter(not(EntityUtils::isSystemEntity))
-							 					.filter(not(EntityType::isAbstract))
+												.filter(not(EntityTypeUtils::isSystemEntity))
+												.filter(not(EntityType::isAbstract))
 												.map(entityType -> toEntityTypeResult(searchTerm, entityType, lang))
 												.filter(EntityTypeResult::isMatch)
 												.collect(toList()))
-					 .setPackages(dataService.findAll(PACKAGE, Package.class)
-											 .filter(not(EntityUtils::isSystemPackage))
+					 .setPackages(dataService.findAll(PACKAGE, Package.class).filter(not(MetaUtils::isSystemPackage))
 											 .map(PackageResult::create)
 											 .filter(packageResult -> packageResult.isLabelOrDescriptionMatch(
 													 searchTerm))

@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 

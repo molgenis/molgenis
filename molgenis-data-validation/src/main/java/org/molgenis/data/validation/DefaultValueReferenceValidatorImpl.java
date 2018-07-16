@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
-import static org.molgenis.data.support.AttributeUtils.getDefaultTypedValue;
+import static org.molgenis.data.util.AttributeUtils.getDefaultTypedValue;
 
 @Component
 class DefaultValueReferenceValidatorImpl implements DefaultValueReferenceValidator

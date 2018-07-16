@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {

@@ -47,7 +47,10 @@ class EmxDataProvider implements DataProvider
 		else
 		{
 			Optional<String> packageId = job.getPackageId();
-			return packageId.isPresent() && entityType.getId().startsWith(packageId.get() + PACKAGE_SEPARATOR);
+			return packageId.isPresent() && entityType.getId().startsWith(packageId.get() + PACKAGE_SEPARATOR)
+					&& job.getSource()
+						  .hasRepository(
+								  entityType.getId().substring(packageId.get().length() + PACKAGE_SEPARATOR.length()));
 		}
 	}
 

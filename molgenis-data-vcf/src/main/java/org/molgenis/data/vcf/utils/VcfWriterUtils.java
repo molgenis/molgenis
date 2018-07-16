@@ -22,7 +22,7 @@ import static com.google.common.collect.Iterables.transform;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.meta.AttributeType.BOOL;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
