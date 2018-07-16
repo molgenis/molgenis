@@ -15,26 +15,35 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.util.Objects.requireNonNull;
+
 @Import(JobFactoryRegistry.class)
 @Configuration
 public class JobExecutionConfig
 {
-	@Autowired
-	private DataService dataService;
-	@Autowired
-	private EntityManager entityManager;
-	@Autowired
-	private UserDetailsService userDetailsService;
-	@Autowired
-	private JobExecutionUpdater jobExecutionUpdater;
-	@Autowired
-	private MailSender mailSender;
+	private final DataService dataService;
+	private final EntityManager entityManager;
+	private final UserDetailsService userDetailsService;
+	private final JobExecutionUpdater jobExecutionUpdater;
+	private final MailSender mailSender;
+	private final JobFactoryRegistry jobFactoryRegistry;
+	private final RunAsUserTokenFactory runAsUserTokenFactory;
+
 	@Autowired
 	private ExecutorService executorService;
-	@Autowired
-	private JobFactoryRegistry jobFactoryRegistry;
-	@Autowired
-	private RunAsUserTokenFactory runAsUserTokenFactory;
+
+	public JobExecutionConfig(DataService dataService, EntityManager entityManager,
+			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
+			JobFactoryRegistry jobFactoryRegistry, RunAsUserTokenFactory runAsUserTokenFactory)
+	{
+		this.dataService = requireNonNull(dataService);
+		this.entityManager = requireNonNull(entityManager);
+		this.userDetailsService = requireNonNull(userDetailsService);
+		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
+		this.mailSender = requireNonNull(mailSender);
+		this.jobFactoryRegistry = requireNonNull(jobFactoryRegistry);
+		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
+	}
 
 	@Primary // Use this ExecutorService when no specific bean is demanded
 	@Bean
