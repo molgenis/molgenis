@@ -24,8 +24,8 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.

@@ -1,7 +1,7 @@
 package org.molgenis.data.security;
 
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.util.MetaUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;

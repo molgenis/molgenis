@@ -29,7 +29,7 @@ import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 /**

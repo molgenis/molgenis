@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.util.AttributeUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

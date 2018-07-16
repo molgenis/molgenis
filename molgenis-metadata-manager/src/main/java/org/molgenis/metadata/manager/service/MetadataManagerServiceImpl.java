@@ -6,7 +6,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;

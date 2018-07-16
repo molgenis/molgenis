@@ -26,12 +26,12 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
 
 /**
  * Meta data service for retrieving and editing meta data.

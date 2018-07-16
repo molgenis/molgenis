@@ -4,6 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.util.UnexpectedEnumException;
 
 import java.time.Instant;

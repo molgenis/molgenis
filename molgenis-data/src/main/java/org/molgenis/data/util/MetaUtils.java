@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.util;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Package;

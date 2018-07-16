@@ -11,7 +11,7 @@ import org.molgenis.semanticmapper.algorithmgenerator.categorymapper.CategoryMap
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 
 abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {

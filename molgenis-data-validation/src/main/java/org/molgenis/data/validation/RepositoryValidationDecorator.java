@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.support.EntityTypeUtils.*;
+import static org.molgenis.data.util.EntityTypeUtils.*;
 
 public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<Entity>
 {

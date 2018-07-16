@@ -2,7 +2,7 @@ package org.molgenis.semanticmapper.mapping.model;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

@@ -4,13 +4,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityIdentityUtils;
-import org.molgenis.data.util.EntityUtils;
+import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.data.util.MetaUtils;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.springframework.stereotype.Component;
 
@@ -110,7 +110,7 @@ public class SystemEntityTypePersister
 	{
 		// get all system entities
 		List<EntityType> removedSystemEntityMetas = dataService.findAll(ENTITY_TYPE_META_DATA, EntityType.class)
-															   .filter(EntityUtils::isSystemEntity)
+															   .filter(EntityTypeUtils::isSystemEntity)
 															   .filter(this::isNotExists)
 															   .collect(toList());
 

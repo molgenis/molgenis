@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**

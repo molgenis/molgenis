@@ -24,9 +24,9 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.util.AttributeUtils.getValidIdAttributeTypes;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.UPDATE;
 

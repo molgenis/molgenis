@@ -7,9 +7,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.PartialEntity;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -24,8 +24,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
+import static org.molgenis.data.util.EntityTypeUtils.createFetchForReindexing;
 
 /**
  * Elasticsearch search service that executes all requests using the elasticsearch client facade.
