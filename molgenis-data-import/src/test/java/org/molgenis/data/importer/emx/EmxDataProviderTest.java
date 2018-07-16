@@ -78,6 +78,20 @@ public class EmxDataProviderTest extends AbstractMockitoTest
 	}
 
 	@Test
+	public void testHasEntitiesExistingPackageFalse() throws Exception
+	{
+		String entityTypeId = "test_EntityTypeId";
+		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+
+		RepositoryCollection repositoryCollection = mock(RepositoryCollection.class);
+		when(repositoryCollection.hasRepository(entityType)).thenReturn(false);
+		when(emxImportJob.getSource()).thenReturn(repositoryCollection);
+		when(emxImportJob.getPackageId()).thenReturn(Optional.of("test"));
+
+		assertFalse(emxDataProvider.hasEntities(entityType));
+	}
+
+	@Test
 	public void testHasEntitiesAlternativeEntityTypeIdTrue() throws Exception
 	{
 		String entityTypeId = "base_EntityTypeId";
