@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-if=false class="alert alert-danger" role="alert">
-      <button type="button" class="close"><span aria-hidden="true">&times;</span></button>
+    <div v-if="error != undefined" class="alert alert-danger" role="alert">
+      <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
       {{error}}
     </div>
 
@@ -58,6 +58,7 @@
   import SearchInput from './SearchInput'
   import PackagesResult from './PackagesResult'
   import EntityResult from './EntityResult'
+  import {SET_ERROR} from '../store/mutations'
 
   export default {
     name: 'SearchAll',
@@ -76,6 +77,16 @@
           return text.toString().replace(iQuery, function (matchedTxt, a, b) {
             return ('<b class=\'search-result\'>' + matchedTxt + '</b>')
           })
+        }
+      }
+    },
+    computed: {
+      error: {
+        get() {
+          return this.$store.state.error
+        },
+        set(error) {
+          this.$store.commit(SET_ERROR, error)
         }
       }
     }
