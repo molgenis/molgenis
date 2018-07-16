@@ -3,6 +3,8 @@ package org.molgenis.data.util;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.Package;
 
+import javax.annotation.Nullable;
+
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -34,7 +36,7 @@ public class MetaUtils
 	 * @param aPackage package
 	 * @return whether package is a system package
 	 */
-	public static boolean isSystemPackage(Package aPackage)
+	public static boolean isSystemPackage(@Nullable Package aPackage)
 	{
 		if (aPackage == null)
 		{
