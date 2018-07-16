@@ -166,6 +166,7 @@ export default {
 
   printContent: function (docTitle: string, content: Object) {
     let docDefinition = {
+      pageSize: 'LETTER',
       info: {
         title: 'questionnaire-overview'
       },

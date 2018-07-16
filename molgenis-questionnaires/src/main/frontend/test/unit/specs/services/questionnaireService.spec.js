@@ -309,7 +309,7 @@ describe('Questionniare service', () => {
     })
 
     it('should include logo and intro text if these are passed', () => {
-      const smallQuestionnaireOverView= {
+      const smallQuestionnaireOverView = {
         title: 'test questionnaire',
         chapters: [{
           id: 'Chapter1',
@@ -330,33 +330,33 @@ describe('Questionniare service', () => {
       const pdfContent = questionnaireService.buildPdfContent(smallQuestionnaireOverView, reportHeaderData)
       const expectedPdfContent = [
         {
-          "text": "test questionnaire",
-          "style": "header"
+          'text': 'test questionnaire',
+          'style': 'header'
         },
         {
-          "alignment": "justify",
-          "columns": [
+          'alignment': 'justify',
+          'columns': [
             {
-              "text": "introText",
-              "style": "introText"
+              'text': 'introText',
+              'style': 'introText'
             },
             {
-              "image": "logoDataUrl",
-              "alignment": "right"
+              'image': 'logoDataUrl',
+              'alignment': 'right'
             }
           ]
         },
         {
-          "text": "General questions",
-          "style": "chapterTitle"
+          'text': 'General questions',
+          'style': 'chapterTitle'
         },
         {
-          "text": "mref type question",
-          "style": "questionLabel"
+          'text': 'mref type question',
+          'style': 'questionLabel'
         },
         {
-          "text": "MREF answer",
-          "style": "answerLabel"
+          'text': 'MREF answer',
+          'style': 'answerLabel'
         }
       ]
 
@@ -364,7 +364,7 @@ describe('Questionniare service', () => {
     })
 
     it('should include intro text if this is passed', () => {
-      const smallQuestionnaireOverView= {
+      const smallQuestionnaireOverView = {
         title: 'test questionnaire',
         chapters: [{
           id: 'Chapter1',
@@ -385,24 +385,24 @@ describe('Questionniare service', () => {
 
       const expectedPdfContent = [
         {
-          "text": "test questionnaire",
-          "style": "header"
+          'text': 'test questionnaire',
+          'style': 'header'
         },
         {
-          "text": "introText",
-          "style": "introText"
+          'text': 'introText',
+          'style': 'introText'
         },
         {
-          "text": "General questions",
-          "style": "chapterTitle"
+          'text': 'General questions',
+          'style': 'chapterTitle'
         },
         {
-          "text": "mref type question",
-          "style": "questionLabel"
+          'text': 'mref type question',
+          'style': 'questionLabel'
         },
         {
-          "text": "MREF answer",
-          "style": "answerLabel"
+          'text': 'MREF answer',
+          'style': 'answerLabel'
         }
       ]
 
@@ -410,7 +410,7 @@ describe('Questionniare service', () => {
     })
 
     it('should include logo if this is passed', () => {
-      const smallQuestionnaireOverView= {
+      const smallQuestionnaireOverView = {
         title: 'test questionnaire',
         chapters: [{
           id: 'Chapter1',
@@ -431,24 +431,24 @@ describe('Questionniare service', () => {
 
       const expectedPdfContent = [
         {
-          "text": "test questionnaire",
-          "style": "header"
+          'text': 'test questionnaire',
+          'style': 'header'
         },
         {
-          "image": "logoDataUrl",
-          "alignment": "right"
+          'image': 'logoDataUrl',
+          'alignment': 'right'
         },
         {
-          "text": "General questions",
-          "style": "chapterTitle"
+          'text': 'General questions',
+          'style': 'chapterTitle'
         },
         {
-          "text": "mref type question",
-          "style": "questionLabel"
+          'text': 'mref type question',
+          'style': 'questionLabel'
         },
         {
-          "text": "MREF answer",
-          "style": "answerLabel"
+          'text': 'MREF answer',
+          'style': 'answerLabel'
         }
       ]
 

@@ -161,7 +161,7 @@ describe('mutations', () => {
       const data = {
         logoDataUrl: 'daya:abc-123',
         introText: 'introText'
-      };
+      }
       mutations.SET_QUESTIONNAIRE_REPORT_HEADER(state, data)
 
       expect(state.reportHeaderData).to.equal(data)
@@ -170,7 +170,7 @@ describe('mutations', () => {
 
   describe('SET_LANGUAGE', () => {
     it('should set the language used on the state', () => {
-      const lng = 'lng';
+      const lng = 'lng'
       mutations.SET_LANGUAGE(state, lng)
 
       expect(state.language).to.equal(lng)
@@ -179,7 +179,7 @@ describe('mutations', () => {
 
   describe('SET_USERNAME', () => {
     it('should set the username on the state', () => {
-      const user = 'user';
+      const user = 'user'
       mutations.SET_USERNAME(state, user)
 
       expect(state.username).to.equal(user)
