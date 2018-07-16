@@ -5,7 +5,8 @@ import {
   OverViewChapter,
   OverViewSection,
   PdfSection,
-  QuestionnaireEntityResponse, ReportHeaderData,
+  QuestionnaireEntityResponse,
+  ReportHeaderData,
   ResponseMetaAttribute,
   Translation
 } from '../flow.types'
