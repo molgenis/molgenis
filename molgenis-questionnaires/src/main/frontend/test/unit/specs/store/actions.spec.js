@@ -273,6 +273,7 @@ describe('actions', () => {
         {type: 'SET_ERROR', payload: ''},
         {type: 'SET_LOADING', payload: true},
         {type: 'SET_QUESTIONNAIRE', payload: questionnaire},
+        {type: 'SET_QUESTIONNAIRE_ROW_ID', payload: questionnaire.items[0][questionnaire.meta.idAttribute]},
         {type: 'SET_FORM_DATA', payload: {id: 'id', field: undefined}},
         {type: 'SET_CHAPTER_FIELDS', payload: chapters},
         {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
