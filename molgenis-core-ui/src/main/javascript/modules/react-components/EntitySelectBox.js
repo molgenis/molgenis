@@ -136,7 +136,7 @@ var EntitySelectBox = React.createClass({
             var attrs = this._getAttrs();
             for (var i = 0; i < attrs.length; ++i) {
                 var operator = 'SEARCH';
-                switch (this.state.entity.attributes[attrs[i]].fieldType) {
+              switch (this.state.entity.allAttributes[attrs[i]].fieldType) {
                     case 'INT':
                     case 'LONG':
                     case 'BOOL':
@@ -213,7 +213,7 @@ var EntitySelectBox = React.createClass({
         }
     },
     _getAttrsWithRefEntity: function () {
-        var attrsWithRefEntity = _.filter(this.state.entity.attributes, function (attr) {
+      var attrsWithRefEntity = _.filter(this.state.entity.allAttributes, function (attr) {
             switch (attr.fieldType) {
                 case 'CATEGORICAL':
                 case 'CATEGORICAL_MREF':
