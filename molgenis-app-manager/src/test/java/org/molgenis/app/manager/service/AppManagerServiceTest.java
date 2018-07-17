@@ -219,11 +219,11 @@ public class AppManagerServiceTest
 		InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
 		String fileName = "valid-app.zip";
 
-		String tmpDirName = "apps_tmp/extracted_valid-app.zip";
+		String tmpDirName = "apps_tmp" + File.separator + "extracted_valid-app.zip";
 		doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-		doReturn(indexFile).when(fileStore).getFile(tmpDirName + "/index.html");
+		doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
 		when(indexFile.exists()).thenReturn(true);
-		doReturn(configFile).when(fileStore).getFile(tmpDirName + "/config.json");
+		doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
 		when(configFile.exists()).thenReturn(true);
 
 		assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
@@ -237,7 +237,7 @@ public class AppManagerServiceTest
 		InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/flip.zip");
 		String fileName = "flip.zip";
 
-		String tmpDirName = "apps_tmp/extracted_flip.zip";
+		String tmpDirName = "apps_tmp" + File.separator + "extracted_flip.zip";
 		doReturn(tempDir).when(fileStore).getFile(tmpDirName);
 
 		appManagerService.uploadApp(zipData, fileName, "app");
@@ -250,10 +250,10 @@ public class AppManagerServiceTest
 		InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
 		String fileName = "app.zip";
 
-		String tmpDirName = "apps_tmp/extracted_app.zip";
+		String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
 		doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-		doReturn(indexFile).when(fileStore).getFile(tmpDirName + "/index.html");
-		doReturn(configFile).when(fileStore).getFile(tmpDirName + "/config.json");
+		doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
+		doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
 		when(configFile.exists()).thenReturn(true);
 
 		assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
@@ -267,11 +267,11 @@ public class AppManagerServiceTest
 		InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
 		String fileName = "app.zip";
 
-		String tmpDirName = "apps_tmp/extracted_app.zip";
+		String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
 		doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-		doReturn(indexFile).when(fileStore).getFile(tmpDirName + "/index.html");
+		doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
 		when(indexFile.exists()).thenReturn(true);
-		doReturn(configFile).when(fileStore).getFile(tmpDirName + "/config.json");
+		doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
 
 		assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
 
