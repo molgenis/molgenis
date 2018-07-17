@@ -146,7 +146,6 @@ public class DataExplorerController extends PluginController
 			model.addAttribute("warningMessage", message.toString());
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("isAdmin", currentUserIsSu);
 		boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
 		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
 
