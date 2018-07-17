@@ -1,0 +1,42 @@
+version: "3.1"
+services:
+    molgenis:
+      image: registry.molgenis.org/molgenis/molgenis-app:${TAG:-latest}
+      ports:
+        - 8081:8080
+      environment:
+        - molgenis.home=/home/molgenis
+        - opencpu.uri.host=opencpu
+        - elasticsearch.transport.addresses=elasticsearch:9300
+        - db_uri=jdbc:postgresql://postgres/molgenis
+        - db_user=molgenis
+        - db_password=molgenis
+        - admin.password=admin
+        - "CATALINA_OPTS=-Xmx1g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+
+    postgres:
+      image: postgres:9.6-alpine
+      environment:
+          - POSTGRES_USER=molgenis
+          - POSTGRES_PASSWORD=molgenis
+          - POSTGRES_DB=molgenis
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:5.5.3
+        environment:
+          - cluster.name=molgenis
+          - bootstrap.memory_lock=true
+          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - xpack.security.enabled=false
+          - discovery.type=single-node
+        ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+        ports:
+          - 9200:9200
+
+    opencpu:
+        image: molgenis/opencpu:latest
+        ports:
+          - 8004:8004

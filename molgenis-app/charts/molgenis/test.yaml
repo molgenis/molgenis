@@ -1,0 +1,120 @@
+# Source: molgenis/templates/deployment.yaml
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: lanky-ragdoll-molgenis
+  labels:
+    app: molgenis
+    chart: molgenis-0.1.0
+    release: lanky-ragdoll
+    heritage: Tiller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: molgenis
+      release: lanky-ragdoll
+  template:
+    metadata:
+      labels:
+        app: molgenis
+        release: lanky-ragdoll
+    spec:
+      containers:
+        - name: molgenis
+          image: "registry.molgenis.org/molgenis/molgenis-app:latest"
+          imagePullPolicy: Always
+          env:
+            - name: molgenis.home
+              value: /home/molgenis
+            - name: opencpu.uri.host
+              value: opencpu
+            - name: elasticsearch.transport.addresses
+              value: elasticsearch:9300
+            - name: elasticsearch.cluster.name
+              value: molgenis
+            - name: db_uri
+              value: "jdbc:postgresql://postgres/molgenis"
+            - name: db_user
+              value: molgenis
+            - name: db_password
+              value: molgenis
+            - name: admin.password
+              value: admin
+            - name: CATALINA_OPTS
+              value: "-Xmx1g -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v2/version
+              port: http
+          resources:
+            limits:
+              cpu: 1
+              memory: 1250Mi
+            requests:
+              cpu: 200m
+              memory: 1Gi
+
+
+        - name: elasticsearch
+          image: "docker.elastic.co/elasticsearch/elasticsearch:5.5.3"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: cluster.name
+              value: molgenis
+            - name: bootstrap.memory_lock
+              value: true
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: xpack.security.enabled
+              value: false
+            - name: discovery.type
+              value: single-node
+          ports:
+            - containerPort: 9200
+            - containerPort: 9300
+            limits:
+              cpu: 1
+              memory: 1500Mi
+            requests:
+              cpu: 100m
+              memory: 1Gi
+
+
+        - name: postgres
+          image: "postgres:9.6-alpine"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              value: molgenis
+            - name: POSTGRES_PASSWORD
+              value: molgenis
+            - name: POSTGRES_DB
+              value: molgenis
+          ports:
+            - containerPort: 5432
+            limits:
+              cpu: 1
+              memory: 250Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+
+
+        - name: opencpu
+          image: "molgenis/opencpu:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8004
+            limits:
+              cpu: 1
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
