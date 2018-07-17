@@ -52,6 +52,7 @@ const actions = {
         return api.get(getUrl).then(response => {
           commit('SET_QUESTIONNAIRE', response)
           const data = response.items[0]
+          commit('SET_QUESTIONNAIRE_ROW_ID', data[response.meta.idAttribute])
           const form = EntityToFormMapper.generateForm(response.meta, data, state.mapperOptions)
           commit('SET_FORM_DATA', form.formData)
           const chapters = form.formFields.filter(field => field.type === 'field-group')
