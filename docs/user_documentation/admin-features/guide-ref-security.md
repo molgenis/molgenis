@@ -100,7 +100,7 @@ The default permissions for these roles are as follows:
     * Search all
     * Questionnaires
 
-![Membership overview](../../images/security/membership_overview.png?raw=true, "Membershio overview")
+![Membership overview](../../images/security/membership_overview.png?raw=true, "Membership overview")
 
 You can switch between roles whenever you want by updating the role of the member. Click on a member ("test" in this example).
 
@@ -110,7 +110,7 @@ Click on "Edit" to update the role and click on "Update role".
 
 ![Update role membership](../../images/security/update_membershiprole.png?raw=true, "Update rolemembershio")
 
-You can no view the members of the group and see that the "test"-member has a Manager-role.
+You can now view the members of the group and see that the "test" member has a Manager-role.
 
 ![Membership overview with role change](../../images/security/membership_overview_with_rolechange.png?raw=true, "Membership overview with role change")
 
