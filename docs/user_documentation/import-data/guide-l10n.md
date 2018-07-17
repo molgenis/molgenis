@@ -73,4 +73,4 @@ In the data sheet for your City entity, add columns for both `name` and `name-nl
 | london    | London    | Londen   |
 | the_hague | The Hague	| Den Haag |
 
-Check out the [Sample EMX file](../data/l10n.xlsx).
+Check out the [Sample EMX file](../../data/l10n.xlsx).

@@ -4,7 +4,7 @@ The Scripts plugin allows you to create, edit and delete the available scripts.
 **
 
 # Create a script
-You open the script editor by clicking the add button ![image](../images//new.png).
+You open the script editor by clicking the add button ![image](../../images/new.png).
 
 * Name: The name uniquely identifies the script
 * Type: The script type determines how the script is executed.
@@ -78,7 +78,7 @@ molgenis.get("MolgenisUser")
 ```
 
 # Running a script
-You can run your script by pressing the ![image](../images//execute.png) execute button.
+You can run your script by pressing the ![image](../../images/execute.png) execute button.
 If the script has parameters, you'll be presented with a popup form to specify them.
 
 You can also run the script through an HTTP request.
@@ -152,10 +152,10 @@ Note how we use the `snp_id` parameter a second time, to render the plot title.
 Save the script.
 
 ## Call the script
-Push the ![image](../images//execute.png) execute button.
+Push the ![image](../../images/execute.png) execute button.
 
 In the popup, specify the value for `snp_id`, for example `rs2287988`.
 
 Push Run.
 
-![image](../images//rs2287988.png)
+![image](../../images/rs2287988.png)

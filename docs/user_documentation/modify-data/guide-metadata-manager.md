@@ -1,7 +1,7 @@
 # Metadata manager
 The metadata manager can be used to manage your metadata.
 
-![1](../images/metadata-manager/full-edit-overview.png?raw=true)
+![1](../../images/metadata-manager/full-edit-overview.png?raw=true)
 
 This entails changing descriptions, changing the labels, changing the package in which the EntityType lives, but it also 
 means you can add and remove attributes (columns), or even change the order in which they are shown in the data explorer.
@@ -13,7 +13,7 @@ from scratch using the metadata manager user interface.
 ## Creating a new EntityType
 To create a new EntityType, press the blue 'plus' button next to the EntityType select dropdown.
 
-![2](../images/metadata-manager/entity-edit-form-new.png?raw=true)
+![2](../../images/metadata-manager/entity-edit-form-new.png?raw=true)
 
 You will get an empty template, allowing you to build your EntityType from scratch. 
 If you are familiar with relational database concepts, you will probably recognize most of the inputs. 
@@ -66,7 +66,7 @@ __Lookup attributes__
 When talking about ID attributes and lookup attributes, you might wonder: where do I get these attributes?
 The answer is: in the Attribute tree!
 
-![3](../images/metadata-manager/attribute-tree-new.png?raw=true)
+![3](../../images/metadata-manager/attribute-tree-new.png?raw=true)
 
 The tree allows you to do three things:
 - Create new attributes
@@ -77,7 +77,7 @@ For tutorials sake, I created three attributes: _id_, _label_, and _country_
 
 Now we will add a new attribute. I click the blue plus button next to attributes.
 
-![4](../images/metadata-manager/attribute-edit-form-new.png?raw=true)
+![4](../../images/metadata-manager/attribute-edit-form-new.png?raw=true)
 
 just like with a new EntityType, you get an empty template. This gives you complete control on how you want your attribute to look like.
 
@@ -158,7 +158,7 @@ for it via the importer.
 ## Editing existing EntityTypes
 You can select existing EntityTypes in the dropdown at the top of the screen
 
-![5](../images/metadata-manager/header-select-open.png?raw=true)
+![5](../../images/metadata-manager/header-select-open.png?raw=true)
 
 On select, all the fields that were visible for creating a new EntityType are available to you.
 After you are done changing things, you can hit the save all changes button.
