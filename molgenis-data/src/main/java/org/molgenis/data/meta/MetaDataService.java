@@ -131,9 +131,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Gets the package for a given package identifier.
 	 *
 	 * @param packageId package identifier
-	 * @return the Package, or <tt>null</tt> if the package does not exist.
+	 * @return optional package
 	 */
-	Package getPackage(String packageId);
+	Optional<Package> getPackage(String packageId);
 
 	/**
 	 * Adds a new Package
@@ -167,9 +167,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Gets the entity type for a given entity type identifier.
 	 *
 	 * @param entityTypeId the identifier of the entity
-	 * @return EntityType of the entity, or null if the entity does not exist
+	 * @return optional entity type
 	 */
-	EntityType getEntityType(String entityTypeId);
+	Optional<EntityType> getEntityType(String entityTypeId);
 
 	/**
 	 * Returns a stream of all {@link EntityType entity type}.

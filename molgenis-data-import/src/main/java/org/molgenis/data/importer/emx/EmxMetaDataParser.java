@@ -644,7 +644,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						if (dataService != null)
 						{
-							extendsEntityType = dataService.getMeta().getEntityType(emxEntityExtends);
+							extendsEntityType = dataService.getMeta().getEntityType(emxEntityExtends).orElse(null);
 						}
 					}
 

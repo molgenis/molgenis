@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.MREF;
@@ -75,7 +76,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
 		Attribute attr2 = mock(Attribute.class);
 		EditorEntityType editorEntityType = mock(EditorEntityType.class);
 
-		when(metaDataService.getEntityType("id_1")).thenReturn(entityType);
+		when(metaDataService.getEntityType("id_1")).thenReturn(of(entityType));
 		when(metaDataService.getReferringAttributes("id_1")).thenReturn(Stream.of(attr1, attr2));
 
 		when(attr1.getDataType()).thenReturn(MREF);

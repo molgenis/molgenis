@@ -30,7 +30,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public EntityType getEntityType(String entityTypeId)
 	{
-		return metaDataService.getEntityType(entityTypeId);
+		return metaDataService.getEntityType(entityTypeId).orElse(null);
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.*;
+import static java.util.Optional.of;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
@@ -121,7 +122,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
-		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+		when(metaDataService.getPackage(importPackageId)).thenReturn(of(importPackage));
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD,
 				importPackageId);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
@@ -219,7 +220,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(source.getRepository(entityTypeId0)).thenReturn(repo0);
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
-		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+		when(metaDataService.getPackage(importPackageId)).thenReturn(of(importPackage));
 		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD,
 				importPackageId);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
@@ -251,7 +252,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		when(dataService.hasRepository(entityTypeId0)).thenReturn(true);
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
-		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+		when(metaDataService.getPackage(importPackageId)).thenReturn(of(importPackage));
 		vcfImporterService.doImport(source, DatabaseAction.ADD, importPackageId);
 	}
 

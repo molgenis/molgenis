@@ -41,6 +41,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -280,7 +281,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		EntityType targetRepositoryMetaData = entityTypeFactory.create(targetRepositoryName);
 		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
 		targetRepositoryMetaData.setPackage(package_);
-		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(of(targetRepositoryMetaData));
 
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, targetRepositoryName, null, null,
 				null);
@@ -298,7 +299,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(mappingTarget.getTarget()).thenReturn(hopMetaData);
 
 		Package targetPackage = mock(Package.class);
-		when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
+		when(metaDataService.getPackage("targetPackage")).thenReturn(of(targetPackage));
 
 		EntityType targetMetadata = mappingService.createTargetMetadata(mappingTarget, "test", "targetPackage",
 				"target label", true);
@@ -385,7 +386,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
 		when(dataService.hasRepository(entityTypeId)).thenReturn(true);
 		when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
-		when(metaDataService.getEntityType(entityTypeId)).thenReturn(targetMeta);
+		when(metaDataService.getEntityType(entityTypeId)).thenReturn(of(targetMeta));
 
 		when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
 		when(metaDataService.createRepository(argThat(obj -> obj.getLabel().equals(entityTypeId)))).thenReturn(
@@ -533,7 +534,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
-		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(of(targetRepositoryMetaData));
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
 		EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
@@ -565,7 +566,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
-		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(of(targetRepositoryMetaData));
 
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
@@ -604,7 +605,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
 		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
 		when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
-		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+		when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(of(targetRepositoryMetaData));
 
 
 		EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName);

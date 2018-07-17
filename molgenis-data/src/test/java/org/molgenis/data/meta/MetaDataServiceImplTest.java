@@ -36,7 +36,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
 import static org.testng.Assert.*;
-import static org.testng.AssertJUnit.assertNull;
 
 @SuppressWarnings("deprecation")
 public class MetaDataServiceImplTest extends AbstractMockitoTest
@@ -407,7 +406,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		Package package_ = mock(Package.class);
 		String packageId = "package";
 		when(dataService.findOneById(PACKAGE, packageId, Package.class)).thenReturn(package_);
-		assertEquals(metaDataServiceImpl.getPackage(packageId), package_);
+		assertEquals(metaDataServiceImpl.getPackage(packageId), of(package_));
 	}
 
 	@Test
@@ -415,7 +414,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	{
 		String packageName = "package";
 		when(dataService.findOneById(PACKAGE, packageName, Package.class)).thenReturn(null);
-		assertNull(metaDataServiceImpl.getPackage(packageName));
+		assertEquals(metaDataServiceImpl.getPackage(packageName), empty());
 	}
 
 	@Test
@@ -476,14 +475,14 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class),
 				eq(EntityType.class))).thenReturn(entityType);
 
-		assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), entityType);
+		assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), of(entityType));
 		verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
 	}
 
 	@Test
 	public void getEntityTypeNull()
 	{
-		assertNull(metaDataServiceImpl.getEntityType(null));
+		assertEquals(metaDataServiceImpl.getEntityType(null), empty());
 	}
 
 	@Test
@@ -491,7 +490,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 	{
 		String entityTypeId = "entity";
 
-		assertNull(metaDataServiceImpl.getEntityType(entityTypeId));
+		assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), empty());
 
 		verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
 		verify(dataService).findOneById(ENTITY_TYPE_META_DATA, entityTypeId, getEntityTypeFetch(), EntityType.class);
@@ -504,7 +503,7 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest
 		SystemEntityType systemEntityType = mock(SystemEntityType.class);
 
 		when(systemEntityTypeRegistry.getSystemEntityType(systemEntityTypeId)).thenReturn(systemEntityType);
-		assertEquals(metaDataServiceImpl.getEntityType(systemEntityTypeId), systemEntityType);
+		assertEquals(metaDataServiceImpl.getEntityType(systemEntityTypeId), of(systemEntityType));
 
 		verifyZeroInteractions(dataService);
 	}

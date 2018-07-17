@@ -59,6 +59,7 @@ import static java.text.MessageFormat.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.util.MetaUtils.isSystemPackage;
 import static org.molgenis.data.validation.meta.NameValidator.validateEntityName;
@@ -537,19 +538,19 @@ public class MappingServiceController extends PluginController
 	 * @param mappingProjectId   ID of the mapping project
 	 * @param targetEntityTypeId ID of the target entity to create or update
 	 * @param label              label of the target entity to create
-	 * @param packageId          ID of the package to put the newly created entity in
+	 * @param rawPackageId       ID of the package to put the newly created entity in
 	 * @return the href of the created MappingJobExecution
 	 */
 	@PostMapping(value = "/map", produces = TEXT_PLAIN_VALUE)
 	public ResponseEntity<String> scheduleMappingJob(@RequestParam String mappingProjectId,
 			@RequestParam String targetEntityTypeId, @RequestParam(required = false) String label,
-			@RequestParam(required = false, name = "package") String packageId,
+			@RequestParam(required = false, name = "package") String rawPackageId,
 			@RequestParam(required = false) Boolean addSourceAttribute) throws URISyntaxException
 	{
 		mappingProjectId = mappingProjectId.trim();
 		targetEntityTypeId = targetEntityTypeId.trim();
 		label = trim(label);
-		packageId = trim(packageId);
+		String packageId = trim(rawPackageId);
 
 		try
 		{
@@ -560,11 +561,9 @@ public class MappingServiceController extends PluginController
 			}
 			if (packageId != null)
 			{
-				Package aPackage = dataService.getMeta().getPackage(packageId);
-				if (aPackage == null)
-				{
-					throw new MolgenisDataException("No package found with ID " + packageId);
-				}
+				Package aPackage = dataService.getMeta()
+											  .getPackage(packageId)
+											  .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
 				if (isSystemPackage(aPackage))
 				{
 					throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
