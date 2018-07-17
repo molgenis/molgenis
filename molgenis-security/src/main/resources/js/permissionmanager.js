@@ -35,22 +35,22 @@
         })
         $('#package-role-select').change(function () {
             $.get(molgenis.getContextUrl() + '/package/role/' + $(this).val(), function (data) {
-                $('#package-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#package-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count', 'readmeta']))
             })
         })
         $('#package-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/package/user/' + $(this).val(), function (data) {
-                $('#package-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#package-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count', 'readmeta']))
             })
         })
         $('#entity-class-role-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/role/' + $(this).val(), function (data) {
-                $('#entity-class-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#entity-class-role-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count', 'readmeta']))
             })
         })
         $('#entity-class-user-select').change(function () {
             $.get(molgenis.getContextUrl() + '/entityclass/user/' + $(this).val(), function (data) {
-                $('#entity-class-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count']))
+                $('#entity-class-user-permission-table tbody').empty().html(createPermissionTable(data, ['writemeta', 'write', 'read', 'count', 'readmeta']))
             })
         })
         $('input:checkbox', '#entity-type-rls-table').change(function () {

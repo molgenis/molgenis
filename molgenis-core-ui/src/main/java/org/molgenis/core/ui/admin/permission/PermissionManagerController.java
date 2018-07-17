@@ -301,6 +301,8 @@ public class PermissionManagerController extends PluginController
 	{
 		switch (paramValue.toUpperCase())
 		{
+			case "READMETA":
+				return PermissionSet.READMETA;
 			case "COUNT":
 				return PermissionSet.COUNT;
 			case "READ":
@@ -393,6 +395,8 @@ public class PermissionManagerController extends PluginController
 	{
 		switch (ace.getPermission().getMask())
 		{
+			case READ_META_MASK:
+				return "readmeta";
 			case COUNT_MASK:
 				return "count";
 			case READ_MASK:

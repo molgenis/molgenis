@@ -37,6 +37,7 @@ import static org.molgenis.data.plugin.model.PluginIdentity.PLUGIN;
 import static org.molgenis.data.security.EntityTypeIdentity.ENTITY_TYPE;
 import static org.molgenis.data.security.PackageIdentity.PACKAGE;
 import static org.molgenis.data.security.auth.GroupService.*;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorPackage.PACKAGE_NEGOTIATOR;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserPackage.PACKAGE_GENOME_BROWSER;
 import static org.molgenis.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
@@ -101,7 +102,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, ONTOLOGY_TERM_HIT, editor, WRITE);
 		register(ENTITY_TYPE, SORTA_JOB_EXECUTION, editor, WRITE);
 		register(PACKAGE, PACKAGE_ONTOLOGY, user, READ);
-		register(ENTITY_TYPE, QUESTIONNAIRE, user, COUNT);
+		register(ENTITY_TYPE, QUESTIONNAIRE, user, READMETA);
 		register(PLUGIN, QuestionnaireController.ID, user, READ);
 		register(PACKAGE, PACKAGE_GENOME_BROWSER, viewer, READ);
 		register(ENTITY_TYPE, LANGUAGE, anonymousUser, READ);
@@ -114,8 +115,9 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PACKAGE, PACKAGE_META, manager, WRITE);
 		register(PLUGIN, NavigatorController.ID, viewer, READ);
 		register(PLUGIN, ONE_CLICK_IMPORTER, editor, READ);
-		register(ENTITY_TYPE, JOB_EXECUTION, editor, COUNT);
+		register(ENTITY_TYPE, JOB_EXECUTION, editor, READMETA);
 		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
+		register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
 	}
 
 	@Override
