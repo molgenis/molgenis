@@ -94,7 +94,6 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, SearchAllPluginController.ID, viewer, READ);
 		register(PLUGIN, DataRowEditController.ID, editor, READ);
 		register(PLUGIN, JobsController.ID, editor, READ);
-		register(PLUGIN, MappingServiceController.ID, editor, READ);
 		register(PACKAGE, PACKAGE_MAPPER, editor, READ);
 		register(ENTITY_TYPE, MAPPING_JOB_EXECUTION, editor, WRITE);
 		register(ENTITY_TYPE, IMPORT_RUN, editor, WRITE);
