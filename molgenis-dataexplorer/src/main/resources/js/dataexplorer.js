@@ -326,6 +326,14 @@ $.when($,
                 }
             });
 
+            $.get(molgenis.getContextUrl() + '/deletePermission?entity=' + state.entity).done(function (data) {
+                if (data === "DELETE_DATA") {
+                    $("#delete-button-container").show()
+                } else if (data === "DELETE_META") {
+                    $("#delete-dropdown-container").show()
+                }
+            });
+
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
                 selectedEntityMetaData = entityMetaData;
@@ -654,7 +662,7 @@ $.when($,
                 $(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
             });
 
-            $('#delete-data-btn').on('click', function () {
+            function deleteData() {
                 bootbox.confirm("Are you sure you want to delete all data for this entity?", function (confirmed) {
                     if (confirmed) {
                         $.ajax('/api/v1/' + selectedEntityMetaData.name, {'type': 'DELETE'}).done(function () {
@@ -662,6 +670,14 @@ $.when($,
                         });
                     }
                 });
+            }
+
+            $('#delete-data-btn').on('click', function () {
+                deleteData();
+            });
+
+            $('#delete-data-option').on('click', function () {
+                deleteData();
             });
 
             $('#copy-data-btn').on('click', function () {
@@ -694,7 +710,7 @@ $.when($,
                 });
             });
 
-            $('#delete-data-metadata-btn').on('click', function () {
+            $('#delete-data-metadata-option').on('click', function () {
                 bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function (confirmed) {
                     if (confirmed) {
                         $.ajax('/api/v1/' + selectedEntityMetaData.name + '/meta', {'type': 'DELETE'}).done(function () {

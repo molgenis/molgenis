@@ -64,6 +64,11 @@ public class DataExplorerController extends PluginController
 	public static final String MOD_DATA = "data";
 	public static final String NAVIGATOR = "navigator";
 
+	private enum DeletePermission
+	{
+		NONE, DELETE_DATA, DELETE_META
+	}
+
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
 
@@ -146,7 +151,6 @@ public class DataExplorerController extends PluginController
 			model.addAttribute("warningMessage", message.toString());
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("isAdmin", currentUserIsSu);
 		boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
 		model.addAttribute("showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
 
@@ -218,6 +222,28 @@ public class DataExplorerController extends PluginController
 
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
+
+	@GetMapping("/deletePermission")
+	@ResponseBody
+	private DeletePermission getDeletePermission(@RequestParam("entity") String entityTypeId)
+	{
+		DeletePermission permission = DeletePermission.NONE;
+		if (StringUtils.isNotEmpty(entityTypeId))
+		{
+			if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+					EntityTypePermission.DELETE_METADATA))
+			{
+				permission = DeletePermission.DELETE_META;
+			}
+			else if (permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+					EntityTypePermission.DELETE_DATA))
+			{
+				permission = DeletePermission.DELETE_DATA;
+			}
+		}
+		return permission;
+	}
+
 
 	@GetMapping("/copy")
 	@ResponseBody
