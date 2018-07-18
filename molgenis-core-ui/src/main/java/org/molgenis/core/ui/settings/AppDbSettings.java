@@ -31,7 +31,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String TITLE = "title";
 		private static final String LOGO_NAVBAR_HREF = "logo_href_navbar";
 		private static final String LOGO_TOP_HREF = "logo_href_top";
-		private static final String FIXED_LOGO_HEIGHT = "fixed_logo_height";
+		private static final String LOGO_TOP_MAX_HEIGHT = "logoTopMaxHeight";
 		private static final String FOOTER = "footer";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
@@ -49,7 +49,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String DEFAULT_TITLE = "MOLGENIS";
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
-		private static final Integer DEFAULT_FIXED_LOGO_HEIGHT = 150;
+		private static final Integer DEFAULT_LOGO_TOP_MAX_HEIGHT = 150;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -87,11 +87,11 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 									   .setNillable(true)
 									   .setLabel("Logo above navigation bar")
 									   .setDescription("HREF to logo image");
-			addAttribute(FIXED_LOGO_HEIGHT).setDataType(INT)
-										   .setNillable(true)
-										   .setLabel("Fixed height top logo")
-										   .setDefaultValue(String.valueOf(DEFAULT_FIXED_LOGO_HEIGHT))
-										   .setDescription("Set fixed height for top logo in px");
+			addAttribute(LOGO_TOP_MAX_HEIGHT).setDataType(INT)
+											 .setNillable(false)
+											 .setLabel("Max height of logo above navigation bar")
+											 .setDefaultValue(String.valueOf(DEFAULT_LOGO_TOP_MAX_HEIGHT))
+											 .setDescription("Set max height for top logo in px");
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
 			addAttribute(MENU).setDataType(TEXT)
 							  .setNillable(true)
@@ -207,16 +207,15 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		set(Meta.LOGO_TOP_HREF, logoHref);
 	}
 
-	@Override
-	public Integer getFixedHeightLogo()
+	public int getLogoTopMaxHeight()
 	{
-		return getInt(Meta.FIXED_LOGO_HEIGHT);
+		return getInt(Meta.LOGO_TOP_MAX_HEIGHT);
 	}
 
 	@Override
-	public void setFixedHeightLogo(int fixedHeight)
+	public void setLogoTopMaxHeight(int logoTopHrefMaxHeight)
 	{
-		set(Meta.FIXED_LOGO_HEIGHT, fixedHeight);
+		set(Meta.LOGO_TOP_MAX_HEIGHT, logoTopHrefMaxHeight);
 	}
 
 	@Override
