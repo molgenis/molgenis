@@ -82,10 +82,10 @@
     },
     computed: {
       error: {
-        get() {
+        get () {
           return this.$store.state.error
         },
-        set(error) {
+        set (error) {
           this.$store.commit(SET_ERROR, error)
         }
       }
