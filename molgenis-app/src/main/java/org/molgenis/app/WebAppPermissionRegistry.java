@@ -118,6 +118,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, ONE_CLICK_IMPORTER, editor, READ);
 		register(ENTITY_TYPE, JOB_EXECUTION, editor, COUNT);
 		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
+		register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
 		register(PLUGIN, SecurityUiController.ID, manager, READ);
 	}
 
