@@ -27,13 +27,13 @@ public class TestAppSettings implements AppSettings
 	}
 
 	@Override
-	public Integer getFixedHeightLogo()
+	public int getLogoTopMaxHeight()
 	{
-		return null;
+		return 0;
 	}
 
 	@Override
-	public void setFixedHeightLogo(int fixedHeight)
+	public void setLogoTopMaxHeight(int fixedHeight)
 	{
 	}
 
