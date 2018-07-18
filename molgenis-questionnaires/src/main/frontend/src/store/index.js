@@ -10,6 +10,11 @@ import type { QuestionnaireState } from '../flow.types'
 const state: QuestionnaireState = {
 
   /**
+   * Language to use for localization
+   */
+  language: 'en',
+
+  /**
    * All the compound fields of the questionnaire metadata as chapters
    */
   chapters: [],
@@ -63,7 +68,12 @@ const state: QuestionnaireState = {
   /**
    * Submission text shown after completing a questionnaire
    */
-  submissionText: ''
+  submissionText: '',
+
+  /**
+   * Data (text and logo) used in overview report header
+   */
+  reportHeaderData: {}
 }
 
 Vue.use(Vuex)

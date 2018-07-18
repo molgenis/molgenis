@@ -1,9 +1,12 @@
 // @flow
-import type { QuestionnaireState, Chapter, QuestionnaireType } from '../flow.types.js'
+import type { QuestionnaireState, Chapter, QuestionnaireType, ReportHeaderData } from '../flow.types.js'
 
 const mutations = {
   'SET_USERNAME' (state: QuestionnaireState, username: string) {
     state.username = username
+  },
+  'SET_LANGUAGE' (state: QuestionnaireState, language: string) {
+    state.language = language
   },
   'BLOCK_NAVIGATION' (state: QuestionnaireState, block: boolean) {
     state.navigationBlocked = block
@@ -66,6 +69,10 @@ const mutations = {
 
   'UPDATE_FORM_STATUS' (state: QuestionnaireState, status: string) {
     state.formData.status = status
+  },
+
+  'SET_QUESTIONNAIRE_REPORT_HEADER' (state: QuestionnaireState, reportHeaderData: ReportHeaderData) {
+    state.reportHeaderData = reportHeaderData
   }
 }
 

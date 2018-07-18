@@ -56,7 +56,11 @@ describe('QuestionnaireOverview component', () => {
         }]
       },
       error: 'error',
-      loading: true
+      loading: true,
+      reportHeaderData: {
+        logoDataUrl: 'data:abc-123',
+        introText: 'introText'
+      }
     }
 
     store = new Vuex.Store({actions, state})
@@ -107,7 +111,7 @@ describe('QuestionnaireOverview component', () => {
       const buildPdfContent = td.function('questionnaireService.buildPdfContent')
       const printContent = td.function('questionnaireService.printContent')
       td.when(buildOverViewObject(state.questionnaire, mockTranslations)).thenReturn(mockOverView)
-      td.when(buildPdfContent(mockOverView)).thenReturn(mockPdfContent)
+      td.when(buildPdfContent(mockOverView, state.reportHeaderData)).thenReturn(mockPdfContent)
       td.replace(questionnaireService, 'buildOverViewObject', buildOverViewObject)
       td.replace(questionnaireService, 'buildPdfContent', buildPdfContent)
       td.replace(questionnaireService, 'printContent', printContent)

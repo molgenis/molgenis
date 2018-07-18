@@ -6,6 +6,7 @@ import {
   OverViewSection,
   PdfSection,
   QuestionnaireEntityResponse,
+  ReportHeaderData,
   ResponseMetaAttribute,
   Translation
 } from '../flow.types'
@@ -102,7 +103,7 @@ export default {
     }
   },
 
-  buildPdfContent: function (questionnaire: OverView): Array<PdfSection> {
+  buildPdfContent: function (questionnaire: OverView, reportHeaderData: ReportHeaderData): Array<PdfSection> {
     let content = []
 
     const printQuestionAndAnswer = (question: OverViewAnswer) => {
@@ -127,6 +128,35 @@ export default {
       content.push({text: chapter.title, style: 'chapterTitle'})
     }
 
+    const buildIntroText = () => {
+      return {
+        text: reportHeaderData.introText,
+        style: 'introText'
+      }
+    }
+
+    const buildHeaderLogo = () => {
+      return {
+        image: reportHeaderData.logoDataUrl,
+        alignment: 'right'
+      }
+    }
+
+    content.push({text: questionnaire.title, style: 'header'})
+
+    if (reportHeaderData) {
+      if (reportHeaderData.logoDataUrl && reportHeaderData.introText) {
+        content.push({
+          alignment: 'justify',
+          columns: [buildIntroText(), buildHeaderLogo()]
+        })
+      } else if (reportHeaderData.introText) {
+        content.push({text: reportHeaderData.introText, style: 'introText'})
+      } else if (reportHeaderData.logoDataUrl) {
+        content.push(buildHeaderLogo())
+      }
+    }
+
     questionnaire.chapters.forEach((chapter) => {
       printChapter(chapter)
       chapter.chapterSections.forEach(printSection)
@@ -137,11 +167,23 @@ export default {
 
   printContent: function (docTitle: string, content: Object) {
     let docDefinition = {
+      pageSize: 'LETTER',
       info: {
         title: 'questionnaire-overview'
       },
       content,
       styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 5, 0, 10]
+        },
+        introText: {
+          fontSize: 10,
+          bold: false,
+          italics: true,
+          margin: [0, 0, 0, 20]
+        },
         chapterTitle: {
           fontSize: 16,
           bold: true,

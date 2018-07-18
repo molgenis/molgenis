@@ -26,11 +26,16 @@ export type QuestionnaireType = {
   label: string,
   description? : string,
   status: QuestionnaireStatus
+}
 
+export type ReportHeaderData = {
+  introText?: string,
+  logoDataUrl?: string
 }
 
 export type QuestionnaireState = {
   username: string,
+  language: string,
   chapters: Array<Chapter>,
   error: string,
   formData: Object,
@@ -41,7 +46,8 @@ export type QuestionnaireState = {
   questionnaireList: Array<*>,
   questionnaireRowId: string,
   numberOfOutstandingCalls: number,
-  submissionText: string
+  submissionText: string,
+  reportHeaderData: ?ReportHeaderData
 }
 
 export type VuexContext = {
@@ -98,6 +104,8 @@ export type OverViewChapter = {
 
 export type OverView = {
   title: string,
+  intoText?: string,
+  logoData?: string,
   chapters: Array<OverViewChapter>
 }
 
