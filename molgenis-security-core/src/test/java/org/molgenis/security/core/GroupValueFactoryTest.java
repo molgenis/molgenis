@@ -19,6 +19,15 @@ public class GroupValueFactoryTest
 		GroupValue bbmri_eric = groupValueFactory.createGroup("bbmri-eric", "BBMRI Eric",
 				"The world's largest biobank catalogue", true, ImmutableList.of("Manager", "Editor", "Viewer"));
 
+		GroupValue groupValue = getTestGroupValue();
+		assertEquals(bbmri_eric, groupValue);
+	}
+
+	/**
+	 * Creates a test GroupValue.
+	 */
+	public static GroupValue getTestGroupValue()
+	{
 		RoleValue manager = RoleValue.builder()
 									 .setName("BBMRI_ERIC_MANAGER")
 									 .setLabel("Manager")
@@ -50,7 +59,7 @@ public class GroupValueFactoryTest
 
 		expectedBuilder.rolesBuilder().add(manager).add(editor).add(viewer);
 
-		assertEquals(bbmri_eric, expectedBuilder.build());
+		return expectedBuilder.build();
 	}
 
 	@Test(dataProvider = "roleNameProvider")

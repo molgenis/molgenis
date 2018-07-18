@@ -1,10 +1,12 @@
 package org.molgenis.data.security.permission;
 
+import com.google.common.collect.ImmutableList;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.auth.*;
@@ -15,10 +17,13 @@ import org.testng.annotations.Test;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class RoleMembershipServiceImplTest extends AbstractMockitoTest
@@ -37,11 +42,19 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 
 	@Mock
 	private RoleMetadata roleMetadata;
+	@Mock
+	private RoleMembership roleMembership;
+	@Mock
+	private RoleMembership oldRoleMembership;
+	@Mock
+	private Role viewer;
+	@Mock
+	private Role editor;
 
 	@Captor
 	private ArgumentCaptor<Instant> instantCaptor;
 
-	private RoleMembershipService roleMembershipService;
+	private RoleMembershipServiceImpl roleMembershipService;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -106,5 +119,55 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest
 		when(userService.getUser(username)).thenReturn(null);
 
 		roleMembershipService.addUserToRole(username, "GCC_MANAGER");
+	}
+
+	@Test
+	public void testRemoveMembership()
+	{
+		roleMembershipService.removeMembership(roleMembership);
+
+		verify(dataService).delete(ROLE_MEMBERSHIP, roleMembership);
+	}
+
+	@Test
+	public void testUpdateMembership()
+	{
+		when(roleMembership.getId()).thenReturn("membershipId");
+		when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class)).thenReturn(roleMembership);
+
+		roleMembershipService.updateMembership(roleMembership, editor);
+
+		verify(roleMembership).setRole(editor);
+		verify(dataService).update(ROLE_MEMBERSHIP, roleMembership);
+	}
+
+	@Test(expectedExceptions = UnknownEntityException.class)
+	public void testUpdateMembershipNotAMember()
+	{
+		when(roleMembership.getId()).thenReturn("membershipId");
+		when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class)).thenReturn(null);
+
+		roleMembershipService.updateMembership(roleMembership, editor);
+	}
+
+	@Test
+	public void testGetMemberships()
+	{
+		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+		Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+		Fetch fetch = new Fetch().field(RoleMembershipMetadata.ROLE, roleFetch)
+								 .field(RoleMembershipMetadata.USER, userFetch)
+								 .field(RoleMembershipMetadata.FROM)
+								 .field(RoleMembershipMetadata.TO)
+								 .field(RoleMembershipMetadata.ID);
+		when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+						.in(RoleMembershipMetadata.ROLE, ImmutableList.of(editor, viewer))
+						.fetch(fetch)
+						.findAll()).thenReturn(Stream.of(oldRoleMembership, roleMembership));
+
+		when(roleMembership.isCurrent()).thenReturn(true);
+
+		assertEquals(roleMembershipService.getMemberships(ImmutableList.of(editor, viewer)),
+				singletonList(roleMembership));
 	}
 }

@@ -1,16 +1,16 @@
 <template>
-
   <div class="row">
     <div class="col-md-12">
-      <div id="alert-message fade" v-if="toast" :class="'alert alert-' + toast.type" role="alert">
-        <button @click="clearToast()" type="button" class="close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        <span id="message-span">{{toast.message}}</span>
-      </div>
+      <transition name="slide">
+        <div id="alert-message fade" v-if="toast" :class="'alert alert-' + toast.type" role="alert">
+          <button @click="clearToast()" type="button" class="close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <span id="message-span">{{toast.message}}</span>
+        </div>
+      </transition>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -30,4 +30,18 @@
     }
   }
 </script>
+
+<style>
+  .slide-enter-active, .slide-leave-active {
+    transition: transform 500ms ease-in-out;
+  }
+
+  .slide-enter, .slide-leave-to {
+    transform: translateY(-100%);
+  }
+
+  .slide-enter-to, .slide-leave {
+    transform: translateY(0);
+  }
+</style>
 

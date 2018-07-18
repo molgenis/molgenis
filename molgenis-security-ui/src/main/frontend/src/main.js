@@ -4,6 +4,9 @@ import store from './store'
 import SecurityApp from './SecurityApp'
 import GroupOverview from './components/GroupOverview'
 import GroupCreate from './components/GroupCreate'
+import GroupDetail from './components/GroupDetail'
+import MemberAdd from './components/MemberAdd'
+import MemberDetail from './components/MemberDetail'
 import i18n from '@molgenis/molgenis-i18n-js'
 
 Vue.use(Router)
@@ -23,6 +26,24 @@ const router = new Router({
       path: '/group/create',
       name: 'createGroup',
       component: GroupCreate
+    },
+    {
+      path: '/group/:name',
+      name: 'groupDetail',
+      props: true,
+      component: GroupDetail
+    },
+    {
+      path: '/group/:groupName/addMember',
+      name: 'addMember',
+      props: true,
+      component: MemberAdd
+    },
+    {
+      path: '/group/:groupName/member/:memberName',
+      name: 'memberDetail',
+      props: true,
+      component: MemberDetail
     },
     {
       path: '/',
@@ -45,6 +66,6 @@ Vue.use(i18n, {
       template: '<SecurityApp />',
       components: {SecurityApp}
     })
-    store.commit('setUser', { name: 'admin', isSuperUser: isSuperUser })
+    store.commit('setLoginUser', { name: 'admin', isSuperUser: isSuperUser })
   }
 })

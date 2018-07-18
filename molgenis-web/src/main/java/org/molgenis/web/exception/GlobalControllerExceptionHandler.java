@@ -3,6 +3,7 @@ package org.molgenis.web.exception;
 import org.molgenis.data.DataAlreadyExistsException;
 import org.molgenis.data.UnknownDataException;
 import org.molgenis.data.security.exception.PermissionDeniedException;
+import org.molgenis.i18n.BadRequestException;
 import org.molgenis.i18n.CodedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,13 @@ public class GlobalControllerExceptionHandler
 	{
 		LOG.info("", e);
 		return ExceptionHandlerUtils.handleException(e, handlerMethod, CONFLICT, e.getErrorCode(), environment);
+	}
+
+	@ExceptionHandler(BadRequestException.class)
+	public Object handleException(BadRequestException e, HandlerMethod handlerMethod)
+	{
+		LOG.info("", e);
+		return ExceptionHandlerUtils.handleException(e, handlerMethod, BAD_REQUEST, e.getErrorCode(), environment);
 	}
 
 	@ExceptionHandler(CodedRuntimeException.class)

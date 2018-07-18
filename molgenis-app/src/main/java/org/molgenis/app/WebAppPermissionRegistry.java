@@ -18,6 +18,7 @@ import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.securityui.controller.SecurityUiController;
 import org.molgenis.semanticmapper.controller.MappingServiceController;
 import org.molgenis.util.Pair;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -118,6 +119,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, JOB_EXECUTION, editor, READMETA);
 		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
 		register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
+		register(PLUGIN, SecurityUiController.ID, manager, READ);
 	}
 
 	@Override

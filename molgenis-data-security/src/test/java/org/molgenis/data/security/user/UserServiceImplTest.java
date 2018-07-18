@@ -17,6 +17,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
@@ -85,5 +88,15 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests
 				User.class)).thenReturn(existingUser);
 
 		assertEquals(molgenisUserServiceImpl.getUser(username), existingUser);
+	}
+
+	@Test
+	public void getUsers()
+	{
+		User existingUser = mock(User.class);
+
+		when(dataService.findAll(USER, User.class)).thenReturn(Stream.of(existingUser));
+
+		assertEquals(molgenisUserServiceImpl.getUsers(), Collections.singletonList(existingUser));
 	}
 }
