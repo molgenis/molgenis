@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
@@ -63,7 +62,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject addMappingProject(String projectName, String target)
 	{
@@ -74,7 +73,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
@@ -82,7 +81,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId)
 	{
@@ -117,7 +116,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_menumanager')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
 	{
@@ -139,14 +138,14 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
 	@Override
-	@RunAsSystem
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
@@ -154,13 +153,14 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@RunAsSystem
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public long applyMappings(String mappingProjectId, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
@@ -176,6 +176,9 @@ public class MappingServiceImpl implements MappingService
 		return applyMappingsInternal(mappingTarget, targetRepo, progress);
 	}
 
+	/**
+	 * Package-private for testability
+	 */
 	EntityType createTargetMetadata(MappingTarget mappingTarget, String entityTypeId, String packageId, String label,
 			Boolean addSourceAttribute)
 	{
@@ -247,12 +250,12 @@ public class MappingServiceImpl implements MappingService
 		return result;
 	}
 
+	/**
+	 * Public for testability
+	 */
 	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
 	{
-		return dataService.getMeta()
-						  .getEntityTypes()
-						  .filter(candidate -> !candidate.isAbstract())
-						  .filter(isCompatible(target));
+		return dataService.getMeta().getEntityTypes().filter(candidate -> !candidate.isAbstract()).filter(isCompatible(target));
 	}
 
 	private Predicate<EntityType> isCompatible(EntityType target)
@@ -335,6 +338,9 @@ public class MappingServiceImpl implements MappingService
 							.sum();
 	}
 
+	/**
+	 * Package-private for testability
+	 */
 	long applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress)
 	{
 		progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
@@ -399,6 +405,9 @@ public class MappingServiceImpl implements MappingService
 		target.set(targetAttributeName, typedValue);
 	}
 
+	/**
+	 * Package-private for testablility
+	 */
 	int calculateMaxProgress(MappingTarget mappingTarget)
 	{
 		int batches = mappingTarget.getEntityMappings().stream().mapToInt(this::countBatches).sum();
