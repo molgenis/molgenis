@@ -27,9 +27,9 @@ public class DataPermissionConfig
 		permissionRegistry.addMapping(PackagePermission.ADD_PACKAGE, WRITEMETA);
 		permissionRegistry.addMapping(PackagePermission.ADD_ENTITY_TYPE, WRITEMETA);
 		permissionRegistry.addMapping(PackagePermission.UPDATE, WRITE, WRITEMETA);
-		permissionRegistry.addMapping(PackagePermission.VIEW, READ, WRITE, WRITEMETA);
+		permissionRegistry.addMapping(PackagePermission.VIEW, READMETA, COUNT, READ, WRITE, WRITEMETA);
 
-		permissionRegistry.addMapping(EntityTypePermission.READ_METADATA, COUNT, READ, WRITE, WRITEMETA);
+		permissionRegistry.addMapping(EntityTypePermission.READ_METADATA, READMETA, COUNT, READ, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(EntityTypePermission.COUNT_DATA, COUNT, READ, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(EntityTypePermission.AGGREGATE_DATA, COUNT, READ, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(EntityTypePermission.READ_DATA, READ, WRITE, WRITEMETA);

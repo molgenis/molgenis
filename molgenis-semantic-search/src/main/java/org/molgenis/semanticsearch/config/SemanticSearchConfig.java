@@ -2,7 +2,6 @@ package org.molgenis.semanticsearch.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
 import org.molgenis.data.populate.IdGenerator;
@@ -20,36 +19,34 @@ import org.molgenis.semanticsearch.service.impl.OntologyTagServiceImpl;
 import org.molgenis.semanticsearch.service.impl.SemanticSearchServiceHelper;
 import org.molgenis.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.semanticsearch.service.impl.UntypedTagService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static java.util.Objects.requireNonNull;
 
 @Configuration
 public class SemanticSearchConfig
 {
-	@Autowired
-	DataService dataService;
+	private final DataService dataService;
+	private final OntologyService ontologyService;
+	private final IdGenerator idGenerator;
+	private final TermFrequencyService termFrequencyService;
+	private final TagMetadata tagMetadata;
+	private final TagFactory tagFactory;
+	private final ElasticsearchService elasticsearchService;
 
-	@Autowired
-	MetaDataService metaDataService;
-
-	@Autowired
-	OntologyService ontologyService;
-
-	@Autowired
-	IdGenerator idGenerator;
-
-	@Autowired
-	TermFrequencyService termFrequencyService;
-
-	@Autowired
-	TagMetadata tagMetadata;
-
-	@Autowired
-	TagFactory tagFactory;
-
-	@Autowired
-	ElasticsearchService elasticsearchService;
+	public SemanticSearchConfig(DataService dataService, OntologyService ontologyService, IdGenerator idGenerator,
+			TermFrequencyService termFrequencyService, TagMetadata tagMetadata, TagFactory tagFactory,
+			ElasticsearchService elasticsearchService)
+	{
+		this.dataService = requireNonNull(dataService);
+		this.ontologyService = requireNonNull(ontologyService);
+		this.idGenerator = requireNonNull(idGenerator);
+		this.termFrequencyService = requireNonNull(termFrequencyService);
+		this.tagMetadata = requireNonNull(tagMetadata);
+		this.tagFactory = requireNonNull(tagFactory);
+		this.elasticsearchService = requireNonNull(elasticsearchService);
+	}
 
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()

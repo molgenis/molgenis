@@ -10,7 +10,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.Pair;
 import org.molgenis.util.UnexpectedEnumException;
@@ -27,7 +26,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.data.util.MolgenisDateFormat.*;
 
 public class EntityUtils
@@ -687,25 +685,6 @@ public class EntityUtils
 			if (!equals(entity, otherIt.next())) return false;
 		}
 		return true;
-	}
-
-	public static boolean isSystemEntity(EntityType entityType)
-	{
-		return isSystemPackage(entityType.getPackage());
-	}
-
-	public static boolean isSystemPackage(Package pack)
-	{
-		if (pack == null)
-		{
-			return false;
-		}
-		if (pack.getId().equals(PACKAGE_SYSTEM))
-		{
-			return true;
-		}
-		Package rootPackage = pack.getRootPackage();
-		return rootPackage != null && rootPackage.getId().equals(PACKAGE_SYSTEM);
 	}
 
 	/**

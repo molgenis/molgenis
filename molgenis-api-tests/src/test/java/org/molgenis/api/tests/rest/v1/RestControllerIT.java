@@ -211,11 +211,10 @@ public class RestControllerIT
 		// @formatter:off
 		given().log()
 			   .all()
-			   .header(X_MOLGENIS_TOKEN, this.testUserToken)
 			   .when()
 			   .get(PATH + "sys_App/meta")
 			   .then()
-			   .statusCode(FORBIDDEN)
+			   .statusCode(UNAUTHORIZED)
 			   .body("errors.code[0]", equalTo("DS04"))
 			   .body("errors.message[0]",
 					   equalTo("No 'Read metadata' permission on entity type 'App' with id 'sys_App'."));

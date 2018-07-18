@@ -116,4 +116,4 @@ And add a line for the non-specific expression.
 plt.plot([0, 5000], [0, 5000])
 plt.show()
 ```
-![image](../images//rs12460890-py.png)
+![image](../../images/rs12460890-py.png)

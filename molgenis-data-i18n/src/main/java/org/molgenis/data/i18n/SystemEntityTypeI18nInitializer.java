@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Stream;
 
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
+import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 /**
  * Enriches system entity meta data with internationalization attributes.

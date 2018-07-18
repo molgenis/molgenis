@@ -31,6 +31,7 @@
                                 <th>Edit</th>
                                 <th>View</th>
                                 <th>Count</th>
+                                <th>View metadata</th>
                                 <th>None</th>
                             </tr>
                             </thead>
@@ -70,6 +71,7 @@
                                 <th>Edit</th>
                                 <th>View</th>
                                 <th>Count</th>
+                                <th>View metadata</th>
                                 <th>None</th>
                             </tr>
                             </thead>

@@ -1,15 +1,15 @@
-package org.molgenis.data.support;
+package org.molgenis.data.util;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.util.MetaUtils.isSystemPackage;
 
 public class EntityTypeUtils
 {
@@ -359,8 +359,6 @@ public class EntityTypeUtils
 
 	public static boolean isSystemEntity(EntityType entityType)
 	{
-		return entityType.getPackage() != null && (entityType.getPackage().getId().equals("sys") || entityType.getId()
-																											  .startsWith(
-																													  "sys_"));
+		return isSystemPackage(entityType.getPackage());
 	}
 }

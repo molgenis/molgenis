@@ -11,13 +11,13 @@ import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.model.JobPackage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import javax.annotation.PostConstruct;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
 //TODO: These imported classes should be in separate config and this is the IndexJobConfig
@@ -27,26 +27,26 @@ import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUT
 @Configuration
 public class IndexConfig
 {
-	@Autowired
-	private IndexActionRegisterService indexActionRegisterService;
+	private final IndexActionRegisterService indexActionRegisterService;
+	private final TransactionManager transactionManager;
+	private final DataService dataService;
+	private final IndexService indexService;
+	private final IndexJobExecutionFactory indexJobExecutionFactory;
+	private final EntityTypeFactory entityTypeFactory;
+	private final JobExecutor jobExecutor;
 
-	@Autowired
-	private TransactionManager transactionManager;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private IndexService indexService;
-
-	@Autowired
-	private IndexJobExecutionFactory indexJobExecutionFactory;
-
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
-
-	@Autowired
-	private JobExecutor jobExecutor;
+	public IndexConfig(IndexActionRegisterService indexActionRegisterService, TransactionManager transactionManager,
+			DataService dataService, IndexService indexService, IndexJobExecutionFactory indexJobExecutionFactory,
+			EntityTypeFactory entityTypeFactory, JobExecutor jobExecutor)
+	{
+		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
+		this.transactionManager = requireNonNull(transactionManager);
+		this.dataService = requireNonNull(dataService);
+		this.indexService = requireNonNull(indexService);
+		this.indexJobExecutionFactory = requireNonNull(indexJobExecutionFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
+		this.jobExecutor = requireNonNull(jobExecutor);
+	}
 
 	@PostConstruct
 	public void register()

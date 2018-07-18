@@ -6,7 +6,7 @@ import org.molgenis.data.meta.model.Attribute;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.data.util.EntityUtils.asStream;
 
 public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorator<Entity>

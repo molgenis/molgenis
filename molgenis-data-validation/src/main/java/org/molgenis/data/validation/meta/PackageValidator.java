@@ -1,8 +1,8 @@
 package org.molgenis.data.validation.meta;
 
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
+import org.molgenis.data.util.MetaUtils;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.slf4j.Logger;

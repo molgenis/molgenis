@@ -279,7 +279,7 @@ public class RestControllerV2IT
 			   .all()
 			   .header(X_MOLGENIS_TOKEN, testUserToken)
 			   .when()
-			   .get(API_V2 + "sys_App?aggs=x==active;y==superuser")
+			   .get(API_V2 + "sys_App?aggs=x==isActive")
 			   .then()
 			   .statusCode(FORBIDDEN);
 		// @formatter:on

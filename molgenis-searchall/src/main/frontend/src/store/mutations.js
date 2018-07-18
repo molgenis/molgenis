@@ -1,10 +1,10 @@
 // @flow
-import type { Result, State } from './state'
+import type {Result, State} from './state'
 
 export const SET_SUBMITTED = '__SET_SUBMITTED__'
 export const SET_SEARCHTERM = '__SET_SEARCHTERM__'
 export const SET_RESULTS = '__SET_RESULTS__'
-export const SET_ERRORS = '__SET_ERRORS__'
+export const SET_ERROR = '__SET_ERROR__'
 
 export default {
   [SET_SUBMITTED] (state: State, submitted: boolean) {
@@ -16,7 +16,7 @@ export default {
   [SET_RESULTS] (state: State, result: Result) {
     state.result = result
   },
-  [SET_ERRORS] (state: State, message: string) {
-    state.error = message
+  [SET_ERROR](state: State, error: any) {
+    state.error = error
   }
 }

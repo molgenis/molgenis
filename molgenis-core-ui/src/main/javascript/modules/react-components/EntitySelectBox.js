@@ -1,13 +1,13 @@
-import React from "react";
-import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
-import EntityLoaderMixin from "./mixin/EntityLoaderMixin";
-import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
-import RestClient from "rest-client/RestClientV1";
-import Spinner from "./Spinner";
-import Select2 from "./wrapper/Select2";
-import Form from "./Form";
-import _ from "underscore";
-import {htmlEscape} from "../utils/HtmlUtils";
+import React from 'react'
+import DeepPureRenderMixin from './mixin/DeepPureRenderMixin'
+import EntityLoaderMixin from './mixin/EntityLoaderMixin'
+import ReactLayeredComponentMixin from './mixin/ReactLayeredComponentMixin'
+import RestClient from 'rest-client/RestClientV1'
+import Spinner from './Spinner'
+import Select2 from './wrapper/Select2'
+import Form from './Form'
+import _ from 'underscore'
+import { htmlEscape } from '../utils/HtmlUtils'
 
 var div = React.DOM.div;
 
@@ -59,8 +59,8 @@ var EntitySelectBox = React.createClass({
             placeholder: props.placeholder || ' ', // cannot be an empty string
             closeOnSelect: props.multiple !== true,
             query: this._select2Query,
-            formatResult: this._select2FormatResult,
-            formatSelection: this._select2FormatSelection
+          formatResult: this._select2FormatResult.bind(this),
+          formatSelection: this._select2FormatSelection.bind(this)
         };
 
         return Select2({
@@ -136,7 +136,7 @@ var EntitySelectBox = React.createClass({
             var attrs = this._getAttrs();
             for (var i = 0; i < attrs.length; ++i) {
                 var operator = 'SEARCH';
-                switch (this.state.entity.attributes[attrs[i]].fieldType) {
+              switch (this.state.entity.allAttributes[attrs[i]].fieldType) {
                     case 'INT':
                     case 'LONG':
                     case 'BOOL':
@@ -165,7 +165,7 @@ var EntitySelectBox = React.createClass({
             var width = Math.round(12 / attrs.length); // FIXME fix in case of 5, 7 etc. lookup attributes
             for (var i = 0; i < attrs.length; ++i) {
                 var attrName = attrs[i];
-                var attrLabel = this.state.entity.attributes[attrName].label;
+              var attrLabel = this.state.entity.allAttributes[attrName].label
                 var attrValue = item[attrName] !== undefined ? item[attrName] : '';
                 items.push('<div class="col-md-' + width + '">');
                 items.push(htmlEscape(attrLabel) + ': <b>' + htmlEscape(attrValue) + '</b>');
@@ -213,7 +213,7 @@ var EntitySelectBox = React.createClass({
         }
     },
     _getAttrsWithRefEntity: function () {
-        var attrsWithRefEntity = _.filter(this.state.entity.attributes, function (attr) {
+      var attrsWithRefEntity = _.filter(this.state.entity.allAttributes, function (attr) {
             switch (attr.fieldType) {
                 case 'CATEGORICAL':
                 case 'CATEGORICAL_MREF':

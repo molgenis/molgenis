@@ -103,7 +103,7 @@ And add a line for the non-specific expression.
 ```
 lines(c(0,5000), c(0, 5000))
 ```
-![image](../images/rs12460890-r.png)
+![image](../../images/rs12460890-r.png)
 
 # Query format
 

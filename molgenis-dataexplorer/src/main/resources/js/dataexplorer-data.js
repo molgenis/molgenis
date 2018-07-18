@@ -46,7 +46,7 @@
      * @memberOf molgenis.dataexplorer.data
      */
     function createDataTable() {
-        var useDateEditRowPlugin = this.useDateEditRowPlugin;
+      var useDataEditRowPlugin = this.useDateEditRowPlugin
         $.get('/permission/sys_FreemarkerTemplate/read').done(function (canRead) {
             var tableProperties = {
                 entity: getEntity().name,
@@ -67,7 +67,7 @@
                     };
                 }
             }
-            if (useDateEditRowPlugin) {
+          if (useDataEditRowPlugin) {
                 tableProperties.onEditClick = function (tableId, tableRowId) {
                     window.location.assign(window.location.origin + '/plugin/data-row-edit/' + tableId + '/' + tableRowId)
                 },

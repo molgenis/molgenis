@@ -47,7 +47,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributes;
 import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
-import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database

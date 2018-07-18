@@ -3,7 +3,7 @@ package org.molgenis.data.meta.model;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.support.AttributeUtils.getValidIdAttributeTypes;
+import static org.molgenis.data.util.AttributeUtils.getValidIdAttributeTypes;
 
 @Component
 public class AttributeMetadata extends SystemEntityType

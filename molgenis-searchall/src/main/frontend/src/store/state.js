@@ -11,7 +11,7 @@ export type State = {
 const state: State = {
   query: '',
   result: null,
-  error: '',
+  error: undefined,
   submitted: false
 }
 

@@ -6,6 +6,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -123,9 +124,15 @@ public class EntityTypeUtilsTest
 	{
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
+		when(entityPackage.getId()).thenReturn("foo");
+
+		Package sysPackage = mock(Package.class);
+		when(sysPackage.getId()).thenReturn("sys");
+
+		when(entityPackage.getRootPackage()).thenReturn(sysPackage);
 		when(entity.getPackage()).thenReturn(entityPackage);
-		when(entityPackage.getId()).thenReturn("not-system");
-		when(entity.getId()).thenReturn("sys_foo_bar_Entity");
+		when(entity.getId()).thenReturn("sys_foo_Entity");
+
 		assertTrue(EntityTypeUtils.isSystemEntity(entity));
 	}
 
@@ -135,7 +142,7 @@ public class EntityTypeUtilsTest
 		EntityType entity = mock(EntityType.class);
 		Package entityPackage = mock(Package.class);
 		when(entity.getPackage()).thenReturn(entityPackage);
-		when(entityPackage.getId()).thenReturn("not-system");
+		when(entityPackage.getId()).thenReturn("foo_bar");
 		when(entity.getId()).thenReturn("foo_bar_Entity");
 		assertFalse(EntityTypeUtils.isSystemEntity(entity));
 	}

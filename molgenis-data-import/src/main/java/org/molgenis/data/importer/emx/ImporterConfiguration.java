@@ -18,60 +18,56 @@ import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
 import org.molgenis.data.validation.meta.TagValidator;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static java.util.Objects.requireNonNull;
 
 @Configuration
 public class ImporterConfiguration
 {
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final MetaDataService metaDataService;
+	private final PermissionSystemService permissionSystemService;
+	private final UserPermissionEvaluator permissionService;
+	private final PackageFactory packageFactory;
+	private final AttributeFactory attrMetaFactory;
+	private final EntityTypeFactory entityTypeFactory;
+	private final TagFactory tagFactory;
+	private final LanguageFactory languageFactory;
+	private final L10nStringFactory l10nStringFactory;
+	private final EntityManager entityManager;
+	private final EntityTypeValidator entityTypeValidator;
+	private final AttributeValidator attributeValidator;
+	private final TagValidator tagValidator;
+	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+	private final DataPersister dataPersister;
 
-	@Autowired
-	private MetaDataService metaDataService;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
-
-	@Autowired
-	private UserPermissionEvaluator permissionService;
-
-	@Autowired
-	private PackageFactory packageFactory;
-
-	@Autowired
-	private AttributeFactory attrMetaFactory;
-
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
-
-	@Autowired
-	private TagFactory tagFactory;
-
-	@Autowired
-	private LanguageFactory languageFactory;
-
-	@Autowired
-	private L10nStringFactory l10nStringFactory;
-
-	@Autowired
-	private EntityManager entityManager;
-
-	@Autowired
-	private EntityTypeValidator entityTypeValidator;
-
-	@Autowired
-	private AttributeValidator attributeValidator;
-
-	@Autowired
-	private TagValidator tagValidator;
-
-	@Autowired
-	private EntityTypeDependencyResolver entityTypeDependencyResolver;
-
-	@Autowired
-	private DataPersister dataPersister;
+	public ImporterConfiguration(PackageFactory packageFactory, DataService dataService,
+			MetaDataService metaDataService, PermissionSystemService permissionSystemService,
+			EntityTypeDependencyResolver entityTypeDependencyResolver, UserPermissionEvaluator permissionService,
+			AttributeValidator attributeValidator, AttributeFactory attrMetaFactory,
+			EntityTypeFactory entityTypeFactory, DataPersister dataPersister, EntityTypeValidator entityTypeValidator,
+			TagValidator tagValidator, TagFactory tagFactory, LanguageFactory languageFactory,
+			L10nStringFactory l10nStringFactory, EntityManager entityManager)
+	{
+		this.packageFactory = requireNonNull(packageFactory);
+		this.dataService = requireNonNull(dataService);
+		this.metaDataService = requireNonNull(metaDataService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+		this.permissionService = requireNonNull(permissionService);
+		this.attributeValidator = requireNonNull(attributeValidator);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
+		this.dataPersister = requireNonNull(dataPersister);
+		this.entityTypeValidator = requireNonNull(entityTypeValidator);
+		this.tagValidator = requireNonNull(tagValidator);
+		this.tagFactory = requireNonNull(tagFactory);
+		this.languageFactory = requireNonNull(languageFactory);
+		this.l10nStringFactory = requireNonNull(l10nStringFactory);
+		this.entityManager = requireNonNull(entityManager);
+	}
 
 	@Bean
 	public ImportService emxImportService()

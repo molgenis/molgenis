@@ -17,7 +17,7 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.support.EntityTypeUtils;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
@@ -49,9 +49,9 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
-import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
-import static org.molgenis.data.support.EntityTypeUtils.isStringType;
+import static org.molgenis.data.util.AttributeUtils.isIdAttributeTypeAllowed;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isStringType;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using

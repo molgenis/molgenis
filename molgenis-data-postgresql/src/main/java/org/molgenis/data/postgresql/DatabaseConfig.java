@@ -6,7 +6,6 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.postgresql.transaction.PostgreSqlTransactionManager;
 import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistry;
 import org.molgenis.data.transaction.TransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +17,8 @@ import org.springframework.transaction.annotation.TransactionManagementConfigure
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.util.Properties;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Database configuration
@@ -43,11 +44,16 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	@Value("${db_password:@null}")
 	private String dbPassword;
 
-	@Autowired
-	private IdGenerator idGenerator;
+	private final IdGenerator idGenerator;
 
-	@Autowired
-	private TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
+	private final TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry;
+
+	public DatabaseConfig(IdGenerator idGenerator,
+			TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry)
+	{
+		this.idGenerator = requireNonNull(idGenerator);
+		this.transactionExceptionTranslatorRegistry = requireNonNull(transactionExceptionTranslatorRegistry);
+	}
 
 	@Bean
 	public DataSource dataSource()
