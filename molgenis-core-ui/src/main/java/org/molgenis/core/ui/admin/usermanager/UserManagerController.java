@@ -11,16 +11,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import static org.molgenis.core.ui.admin.usermanager.UserManagerController.URI;
-import static org.molgenis.core.ui.admin.usermanager.UserManagerController.VIEW_STATE;
 
 @Api("User manager")
 @Controller
 @RequestMapping(URI)
-@SessionAttributes(VIEW_STATE)
 public class UserManagerController extends PluginController
 {
 	public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
-	static final String VIEW_STATE = "viewState";
 	private final UserManagerService pluginUserManagerService;
 
 	public UserManagerController(UserManagerService pluginUserManagerService)
@@ -40,22 +37,7 @@ public class UserManagerController extends PluginController
 	{
 		model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
 
-		if (!model.containsAttribute(VIEW_STATE))
-		{
-			model.addAttribute(VIEW_STATE, "users");
-		}
-
 		return "view-usermanager";
-	}
-
-	@ApiOperation("Sets viewState")
-	@ApiResponses({ @ApiResponse(code = 200, message = "Ok"),
-			@ApiResponse(code = 500, message = "ViewState could not be set") })
-	@PutMapping("/setViewState/{viewState}")
-	@ResponseStatus(HttpStatus.OK)
-	public void setViewState(@PathVariable("viewState") String viewState, Model model)
-	{
-		model.addAttribute(VIEW_STATE, viewState);
 	}
 
 	@ApiOperation("Sets activation status for a user")
