@@ -168,6 +168,9 @@ export default {
   printContent: function (docTitle: string, content: Object) {
     let docDefinition = {
       pageSize: 'LETTER',
+      footer: function (currentPage, pageCount) {
+        return {text: currentPage.toString() + ' / ' + pageCount, alignment: 'right', style: 'pageNumber'}
+      },
       info: {
         title: 'questionnaire-overview'
       },
@@ -177,6 +180,11 @@ export default {
           fontSize: 18,
           bold: true,
           margin: [0, 5, 0, 10]
+        },
+        pageNumber: {
+          fontSize: 10,
+          italics: true,
+          margin: [10, 10, 10, 10]
         },
         introText: {
           fontSize: 10,
