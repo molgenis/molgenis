@@ -49,7 +49,6 @@ public class GroupRestController
 	private static final String GROUP_PERMISSION_END_POINT = GROUP_END_POINT + "/{groupName}/permission";
 	static final String TEMP_USER_END_POINT = SECURITY_API_PATH + USER;
 
-
 	private final GroupValueFactory groupValueFactory;
 	private final GroupService groupService;
 	private final RoleMembershipService roleMembershipService;
@@ -81,26 +80,27 @@ public class GroupRestController
 	{
 		GroupValue groupValue = groupValueFactory.createGroup(group.getName(), group.getLabel(), DEFAULT_ROLES);
 
-//		if (!groupService.isGroupNameAvailable(groupValue))
-//		{
+		if (!groupService.isGroupNameAvailable(groupValue))
+		{
 			throw new GroupNameNotAvailableException(group.getName());
-//		}
+		}
 
-//		groupService.persist(groupValue);
-//		groupPermissionService.grantDefaultPermissions(groupValue);
-//		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
+		groupService.persist(groupValue);
+		groupPermissionService.grantDefaultPermissions(groupValue);
+		roleMembershipService.addUserToRole(getCurrentUsername(), getManagerRoleName(groupValue));
 
-//		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-//												  .path("/{name}")
-//												  .buildAndExpand(groupValue.getName())
-//												  .toUri();
-//
-//		return ResponseEntity.created(location).build();
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+												  .path("/{name}")
+												  .buildAndExpand(groupValue.getName())
+												  .toUri();
+
+		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping(GROUP_END_POINT)
 	@ApiOperation(value = "Get list with groups", response = ResponseEntity.class)
-	@ApiResponses({ @ApiResponse(code = 200, message = "List of groupResponse object available to user", response = List.class) })
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "List of groupResponse object available to user", response = List.class) })
 	@ResponseBody
 	public List<GroupResponse> getGroups()
 	{
@@ -119,9 +119,9 @@ public class GroupRestController
 		checkGroupPermission(groupName, VIEW_MEMBERSHIP);
 		Iterable<Role> roles = groupService.getGroup(groupName).getRoles();
 		return roleMembershipService.getMemberships(Lists.newArrayList(roles))
-							 .stream()
-							 .map(GroupMemberResponse::fromEntity)
-							 .collect(Collectors.toList());
+									.stream()
+									.map(GroupMemberResponse::fromEntity)
+									.collect(Collectors.toList());
 
 	}
 
@@ -153,7 +153,8 @@ public class GroupRestController
 	@ApiOperation(value = "Remove member from group", response = ResponseEntity.class)
 	@Transactional
 	@ApiResponses({ @ApiResponse(code = 204, message = "Member removed from group", response = ResponseEntity.class) })
-	public ResponseEntity removeMember(@PathVariable(value = "groupName") String groupName, @PathVariable(value = "memberName") String memberName)
+	public ResponseEntity removeMember(@PathVariable(value = "groupName") String groupName,
+			@PathVariable(value = "memberName") String memberName)
 	{
 		checkGroupPermission(groupName, REMOVE_MEMBERSHIP);
 		final Group group = groupService.getGroup(groupName);
@@ -170,8 +171,7 @@ public class GroupRestController
 	@ResponseStatus(HttpStatus.OK)
 	@ApiResponses({ @ApiResponse(code = 200, message = "Updated membership role", response = ResponseEntity.class) })
 	public void updateMember(@PathVariable(value = "groupName") String groupName,
-			@PathVariable(value = "memberName") String memberName,
-			@RequestBody UpdateGroupMemberCommand groupMember)
+			@PathVariable(value = "memberName") String memberName, @RequestBody UpdateGroupMemberCommand groupMember)
 	{
 		checkGroupPermission(groupName, UPDATE_MEMBERSHIP);
 		final Group group = groupService.getGroup(groupName);
@@ -201,7 +201,8 @@ public class GroupRestController
 	@PreAuthorize("hasAnyRole('SU', 'MANAGER')")
 	public Collection<UserResponse> getUsers()
 	{
-		return userService.getUsers().stream()
+		return userService.getUsers()
+						  .stream()
 						  .filter(u -> !u.getUsername().equals("anonymous"))
 						  .map(UserResponse::fromEntity)
 						  .collect(Collectors.toList());
@@ -209,7 +210,8 @@ public class GroupRestController
 
 	@GetMapping(GROUP_PERMISSION_END_POINT)
 	@ApiOperation(value = "Get group permissions", response = Collection.class)
-	@ApiResponses({ @ApiResponse(code = 200, message = "List of permissions for current user on group", response = Collection.class) })
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "List of permissions for current user on group", response = Collection.class) })
 	@ResponseBody
 	public Collection<Permission> getPermissions(@PathVariable(value = "groupName") String groupName)
 	{
