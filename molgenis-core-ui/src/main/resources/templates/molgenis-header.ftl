@@ -121,6 +121,7 @@
             window.molgenisMenu = {
                 menu: ${menu}
                 <#if app_settings.logoTopHref??>, topLogo: '${app_settings.logoTopHref}'</#if>
+                <#if app_settings.logoTopHref??>, topLogoMaxHeight: ${app_settings.logoTopMaxHeight}</#if>
                 <#if app_settings.logoNavBarHref?has_content>, navBarLogo: '${app_settings.logoNavBarHref}'</#if>
                 <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
                 , authenticated: ${authenticated?c}
@@ -139,7 +140,8 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid">
+<div class="container-fluid"<#if app_settings.logoTopHref??>
+     style="padding-top: ${app_settings.logoTopMaxHeight + 60}px;"</#if>>
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
@@ -183,35 +185,6 @@
 <div class="row">
     <div class="col-md-12">
         <div id="plugin-container">
-            <#if app_settings.logoTopHref?has_content>
-                <script>
-                    // Calculate the amount of pixels that the content needs to
-                    // be pushed down based on the height of the uploaded banner
-                    var maxHeight = 0
-
-                    function setContainerHeight() {
-                        var img = document.getElementById('logo-top');
-                        img.style['height'] = 'auto'
-
-                        <#if app_settings.fixedHeightLogo??>
-                        img.style['max-height'] = '${app_settings.fixedHeightLogo?string}px'
-                        </#if>
-
-                        var height = img.height
-                        maxHeight = height + 60
-
-                        var container = document.querySelector('body>.container-fluid')
-                        container.setAttribute("style", "padding-top: " + maxHeight + "px;")
-                    }
-
-                    $(window).resize(function() {
-                        setContainerHeight()
-                    })
-
-                    setContainerHeight()
-                </script>
-            </#if>
-
             <#assign plugin_description_key = plugin_id + '_description_text'>
             <#if i18n[plugin_description_key] != "#" + plugin_id + "_description_text#">
                 ${i18n[plugin_description_key]}
@@ -225,8 +198,10 @@
     <nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
             <#if app_settings.logoTopHref?has_content>
-            <header id="top-logo-banner">
-                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"></a>
+            <header id="top-logo-banner" style="height: ${app_settings.logoTopMaxHeight}px">
+                <span style="display: inline-block;height: 100%;vertical-align: middle;"></span>
+                <a href="/"><img id="logo-top" src="${app_settings.logoTopHref?html}" alt="" border="0"
+                                 style="max-height: ${app_settings.logoTopMaxHeight}px"></a>
             </header>
             </#if>
             <div class="navbar-header">
