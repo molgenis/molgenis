@@ -140,8 +140,8 @@
     </#if>
 
 <#-- Start application content -->
-<div class="container-fluid"<#if app_settings.logoTopHref??>
-     style="padding-top: ${app_settings.logoTopMaxHeight + 60}px;"</#if>>
+<div class="container-fluid"
+     style="padding-top: <#if app_settings.logoTopHref??>${app_settings.logoTopMaxHeight + 60}<#elseif version gt 1>60</#if>px;">
     <div class="row">
         <div class="col-md-12">
             <div id="login-modal-container-header"></div>
