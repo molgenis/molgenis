@@ -14,7 +14,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^2.2.0",
+    "@molgenis/molgenis-api-client": "^3.0.0",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
     "lodash": "^4.17.10",
     "vue": "^2.5.16",
