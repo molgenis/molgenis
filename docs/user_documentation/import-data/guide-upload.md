@@ -165,13 +165,13 @@ notify: Boolean value to indicate of success and failure should be reported to t
 ## Response:
 The service responds with a statuscode **201 CREATED** if the preliminary checks went well and the import run has been started, it also returns a href to the metadata of the importrun.
 The href can be used to poll the status of the import by checking the status field of the importrun, also the message field of the importrun entity gives some basic feedback on what was imported or what went wrong.
-##Examples
+## Examples
 ### importByURL Example:
 
     https://molgenis01.gcc.rug.nl/plugin/importwizard/importByUrl
     notify=false&entityTypeId=demo&url=https://raw.githubusercontent.com/molgenis/molgenis/master/molgenis-data-vcf/src/test/resources/testFile.vcf
     
-#####Response:
+##### Response:
 
     201 CREATED
     /api/v2/ImportRun/[ImportRunID]
@@ -184,7 +184,7 @@ A token can be obtained using:
 
     curl -H "Content-Type: application/json" -X POST -d '{"username"="USERNAME", "password"="YOURPASSWORD"}' https://[SERVER URL]/api/v1/login
 
-#####Response:
+##### Response:
 
     201 CREATED
     /api/v2/ImportRun/[ImportRunID]
