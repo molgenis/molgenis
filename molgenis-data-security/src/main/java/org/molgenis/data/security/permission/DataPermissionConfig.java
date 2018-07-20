@@ -38,6 +38,8 @@ public class DataPermissionConfig
 		permissionRegistry.addMapping(EntityTypePermission.DELETE_DATA, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(EntityTypePermission.UPDATE_METADATA, WRITEMETA);
 		permissionRegistry.addMapping(EntityTypePermission.DELETE_METADATA, WRITEMETA);
+		permissionRegistry.addMapping(EntityTypePermission.VIEW_REPORT, READ, WRITE, WRITEMETA);
+		permissionRegistry.addMapping(EntityTypePermission.MANAGE_REPORT, WRITE, WRITEMETA);
 
 		permissionRegistry.addMapping(EntityPermission.READ, READ, WRITE, WRITEMETA);
 		permissionRegistry.addMapping(EntityPermission.UPDATE, WRITE, WRITEMETA);
