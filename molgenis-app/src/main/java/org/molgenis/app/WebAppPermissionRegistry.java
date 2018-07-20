@@ -106,8 +106,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, DECORATOR_CONFIGURATION, user, READ);
 		register(PACKAGE, PACKAGE_META, manager, WRITE);
 		register(PLUGIN, NavigatorController.ID, viewer, READ);
-		register(PLUGIN, ONE_CLICK_IMPORTER, editor, READ);
-		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
+		register(PLUGIN, ONE_CLICK_IMPORTER, manager, READ);
+		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, manager, WRITE);
 		register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
 		register(PLUGIN, SecurityUiController.ID, manager, READ);
 	}
