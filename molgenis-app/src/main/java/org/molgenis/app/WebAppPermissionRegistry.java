@@ -59,9 +59,9 @@ import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 @Component
 public class WebAppPermissionRegistry implements PermissionRegistry
 {
-	ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
+	private ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
 
-	public WebAppPermissionRegistry()
+	WebAppPermissionRegistry()
 	{
 		Sid anonymousUser = createUserSid(ANONYMOUS_USERNAME);
 		Sid user = createAuthoritySid(AUTHORITY_USER);
