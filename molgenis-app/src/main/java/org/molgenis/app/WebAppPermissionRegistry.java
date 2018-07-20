@@ -53,8 +53,6 @@ import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
-import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.MAPPING_JOB_EXECUTION;
-import static org.molgenis.semanticmapper.meta.MapperPackage.PACKAGE_MAPPER;
 import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
@@ -93,8 +91,6 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, SearchAllPluginController.ID, viewer, READ);
 		register(PLUGIN, DataRowEditController.ID, editor, READ);
 		register(PLUGIN, JobsController.ID, editor, READ);
-		register(PACKAGE, PACKAGE_MAPPER, editor, READ);
-		register(ENTITY_TYPE, MAPPING_JOB_EXECUTION, editor, WRITE);
 		register(ENTITY_TYPE, IMPORT_RUN, editor, WRITE);
 		register(PLUGIN, SortaController.ID, editor, READ);
 		register(ENTITY_TYPE, MATCHING_TASK_CONTENT, editor, WRITE);
