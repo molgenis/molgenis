@@ -40,14 +40,12 @@ import static org.molgenis.data.security.auth.GroupService.*;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorPackage.PACKAGE_NEGOTIATOR;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserPackage.PACKAGE_GENOME_BROWSER;
-import static org.molgenis.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.ONE_CLICK_IMPORTER;
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ONE_CLICK_IMPORT_JOB_EXECUTION;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHING_TASK_CONTENT;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.ONTOLOGY_TERM_HIT;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
-import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
 import static org.molgenis.security.core.PermissionSet.*;
 import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
@@ -61,9 +59,9 @@ import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 @Component
 public class WebAppPermissionRegistry implements PermissionRegistry
 {
-	ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
+	private ImmutableMultimap.Builder<ObjectIdentity, Pair<PermissionSet, Sid>> builder = new ImmutableMultimap.Builder<>();
 
-	public WebAppPermissionRegistry()
+	WebAppPermissionRegistry()
 	{
 		Sid anonymousUser = createUserSid(ANONYMOUS_USERNAME);
 		Sid user = createAuthoritySid(AUTHORITY_USER);
@@ -97,8 +95,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, ONTOLOGY_TERM_HIT, editor, WRITE);
 		register(ENTITY_TYPE, SORTA_JOB_EXECUTION, editor, WRITE);
 		register(PACKAGE, PACKAGE_ONTOLOGY, user, READ);
-		register(ENTITY_TYPE, QUESTIONNAIRE, user, READMETA);
-		register(PLUGIN, QuestionnaireController.ID, user, READ);
+		register(PLUGIN, QuestionnaireController.ID, editor, READ);
 		register(PACKAGE, PACKAGE_GENOME_BROWSER, viewer, READ);
 		register(ENTITY_TYPE, LANGUAGE, anonymousUser, READ);
 		register(ENTITY_TYPE, LANGUAGE, user, READ);
@@ -109,9 +106,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, DECORATOR_CONFIGURATION, user, READ);
 		register(PACKAGE, PACKAGE_META, manager, WRITE);
 		register(PLUGIN, NavigatorController.ID, viewer, READ);
-		register(PLUGIN, ONE_CLICK_IMPORTER, editor, READ);
-		register(ENTITY_TYPE, JOB_EXECUTION, editor, READMETA);
-		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, editor, WRITE);
+		register(PLUGIN, ONE_CLICK_IMPORTER, manager, READ);
+		register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, manager, WRITE);
 		register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
 		register(PLUGIN, SecurityUiController.ID, manager, READ);
 	}
