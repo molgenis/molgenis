@@ -67,25 +67,17 @@ The default permissions for these roles are as follows:
     * One click importer
   * Navigator
   * Data Explorer
-  * Data Integration
-    * Mapping service
-    * SORTA
   * Plugins
     * Search all
     * Job overview
-    * Questionnaires
     
 **Editor**:
 * You can edit data in the group
 * You get access to the following plugins:
   * Import Data
     * Advanced importer
-    * One click importer
   * Navigator
   * Data Explorer
-  * Data Integration
-    * Mapping service
-    * SORTA
   * Plugins
     * Search all
     * Job overview
@@ -98,7 +90,6 @@ The default permissions for these roles are as follows:
   * Data Explorer
   * Plugins
     * Search all
-    * Questionnaires
 
 ![Membership overview](../../images/security/membership_overview.png?raw=true, "Membership overview")
 
