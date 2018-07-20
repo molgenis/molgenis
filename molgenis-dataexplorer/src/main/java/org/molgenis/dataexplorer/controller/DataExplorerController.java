@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.controller.DataRequest.DownloadType;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -43,6 +44,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
+import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
@@ -222,8 +226,15 @@ public class DataExplorerController extends PluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityTypeId)
 	{
-		return permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), EntityTypePermission.READ_DATA)
-				&& dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.WRITABLE);
+		boolean canReadData = permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA);
+		boolean repositoryIsWritable = dataService.getCapabilities(entityTypeId).contains(WRITABLE);
+
+		Package containingPackage = dataService.getEntityType(entityTypeId).getPackage();
+		boolean canAddEntityType =
+				containingPackage != null && permissionService.hasPermission(new PackageIdentity(containingPackage),
+						ADD_ENTITY_TYPE);
+
+		return canReadData && canAddEntityType && repositoryIsWritable;
 	}
 
 	/**
@@ -240,8 +251,7 @@ public class DataExplorerController extends PluginController
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
 				LocaleContextHolder.getLocale());
-		if (modData && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ_DATA))
+		if (modData && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
 		{
 			modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
 		}
@@ -251,8 +261,8 @@ public class DataExplorerController extends PluginController
 		{
 			modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
 		}
-		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.READ_DATA) && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
+		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)
+				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
 				EntityTypePermission.UPDATE_METADATA))
 		{
 			String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
