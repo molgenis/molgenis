@@ -16,7 +16,7 @@ export default {
   [SET_RESULTS] (state: State, result: Result) {
     state.result = result
   },
-  [SET_ERROR](state: State, error: any) {
+  [SET_ERROR] (state: State, error: any) {
     state.error = error
   }
 }

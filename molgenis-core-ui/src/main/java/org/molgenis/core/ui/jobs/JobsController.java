@@ -4,10 +4,13 @@ import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.schedule.JobScheduler;
+import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.MediaType;
@@ -24,6 +27,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.jobs.JobsController.URI;
 import static org.molgenis.data.rest.util.Href.concatEntityHref;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -41,9 +45,11 @@ public class JobsController extends PluginController
 	private final JobExecutionMetaData jobMetaDataMetaData;
 	private final JobScheduler jobScheduler;
 	private final MenuReaderService menuReaderService;
+	private final UserPermissionEvaluator userPermissionEvaluator;
 
-	public JobsController(UserAccountService userAccountService, DataService dataService,
-			JobExecutionMetaData jobMetaDataMetaData, JobScheduler jobScheduler, MenuReaderService menuReaderService)
+	JobsController(UserAccountService userAccountService, DataService dataService,
+			JobExecutionMetaData jobMetaDataMetaData, JobScheduler jobScheduler, MenuReaderService menuReaderService,
+			UserPermissionEvaluator userPermissionEvaluator)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
@@ -51,6 +57,7 @@ public class JobsController extends PluginController
 		this.jobMetaDataMetaData = requireNonNull(jobMetaDataMetaData);
 		this.jobScheduler = requireNonNull(jobScheduler);
 		this.menuReaderService = requireNonNull(menuReaderService);
+		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
 	}
 
 	@GetMapping
@@ -78,18 +85,15 @@ public class JobsController extends PluginController
 		Instant weekAgo = Instant.now().minus(7, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
 		User currentUser = userAccountService.getCurrentUser();
 
-		dataService.getMeta()
-				   .getEntityTypes()
-				   .filter(e -> e.getExtends() != null && e.getExtends().getId().equals(jobMetaDataMetaData.getId()))
-				   .forEach(e ->
-				   {
-					   Query<Entity> q = dataService.query(e.getId()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
-					   if (!currentUser.isSuperuser())
-					   {
-						   q.and().eq(USER, currentUser.getUsername());
-					   }
-					   dataService.findAll(e.getId(), q).forEach(jobs::add);
-				   });
+		dataService.getMeta().getEntityTypes().filter(this::isAllowedJobExecutionEntityType).forEach(e ->
+		{
+			Query<Entity> q = dataService.query(e.getId()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
+			if (!currentUser.isSuperuser())
+			{
+				q.and().eq(USER, currentUser.getUsername());
+			}
+			dataService.findAll(e.getId(), q).forEach(jobs::add);
+		});
 
 		jobs.sort((job1, job2) -> job2.getInstant(SUBMISSION_DATE).compareTo(job1.getInstant(SUBMISSION_DATE)));
 		if (jobs.size() > MAX_JOBS_TO_RETURN)
@@ -113,5 +117,24 @@ public class JobsController extends PluginController
 		String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(ID);
 		return format("%s/viewJob/?jobHref=%s&refreshTimeoutMillis=%s", jobControllerURL, jobHref,
 				refreshTimeoutMillis);
+	}
+
+	/**
+	 * Package-private for testability.
+	 */
+	boolean isAllowedJobExecutionEntityType(EntityType entityType)
+	{
+		return isJobExecutionEntityType(entityType) && currentUserCanReadEntityTypeData(entityType);
+	}
+
+	private boolean isJobExecutionEntityType(EntityType entityType)
+	{
+		EntityType parentEntityType = entityType.getExtends();
+		return parentEntityType != null && parentEntityType.getId().equals(jobMetaDataMetaData.getId());
+	}
+
+	private boolean currentUserCanReadEntityTypeData(EntityType entityType)
+	{
+		return userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityType), READ_DATA);
 	}
 }
