@@ -16,9 +16,15 @@ in a database.
 in a database
 
 ## Permissions
-A group's editors can use the import wizard to add or update entities of existing entity types in
-the group's package.
-A group's managers can use the import wizard to upload new entity types into the group's package.
+When we're uploading a new entity type, we need a package to add it to.
+The easiest way is to [create a group](../admin-features/guide-ref-security) first.
+
+> N.B. You cannot create the group after importing the package!
+
+The group's manager or a superuser can then use the import wizard to upload new entity types into the group's package.
+
+The group's editors can use the import wizard to add or update entities of existing entity types in
+their group's package.
 
 ## Formats
 The MOLGENIS upload module supports the following file formats and data:
@@ -80,11 +86,10 @@ Choose options:
 * Add entities / update existing: Importer adds new entities or updates existing entities.
 * Update entities: Importer updates existing entities or fails if entity does not exist.
 
-
 ![Upload file screen](../../images/upload/options-screen.png?raw=true, "Options")
 
 # Choose packages
-Because the entity type (table) persons has no package defined, we get the option to choose another package different from the MOLGENIS default package. The select options list the available packages in the file.
+If some Entity types do not yet have a package specified, you must choose where you want to create them.
 
 ![Upload file screen](../../images/upload/packages-screen.png?raw=true, "Packages")
 
@@ -94,7 +99,7 @@ When you see this page the validation is already done. This page validates the s
 "Entities" table where all the entity types are defined.
 
 * Name: Name of entity
-* Importable: Is this entity inportable or not. Two options (Yes, No) 
+* Importable: Is this entity importable or not. Two options (Yes, No) 
 
 "Entity fields" table that will contain information about the fields of an entity (Columns of the table)
 
