@@ -2,12 +2,12 @@ package org.molgenis.dataexplorer;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.core.ui.menumanager.MenuManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -18,6 +18,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.controller.NavigatorLink;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.LocaleResolver;
@@ -45,11 +45,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
+import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.NAVIGATOR;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_XLSX;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { GsonConfig.class })
@@ -79,32 +82,29 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 	private Model model;
 
 	@Mock
-	public AppSettings appSettings;
+	private AppSettings appSettings;
 	@Mock
-	DataExplorerSettings dataExplorerSettings;
+	private DataExplorerSettings dataExplorerSettings;
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private DataService dataService;
 	@Mock
-	DataService dataService;
+	private FreeMarkerConfigurer freemarkerConfigurer;
 	@Mock
-	FreeMarkerConfigurer freemarkerConfigurer;
+	private UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
 	@Mock
-	MenuManagerService menuManager;
+	private MenuReaderService menuReaderService;
 	@Mock
-	UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
-	@Mock
-	MenuReaderService menuReaderService;
-	@Mock
-	LocaleResolver localeResolver;
+	private LocaleResolver localeResolver;
 
 	@Mock
-	Menu menu;
+	private Menu menu;
 	@Mock
-	Package package_;
+	private Package package_;
 	@Mock
-	Package parentPackage;
+	private Package parentPackage;
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
-	private MockMvc mockMvc;
 
 	public DataExplorerControllerTest()
 	{
@@ -141,7 +141,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
 		when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
+		MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
@@ -289,5 +289,57 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 		expected.add(NavigatorLink.create("menu/main/navigation/navigator/parentId", "parent"));
 		expected.add(NavigatorLink.create("menu/main/navigation/navigator/packId", "pack"));
 		assertEquals(controller.getNavigatorLinks(entityTypeId), expected);
+	}
+
+	@Test
+	public void testShowCopyNoReadDataPermission()
+	{
+		when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)).thenReturn(false);
+		when(permissionService.hasPermission(new PackageIdentity(package_), ADD_ENTITY_TYPE)).thenReturn(true);
+
+		assertFalse(controller.showCopy(entityTypeId));
+	}
+
+	@Test
+	public void testShowCopyNoParentPackage()
+	{
+		when(entityType.getPackage()).thenReturn(null);
+
+		when(dataService.getEntityType(entityTypeId)).thenReturn(entityType);
+		when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)).thenReturn(true);
+
+		assertFalse(controller.showCopy(entityTypeId));
+	}
+
+	@Test
+	public void testShowCopyNoAddEntityTypePermission()
+	{
+		when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)).thenReturn(true);
+		when(permissionService.hasPermission(new PackageIdentity(package_), ADD_ENTITY_TYPE)).thenReturn(false);
+
+		assertFalse(controller.showCopy(entityTypeId));
+	}
+
+	@Test
+	public void testShowCopyRepositoryNotWritable()
+	{
+		when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(false);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)).thenReturn(true);
+		when(permissionService.hasPermission(new PackageIdentity(package_), ADD_ENTITY_TYPE)).thenReturn(true);
+
+		assertFalse(controller.showCopy(entityTypeId));
+	}
+
+	@Test
+	public void testShowCopyAllowed()
+	{
+		when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
+		when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)).thenReturn(true);
+		when(permissionService.hasPermission(new PackageIdentity(package_), ADD_ENTITY_TYPE)).thenReturn(true);
+
+		assertTrue(controller.showCopy(entityTypeId));
 	}
 }
