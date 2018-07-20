@@ -95,7 +95,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(ENTITY_TYPE, ONTOLOGY_TERM_HIT, editor, WRITE);
 		register(ENTITY_TYPE, SORTA_JOB_EXECUTION, editor, WRITE);
 		register(PACKAGE, PACKAGE_ONTOLOGY, user, READ);
-		register(PLUGIN, QuestionnaireController.ID, user, READ);
+		register(PLUGIN, QuestionnaireController.ID, editor, READ);
 		register(PACKAGE, PACKAGE_GENOME_BROWSER, viewer, READ);
 		register(ENTITY_TYPE, LANGUAGE, anonymousUser, READ);
 		register(ENTITY_TYPE, LANGUAGE, user, READ);
