@@ -1,24 +1,24 @@
-# Upload you data (advanced importer)
-In this section you will learn how to upload you data. Let us not wait any longer! After a quick re-cap of terminology and formats we will start off with the most basic step, importing your data.
+# Upload your data using the Import Wizard (Advanced data import)
+In this section you will learn how to upload your data. 
+Let us not wait any longer! 
+After a quick re-cap of terminology and formats we will describe how you can import your data.
 
 ## Terminology
-In this section we introduce and explain, terminology of MOLGENIS
+In this section we introduce and explain some terminology of MOLGENIS
 
-
-* Package: A namespace item. Multiple packages can create a namspace where entities can live in. The default namespace in molgenis is called "default"
-* Data set: A collections of entities that are contextually related. 
-* Entity: An entity is the template and collection of a subject like a table in a database.
-* Entity: We also use the term entity for the actual data that is collected based on the template from an entity (Term above), like a row in a database. In the future we will change this term to "instance" to avoid complexity and double use of the same term
-* Attribute: An attribute describes the charcteristics of a data item in an entity, Like a column in a database
+* Package: Each group has a root package where it can store its data.
+Packages can have child packages to logically subdivide that root package into a tree structure, 
+like folders on a hard drive.
+* Entity Type: An entity type is the metadata of a data collection, like a table in a database.
+* Entity: The actual data that is collected based on the template from an entity type, like a table row
+in a database.
+* Attribute: An attribute describes the characteristics of a data item in an entity type, like a column 
+in a database
 
 ## Permissions
-User need the following permissions to use the upload plugin:
-
-* WRITE on sys_md_EntityType, sys_md_Attribute
-* WRITE on sys_md_Tag and sys_md_Package if those are uploaded
-* WRITEMETA on the packages the uploaded entities are in and parentpackages of imported packages
-* WRITE on sys_ImportRun
-* VIEW on the upload plugin
+A group's editors can use the import wizard to add or update entities of existing entity types in
+the group's package.
+A group's managers can use the import wizard to upload new entity types into the group's package.
 
 ## Formats
 The MOLGENIS upload module supports the following file formats and data:
@@ -45,7 +45,7 @@ The upload module is the place in MOLGENIS where you can upload your data into t
 
 ![Upload menu item](../../images/upload/upload-menu-item.png?raw=true, "upload menu item")
 
-The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](/data/advanced_data_example_v20171206.xlsx)) example data set.
+The different pages will be explained by uploading the<a name="advanced-data-example"></a> "Advanced data example" ([download](/data/advanced_data_example_v20171206.xlsx)) example file.
 
 The steps are: 
 
@@ -59,7 +59,7 @@ Navigation buttons at the bottom of the pages:
 
 * Previous: Go to the previous page.
 * Next: Go to the next page.
-* Restart: Push this button when you want to start importing a new data set. It will redirect you to the start of this wizard. Pushing this button will restart the wizard. The upload job continues to upload the data set.
+* Restart: Push this button when you want to start importing a new file. It will redirect you to the start of this wizard. Pushing this button will restart the wizard. The upload job continues to upload the data set.
 * Finish: The same as Restart.
 
 # Upload file
@@ -70,8 +70,10 @@ Navigation buttons at the bottom of the pages:
 ![Upload file screen](../../images/upload/upload-file-screen.png?raw=true, "Upload file")
 
 # Choose options
-Select a data upload option. On this page you can select the rules of how to upload your data into MOLGENIS. Because this dataset is an new data set to the application we leave the default option "Add entities" selected. In tabular data sets, the term entities refers to data-rows.
-It is important to understand that this selection is about the data and not the meta data of the data set. 
+Select a data upload option. On this page you can select the rules of how to upload your data into MOLGENIS.
+Because this dataset is an new data set to the application we leave the default option "Add entities" selected.
+In tabular data sets, the term entities refers to data-rows.
+It is important to understand that this selection is about the entities and not the entity types. 
 
 Choose options:
 * Add entities: Importer adds new entities or fails if entity exists.
@@ -82,14 +84,14 @@ Choose options:
 ![Upload file screen](../../images/upload/options-screen.png?raw=true, "Options")
 
 # Choose packages
-Because the entity (table) persons has no package defined, we get the option to choose another package different from the MOLGENIS default package. The select options list the available packages in the data set.
+Because the entity type (table) persons has no package defined, we get the option to choose another package different from the MOLGENIS default package. The select options list the available packages in the file.
 
 ![Upload file screen](../../images/upload/packages-screen.png?raw=true, "Packages")
 
 # Check validation
 When you see this page the validation is already done. This page validates the structure of the meta data.
 
-"Entities" table where all the entities (tables) are defined.
+"Entities" table where all the entity types are defined.
 
 * Name: Name of entity
 * Importable: Is this entity inportable or not. Two options (Yes, No) 
