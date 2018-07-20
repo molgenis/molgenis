@@ -20,7 +20,7 @@ const toGroupMember = (response): GroupMember => {
 const buildErrorMessage = (response) => {
   if (response.errors) {
     return response.errors.map((error) => {
-      return error.message + ' ' + error.code
+      return error.message + ' (' + error.code + ')'
     }).join(', ')
   } else {
     // fallback if error is not in expected format

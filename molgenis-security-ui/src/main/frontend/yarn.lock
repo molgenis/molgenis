@@ -78,9 +78,9 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@molgenis/molgenis-api-client@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.2.0.tgz#4d5c2e76738175a9e90ae2fa429a9910ff414b3e"
+"@molgenis/molgenis-api-client@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-3.0.0.tgz#eaf458f437bd72fd753ec358a7199b1e6d4bd138"
   dependencies:
     babel-runtime "^6.11.6"
     form-data "^2.3.1"

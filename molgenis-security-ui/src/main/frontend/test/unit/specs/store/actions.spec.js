@@ -41,7 +41,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -86,7 +86,7 @@ describe('actions', () => {
       const options = {
         payload: 'error-group',
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -127,7 +127,7 @@ describe('actions', () => {
 
       const options = {
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -192,7 +192,7 @@ describe('actions', () => {
       const options = {
         payload: 'error-group',
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -234,7 +234,7 @@ describe('actions', () => {
       const options = {
         payload: 'error-group',
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -304,7 +304,7 @@ describe('actions', () => {
       const options = {
         payload: createGroupCommand,
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -358,7 +358,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, addMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -401,7 +401,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, memberName},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
@@ -454,7 +454,7 @@ describe('actions', () => {
       const options = {
         payload: {groupName, memberName, updateMemberCommand},
         expectedMutations: [
-          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling backend'}}
+          {type: 'setToast', payload: {type: 'danger', message: 'Error when calling (backend)'}}
         ]
       }
 
