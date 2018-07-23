@@ -4,7 +4,7 @@ Let us not wait any longer!
 After a quick re-cap of terminology and formats we will describe how you can import your data.
 
 ## Terminology
-In this section we introduce and explain some terminology of MOLGENIS
+In this section we introduce and explain the terminology (for example datastructure) of MOLGENIS.
 
 * Package: Each group has a root package where it can store its data.
 Packages can have child packages to logically subdivide that root package into a tree structure, 
