@@ -3,10 +3,10 @@ package org.molgenis.jobs;
 import org.mockito.Mock;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.security.token.RunAsUserTokenFactory;
+import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

@@ -1,10 +1,13 @@
 package org.molgenis.jobs;
 
 import org.molgenis.jobs.scheduler.SchedulerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.security.token.RunAsUserTokenFactory;
+import org.molgenis.security.user.UserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Jobs configuration
@@ -13,12 +16,25 @@ import org.springframework.context.annotation.Import;
 @Import(SchedulerConfig.class)
 public class JobConfig
 {
-	@Autowired
-	private JobExecutorTokenService jobExecutorTokenService;
+	private final UserDetailsService userDetailsService;
+	private final RunAsUserTokenFactory runAsUserTokenFactory;
+
+	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+	public JobConfig(UserDetailsService userDetailsService, RunAsUserTokenFactory runAsUserTokenFactory)
+	{
+		this.userDetailsService = requireNonNull(userDetailsService);
+		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
+	}
+
+	@Bean
+	public JobExecutorTokenService jobExecutorTokenService()
+	{
+		return new JobExecutorTokenServiceImpl(userDetailsService, runAsUserTokenFactory);
+	}
 
 	@Bean
 	public JobExecutionUpdater jobExecutionUpdater()
 	{
-		return new JobExecutionUpdaterImpl(jobExecutorTokenService);
+		return new JobExecutionUpdaterImpl(jobExecutorTokenService());
 	}
 }

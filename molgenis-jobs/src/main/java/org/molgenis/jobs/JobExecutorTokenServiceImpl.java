@@ -2,10 +2,10 @@ package org.molgenis.jobs;
 
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.security.token.RunAsUserTokenFactory;
+import org.molgenis.security.user.UserDetailsService;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import static java.util.Objects.requireNonNull;
