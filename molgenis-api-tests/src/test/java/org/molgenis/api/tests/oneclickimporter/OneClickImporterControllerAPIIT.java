@@ -86,7 +86,7 @@ public class OneClickImporterControllerAPIIT
 														  .put("sys_FileMeta", WRITE)
 														  .put("sys_L10nString", WRITE)
 														  .put("sys_job_JobExecution", READ)
-														  .put("sys_job_OneClickImportJobExecution", READ)
+														  .put("sys_job_OneClickImportJobExecution", WRITE)
 														  .build());
 		setGrantedPackagePermissions(adminToken, oneClickImporterTestUsername,
 				ImmutableMap.<String, Permission>builder().put("base", WRITEMETA).build());
