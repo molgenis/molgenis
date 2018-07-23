@@ -13,24 +13,18 @@ import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
-import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import static org.mockito.Mockito.*;
@@ -57,9 +51,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 	private ScheduledJobType scheduledJobType;
 
 	@Autowired
-	private UserDetailsService userDetailsService;
-
-	@Autowired
 	private JobFactoryRegistry jobFactoryRegistry;
 
 	@Autowired
@@ -82,15 +73,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private TestJobExecution jobExecution;
-
-	@Mock
-	private UserDetails userDetails;
-
-	@Mock
-	private GrantedAuthority grantedAuthority1;
-
-	@Mock
-	private GrantedAuthority grantedAuthority2;
 
 	@Captor
 	private ArgumentCaptor<Runnable> jobCaptor;
@@ -120,6 +102,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void executeScheduledJob() throws Exception
 	{
@@ -133,11 +116,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(scheduledJob.getSuccessEmail()).thenReturn("a@b.c");
 		when(scheduledJob.getUser()).thenReturn("fjant");
 		when(scheduledJob.getType()).thenReturn(scheduledJobType);
-
-		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
-
-		Collection<? extends GrantedAuthority> authorities = Arrays.asList(grantedAuthority1, grantedAuthority2);
-		when(userDetails.getAuthorities()).thenAnswer(i -> authorities);
 
 		when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
 		when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
@@ -155,6 +133,7 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(job).call(any(Progress.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void submitJobExecution() throws Exception
 	{
@@ -163,10 +142,6 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		when(jobExecution.getUser()).thenReturn("fjant");
 
 		when(jobFactory.createJob(jobExecution)).thenReturn(job);
-		when(userDetailsService.loadUserByUsername("fjant")).thenReturn(userDetails);
-
-		Collection<? extends GrantedAuthority> authorities = Arrays.asList(grantedAuthority1, grantedAuthority2);
-		when(userDetails.getAuthorities()).thenAnswer(i -> authorities);
 
 		jobExecutor.submit(jobExecution);
 
@@ -177,8 +152,9 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		verify(job).call(any(Progress.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void submitJobExecutionJobFactoryThrowsException() throws Exception
+	public void submitJobExecutionJobFactoryThrowsException()
 	{
 		when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
 		when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
@@ -209,21 +185,25 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 			super(entity);
 		}
 
+		@SuppressWarnings("WeakerAccess")
 		public void setParam1(String param1)
 		{
 			this.param1 = param1;
 		}
 
+		@SuppressWarnings("unused")
 		public String getParam1()
 		{
 			return param1;
 		}
 
+		@SuppressWarnings("WeakerAccess")
 		public void setParam2(int param2)
 		{
 			this.param2 = param2;
 		}
 
+		@SuppressWarnings("unused")
 		public int getParam2()
 		{
 			return param2;
@@ -240,23 +220,29 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		}
 
 		@Mock
-		JobFactory jobFactory;
+		private JobFactoryRegistry jobFactoryRegistry;
 
 		@Mock
-		ScheduledJobType scheduledJobType;
+		private JobFactory jobFactory;
 
 		@Mock
-		JobFactoryRegistry jobFactoryRegistry;
-
-		@Mock
-		RunAsUserTokenFactory runAsUserTokenFactory;
+		private ScheduledJobType scheduledJobType;
 
 		@Mock
 		private ExecutorService executorService;
 
+		@Mock
+		private MailSender mailSender;
+
+		@Mock
+		private JobExecutorTokenService jobExecutorTokenService;
+
+		@Mock
+		private EntityManager entityManager;
+
 		public void resetMocks()
 		{
-			reset(jobFactory, scheduledJobType, executorService);
+			reset(jobFactory, scheduledJobType, executorService, mailSender, jobExecutorTokenService, entityManager);
 		}
 
 		@Bean
@@ -286,25 +272,19 @@ public class JobExecutorTest extends AbstractMolgenisSpringTest
 		@Bean
 		public MailSender mailSender()
 		{
-			return mock(MailSender.class);
+			return mailSender;
 		}
 
 		@Bean
-		public RunAsUserTokenFactory runAsUserTokenFactory()
+		public JobExecutorTokenService jobExecutorTokenService()
 		{
-			return runAsUserTokenFactory;
-		}
-
-		@Bean
-		public UserDetailsService userDetailsService()
-		{
-			return mock(UserDetailsService.class);
+			return jobExecutorTokenService;
 		}
 
 		@Bean
 		public EntityManager entityManager()
 		{
-			return mock(EntityManager.class);
+			return entityManager;
 		}
 	}
 }
