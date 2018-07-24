@@ -1,5 +1,4 @@
-# Quick importer
-
+# Quick data import
 The Quick data import allows you to easily get your data into MOLGENIS, without the need of understanding the EMX format.
 There are some assumptions we make with regards file types and file contents.
 
@@ -12,7 +11,6 @@ There are some assumptions we make with regards file types and file contents.
 - __To use the importer WRITEMETA permissions on the "base/upload" package are required__
 
 ## Metadata guessing
-
 The quick data import tries to guess what type your data is. 
 MOLGENIS supports multiple data types like booleans, date fields, numbers etc.
 
@@ -23,17 +21,32 @@ MOLGENIS supports multiple data types like booleans, date fields, numbers etc.
 5. To get __BOOLEAN__, submit strings in the format _TRUE_ or _FALSE_
 6. Other values are inserted into the database as __STRING__. If a piece of text is longer then 255 characters, we use __TEXT__
 
-## Data placement
+## Data structure
+MOLGENIS has an explicit data structure within the application. You need to know the basic terminology to understand how the data is structured.
 
-Data is imported into the MOLGENIS database as a single _data table_
-_Data tables_ are grouped within packages
+### Terminology
+In this section we introduce and explain the terminology concerning data structure of MOLGENIS.
 
-1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name. Packages will be created as children of the "base/upload" package.
-2. In the case of a CSV, the file is used as the _package_ and the _data table_ name. The package will be created as child of the "base/upload" package.
-3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _data tables_. The package will be created as child of the "base/upload" package.
+* Groups: a group of people who manage data within one package (folder). 
+* Package: Each group has a root package where it can store its data.
+Packages can have child packages to logically subdivide that root package into a tree structure, 
+like folders on a hard drive.
+* Entity Type: An entity type is the metadata of a data collection, like a table in a database.
+* Entity: The actual data that is collected based on the template from an entity type, like a table row
+in a database.
+* Attribute: An attribute describes the characteristics of a data item in an entity type, like a column 
+in a database
+
+Data is imported into the MOLGENIS database as a single _entity_
+_entities_ are grouped within packages (folders)
+
+The base folder in which all other entities and packages are placed is dependent of the group you are part of.
+
+1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name. Packages will be created as children of the "group" package, dependent on who you are in MOLGENIS.
+2. In the case of a CSV, the file is used as the _package_ and the _data table_ name. The package will be created as child of the "group" package, dependent on who you are in MOLGENIS.
+3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _entities_. The package will be created as child of the "group" package, dependent on who you are in MOLGENIS.
 
 ## How to use
-
 1. Click upload file
 2. Select a file
 3. Wait...
