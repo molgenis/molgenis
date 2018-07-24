@@ -13,6 +13,7 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.security.auth.SecurityPackage;
 import org.molgenis.jobs.Progress;
 import org.molgenis.util.ResourceUtils;
@@ -30,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 
 @ContextConfiguration(classes = { AmazonBucketIngesterTest.Config.class })
 public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
@@ -70,13 +71,14 @@ public class AmazonBucketIngesterTest extends AbstractMolgenisSpringTest
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
 				fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService("test_data_only.xlsx")).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null))).thenReturn(report);
+		when(importServiceMock.doImport(any(), eq(MetadataAction.UPSERT), eq(ADD_UPDATE_EXISTING),
+				eq(null))).thenReturn(report);
 		when(progress.getJobExecution()).thenReturn(mock(AmazonBucketJobExecution.class));
 
 		amazonBucketIngester.ingest("jobExecutionID", "targetEntityTypeName", "bucket", "key(.*)", null, "test", "test",
 				"region1", true, progress);
 		verify(importServiceFactoryMock).getImportService("test_data_only.xlsx");
-		verify(importServiceMock).doImport(any(), eq(ADD_UPDATE_EXISTING), eq(null));
+		verify(importServiceMock).doImport(any(), eq(MetadataAction.UPSERT), eq(ADD_UPDATE_EXISTING), eq(null));
 	}
 
 	@Configuration

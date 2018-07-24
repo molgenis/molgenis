@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.ontology.core.importer.OntologyImportService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -56,7 +57,8 @@ public class OntologyImportServiceTest extends AbstractMockitoTest
 		doReturn(targetRepository0).when(dataService).getRepository(entityTypeId0);
 		doReturn(targetRepository1).when(dataService).getRepository(entityTypeId1);
 
-		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection, DatabaseAction.ADD,
+		EntityImportReport entityImportReport = ontologyImportService.doImport(repositoryCollection,
+				MetadataAction.IGNORE, DataAction.ADD,
 				null);
 
 		assertEquals(entityImportReport.getNewEntities(), emptyList());

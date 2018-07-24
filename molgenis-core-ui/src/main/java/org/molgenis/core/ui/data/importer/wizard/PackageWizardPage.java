@@ -2,12 +2,13 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.MetaDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,17 +59,23 @@ public class PackageWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String entityImportOption = importWizard.getEntityImportOption();
+		String metadataImportOption = importWizard.getMetadataImportOption();
+		String dataImportOption = importWizard.getDataImportOption();
 
-		if (entityImportOption != null)
+		if (dataImportOption != null)
 		{
 			try
 			{
 				// convert input to database action
-				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
+				MetadataAction metadataAction = ImportWizardUtil.toMetadataAction(metadataImportOption);
+				if (metadataAction == null)
+				{
+					throw new IOException("unknown metadata action: " + metadataImportOption);
+				}
+				DataAction entityDbAction = ImportWizardUtil.toDataAction(dataImportOption);
 				if (entityDbAction == null)
 				{
-					throw new IOException("unknown database action: " + entityImportOption);
+					throw new IOException("unknown data action: " + dataImportOption);
 				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
@@ -78,7 +85,8 @@ public class PackageWizardPage extends AbstractWizardPage
 						repositoryCollection);
 
 				// Do integration test only if there are no previous errors found
-				if (!importWizard.getEntitiesImportable().containsValue(false))
+				if (metadataAction != MetadataAction.IGNORE && !importWizard.getEntitiesImportable()
+																			.containsValue(false))
 				{
 					// The package name that is selected in the "package selection" page
 					String selectedPackage = request.getParameter("selectedPackage");
@@ -110,7 +118,7 @@ public class PackageWizardPage extends AbstractWizardPage
 			}
 			catch (RuntimeException | IOException e)
 			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
 			}
 		}
 		return null;

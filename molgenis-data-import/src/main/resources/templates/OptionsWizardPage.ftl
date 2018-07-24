@@ -16,17 +16,65 @@
         </div>
     </div>
 </#if>
-
+<#-- hide the metadata options panel in case only one option is available -->
+    <div class="row<#if wizard.supportedMetadataActions?size lte 1> hidden</#if>">
+        <div class="col-md-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h4 class="panel-title">Metadata options</h4></div>
+                <div class="panel-body">
+                    <#list wizard.supportedMetadataActions as action>
+                        <#if action == 'UPSERT'>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="metadata-option" value="upsert"<#if action?index == 0>
+                                           checked</#if>>
+                                    <strong>Create new metadata / update existing metadata</strong>
+                                </label>
+                            </div>
+                            <span>Importer adds new metadata or updates existing metadata<span>
+                        <#elseif action == 'ADD'>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="metadata-option" value="add"<#if action?index == 0>
+                                           checked</#if>>
+                                    <strong>Create new metadata</strong>
+                                </label>
+                            </div>
+                            <span>Importer adds new metadata or fails if metadata exists</span>
+                        <#elseif action == 'UPDATE'>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="metadata-option" value="update"<#if action?index == 0>
+                                           checked</#if>>
+                                    <strong>Update existing metadata</strong>
+                                </label>
+                            </div>
+                            <span>Importer updates existing metadata or fails if entity does not exist</span>
+                        <#elseif action == 'IGNORE'>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="metadata-option" value="ignore"<#if action?index == 0>
+                                           checked</#if>>
+                                    <strong>Ignore metadata</strong>
+                                </label>
+                            </div>
+                            <span>Importer ignores metadata</span>
+                        </#if>
+                    </#list>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-4">
             <div class="panel panel-primary">
-                <div class="panel-heading"><h4 class="panel-title">Entity options</h4></div>
+                <div class="panel-heading"><h4 class="panel-title">Data options</h4></div>
                 <div class="panel-body">
-                <#list wizard.supportedDatabaseActions as action>
+                <#list wizard.supportedDataActions as action>
                     <#if action == 'ADD_UPDATE_EXISTING'>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="entity_option" value="add_update"><strong>Add entities /
+                                <input type="radio" name="data_option" value="add_update"><strong>Add entities /
                                 update existing</strong>
                             </label>
                         </div>
@@ -35,7 +83,7 @@
                     <#if action == 'ADD'>
                         <div class="radio">
 								<label>
-									<input type="radio" name="entity_option" value="add"
+									<input type="radio" name="data_option" value="add"
                                            checked><strong>Add entities</strong>
 								</label>
 							</div>
@@ -44,7 +92,7 @@
                     <#if action == 'UPDATE'>
                         <div class="radio">
 								<label>
-									<input type="radio" name="entity_option"
+									<input type="radio" name="data_option"
                                            value="update"><strong>Update entities</strong>
 								</label>
 							</div>

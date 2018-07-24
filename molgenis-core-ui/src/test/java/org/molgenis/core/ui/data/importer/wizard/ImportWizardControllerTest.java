@@ -3,8 +3,8 @@ package org.molgenis.core.ui.data.importer.wizard;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.importer.*;
@@ -80,13 +80,14 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 	@DataProvider(name = "testImportFileProvider")
 	public static Iterator<Object[]> testInitProvider()
 	{
-		return asList(new Object[] { "add", DatabaseAction.ADD },
-				new Object[] { "update", DatabaseAction.UPDATE }).iterator();
+		return asList(new Object[] { "add", DataAction.ADD, "upsert", MetadataAction.UPSERT },
+				new Object[] { "update", DataAction.UPDATE, "ignore", MetadataAction.IGNORE }).iterator();
 	}
 
 	@WithMockUser(username = USERNAME)
 	@Test(dataProvider = "testImportFileProvider")
-	public void testImportFile(String action, DatabaseAction databaseAction) throws IOException, URISyntaxException
+	public void testImportFile(String dataActionStr, DataAction dataAction, String metadataActionStr,
+			MetadataAction metadataAction) throws IOException, URISyntaxException
 	{
 		HttpSession httpSession = mock(HttpSession.class);
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
@@ -118,7 +119,7 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 
 		@SuppressWarnings("ConstantConditions")
 		ResponseEntity<String> responseEntity = importWizardController.importFile(httpServletRequest, multipartFile,
-				entityTypeId, packageId, action, notify);
+				entityTypeId, packageId, metadataActionStr, dataActionStr, notify);
 		assertEquals(responseEntity, ResponseEntity.created(new java.net.URI("/api/v2/entityTypeId/importRunId"))
 												   .contentType(TEXT_PLAIN)
 												   .body("/api/v2/entityTypeId/importRunId"));
@@ -127,12 +128,12 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 		ArgumentCaptor<ImportJob> importJobArgumentCaptor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService).execute(importJobArgumentCaptor.capture());
 		assertEquals(importJobArgumentCaptor.getValue(),
-				new ImportJob(importService, SecurityContextHolder.getContext(), null, databaseAction, importRunIdValue,
-						importRunService, httpSession, null));
+				new ImportJob(importService, SecurityContextHolder.getContext(), null, metadataAction, dataAction,
+						importRunIdValue, importRunService, httpSession, null));
 	}
 
 	@Test
-	public void testImportFileActionUnknown() throws IOException, URISyntaxException
+	public void testImportFileDataActionUnknown() throws IOException, URISyntaxException
 	{
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 
@@ -140,6 +141,7 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 		MultipartFile multipartFile = createMultipartFile(filename);
 		String entityTypeId = null;
 		String packageId = null;
+		String metadataAction = "add";
 		String action = "unknownAction";
 		Boolean notify = null;
 
@@ -150,10 +152,37 @@ public class ImportWizardControllerTest extends AbstractMockitoTestNGSpringConte
 
 		@SuppressWarnings("ConstantConditions")
 		ResponseEntity<String> responseEntity = importWizardController.importFile(httpServletRequest, multipartFile,
-				entityTypeId, packageId, action, notify);
+				entityTypeId, packageId, metadataAction, action, notify);
+		assertEquals(responseEntity, ResponseEntity.badRequest().contentType(TEXT_PLAIN).body("Invalid action:[UNKNOWNACTION] valid values: [ADD, ADD_UPDATE_EXISTING, UPDATE, ADD_IGNORE_EXISTING]"));
+
+		verify(fileStore).store(any(), eq(filename));
+		verifyZeroInteractions(executorService);
+	}
+
+	@Test
+	public void testImportFileMetadataActionUnknown() throws IOException, URISyntaxException
+	{
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+
+		String filename = "example.xlsx";
+		MultipartFile multipartFile = createMultipartFile(filename);
+		String entityTypeId = null;
+		String packageId = null;
+		String metadataAction = "unknownAction";
+		String action = "add";
+		Boolean notify = null;
+
+		String tmpFileName = "tmp-example.xlsx";
+		File tmpFile = mock(File.class);
+		when(tmpFile.getName()).thenReturn(tmpFileName);
+		when(fileStore.store(any(), eq("example.xlsx"))).thenReturn(tmpFile);
+
+		@SuppressWarnings("ConstantConditions")
+		ResponseEntity<String> responseEntity = importWizardController.importFile(httpServletRequest, multipartFile,
+				entityTypeId, packageId, metadataAction, action, notify);
 		assertEquals(responseEntity, ResponseEntity.badRequest()
 												   .contentType(TEXT_PLAIN)
-												   .body("Invalid action:[UNKNOWNACTION] valid values: [ADD, ADD_UPDATE_EXISTING, UPDATE, ADD_IGNORE_EXISTING]"));
+												   .body("Invalid action:[UNKNOWNACTION] valid values: [ADD, UPDATE, UPSERT, IGNORE]"));
 
 		verify(fileStore).store(any(), eq(filename));
 		verifyZeroInteractions(executorService);

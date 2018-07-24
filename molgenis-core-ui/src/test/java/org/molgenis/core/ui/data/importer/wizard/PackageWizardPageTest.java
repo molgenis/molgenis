@@ -20,7 +20,8 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.DatabaseAction.ADD;
+import static org.molgenis.data.DataAction.ADD;
+import static org.molgenis.data.importer.MetadataAction.UPSERT;
 import static org.testng.Assert.assertTrue;
 
 public class PackageWizardPageTest extends AbstractMockitoTest
@@ -53,7 +54,8 @@ public class PackageWizardPageTest extends AbstractMockitoTest
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		BindingResult bindingResult = mock(BindingResult.class);
 		ImportWizard wizard = mock(ImportWizard.class);
-		when(wizard.getEntityImportOption()).thenReturn(ADD.toString().toLowerCase());
+		when(wizard.getMetadataImportOption()).thenReturn(UPSERT.toString().toLowerCase());
+		when(wizard.getDataImportOption()).thenReturn(ADD.toString().toLowerCase());
 		Map<String, Collection<String>> result = new HashMap<>();
 		result.put("test", null);
 

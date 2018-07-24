@@ -63,8 +63,10 @@ public class OptionsWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String entityImportOption = request.getParameter("entity_option");
-		importWizard.setEntityImportOption(entityImportOption);
+		String dataImportOption = request.getParameter("data_option");
+		importWizard.setDataImportOption(dataImportOption);
+		String metadataImportOption = request.getParameter("metadata-option");
+		importWizard.setMetadataImportOption(metadataImportOption);
 
 		if (importWizard.getMustChangeEntityName())
 		{
@@ -86,7 +88,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 			}
 			catch (MolgenisDataException e)
 			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
 				return null;
 			}
 
@@ -111,7 +113,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
 		}
 
 		return null;
@@ -188,8 +190,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 	 */
 	private Map<String, String> getPackageSelection(List<Package> packages)
 	{
-		return packages.stream()
-					   .filter(this::isWritablePackage)
+		return packages.stream().filter(this::isReadablePackage)
 					   .sorted(comparing(this::getPackagePathLabel))
 					   .collect(toLinkedMap(Package::getId, this::getPackagePathLabel));
 	}
@@ -201,8 +202,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 		return parentPackage == null ? packageLabel : getPackagePathLabel(parentPackage) + " / " + packageLabel;
 	}
 
-	private boolean isWritablePackage(Package aPackage)
+	private boolean isReadablePackage(Package aPackage)
 	{
-		return PackagePermissionUtils.isWritablePackage(aPackage, userPermissionEvaluator);
+		return PackagePermissionUtils.isReadablePackage(aPackage, userPermissionEvaluator);
 	}
 }

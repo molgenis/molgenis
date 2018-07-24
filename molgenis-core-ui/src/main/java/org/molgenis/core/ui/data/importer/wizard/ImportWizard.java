@@ -1,8 +1,9 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetadataAction;
 
 import java.io.File;
 import java.util.Collection;
@@ -19,10 +20,12 @@ public class ImportWizard extends Wizard
 	private Map<String, Collection<String>> fieldsUnknown;
 	private Map<String, Collection<String>> fieldsRequired;
 	private Map<String, Collection<String>> fieldsAvailable;
-	private String entityImportOption;
+	private String entityTypeImportOption;
+	private String dataImportOption;
 	private String validationMessage;
 	private String importRunId;
-	private List<DatabaseAction> supportedDatabaseActions;
+	private List<MetadataAction> supportedMetadataActions;
+	private List<DataAction> supportedDataActions;
 	private boolean mustChangeEntityName;
 	private List<String> entityTypeIds;
 	private Map<String, String> packageSelection;
@@ -103,14 +106,24 @@ public class ImportWizard extends Wizard
 		return this;
 	}
 
-	public String getEntityImportOption()
+	public String getMetadataImportOption()
 	{
-		return entityImportOption;
+		return entityTypeImportOption;
 	}
 
-	public void setEntityImportOption(String entityImportOption)
+	public void setMetadataImportOption(String entityTypeImportOption)
 	{
-		this.entityImportOption = entityImportOption;
+		this.entityTypeImportOption = entityTypeImportOption;
+	}
+
+	public String getDataImportOption()
+	{
+		return dataImportOption;
+	}
+
+	public void setDataImportOption(String dataImportOption)
+	{
+		this.dataImportOption = dataImportOption;
 	}
 
 	public String getValidationMessage()
@@ -133,14 +146,24 @@ public class ImportWizard extends Wizard
 		this.importRunId = importRunId;
 	}
 
-	public List<DatabaseAction> getSupportedDatabaseActions()
+	public List<MetadataAction> getSupportedMetadataActions()
 	{
-		return supportedDatabaseActions;
+		return supportedMetadataActions;
 	}
 
-	public void setSupportedDatabaseActions(List<DatabaseAction> supportedDatabaseActions)
+	public void setSupportedMetadataActions(List<MetadataAction> supportedMetadataActions)
 	{
-		this.supportedDatabaseActions = supportedDatabaseActions;
+		this.supportedMetadataActions = supportedMetadataActions;
+	}
+
+	public List<DataAction> getSupportedDataActions()
+	{
+		return supportedDataActions;
+	}
+
+	public void setSupportedDataActions(List<DataAction> supportedDataActions)
+	{
+		this.supportedDataActions = supportedDataActions;
 	}
 
 	public boolean getMustChangeEntityName()

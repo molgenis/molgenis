@@ -9,6 +9,7 @@ import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.jobs.Progress;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 
 /**
@@ -63,7 +64,8 @@ public class FileIngester
 		progress.progress(1, "Importing...");
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport report = importService.doImport(repoCollection, ADD_UPDATE_EXISTING, null);
+		EntityImportReport report = importService.doImport(repoCollection, MetadataAction.UPSERT, ADD_UPDATE_EXISTING,
+				null);
 
 		progress.status("Ingestion of url '" + url + "' done.");
 		Integer count = report.getNrImportedEntitiesMap().get(entityTypeId);

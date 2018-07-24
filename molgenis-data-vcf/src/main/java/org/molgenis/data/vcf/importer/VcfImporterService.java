@@ -1,11 +1,9 @@
 package org.molgenis.data.vcf.importer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
-import org.molgenis.data.importer.EntitiesValidationReport;
-import org.molgenis.data.importer.EntitiesValidationReportImpl;
-import org.molgenis.data.importer.EntityImportReport;
-import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -50,10 +48,10 @@ public class VcfImporterService implements ImportService
 
 	@Transactional
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
-			@Nullable String packageId)
+	public EntityImportReport doImport(RepositoryCollection source, MetadataAction metadataAction,
+			DataAction dataAction, @Nullable String packageId)
 	{
-		if (databaseAction != DatabaseAction.ADD)
+		if (dataAction != DataAction.ADD)
 		{
 			throw new IllegalArgumentException("Only ADD is supported");
 		}
@@ -263,9 +261,15 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public List<DatabaseAction> getSupportedDatabaseActions()
+	public List<MetadataAction> getSupportedMetadataActions()
 	{
-		return Lists.newArrayList(DatabaseAction.ADD);
+		return ImmutableList.of(MetadataAction.ADD);
+	}
+
+	@Override
+	public List<DataAction> getSupportedDataActions()
+	{
+		return Lists.newArrayList(DataAction.ADD);
 	}
 
 	@Override

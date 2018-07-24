@@ -2,14 +2,12 @@ package org.molgenis.data.importer.emx;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.DataPersister;
+import org.molgenis.data.importer.*;
 import org.molgenis.data.importer.DataPersister.DataMode;
-import org.molgenis.data.importer.EntityImportReport;
-import org.molgenis.data.importer.ParsedMetaData;
-import org.molgenis.data.importer.PersistResult;
+import org.molgenis.data.importer.DataPersister.MetadataMode;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -30,7 +28,6 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.importer.DataPersister.MetadataMode.UPSERT;
 import static org.molgenis.data.security.EntityTypePermission.READ_METADATA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
@@ -65,8 +62,8 @@ public class ImportWriter
 
 		validateEntityTypePermissions(groupedEntityTypes.getUpdatedEntityTypes());
 
-		PersistResult persistResult = dataPersister.persist(new EmxDataProvider(job, entityManager), UPSERT,
-				toDataMode(job.dbAction));
+		PersistResult persistResult = dataPersister.persist(new EmxDataProvider(job, entityManager),
+				toMetadataMode(job.getMetadataAction()), toDataMode(job.getDataAction()));
 		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
 
 		persistResult.getNrPersistedEntitiesMap()
@@ -87,7 +84,30 @@ public class ImportWriter
 		metaDataService.upsertPackages(packages.stream().filter(Objects::nonNull));
 	}
 
-	private DataMode toDataMode(DatabaseAction databaseAction)
+	private MetadataMode toMetadataMode(MetadataAction metadataAction)
+	{
+		MetadataMode metadataMode;
+		switch (metadataAction)
+		{
+			case ADD:
+				metadataMode = MetadataMode.ADD;
+				break;
+			case UPDATE:
+				metadataMode = MetadataMode.UPDATE;
+				break;
+			case UPSERT:
+				metadataMode = MetadataMode.UPSERT;
+				break;
+			case IGNORE:
+				metadataMode = MetadataMode.NONE;
+				break;
+			default:
+				throw new UnexpectedEnumException(metadataAction);
+		}
+		return metadataMode;
+	}
+
+	private DataMode toDataMode(DataAction databaseAction)
 	{
 		DataMode dataMode;
 		switch (databaseAction)

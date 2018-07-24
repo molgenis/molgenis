@@ -7,6 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
@@ -34,8 +35,8 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.DatabaseAction.ADD;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.DataAction.ADD;
+import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.testng.Assert.*;
@@ -79,7 +80,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		File file = getFile("/csv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
+		EntityImportReport importReport = importService.doImport(repoCollection, MetadataAction.UPSERT, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(CSV_HOSPITAL, 3, CSV_PATIENTS, 3),
 				ImmutableSet.of(CSV_HOSPITAL, CSV_PATIENTS));
 		verifyFirstAndLastRows(CSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
@@ -107,7 +108,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		File file = getFile("/tsv/" + fileName);
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
+		EntityImportReport importReport = importService.doImport(repoCollection, MetadataAction.UPSERT, ADD, null);
 		validateImportReport(importReport, ImmutableMap.of(TSV_HOSPITAL, 3, TSV_PATIENTS, 3),
 				ImmutableSet.of(TSV_HOSPITAL, TSV_PATIENTS));
 		verifyFirstAndLastRows(TSV_HOSPITAL, hospitalFirstRow, hospitalLastRow);
@@ -260,7 +261,7 @@ public class EmxImportServiceIT extends ImportServiceIT
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
 
-		EntityImportReport importReport = importService.doImport(repoCollection, ADD, null);
+		EntityImportReport importReport = importService.doImport(repoCollection, MetadataAction.UPSERT, ADD, null);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 		entityValidationMethod.run();
@@ -331,14 +332,14 @@ public class EmxImportServiceIT extends ImportServiceIT
 		FileRepositoryCollection addRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 				file);
 		ImportService addImportService = importServiceFactory.getImportService(file, addRepoCollection);
-		addImportService.doImport(addRepoCollection, ADD, null);
+		addImportService.doImport(addRepoCollection, MetadataAction.UPSERT, ADD, null);
 
 		FileRepositoryCollection addUpdateRepoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 				addUpdateFile);
 		ImportService addUpdateImportService = importServiceFactory.getImportService(addUpdateFile,
 				addUpdateRepoCollection);
-		EntityImportReport importReport = addUpdateImportService.doImport(addUpdateRepoCollection, ADD_UPDATE_EXISTING,
-				null);
+		EntityImportReport importReport = addUpdateImportService.doImport(addUpdateRepoCollection,
+				MetadataAction.UPSERT, ADD_UPDATE_EXISTING, null);
 
 		validateImportReport(importReport, entityCountMap, addedEntityTypes);
 		entityValidationMethod.run();
