@@ -79,7 +79,6 @@ import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
 @Controller
 @RequestMapping(URI)
-@PreAuthorize("hasAnyRole('ROLE_SU')")
 public class SortaController extends PluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SortaController.class);
