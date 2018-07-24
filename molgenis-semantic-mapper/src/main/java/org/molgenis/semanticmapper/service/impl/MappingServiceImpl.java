@@ -36,6 +36,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 
+@PreAuthorize("hasAnyRole('ROLE_SU')")
 public class MappingServiceImpl implements MappingService
 {
 	public static final int MAPPING_BATCH_SIZE = 1000;
@@ -62,7 +63,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject addMappingProject(String projectName, String target)
 	{
@@ -73,7 +73,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public void deleteMappingProject(String mappingProjectId)
 	{
@@ -81,7 +80,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId)
 	{
@@ -116,7 +114,6 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
 	{
@@ -138,14 +135,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public void updateMappingProject(MappingProject mappingProject)
 	{
@@ -153,14 +148,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional
 	public long applyMappings(String mappingProjectId, String entityTypeId, Boolean addSourceAttribute,
 			String packageId, String label, Progress progress)
@@ -255,7 +248,10 @@ public class MappingServiceImpl implements MappingService
 	 */
 	public Stream<EntityType> getCompatibleEntityTypes(EntityType target)
 	{
-		return dataService.getMeta().getEntityTypes().filter(candidate -> !candidate.isAbstract()).filter(isCompatible(target));
+		return dataService.getMeta()
+						  .getEntityTypes()
+						  .filter(candidate -> !candidate.isAbstract())
+						  .filter(isCompatible(target));
 	}
 
 	private Predicate<EntityType> isCompatible(EntityType target)

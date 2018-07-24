@@ -14,7 +14,6 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.datarowedit.controller.DataRowEditController;
 import org.molgenis.navigator.NavigatorController;
-import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
@@ -45,7 +44,6 @@ import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetada
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHING_TASK_CONTENT;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.ONTOLOGY_TERM_HIT;
-import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
 import static org.molgenis.security.core.PermissionSet.*;
 import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.SidUtils.createUserSid;
@@ -90,10 +88,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, DataRowEditController.ID, editor, READ);
 		register(PLUGIN, JobsController.ID, editor, READ);
 		register(ENTITY_TYPE, IMPORT_RUN, editor, WRITE);
-		register(PLUGIN, SortaController.ID, editor, READ);
 		register(ENTITY_TYPE, MATCHING_TASK_CONTENT, editor, WRITE);
 		register(ENTITY_TYPE, ONTOLOGY_TERM_HIT, editor, WRITE);
-		register(ENTITY_TYPE, SORTA_JOB_EXECUTION, editor, WRITE);
 		register(PACKAGE, PACKAGE_ONTOLOGY, user, READ);
 		register(PLUGIN, QuestionnaireController.ID, editor, READ);
 		register(PACKAGE, PACKAGE_GENOME_BROWSER, viewer, READ);
