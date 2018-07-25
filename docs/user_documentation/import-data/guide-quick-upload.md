@@ -8,7 +8,7 @@ There are some assumptions we make with regards file types and file contents.
 
 - __Empty files can not be imported__
 - __Files containing only a header can not be uploaded__
-- __You need a pacakge you can write in, usually the package of the group you are a member of__
+- __You need a package you can write content into, usually the package of the group you are a member of__
 
 ## Metadata guessing
 The quick data import tries to guess what type your data is. 
