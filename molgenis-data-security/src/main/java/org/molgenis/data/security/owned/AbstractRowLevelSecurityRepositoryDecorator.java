@@ -6,12 +6,14 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Iterators.partition;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -24,6 +26,8 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSy
 public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Entity>
 		extends AbstractRepositoryDecorator<E>
 {
+	private static final int BATCH_SIZE = 1000;
+
 	private final MutableAclService mutableAclService;
 
 	/**
@@ -161,14 +165,23 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 		{
 			throwPermissionException(entity, DELETE);
 		}
-		deleteAcl(entity);
+
+		// delete entity before deleting ACL
 		delegate().delete(entity);
+		deleteAcl(entity);
 	}
 
+	@Transactional
 	@Override
 	public void delete(Stream<E> entities)
 	{
-		deleteStream(entities);
+		// delete entity before deleting ACL
+		partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entityBatch ->
+		{
+			List<E> filteredEntityBatch = entityBatch.stream().filter(entity -> isActionPermitted(entity, DELETE)).collect(toList());
+			delegate().delete(filteredEntityBatch.stream());
+			filteredEntityBatch.forEach(this::deleteAcl);
+		});
 	}
 
 	@Override
@@ -176,23 +189,23 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	{
 		if (isActionPermitted(id, DELETE))
 		{
-			deleteAcl(id);
+			// delete entity before deleting ACL
 			delegate().deleteById(id);
+			deleteAcl(id);
 		}
 	}
 
+	@Transactional
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		delegate().deleteAll(ids.filter(id ->
+		// delete entity before deleting ACL
+		partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch ->
 		{
-			boolean deleteAllowed = isActionPermitted(id, DELETE);
-			if (deleteAllowed)
-			{
-				deleteAcl(id);
-			}
-			return deleteAllowed;
-		}));
+			List<Object> filteredIds = idsBatch.stream().filter(id -> isActionPermitted(id, DELETE)).collect(toList());
+			delegate().deleteAll(filteredIds.stream());
+			filteredIds.forEach(this::deleteAcl);
+		});
 	}
 
 	@Override
@@ -220,19 +233,6 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 			isActionPermitted(entity, Action.CREATE);
 			createAcl(entity);
 			return true;
-		}));
-	}
-
-	private void deleteStream(Stream<E> entityStream)
-	{
-		delegate().delete(entityStream.filter(entity ->
-		{
-			boolean deleteAllowed = isActionPermitted(entity, DELETE);
-			if (deleteAllowed)
-			{
-				deleteAcl(entity);
-			}
-			return deleteAllowed;
 		}));
 	}
 
