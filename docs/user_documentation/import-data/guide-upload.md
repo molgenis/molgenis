@@ -33,6 +33,7 @@ The MOLGENIS upload module supports the following file formats and data:
 |-------------------|---------------------------|-----------------|
 |CSV              	|".csv" ".txt" ".tsv" ".zip"|EMX              |
 |Excel            	|".xls" ".xlsx"             |EMX              |
+|OBO                |".obo.zip"                 |OBO
 |OWL              	|".owl.zip"                 |OWL              |
 |VCF (version 4.0)	|"vcf" ".vcf.gz"            |VCF (version 4.0)|
 
@@ -79,9 +80,16 @@ Navigation buttons at the bottom of the pages:
 Select a data upload option. On this page you can select the rules of how to upload your data into MOLGENIS.
 Because this dataset is an new data set to the application we leave the default option "Add entities" selected.
 In tabular data sets, the term entities refers to data-rows.
-It is important to understand that this selection is about the entities and not the entity types. 
 
-Choose options:
+Metadata options:
+* Create new metadata
+* Update existing metadata
+* Create new metadata or update existing metadata
+* Ignore metadata
+
+The metadata options panel is displayed if more than one option is available based on the input file.
+
+Data options:
 * Add entities: Importer adds new entities or fails if entity exists.
 * Add entities / update existing: Importer adds new entities or updates existing entities.
 * Update entities: Importer updates existing entities or fails if entity does not exist.
