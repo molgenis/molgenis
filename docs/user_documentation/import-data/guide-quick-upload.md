@@ -8,7 +8,7 @@ There are some assumptions we make with regards file types and file contents.
 
 - __Empty files can not be imported__
 - __Files containing only a header can not be uploaded__
-- __To use the importer WRITEMETA permissions on the "base/upload" package are required__
+- __You need a pacakge you can write in, usually the package of the group you are a member of__
 
 ## Metadata guessing
 The quick data import tries to guess what type your data is. 
@@ -37,14 +37,17 @@ in a database.
 * Attribute: An attribute describes the characteristics of a data item in an entity type, like a column 
 in a database
 
-Data is imported into the MOLGENIS database as a single _entity_
+Data is imported into the MOLGENIS database as a single _entity_ (table)
 _entities_ are grouped within packages (folders)
+Your entities are stored within a package that you can write content into, usually your "group" package
 
 The base folder in which all other entities and packages are placed is dependent of the group you are part of.
 
-1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _data table_ name. Packages will be created as children of the "group" package, dependent on who you are in MOLGENIS.
-2. In the case of a CSV, the file is used as the _package_ and the _data table_ name. The package will be created as child of the "group" package, dependent on who you are in MOLGENIS.
-3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _entities_. The package will be created as child of the "group" package, dependent on who you are in MOLGENIS.
+1. In the case of an excel, the file name is used as the _package_ name and the workbook sheet is used as the _entity_ name. Packages will be created as children of the first writable package, usually the package of the group you are in.
+2. In the case of a CSV, the file is used as the _package_ and the _entity_ name. The package will be created as child of the first writable package, usually the package of the group you are in.
+3. In the case of a ZIP file, the name of the ZIP file is used as the _package_ name, and the names of the files inside the ZIP are used as the names for the _entities_. The package will be created as child of the first writable package, usually the package of the group you are in.
+
+You can move the package to the location you want after the import is done.
 
 ## How to use
 1. Click upload file
