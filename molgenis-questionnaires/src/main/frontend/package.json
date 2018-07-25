@@ -8,6 +8,7 @@
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "yarn dev",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
+    "debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --browsers Chrome",
     "e2e": "node test/e2e/runner.js",
     "test": "yarn unit && yarn e2e",
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
@@ -16,7 +17,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.2",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
-    "@molgenis/molgenis-ui-form": "^0.11.1",
+    "@molgenis/molgenis-ui-form": "^0.11.2",
     "font-awesome": "^4.7.0",
     "moment": "^2.20.1",
     "pdfmake": "^0.1.36",
