@@ -38,6 +38,7 @@ public class OneClickImportJobExecutionMetadata extends SystemEntityType
 		setLabel("One click import job execution");
 		setExtends(jobExecutionMetaData);
 		setPackage(jobPackage);
+		setRowLevelSecured(true);
 
 		addAttribute(FILE).setLabel("Imported file").setDescription("The file that was imported").setDataType(STRING);
 		addAttribute(ENTITY_TYPES).setLabel("EntityTypes").setDescription("Imported EntityTypes").setDataType(STRING);

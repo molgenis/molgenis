@@ -5,30 +5,22 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.jobs.JobExecutionConfig;
-import org.molgenis.jobs.JobExecutor;
-import org.molgenis.jobs.JobFactoryRegistrar;
-import org.molgenis.jobs.JobFactoryRegistry;
+import org.molgenis.jobs.*;
 import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecutionMetaData;
-import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertTrue;
 
@@ -62,16 +54,10 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 	public static class Config implements ApplicationListener<ContextRefreshedEvent>
 	{
 		@Mock
-		private UserDetailsService userDetailsService;
-
-		@Mock
 		private MailSender mailSender;
 
 		@Mock
-		private UserDetails userDetails;
-
-		@Mock
-		private RunAsUserTokenFactory runAsUserTokenFactory;
+		private JobExecutorTokenService jobExecutorTokenService;
 
 		@Autowired
 		JobFactoryRegistrar jobFactoryRegistrar;
@@ -79,15 +65,6 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 		public Config()
 		{
 			initMocks(this);
-			when(userDetailsService.loadUserByUsername("user")).thenReturn(userDetails);
-			when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
-
-		}
-
-		@Bean
-		public UserDetailsService userDetailsService()
-		{
-			return userDetailsService;
 		}
 
 		@Bean
@@ -97,9 +74,9 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public RunAsUserTokenFactory runAsUserTokenFactory()
+		public JobExecutorTokenService jobExecutorTokenService()
 		{
-			return runAsUserTokenFactory;
+			return jobExecutorTokenService;
 		}
 
 		@Bean

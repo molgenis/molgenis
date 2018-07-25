@@ -7,16 +7,13 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.mail.MailSender;
-import org.springframework.security.access.intercept.RunAsUserToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
@@ -44,24 +41,22 @@ public class JobExecutor
 	private final JobExecutionTemplate jobExecutionTemplate = new JobExecutionTemplate();
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final MailSender mailSender;
-	private final UserDetailsService userDetailsService;
 	private final ExecutorService executorService;
 	private final JobFactoryRegistry jobFactoryRegistry;
+	private final JobExecutorTokenService jobExecutorTokenService;
 	private final Gson gson;
-	private final RunAsUserTokenFactory runAsUserTokenFactory;
 
-	public JobExecutor(DataService dataService, EntityManager entityManager, UserDetailsService userDetailsService,
-			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, ExecutorService executorService,
-			JobFactoryRegistry jobFactoryRegistry, RunAsUserTokenFactory runAsUserTokenFactory)
+	public JobExecutor(DataService dataService, EntityManager entityManager, JobExecutionUpdater jobExecutionUpdater,
+			MailSender mailSender, ExecutorService executorService, JobFactoryRegistry jobFactoryRegistry,
+			JobExecutorTokenService jobExecutorTokenService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
-		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
 		this.executorService = requireNonNull(executorService);
 		this.jobFactoryRegistry = jobFactoryRegistry;
-		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
+		this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
 		this.gson = new Gson();
 	}
 
@@ -108,7 +103,6 @@ public class JobExecutor
 	 *
 	 * @param jobExecution the {@link JobExecution} to save and submit.
 	 */
-	@RunAsSystem
 	public CompletableFuture<Void> submit(JobExecution jobExecution)
 	{
 		return submit(jobExecution, executorService);
@@ -121,7 +115,6 @@ public class JobExecutor
 	 * @param jobExecution    the {@link JobExecution} to save and submit.
 	 * @param executorService the ExecutorService to run the submitted job on
 	 */
-	@RunAsSystem
 	public CompletableFuture<Void> submit(JobExecution jobExecution, ExecutorService executorService)
 	{
 		Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
@@ -148,14 +141,9 @@ public class JobExecutor
 
 	private void runJob(JobExecution jobExecution, Job<?> molgenisJob)
 	{
-		jobExecutionTemplate.call(molgenisJob, new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender),
-				createAuthorization(jobExecution.getUser()));
-	}
-
-	private RunAsUserToken createAuthorization(String username)
-	{
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-		return runAsUserTokenFactory.create("Job Execution", userDetails, null);
+		Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
+		Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
+		jobExecutionTemplate.call(molgenisJob, progress, authentication);
 	}
 
 	private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs)

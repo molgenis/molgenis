@@ -398,8 +398,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 
+	@Bean
 	@Override
-	protected org.springframework.security.core.userdetails.UserDetailsService userDetailsService()
+	protected UserDetailsService userDetailsService()
 	{
 		return new UserDetailsService(dataService, roleHierarchyAuthoritiesMapper());
 	}

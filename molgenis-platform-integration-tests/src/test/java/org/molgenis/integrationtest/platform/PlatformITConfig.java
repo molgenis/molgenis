@@ -51,19 +51,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.springframework.security.acls.jdbc.AclConfig;
 import org.springframework.security.acls.model.MutableAclService;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.Collection;
-
-import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
@@ -93,10 +85,9 @@ import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 		AuthenticationAuthoritiesUpdaterImpl.class, SecurityContextRegistryImpl.class,
 		org.molgenis.data.importer.ImportServiceRegistrar.class, EntityTypeRegistryPopulator.class,
 		UserPermissionEvaluatorImpl.class, DataserviceRoleHierarchy.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class,
-		SemanticSearchConfig.class, OntologyConfig.class, JobExecutionConfig.class, JobFactoryRegistrar.class,
-		SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class, AclConfig.class, MutableAclClassServiceImpl.class,
-		PermissionRegistry.class, DataPermissionConfig.class })
+		SystemRepositoryDecoratorFactoryRegistrar.class, SemanticSearchConfig.class, OntologyConfig.class,
+		JobExecutionConfig.class, JobFactoryRegistrar.class, SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class,
+		AclConfig.class, MutableAclClassServiceImpl.class, PermissionRegistry.class, DataPermissionConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired
@@ -134,18 +125,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public MailSender mailSender()
 	{
 		return mock(MailSender.class);
-	}
-
-	@Bean
-	public UserDetailsService userDetailsService()
-	{
-		UserDetailsService userDetailsService = mock(UserDetailsService.class);
-		UserDetails adminUserDetails = mock(UserDetails.class);
-		when(adminUserDetails.isEnabled()).thenReturn(true);
-		Collection authorities = singleton(new SimpleGrantedAuthority(ROLE_SYSTEM));
-		when(adminUserDetails.getAuthorities()).thenReturn(authorities);
-		when(userDetailsService.loadUserByUsername("admin")).thenReturn(adminUserDetails);
-		return userDetailsService;
 	}
 
 	@Bean

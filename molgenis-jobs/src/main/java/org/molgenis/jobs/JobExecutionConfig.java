@@ -3,14 +3,12 @@ package org.molgenis.jobs;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,26 +21,24 @@ public class JobExecutionConfig
 {
 	private final DataService dataService;
 	private final EntityManager entityManager;
-	private final UserDetailsService userDetailsService;
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final MailSender mailSender;
 	private final JobFactoryRegistry jobFactoryRegistry;
-	private final RunAsUserTokenFactory runAsUserTokenFactory;
+	private final JobExecutorTokenService jobExecutorTokenService;
 
 	@Autowired
 	private ExecutorService executorService;
 
 	public JobExecutionConfig(DataService dataService, EntityManager entityManager,
-			UserDetailsService userDetailsService, JobExecutionUpdater jobExecutionUpdater, MailSender mailSender,
-			JobFactoryRegistry jobFactoryRegistry, RunAsUserTokenFactory runAsUserTokenFactory)
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, JobFactoryRegistry jobFactoryRegistry,
+			JobExecutorTokenService jobExecutorTokenService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
-		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.mailSender = requireNonNull(mailSender);
 		this.jobFactoryRegistry = requireNonNull(jobFactoryRegistry);
-		this.runAsUserTokenFactory = requireNonNull(runAsUserTokenFactory);
+		this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
 	}
 
 	@Primary // Use this ExecutorService when no specific bean is demanded
@@ -55,7 +51,7 @@ public class JobExecutionConfig
 	@Bean
 	public JobExecutor jobExecutor()
 	{
-		return new JobExecutor(dataService, entityManager, userDetailsService, jobExecutionUpdater, mailSender,
-				executorService, jobFactoryRegistry, runAsUserTokenFactory);
+		return new JobExecutor(dataService, entityManager, jobExecutionUpdater, mailSender, executorService,
+				jobFactoryRegistry, jobExecutorTokenService);
 	}
 }

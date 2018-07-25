@@ -7,39 +7,64 @@ import org.molgenis.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static java.util.Objects.requireNonNull;
 
 @Component
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater
 {
 	private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdater.class);
+
+	private final JobExecutorTokenService jobExecutorTokenService;
+	private final ExecutorService executorService;
 	@Autowired
 	private DataService dataService;
-	private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+	JobExecutionUpdaterImpl(JobExecutorTokenService jobExecutorTokenService)
+	{
+		this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
+		this.executorService = Executors.newSingleThreadExecutor();
+	}
 
 	@Override
 	public void update(JobExecution jobExecution)
 	{
-		Entity copy = new DynamicEntity(jobExecution.getEntityType());
-		copy.set(jobExecution);
-		executorService.execute(() -> updateInternal(copy));
+		Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
+		executorService.execute(() -> updateInternal(authentication, jobExecution));
 	}
 
-	private void updateInternal(Entity jobExecution)
+	private void updateInternal(Authentication authentication, JobExecution jobExecution)
 	{
-		runAsSystem(() -> tryUpdate(jobExecution));
-	}
-
-	private void tryUpdate(Entity jobExecution)
-	{
+		SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
 		{
-			dataService.update(jobExecution.getEntityType().getId(), jobExecution);
+			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+			securityContext.setAuthentication(authentication);
+			SecurityContextHolder.setContext(securityContext);
+
+			tryUpdate(jobExecution);
+		}
+		finally
+		{
+			SecurityContextHolder.setContext(originalContext);
+		}
+	}
+
+	private void tryUpdate(JobExecution jobExecution)
+	{
+		Entity jobExecutionCopy = new DynamicEntity(jobExecution.getEntityType());
+		jobExecutionCopy.set(jobExecution);
+
+		try
+		{
+			dataService.update(jobExecutionCopy.getEntityType().getId(), jobExecutionCopy);
 		}
 		catch (Exception ex)
 		{
