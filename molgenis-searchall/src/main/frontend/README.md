@@ -21,7 +21,7 @@ yarn install
 yarn dev
 ```
 
-It will render a local version of the questionnaires.
+It should render a local version of the searchall plugin, however the mock data is not yet available here. It needs a running backend at the moment.
 
 #### Run unit tests
 You can run unit tests by executing this command:
@@ -74,7 +74,7 @@ And comment out this block in the same file.
 // there is no mock data available in this module
 ```
 
-That is it. Run a molgenis instance on localhost:8080 and start the questionnaire with:
+That is it. Run a MOLGENIS instance on localhost:8080 and start the searchall plugin with:
 
 ```javascript
 yarn dev
