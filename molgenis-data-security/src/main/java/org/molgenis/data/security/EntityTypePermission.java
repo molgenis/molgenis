@@ -16,7 +16,9 @@ public enum EntityTypePermission implements Permission
 	UPDATE_DATA("Permission to update entities of this EntityType"),
 	DELETE_DATA("Permission to delete entities of this EntityType"),
 	UPDATE_METADATA("Permission to update the metadata of this EntityType"),
-	DELETE_METADATA("Permission to delete the data and metadata of this EntityType");
+	DELETE_METADATA("Permission to delete the data and metadata of this EntityType"),
+	MANAGE_REPORT("Permission to manage the report for this EntityType"),
+	VIEW_REPORT("Permission to view the report for this EntityType");
 	// @formatter:on
 
 	private final String defaultDescription;

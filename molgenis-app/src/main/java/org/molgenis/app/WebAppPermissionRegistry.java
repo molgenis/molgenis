@@ -80,6 +80,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry
 		register(PLUGIN, ImportWizardController.ID, editor, READ);
 		register(ENTITY_TYPE, FREEMARKER_TEMPLATE, anonymousUser, READ);
 		register(ENTITY_TYPE, FREEMARKER_TEMPLATE, user, READ);
+		register(ENTITY_TYPE, FREEMARKER_TEMPLATE, editor, WRITE);
 		register(PLUGIN, DataExplorerController.ID, viewer, READ);
 		register(ENTITY_TYPE, PACKAGE_SETTINGS + PACKAGE_SEPARATOR + DataExplorerController.ID, viewer, READ);
 		register(PLUGIN, NegotiatorController.ID, viewer, READ);
