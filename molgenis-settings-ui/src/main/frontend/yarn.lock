@@ -88,16 +88,17 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.9.7":
-  version "0.9.7"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.9.7.tgz#4a76ccc317c07c2d8a028309875ec9d3f6e626b3"
+"@molgenis/molgenis-ui-form@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.2.tgz#3523fb116f0b69acc890c0f9d4f29dc79308d64c"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
+    debounce "^1.1.0"
     moment "^2.20.1"
     vue-code "^1.2.3"
-    vue-flatpickr-component "^6.1.0"
-    vue-form "^4.7.0"
-    vue-select "^2.4.0"
+    vue-flatpickr-component "^7.0.4"
+    vue-form "^4.8.1"
+    vue-select ConnorStroomberg/vue-select.git#release/patch-for-update-issue
 
 "@molgenis/molgenis-vue-test-utils@^1.0.0":
   version "1.0.0"
@@ -2075,6 +2076,10 @@ de-indent@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/de-indent/-/de-indent-1.0.2.tgz#b2038e846dc33baa5796128d0804b455b8c1e21d"
 
+debounce@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.1.0.tgz#6a1a4ee2a9dc4b7c24bb012558dbcdb05b37f408"
+
 debug@2, debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -3158,9 +3163,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flatpickr@^4.2.4:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.3.2.tgz#6a477043c075ef36c3ff54fadb49b936a64d635f"
+flatpickr@^4.4.6:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.5.1.tgz#f65eaf54c07538f87d6f68a67b03cf816d7fb82f"
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -7620,15 +7625,15 @@ vue-code@^1.2.3:
   dependencies:
     codemirror "5.x"
 
-vue-flatpickr-component@^6.1.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-6.2.0.tgz#911b70672de9dfe16adbe78e1ed83adc718133cb"
+vue-flatpickr-component@^7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.4.tgz#29909596555f5160792a917f469f9e809e5e6c26"
   dependencies:
-    flatpickr "^4.2.4"
+    flatpickr "^4.4.6"
 
-vue-form@^4.7.0:
-  version "4.7.1"
-  resolved "https://registry.yarnpkg.com/vue-form/-/vue-form-4.7.1.tgz#dca7adae77f4afcb46e76b96086bb1307a8f4c22"
+vue-form@^4.8.1:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/vue-form/-/vue-form-4.9.0.tgz#cfb0f75f6c1b387a6b830084fb12ec9cbde8d260"
   dependencies:
     extend "3.0.1"
     scope-eval "1.0.0"
@@ -7663,9 +7668,9 @@ vue-router@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.1.tgz#d9b05ad9c7420ba0f626d6500d693e60092cc1e9"
 
-vue-select@^2.4.0:
+"vue-select@github:ConnorStroomberg/vue-select#release/patch-for-update-issue":
   version "2.4.0"
-  resolved "https://registry.yarnpkg.com/vue-select/-/vue-select-2.4.0.tgz#ef06547fe857f3259841ab2f3d29c5d8a1e52630"
+  resolved "https://codeload.github.com/ConnorStroomberg/vue-select/tar.gz/3bee82380e07634b4d5d7d1c2450d7101581a9b0"
 
 vue-style-loader@^3.0.0, vue-style-loader@^3.0.1:
   version "3.1.2"
