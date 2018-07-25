@@ -9,13 +9,14 @@ There are 2 ways to test and develop in frontend-plugins for MOLGENIS.
 - locally without MOLGENIS
 - locally with MOLGENIS
 
-### Test locally
+### Test locally without a running MOLGENIS instance
 
 For local testing you can execute the following commands:
 
 ```bash
 # To install the application
 yarn install
+
 # To run develop mode
 yarn dev
 ```
@@ -25,19 +26,20 @@ It will render a local version of the questionnaires.
 #### Run unit tests
 You can run unit tests by executing this command:
 
-```javascript
-// Run once
-
+```bash
+# Run once
 yarn unit
 
-// Run in watch-mode
+# Run in watch-mode
+yarn debug
 ```
 
-
-
 #### Run end-to-end tests
+You can run edn-to-end test locally by running the following command:
 
-
+```bash
+yarn e2e
+```
 
 ### Test with a running MOLGENIS instance
 
