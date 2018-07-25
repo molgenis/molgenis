@@ -45,7 +45,7 @@ public class UploadWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String dataImportOption = request.getParameter("data_option");
+		String dataImportOption = request.getParameter("data-option");
 
 		try
 		{

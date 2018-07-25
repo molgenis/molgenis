@@ -74,7 +74,7 @@ public class OptionsWizardPageTest extends AbstractMockitoTest
 	public void testHandleRequestNoWritablePackageException()
 	{
 		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-		when(httpServletRequest.getParameter("data_option")).thenReturn("MyAction");
+		when(httpServletRequest.getParameter("data-option")).thenReturn("MyAction");
 		BindingResult bindingResult = mock(BindingResult.class);
 		ImportWizard wizard = mock(ImportWizard.class);
 		File file = mock(File.class);

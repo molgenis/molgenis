@@ -74,7 +74,7 @@
                     <#if action == 'ADD_UPDATE_EXISTING'>
                         <div class="radio">
                             <label>
-                                <input type="radio" name="data_option" value="add_update"><strong>Add entities /
+                                <input type="radio" name="data-option" value="add_update"><strong>Add entities /
                                 update existing</strong>
                             </label>
                         </div>
@@ -83,7 +83,7 @@
                     <#if action == 'ADD'>
                         <div class="radio">
 								<label>
-									<input type="radio" name="data_option" value="add"
+									<input type="radio" name="data-option" value="add"
                                            checked><strong>Add entities</strong>
 								</label>
 							</div>
@@ -92,7 +92,7 @@
                     <#if action == 'UPDATE'>
                         <div class="radio">
 								<label>
-									<input type="radio" name="data_option"
+									<input type="radio" name="data-option"
                                            value="update"><strong>Update entities</strong>
 								</label>
 							</div>

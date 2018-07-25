@@ -63,7 +63,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String dataImportOption = request.getParameter("data_option");
+		String dataImportOption = request.getParameter("data-option");
 		importWizard.setDataImportOption(dataImportOption);
 		String metadataImportOption = request.getParameter("metadata-option");
 		importWizard.setMetadataImportOption(metadataImportOption);
