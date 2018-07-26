@@ -328,11 +328,18 @@ $.when($,
 
             // get entity meta data and update header and tree
             var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function (entityMetaData) {
-                if (entityMetaData.permissions.indexOf('DELETE_METADATA') >= 0) {
+                const deleteMeta = entityMetaData.permissions.indexOf('DELETE_METADATA') >= 0;
+                const deleteData = entityMetaData.permissions.indexOf('DELETE_DATA') >= 0;
+                if (deleteMeta || deleteData){
                     $('#delete-dropdown-container').show()
-                } else if (entityMetaData.permissions.indexOf('DELETE_DATA') >= 0) {
-                    $('#delete-button-container').show()
+                    if (deleteMeta) {
+                        $('#delete-metadata-dropdown-item').show()
+                    }
+                    if (deleteData) {
+                        $('#delete-data-dropdown-item').show()
+                    }
                 }
+
                 selectedEntityMetaData = entityMetaData;
                 selectedAttributes = [];
                 self.createHeader(entityMetaData);
