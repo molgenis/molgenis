@@ -61,24 +61,22 @@
                             Delete <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#"
-                                                       id="delete-data-option">Data</a></li>
-                            <li id="delete-metadata-option" role="presentation"><a role="menuitem" tabindex="-1"
-                                                                                   href="#"
-                                                                                   id="delete-data-metadata-option">Data
+                            <li id="delete-data-dropdown-item" role="presentation" hidden><a role="menuitem"
+                                                                                             tabindex="-1" href="#"
+                                                                                             id="delete-data-option">Data</a>
+                            </li>
+                            <li id="delete-metadata-dropdown-item" role="presentation" hidden><a role="menuitem"
+                                                                                                 tabindex="-1"
+                                                                                                 href="#"
+                                                                                                 id="delete-data-metadata-option">Data
                                 and meta data</a></li>
                         </ul>
                     </div>
                 </div>
-                <div id="delete-button-container" class="col-md-1" hidden>
-                    <button id="delete-data-btn" class="btn btn-danger dropdown-toggle" type="button" href="#">
-                        Delete data
-                    </button>
-                </div>
-            </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <div class="row">
     <div class="col-md-3" id="selectors">
