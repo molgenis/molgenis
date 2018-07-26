@@ -8,8 +8,8 @@
     "dev": "node build/dev-server.js",
     "build": "node build/build.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
-    "unit:watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --watch",
-    "unit:debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js -i --watch",
+    "watch": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --watch",
+    "debug": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js -i --watch",
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "lint:fix": "eslint --fix --ext .js,.vue src test/unit/specs"
   },
@@ -76,7 +76,6 @@
     "lolex": "^1.5.2",
     "mocha": "^3.2.0",
     "moment": "^2.18.1",
-    "node-sass": "^4.5.3",
     "opn": "^4.0.2",
     "ora": "^1.1.0",
     "phantomjs-prebuilt": "^2.1.14",
