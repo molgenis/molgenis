@@ -1,7 +1,7 @@
 package org.molgenis.data.importer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.RepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpSession;
 
+import static java.util.Objects.requireNonNull;
+
 public class ImportJob implements Runnable
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ImportJob.class);
@@ -17,19 +19,21 @@ public class ImportJob implements Runnable
 	private final ImportService importService;
 	private final SecurityContext securityContext;
 	private final RepositoryCollection source;
-	private final DatabaseAction databaseAction;
+	private final MetadataAction metadataAction;
+	private final DataAction databaseAction;
 	private final String importRunId;
 	private final ImportRunService importRunService;
 	private final HttpSession session;
 	private final String packageId;
 
 	public ImportJob(ImportService importService, SecurityContext securityContext, RepositoryCollection source,
-			DatabaseAction databaseAction, String importRunId, ImportRunService importRunService, HttpSession session,
-			String packageId)
+			MetadataAction metadataAction, DataAction databaseAction, String importRunId,
+			ImportRunService importRunService, HttpSession session, String packageId)
 	{
 		this.importService = importService;
 		this.securityContext = securityContext;
 		this.source = source;
+		this.metadataAction = requireNonNull(metadataAction);
 		this.databaseAction = databaseAction;
 		this.importRunId = importRunId;
 		this.importRunService = importRunService;
@@ -47,7 +51,7 @@ public class ImportJob implements Runnable
 
 			SecurityContextHolder.setContext(securityContext);
 
-			EntityImportReport importReport = importService.doImport(source, databaseAction, packageId);
+			EntityImportReport importReport = importService.doImport(source, metadataAction, databaseAction, packageId);
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 

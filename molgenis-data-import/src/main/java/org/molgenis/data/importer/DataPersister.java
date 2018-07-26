@@ -1,9 +1,9 @@
 package org.molgenis.data.importer;
 
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 
 /**
- * Persists data and metadata provided by a {@link DataProvider} using a {@link DatabaseAction}.
+ * Persists data and metadata provided by a {@link DataProvider} using a {@link DataAction}.
  */
 public interface DataPersister
 {

@@ -17,8 +17,8 @@ public class ImportWizardUtilTest
 		ImportWizard importWizard = mock(ImportWizard.class);
 		BindingResult bindingResult = mock(BindingResult.class);
 		Logger logger = mock(Logger.class);
-		String entityImportOption = "entityImportOption";
-		ImportWizardUtil.handleException(exception, importWizard, bindingResult, logger, entityImportOption);
+		String dataImportOption = "dataImportOption";
+		ImportWizardUtil.handleException(exception, importWizard, bindingResult, logger, dataImportOption);
 		verify(bindingResult).addError(new ObjectError("wizard", "<b>Your import failed:</b><br />message"));
 	}
 }

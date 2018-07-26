@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.*;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -122,7 +123,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
 		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
-		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD,
+		EntityImportReport entityImportReport = vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD,
 				importPackageId);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addEntityCount(entityTypeId0, entities.size());
@@ -220,7 +221,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
 		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
-		EntityImportReport entityImportReport = vcfImporterService.doImport(source, DatabaseAction.ADD,
+		EntityImportReport entityImportReport = vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD,
 				importPackageId);
 		EntityImportReport expectedEntityImportReport = new EntityImportReport();
 		expectedEntityImportReport.addNewEntity(sampleEntityName0);
@@ -252,7 +253,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 		String importPackageId = "package";
 		Package importPackage = mock(Package.class);
 		when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
-		vcfImporterService.doImport(source, DatabaseAction.ADD, importPackageId);
+		vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD, importPackageId);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -260,7 +261,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	{
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		String defaultPackage = "package";
-		vcfImporterService.doImport(source, DatabaseAction.ADD_IGNORE_EXISTING, defaultPackage);
+		vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD_IGNORE_EXISTING, defaultPackage);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -268,7 +269,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	{
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		String defaultPackage = "package";
-		vcfImporterService.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING, defaultPackage);
+		vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD_UPDATE_EXISTING, defaultPackage);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -276,7 +277,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest
 	{
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		String defaultPackage = "package";
-		vcfImporterService.doImport(source, DatabaseAction.UPDATE, defaultPackage);
+		vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.UPDATE, defaultPackage);
 	}
 
 	@Test

@@ -1,11 +1,13 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
+import org.molgenis.data.importer.MetadataAction;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Optional;
 
@@ -17,39 +19,68 @@ class ImportWizardUtil
 	{
 	}
 
-	static DatabaseAction toDatabaseAction(String actionStr)
+	static @Nullable
+	MetadataAction toMetadataAction(String actionStr)
 	{
 		// convert input to database action
-		DatabaseAction dbAction;
+		MetadataAction metadataAction;
 
 		switch (actionStr)
 		{
 			case "add":
-				dbAction = DatabaseAction.ADD;
-				break;
-			case "add_update":
-				dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
+				metadataAction = MetadataAction.ADD;
 				break;
 			case "update":
-				dbAction = DatabaseAction.UPDATE;
+				metadataAction = MetadataAction.UPDATE;
+				break;
+			case "upsert":
+				metadataAction = MetadataAction.UPSERT;
+				break;
+			case "ignore":
+				metadataAction = MetadataAction.IGNORE;
 				break;
 			default:
-				dbAction = null;
+				metadataAction = null;
 				break;
 		}
 
-		return dbAction;
+		return metadataAction;
+	}
+
+	static @Nullable
+	DataAction toDataAction(String actionStr)
+	{
+		// convert input to database action
+		DataAction dataAction;
+
+		switch (actionStr)
+		{
+			case "add":
+				dataAction = DataAction.ADD;
+				break;
+			case "add_update":
+				dataAction = DataAction.ADD_UPDATE_EXISTING;
+				break;
+			case "update":
+				dataAction = DataAction.UPDATE;
+				break;
+			default:
+				dataAction = null;
+				break;
+		}
+
+		return dataAction;
 	}
 
 	static void handleException(Exception e, ImportWizard importWizard, BindingResult result, Logger logger,
-			String entityImportOption)
+			String dataImportOption)
 	{
 		File file = importWizard.getFile();
 
 		if (logger.isWarnEnabled())
 		{
 			logger.warn(format("Import of file [%s] failed for action [%s]",
-					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), entityImportOption), e);
+					Optional.ofNullable(file).map(File::getName).orElse("UNKNOWN"), dataImportOption), e);
 		}
 
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getLocalizedMessage()));

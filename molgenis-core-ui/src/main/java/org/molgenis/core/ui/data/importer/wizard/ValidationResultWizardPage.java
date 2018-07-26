@@ -2,7 +2,7 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.AbstractWizardPage;
 import org.molgenis.core.ui.wizard.Wizard;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.*;
@@ -55,15 +55,24 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String entityImportOption = importWizard.getEntityImportOption();
+		String metadataImportOption = importWizard.getMetadataImportOption();
+		String dataImportOption = importWizard.getDataImportOption();
 
-		if (entityImportOption != null)
+		if (dataImportOption != null)
 		{
 			try
 			{
 				// convert input to database action
-				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
-				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
+				MetadataAction metadataAction = ImportWizardUtil.toMetadataAction(metadataImportOption);
+				if (metadataAction == null)
+				{
+					throw new IOException("unknown metadata action: " + metadataImportOption);
+				}
+				DataAction dataAction = ImportWizardUtil.toDataAction(dataImportOption);
+				if (dataAction == null)
+				{
+					throw new IOException("unknown data action: " + dataImportOption);
+				}
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 						importWizard.getFile());
@@ -77,14 +86,15 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 					asyncImportJobs.execute(
 							new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection,
-									entityDbAction, importRun.getId(), importRunService, request.getSession(),
+									metadataAction, dataAction, importRun.getId(), importRunService,
+									request.getSession(),
 									importWizard.getSelectedPackage()));
 				}
 
 			}
 			catch (RuntimeException | IOException e)
 			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
 			}
 
 		}

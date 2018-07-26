@@ -2,8 +2,8 @@ package org.molgenis.core.ui.data.importer.wizard;
 
 import org.molgenis.core.ui.wizard.AbstractWizardController;
 import org.molgenis.core.ui.wizard.Wizard;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
@@ -126,6 +127,7 @@ public class ImportWizardController extends AbstractWizardController
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
 			@RequestParam(value = "packageId", required = false) String packageId,
+			@RequestParam(value = "metadataAction", required = false) String metadataAction,
 			@RequestParam(value = "action", required = false) String action,
 			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
@@ -139,7 +141,7 @@ public class ImportWizardController extends AbstractWizardController
 									 .contentType(TEXT_PLAIN)
 									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
-			importRun = importFile(request, tmpFile, action, notify, packageId);
+			importRun = importFile(request, tmpFile, metadataAction, action, notify, packageId);
 		}
 		catch (Exception e)
 		{
@@ -164,8 +166,9 @@ public class ImportWizardController extends AbstractWizardController
 			@RequestParam(value = "file") MultipartFile file,
 			@RequestParam(value = "entityTypeId", required = false) String entityTypeId,
 			@RequestParam(value = "packageId", required = false) String packageId,
+			@RequestParam(value = "metadataAction", required = false) String metadataAction,
 			@RequestParam(value = "action", required = false) String action,
-			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
+			@RequestParam(value = "notify", required = false) Boolean notify) throws URISyntaxException
 	{
 		ImportRun importRun;
 		String filename;
@@ -185,7 +188,7 @@ public class ImportWizardController extends AbstractWizardController
 									 .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
 			}
 
-			importRun = importFile(request, tmpFile, action, notify, packageId);
+			importRun = importFile(request, tmpFile, metadataAction, action, notify, packageId);
 		}
 		catch (Exception e)
 		{
@@ -229,12 +232,14 @@ public class ImportWizardController extends AbstractWizardController
 		return filename;
 	}
 
-	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify, String packageId)
+	private ImportRun importFile(HttpServletRequest request, File file, String metadataActionStr, String actionStr,
+			Boolean notify, String packageId)
 	{
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;
 		String fileExtension = getExtension(file.getName());
-		DatabaseAction databaseAction = getDatabaseAction(file, action);
+		MetadataAction metadataAction = getMetadataAction(metadataActionStr);
+		DataAction dataAction = getDataAction(actionStr);
 		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
 		{
 			throw new MolgenisDataException(
@@ -246,26 +251,49 @@ public class ImportWizardController extends AbstractWizardController
 
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
-				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, databaseAction,
-						importRun.getId(), importRunService, request.getSession(), packageId));
+				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, metadataAction,
+						dataAction, importRun.getId(), importRunService, request.getSession(), packageId));
 
 		return importRun;
 	}
 
-	private DatabaseAction getDatabaseAction(File file, String action)
+	private MetadataAction getMetadataAction(@Nullable String action)
 	{
-		DatabaseAction databaseAction = DatabaseAction.ADD;
+		MetadataAction metadataAction;
+		if (action == null)
+		{
+			metadataAction = MetadataAction.ADD;
+		}
+		else
+		{
+			try
+			{
+				metadataAction = MetadataAction.valueOf(action.toUpperCase());
+			}
+			catch (IllegalArgumentException e)
+			{
+				throw new IllegalArgumentException(
+						String.format("Invalid action:[%s] valid values: %s", action.toUpperCase(),
+								Arrays.toString(MetadataAction.values())));
+			}
+		}
+		return metadataAction;
+	}
+
+	private DataAction getDataAction(String action)
+	{
+		DataAction databaseAction = DataAction.ADD;
 		if (action != null)
 		{
 			try
 			{
-				databaseAction = DatabaseAction.valueOf(action.toUpperCase());
+				databaseAction = DataAction.valueOf(action.toUpperCase());
 			}
 			catch (IllegalArgumentException e)
 			{
 				throw new IllegalArgumentException(
 						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays.toString(
-								DatabaseAction.values())));
+								DataAction.values())));
 			}
 		}
 		return databaseAction;

@@ -2,7 +2,7 @@ package org.molgenis.amazon.bucket;
 
 import com.amazonaws.services.s3.AmazonS3;
 import org.molgenis.amazon.bucket.client.AmazonBucketClient;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.excel.ExcelUtils;
@@ -13,6 +13,7 @@ import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +75,8 @@ public class AmazonBucketIngester
 			Files.copy(file.toPath(), renamed.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(
 					renamed);
-			EntityImportReport report = importService.doImport(repositoryCollection, DatabaseAction.ADD_UPDATE_EXISTING,
+			EntityImportReport report = importService.doImport(repositoryCollection, MetadataAction.UPSERT,
+					DataAction.ADD_UPDATE_EXISTING,
 					null);
 			progress.status("Download and import from Amazon Bucket done.");
 			progress.progress(3,

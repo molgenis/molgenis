@@ -45,7 +45,7 @@ public class UploadWizardPage extends AbstractWizardPage
 	{
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String entityImportOption = request.getParameter("entity_option");
+		String dataImportOption = request.getParameter("data-option");
 
 		try
 		{
@@ -68,14 +68,15 @@ public class UploadWizardPage extends AbstractWizardPage
 						file);
 				ImportService importService = importServiceFactory.getImportService(file, repositoryCollection);
 
-				importWizard.setSupportedDatabaseActions(importService.getSupportedDatabaseActions());
+				importWizard.setSupportedMetadataActions(importService.getSupportedMetadataActions());
+				importWizard.setSupportedDataActions(importService.getSupportedDataActions());
 				importWizard.setMustChangeEntityName(importService.getMustChangeEntityName());
 			}
 
 		}
 		catch (Exception e)
 		{
-			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
 		}
 
 		return null;

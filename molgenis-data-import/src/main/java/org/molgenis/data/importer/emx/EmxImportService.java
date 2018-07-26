@@ -1,8 +1,9 @@
 package org.molgenis.data.importer.emx;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.*;
 import org.molgenis.data.meta.MetaDataService;
@@ -59,13 +60,14 @@ public class EmxImportService implements ImportService
 	}
 
 	@Override
-	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction,
+	public EntityImportReport doImport(final RepositoryCollection source, MetadataAction metadataAction,
+			DataAction dataAction,
 			@Nullable String packageId)
 	{
 		ParsedMetaData parsedMetaData = parser.parse(source, packageId);
 
 		// TODO altered entities (merge, see getEntityType)
-		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, packageId));
+		return doImport(new EmxImportJob(metadataAction, dataAction, source, parsedMetaData, packageId));
 	}
 
 	/**
@@ -100,9 +102,15 @@ public class EmxImportService implements ImportService
 	}
 
 	@Override
-	public List<DatabaseAction> getSupportedDatabaseActions()
+	public List<MetadataAction> getSupportedMetadataActions()
 	{
-		return newArrayList(DatabaseAction.values());
+		return ImmutableList.of(MetadataAction.UPSERT, MetadataAction.IGNORE);
+	}
+
+	@Override
+	public List<DataAction> getSupportedDataActions()
+	{
+		return newArrayList(DataAction.values());
 	}
 
 	@Override

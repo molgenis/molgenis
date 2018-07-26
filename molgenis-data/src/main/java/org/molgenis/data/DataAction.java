@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public enum DatabaseAction
+public enum DataAction
 {
 	/**
 	 * add records , error on duplicate records
