@@ -15,20 +15,19 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
+import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 import static org.molgenis.security.core.SidUtils.createRoleAuthority;
 
 @Service
@@ -78,20 +77,22 @@ public class GroupService
 	{
 		Package rootPackage = packageFactory.create(groupValue.getRootPackage());
 
-		List<Role> roles = groupValue.getRoles()
-									 .stream()
-									 .map(roleFactory::create)
-									 .map(this::addIncludedRole).collect(toList());
+		Map<String, Role> roles = groupValue.getRoles()
+											.stream()
+											.map(roleFactory::create)
+											.collect(toMap(Role::getName, identity()));
+
+		roles.values().forEach(role -> addIncludedRoles(role, roles, groupValue.getName()));
 
 		Group group = groupFactory.create(groupValue);
 		group.setRootPackage(rootPackage.getId());
-		group.setRoles(roles);
+		group.setRoles(roles.values());
 
 		dataService.add(PACKAGE, rootPackage);
 		dataService.add(GROUP, group);
-		roles.forEach(role -> role.setGroup(group));
+		roles.values().forEach(role -> role.setGroup(group));
 
-		dataService.add(ROLE, roles.stream());
+		dataService.add(ROLE, roles.values().stream());
 	}
 
 	@RunAsSystem
@@ -136,8 +137,8 @@ public class GroupService
 	 * The user can only have a single role within the group
 	 *
 	 * @param group group to add the user to in the given role
-	 * @param user user to be added in the given role to the given group
-	 * @param role role in which the given user is to be added to given group
+	 * @param user  user to be added in the given role to the given group
+	 * @param role  role in which the given user is to be added to given group
 	 */
 	@RunAsSystem
 	public void addMember(final Group group, final User user, final Role role)
@@ -146,14 +147,14 @@ public class GroupService
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		boolean isGroupRole = groupRoles.stream().anyMatch(gr -> gr.getName().equals(role.getName()));
 
-		if(!isGroupRole)
+		if (!isGroupRole)
 		{
 			throw new NotAValidGroupRoleException(role, group);
 		}
 
 		boolean isMember = memberships.stream().parallel().anyMatch(m -> m.getUser().equals(user));
 
-		if(isMember)
+		if (isMember)
 		{
 			throw new IsAlreadyMemberException(user, group);
 		}
@@ -205,13 +206,21 @@ public class GroupService
 		Collection<RoleMembership> memberships = roleMembershipService.getMemberships(groupRoles);
 		return memberships.stream()
 						  .filter(m -> m.getUser().getId().equals(member.getId()))
-						  .findFirst().orElseThrow(() -> unknownMembershipForUser(member));
+						  .findFirst()
+						  .orElseThrow(() -> unknownMembershipForUser(member));
 	}
 
-	private Role addIncludedRole(Role role)
+	private void addIncludedRoles(Role role, Map<String, Role> groupRoles, String groupName)
 	{
-		role.setIncludes(singletonList(findRoleNamed(role.getLabel().toUpperCase())));
-		return role;
+		List<Role> toInclude = newArrayList();
+		Role defaultRole = findRoleNamed(role.getLabel().toUpperCase());
+		toInclude.add(defaultRole);
+
+		stream(defaultRole.getIncludes()).map(includedRole -> createRoleName(groupName, includedRole.getLabel()))
+										 .map(groupRoles::get)
+										 .forEach(toInclude::add);
+
+		role.setIncludes(toInclude);
 	}
 
 	private Role findRoleNamed(String rolename)
