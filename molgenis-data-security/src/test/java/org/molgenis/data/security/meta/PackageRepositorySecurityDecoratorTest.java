@@ -11,7 +11,6 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
@@ -21,9 +20,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -233,31 +235,31 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 		verify(delegateRepository).deleteById("1");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testDeleteAll()
 	{
-		Package package1 = mock(Package.class);
-		Package package2 = mock(Package.class);
-		Package package3 = mock(Package.class);
-		Package package4 = mock(Package.class);
-		when(package3.getId()).thenReturn("3");
-		when(package4.getId()).thenReturn("4");
+		PackageMetadata packageMetadata = mock(PackageMetadata.class);
 
-		when(package1.getParent()).thenReturn(package3);
-		when(package2.getParent()).thenReturn(package4);
+		Package permittedParentPackage = when(mock(Package.class).getId()).thenReturn("permittedParentPackageId")
+																		  .getMock();
 
-		when(delegateRepository.findAll(new QueryImpl<Package>().pageSize(2147483647))).thenReturn(
-				Stream.of(package1, package2));
+		Package permittedPackage = when(mock(Package.class).getId()).thenReturn("permittedPackageId").getMock();
+		when(permittedPackage.getParent()).thenReturn(permittedParentPackage);
+		Package notPermittedPackage = mock(Package.class);
+		doAnswer(invocation ->
+		{
+			Consumer<List<Package>> consumer = invocation.getArgument(0);
+			consumer.accept(asList(permittedPackage, notPermittedPackage));
+			return null;
+		}).when(delegateRepository).forEachBatched(any(), eq(1000));
 
-		doReturn(true).when(userPermissionEvaluator).hasPermission(new PackageIdentity("3"), UPDATE);
-		doReturn(false).when(userPermissionEvaluator).hasPermission(new PackageIdentity("4"), UPDATE);
+		when(userPermissionEvaluator.hasPermission(new PackageIdentity(permittedParentPackage),
+				PackagePermission.UPDATE)).thenReturn(true);
 		repo.deleteAll();
-
-		//TODO: how to verify the deleteAcl method in the "filter" of the stream
-		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
-		verify(delegateRepository).delete(captor.capture());
-		assertEquals(captor.getValue().collect(toList()), asList(package1));
-
+		ArgumentCaptor<Stream<Package>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
+		verify(delegateRepository).delete(entityStreamCaptor.capture());
+		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedPackage));
 	}
 
 	@Test
