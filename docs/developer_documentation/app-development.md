@@ -125,7 +125,7 @@ module.exports = {
   build: {
     // ...
     assetsSubDirectory: '',
-    assetsPublicPath: '/plugins/app/' + packageJson.name,
+    assetsPublicPath: '/plugin/app/' + packageJson.name,
     // ...
   }
 }
