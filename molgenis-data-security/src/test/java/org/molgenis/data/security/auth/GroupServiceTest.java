@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -31,11 +32,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.security.auth.GroupMetadata.GROUP;
+import static org.molgenis.data.security.auth.GroupService.EDITOR;
+import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class GroupServiceTest extends AbstractMockitoTest
 {
@@ -59,15 +60,13 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Mock
 	private Group group;
 	@Mock
-	private Role role;
+	private Role managerRole;
+	@Mock
+	private Role editorRole;
 	@Mock
 	private User user;
 	@Mock
 	private Package aPackage;
-	@Mock
-	private Role roleManager;
-	@Mock
-	private Role editor;
 	@Mock
 	private RoleMembershipMetadata roleMembershipMetadata;
 	@Mock
@@ -79,22 +78,28 @@ public class GroupServiceTest extends AbstractMockitoTest
 	private GroupService groupService;
 
 	private GroupValue groupValue;
-	private RoleValue roleValue;
+	private RoleValue managerRoleValue;
+	private RoleValue editorRoleValue;
 	private PackageValue packageValue;
+
+	private static final String MANAGER_NAME = "GROUP_MANAGER";
+	private static final String EDITOR_NAME = "GROUP_EDITOR";
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		packageValue = PackageValue.builder().setName("package").setLabel("Package").build();
-		roleValue = RoleValue.builder().setName("NAME_MANAGER").setLabel("Manager").build();
+		managerRoleValue = RoleValue.builder().setName(MANAGER_NAME).setLabel(MANAGER).build();
+		editorRoleValue = RoleValue.builder().setName(EDITOR_NAME).setLabel(EDITOR).build();
 		GroupValue.Builder builder = GroupValue.builder()
-											   .setRootPackage(packageValue)
-											   .setName("name")
-											   .setLabel("label")
+											   .setRootPackage(packageValue).setName("group").setLabel("Group")
 											   .setPublic(true)
 											   .setDescription("description");
-		builder.rolesBuilder().add(roleValue);
+
+		builder.rolesBuilder().add(managerRoleValue);
+		builder.rolesBuilder().add(editorRoleValue);
 		groupValue = builder.build();
+
 		groupService = new GroupService(groupFactory, roleFactory, packageFactory, dataService, groupMetadata,
 				roleMembershipService, roleMetadata, roleMembershipMetadata);
 	}
@@ -103,35 +108,55 @@ public class GroupServiceTest extends AbstractMockitoTest
 	public void testPersist()
 	{
 		when(groupFactory.create(groupValue)).thenReturn(group);
-		when(roleFactory.create(roleValue)).thenReturn(role);
 		when(packageFactory.create(packageValue)).thenReturn(aPackage);
-		when(role.getLabel()).thenReturn("Manager");
 
-		when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, "MANAGER").findOne()).thenReturn(roleManager);
+		when(editorRole.getName()).thenReturn(EDITOR_NAME);
+		when(editorRole.getLabel()).thenReturn(EDITOR);
+		doReturn(editorRole).when(roleFactory).create(editorRoleValue);
+
+		when(managerRole.getName()).thenReturn(MANAGER_NAME);
+		when(managerRole.getLabel()).thenReturn(MANAGER);
+		doReturn(managerRole).when(roleFactory).create(managerRoleValue);
+
+		Role defaultEditorRole = mock(Role.class);
+		when(defaultEditorRole.getLabel()).thenReturn(EDITOR);
+
+		Role defaultManagerRole = mock(Role.class);
+		when(defaultManagerRole.getIncludes()).thenReturn(singletonList(defaultEditorRole));
+
+		when(dataService.query(ROLE, Role.class).eq(eq(RoleMetadata.NAME), any(String.class)).findOne()).thenReturn(
+				defaultManagerRole, defaultEditorRole);
 
 		groupService.persist(groupValue);
 
 		verify(dataService).add(GROUP, group);
 		verify(dataService).add(eq(ROLE), roleCaptor.capture());
 		verify(dataService).add(PackageMetadata.PACKAGE, aPackage);
-		assertEquals(roleCaptor.getValue().collect(toList()), singletonList(role));
+		assertEquals(roleCaptor.getValue().collect(toList()), asList(managerRole, editorRole));
 
-		verify(role).setGroup(group);
-		verify(role).setIncludes(singletonList(roleManager));
+		verify(managerRole).setGroup(group);
+		verify(managerRole).setIncludes(asList(defaultManagerRole, editorRole));
+
+		verify(editorRole).setGroup(group);
+		verify(editorRole).setIncludes(singletonList(defaultEditorRole));
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_Role id:MANAGER attribute:name")
 	public void testPersistIncludedRoleNotFound()
 	{
-		when(roleFactory.create(roleValue)).thenReturn(role);
+		doReturn(editorRole).when(roleFactory).create(editorRoleValue);
+		doReturn(managerRole).when(roleFactory).create(managerRoleValue);
+		when(managerRole.getName()).thenReturn(MANAGER_NAME);
+		when(managerRole.getLabel()).thenReturn(MANAGER);
+		when(editorRole.getName()).thenReturn(EDITOR_NAME);
 		when(packageFactory.create(packageValue)).thenReturn(aPackage);
-		when(role.getLabel()).thenReturn("Manager");
 
 		when(roleMetadata.getId()).thenReturn(ROLE);
 		when(roleMetadata.getAttribute(NAME)).thenReturn(attribute);
 		when(attribute.getName()).thenReturn(NAME);
 
-		when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, "MANAGER").findOne()).thenReturn(null);
+		when(dataService.query(ROLE, Role.class).eq(RoleMetadata.NAME, MANAGER.toUpperCase()).findOne()).thenReturn(
+				null);
 
 		groupService.persist(groupValue);
 	}
@@ -181,26 +206,26 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test
 	public void testAddMemberHappyPath()
 	{
-		when(group.getRoles()).thenReturn(singletonList(role));
-		when(role.getName()).thenReturn("dev");
+		when(group.getRoles()).thenReturn(singletonList(managerRole));
+		when(managerRole.getName()).thenReturn("dev");
 
-		when(roleMembershipService.getMemberships(singletonList(role))).thenReturn(emptyList());
+		when(roleMembershipService.getMemberships(singletonList(managerRole))).thenReturn(emptyList());
 
-		groupService.addMember(group, user, role);
+		groupService.addMember(group, user, managerRole);
 
-		verify(roleMembershipService).addUserToRole(user, role);
+		verify(roleMembershipService).addUserToRole(user, managerRole);
 	}
 
 	@Test(expectedExceptions = IsAlreadyMemberException.class)
 	public void testAddMemberAlreadyAMember()
 	{
-		when(group.getRoles()).thenReturn(singletonList(role));
-		when(role.getName()).thenReturn("dev");
+		when(group.getRoles()).thenReturn(singletonList(managerRole));
+		when(managerRole.getName()).thenReturn("dev");
 
-		when(roleMembershipService.getMemberships(singletonList(role))).thenReturn(singletonList(membership));
+		when(roleMembershipService.getMemberships(singletonList(managerRole))).thenReturn(singletonList(membership));
 		when(membership.getUser()).thenReturn(user);
 
-		groupService.addMember(group, user, role);
+		groupService.addMember(group, user, managerRole);
 	}
 
 	@Test(expectedExceptions = NotAValidGroupRoleException.class)
@@ -208,14 +233,14 @@ public class GroupServiceTest extends AbstractMockitoTest
 	{
 		when(group.getRoles()).thenReturn(emptyList());
 
-		groupService.addMember(group, user, role);
+		groupService.addMember(group, user, managerRole);
 	}
 
 	@Test
 	public void testRemoveMember()
 	{
-		when(group.getRoles()).thenReturn(singletonList(role));
-		when(roleMembershipService.getMemberships(singletonList(role))).thenReturn(singletonList(membership));
+		when(group.getRoles()).thenReturn(singletonList(managerRole));
+		when(roleMembershipService.getMemberships(singletonList(managerRole))).thenReturn(singletonList(membership));
 		when(membership.getUser()).thenReturn(user);
 		when(user.getId()).thenReturn("userID");
 
@@ -227,8 +252,8 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void testRemoveMemberNotAMember()
 	{
-		when(group.getRoles()).thenReturn(singletonList(role));
-		when(roleMembershipService.getMemberships(singletonList(role))).thenReturn(emptyList());
+		when(group.getRoles()).thenReturn(singletonList(managerRole));
+		when(roleMembershipService.getMemberships(singletonList(managerRole))).thenReturn(emptyList());
 		when(roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER)).thenReturn(attribute);
 		when(user.getUsername()).thenReturn("henkie");
 
@@ -238,40 +263,40 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test
 	public void testUpdateMemberRole()
 	{
-		when(role.getName()).thenReturn("ROLE_NAME");
-		when(editor.getName()).thenReturn("EDITOR_NAME");
-		when(group.getRoles()).thenReturn(ImmutableList.of(role, editor));
-		when(roleMembershipService.getMemberships(ImmutableList.of(role, editor))).thenReturn(
+		when(managerRole.getName()).thenReturn(MANAGER_NAME);
+		when(editorRole.getName()).thenReturn(EDITOR_NAME);
+		when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
+		when(roleMembershipService.getMemberships(ImmutableList.of(managerRole, editorRole))).thenReturn(
 				singletonList(membership));
 		when(membership.getUser()).thenReturn(user);
 		when(user.getId()).thenReturn("userID");
 
-		groupService.updateMemberRole(group, user, editor);
+		groupService.updateMemberRole(group, user, editorRole);
 
-		verify(roleMembershipService).updateMembership(membership, editor);
+		verify(roleMembershipService).updateMembership(membership, editorRole);
 	}
 
 	@Test(expectedExceptions = NotAValidGroupRoleException.class)
 	public void testUpdateMemberRoleNotAGroupRole()
 	{
-		when(role.getName()).thenReturn("ROLE_NAME");
-		when(editor.getName()).thenReturn("EDITOR_NAME");
-		when(group.getRoles()).thenReturn(ImmutableList.of(role));
+		when(group.getRoles()).thenReturn(ImmutableList.of(managerRole));
+		when(managerRole.getName()).thenReturn(MANAGER_NAME);
+		when(editorRole.getName()).thenReturn(EDITOR_NAME);
 
-		groupService.updateMemberRole(group, user, editor);
+		groupService.updateMemberRole(group, user, editorRole);
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
 	public void testUpdateMemberRoleUserNotAMember()
 	{
-		when(role.getName()).thenReturn("ROLE_NAME");
-		when(editor.getName()).thenReturn("EDITOR_NAME");
-		when(group.getRoles()).thenReturn(ImmutableList.of(role, editor));
-		when(roleMembershipService.getMemberships(ImmutableList.of(role, editor))).thenReturn(emptyList());
+		when(group.getRoles()).thenReturn(ImmutableList.of(managerRole, editorRole));
+		when(roleMembershipService.getMemberships(ImmutableList.of(managerRole, editorRole))).thenReturn(emptyList());
 		when(roleMembershipMetadata.getAttribute(RoleMembershipMetadata.USER)).thenReturn(attribute);
 		when(user.getUsername()).thenReturn("henkie");
+		when(managerRole.getName()).thenReturn(MANAGER_NAME);
+		when(editorRole.getName()).thenReturn(EDITOR_NAME);
 
-		groupService.updateMemberRole(group, user, editor);
+		groupService.updateMemberRole(group, user, editorRole);
 	}
 
 	@Test
