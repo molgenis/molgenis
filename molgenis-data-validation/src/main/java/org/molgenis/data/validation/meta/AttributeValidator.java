@@ -204,6 +204,7 @@ public class AttributeValidator
 				}
 				else if (isMultipleReferenceType(attr))
 				{
+					@SuppressWarnings("unchecked")
 					Iterable<Entity> refEntitiesValue = (Iterable<Entity>) typedValue;
 					EntityType refEntityType = attr.getRefEntity();
 					if (dataService.query(refEntityType.getId())

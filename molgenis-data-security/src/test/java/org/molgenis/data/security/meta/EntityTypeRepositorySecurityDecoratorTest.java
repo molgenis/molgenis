@@ -53,7 +53,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 	private static final String USERNAME = "user";
 
 	@Mock
-	private Repository delegateRepository;
+	private Repository<EntityType> delegateRepository;
 	@Mock
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	@Mock
@@ -82,8 +82,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		when(delegateRepository.findAll(new QueryImpl<>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenReturn(
-				asList(entityType0, entityType1).stream());
+		when(delegateRepository.findAll(
+				new QueryImpl<EntityType>().setOffset(0).setPageSize(Integer.MAX_VALUE))).thenReturn(
+				Stream.of(entityType0, entityType1));
 		doReturn(false).when(userPermissionEvaluator)
 					   .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA);
 		doReturn(true).when(userPermissionEvaluator)
@@ -154,9 +155,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		String entityType1Name = "entity1";
 		EntityType entityType1 = when(mock(EntityType.class).getId()).thenReturn(entityType1Name).getMock();
-		Query q = new QueryImpl<>();
+		Query<EntityType> q = new QueryImpl<>();
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
 		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
 		doReturn(false).when(userPermissionEvaluator)
 					   .hasPermission(new EntityTypeIdentity(entityType0Name), EntityTypePermission.READ_METADATA);
@@ -178,9 +179,9 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query q = mock(Query.class);
+		Query<EntityType> q = mock(Query.class);
 		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass(Query.class);
 		when(delegateRepository.findAll(queryCaptor.capture())).thenReturn(
 				Stream.of(entityType0, entityType1, entityType2));
 		doReturn(true).when(userPermissionEvaluator)
@@ -206,7 +207,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType2Name = "entity2";
 		EntityType entityType2 = when(mock(EntityType.class).getId()).thenReturn(entityType2Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query q = mock(Query.class);
+		Query<EntityType> q = mock(Query.class);
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
 		@SuppressWarnings("unchecked")
@@ -245,6 +246,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType2));
 	}
 
+	@SuppressWarnings("unchecked")
 	@WithMockUser(username = USERNAME)
 	@Test
 	public void findOneQueryUserPermissionAllowed()
@@ -252,13 +254,14 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query q = mock(Query.class);
+		Query<EntityType> q = mock(Query.class);
 		when(delegateRepository.findAll(any(Query.class))).thenReturn(Stream.of(entityType0));
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.READ_METADATA)).thenReturn(true);
 		assertEquals(repo.findOne(q), entityType0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@WithMockUser(username = USERNAME)
 	@Test
 	public void findOneQueryUserPermissionDenied()
@@ -266,7 +269,7 @@ public class EntityTypeRepositorySecurityDecoratorTest extends AbstractMockitoTe
 		String entityType0Name = "entity0";
 		EntityType entityType0 = when(mock(EntityType.class).getId()).thenReturn(entityType0Name).getMock();
 		@SuppressWarnings("unchecked")
-		Query q = mock(Query.class);
+		Query<EntityType> q = mock(Query.class);
 		when(delegateRepository.findAll(any(Query.class))).thenReturn(Stream.of(entityType0));
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityType0Name),
 				EntityTypePermission.READ_METADATA)).thenReturn(false);

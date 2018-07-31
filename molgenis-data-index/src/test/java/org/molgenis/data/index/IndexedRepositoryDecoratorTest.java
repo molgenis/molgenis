@@ -368,12 +368,12 @@ public class IndexedRepositoryDecoratorTest
 		verify(delegateRepository).findAll(any(Stream.class), isNull());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findAllUnknownIndexExceptionRecoverable()
 	{
 		Stream<Object> entityStream = mock(Stream.class);
-		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg"))
-																		  .thenReturn(entityStream);
+		when(searchService.search(repositoryEntityType, unsupportedQuery)).thenThrow(new UnknownIndexException("msg")).thenReturn(entityStream);
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
 		verify(searchService, times(2)).search(repositoryEntityType, unsupportedQuery);
 		verify(delegateRepository).findAll(any(Stream.class), isNull());

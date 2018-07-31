@@ -169,6 +169,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 		doReturn(true).when(userPermissionEvaluator).hasPermission(new PackageIdentity("1"), UPDATE);
 		doReturn(true).when(userPermissionEvaluator).hasPermission(new PackageIdentity("2"), UPDATE);
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).update(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(package1, package2));
@@ -213,9 +214,10 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 
 		//TODO: how to verify the deleteAcl method in the "filter" of the stream
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).delete(captor.capture());
-		assertEquals(captor.getValue().collect(toList()), asList(package1));
+		assertEquals(captor.getValue().collect(toList()), singletonList(package1));
 	}
 
 	@Test
@@ -257,6 +259,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 		when(userPermissionEvaluator.hasPermission(new PackageIdentity(permittedParentPackage),
 				PackagePermission.UPDATE)).thenReturn(true);
 		repo.deleteAll();
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> entityStreamCaptor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).delete(entityStreamCaptor.capture());
 		assertEquals(entityStreamCaptor.getValue().collect(toList()), singletonList(permittedPackage));
@@ -283,9 +286,10 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 
 		Stream<Object> ids = Stream.of("1", "2");
 		repo.deleteAll(ids);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).deleteAll(captor.capture());
-		assertEquals(captor.getValue().collect(toList()), asList("1"));
+		assertEquals(captor.getValue().collect(toList()), singletonList("1"));
 	}
 
 	@Test
@@ -374,6 +378,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 
 		Stream<Package> packages = Stream.of(package1, package2);
 		repo.add(packages);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Package>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).add(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), asList(package1, package2));

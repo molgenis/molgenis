@@ -20,7 +20,7 @@ public class AppRepositoryDecoratorTest
 	@Mock
 	private AppManagerService appManagerService;
 	@Mock
-	private Repository repository;
+	private Repository<App> repository;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -53,7 +53,7 @@ public class AppRepositoryDecoratorTest
 		when(app2.getId()).thenReturn("app2");
 		Stream<App> apps = Stream.of(app1, app2);
 
-		when(repository.findAll(new QueryImpl())).thenReturn(apps);
+		when(repository.findAll(new QueryImpl<>())).thenReturn(apps);
 		appRepositoryDecorator.deleteAll();
 
 		verify(appManagerService).deleteApp("app1");

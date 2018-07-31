@@ -11,7 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,17 +28,15 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 	DecoratorConfigurationMetadata decoratorConfigurationMetadata;
 
 	@Mock
-	private Repository repository;
+	private Repository<Entity> repository;
 	@Mock
 	private DataService dataService;
 	@Mock
 	private EntityType entityType;
 	@Mock
-	private RepositoryCollection repositoryCollection;
-	@Mock
 	private DecoratorConfiguration decoratorConfiguration;
 	@Mock
-	private DynamicRepositoryDecoratorFactory dynamicRepositoryDecoratorFactory;
+	private DynamicRepositoryDecoratorFactory<Entity, EntityType> dynamicRepositoryDecoratorFactory;
 
 	@BeforeMethod
 	public void setUp()
@@ -51,14 +49,16 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 	public void testDecorate()
 	{
 		DynamicDecorator dynamicDecorator = mock(DynamicDecorator.class);
-		Repository decoratedRepository = mock(Repository.class);
+		@SuppressWarnings("unchecked")
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 
 		when(decoratedRepository.getName()).thenReturn("decoratedRepositoryName");
-		when(decoratorConfiguration.getDecorators()).thenReturn(Arrays.asList(dynamicDecorator).stream());
+		when(decoratorConfiguration.getDecorators()).thenReturn(Stream.of(dynamicDecorator));
 		when(dynamicDecorator.getId()).thenReturn("dynamicDecoratorId");
 		when(dynamicRepositoryDecoratorFactory.getId()).thenReturn("dynamicDecoratorId");
 		when(dynamicRepositoryDecoratorFactory.createDecoratedRepository(repository)).thenReturn(decoratedRepository);
-		Query query = new QueryImpl().eq(ENTITY_TYPE_ID, "entityTypeId");
+		Query<DecoratorConfiguration> query = new QueryImpl<>();
+		query.eq(ENTITY_TYPE_ID, "entityTypeId");
 		when(dataService.findOne(DECORATOR_CONFIGURATION, query, DecoratorConfiguration.class)).thenReturn(
 				decoratorConfiguration);
 

@@ -65,6 +65,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		if (!entityTypeId.equals(DECORATOR_CONFIGURATION) && bootstrappingDone)
 		{
 			Query query = new QueryImpl().eq(ENTITY_TYPE_ID, entityTypeId);
+			@SuppressWarnings("unchecked")
 			DecoratorConfiguration configuration = dataService.findOne(DECORATOR_CONFIGURATION, query,
 					DecoratorConfiguration.class);
 

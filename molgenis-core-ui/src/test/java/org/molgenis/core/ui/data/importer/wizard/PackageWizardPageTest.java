@@ -12,7 +12,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,21 +34,22 @@ public class PackageWizardPageTest extends AbstractMockitoTest
 	@Mock
 	private ImportService importService;
 
-	PackageWizardPage packageWizardPage;
+	private PackageWizardPage packageWizardPage;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
-	public void beforeTest() throws IOException
+	public void beforeTest()
 	{
 		when(importServiceFactory.getImportService(any(), any())).thenReturn(importService);
 		LinkedHashMap importableEntities = new LinkedHashMap<>();
 		importableEntities.put("pack1_test", true);
 		when(importService.determineImportableEntities(any(), any(), any())).thenReturn(importableEntities);
-		packageWizardPage = new PackageWizardPage(fileRepositoryCollectionFactory, importServiceFactory,
-				metaDataService);
+		packageWizardPage = new PackageWizardPage(fileRepositoryCollectionFactory, importServiceFactory, metaDataService);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
-	public void testHandleRequest() throws Exception
+	public void testHandleRequest()
 	{
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		BindingResult bindingResult = mock(BindingResult.class);

@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.FileStore;
@@ -131,7 +132,8 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		InputStream bs4Data = IOUtils.toInputStream("any", "UTF-8");
 
 		StyleSheet styleSheet = mock(StyleSheet.class);
-		Repository styleSheetRepository = mock(Repository.class);
+		@SuppressWarnings("unchecked")
+		Repository<Entity> styleSheetRepository = mock(Repository.class);
 		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
 		when(styleSheetRepository.findOneById(styleId)).thenReturn(styleSheet);
 		styleService.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
@@ -147,7 +149,8 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		InputStream bs3Data = IOUtils.toInputStream("bs 3 data", "UTF-8");
 		InputStream bs4Data = IOUtils.toInputStream("bs 4 data", "UTF-8");
 
-		Repository styleSheetRepository = mock(Repository.class);
+		@SuppressWarnings("unchecked")
+		Repository<Entity> styleSheetRepository = mock(Repository.class);
 		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
 		when(styleSheetRepository.findOneById(styleId)).thenReturn(null);
 
@@ -185,7 +188,8 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests
 		String bs3FileName = "bs3FileName";
 		InputStream bs3Data = IOUtils.toInputStream("bs 3 data", "UTF-8");
 
-		Repository styleSheetRepository = mock(Repository.class);
+		@SuppressWarnings("unchecked")
+		Repository<Entity> styleSheetRepository = mock(Repository.class);
 		when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
 		when(styleSheetRepository.findOneById(styleId)).thenReturn(null);
 

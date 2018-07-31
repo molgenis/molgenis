@@ -6,7 +6,7 @@ import org.molgenis.settings.AppSettings;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
@@ -14,8 +14,9 @@ public class StyleSheetRepositoryDecoratorTest
 {
 	private StyleSheetRepositoryDecorator decorator;
 	private AppSettings settings;
-	private Repository delegate;
+	private Repository<StyleSheet> delegate;
 
+	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public void setUp()
 	{
@@ -28,21 +29,22 @@ public class StyleSheetRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteById() throws Exception
+	public void testDeleteById()
 	{
 		decorator.deleteById("1");
 		verify(delegate).deleteById("1");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testDeleteByIdCurrent() throws Exception
+	public void testDeleteByIdCurrent()
 	{
 		decorator.deleteById("2");
 		verifyZeroInteractions(delegate);
 	}
 
 	@Test
-	public void testDelete() throws Exception
+	public void testDelete()
 	{
 		StyleSheet sheet = mock(StyleSheet.class);
 		when(sheet.getId()).thenReturn("1");
@@ -50,8 +52,9 @@ public class StyleSheetRepositoryDecoratorTest
 		verify(delegate).delete(sheet);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testDeleteCurrent() throws Exception
+	public void testDeleteCurrent()
 	{
 		StyleSheet sheet = mock(StyleSheet.class);
 		when(sheet.getId()).thenReturn("2");
@@ -59,17 +62,19 @@ public class StyleSheetRepositoryDecoratorTest
 		verifyZeroInteractions(delegate);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testDeleteAll() throws Exception
+	public void testDeleteAll()
 	{
 		decorator.deleteAll();
 		verifyZeroInteractions(delegate);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testDeleteAllStream() throws Exception
+	public void testDeleteAllStream()
 	{
-		decorator.deleteAll(Arrays.<Object>asList("1", "2", "3", "4").stream());
+		decorator.deleteAll(Stream.of("1", "2", "3", "4"));
 	}
 
 }

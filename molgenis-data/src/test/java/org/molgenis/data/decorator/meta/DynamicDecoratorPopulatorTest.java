@@ -58,7 +58,9 @@ public class DynamicDecoratorPopulatorTest extends AbstractMockitoTest
 				dynamicDecoratorFactory);
 		populator.populate();
 
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<DynamicDecorator>> decoratorCaptor = forClass(Stream.class);
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> stringCaptor = forClass(Stream.class);
 
 		verify(dataService).add(eq(DYNAMIC_DECORATOR), decoratorCaptor.capture());
