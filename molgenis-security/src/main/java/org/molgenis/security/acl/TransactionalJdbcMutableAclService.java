@@ -1,9 +1,14 @@
 package org.molgenis.security.acl;
 
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -19,11 +24,36 @@ public class TransactionalJdbcMutableAclService extends JdbcMutableAclService
 		super(dataSource, lookupStrategy, aclCache);
 	}
 
+	/**
+	 * Same as {@link JdbcMutableAclService#createAcl(ObjectIdentity)} except for duplicate key checking which is
+	 * handled by by the database for performance reasons.
+	 */
 	@Transactional
 	@Override
 	public MutableAcl createAcl(ObjectIdentity objectIdentity)
 	{
-		return super.createAcl(objectIdentity);
+		Assert.notNull(objectIdentity, "Object Identity required");
+
+		// Need to retrieve the current principal, in order to know who "owns" this ACL
+		// (can be changed later on)
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		PrincipalSid sid = new PrincipalSid(auth);
+
+		try
+		{
+			// Create the acl_object_identity row
+			createObjectIdentity(objectIdentity, sid);
+		}
+		catch (DuplicateKeyException e)
+		{
+			throw new AlreadyExistsException("Object identity '" + objectIdentity + "' already exists");
+		}
+		// Retrieve the ACL via superclass (ensures cache registration, proper retrieval
+		// etc)
+		Acl acl = readAclById(objectIdentity);
+		Assert.isInstanceOf(MutableAcl.class, acl, "MutableAcl should be been returned");
+
+		return (MutableAcl) acl;
 	}
 
 	@Transactional
