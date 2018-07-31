@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +50,7 @@ import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.molgenis.dataexplorer.controller.DataRequest.DownloadType.DOWNLOAD_TYPE_CSV;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 
 /**
  * Controller class for the data explorer.
@@ -100,6 +100,9 @@ public class DataExplorerController extends PluginController
 
 	@Autowired
 	private AppSettings appSettings;
+
+	@Autowired
+	private DataExplorerService dataExplorerService;
 
 	public DataExplorerController()
 	{
@@ -244,34 +247,45 @@ public class DataExplorerController extends PluginController
 	@ResponseBody
 	public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId)
 	{
-		boolean modAggregates = dataExplorerSettings.getModAggregates();
-		boolean modData = dataExplorerSettings.getModData();
-		boolean modReports = dataExplorerSettings.getModReports();
+		EntityType entityType = dataService.getEntityType(entityTypeId);
+		if (entityType == null)
+		{
+			throw new UnknownEntityTypeException(entityTypeId);
+		}
 
-		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-		String aggregatesTitle = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {},
-				LocaleContextHolder.getLocale());
-		if (modData && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
+		List<Module> modules = dataExplorerService.getModules(entityType);
+
+		ModulesConfigResponse modulesConfigResponse = new ModulesConfigResponse();
+		modules.forEach(module ->
 		{
-			modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
-		}
-		if (modAggregates && dataService.getCapabilities(entityTypeId).contains(RepositoryCapability.AGGREGATEABLE)
-				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.AGGREGATE_DATA))
-		{
-			modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
-		}
-		if (modReports && permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA)
-				&& permissionService.hasPermission(new EntityTypeIdentity(entityTypeId),
-				EntityTypePermission.UPDATE_METADATA))
-		{
-			String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityTypeId);
-			if (modEntitiesReportName != null)
+			String id;
+			String label;
+			String icon;
+
+			switch (module)
 			{
-				modulesConfig.add(new ModuleConfig(MOD_ENTITIESREPORT, modEntitiesReportName, "report-icon.png"));
+				case DATA:
+					id = MOD_DATA;
+					label = "Data";
+					icon = "grid-icon.png";
+					break;
+				case AGGREGATION:
+					id = "aggregates";
+					label = messageSource.getMessage("dataexplorer_aggregates_title", new Object[] {}, getLocale());
+					icon = "aggregate-icon.png";
+					break;
+				case REPORT:
+					id = MOD_ENTITIESREPORT;
+					label = dataExplorerSettings.getEntityReport(entityTypeId);
+					icon = "report-icon.png";
+					break;
+				default:
+					throw new UnexpectedEnumException(module);
 			}
-		}
-		return modulesConfig;
+
+			modulesConfigResponse.add(new ModuleConfig(id, label, icon));
+		});
+		return modulesConfigResponse;
 	}
 
 	@GetMapping("/navigatorLinks")
