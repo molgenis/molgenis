@@ -7,6 +7,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -66,13 +68,13 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
-	public void testDelegate() throws Exception
+	public void testDelegate()
 	{
 		new CascadeDeleteRepositoryDecorator(null, null);
 	}
 
 	@Test
-	public void testDeleteNoCascade() throws Exception
+	public void testDeleteNoCascade()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(null);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
@@ -82,7 +84,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteCascadeNotNull() throws Exception
+	public void testDeleteCascadeNotNull()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(Boolean.TRUE);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
@@ -93,7 +95,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteCascadeNull() throws Exception
+	public void testDeleteCascadeNull()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(Boolean.TRUE);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(null);
@@ -103,7 +105,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteCascadeMrefEmpty() throws Exception
+	public void testDeleteCascadeMrefEmpty()
 	{
 		String mrefAttrName = "mrefAttrName";
 		Attribute mrefAttr = mock(Attribute.class);
@@ -120,7 +122,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteCascadeMrefNotEmpty() throws Exception
+	public void testDeleteCascadeMrefNotEmpty()
 	{
 		String mrefAttrName = "mrefAttrName";
 		Attribute mrefAttr = mock(Attribute.class);
@@ -137,7 +139,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteByIdCascadeNotNull() throws Exception
+	public void testDeleteByIdCascadeNotNull()
 	{
 		String entityId = "id";
 		when(delegateRepository.findOneById(entityId)).thenReturn(entity);
@@ -150,7 +152,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteByIdNoCascade() throws Exception
+	public void testDeleteByIdNoCascade()
 	{
 		String entityId = "id";
 		when(delegateRepository.findOneById(entityId)).thenReturn(entity);
@@ -164,12 +166,19 @@ public class CascadeDeleteRepositoryDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteAllCascadeNotNull() throws Exception
+	public void testDeleteAllCascadeNotNull()
 	{
-		when(delegateRepository.findAll(any(Query.class))).thenReturn(Stream.of(entity));
 		when(xrefAttr.getCascadeDelete()).thenReturn(Boolean.TRUE);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
 		when(dataService.findOneById(REF_ENTITY_TYPE_NAME, REF_ENTITY_ID)).thenReturn(refEntity);
+
+		doAnswer(invocation ->
+		{
+			Consumer<List<Entity>> consumer = invocation.getArgument(0);
+			consumer.accept(singletonList(entity));
+			return null;
+		}).when(delegateRepository).forEachBatched(any(), eq(1000));
+
 		cascadeDeleteRepositoryDecorator.deleteAll();
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass(Stream.class);
 		verify(delegateRepository).delete(captor.capture());
@@ -178,7 +187,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 	}
 
 	@Test
-	public void testDeleteAllNoCascade() throws Exception
+	public void testDeleteAllNoCascade()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(null);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
@@ -189,7 +198,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteStreamCascadeNotNull() throws Exception
+	public void testDeleteStreamCascadeNotNull()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(Boolean.TRUE);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
@@ -203,7 +212,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteStreamNoCascade() throws Exception
+	public void testDeleteStreamNoCascade()
 	{
 		when(xrefAttr.getCascadeDelete()).thenReturn(null);
 		when(entity.getEntity(XREF_ATTR_NAME)).thenReturn(refEntity);
@@ -217,7 +226,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteAllStreamCascadeNotNull() throws Exception
+	public void testDeleteAllStreamCascadeNotNull()
 	{
 		String entityId = "id";
 		when(delegateRepository.findAll(any(Stream.class))).thenReturn(Stream.of(entity));
@@ -233,7 +242,7 @@ public class CascadeDeleteRepositoryDecoratorTest
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDeleteAllStreamNoCascade() throws Exception
+	public void testDeleteAllStreamNoCascade()
 	{
 		String entityId = "id";
 		when(delegateRepository.findAll(any(Stream.class))).thenReturn(Stream.of(entity));

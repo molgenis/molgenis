@@ -56,11 +56,12 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
 	{
 		if (hasCascadeDeleteAttributes())
 		{
-			Iterators.partition(query().findAll().iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch ->
+			// finding during deletion is tricky business: can't use iterator or findAll here
+			delegate().forEachBatched(entitiesBatch ->
 			{
-				super.delete(entitiesBatch.stream());
+				delegate().delete(entitiesBatch.stream());
 				entitiesBatch.forEach(this::handleCascadeDeletes);
-			});
+			}, BATCH_SIZE);
 		}
 		else
 		{
