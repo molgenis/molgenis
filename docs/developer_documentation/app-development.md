@@ -106,20 +106,67 @@ Build tools like webpack already generate your source files with a hash code inc
 To use webpack in rapid prototyping of your MOLGENIS apps, use the standard webpack template 
 and make some small tweaks to make it a `build -> compress -> upload` workflow.
 
-Make sure that you set the following two parameters in your production config
+First you need to install 2 plugins:
+
+```javascript
+yarn --dev add zip-webpack-plugin@2.0.0
+yarn --dev add generate-json-webpack-plugin
+```
+
+Make sure that you set the following two parameters in your production config. 
+
+In **config/index.js**
+
 ```js
+const packageJson = require('../package')
+
 module.exports = {
   // ...
   build: {
     // ...
     assetsSubDirectory: '',
-    assetsPublicPath: ''
+    assetsPublicPath: '/plugins/app/' + packageJson.name
     // ...
   }
 }
 ```
+
+In **build/webpack.prod.conf.js**
+
+```javascript
+plugins: [
+  
+  ...  
+  
+  new GenerateJsonPlugin('config.json', {
+      name: packageJson.name,
+      label: packageJson.name,
+      description: packageJson.description,
+      version: packageJson.version,
+      apiDependency: "v2",
+      includeMenuAndFooter: true,
+      runtimeOptions: {
+        language: "en"
+      }
+    }),
+
+    // copy custom static assets
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, '../static'),
+        to: config.build.assetsSubDirectory,
+        ignore: ['.*']
+      }
+    ]),
+
+    new ZipPlugin({
+      filename: packageJson.name + '.zip'
+    })
+  ]
+```
+
 These settings will ensure that your compiled resources are already in the correct file structure, and references to your resources are relative.
 
-##### Note
+> Note
 If you set `includeMenuAndFooter: true`, you will have to edit your `index.html` to only include 
 the contents of your body. So remove all `<head>`, `<body`, and `<html>` tags, and move your included resources as body content. The example archive contains an `index.html` as a good example
