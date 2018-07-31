@@ -170,12 +170,12 @@ public class GroupServiceTest extends AbstractMockitoTest
 	{
 		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
 		return new Fetch().field(GroupMetadata.ROLES, roleFetch)
-								 .field(GroupMetadata.NAME)
-								 .field(GroupMetadata.LABEL)
-								 .field(GroupMetadata.DESCRIPTION)
-								 .field(GroupMetadata.ID)
-								 .field(GroupMetadata.PUBLIC)
-								 .field(GroupMetadata.ROOT_PACKAGE);
+						  .field(GroupMetadata.NAME)
+						  .field(GroupMetadata.LABEL)
+						  .field(GroupMetadata.DESCRIPTION)
+						  .field(GroupMetadata.ID)
+						  .field(GroupMetadata.PUBLIC)
+						  .field(GroupMetadata.ROOT_PACKAGE);
 	}
 
 	@Test
@@ -277,12 +277,15 @@ public class GroupServiceTest extends AbstractMockitoTest
 	@Test
 	public void testIsGroupNameAvailableReturnsTrueIfNameIsAvailable()
 	{
-		when(dataService.query(PACKAGE, Package.class)
-						 .eq(PackageMetadata.ID, "foo_bar")
-						 .findOne()).thenReturn(null);
+		when(dataService.query(PACKAGE, Package.class).eq(PackageMetadata.ID, "foo_bar").findOne()).thenReturn(null);
 
 		PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
-		final GroupValue groupValue = GroupValue.builder().setRootPackage(rootPackage).setPublic(true).setName("foo-bar").setLabel("label").build();
+		final GroupValue groupValue = GroupValue.builder()
+												.setRootPackage(rootPackage)
+												.setPublic(true)
+												.setName("foo-bar")
+												.setLabel("label")
+												.build();
 
 		assertTrue(groupService.isGroupNameAvailable(groupValue));
 	}
@@ -291,12 +294,15 @@ public class GroupServiceTest extends AbstractMockitoTest
 	public void testIsGroupNameAvailableReturnsFalseIfNameIsNotAvailable()
 	{
 		Package mock = mock(Package.class);
-		when(dataService.query(PACKAGE, Package.class)
-						.eq(PackageMetadata.ID, "foo_bar")
-						.findOne()).thenReturn(mock);
+		when(dataService.query(PACKAGE, Package.class).eq(PackageMetadata.ID, "foo_bar").findOne()).thenReturn(mock);
 
 		PackageValue rootPackage = PackageValue.builder().setName("foo_bar").setLabel("label").build();
-		final GroupValue groupValue = GroupValue.builder().setRootPackage(rootPackage).setPublic(true).setName("foo-bar").setLabel("label").build();
+		final GroupValue groupValue = GroupValue.builder()
+												.setRootPackage(rootPackage)
+												.setPublic(true)
+												.setName("foo-bar")
+												.setLabel("label")
+												.build();
 
 		assertFalse(groupService.isGroupNameAvailable(groupValue));
 	}
