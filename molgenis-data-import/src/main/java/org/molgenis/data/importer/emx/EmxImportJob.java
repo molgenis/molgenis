@@ -60,4 +60,9 @@ public class EmxImportJob
 	{
 		return packageId != null ? Optional.of(packageId) : Optional.empty();
 	}
+
+	public EntityImportReport getEntityImportReport()
+	{
+		return report;
+	}
 }
