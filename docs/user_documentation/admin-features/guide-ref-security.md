@@ -137,8 +137,8 @@ when your MOLGENIS hosts multiple groups. Some examples:
 1. You want all the users in your group to see a special plugin that's not relevant for other groups. You achieve this by
 giving the `TEST_VIEWER` role `VIEW` permission on that plugin.
 2. You don't want all Editors in the system to see the Job Overview plugin. You achieve this by removing that plugin permission 
-from the default Editor role and adding it to your group's Editor role. Now both the Editors and Managers in you group can use it, 
-but from now on any new group that's added won't have these default permissions anymore.
+from the default Editor role and adding it to your group's Editor role. Now both the Editors and Managers in your group can use it, 
+but from now on any new group that's added won't have these permission by default.
 
 Even though you'll find that the default settings are sufficient most of the time, you have complete control over all the roles and
 permissions in the system if you every wish to change something.
