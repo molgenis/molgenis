@@ -176,12 +176,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	public void delete(Stream<E> entities)
 	{
 		// delete entity before deleting ACL
-		partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entityBatch ->
-		{
-			List<E> filteredEntityBatch = entityBatch.stream().filter(entity -> isActionPermitted(entity, DELETE)).collect(toList());
-			delegate().delete(filteredEntityBatch.stream());
-			filteredEntityBatch.forEach(this::deleteAcl);
-		});
+		partition(entities.iterator(), BATCH_SIZE).forEachRemaining(this::deleteBatch);
 	}
 
 	@Override
@@ -195,7 +190,6 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 		}
 	}
 
-	@Transactional
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
@@ -211,7 +205,17 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
 	@Override
 	public void deleteAll()
 	{
-		delegate().delete(findAllPermitted(new QueryImpl<>(), DELETE));
+		// finding during deletion is tricky business: can't use iterator or findAll here
+		delegate().forEachBatched(this::deleteBatch, BATCH_SIZE);
+	}
+
+	private void deleteBatch(List<E> entities)
+	{
+		List<E> filteredEntities = entities.stream()
+										   .filter(entity -> isActionPermitted(entity, DELETE))
+										   .collect(toList());
+		delegate().delete(filteredEntities.stream());
+		filteredEntities.forEach(this::deleteAcl);
 	}
 
 	@Override
