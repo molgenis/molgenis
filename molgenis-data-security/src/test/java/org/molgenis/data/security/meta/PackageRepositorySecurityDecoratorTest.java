@@ -237,12 +237,9 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 		verify(delegateRepository).deleteById("1");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDeleteAll()
 	{
-		PackageMetadata packageMetadata = mock(PackageMetadata.class);
-
 		Package permittedParentPackage = when(mock(Package.class).getId()).thenReturn("permittedParentPackageId")
 																		  .getMock();
 
