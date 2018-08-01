@@ -141,4 +141,4 @@ from the default Editor role and adding it to your group's Editor role. Now both
 but from now on any new group that's added won't have these permission by default.
 
 Even though you'll find that the default settings are sufficient most of the time, you have complete control over all the roles and
-permissions in the system if you every wish to change something.
+permissions in the system if you ever wish to change something.
