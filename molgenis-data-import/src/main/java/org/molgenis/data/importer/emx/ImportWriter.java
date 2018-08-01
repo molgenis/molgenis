@@ -55,10 +55,13 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		importTags(job.parsedMetaData);
-		importPackages(job.parsedMetaData);
+		if (job.getMetadataAction() != MetadataAction.IGNORE)
+		{
+			importTags(job.parsedMetaData);
+			importPackages(job.parsedMetaData);
+		}
 
-		GroupedEntityTypes groupedEntityTypes = groupEntityTypes(job.parsedMetaData.getEntities());
+		GroupedEntityTypes groupedEntityTypes = groupEntityTypes(job.getParsedMetaData().getEntities());
 
 		validateEntityTypePermissions(groupedEntityTypes.getUpdatedEntityTypes());
 
@@ -67,8 +70,11 @@ public class ImportWriter
 		permissionSystemService.giveUserWriteMetaPermissions(groupedEntityTypes.getNewEntityTypes());
 
 		persistResult.getNrPersistedEntitiesMap()
-					 .forEach((key, value) -> job.report.addEntityCount(key, Math.toIntExact(value)));
-		groupedEntityTypes.getNewEntityTypes().stream().map(EntityType::getId).forEach(job.report::addNewEntity);
+					 .forEach((key, value) -> job.getEntityImportReport().addEntityCount(key, Math.toIntExact(value)));
+		groupedEntityTypes.getNewEntityTypes()
+						  .stream()
+						  .map(EntityType::getId)
+						  .forEach(job.getEntityImportReport()::addNewEntity);
 		return job.report;
 	}
 
