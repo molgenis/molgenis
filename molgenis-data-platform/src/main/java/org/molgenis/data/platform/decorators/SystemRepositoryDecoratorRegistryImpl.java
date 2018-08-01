@@ -21,6 +21,7 @@ public class SystemRepositoryDecoratorRegistryImpl implements SystemRepositoryDe
 		factories.put(factoryId, factory);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public synchronized Repository<Entity> decorate(Repository<Entity> repository)
 	{

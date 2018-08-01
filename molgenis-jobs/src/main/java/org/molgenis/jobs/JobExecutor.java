@@ -121,6 +121,7 @@ public class JobExecutor
 		return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Job saveExecutionAndCreateJob(JobExecution jobExecution)
 	{
 		String entityTypeId = jobExecution.getEntityType().getId();

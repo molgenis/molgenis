@@ -6,7 +6,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityPermission;
 import org.molgenis.data.security.exception.EntityPermissionDeniedException;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -28,7 +27,7 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRowLevelSecurit
 	private final UserPermissionEvaluator userPermissionEvaluator;
 	private final MutableAclService mutableAclService;
 
-	RowLevelSecurityRepositoryDecorator(Repository delegateRepository,
+	RowLevelSecurityRepositoryDecorator(Repository<Entity> delegateRepository,
 			UserPermissionEvaluator userPermissionEvaluator, MutableAclService mutableAclService)
 	{
 		super(delegateRepository, mutableAclService);
@@ -138,10 +137,5 @@ public class RowLevelSecurityRepositoryDecorator extends AbstractRowLevelSecurit
 	private EntityIdentity toEntityIdentity(Entity entity)
 	{
 		return new EntityIdentity(entity.getEntityType().getId(), entity.getIdValue());
-	}
-
-	protected Permission toMessagePermission(Action action)
-	{
-		return getPermission(action);
 	}
 }

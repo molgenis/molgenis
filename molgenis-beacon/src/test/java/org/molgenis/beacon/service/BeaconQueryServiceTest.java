@@ -11,6 +11,7 @@ import org.molgenis.beacon.controller.model.exceptions.BeaconException;
 import org.molgenis.beacon.controller.model.exceptions.NestedBeaconException;
 import org.molgenis.beacon.service.impl.BeaconQueryServiceImpl;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -28,8 +29,8 @@ public class BeaconQueryServiceTest
 	@Mock
 	private DataService dataService;
 
-	private Query query1;
-	private Query query2;
+	private Query<Entity> query1;
+	private Query<Entity> query2;
 
 	private BeaconDataset dataset1;
 	private BeaconDataset dataset2;
@@ -133,6 +134,7 @@ public class BeaconQueryServiceTest
 		assertEquals(actualResponse, expectedResponse);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void queryErrorTest()
 	{

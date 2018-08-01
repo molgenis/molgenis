@@ -45,6 +45,7 @@ public class SecurityITConfig
 		return mock(RoleHierarchy.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Bean
 	public UserDetailsService userDetailsService()
 	{

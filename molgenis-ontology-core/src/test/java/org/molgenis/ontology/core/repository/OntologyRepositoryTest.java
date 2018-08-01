@@ -56,6 +56,7 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntologiesList()
 	{
+		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Stream<Object>> idCaptor = ArgumentCaptor.forClass(Stream.class);
 		when(dataService.findAll(eq(ONTOLOGY), idCaptor.capture(),
 				eq(org.molgenis.ontology.core.meta.Ontology.class))).thenReturn(Stream.of(ontologyEntity));

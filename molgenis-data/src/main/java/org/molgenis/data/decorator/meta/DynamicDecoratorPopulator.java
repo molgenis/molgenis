@@ -45,6 +45,7 @@ public class DynamicDecoratorPopulator
 				registry.getFactoryIds().filter(this::notPersisted).map(this::createDecorator));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void removeNonExistingDecorators()
 	{
 		Set<String> nonExistingDecorators = getNonExistingDecorators();
