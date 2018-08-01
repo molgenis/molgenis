@@ -71,6 +71,7 @@ public class DataExplorerServiceImpl implements DataExplorerService
 	private boolean includeReportModule(EntityType entityType)
 	{
 		return dataExplorerSettings.getModReports() && userPermissionEvaluator.hasPermission(
-				new EntityTypeIdentity(entityType), EntityTypeReportPermission.VIEW_REPORT);
+				new EntityTypeIdentity(entityType), EntityTypeReportPermission.VIEW_REPORT)
+				&& dataExplorerSettings.getEntityReport(entityType.getId()) != null;
 	}
 }
