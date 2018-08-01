@@ -178,7 +178,11 @@ There are two ways to create your own reports:
 
 You will need:
 
-1. A data set: "Advanced data example" ([download](../../data/advanced_data_example_v20171206.xlsx)). Upload this dataset into your MOLGENIS instance, see the [Upload guide](guide-upload).
+1. Create a test group
+2. Create a user; e.g. *Manager*
+3. Assign the user to the group with a manager-role
+4. Login as Manager
+5. Import a data set: "Advanced data example" ([download](../../data/advanced_data_example_v20171206.xlsx)), using the "Advanced importer", see the [Upload guide](guide-upload).
 
 ###### Override the entity view
 
@@ -189,21 +193,21 @@ Steps:
 3. The entity view modal is opened when you click on the ![View entity report button](../../images/reports/view-entityreport-button.png?raw=true, "Entity view") button".
 4. The default view will be: ![View entity report default](../../images/reports/default-entityreport-view.png?raw=true, "Entity view")
 5. Let's upload our own template. 
-	a. Go to the data explorer and select the FreemarkerTemplate entity.
-	b. Click on the ![add](../../images/add.png?raw=true, "add") button. In the modal you fill in:
-		* Name: view-entityreport-specific-root_hospital_cities.ftl (view-entityreport-specific-\<Full entity name>.ftl)
-		* Value: "\<div>City name: ${entity.get('cityName')}\</div>"
-	![view-Cities-entitiesreport](../../images/reports/view-entityreport-specific-root_hospital_cities.png?raw=true, "view-Cities-entitiesreport")
+   1. Go to the data explorer and select the FreemarkerTemplate entity.
+   2. Click on the ![add](../../images/add.png?raw=true, "add") button. In the modal you fill in:
+	   * Name: ```view-entityreport-specific-test_cities.ftl```
+	   * Value: ```<div>City name: ${entity.get('cityName')}\</div>"```
+    ![view-Cities-entitiesreport](../../images/reports/view-entityreport-specific-test_cities.png?raw=true, "view-Cities-entitiesreport")
 6. Repeat steps 2 and 3. 
-7. The new view will be: ![View entity report custom](../images/reports/custom-entityreport-view.png?raw=true, "Entity view")
+7. The new view will be: ![View entity report custom](../../images/reports/custom-entityreport-view.png?raw=true, "Entity view")
 
 ###### Add an instances view tab
 1. Go to the data explorer and select the "cities" entity through the entity select dropdown.
 2. Let's upload our own template. 
-	a. Go to the data explorer and select the FreemarkerTemplate entity.
-	b. Click on the ![add](../../images/add.png?raw=true, "add") button. In the modal you fill in:
+	1. Go to the data explorer and select the FreemarkerTemplate entity.
+	2. Click on the ![add](../../images/add.png?raw=true, "add") button. In the modal you fill in:
 
-Name: ```view-Cities-entitiesreport.ftl (view-<template name>-entitiesreport.ftl)```
+Name: ```view-Cities-entitiesreport.ftl```
 
 Value: 
 ```javascript
@@ -232,14 +236,15 @@ Value:
     $.getScript("//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js", showMap);
 </script>
 ```
-		
-		![view-Cities-entitiesreport](../../images/reports/view-Cities-entitiesreport.png?raw=true, "view-Cities-entitiesreport")
+
+![view-Cities-entitiesreport](../../images/reports/view-Cities-entitiesreport.png?raw=true, "view-Cities-entitiesreport")
+
 
 3. Click on the settings icon ![Settings](../../images/settings.png?raw=true, "Settings")
-	a. Check: Modules -> Data -> Reports -> Yes
-	b. Set: Reports -> Reports -> root_hospital_cities:Cities
-		* root_hospital_cities is the entity name.
-		* Cities is the template name.
+	1. Check: Modules -> Data -> Reports -> ```Yes```
+	2. Set: Reports -> Reports -> ```test_cities:Cities```
+	   * test_citites is the entity name.
+	   * Cities is the template name.
 	
 	![Entities report settings](../../images/reports/entities-report-correct-settings.png?raw=true, "Entities report settings")
 4. Refresh the page and repeat step 1.
