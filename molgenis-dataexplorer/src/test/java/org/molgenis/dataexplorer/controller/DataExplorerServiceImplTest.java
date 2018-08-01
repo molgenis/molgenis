@@ -64,6 +64,7 @@ public class DataExplorerServiceImplTest extends AbstractMockitoTest
 		when(dataExplorerSettings.getModReports()).thenReturn(true);
 		when(userPermissionEvaluator.hasPermission(new EntityTypeIdentity(entityType),
 				EntityTypeReportPermission.VIEW_REPORT)).thenReturn(true);
+		when(dataExplorerSettings.getEntityReport("MyEntityType")).thenReturn("MyEntityReport");
 		assertEquals(dataExplorerServiceImpl.getModules(entityType), singletonList(Module.REPORT));
 	}
 
