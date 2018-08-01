@@ -6,7 +6,7 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
@@ -40,8 +40,8 @@ public class OneClickImportJobExecutionMetadata extends SystemEntityType
 		setPackage(jobPackage);
 		setRowLevelSecured(true);
 
-		addAttribute(FILE).setLabel("Imported file").setDescription("The file that was imported").setDataType(STRING);
-		addAttribute(ENTITY_TYPES).setLabel("EntityTypes").setDescription("Imported EntityTypes").setDataType(STRING);
-		addAttribute(PACKAGE).setLabel("Package name").setDataType(STRING);
+		addAttribute(FILE).setLabel("Imported file").setDescription("The file that was imported").setNillable(false);
+		addAttribute(ENTITY_TYPES).setLabel("Entity types").setDescription("Imported entity types").setDataType(TEXT);
+		addAttribute(PACKAGE).setLabel("Package name");
 	}
 }
