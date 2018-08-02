@@ -99,8 +99,7 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-dataexplorer</artifactId>
-            <version>7.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
