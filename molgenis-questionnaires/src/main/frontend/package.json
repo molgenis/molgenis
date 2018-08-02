@@ -27,7 +27,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@vue/test-utils": "^1.0.0-beta.23",
+    "@vue/test-utils": "1.0.0-beta.15",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",
