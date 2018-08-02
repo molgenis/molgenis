@@ -104,9 +104,9 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.11.2":
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.2.tgz#3523fb116f0b69acc890c0f9d4f29dc79308d64c"
+"@molgenis/molgenis-ui-form@^0.11.4":
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.4.tgz#5900078ca93ce4527251683e533c26841a75896d"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     debounce "^1.1.0"
@@ -7724,7 +7724,7 @@ vue-router@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.1.tgz#d9b05ad9c7420ba0f626d6500d693e60092cc1e9"
 
-vue-select@ConnorStroomberg/vue-select.git#release/patch-for-update-issue:
+"vue-select@github:ConnorStroomberg/vue-select#release/patch-for-update-issue":
   version "2.4.0"
   resolved "https://codeload.github.com/ConnorStroomberg/vue-select/tar.gz/3bee82380e07634b4d5d7d1c2450d7101581a9b0"
 

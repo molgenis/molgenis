@@ -88,9 +88,9 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.11.2":
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.2.tgz#3523fb116f0b69acc890c0f9d4f29dc79308d64c"
+"@molgenis/molgenis-ui-form@^0.11.4":
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.4.tgz#5900078ca93ce4527251683e533c26841a75896d"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     debounce "^1.1.0"
@@ -8072,9 +8072,9 @@ vue-style-loader@^4.0.1, vue-style-loader@^4.0.2:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-template-compiler@2.5.15:
-  version "2.5.15"
-  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.5.15.tgz#cc004097e37167be8b85ea22ab2840d8e8cca1c0"
+vue-template-compiler@^2.5.15:
+  version "2.5.17"
+  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.5.17.tgz#52a4a078c327deb937482a509ae85c06f346c3cb"
   dependencies:
     de-indent "^1.0.2"
     he "^1.1.0"

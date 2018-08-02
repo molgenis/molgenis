@@ -17,7 +17,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.2",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
-    "@molgenis/molgenis-ui-form": "^0.11.2",
+    "@molgenis/molgenis-ui-form": "^0.11.4",
     "font-awesome": "^4.7.0",
     "moment": "^2.20.1",
     "pdfmake": "^0.1.36",
@@ -98,7 +98,7 @@
     "url-loader": "^0.5.8",
     "vue-loader": "^14.2.1",
     "vue-style-loader": "^4.0.2",
-    "vue-template-compiler": "2.5.15",
+    "vue-template-compiler": "^2.5.15",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.11.1",
     "webpack-dev-server": "^2.11.2",

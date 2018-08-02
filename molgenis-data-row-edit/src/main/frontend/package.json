@@ -15,7 +15,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.3",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
-    "@molgenis/molgenis-ui-form": "^0.11.2",
+    "@molgenis/molgenis-ui-form": "^0.11.4",
     "font-awesome": "^4.7.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
