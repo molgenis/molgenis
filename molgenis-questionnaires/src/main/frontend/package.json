@@ -17,7 +17,7 @@
   "dependencies": {
     "@molgenis/molgenis-api-client": "^2.1.2",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
-    "@molgenis/molgenis-ui-form": "^0.11.2",
+    "@molgenis/molgenis-ui-form": "^0.11.4",
     "font-awesome": "^4.7.0",
     "moment": "^2.20.1",
     "pdfmake": "^0.1.36",
@@ -27,7 +27,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@vue/test-utils": "^1.0.0-beta.12",
+    "@vue/test-utils": "1.0.0-beta.15",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",
