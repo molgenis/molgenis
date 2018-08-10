@@ -45,6 +45,7 @@ class Session():
                                      headers={"Content-Type": "application/json"})
         if response.status_code == 200:
             self.token = response.json()["token"]
+
         response.raise_for_status()
         return response
 
@@ -54,6 +55,7 @@ class Session():
                                      headers=self._get_token_header())
         if response.status_code == 200:
             self.token = None
+            self.session.cookies.clear()
         response.raise_for_status()
         return response
 

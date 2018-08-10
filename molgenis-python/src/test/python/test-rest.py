@@ -7,7 +7,7 @@ import molgenis
 class TestStringMethods(unittest.TestCase):
     api_url = "https://molgenis62.gcc.rug.nl/api/"
 
-    no_count_permission_user_msg = 'No [COUNT] permission on entity type [User] with id [sys_sec_User]'
+    no_readmeta_permission_user_msg = "No 'Read metadata' permission on entity type 'User' with id 'sys_sec_User'."
     user_entity = 'sys_sec_User'
     ref_entity = 'it_emx_datatypes_TypeTestRef'
 
@@ -20,13 +20,13 @@ class TestStringMethods(unittest.TestCase):
     def test_login_logout_and_get_MolgenisUser(self):
         s = molgenis.Session(self.api_url)
         s.login('admin', 'admin')
-        response = s.get(self.user_entity)
+        s.get(self.user_entity)
         s.logout()
         try:
-            response = s.get(self.user_entity)
+            s.get(self.user_entity)
         except requests.exceptions.HTTPError as e:
             self.assertEqual(e.response.status_code, 401)
-            self.assertEqual(e.response.json()['errors'][0]['message'], self.no_count_permission_user_msg)
+            self.assertEqual(e.response.json()['errors'][0]['message'], self.no_readmeta_permission_user_msg)
 
     def test_no_login_and_get_MolgenisUser(self):
         s = molgenis.Session(self.api_url)
@@ -34,7 +34,7 @@ class TestStringMethods(unittest.TestCase):
             s.get(self.user_entity)
         except requests.exceptions.HTTPError as e:
             self.assertEqual(e.response.status_code, 401)
-            self.assertEqual(e.response.json()['errors'][0]['message'], self.no_count_permission_user_msg)
+            self.assertEqual(e.response.json()['errors'][0]['message'], self.no_readmeta_permission_user_msg)
 
     def test_add_all(self):
         s = molgenis.Session(self.api_url)
@@ -115,12 +115,13 @@ class TestStringMethods(unittest.TestCase):
         s = molgenis.Session(self.api_url)
         s.login('admin', 'admin')
         meta = s.get_attribute_meta_data(self.user_entity, 'username')
-        self.assertEqual({'isAggregatable': False, 'attributes': [], 'auto': False,
-                          'fieldType': 'STRING', 'href': '/api/v1/' + self.user_entity + '/meta/username',
-                          'label': 'Username',
-                          'labelAttribute': True, 'lookupAttribute': True, 'maxLength': 255, 'nillable': False,
-                          'readOnly': False, 'unique': True, 'visible': True, 'name': 'username', 'enumOptions': []},
+        self.assertEqual({'labelAttribute': True, 'isAggregatable': False, 'name': 'username',
+                          'auto': False, 'nillable': False, 'label': 'Username', 'lookupAttribute': True,
+                          'visible': True, 'readOnly': True, 'href': '/api/v1/sys_sec_User/meta/username',
+                          'enumOptions': [], 'fieldType': 'STRING', 'maxLength': 255, 'attributes': [],
+                          'unique': True},
                          meta)
+
 
 if __name__ == '__main__':
     unittest.main()
