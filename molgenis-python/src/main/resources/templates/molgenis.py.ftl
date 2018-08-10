@@ -199,7 +199,7 @@ class Session():
         url = self.url.strip('/api/') + '/plugin/importwizard/importFile'
         response = requests.post(url, headers=header, files=files)
         if response.status_code == 201:
-            return response.json()
+            return response.content
         response.raise_for_status()
         return response
 
