@@ -6,7 +6,6 @@
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
-    - [Configuration](user_documentation/guide-configuration.md)
     - Data
       - Import data
         - [Quick data upload](user_documentation/import-data/guide-quick-upload.md)
