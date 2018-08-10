@@ -10,7 +10,7 @@ Now you can create a python script.
 To get started, you should import the python api, connect to a molgenis server and login:
 ```python
 import molgenis
-session = molgenis.Session.("https://molgenis.mydomain.example/api/")
+session = molgenis.Session("https://molgenis.mydomain.example/api/")
 session.login("username","password")
 ```
 Always put the import and molgenis.Session in your script to make the api work. 
@@ -18,7 +18,7 @@ Always put the import and molgenis.Session in your script to make the api work.
 # Overview example
 ```python
 import molgenis
-session = molgenis.Session.("https://molgenis.mydomain.example/api/")
+session = molgenis.Session("https://molgenis.mydomain.example/api/")
 session.login("username","password")
 my_table = session.get("package_entityName")
 print(my_table)
