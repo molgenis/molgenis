@@ -88,7 +88,7 @@ pipeline {
                 expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
             }
             environment {
-                TAG = 'stable'
+                TAG = 'lts'
                 ORG = 'molgenis'
                 REPO = 'molgenis'
                 MAVEN_ARTIFACT_ID = 'molgenis'
@@ -114,7 +114,7 @@ pipeline {
                     sh "git remote set-url origin https://${env.GITHUB_CRED_PSW}@github.com/${ORG}/${REPO}.git"
                     sh "git checkout -f ${BRANCH_NAME}"
                     sh ".release/generate_release_properties.bash ${MAVEN_ARTIFACT_ID} ${MAVEN_GROUP_ID} ${env.RELEASE_SCOPE}"
-                    sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
+                    sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-DskipITs\" -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
                     sh "git push --tags origin ${BRANCH_NAME}"
                 }
             }
