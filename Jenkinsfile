@@ -56,7 +56,7 @@ pipeline {
                     junit '**/target/surefire-reports/**.xml'
                     container('maven') {
                         sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                     }
                 }
             }
@@ -78,7 +78,7 @@ pipeline {
                     junit '**/target/surefire-reports/**.xml'
                     container('maven') {
                         sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                     }
                 }
             }
