@@ -4,9 +4,6 @@ pipeline {
             label 'molgenis'
         }
     }
-    environment {
-        SAUCELABS_CRED = credentials('molgenis-jenkins-saucelabs-secret')
-    }
     stages {
         stage('Prepare') {
             steps {
@@ -112,8 +109,8 @@ pipeline {
                 milestone 1
                 container('maven') {
                     sh "git config --global user.email git@molgenis.org"
-                    sh "git config --global user.name ${env.GITHUB_CRED_USR}"
-                    sh "git remote set-url origin https://${env.GITHUB_CRED_PSW}@github.com/${GROUP_NAME}/${APP_NAME}.git"
+                    sh "git config --global user.name ${GITHUB_CRED_USR}"
+                    sh "git remote set-url origin https://${env.GITHUB_CRED_PSW}@github.com/${ORG}/${APP_NAME}.git"
                     sh "git checkout -f ${BRANCH_NAME}"
                     sh ".release/generate_release_properties.bash ${APP_NAME} ${GROUP_NAME} ${env.RELEASE_SCOPE}"
                     sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
