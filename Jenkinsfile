@@ -95,7 +95,7 @@ pipeline {
                 GITHUB_CRED = credentials('molgenis-jenkins-github-secret')
             }
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
+                timeout(time: 40, unit: 'MINUTES') {
                     script {
                         env.RELEASE_SCOPE = input(
                                 message: 'Do you want to release?',
