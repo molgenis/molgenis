@@ -88,7 +88,7 @@ pipeline {
                 expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
             }
             environment {
-                TAG = 'stable'
+                TAG = 'lts'
                 ORG = 'molgenis'
                 REPO = 'molgenis'
                 MAVEN_ARTIFACT_ID = 'molgenis'
