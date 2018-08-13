@@ -91,7 +91,7 @@ pipeline {
                 TAG = 'stable'
                 ORG = 'molgenis'
                 REPO = 'molgenis'
-                MAVEN_ARTIFACT_ID = 'molgenis-app'
+                MAVEN_ARTIFACT_ID = 'molgenis'
                 MAVEN_GROUP_ID = 'org.molgenis'
                 GITHUB_CRED = credentials('molgenis-jenkins-github-secret')
             }
