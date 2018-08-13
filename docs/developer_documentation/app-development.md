@@ -11,6 +11,7 @@ If you downloaded the example archive, you probably noticed that the structure o
 ```
 |-- config.json
 |-- index.html
+|-- app-template.html
 |-- js
     |-- example.js
 |-- css
@@ -20,19 +21,25 @@ If you downloaded the example archive, you probably noticed that the structure o
 The index.html is your main entry point, and the contents will be interpreted and rendered by a FreeMarker engine. 
 Relative to your index.html you can include js and css. 
 
-##### Note
-If you use absolute paths, MOLGENIS is unable to serve your resources properly
+> note: If you use absolute paths, MOLGENIS is unable to serve your resources properly
 
 ### Example
+
 The following example assumes we have a setup according to the tree structure shown in the previous paragraph.
 
 _index.html_
 ```html
-<link href="css/example.css"
-<div class="container">
-    <h1>This is an example of including resources with relative paths</h1>
-</div>
-<script src="js/example.js"></script>
+<html>
+  <head>
+    <link href="css/example.css"/>
+  </head>
+  <body>
+    <div class="container">
+      <h1>This is an example of including resources with relative paths</h1>
+    </div>
+    <script src="js/example.js"></script>
+  </body>
+</html>
 ```
 
 _example.js_
@@ -47,6 +54,16 @@ _example.css_
     height: 400px;
     width: 100%
 }
+```
+
+> **For production usage**
+
+_app-template.html_
+
+This file is needed by the target MOLGENIS-instance. It will be used to render the index.html for the production app.
+
+```javascript
+<div id="app"></div>
 ```
 
 ## Configuration
@@ -138,6 +155,25 @@ plugins: [
   
   ...  
   
+  new HtmlWebpackPlugin({
+    filename: process.env.NODE_ENV === 'testing'
+      ? 'index.html'
+      : config.build.index,
+    template: 'app-template.html',
+    inject: true,
+    minify: {
+      removeComments: true,
+      collapseWhitespace: true,
+      removeAttributeQuotes: true
+      // more options:
+      // https://github.com/kangax/html-minifier#options-quick-reference
+    },
+    // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    chunksSortMode: 'dependency'
+  }),
+      
+  ...   
+  
   new GenerateJsonPlugin('config.json', {
       name: packageJson.name,
       label: packageJson.name,
@@ -167,6 +203,9 @@ plugins: [
 
 These settings will ensure that your compiled resources are already in the correct file structure, and references to your resources are relative.
 
-> Note
-If you set `includeMenuAndFooter: true`, you will have to edit your `index.html` to only include 
-the contents of your body. So remove all `<head>`, `<body`, and `<html>` tags, and move your included resources as body content. The example archive contains an `index.html` as a good example
+**app-template.html**
+
+This file is needed by the target MOLGENIS-instance. It will be used to render the index.html for the production app.
+```javascript
+<div id="app"></div>
+```
