@@ -555,7 +555,7 @@
                     <configuration>
                         <serverId>${sonatype.id}</serverId>
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -566,7 +566,7 @@
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
-                        <scmCommentPrefix>[ci skip] [maven-release-plugin] </scmCommentPrefix>
+                        <scmCommentPrefix>[ci skip] [maven-release-plugin]${line.separator}</scmCommentPrefix>
                     </configuration>
                 </plugin>
                 <plugin>
