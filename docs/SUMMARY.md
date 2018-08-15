@@ -22,7 +22,9 @@
       - [Downloading data](user_documentation/modify-data/guide-emx-download.md)
       - [Scheduled Jobs](user_documentation/modify-data/guide-schedule.md)
     - Sysadmin features
-      - [Configure MOLGENIS](user_documentation/admin-features/guide-configure-molgenis.md)
+      - [Security principles](user_documentation/admin-features/guide-configure-molgenis.md)
+      - [Role and group management](user_documentation/admin-features/guide-ref-security.md)
+      - [User management](user_documentation/admin-features/guide-ref-user-management.md)
       - [Customize MOLGENIS](user_documentation/admin-features/guide-customize.md)
       - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)        
     - Catalogues
