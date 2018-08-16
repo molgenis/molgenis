@@ -31,8 +31,12 @@ const actions = {
       cleanScreen(commit)
       api.get(`/menu/plugins/questionnaires/start/${questionnaireId}`).then(response => {
         commit('SET_QUESTIONNAIRE_ROW_ID', response.id)
-        dispatch('GET_QUESTIONNAIRE', questionnaireId)
-        resolve(response.id)
+        dispatch('GET_QUESTIONNAIRE', questionnaireId).then(() => {
+          resolve(response.id)
+        }, error => {
+          handleError(commit, error)
+          reject(error)
+        })
       }, error => {
         handleError(commit, error)
         reject(error)
