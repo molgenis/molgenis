@@ -47,21 +47,6 @@
             </#list>
         </#if>
 
-        <#if googleSignIn>
-            <#if authenticated?? && authenticated>
-            <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
-                <script>
-                    function onLoad() {
-                        gapi.load('auth2', function () {
-                            gapi.auth2.init();
-                        });
-                    }
-                </script>
-            </#if>
-
-            <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
-        </#if>
-
         <script>
             top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
                 <#if context_url??>
@@ -93,6 +78,20 @@
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
     </#if>
 
+    <#if googleSignIn>
+        <#if authenticated?? && authenticated>
+        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
+        <script>
+            function onLoad() {
+                gapi.load('auth2', function () {
+                    gapi.auth2.init();
+                });
+            }
+        </script>
+        </#if>
+        <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
+    </#if>
+    
     <#-- Load css specified by plugins -->
     <#list css as css_file_name>
         <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
