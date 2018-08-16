@@ -70,6 +70,8 @@ const actions = {
           reject(error)
         })
       }
+
+      commit('SET_LOADING', false)
     })
   },
 
