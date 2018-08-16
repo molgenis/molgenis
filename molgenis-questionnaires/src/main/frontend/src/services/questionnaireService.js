@@ -146,12 +146,10 @@ export default {
 
     if (reportHeaderData) {
       if (reportHeaderData.logoDataUrl && reportHeaderData.introText) {
-        content.push({
-          alignment: 'justify',
-          columns: [buildIntroText(), buildHeaderLogo()]
-        })
+        content.push(buildHeaderLogo())
+        content.push(buildIntroText())
       } else if (reportHeaderData.introText) {
-        content.push({text: reportHeaderData.introText, style: 'introText'})
+        content.push(buildIntroText())
       } else if (reportHeaderData.logoDataUrl) {
         content.push(buildHeaderLogo())
       }
@@ -189,7 +187,7 @@ export default {
         introText: {
           fontSize: 10,
           bold: false,
-          italics: true,
+          italics: false,
           margin: [0, 0, 0, 20]
         },
         chapterTitle: {
