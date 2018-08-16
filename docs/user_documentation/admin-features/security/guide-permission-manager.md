@@ -9,7 +9,7 @@ edit own account information.
 
 You can navigate to the permission module under the Admin menu, and then navigating to the Permission Manager.
 
-![Permission manager screen](../../images/permission_manager.png?raw=true, "permission manager")
+![Permission manager screen](../../../images/permission_manager.png?raw=true, "permission manager")
 
 Here you can manage permissions for groups and users. Permissions can be set on datasets, packages and plugins. 
 Permissions on a package also grant permissions on datasets within this package.
@@ -27,7 +27,7 @@ Remember that molgenis_user that we created in the user management section?
 If you go to the users tab and look for molgenis_user, you will find it does not have any permissions yet, 
 except for those inherited from the User role.
 Let's change it so that the User role grants the permission to open the Data explorer, 
-and the molgenis_user will be able to see the example_data_table data set, which we created in the [upload-guide](../import-data/guide-upload.md).
+and the molgenis_user will be able to see the example_data_table data set, which we created in the [upload-guide](../../import-data/guide-upload.md).
 
 ### Setting Role permissions  
 As you open the permission manager, the Roles tab is already selected. 
