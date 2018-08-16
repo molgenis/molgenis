@@ -1,5 +1,6 @@
 package org.molgenis.data.index.bootstrap;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -11,6 +12,7 @@ import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
+import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
@@ -31,10 +33,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { IndexBootstrapperTest.Config.class })
 public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
@@ -105,6 +110,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		IndexAction action = mock(IndexAction.class);
 		when(action.getEntityTypeId()).thenReturn("myEntityTypeName");
 		when(action.getEntityId()).thenReturn("1");
+		when(action.getId()).thenReturn("actionId");
 		EntityType entityType = mock(EntityType.class);
 		when(dataService.findOneById(EntityTypeMetadata.ENTITY_TYPE_META_DATA, "myEntityTypeName",
 				EntityType.class)).thenReturn(entityType);
@@ -124,6 +130,14 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		verify(metaDataService, never()).getRepositories();
 		//verify that a new job is registered for the failed one
 		verify(indexActionRegisterService).register(entityType, 1);
+
+		//verify that the failed job and corresponding actions are cleaned up
+		verify(dataService).delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution);
+
+		ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
+		verify(dataService).deleteAll(eq(IndexActionMetaData.INDEX_ACTION), captor.capture());
+		assertEquals(captor.getValue().collect(toList()), singletonList("actionId"));
+		verify(dataService).deleteById(IndexActionGroupMetaData.INDEX_ACTION_GROUP, "id");
 	}
 
 	@Test

@@ -6,6 +6,7 @@ import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMeta;
 import org.molgenis.data.index.meta.IndexAction;
+import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -67,10 +68,14 @@ public class IndexBootstrapper
 	private void registerNewIndexActionForDirtyJobs(IndexJobExecution indexJobExecution)
 	{
 		String id = indexJobExecution.getIndexActionJobID();
-		dataService.findAll(IndexActionMetaData.INDEX_ACTION,
+		List<IndexAction> actions = dataService.findAll(IndexActionMetaData.INDEX_ACTION,
 				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, id), IndexAction.class)
-				   .forEach(this::registerIndexAction);
+											   .collect(Collectors.toList());
+		actions.forEach(this::registerIndexAction);
+
 		dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution);
+		dataService.deleteAll(IndexActionMetaData.INDEX_ACTION, actions.stream().map(IndexAction::getId));
+		dataService.deleteById(IndexActionGroupMetaData.INDEX_ACTION_GROUP, id);
 	}
 
 	private void registerIndexAction(IndexAction action)
