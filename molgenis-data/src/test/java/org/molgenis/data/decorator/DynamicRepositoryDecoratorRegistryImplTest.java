@@ -1,5 +1,6 @@
 package org.molgenis.data.decorator;
 
+import com.google.gson.Gson;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.decorator.meta.*;
@@ -11,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
@@ -56,14 +58,15 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 		when(decoratorConfiguration.getDecorators()).thenReturn(Stream.of(dynamicDecorator));
 		when(dynamicDecorator.getId()).thenReturn("dynamicDecoratorId");
 		when(dynamicRepositoryDecoratorFactory.getId()).thenReturn("dynamicDecoratorId");
-		when(dynamicRepositoryDecoratorFactory.createDecoratedRepository(repository)).thenReturn(decoratedRepository);
+		when(dynamicRepositoryDecoratorFactory.createDecoratedRepository(repository, mock(Map.class))).thenReturn(
+				decoratedRepository);
 		Query<DecoratorConfiguration> query = new QueryImpl<>();
 		query.eq(ENTITY_TYPE_ID, "entityTypeId");
 		when(dataService.findOne(DECORATOR_CONFIGURATION, query, DecoratorConfiguration.class)).thenReturn(
 				decoratorConfiguration);
 
 		DynamicRepositoryDecoratorRegistryImpl dynamicRepositoryDecoratorRegistry = new DynamicRepositoryDecoratorRegistryImpl(
-				dataService);
+				dataService, mock(Gson.class));
 		//fake the event to tell the registry that bootstrapping is done.
 		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED));
 
@@ -80,7 +83,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 		when(entityType.getId()).thenReturn("entityTypeId");
 
 		DynamicRepositoryDecoratorRegistryImpl dynamicRepositoryDecoratorRegistry = new DynamicRepositoryDecoratorRegistryImpl(
-				dataService);
+				dataService, mock(Gson.class));
 		//fake the event to tell the registry that bootstrapping is done.
 		dynamicRepositoryDecoratorRegistry.onApplicationEvent(new BootstrappingEvent(FINISHED));
 

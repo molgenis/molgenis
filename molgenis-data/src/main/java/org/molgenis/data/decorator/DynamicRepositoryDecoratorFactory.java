@@ -4,6 +4,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 
+import java.util.Map;
+
 /**
  * Repository decorator factory that creates decorated {@link Repository repositories} for specific entity types.
  * Used to decorate (system) entity types dynamically.
@@ -24,5 +26,5 @@ public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends E
 	 * @param repository undecorated repository
 	 * @return decorated repository
 	 */
-	Repository<E> createDecoratedRepository(Repository<E> repository);
+	Repository<E> createDecoratedRepository(Repository repository, Map<String, String> parameters);
 }

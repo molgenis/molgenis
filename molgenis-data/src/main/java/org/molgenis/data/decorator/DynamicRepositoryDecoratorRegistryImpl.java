@@ -1,5 +1,7 @@
 package org.molgenis.data.decorator;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -11,11 +13,13 @@ import org.molgenis.data.support.QueryImpl;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
@@ -27,11 +31,17 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 {
 	private final Map<String, DynamicRepositoryDecoratorFactory> factories = new HashMap<>();
 	private final DataService dataService;
+	private final Gson gson;
 	private boolean bootstrappingDone = false;
 
-	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService)
+	private static final Type MAP_TOKEN = new TypeToken<Map<String, Map<String, String>>>()
+	{
+	}.getType();
+
+	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService, Gson gson)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.gson = requireNonNull(gson);
 	}
 
 	@Override
@@ -87,15 +97,29 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 			return repository;
 		}
 
+		Map<String, Map<String, String>> parameters = toParameterMap(configuration.getParameters());
+
 		for (DynamicDecorator decorator : decorators)
 		{
 			DynamicRepositoryDecoratorFactory factory = factories.get(decorator.getId());
 			if (factory != null)
 			{
-				repository = factory.createDecoratedRepository(repository);
+				repository = factory.createDecoratedRepository(repository, parameters.get(factory.getId()));
 			}
 		}
 		return repository;
+	}
+
+	private Map<String, Map<String, String>> toParameterMap(String parameterJson)
+	{
+		if (parameterJson != null)
+		{
+			return gson.fromJson(parameterJson, MAP_TOKEN);
+		}
+		else
+		{
+			return emptyMap();
+		}
 	}
 
 	@EventListener

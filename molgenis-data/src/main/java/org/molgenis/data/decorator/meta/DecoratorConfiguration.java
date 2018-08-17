@@ -1,7 +1,5 @@
 package org.molgenis.data.decorator.meta;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -44,8 +42,8 @@ public class DecoratorConfiguration extends StaticEntity
 		set(DYNAMIC_DECORATORS, decorators);
 	}
 
-	public JsonElement getParameters()
+	public String getParameters()
 	{
-		return new JsonParser().parse(getString(PARAMETERS));
+		return getString(PARAMETERS);
 	}
 }
