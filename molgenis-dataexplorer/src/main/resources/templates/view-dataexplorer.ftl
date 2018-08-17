@@ -22,7 +22,7 @@
 
 <script>
     window.hasTrackingId = ${hasTrackingId?c}
-            window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
+    window.hasMolgenisTrackingId = ${hasMolgenisTrackingId?c}
 </script>
 
 <div class="row">
@@ -216,8 +216,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span
                         aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title"
-                    id="negotiator-modal-label">${i18n.dataexplorer_directory_export_dialog_label?html}</h4>
+                <h4 class="modal-title" id="negotiator-modal-label">${i18n.dataexplorer_directory_export_dialog_label?html}</h4>
             </div>
 
             <div class="modal-body">
@@ -240,8 +239,7 @@
             </div>
 
             <div class="modal-footer">
-                <a href="#" class="btn btn-default"
-                   data-dismiss="modal">${i18n.dataexplorer_directory_export_dialog_no?html}</a>
+                <a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_directory_export_dialog_no?html}</a>
                 <a href="#" id="negotiator-apply-btn" class="btn btn-primary"
                    data-dismiss="modal">${i18n.dataexplorer_directory_export_dialog_yes?html}</a>
             </div>
