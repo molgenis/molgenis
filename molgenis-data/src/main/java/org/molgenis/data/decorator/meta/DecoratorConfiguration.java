@@ -1,5 +1,7 @@
 package org.molgenis.data.decorator.meta;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -8,8 +10,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DYNAMIC_DECORATORS;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.*;
 
 public class DecoratorConfiguration extends StaticEntity
 {
@@ -41,5 +42,10 @@ public class DecoratorConfiguration extends StaticEntity
 	public void setDecorators(List<DynamicDecorator> decorators)
 	{
 		set(DYNAMIC_DECORATORS, decorators);
+	}
+
+	public JsonElement getParameters()
+	{
+		return new JsonParser().parse(getString(PARAMETERS));
 	}
 }

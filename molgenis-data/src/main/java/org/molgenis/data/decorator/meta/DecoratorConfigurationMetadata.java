@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.decorator.meta.DecoratorPackage.PACKAGE_DECORATOR;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -19,6 +20,7 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String ENTITY_TYPE_ID = "entityTypeId";
 	public static final String DYNAMIC_DECORATORS = "dynamicDecorators";
+	public static final String PARAMETERS = "parameters";
 
 	private final DecoratorPackage decoratorPackage;
 	private final DynamicDecoratorMetadata dynamicDecoratorMetadata;
@@ -44,5 +46,9 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 										.setDataType(AttributeType.MREF)
 										.setRefEntity(dynamicDecoratorMetadata)
 										.setLabel("Decorators");
+		addAttribute(PARAMETERS).setDataType(TEXT)
+								.setNillable(true)
+								.setLabel("Parameters")
+								.setDescription("Decorator parameters in JSON");
 	}
 }
