@@ -90,9 +90,9 @@ public class DynamicDecoratorPopulator
 	private DynamicDecorator createDecorator(String id)
 	{
 		DynamicRepositoryDecoratorFactory factory = registry.getFactory(id);
-		DynamicDecorator dynamicDecorator = dynamicDecoratorFactory.create(id)
-																   .setLabel(factory.getLabel())
-																   .setDescription(factory.getDescription());
-		return dynamicDecorator;
+		return dynamicDecoratorFactory.create(id)
+									  .setLabel(factory.getLabel())
+									  .setDescription(factory.getDescription())
+									  .setSchema(factory.getSchema());
 	}
 }

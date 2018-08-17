@@ -18,6 +18,7 @@ public class DynamicDecoratorMetadata extends SystemEntityType
 	public static final String ID = "id";
 	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
+	public static final String SCHEMA = "schema";
 
 	private final DecoratorPackage decoratorPackage;
 
@@ -36,5 +37,6 @@ public class DynamicDecoratorMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setLabel("Label").setNillable(false).setLookupAttributeIndex(0);
 		addAttribute(DESCRIPTION).setLabel("Description").setNillable(false).setLookupAttributeIndex(1);
+		addAttribute(SCHEMA).setLabel("Schema").setReadOnly(true);
 	}
 }

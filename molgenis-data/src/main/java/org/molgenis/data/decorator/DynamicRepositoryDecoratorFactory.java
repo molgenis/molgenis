@@ -21,6 +21,11 @@ public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends E
 	String getDescription();
 
 	/**
+	 * @return JSON schema for the parameters, null when no parameters
+	 */
+	String getSchema();
+
+	/**
 	 * Creates a decorated repository based on the given {@link Repository}
 	 *
 	 * @param repository undecorated repository
