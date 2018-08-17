@@ -77,7 +77,6 @@
         </div>
     </div>
 </div>
-</div>
 <div class="row">
     <div class="col-md-3" id="selectors">
         <div class="well well-sm">
