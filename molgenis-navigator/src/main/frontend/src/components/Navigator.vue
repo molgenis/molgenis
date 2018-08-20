@@ -1,6 +1,6 @@
 // @flow
 <template>
-  <div class="container-fluid">
+  <div>
 
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
@@ -44,36 +44,21 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-lg-6">
-        <!-- Main table element -->
-        <table class="table table-striped">
-            <thead>
-            <tr>
-              <th>{{ 'table-col-header-name' | i18n }}</th>
-              <th>{{ 'table-col-header-description' | i18n }}</th>
-            </tr>
-            </thead>
-            <tbody v-for="item in items">
-            <tr>
-              <td>
-                <span v-if="item.type === 'entity'">
-                  <a :href="'/menu/main/dataexplorer?entity=' + item.id + '&hideselect=true'">
-                    <i class="fa fa-list" aria-hidden="true"></i> {{item.label}}
-                  </a>
-                </span>
-                <span v-else>
-                  <router-link :to="item.id">
-                    <i class="fa fa-folder-open-o" aria-hidden="true"></i> {{item.label}}
-                  </router-link>
-                </span>
-              </td>
-              <td>{{ item.description }}</td>
-            </tr>
-            </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- Main table element -->
+    <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
+      <template slot="label" scope="label">
+        <span v-if="label.item.type === 'entity'">
+            <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
+              <i class="fa fa-list" aria-hidden="true"></i> {{label.item.label}}
+            </a>
+          </span>
+        <span v-else>
+          <router-link :to="label.item.id">
+            <i class="fa fa-folder-open-o" aria-hidden="true"></i> {{label.item.label}}
+          </router-link>
+        </span>
+      </template>
+    </b-table>
   </div>
 </template>
 
@@ -98,7 +83,20 @@
     name: 'Navigator',
     data () {
       return {
-        homeUrl: INITIAL_STATE.baseUrl,
+        fields: {
+          label: {
+            label: this.$t('table-col-header-name'),
+            sortable: true,
+            'class': 'text-nowrap'
+          },
+          description: {
+            label: this.$t('table-col-header-description'),
+            sortable: false,
+            'class': 'd-none d-md-table-cell'
+          }
+        },
+        filter: null,
+        homeUrl: INITIAL_STATE.baseUrl
       }
     },
     methods: {
