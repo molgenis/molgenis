@@ -121,6 +121,7 @@
         <jsdoc3-maven-plugin.version>1.1.0</jsdoc3-maven-plugin.version>
         <jetty-maven-plugin.version>9.4.8.v20171121</jetty-maven-plugin.version>
         <release-maven-plugin.version>2.5.3</release-maven-plugin.version>
+        <reproducible-build-maven-plugin.version>0.7</reproducible-build-maven-plugin.version>
 
         <!-- Integration test properties -->
         <cargo-plugin.version>1.6.6</cargo-plugin.version>
@@ -581,6 +582,19 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>io.github.zlika</groupId>
+                <artifactId>reproducible-build-maven-plugin</artifactId>
+                <version>${reproducible-build-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>strip-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
