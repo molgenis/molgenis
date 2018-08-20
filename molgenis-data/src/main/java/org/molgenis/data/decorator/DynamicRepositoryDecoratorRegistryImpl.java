@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
-import org.molgenis.data.decorator.meta.DynamicDecorator;
+import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.data.event.BootstrappingEvent;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.context.event.EventListener;
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.event.BootstrappingEvent.BootstrappingStatus.FINISHED;
@@ -34,7 +35,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	private final Gson gson;
 	private boolean bootstrappingDone = false;
 
-	private static final Type MAP_TOKEN = new TypeToken<Map<String, Map<String, String>>>()
+	private static final Type MAP_TOKEN = new TypeToken<Map<String, String>>()
 	{
 	}.getType();
 
@@ -91,17 +92,20 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	@SuppressWarnings("unchecked")
 	private Repository<Entity> decorateRepository(Repository<Entity> repository, DecoratorConfiguration configuration)
 	{
-		List<DynamicDecorator> decorators = configuration.getDecorators().collect(toList());
-		if (decorators.isEmpty())
+		List<DecoratorParameters> decoratorParameters = configuration.getDecoratorParameters().collect(toList());
+		if (decoratorParameters.isEmpty())
 		{
 			return repository;
 		}
 
-		Map<String, Map<String, String>> parameters = toParameterMap(configuration.getParameters());
+		Map<String, Map<String, String>> parameters = configuration.getDecoratorParameters()
+																   .collect(toMap(param -> param.getDecorator().getId(),
+																		   param -> toParameterMap(
+																				   param.getParameters())));
 
-		for (DynamicDecorator decorator : decorators)
+		for (DecoratorParameters decoratorParam : decoratorParameters)
 		{
-			DynamicRepositoryDecoratorFactory factory = factories.get(decorator.getId());
+			DynamicRepositoryDecoratorFactory factory = factories.get(decoratorParam.getDecorator().getId());
 			if (factory != null)
 			{
 				repository = factory.createDecoratedRepository(repository, parameters.get(factory.getId()));
@@ -110,7 +114,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		return repository;
 	}
 
-	private Map<String, Map<String, String>> toParameterMap(String parameterJson)
+	private Map<String, String> toParameterMap(String parameterJson)
 	{
 		if (parameterJson != null)
 		{

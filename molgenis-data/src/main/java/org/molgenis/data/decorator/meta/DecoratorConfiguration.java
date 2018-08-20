@@ -4,11 +4,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.*;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_PARAMETERS;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
 
 public class DecoratorConfiguration extends StaticEntity
 {
@@ -32,18 +32,8 @@ public class DecoratorConfiguration extends StaticEntity
 		set(ENTITY_TYPE_ID, entityTypeId);
 	}
 
-	public Stream<DynamicDecorator> getDecorators()
+	public Stream<DecoratorParameters> getDecoratorParameters()
 	{
-		return StreamSupport.stream(getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false);
-	}
-
-	public void setDecorators(List<DynamicDecorator> decorators)
-	{
-		set(DYNAMIC_DECORATORS, decorators);
-	}
-
-	public String getParameters()
-	{
-		return getString(PARAMETERS);
+		return stream(getEntities(DECORATOR_PARAMETERS, DecoratorParameters.class).spliterator(), false);
 	}
 }

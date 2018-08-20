@@ -5,16 +5,12 @@ import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DYNAMIC_DECORATORS;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 
 @Component
@@ -73,12 +69,13 @@ public class DynamicDecoratorPopulator
 	private DecoratorConfiguration removeReferences(Set<String> nonExistingDecorators,
 			DecoratorConfiguration configuration)
 	{
-		List<DynamicDecorator> decorators = StreamSupport.stream(
-				configuration.getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false)
-														 .filter(e -> !nonExistingDecorators.contains(e.getId()))
-														 .collect(toList());
-
-		configuration.set(DYNAMIC_DECORATORS, decorators);
+		//TODO cascade delete
+		//		List<DynamicDecorator> decorators = StreamSupport.stream(
+		//				configuration.getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false)
+		//														 .filter(e -> !nonExistingDecorators.contains(e.getId()))
+		//														 .collect(toList());
+		//
+		//		configuration.set(DYNAMIC_DECORATORS, decorators);
 		return configuration;
 	}
 

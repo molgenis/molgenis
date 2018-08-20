@@ -13,7 +13,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,7 +54,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 		Repository<Entity> decoratedRepository = mock(Repository.class);
 
 		when(decoratedRepository.getName()).thenReturn("decoratedRepositoryName");
-		when(decoratorConfiguration.getDecorators()).thenReturn(Stream.of(dynamicDecorator));
+		//		when(decoratorConfiguration.getDecoratorParameters()).thenReturn(Stream.of(dynamicDecorator)); //TODO
 		when(dynamicDecorator.getId()).thenReturn("dynamicDecoratorId");
 		when(dynamicRepositoryDecoratorFactory.getId()).thenReturn("dynamicDecoratorId");
 		when(dynamicRepositoryDecoratorFactory.createDecoratedRepository(repository, mock(Map.class))).thenReturn(
