@@ -1018,6 +1018,7 @@
         <module>molgenis-swagger</module>
         <module>molgenis-test</module>
         <module>molgenis-util</module>
+        <module>molgenis-validation</module>
         <module>molgenis-web</module>
         <module>molgenis-i18n</module>
         <module>molgenis-beacon</module>

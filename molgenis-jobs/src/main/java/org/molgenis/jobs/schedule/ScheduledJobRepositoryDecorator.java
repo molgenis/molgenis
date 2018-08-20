@@ -3,10 +3,10 @@ package org.molgenis.jobs.schedule;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.validation.JsonValidator;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.validation.JsonValidator;
 
 import java.util.stream.Stream;
 

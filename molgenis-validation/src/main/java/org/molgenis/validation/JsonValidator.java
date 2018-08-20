@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.validation;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.SchemaException;
@@ -7,10 +7,7 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.molgenis.data.MolgenisDataException;
 import org.springframework.stereotype.Component;
-
-import static java.util.stream.Collectors.toSet;
 
 @Component
 public class JsonValidator
@@ -32,7 +29,9 @@ public class JsonValidator
 		}
 		catch (JSONException | SchemaException e)
 		{
-			throw new MolgenisDataException("Failed to load JSON schema", e);
+			//TODO
+			//throw new MolgenisDataException("Failed to load JSON schema", e);
+			return null;
 		}
 	}
 
@@ -52,8 +51,9 @@ public class JsonValidator
 		}
 		catch (ValidationException validationException)
 		{
-			throw new MolgenisValidationException(
-					validationException.getAllMessages().stream().map(ConstraintViolation::new).collect(toSet()));
+			//TODO
+			//			throw new MolgenisValidationException(
+			//					validationException.getAllMessages().stream().map(ConstraintViolation::new).collect(toSet()));
 		}
 	}
 
