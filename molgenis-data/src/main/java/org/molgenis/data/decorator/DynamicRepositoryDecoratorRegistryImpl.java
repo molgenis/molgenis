@@ -35,7 +35,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	private final Gson gson;
 	private boolean bootstrappingDone = false;
 
-	private static final Type MAP_TOKEN = new TypeToken<Map<String, String>>()
+	private static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>()
 	{
 	}.getType();
 
@@ -98,7 +98,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 			return repository;
 		}
 
-		Map<String, Map<String, String>> parameters = configuration.getDecoratorParameters()
+		Map<String, Map<String, Object>> parameters = configuration.getDecoratorParameters()
 																   .collect(toMap(param -> param.getDecorator().getId(),
 																		   param -> toParameterMap(
 																				   param.getParameters())));
@@ -114,7 +114,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		return repository;
 	}
 
-	private Map<String, String> toParameterMap(String parameterJson)
+	private Map<String, Object> toParameterMap(String parameterJson)
 	{
 		if (parameterJson != null)
 		{

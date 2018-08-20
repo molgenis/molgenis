@@ -37,7 +37,7 @@ public class DynamicRepositoryDecoratorRegistryImplTest extends AbstractMolgenis
 	@Mock
 	private DecoratorConfiguration decoratorConfiguration;
 	@Mock
-	private DynamicRepositoryDecoratorFactory<Entity, EntityType> dynamicRepositoryDecoratorFactory;
+	private DynamicRepositoryDecoratorFactory<Entity> dynamicRepositoryDecoratorFactory;
 
 	@BeforeMethod
 	public void setUp()

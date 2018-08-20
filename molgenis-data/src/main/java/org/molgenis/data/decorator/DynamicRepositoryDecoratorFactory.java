@@ -2,7 +2,6 @@ package org.molgenis.data.decorator;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import java.util.Map;
  *
  * @see RepositoryDecoratorFactory
  */
-public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends EntityType>
+public interface DynamicRepositoryDecoratorFactory<E extends Entity>
 {
 	String getId();
 
@@ -31,5 +30,5 @@ public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends E
 	 * @param repository undecorated repository
 	 * @return decorated repository
 	 */
-	Repository<E> createDecoratedRepository(Repository repository, Map<String, String> parameters);
+	Repository<E> createDecoratedRepository(Repository<E> repository, Map<String, Object> parameters);
 }
