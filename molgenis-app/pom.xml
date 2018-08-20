@@ -26,19 +26,6 @@
             </resource>
         </resources>
         <plugins>
-            <plugin>
-                <groupId>io.github.zlika</groupId>
-                <artifactId>reproducible-build-maven-plugin</artifactId>
-                <version>${reproducible-build-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>strip-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Docker image containing the warfile -->
             <!-- Does not run by default but you can explicitly call dockerfile:build dockerfile:tag dockerfile:push -->
             <plugin>
