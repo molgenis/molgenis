@@ -1,14 +1,28 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenis'
+            label 'molgenisv2'
         }
+    }
+    environment {
+        npm_config_registry = "http://nexus.molgenis-nexus:8081/repository/npm-central/"
     }
     stages {
         stage('Prepare') {
             steps {
                 script {
                     env.GIT_COMMIT = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                }
+                container('vault') {
+                    script {
+                        sh "mkdir /home/jenkins/.m2"
+                        sh(script: 'vault read -field=value secret/ops/jenkins/maven/settings.xml > /home/jenkins/.m2/settings.xml')
+                        env.SONAR_TOKEN = sh(script: 'vault read -field=value secret/ops/token/sonar', returnStdout: true)
+                        env.GITHUB_TOKEN = sh(script: 'vault read -field=value secret/ops/token/github', returnStdout: true)
+                        env.PGP_PASSPHRASE = sh(script: 'vault read -field=passphrase secret/ops/certificate/pgp/molgenis-ci', returnStdout: true)
+                        sh(script: 'vault read -field=secret.asc secret/ops/certificate/pgp/molgenis-ci > /home/jenkins/key.asc')
+                        env.CODECOV_TOKEN = sh(script: 'vault read -field=value secret/ops/token/codecov', returnStdout: true)
+                    }
                 }
             }
         }
@@ -93,7 +107,7 @@ pipeline {
                 REPO = 'molgenis'
                 MAVEN_ARTIFACT_ID = 'molgenis'
                 MAVEN_GROUP_ID = 'org.molgenis'
-                GITHUB_CRED = credentials('molgenis-jenkins-github-secret')
+                PGP_SECRETKEY = "keyfile:/home/jenkins/key.asc"
             }
             steps {
                 timeout(time: 40, unit: 'MINUTES') {
@@ -109,11 +123,11 @@ pipeline {
                 }
                 milestone 1
                 container('maven') {
-                    sh "git config --global user.email git@molgenis.org"
-                    sh "git config --global user.name ${GITHUB_CRED_USR}"
-                    sh "git remote set-url origin https://${env.GITHUB_CRED_PSW}@github.com/${ORG}/${REPO}.git"
+                    sh "git config --global user.email molgenis+ci@gmail.com"
+                    sh "git config --global user.name molgenis-jenkins"
+                    sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/${ORG}/${REPO}.git"
                     sh "git checkout -f ${BRANCH_NAME}"
-                    sh ".release/generate_release_properties.bash ${MAVEN_ARTIFACT_ID} ${MAVEN_GROUP_ID} ${env.RELEASE_SCOPE}"
+                    sh ".release/generate_release_properties.bash ${MAVEN_ARTIFACT_ID} ${MAVEN_GROUP_ID} ${RELEASE_SCOPE}"
                     sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-DskipITs\" -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
                     sh "git push --tags origin ${BRANCH_NAME}"
                 }
