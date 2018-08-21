@@ -15,6 +15,11 @@
     <description>Module containing basic validation methods.</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-i18n</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- third party dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -34,6 +39,11 @@
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-test</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
