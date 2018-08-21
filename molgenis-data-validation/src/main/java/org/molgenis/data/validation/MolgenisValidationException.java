@@ -3,6 +3,7 @@ package org.molgenis.data.validation;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.validation.ConstraintViolation;
 
 import java.util.Collections;
 import java.util.List;

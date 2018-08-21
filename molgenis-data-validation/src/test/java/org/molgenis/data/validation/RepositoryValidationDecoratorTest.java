@@ -6,6 +6,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.validation.ConstraintViolation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

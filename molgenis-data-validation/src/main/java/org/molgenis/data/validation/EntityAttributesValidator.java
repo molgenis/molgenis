@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;

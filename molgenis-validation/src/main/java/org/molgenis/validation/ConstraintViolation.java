@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.validation;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,7 +26,7 @@ public class ConstraintViolation implements Serializable
 	 * Renumber the violation row number from a list of actual row numbers The list of indices is 0-indexed and the
 	 * rownnr are 1-indexed
 	 */
-	void renumberRowIndex(List<Integer> indices)
+	public void renumberRowIndex(List<Integer> indices)
 	{
 		this.rowNr = this.rowNr != null ? Long.valueOf(indices.get(toIntExact(this.rowNr - 1))) : null;
 	}
