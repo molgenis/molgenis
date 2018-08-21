@@ -98,20 +98,23 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 			return repository;
 		}
 
-		Map<String, Map<String, Object>> parameters = configuration.getDecoratorParameters()
-																   .collect(toMap(param -> param.getDecorator().getId(),
-																		   param -> toParameterMap(
-																				   param.getParameters())));
-
+		Map<String, Map<String, Object>> parameterMap = getParameterMap(configuration);
 		for (DecoratorParameters decoratorParam : decoratorParameters)
 		{
 			DynamicRepositoryDecoratorFactory factory = factories.get(decoratorParam.getDecorator().getId());
 			if (factory != null)
 			{
-				repository = factory.createDecoratedRepository(repository, parameters.get(factory.getId()));
+				repository = factory.createDecoratedRepository(repository, parameterMap.get(factory.getId()));
 			}
 		}
 		return repository;
+	}
+
+	private Map<String, Map<String, Object>> getParameterMap(DecoratorConfiguration configuration)
+	{
+		return configuration.getDecoratorParameters()
+							.collect(toMap(param -> param.getDecorator().getId(),
+									param -> toParameterMap(param.getParameters())));
 	}
 
 	private Map<String, Object> toParameterMap(String parameterJson)

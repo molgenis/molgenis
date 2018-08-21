@@ -41,7 +41,7 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
 		addAttribute(ENTITY_TYPE_ID, ROLE_LABEL).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");
-		addAttribute(DECORATOR_PARAMETERS).setNillable(true)
+		addAttribute(DECORATOR_PARAMETERS).setNillable(false)
 										  .setDataType(AttributeType.MREF)
 										  .setRefEntity(decoratorParametersMetadata)
 										  .setLabel("Decorator Parameters");
