@@ -64,4 +64,9 @@ public class DynamicDecorator extends StaticEntity
 		set(SCHEMA, schema);
 		return this;
 	}
+
+	public String getSchema()
+	{
+		return getString(SCHEMA);
+	}
 }

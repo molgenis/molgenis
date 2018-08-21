@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.decorator.meta.DecoratorPackage.PACKAGE_DECORATOR;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -37,6 +38,6 @@ public class DynamicDecoratorMetadata extends SystemEntityType
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setLabel("Label").setNillable(false).setLookupAttributeIndex(0);
 		addAttribute(DESCRIPTION).setLabel("Description").setNillable(false).setLookupAttributeIndex(1);
-		addAttribute(SCHEMA).setLabel("Schema").setReadOnly(true);
+		addAttribute(SCHEMA).setDataType(TEXT).setLabel("Schema");
 	}
 }
