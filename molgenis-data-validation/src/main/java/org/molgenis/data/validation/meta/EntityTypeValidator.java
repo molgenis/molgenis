@@ -8,9 +8,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.util.AttributeUtils;
-import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.util.stream.MultimapCollectors;
+import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

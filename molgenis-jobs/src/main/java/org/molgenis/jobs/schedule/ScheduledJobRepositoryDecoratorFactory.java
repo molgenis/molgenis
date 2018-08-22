@@ -2,9 +2,9 @@ package org.molgenis.jobs.schedule;
 
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
-import org.molgenis.data.validation.JsonValidator;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobMetadata;
+import org.molgenis.validation.JsonValidator;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;

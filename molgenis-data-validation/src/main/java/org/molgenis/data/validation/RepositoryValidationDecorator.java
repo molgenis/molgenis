@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
+import org.molgenis.validation.ConstraintViolation;
 
 import java.io.IOException;
 import java.util.*;

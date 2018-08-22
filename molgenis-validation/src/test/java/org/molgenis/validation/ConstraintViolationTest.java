@@ -1,4 +1,4 @@
-package org.molgenis.data.validation;
+package org.molgenis.validation;
 
 import org.testng.annotations.Test;
 

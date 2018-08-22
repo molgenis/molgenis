@@ -2,8 +2,8 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;

@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.validation.ConstraintViolation;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;

@@ -32,11 +32,12 @@
             <artifactId>molgenis-js</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- third party dependencies -->
         <dependency>
-            <groupId>org.everit.json</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-validation</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <!-- third party dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
