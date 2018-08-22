@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.LocaleUtil;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.util.MolgenisDateFormat;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
 import org.molgenis.oneclickimporter.service.OneClickImporterService;
@@ -23,7 +24,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Boolean.parseBoolean;
 import static java.time.ZoneOffset.UTC;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 import static org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted;
 import static org.apache.poi.util.LocaleUtil.resetUserTimeZone;
@@ -94,7 +94,7 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 			case DATE:
 				if (!(value instanceof LocalDate))
 				{
-					castedValue = LocalDate.parse(value.toString(), ISO_LOCAL_DATE_TIME);
+					castedValue = MolgenisDateFormat.parseLocalDate(value.toString());
 				}
 				break;
 			case INT:

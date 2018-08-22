@@ -6,7 +6,6 @@
     - [Run in Tomcat](quickstart/guide-tomcat.md)
     - [Compile code](quickstart/guide-local-compile.md)
 - User Documentation
-    - [Configuration](user_documentation/guide-configuration.md)
     - Data
       - Import data
         - [Quick data upload](user_documentation/import-data/guide-quick-upload.md)
@@ -23,9 +22,14 @@
       - [Downloading data](user_documentation/modify-data/guide-emx-download.md)
       - [Scheduled Jobs](user_documentation/modify-data/guide-schedule.md)
     - Sysadmin features
-      - [Configure MOLGENIS](user_documentation/admin-features/guide-configure-molgenis.md)
+      - Security
+        - [Users](user_documentation/admin-features/security/guide-user-management.md)
+        - [Groups and Roles](user_documentation/admin-features/security/guide-groups-roles.md)
+        - [Permissions](user_documentation/admin-features/security/guide-permission-manager.md)
+        - [Authentication](user_documentation/admin-features/security/guide-authentication.md)
       - [Customize MOLGENIS](user_documentation/admin-features/guide-customize.md)
-      - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)        
+      - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)   
+      - [Mail Settings](user_documentation/admin-features/guide-mailsettings.md)     
     - Catalogues
       - [Biobanking](user_documentation/catalogues/biobanking.md)
         - [Biobank Directory](user_documentation/catalogues/biobank-directory.md)
