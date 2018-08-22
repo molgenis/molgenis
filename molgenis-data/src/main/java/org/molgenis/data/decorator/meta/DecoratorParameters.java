@@ -34,9 +34,19 @@ public class DecoratorParameters extends StaticEntity
 		return getString(ID);
 	}
 
+	public void setDecorator(DynamicDecorator decorator)
+	{
+		set(DECORATOR, decorator);
+	}
+
 	public DynamicDecorator getDecorator()
 	{
 		return getEntity(DECORATOR, DynamicDecorator.class);
+	}
+
+	public void setParameters(String parameters)
+	{
+		set(PARAMETERS, parameters);
 	}
 
 	public String getParameters()

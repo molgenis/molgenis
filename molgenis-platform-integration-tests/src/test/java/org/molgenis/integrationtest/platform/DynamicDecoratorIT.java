@@ -1,13 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
+import com.google.gson.Gson;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
-import org.molgenis.data.decorator.meta.DecoratorConfiguration;
-import org.molgenis.data.decorator.meta.DecoratorConfigurationFactory;
-import org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata;
-import org.molgenis.data.decorator.meta.DynamicDecorator;
+import org.molgenis.data.decorator.meta.*;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -16,6 +14,7 @@ import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFact
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.validation.JsonValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +29,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -45,7 +47,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, AddingRepositoryDecoratorFactory.class,
-		PostFixingRepositoryDecoratorFactory.class })
+		PostFixingRepositoryDecoratorFactory.class, Gson.class, JsonValidator.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
 public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
@@ -67,12 +69,14 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DecoratorConfigurationFactory decoratorConfigurationFactory;
 	@Autowired
+	private DecoratorParametersFactory decoratorParametersFactory;
+	@Autowired
 	private PermissionService testPermissionService;
 
 	private EntityType refEntityTypeDynamic;
 	private EntityType entityTypeDynamic;
 	private DynamicDecorator addingDynamicDecorator;
-	private DynamicDecorator postfixingDynamicDecorator;
+	private DynamicDecorator postfixDynamicDecorator;
 
 	@BeforeClass
 	public void setUp()
@@ -94,7 +98,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 			waitForWorkToBeFinished(indexService, LOG);
 
 			addingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "add", DynamicDecorator.class);
-			postfixingDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "postfix",
+			postfixDynamicDecorator = dataService.findOneById("sys_dec_DynamicDecorator", "postfix",
 					DynamicDecorator.class);
 		});
 	}
@@ -107,7 +111,7 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 
 		//check if all dynamic decorator factory beans get added to the registry
 		List<String> factories = dynamicRepositoryDecoratorRegistry.getFactoryIds().collect(Collectors.toList());
-		List<String> expected = Arrays.asList("add", "postfix");
+		List<String> expected = asList("add", "postfix");
 		assertTrue(factories.containsAll(expected));
 	}
 
@@ -117,11 +121,21 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 	{
 		populatePermissions();
 
-		//Add decorator config
+		//Add DecoratorParameters
+		DecoratorParameters addingDecoratorParameters = decoratorParametersFactory.create("addingParams");
+		addingDecoratorParameters.setDecorator(addingDynamicDecorator);
+		addingDecoratorParameters.setParameters("{attr: 'int_attr'}");
+		DecoratorParameters postfixDecoratorParameters = decoratorParametersFactory.create("postfixParams");
+		postfixDecoratorParameters.setDecorator(postfixDynamicDecorator);
+		postfixDecoratorParameters.setParameters("{attr: 'string_attr', text: '_TEST'}");
+		dataService.add(DecoratorParametersMetadata.DECORATOR_PARAMETERS,
+				Stream.of(addingDecoratorParameters, postfixDecoratorParameters));
+
+		//Add DecoratorConfiguration
 		DecoratorConfiguration decoratorConfiguration = decoratorConfigurationFactory.create("identifier");
-		decoratorConfiguration.setDecorators(Arrays.asList(addingDynamicDecorator, postfixingDynamicDecorator));
+		decoratorConfiguration.setDecoratorParameters(Stream.of(addingDecoratorParameters, postfixDecoratorParameters));
 		decoratorConfiguration.setEntityTypeId(entityTypeDynamic.getId());
-		dataService.add(decoratorConfiguration.getEntityType().getId(), decoratorConfiguration);
+		dataService.add(DECORATOR_CONFIGURATION, decoratorConfiguration);
 
 		//update row
 		Entity entity = dataService.findOneById(entityTypeDynamic.getId(), "0");
@@ -131,8 +145,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		assertEquals(11, entity.getInt("int_attr").intValue());
 
 		//remove second decorator
-		decoratorConfiguration.setDecorators(Arrays.asList(addingDynamicDecorator));
-		dataService.update(decoratorConfiguration.getEntityType().getId(), decoratorConfiguration);
+		decoratorConfiguration.setDecoratorParameters(Stream.of(addingDecoratorParameters));
+		dataService.update(DECORATOR_CONFIGURATION, decoratorConfiguration);
 
 		//update row again
 		dataService.update(entityTypeDynamic.getId(), entity);
@@ -150,7 +164,8 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		{
 			dataService.deleteAll(entityTypeDynamic.getId());
 			dataService.deleteAll(refEntityTypeDynamic.getId());
-			dataService.deleteAll(DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION);
+			dataService.deleteAll(DECORATOR_CONFIGURATION);
+			dataService.deleteAll(DecoratorParametersMetadata.DECORATOR_PARAMETERS);
 			metaDataService.deleteEntityType(entityTypeDynamic.getId());
 			metaDataService.deleteEntityType(refEntityTypeDynamic.getId());
 		});
@@ -165,8 +180,11 @@ public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests
 		permissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.READ);
 		permissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.READ);
 		permissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.READ);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DynamicDecorator"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(DYNAMIC_DECORATOR), PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(DecoratorParametersMetadata.DECORATOR_PARAMETERS),
+				PermissionSet.WRITE);
+		permissionMap.put(new EntityTypeIdentity(DECORATOR_CONFIGURATION), PermissionSet.WRITE);
+
 		permissionMap.put(new EntityTypeIdentity(entityTypeDynamic), PermissionSet.WRITE);
 		permissionMap.put(new EntityTypeIdentity(refEntityTypeDynamic), PermissionSet.READ);
 
