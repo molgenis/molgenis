@@ -2,6 +2,7 @@ package org.molgenis.data.decorator;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
 
 import java.util.Map;
 

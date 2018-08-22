@@ -12,7 +12,7 @@ public class DynamicRepositoryDecoratorFactoryRegistrar
 {
 	private final DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
-	public DynamicRepositoryDecoratorFactoryRegistrar(DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry)
+	DynamicRepositoryDecoratorFactoryRegistrar(DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 	}

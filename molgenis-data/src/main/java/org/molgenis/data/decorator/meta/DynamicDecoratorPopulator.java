@@ -26,7 +26,7 @@ public class DynamicDecoratorPopulator
 	private final DynamicRepositoryDecoratorRegistry registry;
 	private final DynamicDecoratorFactory dynamicDecoratorFactory;
 
-	public DynamicDecoratorPopulator(DataService dataService,
+	DynamicDecoratorPopulator(DataService dataService,
 			DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry,
 			DynamicDecoratorFactory dynamicDecoratorFactory)
 	{

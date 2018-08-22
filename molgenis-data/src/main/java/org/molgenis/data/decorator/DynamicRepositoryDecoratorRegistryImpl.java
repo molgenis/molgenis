@@ -39,7 +39,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	{
 	}.getType();
 
-	public DynamicRepositoryDecoratorRegistryImpl(DataService dataService, Gson gson)
+	DynamicRepositoryDecoratorRegistryImpl(DataService dataService, Gson gson)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.gson = requireNonNull(gson);

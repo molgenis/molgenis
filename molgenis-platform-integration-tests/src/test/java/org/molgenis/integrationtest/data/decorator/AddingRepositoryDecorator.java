@@ -9,7 +9,7 @@ public class AddingRepositoryDecorator extends AbstractRepositoryDecorator<Entit
 {
 	private final String attributeName;
 
-	public AddingRepositoryDecorator(Repository<Entity> delegateRepository, String attributeName)
+	AddingRepositoryDecorator(Repository<Entity> delegateRepository, String attributeName)
 	{
 		super(delegateRepository);
 		this.attributeName = attributeName;

@@ -10,7 +10,7 @@ public class PostFixingRepositoryDecorator extends AbstractRepositoryDecorator<E
 	private final String attributeName;
 	private final String text;
 
-	public PostFixingRepositoryDecorator(Repository<Entity> delegateRepository, String attributeName, String text)
+	PostFixingRepositoryDecorator(Repository<Entity> delegateRepository, String attributeName, String text)
 	{
 		super(delegateRepository);
 		this.attributeName = attributeName;
