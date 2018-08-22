@@ -18,7 +18,7 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 
 	public static final String ID = "id";
 	public static final String ENTITY_TYPE_ID = "entityTypeId";
-	public static final String DECORATOR_PARAMETERS = "decoratorParameters";
+	public static final String PARAMETERS = "parameters";
 
 	private final DecoratorPackage decoratorPackage;
 	private final DecoratorParametersMetadata decoratorParametersMetadata;
@@ -41,9 +41,9 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
 		addAttribute(ENTITY_TYPE_ID, ROLE_LABEL).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");
-		addAttribute(DECORATOR_PARAMETERS).setNillable(false)
-										  .setDataType(AttributeType.MREF)
-										  .setRefEntity(decoratorParametersMetadata)
-										  .setLabel("Decorator Parameters");
+		addAttribute(PARAMETERS).setNillable(false)
+								.setDataType(AttributeType.MREF)
+								.setRefEntity(decoratorParametersMetadata)
+								.setLabel("Decorator Parameters");
 	}
 }

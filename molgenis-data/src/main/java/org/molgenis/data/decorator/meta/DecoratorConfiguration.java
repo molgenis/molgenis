@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_PARAMETERS;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
 
 public class DecoratorConfiguration extends StaticEntity
 {
@@ -35,11 +35,11 @@ public class DecoratorConfiguration extends StaticEntity
 
 	public Stream<DecoratorParameters> getDecoratorParameters()
 	{
-		return stream(getEntities(DECORATOR_PARAMETERS, DecoratorParameters.class).spliterator(), false);
+		return stream(getEntities(PARAMETERS, DecoratorParameters.class).spliterator(), false);
 	}
 
 	public void setDecoratorParameters(Stream<DecoratorParameters> parameters)
 	{
-		set(DECORATOR_PARAMETERS, parameters.collect(toList()));
+		set(PARAMETERS, parameters.collect(toList()));
 	}
 }

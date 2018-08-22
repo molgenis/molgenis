@@ -31,9 +31,9 @@ public class DecoratorParametersRepositoryDecorator extends AbstractRepositoryDe
 	@Override
 	public void update(Stream<DecoratorParameters> decoratorParameters)
 	{
-		delegate().update(decoratorParameters.filter(job ->
+		delegate().update(decoratorParameters.filter(parameters ->
 		{
-			validateParameters(job);
+			validateParameters(parameters);
 			return true;
 		}));
 	}
@@ -46,11 +46,11 @@ public class DecoratorParametersRepositoryDecorator extends AbstractRepositoryDe
 	}
 
 	@Override
-	public Integer add(Stream<DecoratorParameters> jobs)
+	public Integer add(Stream<DecoratorParameters> decoratorParameters)
 	{
-		return delegate().add(jobs.filter(job ->
+		return delegate().add(decoratorParameters.filter(parameters ->
 		{
-			validateParameters(job);
+			validateParameters(parameters);
 			return true;
 		}));
 	}

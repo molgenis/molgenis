@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
 import static org.molgenis.data.decorator.meta.DecoratorParametersMetadata.DECORATOR_PARAMETERS;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 
@@ -73,13 +74,6 @@ public class DynamicDecoratorPopulator
 		dataService.deleteAll(DECORATOR_PARAMETERS, paramsToDelete.stream());
 	}
 
-	private Stream<DecoratorConfiguration> removeParametersFromConfigurations(List<Object> paramsToDelete)
-	{
-		return dataService.findAll(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
-						  .map(config -> removeReferencesOrDeleteIfEmpty(paramsToDelete, config))
-						  .filter(Objects::nonNull);
-	}
-
 	private List<Object> getDecoratorParametersToDelete(Set<String> nonExistingDecorators)
 	{
 		return dataService.findAll(DECORATOR_PARAMETERS, DecoratorParameters.class)
@@ -89,18 +83,24 @@ public class DynamicDecoratorPopulator
 						  .collect(toList());
 	}
 
+	private Stream<DecoratorConfiguration> removeParametersFromConfigurations(List<Object> paramsToDelete)
+	{
+		return dataService.findAll(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
+						  .map(config -> removeReferencesOrDeleteIfEmpty(paramsToDelete, config))
+						  .filter(Objects::nonNull);
+	}
+
 	/**
 	 * Removes references to DecoratorParameters that will be deleted. If this results in a DecoratorConfiguration
 	 * without any parameters, then the row is deleted.
 	 *
 	 * @return DecoratorConfiguration without references to DecoratorParameters that will be deleted, null if the row was deleted
 	 */
-	private DecoratorConfiguration removeReferencesOrDeleteIfEmpty(List<Object> decoratorParametersToRemove,
+	DecoratorConfiguration removeReferencesOrDeleteIfEmpty(List<Object> decoratorParametersToRemove,
 			DecoratorConfiguration configuration)
 	{
 		List<DecoratorParameters> decoratorParameters = stream(
-				configuration.getEntities(DecoratorConfigurationMetadata.DECORATOR_PARAMETERS,
-						DecoratorParameters.class).spliterator(), false).filter(
+				configuration.getEntities(PARAMETERS, DecoratorParameters.class).spliterator(), false).filter(
 				parameters -> !decoratorParametersToRemove.contains(parameters.getId())).collect(toList());
 
 		if (decoratorParameters.isEmpty())
@@ -110,7 +110,7 @@ public class DynamicDecoratorPopulator
 		}
 		else
 		{
-			configuration.set(DecoratorConfigurationMetadata.DECORATOR_PARAMETERS, decoratorParameters);
+			configuration.setDecoratorParameters(decoratorParameters.stream());
 			return configuration;
 		}
 	}

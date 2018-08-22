@@ -4,12 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.decorator.meta.DecoratorConfiguration;
 import org.molgenis.data.decorator.meta.DecoratorParameters;
+import org.molgenis.data.decorator.meta.DynamicDecorator;
 import org.molgenis.data.event.BootstrappingEvent;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -51,7 +51,7 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		String factoryId = factory.getId();
 		if (factories.containsKey(factoryId))
 		{
-			throw new IllegalStateException(String.format("Duplicate decorator id [%s]", factoryId));
+			throw new IllegalArgumentException(format("Duplicate decorator id [%s]", factoryId));
 		}
 		factories.put(factoryId, factory);
 	}
@@ -65,9 +65,16 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 	@Override
 	public DynamicRepositoryDecoratorFactory getFactory(String id)
 	{
+		if (!factories.containsKey(id))
+		{
+			throw new IllegalArgumentException(format("Decorator [%s] does not exist", id));
+		}
 		return factories.get(id);
 	}
 
+	/**
+	 * Decorates a {@link Repository} if there is a {@link DecoratorConfiguration} specified for this repository.
+	 */
 	@Override
 	public synchronized Repository<Entity> decorate(Repository<Entity> repository)
 	{
@@ -75,30 +82,28 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 
 		if (!entityTypeId.equals(DECORATOR_CONFIGURATION) && bootstrappingDone)
 		{
-			Query query = new QueryImpl().eq(ENTITY_TYPE_ID, entityTypeId);
-			@SuppressWarnings("unchecked")
-			DecoratorConfiguration configuration = dataService.findOne(DECORATOR_CONFIGURATION, query,
-					DecoratorConfiguration.class);
+			DecoratorConfiguration config = dataService.query(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
+													   .eq(ENTITY_TYPE_ID, entityTypeId)
+													   .findOne();
 
-			if (configuration != null)
+			if (config != null)
 			{
-				repository = decorateRepository(repository, configuration);
+				repository = decorateRepository(repository, config);
 			}
 		}
 
 		return repository;
 	}
 
+	/**
+	 * Decorates a {@link Repository} with one or more {@link DynamicDecorator}s., based on the
+	 * {@link DecoratorConfiguration} entity.
+	 */
 	@SuppressWarnings("unchecked")
 	private Repository<Entity> decorateRepository(Repository<Entity> repository, DecoratorConfiguration configuration)
 	{
-		List<DecoratorParameters> decoratorParameters = configuration.getDecoratorParameters().collect(toList());
-		if (decoratorParameters.isEmpty())
-		{
-			return repository;
-		}
-
 		Map<String, Map<String, Object>> parameterMap = getParameterMap(configuration);
+		List<DecoratorParameters> decoratorParameters = configuration.getDecoratorParameters().collect(toList());
 		for (DecoratorParameters decoratorParam : decoratorParameters)
 		{
 			DynamicRepositoryDecoratorFactory factory = factories.get(decoratorParam.getDecorator().getId());
@@ -110,14 +115,18 @@ public class DynamicRepositoryDecoratorRegistryImpl implements DynamicRepository
 		return repository;
 	}
 
-	private Map<String, Map<String, Object>> getParameterMap(DecoratorConfiguration configuration)
+	/**
+	 * Collects the JSON parameters of one or more DecoratorParameters entities in a map, with the decorator's ID as the
+	 * key and the JSON object as another key/value Map.
+	 */
+	Map<String, Map<String, Object>> getParameterMap(DecoratorConfiguration configuration)
 	{
 		return configuration.getDecoratorParameters()
 							.collect(toMap(param -> param.getDecorator().getId(),
-									param -> toParameterMap(param.getParameters())));
+									param -> jsonToMap(param.getParameters())));
 	}
 
-	private Map<String, Object> toParameterMap(String parameterJson)
+	private Map<String, Object> jsonToMap(String parameterJson)
 	{
 		if (parameterJson != null)
 		{
