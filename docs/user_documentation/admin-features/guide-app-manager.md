@@ -7,7 +7,7 @@ How to create your own MOLGENIS app is described [here](../../developer_document
 The following paragraphs will give a brief tutorial on the App manager and its functions.
 
 ## Uploading your first app
-We will be using the [example app](../../data/example-app.zip) to go through this tutorial.
+We will be using the [example app](../../data/molgenis-app-example.zip) to go through this tutorial.
 
 When you first go to the app manager, you will probably be greeted by an empty screen with the message that no apps were found.
 

@@ -45,27 +45,27 @@ describe('Questionniare service', () => {
         }
       ]
     },
-    {
-      id: 'Chapter2',
-      title: 'Other questions',
-      chapterSections: [
-        {
-          title: 'Sub section',
-          chapterSections: [
-            {
-              title: 'Sub sub section',
-              chapterSections: [
-                {
-                  questionId: 'qDeepSub',
-                  questionLabel: 'What is deep question',
-                  answerLabel: 'deepSub'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }]
+      {
+        id: 'Chapter2',
+        title: 'Other questions',
+        chapterSections: [
+          {
+            title: 'Sub section',
+            chapterSections: [
+              {
+                title: 'Sub sub section',
+                chapterSections: [
+                  {
+                    questionId: 'qDeepSub',
+                    questionLabel: 'What is deep question',
+                    answerLabel: 'deepSub'
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }]
   }
 
   describe('buildOverViewObject', () => {
@@ -334,17 +334,13 @@ describe('Questionniare service', () => {
           'style': 'header'
         },
         {
-          'alignment': 'justify',
-          'columns': [
-            {
-              'text': 'introText',
-              'style': 'introText'
-            },
-            {
-              'image': 'logoDataUrl',
-              'alignment': 'right'
-            }
-          ]
+          'image': 'logoDataUrl',
+          'alignment': 'right'
+
+        },
+        {
+          'text': 'introText',
+          'style': 'introText'
         },
         {
           'text': 'General questions',
@@ -451,8 +447,6 @@ describe('Questionniare service', () => {
           'style': 'answerLabel'
         }
       ]
-
-      console.log(JSON.stringify(pdfContent))
 
       expect(pdfContent).to.deep.equal(expectedPdfContent)
     })

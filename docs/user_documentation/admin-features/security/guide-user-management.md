@@ -1,12 +1,12 @@
 # User management
-Prerequisites: [configure mailsettings](guide-ref-mailsettings.md)
+Prerequisites: [configure mailsettings](../guide-mailsettings.md)
 
 User management is crucial for keeping an overview of people visiting your online database, 
 but it is also important for security reasons. MOLGENIS has an extensive user management system, 
 allowing people to register themselves, or be registered by an administrator.  
 You can find the User manager module under the Admin menu:
 
-![Menu manager screen](../../images/user_manager.png?raw=true, "user manager")
+![Menu manager screen](../../../images/user_manager.png?raw=true, "user manager")
 
 The user management menu allows you to create new users. 
 But also lets you edit existing users. 
@@ -20,7 +20,7 @@ You can only set them to inactive, which will prevent them from logging in.
 
 ## Authentication
 
-To configure how to authenticate in MOLGENIS you can read [configure authentication](guide-ref-authentication.md).
+To configure how to authenticate in MOLGENIS you can read [configure authentication](guide-authentication.md).
 
 ## Permissions
  
@@ -28,7 +28,7 @@ You can also define more fine grained permissions to each user by setting the pe
 
 ## Try it out
 To let you get a feel of how the user manager works, we will create a new user called molgenis_user.
-First, click the ![New button](../../images/new.png?raw=true, "new button") button. 
+First, click the ![New button](../../../images/new.png?raw=true, "new button") button. 
 This will open up a form for creating a new User. 
 Most of the fields are pretty self-explanatory, but there are a few that we will elaborate on. 
 

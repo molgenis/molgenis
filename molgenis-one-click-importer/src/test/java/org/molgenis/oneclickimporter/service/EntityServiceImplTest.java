@@ -8,6 +8,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.oneclickimporter.model.Column;
 import org.molgenis.oneclickimporter.model.DataCollection;
@@ -17,6 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
 import static org.testng.Assert.assertEquals;
 
 public class EntityServiceImplTest
@@ -112,7 +115,7 @@ public class EntityServiceImplTest
 
 		// mock package
 		Package package_ = mock(Package.class);
-		when(metaDataService.getPackage("package_")).thenReturn(package_);
+		when(metaDataService.getPackage("parent_package_")).thenReturn(package_);
 
 		when(dataService.getMeta()).thenReturn(metaDataService);
 
@@ -133,6 +136,10 @@ public class EntityServiceImplTest
 		when(oneClickImporterNamingService.getLabelWithPostFix("super-powers")).thenReturn("super-powers");
 
 		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
+
+		doReturn(true).when(userPermissionEvaluator).hasPermission(new PackageIdentity("parent"), ADD_PACKAGE);
+		when(metaDataService.getPackages()).thenReturn(Collections.singletonList(package_));
+		when(package_.getId()).thenReturn("parent");
 
 		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
 				metaDataService, entityManager, attributeTypeService, oneClickImporterService,

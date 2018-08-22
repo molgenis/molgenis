@@ -249,5 +249,10 @@ public class OneClickImporterServiceTest
 		type = DATE;
 		casted = oneClickImporterService.castValueAsAttributeType(value, type);
 		assertTrue(casted instanceof LocalDate);
+
+		value = "2018-01-03";
+		type = DATE;
+		casted = oneClickImporterService.castValueAsAttributeType(value, type);
+		assertTrue(casted instanceof LocalDate);
 	}
 }
