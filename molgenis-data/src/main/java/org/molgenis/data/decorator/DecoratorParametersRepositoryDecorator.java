@@ -58,9 +58,10 @@ public class DecoratorParametersRepositoryDecorator extends AbstractRepositoryDe
 	private void validateParameters(DecoratorParameters decoratorParameters)
 	{
 		String schema = decoratorParameters.getDecorator().getSchema();
-		if (schema != null)
+		String parameters = decoratorParameters.getParameters();
+		if (schema != null && parameters != null && !parameters.isEmpty())
 		{
-			jsonValidator.validate(decoratorParameters.getParameters(), schema);
+			jsonValidator.validate(parameters, schema);
 		}
 	}
 }
