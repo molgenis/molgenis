@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.gson.Gson;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -10,11 +9,11 @@ import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.integrationtest.config.JsonTestConfig;
 import org.molgenis.integrationtest.data.decorator.AddingRepositoryDecoratorFactory;
 import org.molgenis.integrationtest.data.decorator.PostFixingRepositoryDecoratorFactory;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.validation.JsonValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 @ContextConfiguration(classes = { PlatformITConfig.class, AddingRepositoryDecoratorFactory.class,
-		PostFixingRepositoryDecoratorFactory.class, Gson.class, JsonValidator.class })
+		PostFixingRepositoryDecoratorFactory.class, JsonTestConfig.class })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
 public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests

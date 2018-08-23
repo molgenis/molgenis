@@ -18,6 +18,7 @@ import org.molgenis.data.security.DataserviceRoleHierarchy;
 import org.molgenis.data.security.SystemEntityTypeRegistryImpl;
 import org.molgenis.data.security.permission.DataPermissionConfig;
 import org.molgenis.data.validation.ExpressionValidator;
+import org.molgenis.integrationtest.config.JsonTestConfig;
 import org.molgenis.integrationtest.config.ScriptTestConfig;
 import org.molgenis.integrationtest.config.SecurityCoreITConfig;
 import org.molgenis.integrationtest.data.TestAppSettings;
@@ -87,7 +88,8 @@ import static org.mockito.Mockito.mock;
 		UserPermissionEvaluatorImpl.class, DataserviceRoleHierarchy.class,
 		SystemRepositoryDecoratorFactoryRegistrar.class, SemanticSearchConfig.class, OntologyConfig.class,
 		JobExecutionConfig.class, JobFactoryRegistrar.class, SystemEntityTypeRegistryImpl.class, ScriptTestConfig.class,
-		AclConfig.class, MutableAclClassServiceImpl.class, PermissionRegistry.class, DataPermissionConfig.class })
+		AclConfig.class, MutableAclClassServiceImpl.class, PermissionRegistry.class, DataPermissionConfig.class,
+		JsonTestConfig.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	@Autowired
