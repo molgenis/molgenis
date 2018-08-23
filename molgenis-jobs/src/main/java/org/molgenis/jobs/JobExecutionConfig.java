@@ -4,10 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.*;
 import org.springframework.mail.MailSender;
 
 import java.util.concurrent.ExecutorService;
@@ -27,6 +24,7 @@ public class JobExecutionConfig
 	private final JobExecutorTokenService jobExecutorTokenService;
 
 	@Autowired
+	@Lazy
 	private ExecutorService executorService;
 
 	public JobExecutionConfig(DataService dataService, EntityManager entityManager,
