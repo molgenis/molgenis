@@ -18,16 +18,17 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 
 	public static final String ID = "id";
 	public static final String ENTITY_TYPE_ID = "entityTypeId";
-	public static final String DYNAMIC_DECORATORS = "dynamicDecorators";
+	public static final String PARAMETERS = "parameters";
 
 	private final DecoratorPackage decoratorPackage;
-	private final DynamicDecoratorMetadata dynamicDecoratorMetadata;
+	private final DecoratorParametersMetadata decoratorParametersMetadata;
 
-	DecoratorConfigurationMetadata(DecoratorPackage decoratorPackage, DynamicDecoratorMetadata dynamicDecoratorMetadata)
+	DecoratorConfigurationMetadata(DecoratorPackage decoratorPackage,
+			DecoratorParametersMetadata decoratorParametersMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_DECORATOR);
 		this.decoratorPackage = requireNonNull(decoratorPackage);
-		this.dynamicDecoratorMetadata = requireNonNull(dynamicDecoratorMetadata);
+		this.decoratorParametersMetadata = requireNonNull(decoratorParametersMetadata);
 	}
 
 	@Override
@@ -40,9 +41,9 @@ public class DecoratorConfigurationMetadata extends SystemEntityType
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setLabel("Identifier");
 		addAttribute(ENTITY_TYPE_ID, ROLE_LABEL).setNillable(false).setUnique(true).setLabel("Entity Type Identifier");
-		addAttribute(DYNAMIC_DECORATORS).setNillable(true)
-										.setDataType(AttributeType.MREF)
-										.setRefEntity(dynamicDecoratorMetadata)
-										.setLabel("Decorators");
+		addAttribute(PARAMETERS).setNillable(false)
+								.setDataType(AttributeType.MREF)
+								.setRefEntity(decoratorParametersMetadata)
+								.setLabel("Decorator Parameters");
 	}
 }

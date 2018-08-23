@@ -2,7 +2,9 @@ package org.molgenis.data.decorator;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.RepositoryDecoratorFactory;
+
+import java.util.Map;
 
 /**
  * Repository decorator factory that creates decorated {@link Repository repositories} for specific entity types.
@@ -10,7 +12,7 @@ import org.molgenis.data.meta.model.EntityType;
  *
  * @see RepositoryDecoratorFactory
  */
-public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends EntityType>
+public interface DynamicRepositoryDecoratorFactory<E extends Entity>
 {
 	String getId();
 
@@ -19,10 +21,15 @@ public interface DynamicRepositoryDecoratorFactory<E extends Entity, M extends E
 	String getDescription();
 
 	/**
+	 * @return JSON schema for the parameters, null when no parameters
+	 */
+	String getSchema();
+
+	/**
 	 * Creates a decorated repository based on the given {@link Repository}
 	 *
 	 * @param repository undecorated repository
 	 * @return decorated repository
 	 */
-	Repository<E> createDecoratedRepository(Repository<E> repository);
+	Repository<E> createDecoratedRepository(Repository<E> repository, Map<String, Object> parameters);
 }

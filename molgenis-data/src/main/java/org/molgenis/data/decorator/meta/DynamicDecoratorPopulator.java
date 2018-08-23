@@ -1,20 +1,23 @@
 package org.molgenis.data.decorator.meta;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorRegistry;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
-import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DYNAMIC_DECORATORS;
+import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
+import static org.molgenis.data.decorator.meta.DecoratorParametersMetadata.DECORATOR_PARAMETERS;
 import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DYNAMIC_DECORATOR;
 
 @Component
@@ -24,7 +27,7 @@ public class DynamicDecoratorPopulator
 	private final DynamicRepositoryDecoratorRegistry registry;
 	private final DynamicDecoratorFactory dynamicDecoratorFactory;
 
-	public DynamicDecoratorPopulator(DataService dataService,
+	DynamicDecoratorPopulator(DataService dataService,
 			DynamicRepositoryDecoratorRegistry dynamicRepositoryDecoratorRegistry,
 			DynamicDecoratorFactory dynamicDecoratorFactory)
 	{
@@ -49,8 +52,8 @@ public class DynamicDecoratorPopulator
 	private void removeNonExistingDecorators()
 	{
 		Set<String> nonExistingDecorators = getNonExistingDecorators();
-		updateDecoratorConfigurations(nonExistingDecorators);
-		dataService.deleteAll(DYNAMIC_DECORATOR, (Stream<Object>) (Stream<?>) nonExistingDecorators.stream());
+		updateReferringEntities(nonExistingDecorators);
+		dataService.deleteAll(DYNAMIC_DECORATOR, nonExistingDecorators.stream().map(id -> (Object) id));
 	}
 
 	private Set<String> getNonExistingDecorators()
@@ -63,23 +66,53 @@ public class DynamicDecoratorPopulator
 		return decorators;
 	}
 
-	private void updateDecoratorConfigurations(Set<String> nonExistingDecorators)
+	private void updateReferringEntities(Set<String> nonExistingDecorators)
 	{
-		Stream<DecoratorConfiguration> updatedEntities = dataService.findAll(DECORATOR_CONFIGURATION,
-				DecoratorConfiguration.class).map(config -> removeReferences(nonExistingDecorators, config));
-		dataService.update(DECORATOR_CONFIGURATION, updatedEntities);
+		List<Object> paramsToDelete = getDecoratorParametersToDelete(nonExistingDecorators);
+		Stream<DecoratorConfiguration> updatedConfigs = removeParametersFromConfigurations(paramsToDelete);
+		dataService.update(DECORATOR_CONFIGURATION, updatedConfigs);
+		dataService.deleteAll(DECORATOR_PARAMETERS, paramsToDelete.stream());
 	}
 
-	private DecoratorConfiguration removeReferences(Set<String> nonExistingDecorators,
+	private List<Object> getDecoratorParametersToDelete(Set<String> nonExistingDecorators)
+	{
+		return dataService.findAll(DECORATOR_PARAMETERS, DecoratorParameters.class)
+						  .filter(decoratorParameters -> nonExistingDecorators.contains(
+								  decoratorParameters.getDecorator().getId()))
+						  .map(Entity::getIdValue)
+						  .collect(toList());
+	}
+
+	private Stream<DecoratorConfiguration> removeParametersFromConfigurations(List<Object> paramsToDelete)
+	{
+		return dataService.findAll(DECORATOR_CONFIGURATION, DecoratorConfiguration.class)
+						  .map(config -> removeReferencesOrDeleteIfEmpty(paramsToDelete, config))
+						  .filter(Objects::nonNull);
+	}
+
+	/**
+	 * Removes references to DecoratorParameters that will be deleted. If this results in a DecoratorConfiguration
+	 * without any parameters, then the row is deleted.
+	 *
+	 * @return DecoratorConfiguration without references to DecoratorParameters that will be deleted, null if the row was deleted
+	 */
+	DecoratorConfiguration removeReferencesOrDeleteIfEmpty(List<Object> decoratorParametersToRemove,
 			DecoratorConfiguration configuration)
 	{
-		List<DynamicDecorator> decorators = StreamSupport.stream(
-				configuration.getEntities(DYNAMIC_DECORATORS, DynamicDecorator.class).spliterator(), false)
-														 .filter(e -> !nonExistingDecorators.contains(e.getId()))
-														 .collect(toList());
+		List<DecoratorParameters> decoratorParameters = stream(
+				configuration.getEntities(PARAMETERS, DecoratorParameters.class).spliterator(), false).filter(
+				parameters -> !decoratorParametersToRemove.contains(parameters.getId())).collect(toList());
 
-		configuration.set(DYNAMIC_DECORATORS, decorators);
-		return configuration;
+		if (decoratorParameters.isEmpty())
+		{
+			dataService.deleteById(DECORATOR_CONFIGURATION, configuration.getIdValue());
+			return null;
+		}
+		else
+		{
+			configuration.setDecoratorParameters(decoratorParameters.stream());
+			return configuration;
+		}
 	}
 
 	private boolean notPersisted(String id)
@@ -90,9 +123,9 @@ public class DynamicDecoratorPopulator
 	private DynamicDecorator createDecorator(String id)
 	{
 		DynamicRepositoryDecoratorFactory factory = registry.getFactory(id);
-		DynamicDecorator dynamicDecorator = dynamicDecoratorFactory.create(id)
-																   .setLabel(factory.getLabel())
-																   .setDescription(factory.getDescription());
-		return dynamicDecorator;
+		return dynamicDecoratorFactory.create(id)
+									  .setLabel(factory.getLabel())
+									  .setDescription(factory.getDescription())
+									  .setSchema(factory.getSchema());
 	}
 }
