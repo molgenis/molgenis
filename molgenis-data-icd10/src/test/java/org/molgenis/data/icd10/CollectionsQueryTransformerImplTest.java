@@ -44,8 +44,6 @@ public class CollectionsQueryTransformerImplTest extends AbstractMockitoTest
 	public void setUpBeforeMethod()
 	{
 		collectionsQueryTransformerImpl = new CollectionsQueryTransformerImpl(icd10ClassExpander, dataService);
-
-		when(icd10ClassExpander.expandClasses(singletonList(diseaseEntity))).thenReturn(expandedDiseaseEntities);
 	}
 
 	/**
@@ -154,7 +152,8 @@ public class CollectionsQueryTransformerImplTest extends AbstractMockitoTest
 	public void testTransformableQueries(Query<Entity> query, Query<Entity> expectedTransformedQuery)
 	{
 		when(dataService.findAll(eq(ICD10_ENTITY_TYPE_ID), any(Stream.class))).thenReturn(Stream.of(diseaseEntity));
-
+		when(icd10ClassExpander.expandClasses(singletonList(diseaseEntity))).thenReturn(expandedDiseaseEntities);
+		
 		Query<Entity> transformedQuery = collectionsQueryTransformerImpl.transformQuery(query, ICD10_ENTITY_TYPE_ID,
 				EXPAND_ATTRIBUTE);
 		assertEquals(transformedQuery, expectedTransformedQuery);
