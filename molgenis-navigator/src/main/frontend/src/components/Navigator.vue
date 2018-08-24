@@ -103,8 +103,13 @@
       submitQuery: _.throttle(function () {
         this.$store.commit(SET_PACKAGES, [])
         this.$store.commit(RESET_PATH)
-        this.$store.dispatch(QUERY_PACKAGES, this.$store.state.query)
-        this.$store.dispatch(QUERY_ENTITIES, this.$store.state.query)
+        const query = this.$store.state.query
+        if (query === undefined || query === null || query === '') {
+          this.$store.dispatch(RESET_STATE)
+        } else {
+          this.$store.dispatch(QUERY_PACKAGES, query)
+          this.$store.dispatch(QUERY_ENTITIES, query)
+        }
       }, 200),
       selectPackage: function (packageId: string) {
         this.$store.commit(SET_QUERY, undefined)

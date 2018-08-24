@@ -7,24 +7,6 @@ describe('Navigator', () => {
     })
   })
 
-  describe('submitQueryWithSpecialCharacters', () => {
-    it('should clear the query and dispatch a call to fetch all packages with special characters', () => {
-      Navigator.methods.$store = {
-        state: {
-          query: 'my-query with spaces and ""'
-        },
-        dispatch: sinon.spy(),
-        commit: sinon.spy()
-      }
-
-      Navigator.methods.submitQuery()
-      Navigator.methods.$store.commit.should.have.been.calledWith('__SET_PACKAGES__', [])
-      Navigator.methods.$store.commit.should.have.been.calledWith('__RESET_PATH__')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_PACKAGES__', 'my-query with spaces and ""')
-      Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_ENTITIES__', 'my-query with spaces and ""')
-    })
-  })
-
   describe('selectPackage', () => {
     Navigator.methods.$store = {
       state: {},
@@ -71,6 +53,46 @@ describe('Navigator', () => {
       Navigator.methods.reset('foobar')
       Navigator.methods.$store.commit.should.have.been.calledWith('__SET_QUERY__', undefined)
       Navigator.methods.$store.dispatch.should.have.been.calledWith('__RESET_STATE__')
+    })
+  })
+
+  describe('Search', () => {
+    it('should reset to initial state when search query is empty', (done) => {
+      Navigator.methods.$store = {
+        state: {
+          query: ''
+        },
+        dispatch: sinon.spy(),
+        commit: sinon.spy()
+      }
+
+      Navigator.methods.submitQuery()
+
+      setTimeout(function () {
+        Navigator.methods.$store.commit.should.have.been.calledWith('__SET_PACKAGES__', [])
+        Navigator.methods.$store.commit.should.have.been.calledWith('__RESET_PATH__')
+        Navigator.methods.$store.dispatch.should.have.been.calledWith('__RESET_STATE__')
+        done()
+      }, 250)
+    })
+
+    it('should dispatch a call to fetch all packages with special characters', () => {
+      Navigator.methods.$store = {
+        state: {
+          query: 'my-query with spaces and ""'
+        },
+        dispatch: sinon.spy(),
+        commit: sinon.spy()
+      }
+
+      Navigator.methods.submitQuery()
+
+      setTimeout(function () {
+        Navigator.methods.$store.commit.should.have.been.calledWith('__SET_PACKAGES__', [])
+        Navigator.methods.$store.commit.should.have.been.calledWith('__RESET_PATH__')
+        Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_PACKAGES__', 'my-query with spaces and ""')
+        Navigator.methods.$store.dispatch.should.have.been.calledWith('__QUERY_ENTITIES__', 'my-query with spaces and ""')
+      }, 250)
     })
   })
 })
