@@ -973,6 +973,7 @@
         <module>molgenis-data-excel</module>
         <module>molgenis-data-file</module>
         <module>molgenis-data-i18n</module>
+        <module>molgenis-data-icd10</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-index</module>
         <module>molgenis-data-migrate</module>
