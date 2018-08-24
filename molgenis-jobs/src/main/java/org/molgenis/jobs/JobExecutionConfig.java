@@ -23,10 +23,6 @@ public class JobExecutionConfig
 	private final JobFactoryRegistry jobFactoryRegistry;
 	private final JobExecutorTokenService jobExecutorTokenService;
 
-	@Autowired
-	@Lazy
-	private ExecutorService executorService;
-
 	public JobExecutionConfig(DataService dataService, EntityManager entityManager,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, JobFactoryRegistry jobFactoryRegistry,
 			JobExecutorTokenService jobExecutorTokenService)
@@ -47,7 +43,7 @@ public class JobExecutionConfig
 	}
 
 	@Bean
-	public JobExecutor jobExecutor()
+	public JobExecutor jobExecutor(ExecutorService executorService)
 	{
 		return new JobExecutor(dataService, entityManager, jobExecutionUpdater, mailSender, executorService,
 				jobFactoryRegistry, jobExecutorTokenService);
