@@ -3,7 +3,6 @@ package org.molgenis.jobs;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -26,9 +25,6 @@ public class JobExecutionConfig
 	private final JobFactoryRegistry jobFactoryRegistry;
 	private final JobExecutorTokenService jobExecutorTokenService;
 
-	@Autowired
-	private ExecutorService executorService;
-
 	public JobExecutionConfig(DataService dataService, EntityManager entityManager,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, JobFactoryRegistry jobFactoryRegistry,
 			JobExecutorTokenService jobExecutorTokenService)
@@ -49,7 +45,7 @@ public class JobExecutionConfig
 	}
 
 	@Bean
-	public JobExecutor jobExecutor()
+	public JobExecutor jobExecutor(ExecutorService executorService)
 	{
 		return new JobExecutor(dataService, entityManager, jobExecutionUpdater, mailSender, executorService,
 				jobFactoryRegistry, jobExecutorTokenService);
