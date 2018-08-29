@@ -18,7 +18,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="test",description=q="test",label=q="test"')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="test",description=q="test",label=q="test"'))).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -40,7 +40,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="test",description=q="test",label=q="test"')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="test",description=q="test",label=q="test"'))).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -70,7 +70,7 @@ describe('actions', () => {
       const query = 'foobar'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"')).thenReject(error)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"'))).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -111,7 +111,7 @@ describe('actions', () => {
       ]
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="test",description=q="test");isAbstract==false')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&' + encodeURIComponent('q=(label=q="test",description=q="test")') + ';isAbstract==false')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -127,7 +127,7 @@ describe('actions', () => {
       const error = 'failed to get'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="test",description=q="test");isAbstract==false')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&' + encodeURIComponent('q=(label=q="test",description=q="test")') + ';isAbstract==false')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -221,8 +221,8 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""')).thenResolve(packageResponse)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""')).thenResolve(entityResponse)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==%22%22')).thenResolve(packageResponse)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==%22%22')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
       const packages = [
@@ -256,8 +256,8 @@ describe('actions', () => {
       const entities = []
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""')).thenReject(error)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""')).thenResolve(entityResponse)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==%22%22')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==%22%22')).thenResolve(entityResponse)
       td.replace(api, 'get', get)
 
       const options = {

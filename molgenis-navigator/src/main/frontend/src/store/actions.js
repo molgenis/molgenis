@@ -13,6 +13,9 @@ export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
 export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
 
 const SYS_PACKAGE_ID = 'sys'
+const REST_API_V2 = '/api/v2'
+const PACKAGE_ENDPOINT = REST_API_V2 + '/sys_md_Package'
+const ENTITY_TYPE_ENDPOINT = REST_API_V2 + '/sys_md_EntityType'
 
 /**
  * Recursively build the path, going backwards starting at the currentPackage
@@ -56,7 +59,7 @@ function toEntity (item: any) {
  * @param query
  */
 function getPackageQuery (query: string) {
-  return '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
+  return PACKAGE_ENDPOINT + '?sort=label&num=1000&' + encodeURIComponent('q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"')
 }
 
 /**
@@ -66,7 +69,7 @@ function getPackageQuery (query: string) {
  * @param query
  */
 function getEntityTypeQuery (query: string) {
-  return '/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false'
+  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&' + encodeURIComponent('q=(label=q="' + query + '",description=q="' + query + '")') + ';isAbstract==false'
 }
 
 /**
@@ -114,7 +117,7 @@ export default {
     let uri
 
     if (!query) {
-      uri = '/api/v2/sys_md_Package?sort=label&num=1000'
+      uri = PACKAGE_ENDPOINT + '?sort=label&num=1000'
     } else {
       try {
         validateQuery(query)
@@ -145,7 +148,7 @@ export default {
     }
   },
   [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
       const entities = response.items.map(toEntity)
       commit(SET_ENTITIES, entities)
     }, error => {
@@ -153,13 +156,13 @@ export default {
     })
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""').then(response => {
+    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000&&q=parent==%22%22').then(response => {
       const visibleRootPackages = filterNonVisiblePackages(response.items)
       commit(SET_PACKAGES, visibleRootPackages)
     }, error => {
       commit(SET_ERROR, error)
     })
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""').then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==%22%22').then(response => {
       const entities = response.items.map(toEntity)
       const visibleRootEntities = filterNonVisibleEntities(entities)
       commit(SET_ENTITIES, visibleRootEntities)
@@ -170,7 +173,7 @@ export default {
     commit(RESET_PATH)
   },
   [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function }, lookupId: string) {
-    api.get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
       // At the moment each entity is stored in either a single package, or no package at all
       if (response.items.length > 0) {
         const entityType = response.items[0]
@@ -191,7 +194,7 @@ export default {
     })
   },
   [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
+    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000').then(response => {
       const packages = filterNonVisiblePackages(response.items)
 
       if (!selectedPackageId) {
