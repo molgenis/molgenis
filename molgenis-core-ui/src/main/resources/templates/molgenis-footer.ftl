@@ -15,10 +15,11 @@
                 <br>
                 </#if>
                 <em>
-                    This database was generated using the open source <a href="http://www.molgenis.org">MOLGENIS
-                    database generator</a><#if molgenis_version?has_content>
+                    This database was created using the open source <a href="http://www.molgenis.org">MOLGENIS
+                   software</a><#if molgenis_version?has_content>
                     <span>version ${molgenis_version!?html}</span></#if><#if molgenis_build_date?has_content><span> built
                     on ${molgenis_build_date!?html}</span></#if>.<br>Please cite <a
+		    	href="https://www.ncbi.nlm.nih.gov/pubmed/30165396">Van der velde et al (2018)</a>, <a
                         href="http://www.ncbi.nlm.nih.gov/pubmed/21210979">Swertz et al (2010)</a> or <a
                         href="http://www.ncbi.nlm.nih.gov/pubmed/17297480">Swertz &amp; Jansen (2007)</a> on use.
                 </em>
