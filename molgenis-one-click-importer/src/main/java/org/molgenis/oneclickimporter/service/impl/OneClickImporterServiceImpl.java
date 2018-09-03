@@ -270,11 +270,10 @@ public class OneClickImporterServiceImpl implements OneClickImporterService
 	 */
 	private static String formatUTCDateAsLocalDateTime(Date javaDate)
 	{
-		String value;// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
+		// Now back from start of day in UTC to LocalDateTime to express that we don't know the timezone.
 		LocalDateTime localDateTime = javaDate.toInstant().atZone(UTC).toLocalDateTime();
 		// And format to string
-		value = localDateTime.toString();
-		return value;
+		return localDateTime.toString();
 	}
 
 	private Object getTypedFormulaValue(Cell cell)

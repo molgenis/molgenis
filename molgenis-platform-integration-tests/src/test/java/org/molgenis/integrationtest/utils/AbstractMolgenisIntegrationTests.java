@@ -94,7 +94,8 @@ public abstract class AbstractMolgenisIntegrationTests extends AbstractTestNGSpr
 	 * <p>The {@link ApplicationContextProvider} must be in this configuration because of the autowiring from context</p>
 	 */
 	@Configuration
-	@EnableWebMvc // use this annotation in your controller configuration to test the GetMapping annotations
+	// Use this annotation in your controller configuration to test the GetMapping annotations
+	@EnableWebMvc
 	@EnableAspectJAutoProxy
 	@Import({ BootstrapTestUtils.class, BootStrapperTestConfig.class, WebAppITConfig.class, SecurityITConfig.class,
 			PostgreSqlTestConfig.class, FileTestConfig.class, DatabaseConfig.class })
