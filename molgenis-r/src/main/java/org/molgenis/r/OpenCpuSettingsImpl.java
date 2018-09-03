@@ -1,7 +1,6 @@
 package org.molgenis.r;
 
 import org.molgenis.settings.DefaultSettingsEntity;
-import org.molgenis.settings.DefaultSettingsEntityType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +20,8 @@ public class OpenCpuSettingsImpl extends DefaultSettingsEntity implements OpenCp
 		super(ID);
 	}
 
-	@Component
-	public static class Meta extends DefaultSettingsEntityType
+	@org.springframework.stereotype.Component
+	public static class Meta extends org.molgenis.settings.DefaultSettingsEntityType
 	{
 		@Value("${opencpu.uri.scheme:http}")
 		private String defaultScheme;
