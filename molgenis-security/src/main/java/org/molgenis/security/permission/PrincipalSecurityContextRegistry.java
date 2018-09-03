@@ -1,10 +1,8 @@
 package org.molgenis.security.permission;
 
+import java.util.stream.Stream;
 import org.springframework.security.core.context.SecurityContext;
 
-import java.util.stream.Stream;
-
-public interface PrincipalSecurityContextRegistry
-{
-	Stream<SecurityContext> getSecurityContexts(Object principal);
+public interface PrincipalSecurityContextRegistry {
+  Stream<SecurityContext> getSecurityContexts(Object principal);
 }

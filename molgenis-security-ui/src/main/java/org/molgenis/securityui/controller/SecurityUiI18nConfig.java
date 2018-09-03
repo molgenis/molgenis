@@ -5,14 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SecurityUiI18nConfig
-{
+public class SecurityUiI18nConfig {
 
-	public static final String NAMESPACE = "security-ui";
+  public static final String NAMESPACE = "security-ui";
 
-	@Bean
-	public PropertiesMessageSource securityUiMessageSource()
-	{
-		return new PropertiesMessageSource(NAMESPACE);
-	}
+  @Bean
+  public PropertiesMessageSource securityUiMessageSource() {
+    return new PropertiesMessageSource(NAMESPACE);
+  }
 }

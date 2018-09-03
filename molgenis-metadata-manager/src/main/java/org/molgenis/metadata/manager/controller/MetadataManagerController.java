@@ -1,5 +1,12 @@
 package org.molgenis.metadata.manager.controller;
 
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
+
+import java.util.List;
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.metadata.manager.model.EditorAttributeResponse;
@@ -16,81 +23,67 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.metadata.manager.controller.MetadataManagerController.URI;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.OK;
-
 @Controller
 @RequestMapping(URI)
-public class MetadataManagerController extends VuePluginController
-{
-	private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
+public class MetadataManagerController extends VuePluginController {
+  private static final Logger LOG = LoggerFactory.getLogger(MetadataManagerController.class);
 
-	public static final String METADATA_MANAGER = "metadata-manager";
-	public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
+  public static final String METADATA_MANAGER = "metadata-manager";
+  public static final String URI = PLUGIN_URI_PREFIX + METADATA_MANAGER;
 
-	private MetadataManagerService metadataManagerService;
+  private MetadataManagerService metadataManagerService;
 
-	public MetadataManagerController(MenuReaderService menuReaderService, AppSettings appSettings,
-			MetadataManagerService metadataManagerService, UserAccountService userAccountService)
-	{
-		super(URI, menuReaderService, appSettings, userAccountService);
-		this.metadataManagerService = requireNonNull(metadataManagerService);
+  public MetadataManagerController(
+      MenuReaderService menuReaderService,
+      AppSettings appSettings,
+      MetadataManagerService metadataManagerService,
+      UserAccountService userAccountService) {
+    super(URI, menuReaderService, appSettings, userAccountService);
+    this.metadataManagerService = requireNonNull(metadataManagerService);
+  }
 
-	}
+  @GetMapping("/**")
+  public String init(Model model) {
+    super.init(model, METADATA_MANAGER);
+    return "view-metadata-manager";
+  }
 
-	@GetMapping("/**")
-	public String init(Model model)
-	{
-		super.init(model, METADATA_MANAGER);
-		return "view-metadata-manager";
-	}
+  @ResponseBody
+  @GetMapping(value = "/editorPackages", produces = "application/json")
+  public List<EditorPackageIdentifier> getEditorPackages() {
+    return metadataManagerService.getEditorPackages();
+  }
 
-	@ResponseBody
-	@GetMapping(value = "/editorPackages", produces = "application/json")
-	public List<EditorPackageIdentifier> getEditorPackages()
-	{
-		return metadataManagerService.getEditorPackages();
-	}
+  @ResponseBody
+  @GetMapping(value = "/entityType/{id:.*}", produces = "application/json")
+  public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String id) {
+    return metadataManagerService.getEditorEntityType(id);
+  }
 
-	@ResponseBody
-	@GetMapping(value = "/entityType/{id:.*}", produces = "application/json")
-	public EditorEntityTypeResponse getEditorEntityType(@PathVariable("id") String id)
-	{
-		return metadataManagerService.getEditorEntityType(id);
-	}
+  @ResponseBody
+  @GetMapping(value = "/create/entityType", produces = "application/json")
+  public EditorEntityTypeResponse createEditorEntityType() {
+    return metadataManagerService.createEditorEntityType();
+  }
 
-	@ResponseBody
-	@GetMapping(value = "/create/entityType", produces = "application/json")
-	public EditorEntityTypeResponse createEditorEntityType()
-	{
-		return metadataManagerService.createEditorEntityType();
-	}
+  @ResponseStatus(OK)
+  @PostMapping(value = "/entityType", consumes = "application/json")
+  public void upsertEntityType(@RequestBody EditorEntityType editorEntityType) {
+    metadataManagerService.upsertEntityType(editorEntityType);
+  }
 
-	@ResponseStatus(OK)
-	@PostMapping(value = "/entityType", consumes = "application/json")
-	public void upsertEntityType(@RequestBody EditorEntityType editorEntityType)
-	{
-		metadataManagerService.upsertEntityType(editorEntityType);
-	}
+  @ResponseBody
+  @GetMapping(value = "/create/attribute", produces = "application/json")
+  public EditorAttributeResponse createEditorAttribute() {
+    return metadataManagerService.createEditorAttribute();
+  }
 
-	@ResponseBody
-	@GetMapping(value = "/create/attribute", produces = "application/json")
-	public EditorAttributeResponse createEditorAttribute()
-	{
-		return metadataManagerService.createEditorAttribute();
-	}
-
-	@ResponseBody
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
-	@ExceptionHandler(RuntimeException.class)
-	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
-	{
-		LOG.error("", e);
-		return new ErrorMessageResponse(singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
-	}
+  @ResponseBody
+  @ResponseStatus(INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(RuntimeException.class)
+  public ErrorMessageResponse handleRuntimeException(RuntimeException e) {
+    LOG.error("", e);
+    return new ErrorMessageResponse(
+        singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+  }
 }

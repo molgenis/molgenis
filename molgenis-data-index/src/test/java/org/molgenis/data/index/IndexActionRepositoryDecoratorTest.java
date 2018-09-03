@@ -1,15 +1,5 @@
 package org.molgenis.data.index;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.EnumSet;
-import java.util.stream.Stream;
-
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -17,312 +7,299 @@ import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.testng.Assert.assertEquals;
 
-public class IndexActionRepositoryDecoratorTest
-{
-	private Repository<Entity> delegateRepository;
-	private IndexActionRegisterService indexActionRegisterService;
-	private IndexActionRepositoryDecorator indexActionRepositoryDecorator;
-	private EntityType entityType;
-	private EntityType mappedByEntity;
-	private EntityType inversedByEntity;
+import java.util.EnumSet;
+import java.util.stream.Stream;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-	@SuppressWarnings("unchecked")
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		delegateRepository = mock(Repository.class);
-		when(delegateRepository.getName()).thenReturn("entity");
-		when(delegateRepository.getCapabilities()).thenReturn(singleton(MANAGABLE));
-		entityType = mock(EntityType.class);
-		when(delegateRepository.getEntityType()).thenReturn(entityType);
-		indexActionRegisterService = mock(IndexActionRegisterService.class);
-		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(delegateRepository,
-				indexActionRegisterService);
-	}
+public class IndexActionRepositoryDecoratorTest {
+  private Repository<Entity> delegateRepository;
+  private IndexActionRegisterService indexActionRegisterService;
+  private IndexActionRepositoryDecorator indexActionRepositoryDecorator;
+  private EntityType entityType;
+  private EntityType mappedByEntity;
+  private EntityType inversedByEntity;
 
-	@Test
-	public void updateEntity()
-	{
-		initEntityMeta();
+  @SuppressWarnings("unchecked")
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    delegateRepository = mock(Repository.class);
+    when(delegateRepository.getName()).thenReturn("entity");
+    when(delegateRepository.getCapabilities()).thenReturn(singleton(MANAGABLE));
+    entityType = mock(EntityType.class);
+    when(delegateRepository.getEntityType()).thenReturn(entityType);
+    indexActionRegisterService = mock(IndexActionRegisterService.class);
+    indexActionRepositoryDecorator =
+        new IndexActionRepositoryDecorator(delegateRepository, indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.update(entity0);
-		verify(delegateRepository, times(1)).update(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void updateEntity() {
+    initEntityMeta();
 
-	@Test
-	public void updateEntityBidi()
-	{
-		initEntityMetaBidi();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.update(entity0);
+    verify(delegateRepository, times(1)).update(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.update(entity0);
-		verify(delegateRepository, times(1)).update(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void updateEntityBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void getCapabilities()
-	{
-		assertEquals(indexActionRepositoryDecorator.getCapabilities(), EnumSet.of(INDEXABLE, MANAGABLE));
-	}
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.update(entity0);
+    verify(delegateRepository, times(1)).update(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-	@Test
-	public void updateStreamEntities()
-	{
-		initEntityMeta();
+  @Test
+  public void getCapabilities() {
+    assertEquals(
+        indexActionRepositoryDecorator.getCapabilities(), EnumSet.of(INDEXABLE, MANAGABLE));
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		indexActionRepositoryDecorator.update(entities);
-		verify(delegateRepository, times(1)).update(entities);
-		verify(indexActionRegisterService).register(entityType, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void updateStreamEntities() {
+    initEntityMeta();
 
-	@Test
-	public void updateStreamEntitiesBidi()
-	{
-		initEntityMetaBidi();
+    Stream<Entity> entities = Stream.empty();
+    indexActionRepositoryDecorator.update(entities);
+    verify(delegateRepository, times(1)).update(entities);
+    verify(indexActionRegisterService).register(entityType, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		indexActionRepositoryDecorator.update(entities);
-		verify(delegateRepository, times(1)).update(entities);
-		verify(indexActionRegisterService).register(entityType, null);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void updateStreamEntitiesBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void deleteEntity()
-	{
-		initEntityMeta();
+    Stream<Entity> entities = Stream.empty();
+    indexActionRepositoryDecorator.update(entities);
+    verify(delegateRepository, times(1)).update(entities);
+    verify(indexActionRegisterService).register(entityType, null);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.delete(entity0);
-		verify(delegateRepository, times(1)).delete(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteEntity() {
+    initEntityMeta();
 
-	@Test
-	public void deleteEntityBidi()
-	{
-		initEntityMetaBidi();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.delete(entity0);
+    verify(delegateRepository, times(1)).delete(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity mappedByEntity0 = mock(Entity.class);
-		when(mappedByEntity0.getIdValue()).thenReturn(2);
-		Entity inversedByEntity0 = mock(Entity.class);
-		when(inversedByEntity0.getIdValue()).thenReturn(3);
+  @Test
+  public void deleteEntityBidi() {
+    initEntityMetaBidi();
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
-		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.delete(entity0);
-		verify(delegateRepository, times(1)).delete(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verify(indexActionRegisterService).register(mappedByEntity, 2);
-		verify(indexActionRegisterService).register(inversedByEntity, 3);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+    Entity mappedByEntity0 = mock(Entity.class);
+    when(mappedByEntity0.getIdValue()).thenReturn(2);
+    Entity inversedByEntity0 = mock(Entity.class);
+    when(inversedByEntity0.getIdValue()).thenReturn(3);
 
-	@Test
-	public void deleteStreamEntities()
-	{
-		initEntityMeta();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
+    when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.delete(entity0);
+    verify(delegateRepository, times(1)).delete(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verify(indexActionRegisterService).register(mappedByEntity, 2);
+    verify(indexActionRegisterService).register(inversedByEntity, 3);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		indexActionRepositoryDecorator.delete(entities);
-		verify(delegateRepository, times(1)).delete(entities);
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteStreamEntities() {
+    initEntityMeta();
 
-	@Test
-	public void deleteStreamEntitiesBidi()
-	{
-		initEntityMetaBidi();
+    Stream<Entity> entities = Stream.empty();
+    indexActionRepositoryDecorator.delete(entities);
+    verify(delegateRepository, times(1)).delete(entities);
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		indexActionRepositoryDecorator.delete(entities);
-		verify(delegateRepository, times(1)).delete(entities);
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteStreamEntitiesBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void deleteEntityById()
-	{
-		initEntityMeta();
+    Stream<Entity> entities = Stream.empty();
+    indexActionRepositoryDecorator.delete(entities);
+    verify(delegateRepository, times(1)).delete(entities);
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.deleteById(1);
-		verify(delegateRepository, times(1)).deleteById(1);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteEntityById() {
+    initEntityMeta();
 
-	@Test
-	public void deleteEntityByIdBidi()
-	{
-		initEntityMetaBidi();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.deleteById(1);
+    verify(delegateRepository, times(1)).deleteById(1);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.deleteById(1);
-		verify(delegateRepository, times(1)).deleteById(1);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteEntityByIdBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void deleteEntityByIdStream()
-	{
-		initEntityMeta();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.deleteById(1);
+    verify(delegateRepository, times(1)).deleteById(1);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Object> ids = Stream.empty();
-		indexActionRepositoryDecorator.deleteAll(ids);
-		verify(delegateRepository, times(1)).deleteAll(ids);
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteEntityByIdStream() {
+    initEntityMeta();
 
-	@Test
-	public void deleteEntityByIdStreamBidi()
-	{
-		initEntityMetaBidi();
+    Stream<Object> ids = Stream.empty();
+    indexActionRepositoryDecorator.deleteAll(ids);
+    verify(delegateRepository, times(1)).deleteAll(ids);
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Object> ids = Stream.empty();
-		indexActionRepositoryDecorator.deleteAll(ids);
-		verify(delegateRepository, times(1)).deleteAll(ids);
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteEntityByIdStreamBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void deleteAll()
-	{
-		initEntityMeta();
+    Stream<Object> ids = Stream.empty();
+    indexActionRepositoryDecorator.deleteAll(ids);
+    verify(delegateRepository, times(1)).deleteAll(ids);
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		indexActionRepositoryDecorator.deleteAll();
-		verify(delegateRepository, times(1)).deleteAll();
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteAll() {
+    initEntityMeta();
 
-	@Test
-	public void deleteAllBidi()
-	{
-		initEntityMetaBidi();
+    indexActionRepositoryDecorator.deleteAll();
+    verify(delegateRepository, times(1)).deleteAll();
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		indexActionRepositoryDecorator.deleteAll();
-		verify(delegateRepository, times(1)).deleteAll();
-		verify(indexActionRegisterService, times(1)).register(entityType, null);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void deleteAllBidi() {
+    initEntityMetaBidi();
 
-	@Test
-	public void addEntity()
-	{
-		initEntityMeta();
+    indexActionRepositoryDecorator.deleteAll();
+    verify(delegateRepository, times(1)).deleteAll();
+    verify(indexActionRegisterService, times(1)).register(entityType, null);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.add(entity0);
-		verify(delegateRepository, times(1)).add(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void addEntity() {
+    initEntityMeta();
 
-	@Test
-	public void addEntityBidi()
-	{
-		initEntityMetaBidi();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.add(entity0);
+    verify(delegateRepository, times(1)).add(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Entity mappedByEntity0 = mock(Entity.class);
-		when(mappedByEntity0.getIdValue()).thenReturn("mappedBy0");
-		Entity inversedByEntity0 = mock(Entity.class);
-		when(inversedByEntity0.getIdValue()).thenReturn("inversedBy0");
+  @Test
+  public void addEntityBidi() {
+    initEntityMetaBidi();
 
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
-		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
-		when(entity0.getIdValue()).thenReturn(1);
-		indexActionRepositoryDecorator.add(entity0);
-		verify(delegateRepository, times(1)).add(entity0);
-		verify(indexActionRegisterService).register(entityType, 1);
-		verify(indexActionRegisterService).register(mappedByEntity, "mappedBy0");
-		verify(indexActionRegisterService).register(inversedByEntity, "inversedBy0");
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+    Entity mappedByEntity0 = mock(Entity.class);
+    when(mappedByEntity0.getIdValue()).thenReturn("mappedBy0");
+    Entity inversedByEntity0 = mock(Entity.class);
+    when(inversedByEntity0.getIdValue()).thenReturn("inversedBy0");
 
-	@Test
-	public void addEntitiesStream()
-	{
-		initEntityMeta();
+    Entity entity0 = mock(Entity.class);
+    when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
+    when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
+    when(entity0.getIdValue()).thenReturn(1);
+    indexActionRepositoryDecorator.add(entity0);
+    verify(delegateRepository, times(1)).add(entity0);
+    verify(indexActionRegisterService).register(entityType, 1);
+    verify(indexActionRegisterService).register(mappedByEntity, "mappedBy0");
+    verify(indexActionRegisterService).register(inversedByEntity, "inversedBy0");
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		when(delegateRepository.add(entities)).thenReturn(123);
-		assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
-		verify(delegateRepository, times(1)).add(entities);
-		verify(indexActionRegisterService).register(entityType, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void addEntitiesStream() {
+    initEntityMeta();
 
-	@Test
-	public void addEntitiesStreamBidi()
-	{
-		initEntityMetaBidi();
+    Stream<Entity> entities = Stream.empty();
+    when(delegateRepository.add(entities)).thenReturn(123);
+    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    verify(delegateRepository, times(1)).add(entities);
+    verify(indexActionRegisterService).register(entityType, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-		Stream<Entity> entities = Stream.empty();
-		when(delegateRepository.add(entities)).thenReturn(123);
-		assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
-		verify(delegateRepository, times(1)).add(entities);
-		verify(indexActionRegisterService).register(entityType, null);
-		verify(indexActionRegisterService).register(mappedByEntity, null);
-		verify(indexActionRegisterService).register(inversedByEntity, null);
-		verifyNoMoreInteractions(indexActionRegisterService);
-	}
+  @Test
+  public void addEntitiesStreamBidi() {
+    initEntityMetaBidi();
 
-	private void initEntityMeta()
-	{
-		when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
-		when(entityType.getInversedByAttributes()).thenReturn(Stream.empty());
-	}
+    Stream<Entity> entities = Stream.empty();
+    when(delegateRepository.add(entities)).thenReturn(123);
+    assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+    verify(delegateRepository, times(1)).add(entities);
+    verify(indexActionRegisterService).register(entityType, null);
+    verify(indexActionRegisterService).register(mappedByEntity, null);
+    verify(indexActionRegisterService).register(inversedByEntity, null);
+    verifyNoMoreInteractions(indexActionRegisterService);
+  }
 
-	private void initEntityMetaBidi()
-	{
-		mappedByEntity = mock(EntityType.class);
-		when(mappedByEntity.getId()).thenReturn("mappedByEntity");
-		Attribute mappedByAttr = mock(Attribute.class);
-		when(mappedByAttr.getName()).thenReturn("mappedByAttr");
-		when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
+  private void initEntityMeta() {
+    when(entityType.getMappedByAttributes()).thenReturn(Stream.empty());
+    when(entityType.getInversedByAttributes()).thenReturn(Stream.empty());
+  }
 
-		inversedByEntity = mock(EntityType.class);
-		when(inversedByEntity.getId()).thenReturn("inversedByEntity");
-		Attribute inversedByAttr = mock(Attribute.class);
-		when(inversedByAttr.getName()).thenReturn("inversedByAttr");
-		when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);
+  private void initEntityMetaBidi() {
+    mappedByEntity = mock(EntityType.class);
+    when(mappedByEntity.getId()).thenReturn("mappedByEntity");
+    Attribute mappedByAttr = mock(Attribute.class);
+    when(mappedByAttr.getName()).thenReturn("mappedByAttr");
+    when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
 
-		when(entityType.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttr));
-		when(entityType.getInversedByAttributes()).thenReturn(Stream.of(inversedByAttr));
-	}
+    inversedByEntity = mock(EntityType.class);
+    when(inversedByEntity.getId()).thenReturn("inversedByEntity");
+    Attribute inversedByAttr = mock(Attribute.class);
+    when(inversedByAttr.getName()).thenReturn("inversedByAttr");
+    when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);
+
+    when(entityType.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttr));
+    when(entityType.getInversedByAttributes()).thenReturn(Stream.of(inversedByAttr));
+  }
 }

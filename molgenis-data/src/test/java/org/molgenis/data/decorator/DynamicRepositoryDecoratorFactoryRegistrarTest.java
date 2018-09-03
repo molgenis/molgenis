@@ -1,41 +1,34 @@
 package org.molgenis.data.decorator;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.mockito.Mock;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.context.ApplicationContext;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+public class DynamicRepositoryDecoratorFactoryRegistrarTest extends AbstractMockitoTest {
+  @Mock DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry;
+  @Mock DynamicRepositoryDecoratorFactory decoratorFactory1;
+  @Mock DynamicRepositoryDecoratorFactory decoratorFactory2;
+  @Mock ApplicationContext context;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+  @Test
+  public void testRegister() {
+    Map<String, DynamicRepositoryDecoratorFactory> map = new HashMap<>();
+    map.put("decoratorFactory1", decoratorFactory1);
+    map.put("decoratorFactory2", decoratorFactory2);
 
-public class DynamicRepositoryDecoratorFactoryRegistrarTest extends AbstractMockitoTest
-{
-	@Mock
-	DynamicRepositoryDecoratorRegistry repositoryDecoratorRegistry;
-	@Mock
-	DynamicRepositoryDecoratorFactory decoratorFactory1;
-	@Mock
-	DynamicRepositoryDecoratorFactory decoratorFactory2;
-	@Mock
-	ApplicationContext context;
+    when(context.getBeansOfType(DynamicRepositoryDecoratorFactory.class)).thenReturn(map);
 
-	@Test
-	public void testRegister()
-	{
-		Map<String, DynamicRepositoryDecoratorFactory> map = new HashMap<>();
-		map.put("decoratorFactory1", decoratorFactory1);
-		map.put("decoratorFactory2", decoratorFactory2);
+    DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar =
+        new DynamicRepositoryDecoratorFactoryRegistrar(repositoryDecoratorRegistry);
+    dynamicRepositoryDecoratorFactoryRegistrar.register(context);
 
-		when(context.getBeansOfType(DynamicRepositoryDecoratorFactory.class)).thenReturn(map);
-
-		DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar = new DynamicRepositoryDecoratorFactoryRegistrar(
-				repositoryDecoratorRegistry);
-		dynamicRepositoryDecoratorFactoryRegistrar.register(context);
-
-		verify(repositoryDecoratorRegistry).addFactory(decoratorFactory1);
-		verify(repositoryDecoratorRegistry).addFactory(decoratorFactory2);
-	}
+    verify(repositoryDecoratorRegistry).addFactory(decoratorFactory1);
+    verify(repositoryDecoratorRegistry).addFactory(decoratorFactory2);
+  }
 }

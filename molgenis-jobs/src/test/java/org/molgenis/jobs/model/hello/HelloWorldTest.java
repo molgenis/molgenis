@@ -1,6 +1,13 @@
 package org.molgenis.jobs.model.hello;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertTrue;
+
 import com.google.gson.Gson;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -16,79 +23,68 @@ import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+@ContextConfiguration(
+    classes = {
+      JobTestConfig.class,
+      JobExecutionConfig.class,
+      HelloWorldJobExecutionFactory.class,
+      HelloWorldJobExecutionMetadata.class,
+      JobExecutionMetaData.class,
+      HelloWorldConfig.class,
+      JobExecutor.class,
+      EntityManagerImpl.class,
+      HelloWorldTest.Config.class,
+      JobFactoryRegistry.class,
+      JobFactoryRegistrar.class
+    })
+public class HelloWorldTest extends AbstractMolgenisSpringTest {
+  @Autowired JobExecutor jobExecutor;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.assertTrue;
+  @Autowired HelloWorldJobExecutionFactory factory;
 
-@ContextConfiguration(classes = { JobTestConfig.class, JobExecutionConfig.class, HelloWorldJobExecutionFactory.class,
-		HelloWorldJobExecutionMetadata.class, JobExecutionMetaData.class, HelloWorldConfig.class, JobExecutor.class,
-		EntityManagerImpl.class, HelloWorldTest.Config.class, JobFactoryRegistry.class, JobFactoryRegistrar.class })
-public class HelloWorldTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	JobExecutor jobExecutor;
+  public HelloWorldTest() {
+    super(Strictness.WARN);
+  }
 
-	@Autowired
-	HelloWorldJobExecutionFactory factory;
+  @Test
+  public void helloWorld() throws InterruptedException, TimeoutException, ExecutionException {
+    HelloWorldJobExecution jobExecution = factory.create();
+    jobExecution.setDelay(1);
+    jobExecution.setUser("user");
+    CompletableFuture<Void> job = jobExecutor.submit(jobExecution);
+    job.get(2, SECONDS);
+    assertTrue(jobExecution.getLog().contains("Hello user!"));
+  }
 
-	public HelloWorldTest()
-	{
-		super(Strictness.WARN);
-	}
+  public static class Config implements ApplicationListener<ContextRefreshedEvent> {
+    @Mock private MailSender mailSender;
 
-	@Test
-	public void helloWorld() throws InterruptedException, TimeoutException, ExecutionException
-	{
-		HelloWorldJobExecution jobExecution = factory.create();
-		jobExecution.setDelay(1);
-		jobExecution.setUser("user");
-		CompletableFuture<Void> job = jobExecutor.submit(jobExecution);
-		job.get(2, SECONDS);
-		assertTrue(jobExecution.getLog().contains("Hello user!"));
-	}
+    @Mock private JobExecutorTokenService jobExecutorTokenService;
 
-	public static class Config implements ApplicationListener<ContextRefreshedEvent>
-	{
-		@Mock
-		private MailSender mailSender;
+    @Autowired JobFactoryRegistrar jobFactoryRegistrar;
 
-		@Mock
-		private JobExecutorTokenService jobExecutorTokenService;
+    public Config() {
+      initMocks(this);
+    }
 
-		@Autowired
-		JobFactoryRegistrar jobFactoryRegistrar;
+    @Bean
+    public MailSender mailSender() {
+      return mailSender;
+    }
 
-		public Config()
-		{
-			initMocks(this);
-		}
+    @Bean
+    public JobExecutorTokenService jobExecutorTokenService() {
+      return jobExecutorTokenService;
+    }
 
-		@Bean
-		public MailSender mailSender()
-		{
-			return mailSender;
-		}
+    @Bean
+    public Gson gson() {
+      return new Gson();
+    }
 
-		@Bean
-		public JobExecutorTokenService jobExecutorTokenService()
-		{
-			return jobExecutorTokenService;
-		}
-
-		@Bean
-		public Gson gson()
-		{
-			return new Gson();
-		}
-
-		@Override
-		public void onApplicationEvent(ContextRefreshedEvent event)
-		{
-			jobFactoryRegistrar.register(event);
-		}
-	}
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+      jobFactoryRegistrar.register(event);
+    }
+  }
 }

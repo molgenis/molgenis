@@ -7,19 +7,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(ScheduledJobsController.URI)
-public class ScheduledJobsController extends PluginController
-{
-	public static final String ID = "scheduledjobs";
-	public static final String URI = PLUGIN_URI_PREFIX + ID;
+public class ScheduledJobsController extends PluginController {
+  public static final String ID = "scheduledjobs";
+  public static final String URI = PLUGIN_URI_PREFIX + ID;
 
-	public ScheduledJobsController()
-	{
-		super(URI);
-	}
+  public ScheduledJobsController() {
+    super(URI);
+  }
 
-	@GetMapping
-	public String init()
-	{
-		return "view-scheduled-jobs";
-	}
+  @GetMapping
+  public String init() {
+    return "view-scheduled-jobs";
+  }
 }

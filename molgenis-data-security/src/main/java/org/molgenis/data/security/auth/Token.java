@@ -1,97 +1,79 @@
 package org.molgenis.data.security.auth;
 
+import static java.time.Instant.now;
+import static org.molgenis.data.security.auth.TokenMetaData.*;
+
+import java.time.Instant;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import javax.annotation.Nullable;
-import java.time.Instant;
+public class Token extends StaticEntity {
+  public Token(Entity entity) {
+    super(entity);
+  }
 
-import static java.time.Instant.now;
-import static org.molgenis.data.security.auth.TokenMetaData.*;
+  public Token(EntityType entityType) {
+    super(entityType);
+  }
 
-public class Token extends StaticEntity
-{
-	public Token(Entity entity)
-	{
-		super(entity);
-	}
+  public Token(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public Token(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public Token(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public void setId(String id) {
+    set(ID, id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public User getUser() {
+    return getEntity(USER, User.class);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public void setUser(User user) {
+    set(USER, user);
+  }
 
-	public User getUser()
-	{
-		return getEntity(USER, User.class);
-	}
+  public String getToken() {
+    return getString(TOKEN_ATTR);
+  }
 
-	public void setUser(User user)
-	{
-		set(USER, user);
-	}
+  public void setToken(String token) {
+    set(TOKEN_ATTR, token);
+  }
 
-	public String getToken()
-	{
-		return getString(TOKEN_ATTR);
-	}
+  @Nullable
+  public Instant getExpirationDate() {
+    return getInstant(EXPIRATIONDATE);
+  }
 
-	public void setToken(String token)
-	{
-		set(TOKEN_ATTR, token);
-	}
+  public void setExpirationDate(Instant expirationDate) {
+    set(EXPIRATIONDATE, expirationDate);
+  }
 
-	@Nullable
-	public Instant getExpirationDate()
-	{
-		return getInstant(EXPIRATIONDATE);
-	}
+  public Instant getCreationDate() {
+    return getInstant(CREATIONDATE);
+  }
 
-	public void setExpirationDate(Instant expirationDate)
-	{
-		set(EXPIRATIONDATE, expirationDate);
-	}
+  public void setCreationDate(Instant creationDate) {
+    set(CREATIONDATE, creationDate);
+  }
 
-	public Instant getCreationDate()
-	{
-		return getInstant(CREATIONDATE);
-	}
+  @Nullable
+  public String getDescription() {
+    return getString(DESCRIPTION);
+  }
 
-	public void setCreationDate(Instant creationDate)
-	{
-		set(CREATIONDATE, creationDate);
-	}
+  public void setDescription(String description) {
+    set(DESCRIPTION, description);
+  }
 
-	@Nullable
-	public String getDescription()
-	{
-		return getString(DESCRIPTION);
-	}
-
-	public void setDescription(String description)
-	{
-		set(DESCRIPTION, description);
-	}
-
-	public boolean isExpired()
-	{
-		return (getExpirationDate() != null) && getExpirationDate().isBefore(now());
-	}
+  public boolean isExpired() {
+    return (getExpirationDate() != null) && getExpirationDate().isBefore(now());
+  }
 }

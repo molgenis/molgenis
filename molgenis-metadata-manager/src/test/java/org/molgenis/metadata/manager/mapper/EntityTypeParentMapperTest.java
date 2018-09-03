@@ -1,6 +1,12 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
 import com.google.common.collect.ImmutableList;
+import java.util.List;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
@@ -12,97 +18,88 @@ import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
+public class EntityTypeParentMapperTest {
+  @Mock private AttributeReferenceMapper attributeReferenceMapper;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+  @Mock private EntityTypeMetadata entityTypeMetadata;
 
-public class EntityTypeParentMapperTest
-{
-	@Mock
-	private AttributeReferenceMapper attributeReferenceMapper;
+  @Mock private DataService dataService;
 
-	@Mock
-	private EntityTypeMetadata entityTypeMetadata;
+  private EntityTypeParentMapper entityTypeParentMapper;
 
-	@Mock
-	private DataService dataService;
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    MockitoAnnotations.initMocks(this);
+    entityTypeParentMapper =
+        new EntityTypeParentMapper(attributeReferenceMapper, entityTypeMetadata, dataService);
+  }
 
-	private EntityTypeParentMapper entityTypeParentMapper;
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testEntityTypeParentMapper() {
+    new EntityTypeParentMapper(null, null, null);
+  }
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		MockitoAnnotations.initMocks(this);
-		entityTypeParentMapper = new EntityTypeParentMapper(attributeReferenceMapper, entityTypeMetadata, dataService);
-	}
+  @Test
+  public void testToEntityTypeReference() {
+    String id = "id";
+    String label = "label";
+    @SuppressWarnings("unchecked")
+    List<EditorAttributeIdentifier> attributes = mock(List.class);
+    EditorEntityTypeParent parent = mock(EditorEntityTypeParent.class);
+    EditorEntityTypeParent editorEntityTypeParent =
+        EditorEntityTypeParent.create(id, label, attributes, parent);
+    EntityType entityType = entityTypeParentMapper.toEntityTypeReference(editorEntityTypeParent);
+    assertEquals(entityType.getIdValue(), id);
+  }
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testEntityTypeParentMapper()
-	{
-		new EntityTypeParentMapper(null, null, null);
-	}
+  @Test
+  public void testToEntityTypeReferenceNull() {
+    assertNull(entityTypeParentMapper.toEntityTypeReference(null));
+  }
 
-	@Test
-	public void testToEntityTypeReference()
-	{
-		String id = "id";
-		String label = "label";
-		@SuppressWarnings("unchecked")
-		List<EditorAttributeIdentifier> attributes = mock(List.class);
-		EditorEntityTypeParent parent = mock(EditorEntityTypeParent.class);
-		EditorEntityTypeParent editorEntityTypeParent = EditorEntityTypeParent.create(id, label, attributes, parent);
-		EntityType entityType = entityTypeParentMapper.toEntityTypeReference(editorEntityTypeParent);
-		assertEquals(entityType.getIdValue(), id);
-	}
+  @Test
+  public void testToEditorEntityTypeParent() {
+    String parentId = "parentId";
+    String parentLabel = "parentLabel";
+    EntityType parentEntityType = mock(EntityType.class);
+    when(parentEntityType.getId()).thenReturn(parentId);
+    when(parentEntityType.getLabel()).thenReturn(parentLabel);
+    @SuppressWarnings("unchecked")
+    Iterable<Attribute> parentAttributes = mock(Iterable.class);
+    when(parentEntityType.getOwnAllAttributes()).thenReturn(parentAttributes);
 
-	@Test
-	public void testToEntityTypeReferenceNull()
-	{
-		assertNull(entityTypeParentMapper.toEntityTypeReference(null));
-	}
+    String id = "id";
+    String label = "label";
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn(id);
+    when(entityType.getLabel()).thenReturn(label);
+    @SuppressWarnings("unchecked")
+    Iterable<Attribute> attributes = mock(Iterable.class);
+    when(entityType.getOwnAllAttributes()).thenReturn(attributes);
+    when(entityType.getExtends()).thenReturn(parentEntityType);
 
-	@Test
-	public void testToEditorEntityTypeParent()
-	{
-		String parentId = "parentId";
-		String parentLabel = "parentLabel";
-		EntityType parentEntityType = mock(EntityType.class);
-		when(parentEntityType.getId()).thenReturn(parentId);
-		when(parentEntityType.getLabel()).thenReturn(parentLabel);
-		@SuppressWarnings("unchecked")
-		Iterable<Attribute> parentAttributes = mock(Iterable.class);
-		when(parentEntityType.getOwnAllAttributes()).thenReturn(parentAttributes);
+    @SuppressWarnings("unchecked")
+    ImmutableList<EditorAttributeIdentifier> editorAttributes = mock(ImmutableList.class);
+    when(attributeReferenceMapper.toEditorAttributeIdentifiers(attributes))
+        .thenReturn(editorAttributes);
+    @SuppressWarnings("unchecked")
+    ImmutableList<EditorAttributeIdentifier> parentEditorAttributes = mock(ImmutableList.class);
+    when(attributeReferenceMapper.toEditorAttributeIdentifiers(parentAttributes))
+        .thenReturn(parentEditorAttributes);
 
-		String id = "id";
-		String label = "label";
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(id);
-		when(entityType.getLabel()).thenReturn(label);
-		@SuppressWarnings("unchecked")
-		Iterable<Attribute> attributes = mock(Iterable.class);
-		when(entityType.getOwnAllAttributes()).thenReturn(attributes);
-		when(entityType.getExtends()).thenReturn(parentEntityType);
+    EditorEntityTypeParent editorEntityTypeParent =
+        entityTypeParentMapper.toEditorEntityTypeParent(entityType);
+    EditorEntityTypeParent expectedEditorEntityTypeParent =
+        EditorEntityTypeParent.create(
+            id,
+            label,
+            editorAttributes,
+            EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
+    assertEquals(editorEntityTypeParent, expectedEditorEntityTypeParent);
+  }
 
-		@SuppressWarnings("unchecked")
-		ImmutableList<EditorAttributeIdentifier> editorAttributes = mock(ImmutableList.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifiers(attributes)).thenReturn(editorAttributes);
-		@SuppressWarnings("unchecked")
-		ImmutableList<EditorAttributeIdentifier> parentEditorAttributes = mock(ImmutableList.class);
-		when(attributeReferenceMapper.toEditorAttributeIdentifiers(parentAttributes)).thenReturn(
-				parentEditorAttributes);
-
-		EditorEntityTypeParent editorEntityTypeParent = entityTypeParentMapper.toEditorEntityTypeParent(entityType);
-		EditorEntityTypeParent expectedEditorEntityTypeParent = EditorEntityTypeParent.create(id, label,
-				editorAttributes, EditorEntityTypeParent.create(parentId, parentLabel, parentEditorAttributes, null));
-		assertEquals(editorEntityTypeParent, expectedEditorEntityTypeParent);
-	}
-
-	@Test
-	public void testToEditorEntityTypeParentNull()
-	{
-		assertNull(entityTypeParentMapper.toEditorEntityTypeParent(null));
-	}
+  @Test
+  public void testToEditorEntityTypeParentNull() {
+    assertNull(entityTypeParentMapper.toEditorEntityTypeParent(null));
+  }
 }

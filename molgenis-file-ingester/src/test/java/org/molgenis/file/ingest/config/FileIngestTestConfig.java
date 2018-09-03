@@ -9,8 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ EntityBaseTestConfig.class, FileTestConfig.class, JobTestConfig.class, FileIngestJobExecutionMetaData.class,
-		FileIngestJobExecutionFactory.class })
-public class FileIngestTestConfig
-{
-}
+@Import({
+  EntityBaseTestConfig.class,
+  FileTestConfig.class,
+  JobTestConfig.class,
+  FileIngestJobExecutionMetaData.class,
+  FileIngestJobExecutionFactory.class
+})
+public class FileIngestTestConfig {}

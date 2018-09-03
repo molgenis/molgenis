@@ -4,13 +4,12 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
 
-public interface AggregateQuery
-{
-	Query<Entity> getQuery();
+public interface AggregateQuery {
+  Query<Entity> getQuery();
 
-	Attribute getAttributeX();
+  Attribute getAttributeX();
 
-	Attribute getAttributeY();
+  Attribute getAttributeY();
 
-	Attribute getAttributeDistinct();
+  Attribute getAttributeDistinct();
 }

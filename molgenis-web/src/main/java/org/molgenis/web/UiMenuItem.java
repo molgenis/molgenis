@@ -1,16 +1,15 @@
 package org.molgenis.web;
 
-public interface UiMenuItem
-{
-	String getId();
+public interface UiMenuItem {
+  String getId();
 
-	String getName();
+  String getName();
 
-	String getUrl();
+  String getUrl();
 
-	UiMenuItemType getType();
+  UiMenuItemType getType();
 
-	UiMenu getParentMenu();
+  UiMenu getParentMenu();
 
-	boolean isAuthorized();
+  boolean isAuthorized();
 }

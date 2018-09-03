@@ -5,10 +5,8 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TokenFactory extends AbstractSystemEntityFactory<Token, TokenMetaData, String>
-{
-	TokenFactory(TokenMetaData tokenMetaData, EntityPopulator entityPopulator)
-	{
-		super(Token.class, tokenMetaData, entityPopulator);
-	}
+public class TokenFactory extends AbstractSystemEntityFactory<Token, TokenMetaData, String> {
+  TokenFactory(TokenMetaData tokenMetaData, EntityPopulator entityPopulator) {
+    super(Token.class, tokenMetaData, entityPopulator);
+  }
 }

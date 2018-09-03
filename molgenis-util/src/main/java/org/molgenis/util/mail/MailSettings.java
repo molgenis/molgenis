@@ -3,21 +3,20 @@ package org.molgenis.util.mail;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
-public interface MailSettings
-{
-	String getHost();
+public interface MailSettings {
+  String getHost();
 
-	int getPort();
+  int getPort();
 
-	String getProtocol();
+  String getProtocol();
 
-	String getUsername();
+  String getUsername();
 
-	String getPassword();
+  String getPassword();
 
-	Charset getDefaultEncoding();
+  Charset getDefaultEncoding();
 
-	Properties getJavaMailProperties();
+  Properties getJavaMailProperties();
 
-	boolean isTestConnection();
+  boolean isTestConnection();
 }

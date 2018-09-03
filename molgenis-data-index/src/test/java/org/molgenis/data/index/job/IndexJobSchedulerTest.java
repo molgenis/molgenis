@@ -1,5 +1,18 @@
 package org.molgenis.data.index.job;
 
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -22,149 +35,109 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
+@ContextConfiguration(classes = {IndexJobSchedulerTest.Config.class, IndexTestConfig.class})
+public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
+  @Autowired private DataService dataService;
 
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+  @Autowired private TransactionManager transactionManager;
 
-@ContextConfiguration(classes = { IndexJobSchedulerTest.Config.class, IndexTestConfig.class })
-public class IndexJobSchedulerTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	private DataService dataService;
+  @Autowired private TransactionListener molgenisTransactionListener;
 
-	@Autowired
-	private TransactionManager transactionManager;
+  @Autowired private JobExecutor jobExecutor;
 
-	@Autowired
-	private TransactionListener molgenisTransactionListener;
+  @Mock private Repository<Entity> repository;
 
-	@Autowired
-	private JobExecutor jobExecutor;
+  @Autowired private IndexJobScheduler indexJobScheduler;
 
-	@Mock
-	private Repository<Entity> repository;
+  @Mock private Stream<Entity> jobExecutions;
 
-	@Autowired
-	private IndexJobScheduler indexJobScheduler;
+  @Captor private ArgumentCaptor<IndexJobExecution> indexJobExecutionCaptor;
 
-	@Mock
-	private Stream<Entity> jobExecutions;
+  @Captor private ArgumentCaptor<Query<Entity>> queryCaptor;
 
-	@Captor
-	private ArgumentCaptor<IndexJobExecution> indexJobExecutionCaptor;
+  @Captor private ArgumentCaptor<Runnable> runnableArgumentCaptor;
 
-	@Captor
-	private ArgumentCaptor<Query<Entity>> queryCaptor;
+  @Autowired private Config config;
 
-	@Captor
-	private ArgumentCaptor<Runnable> runnableArgumentCaptor;
+  @BeforeClass
+  public void setUp() throws Exception {
+    verify(transactionManager).addTransactionListener(molgenisTransactionListener);
+  }
 
-	@Autowired
-	private Config config;
+  @BeforeMethod
+  public void beforeMethod() throws Exception {
+    config.resetMocks();
+  }
 
-	@BeforeClass
-	public void setUp() throws Exception
-	{
-		verify(transactionManager).addTransactionListener(molgenisTransactionListener);
-	}
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() throws Exception {
+    when(dataService.findOneById(INDEX_ACTION_GROUP, "abcde")).thenReturn(null);
 
-	@BeforeMethod
-	public void beforeMethod() throws Exception
-	{
-		config.resetMocks();
-	}
+    indexJobScheduler.scheduleIndexJob("abcde");
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() throws Exception
-	{
-		when(dataService.findOneById(INDEX_ACTION_GROUP, "abcde")).thenReturn(null);
+    verify(jobExecutor, never()).submit(any());
+  }
 
-		indexJobScheduler.scheduleIndexJob("abcde");
+  @Test
+  public void testCleanupJobExecutions() throws Exception {
+    when(dataService.getRepository(INDEX_JOB_EXECUTION)).thenReturn(repository);
+    when(repository.query()).thenReturn(new QueryImpl<>(repository));
+    when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
+    when(dataService.hasRepository(INDEX_JOB_EXECUTION)).thenReturn(true);
 
-		verify(jobExecutor, never()).submit(any());
-	}
+    indexJobScheduler.cleanupJobExecutions();
 
-	@Test
-	public void testCleanupJobExecutions() throws Exception
-	{
-		when(dataService.getRepository(INDEX_JOB_EXECUTION)).thenReturn(repository);
-		when(repository.query()).thenReturn(new QueryImpl<>(repository));
-		when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
-		when(dataService.hasRepository(INDEX_JOB_EXECUTION)).thenReturn(true);
+    verify(dataService).delete(INDEX_JOB_EXECUTION, jobExecutions);
 
-		indexJobScheduler.cleanupJobExecutions();
+    Query<Entity> actualQuery = queryCaptor.getValue();
+    Pattern queryPattern =
+        Pattern.compile("rules=\\['endDate' < '(.*)', AND, 'status' = 'SUCCESS'\\]");
+    Matcher queryMatcher = queryPattern.matcher(actualQuery.toString());
+    assertTrue(queryMatcher.matches());
 
-		verify(dataService).delete(INDEX_JOB_EXECUTION, jobExecutions);
+    // check the endDate time limit in the query
+    assertEquals(
+        Duration.between(parseInstant(queryMatcher.group(1)), Instant.now()).toMinutes(), 5);
+  }
 
-		Query<Entity> actualQuery = queryCaptor.getValue();
-		Pattern queryPattern = Pattern.compile("rules=\\['endDate' < '(.*)', AND, 'status' = 'SUCCESS'\\]");
-		Matcher queryMatcher = queryPattern.matcher(actualQuery.toString());
-		assertTrue(queryMatcher.matches());
+  @Configuration
+  @Import({IndexConfig.class, IndexActionRegisterServiceImpl.class})
+  public static class Config {
+    @Mock private JobExecutor jobExecutor;
 
-		// check the endDate time limit in the query
-		assertEquals(Duration.between(parseInstant(queryMatcher.group(1)), Instant.now()).toMinutes(), 5);
-	}
+    @Mock private MailSender mailSender;
 
-	@Configuration
-	@Import({ IndexConfig.class, IndexActionRegisterServiceImpl.class })
-	public static class Config
-	{
-		@Mock
-		private JobExecutor jobExecutor;
+    @Mock private TransactionManager transactionManager;
 
-		@Mock
-		private MailSender mailSender;
+    @Mock private IndexService indexService;
 
-		@Mock
-		private TransactionManager transactionManager;
+    public Config() {
+      initMocks(this);
+    }
 
-		@Mock
-		private IndexService indexService;
+    private void resetMocks() {
+      reset(jobExecutor, mailSender, transactionManager, indexService);
+    }
 
-		public Config()
-		{
-			initMocks(this);
-		}
+    @Bean
+    public JobExecutor jobExecutor() {
+      return jobExecutor;
+    }
 
-		private void resetMocks()
-		{
-			reset(jobExecutor, mailSender, transactionManager, indexService);
-		}
+    @Bean
+    public IndexService indexService() {
+      return indexService;
+    }
 
-		@Bean
-		public JobExecutor jobExecutor()
-		{
-			return jobExecutor;
-		}
+    @Bean
+    public TransactionManager molgenisTransactionManager() {
+      return transactionManager;
+    }
 
-		@Bean
-		public IndexService indexService()
-		{
-			return indexService;
-		}
-
-		@Bean
-		public TransactionManager molgenisTransactionManager()
-		{
-			return transactionManager;
-		}
-
-		@Bean
-		public MailSender mailSender()
-		{
-			return mailSender;
-		}
-	}
-
+    @Bean
+    public MailSender mailSender() {
+      return mailSender;
+    }
+  }
 }

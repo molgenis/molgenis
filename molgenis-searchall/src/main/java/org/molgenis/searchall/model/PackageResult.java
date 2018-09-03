@@ -6,20 +6,16 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_PackageResult.class)
-@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class PackageResult implements Described
-{
-	public abstract String getId();
+@SuppressWarnings(
+    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+public abstract class PackageResult implements Described {
+  public abstract String getId();
 
-	public static PackageResult create(String id, String label, String description)
-	{
-		return new AutoValue_PackageResult(label, description, id);
-	}
+  public static PackageResult create(String id, String label, String description) {
+    return new AutoValue_PackageResult(label, description, id);
+  }
 
-	public static PackageResult create(Package pack)
-	{
-		return PackageResult.create(pack.getId(), pack.getLabel(), pack.getDescription());
-	}
-
-
+  public static PackageResult create(Package pack) {
+    return PackageResult.create(pack.getId(), pack.getLabel(), pack.getDescription());
+  }
 }

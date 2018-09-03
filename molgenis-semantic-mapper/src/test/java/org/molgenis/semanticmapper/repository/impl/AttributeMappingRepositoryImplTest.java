@@ -1,5 +1,16 @@
 package org.molgenis.semanticmapper.repository.impl;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Collection;
+import java.util.List;
 import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -31,233 +42,225 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
-import java.util.List;
+@ContextConfiguration(
+    classes = {
+      AttributeMappingRepositoryImplTest.Config.class,
+      MappingConfig.class,
+      OntologyConfig.class
+    })
+public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest {
+  @Autowired private EntityTypeFactory entityTypeFactory;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.XREF;
-import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
-import static org.testng.Assert.assertEquals;
+  @Autowired private AttributeFactory attrMetaFactory;
 
-@ContextConfiguration(classes = { AttributeMappingRepositoryImplTest.Config.class, MappingConfig.class,
-		OntologyConfig.class })
-public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
+  @Autowired private AttributeMappingMetaData attrMappingMeta;
 
-	@Autowired
-	private AttributeFactory attrMetaFactory;
+  @Autowired private AttributeMappingRepositoryImpl attributeMappingRepository;
 
-	@Autowired
-	private AttributeMappingMetaData attrMappingMeta;
+  @Autowired private IdGenerator idGenerator;
 
-	@Autowired
-	private AttributeMappingRepositoryImpl attributeMappingRepository;
+  @Test
+  public void testGetAttributeMappings() {
+    Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+    List<Attribute> sourceAttributes = newArrayList();
 
-	@Autowired
-	private IdGenerator idGenerator;
+    List<AttributeMapping> attributeMappings = newArrayList();
+    attributeMappings.add(
+        new AttributeMapping(
+            "attributeMappingID",
+            "targetAttribute",
+            targetAttribute,
+            "algorithm",
+            sourceAttributes));
 
-	@Test
-	public void testGetAttributeMappings()
-	{
-		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
-		List<Attribute> sourceAttributes = newArrayList();
+    Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
+    attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+    attributeMappingEntity.set(TARGET_ATTRIBUTE, "targetAttribute");
+    attributeMappingEntity.set(SOURCE_ATTRIBUTES, "sourceAttributes");
+    attributeMappingEntity.set(ALGORITHM, "algorithm");
 
-		List<AttributeMapping> attributeMappings = newArrayList();
-		attributeMappings.add(
-				new AttributeMapping("attributeMappingID", "targetAttribute", targetAttribute, "algorithm",
-						sourceAttributes));
+    List<Entity> attributeMappingEntities = newArrayList();
+    attributeMappingEntities.add(attributeMappingEntity);
 
-		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
-		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGET_ATTRIBUTE, "targetAttribute");
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "sourceAttributes");
-		attributeMappingEntity.set(ALGORITHM, "algorithm");
+    EntityType sourceEntityType = entityTypeFactory.create("source");
+    EntityType targetEntityType = entityTypeFactory.create("target");
+    targetEntityType.addAttribute(targetAttribute);
 
-		List<Entity> attributeMappingEntities = newArrayList();
-		attributeMappingEntities.add(attributeMappingEntity);
+    assertEquals(
+        attributeMappingRepository.getAttributeMappings(
+            attributeMappingEntities, sourceEntityType, targetEntityType),
+        attributeMappings);
+  }
 
-		EntityType sourceEntityType = entityTypeFactory.create("source");
-		EntityType targetEntityType = entityTypeFactory.create("target");
-		targetEntityType.addAttribute(targetAttribute);
+  @Test
+  public void testUpdate() {
+    Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+    List<Attribute> sourceAttributes = newArrayList();
 
-		assertEquals(attributeMappingRepository.getAttributeMappings(attributeMappingEntities, sourceEntityType,
-				targetEntityType), attributeMappings);
-	}
+    targetAttribute.setDataType(STRING);
 
-	@Test
-	public void testUpdate()
-	{
-		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
-		List<Attribute> sourceAttributes = newArrayList();
+    Collection<AttributeMapping> attributeMappings =
+        singletonList(
+            new AttributeMapping(
+                "attributeMappingID",
+                "targetAttribute",
+                targetAttribute,
+                "algorithm",
+                sourceAttributes,
+                CURATED.toString()));
 
-		targetAttribute.setDataType(STRING);
+    List<Entity> result = newArrayList();
+    Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
+    attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+    attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
+    attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
+    attributeMappingEntity.set(ALGORITHM, "algorithm");
+    attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
 
-		Collection<AttributeMapping> attributeMappings = singletonList(
-				new AttributeMapping("attributeMappingID", "targetAttribute", targetAttribute, "algorithm",
-						sourceAttributes, CURATED.toString()));
+    result.add(attributeMappingEntity);
 
-		List<Entity> result = newArrayList();
-		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
-		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
-		attributeMappingEntity.set(ALGORITHM, "algorithm");
-		attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
+    List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
+    assertEquals(expectedAttrMappings.size(), result.size());
+    for (int i = 0; i < expectedAttrMappings.size(); ++i) {
+      Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
+    }
+  }
 
-		result.add(attributeMappingEntity);
+  @Test
+  public void testInsert() {
+    Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+    List<Attribute> sourceAttributes = newArrayList();
+    targetAttribute.setDataType(STRING);
 
-		List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
-		assertEquals(expectedAttrMappings.size(), result.size());
-		for (int i = 0; i < expectedAttrMappings.size(); ++i)
-		{
-			Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
-		}
-	}
+    Collection<AttributeMapping> attributeMappings =
+        singletonList(
+            new AttributeMapping(
+                null,
+                "targetAttribute",
+                targetAttribute,
+                "algorithm",
+                sourceAttributes,
+                CURATED.toString()));
 
-	@Test
-	public void testInsert()
-	{
-		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
-		List<Attribute> sourceAttributes = newArrayList();
-		targetAttribute.setDataType(STRING);
+    Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
 
-		Collection<AttributeMapping> attributeMappings = singletonList(
-				new AttributeMapping(null, "targetAttribute", targetAttribute, "algorithm", sourceAttributes,
-						CURATED.toString()));
+    List<Entity> result = newArrayList();
+    Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
+    attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
+    attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
+    attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
+    attributeMappingEntity.set(ALGORITHM, "algorithm");
+    attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
 
-		Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
+    result.add(attributeMappingEntity);
 
-		List<Entity> result = newArrayList();
-		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
-		attributeMappingEntity.set(IDENTIFIER, "attributeMappingID");
-		attributeMappingEntity.set(TARGET_ATTRIBUTE, targetAttribute.getName());
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES, "");
-		attributeMappingEntity.set(ALGORITHM, "algorithm");
-		attributeMappingEntity.set(ALGORITHM_STATE, CURATED.toString());
+    List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
+    assertEquals(expectedAttrMappings.size(), result.size());
+    for (int i = 0; i < expectedAttrMappings.size(); ++i) {
+      Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
+    }
+  }
 
-		result.add(attributeMappingEntity);
+  @Test
+  public void testRetrieveAttributesFromAlgorithm() {
+    String algorithm = "$('attribute_1').value()$('attribute_2').value()";
 
-		List<Entity> expectedAttrMappings = attributeMappingRepository.upsert(attributeMappings);
-		assertEquals(expectedAttrMappings.size(), result.size());
-		for (int i = 0; i < expectedAttrMappings.size(); ++i)
-		{
-			Assert.assertTrue(EntityUtils.equals(expectedAttrMappings.get(i), result.get(i)));
-		}
-	}
+    Attribute attr1 = attrMetaFactory.create().setName("attribute_1");
+    Attribute attr2 = attrMetaFactory.create().setName("attribute_2");
 
-	@Test
-	public void testRetrieveAttributesFromAlgorithm()
-	{
-		String algorithm = "$('attribute_1').value()$('attribute_2').value()";
+    EntityType sourceEntityType = entityTypeFactory.create("source");
+    sourceEntityType.addAttribute(attr1);
+    sourceEntityType.addAttribute(attr2);
 
-		Attribute attr1 = attrMetaFactory.create().setName("attribute_1");
-		Attribute attr2 = attrMetaFactory.create().setName("attribute_2");
+    List<Attribute> sourceAttributes = newArrayList();
+    sourceAttributes.add(attr1);
+    sourceAttributes.add(attr2);
 
-		EntityType sourceEntityType = entityTypeFactory.create("source");
-		sourceEntityType.addAttribute(attr1);
-		sourceEntityType.addAttribute(attr2);
+    assertEquals(
+        attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
+        sourceAttributes);
+  }
 
-		List<Attribute> sourceAttributes = newArrayList();
-		sourceAttributes.add(attr1);
-		sourceAttributes.add(attr2);
+  @Test
+  public void testRetrieveAttributesFromAlgorithmWithDotNotation() {
+    String algorithm = "$('person.name').value()";
 
-		assertEquals(attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
-				sourceAttributes);
-	}
+    Attribute id = attrMetaFactory.create().setName("id");
+    Attribute name = attrMetaFactory.create().setName("name");
+    EntityType referenceEntityType = entityTypeFactory.create("reference");
+    referenceEntityType.addAttribute(id);
+    referenceEntityType.addAttribute(name);
 
-	@Test
-	public void testRetrieveAttributesFromAlgorithmWithDotNotation()
-	{
-		String algorithm = "$('person.name').value()";
+    Attribute person =
+        attrMetaFactory
+            .create()
+            .setName("person")
+            .setDataType(XREF)
+            .setRefEntity(referenceEntityType);
+    EntityType sourceEntityType = entityTypeFactory.create("source");
+    sourceEntityType.addAttribute(person);
 
-		Attribute id = attrMetaFactory.create().setName("id");
-		Attribute name = attrMetaFactory.create().setName("name");
-		EntityType referenceEntityType = entityTypeFactory.create("reference");
-		referenceEntityType.addAttribute(id);
-		referenceEntityType.addAttribute(name);
+    List<Attribute> expectedSourceAttributes = newArrayList();
+    expectedSourceAttributes.add(person);
 
-		Attribute person = attrMetaFactory.create().setName("person").setDataType(XREF).setRefEntity(referenceEntityType);
-		EntityType sourceEntityType = entityTypeFactory.create("source");
-		sourceEntityType.addAttribute(person);
+    assertEquals(
+        attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
+        expectedSourceAttributes);
+  }
 
-		List<Attribute> expectedSourceAttributes = newArrayList();
-		expectedSourceAttributes.add(person);
+  @Configuration
+  @Import(MapperTestConfig.class)
+  public static class Config {
+    @Autowired private AttributeMappingMetaData attrMappingMeta;
 
-		assertEquals(attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
-				expectedSourceAttributes);
-	}
+    @Bean
+    DataService dataService() {
+      return mock(DataService.class);
+    }
 
-	@Configuration
-	@Import(MapperTestConfig.class)
-	public static class Config
-	{
-		@Autowired
-		private AttributeMappingMetaData attrMappingMeta;
+    @Bean
+    SemanticSearchService semanticSearchService() {
+      return mock(SemanticSearchService.class);
+    }
 
-		@Bean
-		DataService dataService()
-		{
-			return mock(DataService.class);
-		}
+    @Bean
+    AttributeMappingRepositoryImpl attributeMappingRepository() {
+      return new AttributeMappingRepositoryImpl(dataService(), attrMappingMeta);
+    }
 
-		@Bean
-		SemanticSearchService semanticSearchService()
-		{
-			return mock(SemanticSearchService.class);
-		}
+    @Bean
+    UserService userService() {
+      return mock(UserService.class);
+    }
 
-		@Bean
-		AttributeMappingRepositoryImpl attributeMappingRepository()
-		{
-			return new AttributeMappingRepositoryImpl(dataService(), attrMappingMeta);
-		}
+    @Bean
+    PermissionSystemService permissionSystemService() {
+      return mock(PermissionSystemService.class);
+    }
 
-		@Bean
-		UserService userService()
-		{
-			return mock(UserService.class);
-		}
+    @Bean
+    IdGenerator idGenerator() {
+      return mock(IdGenerator.class);
+    }
 
-		@Bean
-		PermissionSystemService permissionSystemService()
-		{
-			return mock(PermissionSystemService.class);
-		}
+    @Bean
+    EntityManager entityManager() {
+      return mock(EntityManager.class);
+    }
 
-		@Bean
-		IdGenerator idGenerator()
-		{
-			return mock(IdGenerator.class);
-		}
+    @Bean
+    JsMagmaScriptEvaluator jsMagmaScriptEvaluator() {
+      return mock(JsMagmaScriptEvaluator.class);
+    }
 
-		@Bean
-		EntityManager entityManager()
-		{
-			return mock(EntityManager.class);
-		}
+    @Bean
+    public OntologyTagService ontologyTagService() {
+      return mock(OntologyTagService.class);
+    }
 
-		@Bean
-		JsMagmaScriptEvaluator jsMagmaScriptEvaluator()
-		{
-			return mock(JsMagmaScriptEvaluator.class);
-		}
-
-		@Bean
-		public OntologyTagService ontologyTagService()
-		{
-			return mock(OntologyTagService.class);
-		}
-
-		@Bean
-		SystemPackageRegistry systemPackageRegistry()
-		{
-			return mock(SystemPackageRegistry.class);
-		}
-	}
+    @Bean
+    SystemPackageRegistry systemPackageRegistry() {
+      return mock(SystemPackageRegistry.class);
+    }
+  }
 }

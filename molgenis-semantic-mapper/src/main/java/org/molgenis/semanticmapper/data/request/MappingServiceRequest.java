@@ -4,68 +4,59 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-public class MappingServiceRequest
-{
-	@NotNull
-	private final String targetEntityName;
-	@NotNull
-	private final String sourceEntityName;
-	@NotNull
-	private final String targetAttributeName;
-	@NotNull
-	private final String algorithm;
-	@Min(0)
-	private Long offset;
-	@Min(1)
-	@Max(1000)
-	private Long num;
+public class MappingServiceRequest {
+  @NotNull private final String targetEntityName;
+  @NotNull private final String sourceEntityName;
+  @NotNull private final String targetAttributeName;
+  @NotNull private final String algorithm;
 
-	public MappingServiceRequest(String targetEntityName, String sourceEntityName, String targetAttributeName,
-			String algorithm)
-	{
-		this.targetEntityName = targetEntityName;
-		this.sourceEntityName = sourceEntityName;
-		this.targetAttributeName = targetAttributeName;
-		this.algorithm = algorithm;
-	}
+  @Min(0)
+  private Long offset;
 
-	public String getTargetEntityName()
-	{
-		return targetEntityName;
-	}
+  @Min(1)
+  @Max(1000)
+  private Long num;
 
-	public String getSourceEntityName()
-	{
-		return sourceEntityName;
-	}
+  public MappingServiceRequest(
+      String targetEntityName,
+      String sourceEntityName,
+      String targetAttributeName,
+      String algorithm) {
+    this.targetEntityName = targetEntityName;
+    this.sourceEntityName = sourceEntityName;
+    this.targetAttributeName = targetAttributeName;
+    this.algorithm = algorithm;
+  }
 
-	public String getTargetAttributeName()
-	{
-		return targetAttributeName;
-	}
+  public String getTargetEntityName() {
+    return targetEntityName;
+  }
 
-	public String getAlgorithm()
-	{
-		return algorithm;
-	}
+  public String getSourceEntityName() {
+    return sourceEntityName;
+  }
 
-	public Long getOffset()
-	{
-		return offset;
-	}
+  public String getTargetAttributeName() {
+    return targetAttributeName;
+  }
 
-	public void setOffset(Long offset)
-	{
-		this.offset = offset;
-	}
+  public String getAlgorithm() {
+    return algorithm;
+  }
 
-	public Long getNum()
-	{
-		return num;
-	}
+  public Long getOffset() {
+    return offset;
+  }
 
-	public void setNum(Long num)
-	{
-		this.num = num;
-	}
+  public void setOffset(Long offset) {
+    this.offset = offset;
+  }
+
+  public Long getNum() {
+    return num;
+  }
+
+  public void setNum(Long num) {
+    this.num = num;
+  }
 }

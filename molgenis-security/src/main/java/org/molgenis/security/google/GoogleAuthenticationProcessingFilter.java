@@ -1,9 +1,24 @@
 package org.molgenis.security.google;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.auth.UserMetaData.*;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.springframework.http.HttpMethod.POST;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
@@ -23,181 +38,154 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+public class GoogleAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(GoogleAuthenticationProcessingFilter.class);
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.UserMetaData.*;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.springframework.http.HttpMethod.POST;
+  public static final String GOOGLE_AUTHENTICATION_URL = "/login/google";
+  static final String PARAM_ID_TOKEN = "id_token";
+  private static final String PROFILE_KEY_GIVEN_NAME = "given_name";
+  private static final String PROFILE_KEY_FAMILY_NAME = "family_name";
 
-public class GoogleAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter
-{
-	private static final Logger LOG = LoggerFactory.getLogger(GoogleAuthenticationProcessingFilter.class);
+  private final GooglePublicKeysManager googlePublicKeysManager;
+  private final DataService dataService;
+  private final UserDetailsService userDetailsService;
+  private final AuthenticationSettings authenticationSettings;
+  private final UserFactory userFactory;
 
-	public static final String GOOGLE_AUTHENTICATION_URL = "/login/google";
-	static final String PARAM_ID_TOKEN = "id_token";
-	private static final String PROFILE_KEY_GIVEN_NAME = "given_name";
-	private static final String PROFILE_KEY_FAMILY_NAME = "family_name";
+  public GoogleAuthenticationProcessingFilter(
+      GooglePublicKeysManager googlePublicKeysManager,
+      DataService dataService,
+      UserDetailsService userDetailsService,
+      AuthenticationSettings authenticationSettings,
+      UserFactory userFactory) {
+    super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
+    this.userFactory = requireNonNull(userFactory);
 
-	private final GooglePublicKeysManager googlePublicKeysManager;
-	private final DataService dataService;
-	private final UserDetailsService userDetailsService;
-	private final AuthenticationSettings authenticationSettings;
-	private final UserFactory userFactory;
+    setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
-	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
-			DataService dataService, UserDetailsService userDetailsService,
-			AuthenticationSettings authenticationSettings, UserFactory userFactory)
-	{
-		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
-		this.userFactory = requireNonNull(userFactory);
+    this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
+    this.dataService = requireNonNull(dataService);
+    this.userDetailsService = requireNonNull(userDetailsService);
+    this.authenticationSettings = requireNonNull(authenticationSettings);
+  }
 
-		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
+  @Override
+  public Authentication attemptAuthentication(
+      HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException {
+    if (!authenticationSettings.getGoogleSignIn()) {
+      throw new AuthenticationServiceException("Google authentication not available");
+    }
 
-		this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
-		this.dataService = requireNonNull(dataService);
-		this.userDetailsService = requireNonNull(userDetailsService);
-		this.authenticationSettings = requireNonNull(authenticationSettings);
-	}
+    String idTokenString = request.getParameter(PARAM_ID_TOKEN);
 
-	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException
-	{
-		if (!authenticationSettings.getGoogleSignIn())
-		{
-			throw new AuthenticationServiceException("Google authentication not available");
-		}
+    if (idTokenString != null) {
+      // verify token string is valid
+      GoogleIdToken idToken;
+      try {
+        idToken = verify(idTokenString);
+      } catch (GeneralSecurityException e) {
+        throw new UnknownTokenException(e.getMessage(), e);
+      }
 
-		String idTokenString = request.getParameter(PARAM_ID_TOKEN);
+      // google token is null implies that verification failed
+      if (idToken != null) {
+        return createAuthentication(idToken.getPayload());
+      } else {
+        throw new BadCredentialsException(format("Token [%s] verification failed", idTokenString));
+      }
+    }
+    throw new UnknownTokenException(idTokenString);
+  }
 
-		if (idTokenString != null)
-		{
-			// verify token string is valid
-			GoogleIdToken idToken;
-			try
-			{
-				idToken = verify(idTokenString);
-			}
-			catch (GeneralSecurityException e)
-			{
-				throw new UnknownTokenException(e.getMessage(), e);
-			}
+  private GoogleIdToken verify(String idTokenString) throws GeneralSecurityException, IOException {
+    List<String> audience =
+        Collections.singletonList(authenticationSettings.getGoogleAppClientId());
+    GoogleIdTokenVerifier googleIdTokenVerifier =
+        new GoogleIdTokenVerifier.Builder(googlePublicKeysManager).setAudience(audience).build();
+    return googleIdTokenVerifier.verify(idTokenString);
+  }
 
-			// google token is null implies that verification failed
-			if (idToken != null)
-			{
-				return createAuthentication(idToken.getPayload());
-			}
-			else
-			{
-				throw new BadCredentialsException(format("Token [%s] verification failed", idTokenString));
-			}
-		}
-		throw new UnknownTokenException(idTokenString);
-	}
+  private Authentication createAuthentication(Payload payload) {
+    String email = payload.getEmail();
+    if (email == null) {
+      throw new AuthenticationServiceException(
+          "Google URI token is missing required [email] claim, did you forget to specify scope [email]?");
+    }
+    Boolean emailVerified = payload.getEmailVerified();
+    if (emailVerified != null && !emailVerified) {
+      throw new AuthenticationServiceException("Google account email is not verified");
+    }
+    String principal = payload.getSubject();
+    String credentials = payload.getAccessTokenHash();
 
-	private GoogleIdToken verify(String idTokenString) throws GeneralSecurityException, IOException
-	{
-		List<String> audience = Collections.singletonList(authenticationSettings.getGoogleAppClientId());
-		GoogleIdTokenVerifier googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(
-				googlePublicKeysManager).setAudience(audience).build();
-		return googleIdTokenVerifier.verify(idTokenString);
-	}
+    return runAsSystem(
+        () -> {
+          User user;
 
-	private Authentication createAuthentication(Payload payload)
-	{
-		String email = payload.getEmail();
-		if (email == null)
-		{
-			throw new AuthenticationServiceException(
-					"Google URI token is missing required [email] claim, did you forget to specify scope [email]?");
-		}
-		Boolean emailVerified = payload.getEmailVerified();
-		if (emailVerified != null && !emailVerified)
-		{
-			throw new AuthenticationServiceException("Google account email is not verified");
-		}
-		String principal = payload.getSubject();
-		String credentials = payload.getAccessTokenHash();
+          user = dataService.query(USER, User.class).eq(GOOGLEACCOUNTID, principal).findOne();
+          if (user == null) {
+            // no user with google account
+            user = dataService.query(USER, User.class).eq(EMAIL, email).findOne();
+            if (user != null) {
+              // connect google account to user
+              user.setGoogleAccountId(principal);
+              dataService.update(USER, user);
+            } else {
+              // create new user
+              String username = email;
+              String givenName =
+                  payload.containsKey(PROFILE_KEY_GIVEN_NAME)
+                      ? payload.get(PROFILE_KEY_GIVEN_NAME).toString()
+                      : null;
+              String familyName =
+                  payload.containsKey(PROFILE_KEY_FAMILY_NAME)
+                      ? payload.get(PROFILE_KEY_FAMILY_NAME).toString()
+                      : null;
+              user = createMolgenisUser(username, email, givenName, familyName, principal);
+            }
+          }
+          if (!user.isActive()) {
+            throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
+          }
+          // create authentication
+          Collection<? extends GrantedAuthority> authorities =
+              userDetailsService.getAuthorities(user);
+          return new UsernamePasswordAuthenticationToken(
+              user.getUsername(), credentials, authorities);
+        });
+  }
 
-		return runAsSystem(() ->
-		{
-			User user;
+  private User createMolgenisUser(
+      String username, String email, String givenName, String familyName, String googleAccountId) {
+    if (!authenticationSettings.getSignUp()) {
+      throw new AuthenticationServiceException(
+          "Google authentication not possible: sign up disabled");
+    }
 
-			user = dataService.query(USER, User.class).eq(GOOGLEACCOUNTID, principal).findOne();
-			if (user == null)
-			{
-				// no user with google account
-				user = dataService.query(USER, User.class).eq(EMAIL, email).findOne();
-				if (user != null)
-				{
-					// connect google account to user
-					user.setGoogleAccountId(principal);
-					dataService.update(USER, user);
-				}
-				else
-				{
-					// create new user
-					String username = email;
-					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME) ? payload.get(PROFILE_KEY_GIVEN_NAME)
-																							.toString() : null;
-					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME) ? payload.get(
-							PROFILE_KEY_FAMILY_NAME).toString() : null;
-					user = createMolgenisUser(username, email, givenName, familyName, principal);
-				}
-			}
-			if (!user.isActive())
-			{
-				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
-			}
-			// create authentication
-			Collection<? extends GrantedAuthority> authorities = userDetailsService.getAuthorities(user);
-			return new UsernamePasswordAuthenticationToken(user.getUsername(), credentials, authorities);
-		});
-	}
+    if (authenticationSettings.getSignUpModeration()) {
+      throw new AuthenticationServiceException(
+          "Google authentication not possible: sign up moderation enabled");
+    }
 
-	private User createMolgenisUser(String username, String email, String givenName, String familyName,
-			String googleAccountId)
-	{
-		if (!authenticationSettings.getSignUp())
-		{
-			throw new AuthenticationServiceException("Google authentication not possible: sign up disabled");
-		}
-
-		if (authenticationSettings.getSignUpModeration())
-		{
-			throw new AuthenticationServiceException("Google authentication not possible: sign up moderation enabled");
-		}
-
-		// create user
-		LOG.info("first login for [{}], creating MOLGENIS user", username);
-		User user = userFactory.create();
-		user.setUsername(username);
-		user.setPassword(UUID.randomUUID().toString());
-		user.setEmail(email);
-		user.setActive(true);
-		user.setSuperuser(false);
-		user.setChangePassword(false);
-		if (givenName != null)
-		{
-			user.setFirstName(givenName);
-		}
-		if (familyName != null)
-		{
-			user.setLastName(familyName);
-		}
-		user.setGoogleAccountId(googleAccountId);
-		dataService.add(USER, user);
-		return user;
-	}
+    // create user
+    LOG.info("first login for [{}], creating MOLGENIS user", username);
+    User user = userFactory.create();
+    user.setUsername(username);
+    user.setPassword(UUID.randomUUID().toString());
+    user.setEmail(email);
+    user.setActive(true);
+    user.setSuperuser(false);
+    user.setChangePassword(false);
+    if (givenName != null) {
+      user.setFirstName(givenName);
+    }
+    if (familyName != null) {
+      user.setLastName(familyName);
+    }
+    user.setGoogleAccountId(googleAccountId);
+    dataService.add(USER, user);
+    return user;
+  }
 }

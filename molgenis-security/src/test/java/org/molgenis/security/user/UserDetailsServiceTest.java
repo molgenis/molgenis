@@ -1,5 +1,17 @@
 package org.molgenis.security.user;
 
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -16,148 +28,136 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Stream;
+public class UserDetailsServiceTest extends AbstractMockitoTest {
+  @Mock private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
-import static org.testng.Assert.assertEquals;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private DataService dataService;
 
-public class UserDetailsServiceTest extends AbstractMockitoTest
-{
-	@Mock
-	private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+  @Mock private User user;
 
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	private DataService dataService;
+  @Mock private RoleMembership currentMembership;
 
-	@Mock
-	private User user;
+  @Mock private RoleMembership pastMembership;
 
-	@Mock
-	private RoleMembership currentMembership;
+  @Mock private Role role;
 
-	@Mock
-	private RoleMembership pastMembership;
+  private UserDetailsService userDetailsService;
 
-	@Mock
-	private Role role;
+  @BeforeMethod
+  public void setUp() {
+    userDetailsService = new UserDetailsService(dataService, grantedAuthoritiesMapper);
+  }
 
-	private UserDetailsService userDetailsService;
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testUserDetailsService() {
+    new UserDetailsService(null, null);
+  }
 
-	@BeforeMethod
-	public void setUp()
-	{
-		userDetailsService = new UserDetailsService(dataService, grantedAuthoritiesMapper);
-	}
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testLoadUserByUsernameSuperuser() {
+    String username = "user";
+    when(user.getUsername()).thenReturn(username);
+    when(user.getPassword()).thenReturn("pw");
+    when(user.isActive()).thenReturn(true);
+    when(user.isSuperuser()).thenReturn(true);
+    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testUserDetailsService()
-	{
-		new UserDetailsService(null, null);
-	}
+    when(currentMembership.isCurrent()).thenReturn(true);
+    when(currentMembership.getRole()).thenReturn(role);
+    when(role.getName()).thenReturn("MY_ROLE");
+    when(dataService
+            .query(ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.USER, user)
+            .findAll())
+        .thenReturn(Stream.of(currentMembership, pastMembership));
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testLoadUserByUsernameSuperuser()
-	{
-		String username = "user";
-		when(user.getUsername()).thenReturn(username);
-		when(user.getPassword()).thenReturn("pw");
-		when(user.isActive()).thenReturn(true);
-		when(user.isSuperuser()).thenReturn(true);
-		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
+    Collection<GrantedAuthority> mappedAuthorities =
+        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+    when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
+        .thenReturn((Collection) mappedAuthorities);
 
-		when(currentMembership.isCurrent()).thenReturn(true);
-		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("MY_ROLE");
-		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
-						.eq(RoleMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    assertEquals(userDetails.getUsername(), username);
+    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+  }
 
-		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_SU"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
-		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
-		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testLoadUserByUsernameNonSuperuser() {
+    String username = "user";
+    User user = mock(User.class);
+    when(user.getUsername()).thenReturn(username);
+    when(user.getPassword()).thenReturn("pw");
+    when(user.isActive()).thenReturn(true);
+    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-		assertEquals(userDetails.getUsername(), username);
-		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
-	}
+    when(currentMembership.isCurrent()).thenReturn(true);
+    when(currentMembership.getRole()).thenReturn(role);
+    when(role.getName()).thenReturn("MY_ROLE");
+    when(dataService
+            .query(ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.USER, user)
+            .findAll())
+        .thenReturn(Stream.of(currentMembership, pastMembership));
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testLoadUserByUsernameNonSuperuser()
-	{
-		String username = "user";
-		User user = mock(User.class);
-		when(user.getUsername()).thenReturn(username);
-		when(user.getPassword()).thenReturn("pw");
-		when(user.isActive()).thenReturn(true);
-		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
+    Collection<GrantedAuthority> mappedAuthorities =
+        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+    when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
+        .thenReturn((Collection) mappedAuthorities);
 
-		when(currentMembership.isCurrent()).thenReturn(true);
-		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("MY_ROLE");
-		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
-						.eq(RoleMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    assertEquals(userDetails.getUsername(), username);
+    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+  }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testLoadUserByUsernameAnonymous() {
+    String username = "anonymous";
+    when(user.getUsername()).thenReturn(username);
+    when(user.getPassword()).thenReturn("pw");
+    when(user.isActive()).thenReturn(true);
+    when(user.isSuperuser()).thenReturn(false);
+    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
-		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
-		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
-		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
+    when(currentMembership.isCurrent()).thenReturn(true);
+    when(currentMembership.getRole()).thenReturn(role);
+    when(role.getName()).thenReturn("MY_ROLE");
+    when(dataService
+            .query(ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.USER, user)
+            .findAll())
+        .thenReturn(Stream.of(currentMembership, pastMembership));
 
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-		assertEquals(userDetails.getUsername(), username);
-		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
-	}
+    Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
+    userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
+    Collection<GrantedAuthority> mappedAuthorities =
+        singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
+    when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities))
+        .thenReturn((Collection) mappedAuthorities);
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testLoadUserByUsernameAnonymous()
-	{
-		String username = "anonymous";
-		when(user.getUsername()).thenReturn(username);
-		when(user.getPassword()).thenReturn("pw");
-		when(user.isActive()).thenReturn(true);
-		when(user.isSuperuser()).thenReturn(false);
-		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    assertEquals(userDetails.getUsername(), username);
+    assertEquals(userDetails.getAuthorities(), mappedAuthorities);
+  }
 
-		when(currentMembership.isCurrent()).thenReturn(true);
-		when(currentMembership.getRole()).thenReturn(role);
-		when(role.getName()).thenReturn("MY_ROLE");
-		when(dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
-						.eq(RoleMembershipMetadata.USER, user)
-						.findAll()).thenReturn(Stream.of(currentMembership, pastMembership));
+  @Test(
+      expectedExceptions = UsernameNotFoundException.class,
+      expectedExceptionsMessageRegExp = "unknown user 'unknownUser'")
+  public void testLoadUserByUsernameUnknownUser() {
+    String username = "unknownUser";
+    when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(null);
 
-		Set<GrantedAuthority> userAuthorities = new LinkedHashSet<>();
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_ANONYMOUS"));
-		userAuthorities.add(new SimpleGrantedAuthority("ROLE_MY_ROLE"));
-		Collection<GrantedAuthority> mappedAuthorities = singletonList(new SimpleGrantedAuthority("ROLE_MAPPED"));
-		when(grantedAuthoritiesMapper.mapAuthorities(userAuthorities)).thenReturn((Collection) mappedAuthorities);
-
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-		assertEquals(userDetails.getUsername(), username);
-		assertEquals(userDetails.getAuthorities(), mappedAuthorities);
-	}
-
-	@Test(expectedExceptions = UsernameNotFoundException.class, expectedExceptionsMessageRegExp = "unknown user 'unknownUser'")
-	public void testLoadUserByUsernameUnknownUser()
-	{
-		String username = "unknownUser";
-		when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(null);
-
-		userDetailsService.loadUserByUsername(username);
-	}
+    userDetailsService.loadUserByUsername(username);
+  }
 }

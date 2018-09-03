@@ -21,7 +21,8 @@ public class EntityPermissionDeniedException extends PermissionDeniedException {
 
   @Override
   public String getMessage() {
-    return String.format("permission:%s entityTypeId:%s entityId:%s", permission, entityType.getId(), entityId);
+    return String.format(
+        "permission:%s entityTypeId:%s entityId:%s", permission, entityType.getId(), entityId);
   }
 
   @Override

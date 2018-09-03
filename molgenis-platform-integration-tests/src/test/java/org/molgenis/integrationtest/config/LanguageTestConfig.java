@@ -9,8 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ LocalizationService.class, L10nStringFactory.class, L10nStringMetaData.class, LanguageFactory.class,
-		LanguageMetadata.class })
-public class LanguageTestConfig
-{
-}
+@Import({
+  LocalizationService.class,
+  L10nStringFactory.class,
+  L10nStringMetaData.class,
+  LanguageFactory.class,
+  LanguageMetadata.class
+})
+public class LanguageTestConfig {}

@@ -6,6 +6,4 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(GenericDependencyResolver.class)
-public class UtilTestConfig
-{
-}
+public class UtilTestConfig {}

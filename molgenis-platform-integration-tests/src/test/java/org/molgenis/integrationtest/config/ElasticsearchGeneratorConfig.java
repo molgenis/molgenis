@@ -7,12 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Using componentscans because of class-visibility
- */
+/** Using componentscans because of class-visibility */
 @Configuration
-@ComponentScan({ "org.molgenis.data.elasticsearch.generator" })
-@Import({ DocumentIdGenerator.class, ContentGenerators.class, QueryGenerator.class })
-public class ElasticsearchGeneratorConfig
-{
-}
+@ComponentScan({"org.molgenis.data.elasticsearch.generator"})
+@Import({DocumentIdGenerator.class, ContentGenerators.class, QueryGenerator.class})
+public class ElasticsearchGeneratorConfig {}

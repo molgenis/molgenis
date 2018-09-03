@@ -1,12 +1,11 @@
 package org.molgenis.r;
 
-public interface OpenCpuSettings
-{
-	String getScheme();
+public interface OpenCpuSettings {
+  String getScheme();
 
-	String getHost();
+  String getHost();
 
-	int getPort();
+  int getPort();
 
-	String getRootPath();
+  String getRootPath();
 }
