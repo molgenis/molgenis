@@ -18,7 +18,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="test",description=q="test",label=q="test"'))).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=test,label=q=test,description=q=test')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -40,7 +40,7 @@ describe('actions', () => {
       }
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="test",description=q="test",label=q="test"'))).thenResolve(response)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=test,label=q=test,description=q=test')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -70,7 +70,7 @@ describe('actions', () => {
       const query = 'foobar'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&' + encodeURIComponent('q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"'))).thenReject(error)
+      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=foobar,label=q=foobar,description=q=foobar')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {
@@ -111,7 +111,7 @@ describe('actions', () => {
       ]
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&' + encodeURIComponent('q=(label=q="test",description=q="test")') + ';isAbstract==false')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=label=q=test,description=q=test;isAbstract==false')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -127,7 +127,7 @@ describe('actions', () => {
       const error = 'failed to get'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&' + encodeURIComponent('q=(label=q="test",description=q="test")') + ';isAbstract==false')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=label=q=test,description=q=test;isAbstract==false')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {

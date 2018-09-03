@@ -3,6 +3,8 @@ import type {Entity, Package} from '../flow.types'
 import {INITIAL_STATE} from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
+// $FlowFixMe
+import { transformToRSQL, encodeRsqlValue } from '@molgenis/rsql'
 import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from './mutations'
 
 export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
@@ -59,7 +61,16 @@ function toEntity (item: any) {
  * @param query
  */
 function getPackageQuery (query: string) {
-  return PACKAGE_ENDPOINT + '?sort=label&num=1000&' + encodeURIComponent('q=id=q="' + query + '",description=q="' + query + '",label=q="' + query + '"')
+  const rsql = transformToRSQL({
+    operator: 'OR',
+    operands: [
+      {selector: 'id', comparison: '=q=', arguments: query},
+      {selector: 'label', comparison: '=q=', arguments: query},
+      {selector: 'description', comparison: '=q=', arguments: query}
+    ]
+  })
+
+  return PACKAGE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql)
 }
 
 /**
@@ -69,7 +80,14 @@ function getPackageQuery (query: string) {
  * @param query
  */
 function getEntityTypeQuery (query: string) {
-  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&' + encodeURIComponent('q=(label=q="' + query + '",description=q="' + query + '")') + ';isAbstract==false'
+  const rsql = transformToRSQL({
+    operator: 'OR',
+    operands: [
+      {selector: 'label', comparison: '=q=', arguments: query},
+      {selector: 'description', comparison: '=q=', arguments: query}
+    ]
+  })
+  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql) + ';isAbstract==false'
 }
 
 /**
