@@ -26,7 +26,7 @@
 
     <!-- Breadcrumb element -->
     <div class="navigator-path row">
-      <div class="col input-group">
+      <div class="col-11 input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
             <a :href="homeUrl" v-on:click="reset">
@@ -42,10 +42,23 @@
           </li>
         </ol>
       </div>
+      <div class="col-1">
+        <div class="float-right">
+          <b-button :disable="nrSelectedItems > 0 ? false : true" variant="danger" v-b-modal.deleteModal>
+            <i :class="['fa', 'fa-trash', 'fa-lg', nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled']"></i></b-button>
+        </div>
+      </div>
     </div>
 
     <!-- Main table element -->
     <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
+      <template slot="HEAD_selected" scope="data">
+        <b-form-checkbox @click.native.stop v-model="allSelected" @change="toggleAllSelected"></b-form-checkbox>
+      </template>
+      <template slot="selected" scope="row">
+        <b-form-checkbox @click.native.stop :checked="isSelected(row.item)"
+                         @change="toggleSelected(row.item, $event)"></b-form-checkbox>
+      </template>
       <template slot="label" scope="label">
         <span v-if="label.item.type === 'entity'">
             <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
@@ -59,6 +72,10 @@
         </span>
       </template>
     </b-table>
+    <b-modal v-if="nrSelectedItems > 0" id="deleteModal" ok-variant="danger" cancel-variant="default"
+             :title="$t('delete-confirmation-title')" @ok="deleteSelectedItems">
+      {{ 'delete-confirmation-text' | i18n }}
+    </b-modal>
   </div>
 </template>
 
@@ -70,11 +87,34 @@
   .navigator-path .breadcrumb {
     background-color: transparent;
   }
+
+  button[disable=true] {
+    cursor: not-allowed !important;
+  }
+
+  .fa-enabled {
+  }
+
+  .fa-disabled {
+    opacity: 0.6;
+  }
 </style>
 
 <script>
   import _ from 'lodash'
-  import { QUERY_PACKAGES, QUERY_ENTITIES, RESET_STATE, GET_STATE_FOR_PACKAGE } from '../store/actions'
+  import {
+    QUERY_PACKAGES,
+    QUERY_ENTITIES,
+    RESET_STATE,
+    GET_STATE_FOR_PACKAGE,
+    SELECT_ALL_PACKAGES_AND_ENTITY_TYPES,
+    DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES,
+    DESELECT_PACKAGE,
+    SELECT_PACKAGE,
+    DESELECT_ENTITY_TYPE,
+    SELECT_ENTITY_TYPE,
+    DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES
+  } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
@@ -93,10 +133,12 @@
             label: this.$t('table-col-header-description'),
             sortable: false,
             'class': 'd-none d-md-table-cell'
-          }
+          },
+          selected: null
         },
         filter: null,
-        homeUrl: INITIAL_STATE.baseUrl
+        homeUrl: INITIAL_STATE.baseUrl,
+        allSelected: false
       }
     },
     methods: {
@@ -110,10 +152,12 @@
           this.$store.dispatch(QUERY_PACKAGES, query)
           this.$store.dispatch(QUERY_ENTITIES, query)
         }
+        this.allSelected = false
       }, 200),
       selectPackage: function (packageId: string) {
         this.$store.commit(SET_QUERY, undefined)
         this.$store.dispatch(GET_STATE_FOR_PACKAGE, packageId)
+        this.allSelected = false
       },
       isLast: function (list: Array<Package>, item: Package) {
         const tail = list[list.length - 1]
@@ -122,6 +166,26 @@
       reset: function () {
         this.$store.commit(SET_QUERY, undefined)
         this.$store.dispatch(RESET_STATE)
+      },
+      toggleSelected: function (item, checked) {
+        if (checked) {
+          this.$store.dispatch(item.type === 'entity' ? SELECT_ENTITY_TYPE : SELECT_PACKAGE, item.id)
+          this.allSelected = this.nrItems === this.nrSelectedItems
+        } else {
+          this.$store.dispatch(item.type === 'entity' ? DESELECT_ENTITY_TYPE : DESELECT_PACKAGE, item.id)
+          this.allSelected = false
+        }
+      },
+      isSelected: function (item) {
+        const itemIds = item.type === 'entity' ? this.$store.state.selectedEntityTypeIds : this.$store.state.selectedPackageIds
+        return itemIds.indexOf(item.id) !== -1
+      },
+      toggleAllSelected: function (checked) {
+        this.$store.dispatch(checked ? SELECT_ALL_PACKAGES_AND_ENTITY_TYPES : DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES)
+      },
+      deleteSelectedItems: function () {
+        this.$store.dispatch(DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES)
+        this.allSelected = false
       }
     },
     computed: {
@@ -134,9 +198,11 @@
           this.submitQuery()
         }
       },
-      ...mapState(['packages', 'entities', 'path']),
+      ...mapState(['packages', 'entities', 'path', 'selectedEntityTypeIds', 'selectedPackageIds']),
       items () {
-        return [].concat(this.packages).concat(this.entities)
+        var packages = this.packages.map(aPackage => Object.assign(this.selectedPackageIds.indexOf(aPackage.id) === -1 ? {} : {toggleSelected: this.toggleSelected}, aPackage))
+        var entityTypes = this.entities.map(entityType => Object.assign(this.selectedEntityTypeIds.indexOf(entityType.id) === -1 ? {} : {toggleSelected: this.toggleSelected}, entityType))
+        return packages.concat(entityTypes)
       },
       error: {
         get () {
@@ -145,6 +211,12 @@
         set (error) {
           this.$store.commit(SET_ERROR, error)
         }
+      },
+      nrItems () {
+        return this.entities.length + this.packages.length
+      },
+      nrSelectedItems () {
+        return this.selectedEntityTypeIds.length + this.selectedPackageIds.length
       }
     },
     mounted: function () {

@@ -22,6 +22,8 @@ export type State = {
   token: ?string,
   query: ?string,
   packages: Array<Package>,
+  selectedPackageIds: Array<string>,
   entities: Array<Entity>,
+  selectedEntityTypeIds: Array<string>,
   path: Array<Package>
 }

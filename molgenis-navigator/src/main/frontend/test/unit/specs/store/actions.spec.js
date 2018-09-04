@@ -1,8 +1,9 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
-import actions, {GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE} from 'src/store/actions'
-import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from 'src/store/mutations'
+import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE } from 'src/store/actions'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from 'src/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
+import { SET_SELECTED_ENTITY_TYPES, SET_SELECTED_PACKAGES } from '../../../../src/store/mutations'
 
 describe('actions', () => {
   afterEach(() => { td.reset() })
@@ -471,7 +472,7 @@ describe('actions', () => {
 
     it('should reset the state if no package could be found', done => {
       const entityId = 'my-entity-id'
-      const response = { items: [] }
+      const response = {items: []}
       const get = td.function('api.get')
 
       td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
@@ -532,6 +533,245 @@ describe('actions', () => {
       }
 
       utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
+    })
+  })
+
+  describe('SELECT_ALL_PACKAGES_AND_ENTITY_TYPES', () => {
+    it('should select all packages and entity types', done => {
+      const packageId = 'my-package-id'
+      const entityTypeId = 'my-entity-type-id'
+
+      const options = {
+        state: {
+          packages: [{
+            id: packageId
+          }],
+          entities: [{
+            id: entityTypeId
+          }]
+        },
+        expectedMutations: [
+          {type: SET_SELECTED_PACKAGES, payload: [packageId]},
+          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId]}
+        ]
+      }
+
+      utils.testAction(actions.__SELECT_ALL_PACKAGES_AND_ENTITY_TYPES__, options, done)
+    })
+  })
+
+  describe('SELECT_ENTITY_TYPE', () => {
+    it('should select the given entity type', done => {
+      const entityTypeId0 = 'entity-type-id-0'
+      const entityTypeId1 = 'entity-type-id-1'
+
+      const options = {
+        state: {
+          selectedEntityTypeIds: [entityTypeId0]
+        },
+        payload: entityTypeId1,
+        expectedMutations: [
+          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId0, entityTypeId1]}
+        ]
+      }
+
+      utils.testAction(actions.__SELECT_ENTITY_TYPE__, options, done)
+    })
+  })
+
+  describe('SELECT_PACKAGE', () => {
+    it('should select the given package', done => {
+      const packageId0 = 'package-id-0'
+      const packageId1 = 'package-id-1'
+
+      const options = {
+        state: {
+          selectedPackageIds: [packageId0]
+        },
+        payload: packageId1,
+        expectedMutations: [
+          {type: SET_SELECTED_PACKAGES, payload: [packageId0, packageId1]}
+        ]
+      }
+
+      utils.testAction(actions.__SELECT_PACKAGE__, options, done)
+    })
+  })
+
+  describe('DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES', () => {
+    it('should deselect all packages and entity types', done => {
+      const packageId = 'my-package-id'
+      const entityTypeId = 'my-entity-type-id'
+
+      const options = {
+        state: {
+          selectedPackageIds: [packageId],
+          selectedEntityTypeIds: [entityTypeId]
+        },
+        expectedMutations: [
+          {type: SET_SELECTED_PACKAGES, payload: []},
+          {type: SET_SELECTED_ENTITY_TYPES, payload: []}
+        ]
+      }
+
+      utils.testAction(actions.__DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES__, options, done)
+    })
+  })
+
+  describe('DESELECT_ENTITY_TYPE', () => {
+    it('should deselect the given entity type', done => {
+      const entityTypeId0 = 'entity-type-id-0'
+      const entityTypeId1 = 'entity-type-id-1'
+
+      const options = {
+        state: {
+          selectedEntityTypeIds: [entityTypeId0, entityTypeId1]
+        },
+        payload: entityTypeId0,
+        expectedMutations: [
+          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId1]}
+        ]
+      }
+
+      utils.testAction(actions.__DESELECT_ENTITY_TYPE__, options, done)
+    })
+  })
+
+  describe('DESELECT_PACKAGE', () => {
+    it('should deselect the given package', done => {
+      const packageId0 = 'package-id-0'
+      const packageId1 = 'package-id-1'
+
+      const options = {
+        state: {
+          selectedPackageIds: [packageId0, packageId1]
+        },
+        payload: packageId0,
+        expectedMutations: [
+          {type: SET_SELECTED_PACKAGES, payload: [packageId1]}
+        ]
+      }
+
+      utils.testAction(actions.__DESELECT_PACKAGE__, options, done)
+    })
+  })
+
+  describe('DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES', () => {
+    it('should delete the selected packages and entity types', done => {
+      const packageIdRoot = 'package-id-root'
+      const packageId0 = 'package-id-0'
+      const packageId1 = 'package-id-1'
+      const entityTypeId0 = 'entity-type-id-0'
+      const entityTypeId1 = 'entity-type-id-1'
+
+      const response = {
+        statusText: 'OK!'
+      }
+      const deleteBody = {packageIds: [packageId0, packageId1], entityTypeIds: [entityTypeId0, entityTypeId1]}
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        state: {
+          selectedPackageIds: [packageId0, packageId1],
+          selectedEntityTypeIds: [entityTypeId0, entityTypeId1],
+          route: {
+            params: {
+              package: packageIdRoot
+            }
+          }
+        },
+        expectedActions: [
+          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
+        ]
+      }
+
+      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
+    })
+
+    it('should delete the selected packages', done => {
+      const packageIdRoot = 'package-id-root'
+      const packageId0 = 'package-id-0'
+      const packageId1 = 'package-id-1'
+
+      const response = {
+        statusText: 'OK!'
+      }
+      const deleteBody = {packageIds: [packageId0, packageId1], entityTypeIds: []}
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        state: {
+          selectedPackageIds: [packageId0, packageId1],
+          selectedEntityTypeIds: [],
+          route: {
+            params: {
+              package: packageIdRoot
+            }
+          }
+        },
+        expectedActions: [
+          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
+        ]
+      }
+
+      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
+    })
+
+    it('should delete the selected entity types', done => {
+      const packageIdRoot = 'package-id-root'
+      const entityTypeId0 = 'entity-type-id-0'
+      const entityTypeId1 = 'entity-type-id-1'
+
+      const response = {
+        statusText: 'OK!'
+      }
+      const deleteBody = {packageIds: [], entityTypeIds: [entityTypeId0, entityTypeId1]}
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        state: {
+          selectedPackageIds: [],
+          selectedEntityTypeIds: [entityTypeId0, entityTypeId1],
+          route: {
+            params: {
+              package: packageIdRoot
+            }
+          }
+        },
+        expectedActions: [
+          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
+        ]
+      }
+
+      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
+    })
+
+    it('should call the SET_ERROR mutation in case the delete request fails', done => {
+      const entityTypeId0 = 'entity-type-id-0'
+
+      const error = 'failed to delete'
+      const deleteBody = {packageIds: [], entityTypeIds: [entityTypeId0]}
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenReject(error)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        state: {
+          selectedPackageIds: [],
+          selectedEntityTypeIds: [entityTypeId0]
+        },
+        expectedMutations: [
+          {type: SET_ERROR, payload: error}
+        ]
+      }
+
+      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
     })
   })
 })
