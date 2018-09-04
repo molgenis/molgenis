@@ -57,13 +57,13 @@ public class $META_CLASS_NAME extends SystemEntityType {
 
   @Override
   public void init() {
-	  setPackage($PACKAGE_VAR);
+    setPackage($PACKAGE_VAR);
 
-	  setLabel("$LABEL");
-	  //TODO setDescription("");
+    setLabel("$LABEL");
+    //TODO setDescription("");
 
     addAttribute(ID, ROLE_ID).setLabel("Identifier");
-	}
+  }
 }
 
 public class $ENTITY_TYPE_NAME extends StaticEntity {
@@ -75,7 +75,7 @@ public class $ENTITY_TYPE_NAME extends StaticEntity {
     super(entityType);
   }
 
-	public $ENTITY_TYPE_NAME(String id, EntityType entityType) {
+  public $ENTITY_TYPE_NAME(String id, EntityType entityType) {
     super(entityType);
     setId(id);
   }

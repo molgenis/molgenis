@@ -26,13 +26,13 @@ public class $EXCEPTION_CLASS_NAME extends $EXTENDS_FROM {
     this.id = requireNonNull(id);
   }
 
-	@Override
+  @Override
   public String getMessage() {
     return format("id:%s", id); // TODO
   }
 
-	@Override
-	protected Object[] getLocalizedMessageArguments() {
+  @Override
+  protected Object[] getLocalizedMessageArguments() {
     return new Object[] {id}; // TODO
   }
 }

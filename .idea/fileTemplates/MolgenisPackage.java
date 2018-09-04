@@ -34,11 +34,11 @@ public class ${CLASS_NAME} extends SystemPackage {
   private final RootSystemPackage rootSystemPackage;
 
   public ${CLASS_NAME}(PackageMetadata packageMetadata, RootSystemPackage rootSystemPackage){
-	  super($FQN_VAR, packageMetadata);
-	  this.rootSystemPackage = requireNonNull(rootSystemPackage);
+    super($FQN_VAR, packageMetadata);
+    this.rootSystemPackage = requireNonNull(rootSystemPackage);
   }
 
-	@Override
+  @Override
   protected void init() {
     setParent(rootSystemPackage);
 

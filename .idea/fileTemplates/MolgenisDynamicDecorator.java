@@ -19,33 +19,33 @@ public class ${DECORATOR_NAME}RepositoryDecoratorFactory
   private static final String ID = "${IDENTIFIER}";
   private final Gson gson;
 
-	public ${DECORATOR_NAME}RepositoryDecoratorFactory(Gson gson) {
+  public ${DECORATOR_NAME}RepositoryDecoratorFactory(Gson gson) {
     this.gson = requireNonNull(gson);
   }
-	
+
   @Override
   @SuppressWarnings("unchecked")
   public Repository createDecoratedRepository(Repository<Entity> repository, Map<String, Object> parameters) {
     return new ${DECORATOR_NAME}RepositoryDecorator(repository);
   }
 
-	@Override
-	public String getId() {
+  @Override
+  public String getId() {
     return ID;
   }
 
-	@Override
+  @Override
   public String getLabel() {
     return ""; //TODO
   }
 
-	@Override
-	public String getDescription() {
+  @Override
+  public String getDescription() {
     return ""; //TODO
   }
 
-	@Override
-	public String getSchema() {
+  @Override
+  public String getSchema() {
     return gson.toJson(
         of(
             "title",
@@ -53,9 +53,9 @@ public class ${DECORATOR_NAME}RepositoryDecoratorFactory
             "type",
             "object",
             "properties",
-			      of("example", of("type", "string", "description", "An example of a parameter")),
+            of("example", of("type", "string", "description", "An example of a parameter")),
             "required", ImmutableList.of("example"))); //TODO
-	}
+  }
 }
     
 public class ${DECORATOR_NAME}RepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
