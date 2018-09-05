@@ -111,7 +111,7 @@ describe('actions', () => {
       ]
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=label=q=test,description=q=test;isAbstract==false')).thenResolve(response)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=test,description=q=test);isAbstract==false')).thenResolve(response)
       td.replace(api, 'get', get)
 
       const options = {
@@ -127,7 +127,7 @@ describe('actions', () => {
       const error = 'failed to get'
 
       const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=label=q=test,description=q=test;isAbstract==false')).thenReject(error)
+      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=test,description=q=test);isAbstract==false')).thenReject(error)
       td.replace(api, 'get', get)
 
       const options = {

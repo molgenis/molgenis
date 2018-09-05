@@ -81,13 +81,19 @@ function getPackageQuery (query: string) {
  */
 function getEntityTypeQuery (query: string) {
   const rsql = transformToRSQL({
-    operator: 'OR',
+    operator: 'AND',
     operands: [
-      {selector: 'label', comparison: '=q=', arguments: query},
-      {selector: 'description', comparison: '=q=', arguments: query}
-    ]
+      {
+        operator: 'OR',
+        operands: [
+          {selector: 'label', comparison: '=q=', arguments: query},
+          {selector: 'description', comparison: '=q=', arguments: query}
+        ]
+      },
+      {selector: 'isAbstract', comparison: '==', arguments: 'false'}]
   })
-  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql) + ';isAbstract==false'
+
+  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql)
 }
 
 /**
