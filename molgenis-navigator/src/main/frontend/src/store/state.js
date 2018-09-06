@@ -1,5 +1,5 @@
 // @flow
-import type {State} from '../flow.types'
+import type { State } from '../flow.types'
 
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
@@ -9,7 +9,9 @@ const state: State = {
   query: undefined,
   packages: [],
   entities: [],
-  path: []
+  path: [],
+  selectedPackageIds: [],
+  selectedEntityTypeIds: []
 }
 
 export default state
