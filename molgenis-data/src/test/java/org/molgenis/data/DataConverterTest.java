@@ -113,8 +113,7 @@ public class DataConverterTest {
 
   // regression test for https://github.com/molgenis/molgenis/issues/7752
   @Test
-  public void toStringIterable()
-  {
+  public void toStringIterable() {
     Iterable<String> iterable = () -> asList("str1", "str2").iterator();
     assertEquals(DataConverter.toString(iterable), "str1,str2");
   }
