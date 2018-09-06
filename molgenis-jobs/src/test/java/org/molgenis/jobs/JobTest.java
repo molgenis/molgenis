@@ -1,5 +1,10 @@
 package org.molgenis.jobs;
 
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.*;
+
+import java.util.concurrent.Callable;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -16,136 +21,113 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.Callable;
+public class JobTest {
+  @Mock Callable<Authentication> callable;
 
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.testng.Assert.*;
+  @Mock Progress progress;
 
-public class JobTest
-{
-	@Mock
-	Callable<Authentication> callable;
+  @Mock Authentication authentication;
 
-	@Mock
-	Progress progress;
+  @Mock TransactionStatus transactionStatus;
 
-	@Mock
-	Authentication authentication;
+  @Mock TransactionOperations transactionOperations;
 
-	@Mock
-	TransactionStatus transactionStatus;
+  @Captor ArgumentCaptor<TransactionCallback<Authentication>> actionCaptor;
 
-	@Mock
-	TransactionOperations transactionOperations;
+  // sneaky trick to capture the authentication the job executes under: Store it in the job result
+  private Answer<Authentication> authenticationAnswer =
+      (call) -> SecurityContextHolder.getContext().getAuthentication();
 
-	@Captor
-	ArgumentCaptor<TransactionCallback<Authentication>> actionCaptor;
+  private TransactionalJob<Authentication> job;
+  private NontransactionalJob<Authentication> jobWithoutTransaction;
 
-	// sneaky trick to capture the authentication the job executes under: Store it in the job result
-	private Answer<Authentication> authenticationAnswer = (call) -> SecurityContextHolder.getContext()
-																						 .getAuthentication();
+  @BeforeClass
+  public void beforeClass() {
+    initMocks(this);
+    job =
+        new TransactionalJob<Authentication>(progress, transactionOperations, authentication) {
+          @Override
+          public Authentication call(Progress progress) throws Exception {
+            return callable.call();
+          }
+        };
 
-	private TransactionalJob<Authentication> job;
-	private NontransactionalJob<Authentication> jobWithoutTransaction;
+    jobWithoutTransaction =
+        new NontransactionalJob<Authentication>(progress, authentication) {
+          @Override
+          public Authentication call(Progress progress) throws Exception {
+            return callable.call();
+          }
+        };
+  }
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-		job = new TransactionalJob<Authentication>(progress, transactionOperations, authentication)
-		{
-			@Override
-			public Authentication call(Progress progress) throws Exception
-			{
-				return callable.call();
-			}
-		};
+  @BeforeMethod
+  public void beforeMethod() {
+    reset(callable, progress, transactionOperations);
+  }
 
-		jobWithoutTransaction = new NontransactionalJob<Authentication>(progress, authentication)
-		{
-			@Override
-			public Authentication call(Progress progress) throws Exception
-			{
-				return callable.call();
-			}
-		};
-	}
+  @Test
+  public void testTransactionTimeout() {
+    TransactionException transactionException =
+        new TransactionTimedOutException("Transaction timeout test.");
+    when(transactionOperations.execute(any())).thenThrow(transactionException);
+    try {
+      job.call();
+      fail("TransactionException should be thrown");
+    } catch (TransactionException expected) {
+      assertSame(expected, transactionException);
+    }
+    verify(transactionOperations).execute(any());
+    verify(progress).failed(transactionException);
+    verifyNoMoreInteractions(callable, progress, transactionOperations);
+  }
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		reset(callable, progress, transactionOperations);
-	}
+  @Test
+  public void testTransactionalJob() throws Exception {
+    when(transactionOperations.execute(actionCaptor.capture()))
+        .thenAnswer((call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
+    when(callable.call()).thenAnswer(authenticationAnswer);
+    Authentication result = job.call();
 
-	@Test
-	public void testTransactionTimeout()
-	{
-		TransactionException transactionException = new TransactionTimedOutException("Transaction timeout test.");
-		when(transactionOperations.execute(any())).thenThrow(transactionException);
-		try
-		{
-			job.call();
-			fail("TransactionException should be thrown");
-		}
-		catch (TransactionException expected)
-		{
-			assertSame(expected, transactionException);
-		}
-		verify(transactionOperations).execute(any());
-		verify(progress).failed(transactionException);
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
+    assertEquals(result, authentication);
+    verify(progress).start();
+    verify(progress).success();
+    verify(transactionOperations).execute(any());
+    verify(callable).call();
+    verifyNoMoreInteractions(callable, progress, transactionOperations);
+  }
 
-	@Test
-	public void testTransactionalJob() throws Exception
-	{
-		when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(
-				(call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
-		when(callable.call()).thenAnswer(authenticationAnswer);
-		Authentication result = job.call();
+  @Test
+  public void testTransactionOperationsIsCalledWithCorrectAuthentication() throws Exception {
+    when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(authenticationAnswer);
+    Authentication result = job.call();
 
-		assertEquals(result, authentication);
-		verify(progress).start();
-		verify(progress).success();
-		verify(transactionOperations).execute(any());
-		verify(callable).call();
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
+    assertEquals(
+        result,
+        authentication,
+        "Entire transaction should run with specified authentication, see #6124");
+    verify(transactionOperations).execute(any());
+    verifyNoMoreInteractions(callable, progress, transactionOperations);
+  }
 
-	@Test
-	public void testTransactionOperationsIsCalledWithCorrectAuthentication() throws Exception
-	{
-		when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(authenticationAnswer);
-		Authentication result = job.call();
+  @Test
+  public void testTransactionalJobFailure() throws Exception {
+    when(transactionOperations.execute(actionCaptor.capture()))
+        .thenAnswer((call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
+    MolgenisDataException mde = new MolgenisDataException();
+    when(callable.call()).thenThrow(mde);
 
-		assertEquals(result, authentication, "Entire transaction should run with specified authentication, see #6124");
-		verify(transactionOperations).execute(any());
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
+    try {
+      job.call();
+      fail("TransactionalJob call should throw exception if subclass execution fails.");
+    } catch (JobExecutionException ex) {
+      assertSame(ex.getCause(), mde);
+    }
 
-	@Test
-	public void testTransactionalJobFailure() throws Exception
-	{
-		when(transactionOperations.execute(actionCaptor.capture())).thenAnswer(
-				(call) -> actionCaptor.getValue().doInTransaction(transactionStatus));
-		MolgenisDataException mde = new MolgenisDataException();
-		when(callable.call()).thenThrow(mde);
-
-		try
-		{
-			job.call();
-			fail("TransactionalJob call should throw exception if subclass execution fails.");
-		}
-		catch (JobExecutionException ex)
-		{
-			assertSame(ex.getCause(), mde);
-		}
-
-		verify(transactionOperations).execute(any());
-		verify(progress).start();
-		verify(callable).call();
-		verify(progress).failed(mde);
-		verifyNoMoreInteractions(callable, progress, transactionOperations);
-	}
+    verify(transactionOperations).execute(any());
+    verify(progress).start();
+    verify(callable).call();
+    verify(progress).failed(mde);
+    verifyNoMoreInteractions(callable, progress, transactionOperations);
+  }
 }

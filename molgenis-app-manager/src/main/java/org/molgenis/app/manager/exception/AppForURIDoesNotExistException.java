@@ -1,28 +1,24 @@
 package org.molgenis.app.manager.exception;
 
-import org.molgenis.i18n.CodedRuntimeException;
-
 import static java.util.Objects.requireNonNull;
 
-public class AppForURIDoesNotExistException extends CodedRuntimeException
-{
-	private static final String ERROR_CODE = "AM06";
-	private final String uri;
+import org.molgenis.i18n.CodedRuntimeException;
 
-	public AppForURIDoesNotExistException(String uri)
-	{
-		super(ERROR_CODE);
-		this.uri = requireNonNull(uri);
-	}
+public class AppForURIDoesNotExistException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "AM06";
+  private final String uri;
 
-	@Override
-	protected Object[] getLocalizedMessageArguments()
-	{
-		return new Object[] { uri };
-	}
+  public AppForURIDoesNotExistException(String uri) {
+    super(ERROR_CODE);
+    this.uri = requireNonNull(uri);
+  }
 
-	public String getUri()
-	{
-		return uri;
-	}
+  @Override
+  protected Object[] getLocalizedMessageArguments() {
+    return new Object[] {uri};
+  }
+
+  public String getUri() {
+    return uri;
+  }
 }

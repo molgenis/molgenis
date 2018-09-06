@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DecoratorParametersFactory
-		extends AbstractSystemEntityFactory<DecoratorParameters, DecoratorParametersMetadata, String>
-{
-	DecoratorParametersFactory(DecoratorParametersMetadata decoratorParametersMetadata, EntityPopulator entityPopulator)
-	{
-		super(DecoratorParameters.class, decoratorParametersMetadata, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<DecoratorParameters, DecoratorParametersMetadata, String> {
+  DecoratorParametersFactory(
+      DecoratorParametersMetadata decoratorParametersMetadata, EntityPopulator entityPopulator) {
+    super(DecoratorParameters.class, decoratorParametersMetadata, entityPopulator);
+  }
 }

@@ -1,5 +1,7 @@
 package org.molgenis.data.validation.meta.model;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -16,44 +18,48 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.requireNonNull;
-
-/**
- * Due to a circular dependency this decorator factory is not stored in molgenis-data.
- */
+/** Due to a circular dependency this decorator factory is not stored in molgenis-data. */
 @Component
 public class EntityTypeRepositoryDecoratorFactory
-		extends AbstractSystemRepositoryDecoratorFactory<EntityType, EntityTypeMetadata>
-{
-	private final DataService dataService;
-	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
-	private final UserPermissionEvaluator permissionService;
-	private final EntityTypeValidator entityTypeValidator;
-	private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-	private final MutableAclService mutableAclService;
-	private final MutableAclClassService mutableAclClassService;
+    extends AbstractSystemRepositoryDecoratorFactory<EntityType, EntityTypeMetadata> {
+  private final DataService dataService;
+  private final SystemEntityTypeRegistry systemEntityTypeRegistry;
+  private final UserPermissionEvaluator permissionService;
+  private final EntityTypeValidator entityTypeValidator;
+  private final EntityTypeDependencyResolver entityTypeDependencyResolver;
+  private final MutableAclService mutableAclService;
+  private final MutableAclClassService mutableAclClassService;
 
-	public EntityTypeRepositoryDecoratorFactory(DataService dataService, EntityTypeMetadata entityTypeMetadata,
-			SystemEntityTypeRegistry systemEntityTypeRegistry, UserPermissionEvaluator permissionService,
-			EntityTypeValidator entityTypeValidator, EntityTypeDependencyResolver entityTypeDependencyResolver,
-			MutableAclService mutableAclService, MutableAclClassService mutableAclClassService)
-	{
-		super(entityTypeMetadata);
-		this.dataService = requireNonNull(dataService);
-		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
-		this.permissionService = requireNonNull(permissionService);
-		this.entityTypeValidator = requireNonNull(entityTypeValidator);
-		this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-		this.mutableAclService = requireNonNull(mutableAclService);
-		this.mutableAclClassService = requireNonNull(mutableAclClassService);
-	}
+  public EntityTypeRepositoryDecoratorFactory(
+      DataService dataService,
+      EntityTypeMetadata entityTypeMetadata,
+      SystemEntityTypeRegistry systemEntityTypeRegistry,
+      UserPermissionEvaluator permissionService,
+      EntityTypeValidator entityTypeValidator,
+      EntityTypeDependencyResolver entityTypeDependencyResolver,
+      MutableAclService mutableAclService,
+      MutableAclClassService mutableAclClassService) {
+    super(entityTypeMetadata);
+    this.dataService = requireNonNull(dataService);
+    this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
+    this.permissionService = requireNonNull(permissionService);
+    this.entityTypeValidator = requireNonNull(entityTypeValidator);
+    this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+    this.mutableAclService = requireNonNull(mutableAclService);
+    this.mutableAclClassService = requireNonNull(mutableAclClassService);
+  }
 
-	@Override
-	public Repository<EntityType> createDecoratedRepository(Repository<EntityType> repository)
-	{
-		repository = new EntityTypeRepositoryDecorator(repository, dataService, entityTypeDependencyResolver);
-		repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
-		return new EntityTypeRepositorySecurityDecorator(repository, systemEntityTypeRegistry, permissionService,
-				mutableAclService, mutableAclClassService, dataService);
-	}
+  @Override
+  public Repository<EntityType> createDecoratedRepository(Repository<EntityType> repository) {
+    repository =
+        new EntityTypeRepositoryDecorator(repository, dataService, entityTypeDependencyResolver);
+    repository = new EntityTypeRepositoryValidationDecorator(repository, entityTypeValidator);
+    return new EntityTypeRepositorySecurityDecorator(
+        repository,
+        systemEntityTypeRegistry,
+        permissionService,
+        mutableAclService,
+        mutableAclClassService,
+        dataService);
+  }
 }

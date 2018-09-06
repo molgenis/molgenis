@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.config;
 
+import javax.sql.DataSource;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.postgresql.transaction.PostgreSqlTransactionManager;
@@ -10,22 +11,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.sql.DataSource;
-
 @Configuration
-@Import({ TransactionExceptionTranslatorRegistry.class, IdGeneratorImpl.class })
-public class TransactionTestConfig
-{
+@Import({TransactionExceptionTranslatorRegistry.class, IdGeneratorImpl.class})
+public class TransactionTestConfig {
 
-	@Autowired
-	private IdGenerator idGenerator;
-	@Autowired
-	private DataSource dataSource;
+  @Autowired private IdGenerator idGenerator;
+  @Autowired private DataSource dataSource;
 
-	@Bean
-	public TransactionManager transactionManager()
-	{
-		TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry = new TransactionExceptionTranslatorRegistry();
-		return new PostgreSqlTransactionManager(idGenerator, dataSource, transactionExceptionTranslatorRegistry);
-	}
+  @Bean
+  public TransactionManager transactionManager() {
+    TransactionExceptionTranslatorRegistry transactionExceptionTranslatorRegistry =
+        new TransactionExceptionTranslatorRegistry();
+    return new PostgreSqlTransactionManager(
+        idGenerator, dataSource, transactionExceptionTranslatorRegistry);
+  }
 }

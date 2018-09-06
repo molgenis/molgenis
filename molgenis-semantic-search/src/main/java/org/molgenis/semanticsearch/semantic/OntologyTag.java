@@ -7,15 +7,14 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTag.class)
-@SuppressWarnings("squid:S1610") // Abstract classes without fields should be converted to interfaces
-public abstract class OntologyTag
-{
-	public abstract OntologyTerm getOntologyTerm();
+@SuppressWarnings(
+    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+public abstract class OntologyTag {
+  public abstract OntologyTerm getOntologyTerm();
 
-	public abstract String getRelationIRI();
+  public abstract String getRelationIRI();
 
-	public static OntologyTag create(OntologyTerm term, Relation relation)
-	{
-		return new AutoValue_OntologyTag(term, relation.getIRI());
-	}
+  public static OntologyTag create(OntologyTerm term, Relation relation) {
+    return new AutoValue_OntologyTag(term, relation.getIRI());
+  }
 }

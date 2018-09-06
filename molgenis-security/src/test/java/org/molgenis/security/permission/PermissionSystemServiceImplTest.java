@@ -1,5 +1,7 @@
 package org.molgenis.security.permission;
 
+import static org.mockito.Mockito.*;
+
 import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -16,48 +18,38 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.*;
-
-@ContextConfiguration(classes = { PermissionSystemServiceImplTest.Config.class })
+@ContextConfiguration(classes = {PermissionSystemServiceImplTest.Config.class})
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
-public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpringContextTests
-{
-	@Mock
-	private MutableAclService mutableAclService;
+public class PermissionSystemServiceImplTest extends AbstractMockitoTestNGSpringContextTests {
+  @Mock private MutableAclService mutableAclService;
 
-	private PermissionSystemServiceImpl permissionSystemServiceImpl;
+  private PermissionSystemServiceImpl permissionSystemServiceImpl;
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		permissionSystemServiceImpl = new PermissionSystemServiceImpl(mutableAclService);
-	}
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    permissionSystemServiceImpl = new PermissionSystemServiceImpl(mutableAclService);
+  }
 
-	@Test(expectedExceptions = NullPointerException.class)
-	public void testPermissionSystemService()
-	{
-		new PermissionSystemServiceImpl(null);
-	}
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testPermissionSystemService() {
+    new PermissionSystemServiceImpl(null);
+  }
 
-	@Test
-	@WithMockUser(username = "user")
-	public void giveUserEntityPermissions()
-	{
-		String entityTypeId = "entityTypeId";
-		EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
+  @Test
+  @WithMockUser(username = "user")
+  public void giveUserEntityPermissions() {
+    String entityTypeId = "entityTypeId";
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn(entityTypeId).getMock();
 
-		MutableAcl acl = mock(MutableAcl.class);
+    MutableAcl acl = mock(MutableAcl.class);
 
-		when(mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId))).thenReturn(acl);
+    when(mutableAclService.readAclById(new EntityTypeIdentity(entityTypeId))).thenReturn(acl);
 
-		permissionSystemServiceImpl.giveUserWriteMetaPermissions(entityType);
-		verify(mutableAclService).updateAcl(acl);
-		verify(acl).insertAce(0, PermissionSet.WRITEMETA, new PrincipalSid("user"),
-				true);
-	}
+    permissionSystemServiceImpl.giveUserWriteMetaPermissions(entityType);
+    verify(mutableAclService).updateAcl(acl);
+    verify(acl).insertAce(0, PermissionSet.WRITEMETA, new PrincipalSid("user"), true);
+  }
 
-	@Configuration
-	public static class Config
-	{
-	}
+  @Configuration
+  public static class Config {}
 }

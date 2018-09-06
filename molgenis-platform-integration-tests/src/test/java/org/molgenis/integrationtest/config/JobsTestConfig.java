@@ -17,10 +17,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ SchedulerConfig.class, JobExecutionConfig.class, JobPackage.class, ScheduledJobTypeFactory.class,
-		ScheduledJobTypeMetadata.class, JobExecutionUpdaterImpl.class, MailSenderImpl.class, MailSettingsImpl.class,
-		JavaMailSenderFactory.class, JobScheduler.class, JobFactoryRegistrar.class, JavaMailPropertyType.class,
-		MailPackage.class })
-public class JobsTestConfig
-{
-}
+@Import({
+  SchedulerConfig.class,
+  JobExecutionConfig.class,
+  JobPackage.class,
+  ScheduledJobTypeFactory.class,
+  ScheduledJobTypeMetadata.class,
+  JobExecutionUpdaterImpl.class,
+  MailSenderImpl.class,
+  MailSettingsImpl.class,
+  JavaMailSenderFactory.class,
+  JobScheduler.class,
+  JobFactoryRegistrar.class,
+  JavaMailPropertyType.class,
+  MailPackage.class
+})
+public class JobsTestConfig {}

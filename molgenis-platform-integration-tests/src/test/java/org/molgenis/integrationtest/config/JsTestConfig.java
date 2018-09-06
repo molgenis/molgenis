@@ -6,7 +6,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ JsMagmaScriptEvaluator.class, NashornScriptEngine.class })
-public class JsTestConfig
-{
-}
+@Import({JsMagmaScriptEvaluator.class, NashornScriptEngine.class})
+public class JsTestConfig {}

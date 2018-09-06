@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BeaconOrganizationFactory
-		extends AbstractSystemEntityFactory<BeaconOrganization, BeaconOrganizationMetadata, String>
-{
-	BeaconOrganizationFactory(BeaconOrganizationMetadata beaconOrganizationMetadata, EntityPopulator entityPopulator)
-	{
-		super(BeaconOrganization.class, beaconOrganizationMetadata, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<BeaconOrganization, BeaconOrganizationMetadata, String> {
+  BeaconOrganizationFactory(
+      BeaconOrganizationMetadata beaconOrganizationMetadata, EntityPopulator entityPopulator) {
+    super(BeaconOrganization.class, beaconOrganizationMetadata, entityPopulator);
+  }
 }

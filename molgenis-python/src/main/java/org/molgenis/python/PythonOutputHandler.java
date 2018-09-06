@@ -1,6 +1,5 @@
 package org.molgenis.python;
 
-public interface PythonOutputHandler
-{
-	void outputReceived(String output);
+public interface PythonOutputHandler {
+  void outputReceived(String output);
 }

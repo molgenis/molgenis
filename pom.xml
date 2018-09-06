@@ -135,6 +135,7 @@
         <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
         <zt-zip.version>1.13</zt-zip.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
+        <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
     </properties>
 
     <distributionManagement>
@@ -582,6 +583,18 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>${fmt-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>io.github.zlika</groupId>
                 <artifactId>reproducible-build-maven-plugin</artifactId>

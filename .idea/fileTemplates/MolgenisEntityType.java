@@ -27,6 +27,12 @@
 
 package $PACKAGE_NAME;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static ${PACKAGE_NAME}.${META_CLASS_NAME}.ID;
+import static ${PACKAGE_NAME}.${PACKAGE_CLASS}.$PACKAGE_FQN_VAR;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityType;
@@ -35,74 +41,57 @@ import org.springframework.stereotype.Component;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static ${PACKAGE_NAME}.${META_CLASS_NAME}.ID;
-import static ${PACKAGE_NAME}.${PACKAGE_CLASS}.$PACKAGE_FQN_VAR;
-
 @Component
-public class $META_CLASS_NAME extends SystemEntityType
-{
-	private static final String SIMPLE_NAME = "$ENTITY_TYPE_NAME";
-	public static final String $FQN_VAR = $PACKAGE_FQN_VAR + PACKAGE_SEPARATOR + SIMPLE_NAME;
+public class $META_CLASS_NAME extends SystemEntityType {
+  private static final String SIMPLE_NAME = "$ENTITY_TYPE_NAME";
+  public static final String $FQN_VAR = $PACKAGE_FQN_VAR + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-    public static final String ID = "id";
+  public static final String ID = "id";
 
-	private final $PACKAGE_CLASS $PACKAGE_VAR;
+  private final $PACKAGE_CLASS $PACKAGE_VAR;
 
-	public $META_CLASS_NAME($PACKAGE_CLASS $PACKAGE_VAR)
-	{
-		super(SIMPLE_NAME, $PACKAGE_FQN_VAR);
-		this.$PACKAGE_VAR = requireNonNull($PACKAGE_VAR);
-	}
+  public $META_CLASS_NAME($PACKAGE_CLASS $PACKAGE_VAR) {
+    super(SIMPLE_NAME, $PACKAGE_FQN_VAR);
+    this.$PACKAGE_VAR = requireNonNull($PACKAGE_VAR);
+  }
 
-	@Override
-	public void init()
-	{
-		setPackage($PACKAGE_VAR);
-		
-		setLabel("$LABEL");
-		//TODO setDescription("");
-		
-		addAttribute(ID, ROLE_ID).setLabel("Identifier");
-	}
+  @Override
+  public void init() {
+    setPackage($PACKAGE_VAR);
+
+    setLabel("$LABEL");
+    //TODO setDescription("");
+
+    addAttribute(ID, ROLE_ID).setLabel("Identifier");
+  }
 }
 
-public class $ENTITY_TYPE_NAME extends StaticEntity
-{
-	public $ENTITY_TYPE_NAME(Entity entity)
-	{
-		super(entity);
-	}
+public class $ENTITY_TYPE_NAME extends StaticEntity {
+  public $ENTITY_TYPE_NAME(Entity entity) {
+    super(entity);
+  }
 
-	public $ENTITY_TYPE_NAME(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public $ENTITY_TYPE_NAME(EntityType entityType) {
+    super(entityType);
+  }
 
-	public $ENTITY_TYPE_NAME(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public $ENTITY_TYPE_NAME(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public void setId(String id) {
+	  set(ID, id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 }
     
 @Component
-public class $FACTORY_CLASS_NAME extends AbstractSystemEntityFactory<$ENTITY_TYPE_NAME, $META_CLASS_NAME, String>
-{
-	$FACTORY_CLASS_NAME($META_CLASS_NAME $META_CLASS_VAR, EntityPopulator entityPopulator)
-	{
-		super(${ENTITY_TYPE_NAME}.class, $META_CLASS_VAR, entityPopulator);
-	}
+public class $FACTORY_CLASS_NAME extends AbstractSystemEntityFactory<$ENTITY_TYPE_NAME, $META_CLASS_NAME, String> {
+  $FACTORY_CLASS_NAME($META_CLASS_NAME $META_CLASS_VAR, EntityPopulator entityPopulator) {
+    super(${ENTITY_TYPE_NAME}.class, $META_CLASS_VAR, entityPopulator);
+  }
 }

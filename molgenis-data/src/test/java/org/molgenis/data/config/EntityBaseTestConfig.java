@@ -1,5 +1,7 @@
 package org.molgenis.data.config;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistry;
 import org.molgenis.data.EntityReferenceCreator;
@@ -13,26 +15,28 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import static java.util.Objects.requireNonNull;
-
 @Configuration
-@Import({ RootSystemPackage.class, EntityPopulator.class, AutoValuePopulator.class, DefaultValuePopulator.class,
-		IdGeneratorImpl.class, EntityFactoryRegistry.class })
-public class EntityBaseTestConfig
-{
-	private final DataService dataService;
-	private final EntityFactoryRegistry entityFactoryRegistry;
+@Import({
+  RootSystemPackage.class,
+  EntityPopulator.class,
+  AutoValuePopulator.class,
+  DefaultValuePopulator.class,
+  IdGeneratorImpl.class,
+  EntityFactoryRegistry.class
+})
+public class EntityBaseTestConfig {
+  private final DataService dataService;
+  private final EntityFactoryRegistry entityFactoryRegistry;
 
-	public EntityBaseTestConfig(DataService dataService, EntityFactoryRegistry entityFactoryRegistry)
-	{
+  public EntityBaseTestConfig(
+      DataService dataService, EntityFactoryRegistry entityFactoryRegistry) {
 
-		this.dataService = requireNonNull(dataService);
-		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
-	}
+    this.dataService = requireNonNull(dataService);
+    this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
+  }
 
-	@Bean
-	public EntityReferenceCreator entityReferenceCreator()
-	{
-		return new EntityReferenceCreatorImpl(dataService, entityFactoryRegistry);
-	}
+  @Bean
+  public EntityReferenceCreator entityReferenceCreator() {
+    return new EntityReferenceCreatorImpl(dataService, entityFactoryRegistry);
+  }
 }

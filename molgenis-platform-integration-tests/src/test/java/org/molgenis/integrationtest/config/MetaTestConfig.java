@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.config;
 
+import javax.annotation.PostConstruct;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.EntityFactoryRegistry;
@@ -20,30 +21,35 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import javax.annotation.PostConstruct;
-
-/**
- * <p>Uses {@link ComponentScan} because of unclarified issues in metadata model.</p>
- */
+/** Uses {@link ComponentScan} because of unclarified issues in metadata model. */
 @Configuration
-@Import({ DataServiceImpl.class, MetaDataServiceImpl.class, EntityManagerImpl.class,
-		SystemRepositoryDecoratorRegistryImpl.class, EntityFactoryRegistry.class, EntityListenersService.class,
-		AttributeFactory.class, SystemEntityTypeRegistryImpl.class, EntityTypeDependencyResolver.class,
-		SystemPackageRegistry.class, PackagePersister.class, SystemEntityTypePersister.class,
-		SystemEntityTypeRegistrar.class, SystemPackageRegistrar.class, EntityFactoryRegistrar.class,
-		SystemEntityTypeInitializer.class, SystemEntityTypeI18nInitializer.class })
+@Import({
+  DataServiceImpl.class,
+  MetaDataServiceImpl.class,
+  EntityManagerImpl.class,
+  SystemRepositoryDecoratorRegistryImpl.class,
+  EntityFactoryRegistry.class,
+  EntityListenersService.class,
+  AttributeFactory.class,
+  SystemEntityTypeRegistryImpl.class,
+  EntityTypeDependencyResolver.class,
+  SystemPackageRegistry.class,
+  PackagePersister.class,
+  SystemEntityTypePersister.class,
+  SystemEntityTypeRegistrar.class,
+  SystemPackageRegistrar.class,
+  EntityFactoryRegistrar.class,
+  SystemEntityTypeInitializer.class,
+  SystemEntityTypeI18nInitializer.class
+})
 @ComponentScan("org.molgenis.data.meta.model")
-public class MetaTestConfig
-{
-	@Autowired
-	private MetaDataService metaDataService;
+public class MetaTestConfig {
+  @Autowired private MetaDataService metaDataService;
 
-	@Autowired
-	private DataService dataService;
+  @Autowired private DataService dataService;
 
-	@PostConstruct
-	public void init()
-	{
-		dataService.setMetaDataService(metaDataService);
-	}
+  @PostConstruct
+  public void init() {
+    dataService.setMetaDataService(metaDataService);
+  }
 }

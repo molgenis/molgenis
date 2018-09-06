@@ -1,5 +1,7 @@
 package org.molgenis.app;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.molgenis.core.ui.security.MolgenisAccessDecisionVoter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
@@ -19,46 +21,37 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Configuration
 @Import(AclConfig.class)
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
-{
-	@Autowired
-	private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
+public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig {
+  @Autowired private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
 
-	@Autowired
-	private RoleVoter roleVoter;
+  @Autowired private RoleVoter roleVoter;
 
-	@Autowired
-	private DataService dataService;
+  @Autowired private DataService dataService;
 
-	// TODO automate URL authorization configuration (ticket #2133)
-	@Override
-	protected void configureUrlAuthorization(
-			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry)
-	{
-		List<AccessDecisionVoter<?>> listOfVoters = new ArrayList<>();
-		listOfVoters.add(new WebExpressionVoter());
-		listOfVoters.add(new MolgenisAccessDecisionVoter());
-		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
+  // TODO automate URL authorization configuration (ticket #2133)
+  @Override
+  protected void configureUrlAuthorization(
+      ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
+          expressionInterceptUrlRegistry) {
+    List<AccessDecisionVoter<?>> listOfVoters = new ArrayList<>();
+    listOfVoters.add(new WebExpressionVoter());
+    listOfVoters.add(new MolgenisAccessDecisionVoter());
+    expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
-		expressionInterceptUrlRegistry.antMatchers("/").permitAll();
-	}
+    expressionInterceptUrlRegistry.antMatchers("/").permitAll();
+  }
 
-	@Override
-	public RoleHierarchy roleHierarchy()
-	{
-		return new DataserviceRoleHierarchy(dataService);
-	}
+  @Override
+  public RoleHierarchy roleHierarchy() {
+    return new DataserviceRoleHierarchy(dataService);
+  }
 
-	@Bean
-	public MolgenisAccessDecisionVoter molgenisAccessDecisionVoter()
-	{
-		return new MolgenisAccessDecisionVoter();
-	}
+  @Bean
+  public MolgenisAccessDecisionVoter molgenisAccessDecisionVoter() {
+    return new MolgenisAccessDecisionVoter();
+  }
 }

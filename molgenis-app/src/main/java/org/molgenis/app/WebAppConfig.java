@@ -23,22 +23,22 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 @EnableWebMvc
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis")
-@Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, ElasticsearchConfig.class,
-		GsonConfig.class })
-public class WebAppConfig extends MolgenisWebAppConfig
-{
-	@Autowired
-	private DataService dataService;
+@Import({
+  WebAppSecurityConfig.class,
+  DatabaseConfig.class,
+  HttpClientConfig.class,
+  ElasticsearchConfig.class,
+  GsonConfig.class
+})
+public class WebAppConfig extends MolgenisWebAppConfig {
+  @Autowired private DataService dataService;
 
-	/**
-	 * Configures Freemarker
-	 */
-	@Override
-	public FreeMarkerConfigurer freeMarkerConfigurer()
-	{
-		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
-		// Look up unknown templates in the FreemarkerTemplate repository
-		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
-		return result;
-	}
+  /** Configures Freemarker */
+  @Override
+  public FreeMarkerConfigurer freeMarkerConfigurer() {
+    FreeMarkerConfigurer result = super.freeMarkerConfigurer();
+    // Look up unknown templates in the FreemarkerTemplate repository
+    result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
+    return result;
+  }
 }

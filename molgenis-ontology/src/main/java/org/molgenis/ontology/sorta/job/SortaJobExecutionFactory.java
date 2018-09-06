@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SortaJobExecutionFactory
-		extends AbstractSystemEntityFactory<SortaJobExecution, SortaJobExecutionMetaData, String>
-{
-	SortaJobExecutionFactory(SortaJobExecutionMetaData sortaJobExecutionMetaData, EntityPopulator entityPopulator)
-	{
-		super(SortaJobExecution.class, sortaJobExecutionMetaData, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<SortaJobExecution, SortaJobExecutionMetaData, String> {
+  SortaJobExecutionFactory(
+      SortaJobExecutionMetaData sortaJobExecutionMetaData, EntityPopulator entityPopulator) {
+    super(SortaJobExecution.class, sortaJobExecutionMetaData, entityPopulator);
+  }
 }

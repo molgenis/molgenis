@@ -1,6 +1,22 @@
 package org.molgenis.data.vcf;
 
+import static java.nio.file.Files.createTempFile;
+import static java.util.Collections.singleton;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableList;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -22,149 +38,124 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+@ContextConfiguration(classes = {VcfRepositoryTest.Config.class})
+public class VcfRepositoryTest extends AbstractMolgenisSpringTest {
+  @Autowired private VcfAttributes vcfAttrs;
 
-import static java.nio.file.Files.createTempFile;
-import static java.util.Collections.singleton;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+  @Autowired private EntityTypeFactory entityTypeFactory;
 
-@ContextConfiguration(classes = { VcfRepositoryTest.Config.class })
-public class VcfRepositoryTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	private VcfAttributes vcfAttrs;
+  @Autowired private AttributeFactory attrMetaFactory;
 
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
+  @Mock private Consumer<List<Entity>> batchConsumer;
 
-	@Autowired
-	private AttributeFactory attrMetaFactory;
+  @Captor private ArgumentCaptor<List<Entity>> entityListCaptor;
 
-	@Mock
-	private Consumer<List<Entity>> batchConsumer;
+  private static File testData;
+  private static File testNoData;
+  private static File testEmptyFile;
 
-	@Captor
-	private ArgumentCaptor<List<Entity>> entityListCaptor;
+  @BeforeClass
+  public void beforeClass() throws IOException {
+    testData = new ClassPathResource("testdata.vcf").getFile();
+    testNoData = new ClassPathResource("testnodata.vcf").getFile();
+    testEmptyFile = createTempFile("empty", "vcf").toFile();
+  }
 
-	private static File testData;
-	private static File testNoData;
-	private static File testEmptyFile;
+  @AfterClass
+  public void afterClass() {
+    testEmptyFile.delete();
+  }
 
-	@BeforeClass
-	public void beforeClass() throws IOException
-	{
-		testData = new ClassPathResource("testdata.vcf").getFile();
-		testNoData = new ClassPathResource("testnodata.vcf").getFile();
-		testEmptyFile = createTempFile("empty", "vcf").toFile();
-	}
+  // Regression test for https://github.com/molgenis/molgenis/issues/6528
+  @SuppressWarnings("deprecation")
+  @Test(
+      expectedExceptions = MolgenisDataException.class,
+      expectedExceptionsMessageRegExp =
+          "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers")
+  public void testCreateRepositoryForEmptyFile() {
+    new VcfRepository(testEmptyFile, "test", vcfAttrs, entityTypeFactory, attrMetaFactory);
+  }
 
-	@AfterClass
-	public void afterClass()
-	{
-		testEmptyFile.delete();
-	}
+  @Test
+  public void metaData() {
+    VcfRepository vcfRepository =
+        new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory, attrMetaFactory);
 
-	// Regression test for https://github.com/molgenis/molgenis/issues/6528
-	@SuppressWarnings("deprecation")
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Failed to read VCF Metadata from file; nested exception is java.io.IOException: missing column headers")
-	public void testCreateRepositoryForEmptyFile()
-	{
-		new VcfRepository(testEmptyFile, "test", vcfAttrs, entityTypeFactory, attrMetaFactory);
-	}
+    assertEquals(vcfRepository.getName(), "testData");
+    Iterator<Attribute> it = vcfRepository.getEntityType().getAttributes().iterator();
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.CHROM, STRING);
+    assertTrue(it.hasNext());
+    // TEXT to handle large insertions/deletions
+    testAttribute(it.next(), VcfAttributes.ALT, TEXT);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), POS, INT);
+    assertTrue(it.hasNext());
+    // TEXT to handle large insertions/deletions
+    testAttribute(it.next(), VcfAttributes.REF, TEXT);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.FILTER, STRING);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.QUAL, STRING);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.ID, STRING);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.INTERNAL_ID, STRING);
+    assertTrue(it.hasNext());
+    testAttribute(it.next(), VcfAttributes.INFO, COMPOUND);
+    assertTrue(it.hasNext());
+  }
 
-	@Test
-	public void metaData()
-	{
-		VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory);
+  private static void testAttribute(Attribute metadata, String name, AttributeType type) {
+    assertEquals(metadata.getName(), name);
+    assertEquals(metadata.getDataType(), type);
+  }
 
-		assertEquals(vcfRepository.getName(), "testData");
-		Iterator<Attribute> it = vcfRepository.getEntityType().getAttributes().iterator();
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.CHROM, STRING);
-		assertTrue(it.hasNext());
-		// TEXT to handle large insertions/deletions
-		testAttribute(it.next(), VcfAttributes.ALT, TEXT);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), POS, INT);
-		assertTrue(it.hasNext());
-		// TEXT to handle large insertions/deletions
-		testAttribute(it.next(), VcfAttributes.REF, TEXT);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.FILTER, STRING);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.QUAL, STRING);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.ID, STRING);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.INTERNAL_ID, STRING);
-		assertTrue(it.hasNext());
-		testAttribute(it.next(), VcfAttributes.INFO, COMPOUND);
-		assertTrue(it.hasNext());
+  @Test
+  public void testForEachBatched() {
+    VcfRepository vcfRepository =
+        new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory, attrMetaFactory);
 
-	}
+    // stream the file in batches to the batchConsumer
+    vcfRepository.forEachBatched(batchConsumer, 5);
 
-	private static void testAttribute(Attribute metadata, String name, AttributeType type)
-	{
-		assertEquals(metadata.getName(), name);
-		assertEquals(metadata.getDataType(), type);
-	}
+    // verify that the batchConsumer was called with two batches and send the batches to the captor
+    verify(batchConsumer, times(2)).accept(entityListCaptor.capture());
 
-	@Test
-	public void testForEachBatched()
-	{
-		VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory);
+    // get the batch values from the captor
+    List<List<Entity>> allValues = entityListCaptor.getAllValues();
 
-		// stream the file in batches to the batchConsumer
-		vcfRepository.forEachBatched(batchConsumer, 5);
+    List<List<Integer>> positions =
+        allValues
+            .stream()
+            .map(
+                batch ->
+                    batch.stream().map(entity -> entity.getInt(POS)).collect(Collectors.toList()))
+            .collect(Collectors.toList());
+    assertEquals(
+        positions,
+        ImmutableList.of(
+            ImmutableList.of(565286, 2243618, 3171929, 3172062, 3172273),
+            ImmutableList.of(6097450, 7569187)));
 
-		// verify that the batchConsumer was called with two batches and send the batches to the captor
-		verify(batchConsumer, times(2)).accept(entityListCaptor.capture());
+    Set<String> chroms =
+        allValues
+            .stream()
+            .flatMap(batch -> batch.stream().map(entity -> entity.getString(CHROM)))
+            .collect(Collectors.toSet());
+    assertEquals(chroms, singleton("1"));
+  }
 
-		// get the batch values from the captor
-		List<List<Entity>> allValues = entityListCaptor.getAllValues();
+  @Test
+  public void iterator_noValues() {
+    VcfRepository vcfRepository =
+        new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory, attrMetaFactory);
+    vcfRepository.forEachBatched(batchConsumer, 1000);
 
-		List<List<Integer>> positions = allValues.stream()
-												 .map(batch -> batch.stream()
-																	.map(entity -> entity.getInt(POS))
-																	.collect(Collectors.toList()))
-												 .collect(Collectors.toList());
-		assertEquals(positions, ImmutableList.of(ImmutableList.of(565286, 2243618, 3171929, 3172062, 3172273),
-				ImmutableList.of(6097450, 7569187)));
+    verifyZeroInteractions(batchConsumer);
+  }
 
-		Set<String> chroms = allValues.stream()
-									  .flatMap(batch -> batch.stream().map(entity -> entity.getString(CHROM)))
-									  .collect(Collectors.toSet());
-		assertEquals(chroms, singleton("1"));
-	}
-
-	@Test
-	public void iterator_noValues()
-	{
-		VcfRepository vcfRepository = new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory,
-				attrMetaFactory);
-		vcfRepository.forEachBatched(batchConsumer, 1000);
-
-		verifyZeroInteractions(batchConsumer);
-	}
-
-	@Configuration
-	@Import({ VcfTestConfig.class })
-	public static class Config
-	{
-
-	}
-
+  @Configuration
+  @Import({VcfTestConfig.class})
+  public static class Config {}
 }

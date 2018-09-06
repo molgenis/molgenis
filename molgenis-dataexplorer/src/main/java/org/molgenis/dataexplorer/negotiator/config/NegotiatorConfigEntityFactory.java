@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 class NegotiatorConfigEntityFactory
-		extends AbstractSystemEntityFactory<NegotiatorEntityConfig, NegotiatorEntityConfigMeta, String>
-{
-	NegotiatorConfigEntityFactory(NegotiatorEntityConfigMeta myEntityMeta, EntityPopulator entityPopulator)
-	{
-		super(NegotiatorEntityConfig.class, myEntityMeta, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<
+        NegotiatorEntityConfig, NegotiatorEntityConfigMeta, String> {
+  NegotiatorConfigEntityFactory(
+      NegotiatorEntityConfigMeta myEntityMeta, EntityPopulator entityPopulator) {
+    super(NegotiatorEntityConfig.class, myEntityMeta, entityPopulator);
+  }
 }

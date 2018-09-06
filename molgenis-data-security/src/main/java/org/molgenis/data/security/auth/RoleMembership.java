@@ -1,105 +1,88 @@
 package org.molgenis.data.security.auth;
 
-import com.google.common.collect.Range;
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.StaticEntity;
-
-import java.time.Instant;
-import java.util.Optional;
-
 import static com.google.common.collect.Range.atLeast;
 import static com.google.common.collect.Range.closedOpen;
 import static java.time.Instant.now;
 import static org.molgenis.data.security.auth.RoleMembership.Status.*;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.*;
 
-public class RoleMembership extends StaticEntity
-{
-	public enum Status
-	{
-		FUTURE, CURRENT, PAST
-	}
+import com.google.common.collect.Range;
+import java.time.Instant;
+import java.util.Optional;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.StaticEntity;
 
-	public RoleMembership(Entity entity)
-	{
-		super(entity);
-	}
+public class RoleMembership extends StaticEntity {
+  public enum Status {
+    FUTURE,
+    CURRENT,
+    PAST
+  }
 
-	public RoleMembership(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public RoleMembership(Entity entity) {
+    super(entity);
+  }
 
-	public RoleMembership(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public RoleMembership(EntityType entityType) {
+    super(entityType);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public RoleMembership(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public void setId(String id) {
+    set(ID, id);
+  }
 
-	public void setUser(User user)
-	{
-		set(USER, user);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public User getUser()
-	{
-		return getEntity(USER, User.class);
-	}
+  public void setUser(User user) {
+    set(USER, user);
+  }
 
-	public void setRole(Role role)
-	{
-		set(ROLE, role);
-	}
+  public User getUser() {
+    return getEntity(USER, User.class);
+  }
 
-	public Role getRole()
-	{
-		return getEntity(ROLE, Role.class);
-	}
+  public void setRole(Role role) {
+    set(ROLE, role);
+  }
 
-	public void setFrom(Instant from)
-	{
-		set(FROM, from);
-	}
+  public Role getRole() {
+    return getEntity(ROLE, Role.class);
+  }
 
-	public Instant getFrom()
-	{
-		return getInstant(FROM);
-	}
+  public void setFrom(Instant from) {
+    set(FROM, from);
+  }
 
-	public void setTo(Instant to)
-	{
-		set(TO, to);
-	}
+  public Instant getFrom() {
+    return getInstant(FROM);
+  }
 
-	public Optional<Instant> getTo()
-	{
-		return Optional.ofNullable(getInstant(TO));
-	}
+  public void setTo(Instant to) {
+    set(TO, to);
+  }
 
-	public Range<Instant> getValidity()
-	{
-		return getTo().map(to -> closedOpen(getFrom(), to)).orElse(atLeast(getFrom()));
-	}
+  public Optional<Instant> getTo() {
+    return Optional.ofNullable(getInstant(TO));
+  }
 
-	public Status getStatus()
-	{
-		if (getFrom().isAfter(now())) return FUTURE;
-		return getValidity().contains(now()) ? CURRENT : PAST;
-	}
+  public Range<Instant> getValidity() {
+    return getTo().map(to -> closedOpen(getFrom(), to)).orElse(atLeast(getFrom()));
+  }
 
-	public boolean isCurrent()
-	{
-		return getStatus() == CURRENT;
-	}
+  public Status getStatus() {
+    if (getFrom().isAfter(now())) return FUTURE;
+    return getValidity().contains(now()) ? CURRENT : PAST;
+  }
+
+  public boolean isCurrent() {
+    return getStatus() == CURRENT;
+  }
 }

@@ -7,16 +7,14 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 
 /**
- * Registry of application permissions used to bootstrap application.
- * Classes implementing this interface must be annotated with as
- * {@link org.springframework.stereotype.Component Component}.
+ * Registry of application permissions used to bootstrap application. Classes implementing this
+ * interface must be annotated with as {@link org.springframework.stereotype.Component Component}.
  */
-public interface PermissionRegistry
-{
-	/**
-	 * Returns the permissions to populate
-	 *
-	 * @return permissions to populate
-	 */
-	Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> getPermissions();
+public interface PermissionRegistry {
+  /**
+   * Returns the permissions to populate
+   *
+   * @return permissions to populate
+   */
+  Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> getPermissions();
 }

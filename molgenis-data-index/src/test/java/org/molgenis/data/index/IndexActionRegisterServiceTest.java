@@ -1,6 +1,16 @@
 package org.molgenis.data.index;
 
+import static java.util.Collections.singleton;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.testng.Assert.*;
+
 import com.google.common.collect.Lists;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -21,130 +31,110 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+public class IndexActionRegisterServiceTest extends AbstractMockitoTest {
+  private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl;
+  @Mock private IndexActionGroupFactory indexActionGroupFactory;
+  @Mock private IndexActionGroup indexActionGroup;
+  @Mock private IndexActionFactory indexActionFactory;
+  @Mock private IndexAction indexAction;
+  @Mock private DataService dataService;
+  @Captor private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
 
-import static java.util.Collections.singleton;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
-import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.testng.Assert.*;
+  @BeforeMethod
+  public void beforeMethod() {
+    TransactionSynchronizationManager.bindResource(
+        TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
+    indexActionRegisterServiceImpl =
+        new IndexActionRegisterServiceImpl(
+            dataService, indexActionFactory, indexActionGroupFactory, new IndexingStrategy());
+  }
 
-public class IndexActionRegisterServiceTest extends AbstractMockitoTest
-{
-	private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl;
-	@Mock
-	private IndexActionGroupFactory indexActionGroupFactory;
-	@Mock
-	private IndexActionGroup indexActionGroup;
-	@Mock
-	private IndexActionFactory indexActionFactory;
-	@Mock
-	private IndexAction indexAction;
-	@Mock
-	private DataService dataService;
-	@Captor
-	private ArgumentCaptor<Stream<IndexAction>> indexActionStreamCaptor;
+  @AfterMethod
+  public void afterMethod() {
+    TransactionSynchronizationManager.unbindResource(
+        TransactionManager.TRANSACTION_ID_RESOURCE_NAME);
+  }
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		TransactionSynchronizationManager.bindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
-		indexActionRegisterServiceImpl = new IndexActionRegisterServiceImpl(dataService, indexActionFactory,
-				indexActionGroupFactory, new IndexingStrategy());
-	}
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testRegisterCreateSingleEntityNoReferences() {
+    when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
+    when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
 
-	@AfterMethod
-	public void afterMethod()
-	{
-		TransactionSynchronizationManager.unbindResource(TransactionManager.TRANSACTION_ID_RESOURCE_NAME);
-	}
+    when(indexActionFactory.create()).thenReturn(indexAction);
+    when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
+    when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
+    when(indexAction.setEntityId("123")).thenReturn(indexAction);
+    when(indexAction.setActionOrder(0)).thenReturn(indexAction);
+    when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("entityTypeId");
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRegisterCreateSingleEntityNoReferences()
-	{
-		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
-		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
+    indexActionRegisterServiceImpl.register(entityType, 123);
 
-		when(indexActionFactory.create()).thenReturn(indexAction);
-		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
-		when(indexAction.setEntityTypeId("entityTypeId")).thenReturn(indexAction);
-		when(indexAction.setEntityId("123")).thenReturn(indexAction);
-		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
-		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn("entityTypeId");
+    verifyZeroInteractions(dataService);
 
-		indexActionRegisterServiceImpl.register(entityType, 123);
+    Query<Entity> refEntityQuery = mock(Query.class);
+    when(refEntityQuery.count()).thenReturn(0L);
+    when(refEntityQuery.in(AttributeMetadata.REF_ENTITY_TYPE, singleton("entityTypeId")))
+        .thenReturn(refEntityQuery);
+    doReturn(refEntityQuery).when(dataService).query(ATTRIBUTE_META_DATA);
+    indexActionRegisterServiceImpl.storeIndexActions("1");
 
-		verifyZeroInteractions(dataService);
+    verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
+    verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
+    assertEquals(
+        indexActionStreamCaptor.getValue().collect(Collectors.toList()),
+        Lists.newArrayList(indexAction));
+  }
 
-		Query<Entity> refEntityQuery = mock(Query.class);
-		when(refEntityQuery.count()).thenReturn(0L);
-		when(refEntityQuery.in(AttributeMetadata.REF_ENTITY_TYPE, singleton("entityTypeId"))).thenReturn(
-				refEntityQuery);
-		doReturn(refEntityQuery).when(dataService).query(ATTRIBUTE_META_DATA);
-		indexActionRegisterServiceImpl.storeIndexActions("1");
+  @Test
+  public void testRegisterAndForget() {
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("entityTypeId");
+    indexActionRegisterServiceImpl.register(entityType, 123);
 
-		verify(dataService).add(INDEX_ACTION_GROUP, indexActionGroup);
-		verify(dataService).add(eq(INDEX_ACTION), indexActionStreamCaptor.capture());
-		assertEquals(indexActionStreamCaptor.getValue().collect(Collectors.toList()), Lists.newArrayList(indexAction));
-	}
+    verifyZeroInteractions(dataService);
 
-	@Test
-	public void testRegisterAndForget()
-	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn("entityTypeId");
-		indexActionRegisterServiceImpl.register(entityType, 123);
+    indexActionRegisterServiceImpl.forgetIndexActions("1");
 
-		verifyZeroInteractions(dataService);
+    verifyZeroInteractions(dataService);
 
-		indexActionRegisterServiceImpl.forgetIndexActions("1");
+    indexActionRegisterServiceImpl.storeIndexActions("1");
 
-		verifyZeroInteractions(dataService);
+    verifyZeroInteractions(dataService);
+  }
 
-		indexActionRegisterServiceImpl.storeIndexActions("1");
+  @Test
+  public void testRegisterExcludedEntities() {
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn("entityTypeId");
+    indexActionRegisterServiceImpl.addExcludedEntity("ABC");
 
-		verifyZeroInteractions(dataService);
-	}
+    indexActionRegisterServiceImpl.register(entityType, 123);
+    verifyNoMoreInteractions(dataService);
+  }
 
-	@Test
-	public void testRegisterExcludedEntities()
-	{
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn("entityTypeId");
-		indexActionRegisterServiceImpl.addExcludedEntity("ABC");
+  @Test
+  public void isEntityDirtyTrue() {
+    String entityTypeId = "myEntityTypeId";
+    int entityId = 123;
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn(entityTypeId);
+    indexActionRegisterServiceImpl.register(entityType, entityId);
+    EntityKey entityKey = EntityKey.create(entityTypeId, entityId);
+    assertTrue(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
+  }
 
-		indexActionRegisterServiceImpl.register(entityType, 123);
-		verifyNoMoreInteractions(dataService);
-	}
-
-	@Test
-	public void isEntityDirtyTrue()
-	{
-		String entityTypeId = "myEntityTypeId";
-		int entityId = 123;
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		indexActionRegisterServiceImpl.register(entityType, entityId);
-		EntityKey entityKey = EntityKey.create(entityTypeId, entityId);
-		assertTrue(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
-	}
-
-	@Test
-	public void isEntityDirtyFalse()
-	{
-		String entityTypeId = "myEntityTypeId";
-		String entityId = "id";
-		String otherId = "otherID";
-		EntityType entityType = mock(EntityType.class);
-		when(entityType.getId()).thenReturn(entityTypeId);
-		indexActionRegisterServiceImpl.register(entityType, entityId);
-		EntityKey entityKey = EntityKey.create(entityTypeId, otherId);
-		assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
-	}
+  @Test
+  public void isEntityDirtyFalse() {
+    String entityTypeId = "myEntityTypeId";
+    String entityId = "id";
+    String otherId = "otherID";
+    EntityType entityType = mock(EntityType.class);
+    when(entityType.getId()).thenReturn(entityTypeId);
+    indexActionRegisterServiceImpl.register(entityType, entityId);
+    EntityKey entityKey = EntityKey.create(entityTypeId, otherId);
+    assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
+  }
 }

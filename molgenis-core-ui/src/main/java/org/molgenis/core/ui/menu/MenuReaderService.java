@@ -1,6 +1,5 @@
 package org.molgenis.core.ui.menu;
 
-public interface MenuReaderService
-{
-	Menu getMenu();
+public interface MenuReaderService {
+  Menu getMenu();
 }

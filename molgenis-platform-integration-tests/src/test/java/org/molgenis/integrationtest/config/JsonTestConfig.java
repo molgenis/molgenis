@@ -6,7 +6,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ Gson.class, JsonValidator.class })
-public class JsonTestConfig
-{
-}
+@Import({Gson.class, JsonValidator.class})
+public class JsonTestConfig {}

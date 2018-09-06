@@ -1,17 +1,15 @@
 package org.molgenis.data.decorator;
 
+import java.util.stream.Stream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 
-import java.util.stream.Stream;
+public interface DynamicRepositoryDecoratorRegistry {
+  void addFactory(DynamicRepositoryDecoratorFactory factory);
 
-public interface DynamicRepositoryDecoratorRegistry
-{
-	void addFactory(DynamicRepositoryDecoratorFactory factory);
+  Stream<String> getFactoryIds();
 
-	Stream<String> getFactoryIds();
+  DynamicRepositoryDecoratorFactory getFactory(String id);
 
-	DynamicRepositoryDecoratorFactory getFactory(String id);
-
-	Repository<Entity> decorate(Repository<Entity> repository);
+  Repository<Entity> decorate(Repository<Entity> repository);
 }

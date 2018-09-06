@@ -1,5 +1,10 @@
 package org.molgenis.web.exception;
 
+import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.ConversionNotSupportedException;
@@ -23,78 +28,70 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
-
-import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-
 @ControllerAdvice
-@Order(0)//After the Global handler but before the fallback
-public class SpringExceptionHandler
-{
-	private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
+@Order(0) // After the Global handler but before the fallback
+public class SpringExceptionHandler {
+  private static final Logger LOG = LoggerFactory.getLogger(SpringExceptionHandler.class);
 
-	@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod" })
-	@ExceptionHandler(NoHandlerFoundException.class)
-	public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest)
-	{
-		return handleException(ex, httpServletRequest, NOT_FOUND, null);
-	}
+  @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
+  @ExceptionHandler(NoHandlerFoundException.class)
+  public final Object handleSpringException(Exception ex, HttpServletRequest httpServletRequest) {
+    return handleException(ex, httpServletRequest, NOT_FOUND, null);
+  }
 
-	@ExceptionHandler({ HttpRequestMethodNotSupportedException.class, HttpMediaTypeNotSupportedException.class,
-			HttpMediaTypeNotAcceptableException.class, MissingPathVariableException.class,
-			MissingServletRequestParameterException.class, ServletRequestBindingException.class,
-			ConversionNotSupportedException.class, TypeMismatchException.class, HttpMessageNotReadableException.class,
-			HttpMessageNotWritableException.class, MethodArgumentNotValidException.class,
-			MissingServletRequestPartException.class, BindException.class, AsyncRequestTimeoutException.class,
-			ConstraintViolationException.class })
-	public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod)
-	{
-		HttpStatus status;
-		if (ex instanceof HttpRequestMethodNotSupportedException)
-		{
-			status = HttpStatus.METHOD_NOT_ALLOWED;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else if (ex instanceof HttpMediaTypeNotSupportedException)
-		{
-			status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else if (ex instanceof HttpMediaTypeNotAcceptableException)
-		{
-			status = HttpStatus.NOT_ACCEPTABLE;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else if (ex instanceof MissingPathVariableException || ex instanceof ConversionNotSupportedException
-				|| ex instanceof HttpMessageNotWritableException)
-		{
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else if (ex instanceof MissingServletRequestParameterException || ex instanceof ServletRequestBindingException
-				|| ex instanceof TypeMismatchException || ex instanceof HttpMessageNotReadableException
-				|| ex instanceof MethodArgumentNotValidException || ex instanceof MissingServletRequestPartException
-				|| ex instanceof BindException || ex instanceof ConstraintViolationException)
-		{
-			status = HttpStatus.BAD_REQUEST;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else if (ex instanceof AsyncRequestTimeoutException)
-		{
-			status = HttpStatus.SERVICE_UNAVAILABLE;
-			return handleException(ex, handlerMethod, status, null);
-		}
-		else
-		{
-			if (LOG.isWarnEnabled())
-			{
-				LOG.warn("Unknown exception type: {}", ex.getClass().getName());
-			}
+  @ExceptionHandler({
+    HttpRequestMethodNotSupportedException.class,
+    HttpMediaTypeNotSupportedException.class,
+    HttpMediaTypeNotAcceptableException.class,
+    MissingPathVariableException.class,
+    MissingServletRequestParameterException.class,
+    ServletRequestBindingException.class,
+    ConversionNotSupportedException.class,
+    TypeMismatchException.class,
+    HttpMessageNotReadableException.class,
+    HttpMessageNotWritableException.class,
+    MethodArgumentNotValidException.class,
+    MissingServletRequestPartException.class,
+    BindException.class,
+    AsyncRequestTimeoutException.class,
+    ConstraintViolationException.class
+  })
+  public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod) {
+    HttpStatus status;
+    if (ex instanceof HttpRequestMethodNotSupportedException) {
+      status = HttpStatus.METHOD_NOT_ALLOWED;
+      return handleException(ex, handlerMethod, status, null);
+    } else if (ex instanceof HttpMediaTypeNotSupportedException) {
+      status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+      return handleException(ex, handlerMethod, status, null);
+    } else if (ex instanceof HttpMediaTypeNotAcceptableException) {
+      status = HttpStatus.NOT_ACCEPTABLE;
+      return handleException(ex, handlerMethod, status, null);
+    } else if (ex instanceof MissingPathVariableException
+        || ex instanceof ConversionNotSupportedException
+        || ex instanceof HttpMessageNotWritableException) {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      return handleException(ex, handlerMethod, status, null);
+    } else if (ex instanceof MissingServletRequestParameterException
+        || ex instanceof ServletRequestBindingException
+        || ex instanceof TypeMismatchException
+        || ex instanceof HttpMessageNotReadableException
+        || ex instanceof MethodArgumentNotValidException
+        || ex instanceof MissingServletRequestPartException
+        || ex instanceof BindException
+        || ex instanceof ConstraintViolationException) {
+      status = HttpStatus.BAD_REQUEST;
+      return handleException(ex, handlerMethod, status, null);
+    } else if (ex instanceof AsyncRequestTimeoutException) {
+      status = HttpStatus.SERVICE_UNAVAILABLE;
+      return handleException(ex, handlerMethod, status, null);
+    } else {
+      if (LOG.isWarnEnabled()) {
+        LOG.warn("Unknown exception type: {}", ex.getClass().getName());
+      }
 
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-			return handleException(ex, handlerMethod, status, null);
-		}
-	}
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      return handleException(ex, handlerMethod, status, null);
+    }
+  }
 }

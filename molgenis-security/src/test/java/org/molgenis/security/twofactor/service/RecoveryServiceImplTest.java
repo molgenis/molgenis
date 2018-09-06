@@ -1,5 +1,11 @@
 package org.molgenis.security.twofactor.service;
 
+import static org.mockito.Mockito.*;
+import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.*;
+import static org.testng.Assert.assertEquals;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
@@ -19,115 +25,101 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+@ContextConfiguration(classes = {RecoveryServiceImplTest.Config.class})
+@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests {
+  private static final String USERNAME = "molgenisUser";
+  private static final String ROLE_SU = "SU";
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.*;
-import static org.testng.Assert.assertEquals;
+  @Autowired private RecoveryService recoveryService;
+  @Autowired private UserService userService;
+  @Autowired private DataService dataService;
+  @Autowired private RecoveryCodeFactory recoveryCodeFactory;
+  private User molgenisUser = mock(User.class);
+  private RecoveryCode recoveryCode = mock(RecoveryCode.class);
 
-@ContextConfiguration(classes = { RecoveryServiceImplTest.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests
-{
-	private static final String USERNAME = "molgenisUser";
-	private static final String ROLE_SU = "SU";
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
+    when(molgenisUser.getUsername()).thenReturn(USERNAME);
+    when(molgenisUser.getId()).thenReturn("1234");
+    when(dataService
+            .query(RecoveryCodeMetadata.RECOVERY_CODE, RecoveryCode.class)
+            .eq(USER_ID, molgenisUser.getId())
+            .findAll())
+        .thenReturn(IntStream.range(0, 1).mapToObj(i -> recoveryCode));
+  }
 
-	@Autowired
-	private RecoveryService recoveryService;
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private DataService dataService;
-	@Autowired
-	private RecoveryCodeFactory recoveryCodeFactory;
-	private User molgenisUser = mock(User.class);
-	private RecoveryCode recoveryCode = mock(RecoveryCode.class);
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  public void testGenerateRecoveryCodes() {
+    when(recoveryCodeFactory.create()).thenReturn(recoveryCode);
+    Stream<RecoveryCode> recoveryCodeStream = recoveryService.generateRecoveryCodes();
+    assertEquals(10, recoveryCodeStream.count());
+  }
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
-		when(molgenisUser.getUsername()).thenReturn(USERNAME);
-		when(molgenisUser.getId()).thenReturn("1234");
-		when(dataService.query(RecoveryCodeMetadata.RECOVERY_CODE, RecoveryCode.class)
-						.eq(USER_ID, molgenisUser.getId())
-						.findAll()).thenReturn(IntStream.range(0, 1).mapToObj(i -> recoveryCode));
-	}
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  public void testUseRecoveryCode() {
+    String recoveryCodeId = "lkfsdufash";
+    UserSecret userSecret = mock(UserSecret.class);
 
-	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	public void testGenerateRecoveryCodes()
-	{
-		when(recoveryCodeFactory.create()).thenReturn(recoveryCode);
-		Stream<RecoveryCode> recoveryCodeStream = recoveryService.generateRecoveryCodes();
-		assertEquals(10, recoveryCodeStream.count());
-	}
+    when(dataService
+            .query(RECOVERY_CODE, RecoveryCode.class)
+            .eq(USER_ID, molgenisUser.getId())
+            .and()
+            .eq(CODE, recoveryCodeId)
+            .findOne())
+        .thenReturn(recoveryCode);
+    when(dataService
+            .query(UserSecretMetaData.USER_SECRET, UserSecret.class)
+            .eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+            .findOne())
+        .thenReturn(userSecret);
+    recoveryService.useRecoveryCode(recoveryCodeId);
+    verify(userSecret).setFailedLoginAttempts(0);
+    verify(dataService).update(UserSecretMetaData.USER_SECRET, userSecret);
+  }
 
-	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	public void testUseRecoveryCode()
-	{
-		String recoveryCodeId = "lkfsdufash";
-		UserSecret userSecret = mock(UserSecret.class);
+  @Test
+  @WithMockUser(value = USERNAME, roles = ROLE_SU)
+  public void testGetRecoveryCodes() {
+    when(dataService
+            .query(RECOVERY_CODE, RecoveryCode.class)
+            .eq(USER_ID, molgenisUser.getId())
+            .findAll())
+        .thenReturn(Stream.of(recoveryCode));
+    Stream<RecoveryCode> recoveryCodeList = recoveryService.getRecoveryCodes();
+    assertEquals(1, recoveryCodeList.count());
+  }
 
-		when(dataService.query(RECOVERY_CODE, RecoveryCode.class)
-						.eq(USER_ID, molgenisUser.getId())
-						.and()
-						.eq(CODE, recoveryCodeId)
-						.findOne()).thenReturn(recoveryCode);
-		when(dataService.query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-						.eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
-						.findOne()).thenReturn(userSecret);
-		recoveryService.useRecoveryCode(recoveryCodeId);
-		verify(userSecret).setFailedLoginAttempts(0);
-		verify(dataService).update(UserSecretMetaData.USER_SECRET, userSecret);
-	}
+  @Configuration
+  static class Config {
 
-	@Test
-	@WithMockUser(value = USERNAME, roles = ROLE_SU)
-	public void testGetRecoveryCodes()
-	{
-		when(dataService.query(RECOVERY_CODE, RecoveryCode.class)
-						.eq(USER_ID, molgenisUser.getId())
-						.findAll()).thenReturn(Stream.of(recoveryCode));
-		Stream<RecoveryCode> recoveryCodeList = recoveryService.getRecoveryCodes();
-		assertEquals(1, recoveryCodeList.count());
-	}
+    @Bean
+    public RecoveryService recoveryService() {
+      return new RecoveryServiceImpl(
+          dataService(), userService(), recoveryCodeFactory(), idGenerator());
+    }
 
-	@Configuration
-	static class Config
-	{
+    @Bean
+    public DataService dataService() {
+      return mock(DataServiceImpl.class, RETURNS_DEEP_STUBS);
+    }
 
-		@Bean
-		public RecoveryService recoveryService()
-		{
-			return new RecoveryServiceImpl(dataService(), userService(), recoveryCodeFactory(), idGenerator());
-		}
+    @Bean
+    public UserService userService() {
+      return mock(UserServiceImpl.class);
+    }
 
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataServiceImpl.class, RETURNS_DEEP_STUBS);
-		}
+    @Bean
+    public IdGenerator idGenerator() {
+      return new IdGeneratorImpl();
+    }
 
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
-
-		@Bean
-		public IdGenerator idGenerator()
-		{
-			return new IdGeneratorImpl();
-		}
-
-		@Bean
-		public RecoveryCodeFactory recoveryCodeFactory()
-		{
-			return mock(RecoveryCodeFactory.class);
-		}
-
-	}
+    @Bean
+    public RecoveryCodeFactory recoveryCodeFactory() {
+      return mock(RecoveryCodeFactory.class);
+    }
+  }
 }

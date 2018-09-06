@@ -1,6 +1,7 @@
 package org.molgenis.core.ui.data.config;
 
 import com.google.common.collect.Lists;
+import java.util.List;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.molgenis.web.converter.GsonConfig;
@@ -20,45 +21,37 @@ import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConvert
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-
 @Configuration
 @Import(GsonConfig.class)
-public class HttpClientConfig
-{
-	@Autowired
-	private GsonHttpMessageConverter gsonHttpMessageConverter;
+public class HttpClientConfig {
+  @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
-	@Bean
-	public CloseableHttpClient httpClient()
-	{
-		return HttpClients.createDefault();
-	}
+  @Bean
+  public CloseableHttpClient httpClient() {
+    return HttpClients.createDefault();
+  }
 
-	@Bean
-	public ClientHttpRequestFactory clientHttpRequestFactory()
-	{
-		return new HttpComponentsClientHttpRequestFactory();
-	}
+  @Bean
+  public ClientHttpRequestFactory clientHttpRequestFactory() {
+    return new HttpComponentsClientHttpRequestFactory();
+  }
 
-	@Bean
-	public RestTemplate restTemplate()
-	{
-		final RestTemplate result = new RestTemplate(clientHttpRequestFactory());
-		result.setMessageConverters(converters());
-		return result;
-	}
+  @Bean
+  public RestTemplate restTemplate() {
+    final RestTemplate result = new RestTemplate(clientHttpRequestFactory());
+    result.setMessageConverters(converters());
+    return result;
+  }
 
-	private List<HttpMessageConverter<?>> converters()
-	{
-		List<HttpMessageConverter<?>> result = Lists.newArrayList();
-		result.add(new ByteArrayHttpMessageConverter());
-		result.add(new StringHttpMessageConverter());
-		result.add(new ResourceHttpMessageConverter());
-		result.add(new SourceHttpMessageConverter<>());
-		result.add(new AllEncompassingFormHttpMessageConverter());
-		result.add(new Jaxb2RootElementHttpMessageConverter());
-		result.add(gsonHttpMessageConverter);
-		return result;
-	}
+  private List<HttpMessageConverter<?>> converters() {
+    List<HttpMessageConverter<?>> result = Lists.newArrayList();
+    result.add(new ByteArrayHttpMessageConverter());
+    result.add(new StringHttpMessageConverter());
+    result.add(new ResourceHttpMessageConverter());
+    result.add(new SourceHttpMessageConverter<>());
+    result.add(new AllEncompassingFormHttpMessageConverter());
+    result.add(new Jaxb2RootElementHttpMessageConverter());
+    result.add(gsonHttpMessageConverter);
+    return result;
+  }
 }

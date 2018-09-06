@@ -7,11 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TestEntityStaticFactory
-		extends AbstractSystemEntityFactory<TestEntityStatic, TestEntityStaticMetaData, String>
-{
-	@Autowired
-	TestEntityStaticFactory(TestEntityStaticMetaData testEntityStaticMetaData, EntityPopulator entityPopulator)
-	{
-		super(TestEntityStatic.class, testEntityStaticMetaData, entityPopulator);
-	}
+    extends AbstractSystemEntityFactory<TestEntityStatic, TestEntityStaticMetaData, String> {
+  @Autowired
+  TestEntityStaticFactory(
+      TestEntityStaticMetaData testEntityStaticMetaData, EntityPopulator entityPopulator) {
+    super(TestEntityStatic.class, testEntityStaticMetaData, entityPopulator);
+  }
 }

@@ -4,50 +4,46 @@ import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationFilter;
 
 /**
- * <p>Service to use in {@link TwoFactorAuthenticationFilter} and {@link TwoFactorAuthenticationController}</p>
+ * Service to use in {@link TwoFactorAuthenticationFilter} and {@link
+ * TwoFactorAuthenticationController}
  */
-public interface TwoFactorAuthenticationService
-{
-	/**
-	 * <p>Check verificationcode given by user from Google Authenticator</p>
-	 *
-	 * @param verificationCode code given by user from Google Authenticator
-	 * @return is verificationCode valid
-	 */
-	boolean isVerificationCodeValidForUser(String verificationCode);
+public interface TwoFactorAuthenticationService {
+  /**
+   * Check verificationcode given by user from Google Authenticator
+   *
+   * @param verificationCode code given by user from Google Authenticator
+   * @return is verificationCode valid
+   */
+  boolean isVerificationCodeValidForUser(String verificationCode);
 
-	/**
-	 * @return user had too many authentication failures
-	 */
-	boolean userIsBlocked();
+  /** @return user had too many authentication failures */
+  boolean userIsBlocked();
 
-	/**
-	 * <p>Add generated userSecret to userdata.</p>
-	 *
-	 * @param secret given secret for user
-	 */
-	void saveSecretForUser(String secret);
+  /**
+   * Add generated userSecret to userdata.
+   *
+   * @param secret given secret for user
+   */
+  void saveSecretForUser(String secret);
 
-	void resetSecretForUser();
+  void resetSecretForUser();
 
-	void enableForUser();
+  void enableForUser();
 
-	/**
-	 * <p>Disable 2 factor authentication for the current user</p>
-	 * <p>
-	 * Removes the secret key and set the TwoFactorAuthentication field to false
-	 */
-	void disableForUser();
+  /**
+   * Disable 2 factor authentication for the current user
+   *
+   * <p>Removes the secret key and set the TwoFactorAuthentication field to false
+   */
+  void disableForUser();
 
-	/**
-	 * <p>Check if the user is 2 factor authentication ready.</p>
-	 *
-	 * @return is configured for user
-	 */
-	boolean isConfiguredForUser();
+  /**
+   * Check if the user is 2 factor authentication ready.
+   *
+   * @return is configured for user
+   */
+  boolean isConfiguredForUser();
 
-	/**
-	 * @return the secretkey for logged in user
-	 */
-	String generateSecretKey();
+  /** @return the secretkey for logged in user */
+  String generateSecretKey();
 }

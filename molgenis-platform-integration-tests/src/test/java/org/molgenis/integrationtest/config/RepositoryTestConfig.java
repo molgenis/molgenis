@@ -11,10 +11,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ RepositoryCollectionRegistry.class, RepositoryCollectionDecoratorFactoryImpl.class,
-		RepositoryCollectionBootstrapper.class, IndexedRepositoryDecoratorFactory.class,
-		MolgenisRepositoryDecoratorFactory.class, FileRepositoryCollectionFactory.class,
-		SystemRepositoryDecoratorFactoryRegistrar.class })
-public class RepositoryTestConfig
-{
-}
+@Import({
+  RepositoryCollectionRegistry.class,
+  RepositoryCollectionDecoratorFactoryImpl.class,
+  RepositoryCollectionBootstrapper.class,
+  IndexedRepositoryDecoratorFactory.class,
+  MolgenisRepositoryDecoratorFactory.class,
+  FileRepositoryCollectionFactory.class,
+  SystemRepositoryDecoratorFactoryRegistrar.class
+})
+public class RepositoryTestConfig {}

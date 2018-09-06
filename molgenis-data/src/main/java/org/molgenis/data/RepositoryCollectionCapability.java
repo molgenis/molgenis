@@ -1,19 +1,12 @@
 package org.molgenis.data;
 
-public enum RepositoryCollectionCapability
-{
-	/**
-	 * Repository collections can be edited
-	 */
-	WRITABLE,
+public enum RepositoryCollectionCapability {
+  /** Repository collections can be edited */
+  WRITABLE,
 
-	/**
-	 * Repository collections can be updated
-	 */
-	UPDATABLE,
+  /** Repository collections can be updated */
+  UPDATABLE,
 
-	/**
-	 * Repository collections persist meta data
-	 */
-	META_DATA_PERSISTABLE
+  /** Repository collections persist meta data */
+  META_DATA_PERSISTABLE
 }

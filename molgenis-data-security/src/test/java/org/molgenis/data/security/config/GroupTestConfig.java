@@ -8,7 +8,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ EntityBaseTestConfig.class, RoleMetadata.class, RoleFactory.class, SecurityPackage.class })
-public class GroupTestConfig
-{
-}
+@Import({EntityBaseTestConfig.class, RoleMetadata.class, RoleFactory.class, SecurityPackage.class})
+public class GroupTestConfig {}

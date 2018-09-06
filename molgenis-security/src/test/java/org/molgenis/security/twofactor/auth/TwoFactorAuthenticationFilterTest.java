@@ -1,5 +1,14 @@
 package org.molgenis.security.twofactor.auth;
 
+import static org.mockito.Mockito.*;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
+import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -27,163 +36,135 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.io.IOException;
+@ContextConfiguration(classes = {TwoFactorAuthenticationFilterTest.Config.class})
+@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests {
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
-import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+  @Autowired private AuthenticationSettings authenticationSettings;
+  @Autowired private TwoFactorAuthenticationService twoFactorAuthenticationService;
+  @Autowired private TwoFactorAuthenticationFilter filter;
 
-@ContextConfiguration(classes = { TwoFactorAuthenticationFilterTest.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public class TwoFactorAuthenticationFilterTest extends AbstractTestNGSpringContextTests
-{
+  private MockHttpServletRequest request;
+  private MockHttpServletResponse response;
+  private FilterChain chain;
 
-	@Autowired
-	private AuthenticationSettings authenticationSettings;
-	@Autowired
-	private TwoFactorAuthenticationService twoFactorAuthenticationService;
-	@Autowired
-	private TwoFactorAuthenticationFilter filter;
+  @BeforeMethod
+  public void setUpBeforeMethod() {
+    request = new MockHttpServletRequest();
+    response = new MockHttpServletResponse();
+    chain = mock(FilterChain.class);
+  }
 
-	private MockHttpServletRequest request;
-	private MockHttpServletResponse response;
-	private FilterChain chain;
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterInternalIsConfigured() throws IOException, ServletException {
+    request.setRequestURI("/login");
+    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+    when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
 
-	@BeforeMethod
-	public void setUpBeforeMethod()
-	{
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		chain = mock(FilterChain.class);
-	}
+    filter.doFilterInternal(request, response, chain);
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterInternalIsConfigured() throws IOException, ServletException
-	{
-		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
-		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
+    String initialRedirectUrl =
+        TwoFactorAuthenticationController.URI
+            + TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI;
+    assertEquals(response.getRedirectedUrl(), initialRedirectUrl);
+  }
 
-		filter.doFilterInternal(request, response, chain);
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterInternalIsConfiguredChangePassword()
+      throws IOException, ServletException {
+    request.setRequestURI("/account/password/change");
+    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+    when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
 
-		String initialRedirectUrl =
-				TwoFactorAuthenticationController.URI + TwoFactorAuthenticationController.TWO_FACTOR_CONFIGURED_URI;
-		assertEquals(response.getRedirectedUrl(), initialRedirectUrl);
-	}
+    filter.doFilterInternal(request, response, chain);
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterInternalIsConfiguredChangePassword() throws IOException, ServletException
-	{
-		request.setRequestURI("/account/password/change");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
-		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(true);
+    assertNull(response.getRedirectedUrl());
+  }
 
-		filter.doFilterInternal(request, response, chain);
+  @Test
+  @WithMockUser(username = "user")
+  public void testDoFilterInternalIsNotConfigured() throws IOException, ServletException {
+    request.setRequestURI("/login");
+    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+    when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(false);
 
-		assertNull(response.getRedirectedUrl());
-	}
+    filter.doFilterInternal(request, response, chain);
 
-	@Test
-	@WithMockUser(username = "user")
-	public void testDoFilterInternalIsNotConfigured() throws IOException, ServletException
-	{
-		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
-		when(twoFactorAuthenticationService.isConfiguredForUser()).thenReturn(false);
+    String configuredRedirectUrl =
+        TwoFactorAuthenticationController.URI
+            + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
+    assertEquals(response.getRedirectedUrl(), configuredRedirectUrl);
+  }
 
-		filter.doFilterInternal(request, response, chain);
+  @Test
+  public void testDoFilterInternalNotAuthenticated() throws IOException, ServletException {
+    request.setRequestURI("/login");
+    when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
 
-		String configuredRedirectUrl =
-				TwoFactorAuthenticationController.URI + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
-		assertEquals(response.getRedirectedUrl(), configuredRedirectUrl);
+    filter.doFilterInternal(request, response, chain);
+    verify(chain).doFilter(request, response);
+  }
 
-	}
+  @Test
+  @WithMockUser
+  public void testDoFilterInternalRecoveryAuthenticated() throws IOException, ServletException {
+    SecurityContext previous = SecurityContextHolder.getContext();
+    try {
+      SecurityContext testContext = SecurityContextHolder.createEmptyContext();
+      SecurityContextHolder.setContext(testContext);
+      testContext.setAuthentication(new RecoveryAuthenticationToken("recovery"));
 
-	@Test
-	public void testDoFilterInternalNotAuthenticated() throws IOException, ServletException
-	{
-		request.setRequestURI("/login");
-		when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(DISABLED);
+      request.setRequestURI("/menu/main/dataexplorer");
+      when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
 
-		filter.doFilterInternal(request, response, chain);
-		verify(chain).doFilter(request, response);
+      filter.doFilterInternal(request, response, chain);
+      verify(chain).doFilter(request, response);
+    } finally {
+      SecurityContextHolder.setContext(previous);
+    }
+  }
 
-	}
+  @Configuration
+  static class Config {
+    @Bean
+    public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
+      return new TwoFactorAuthenticationFilter(
+          authenticationSettings(),
+          twoFactorAuthenticationService(),
+          redirectStrategy(),
+          userAccountService());
+    }
 
-	@Test
-	@WithMockUser
-	public void testDoFilterInternalRecoveryAuthenticated() throws IOException, ServletException
-	{
-		SecurityContext previous = SecurityContextHolder.getContext();
-		try
-		{
-			SecurityContext testContext = SecurityContextHolder.createEmptyContext();
-			SecurityContextHolder.setContext(testContext);
-			testContext.setAuthentication(new RecoveryAuthenticationToken("recovery"));
+    @Bean
+    public TwoFactorAuthenticationService twoFactorAuthenticationService() {
+      return mock(TwoFactorAuthenticationServiceImpl.class);
+    }
 
-			request.setRequestURI("/menu/main/dataexplorer");
-			when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENFORCED);
+    @Bean
+    public AuthenticationSettings authenticationSettings() {
+      return mock(AuthenticationSettings.class);
+    }
 
-			filter.doFilterInternal(request, response, chain);
-			verify(chain).doFilter(request, response);
-		}
-		finally
-		{
-			SecurityContextHolder.setContext(previous);
-		}
-	}
+    @Bean
+    public RedirectStrategy redirectStrategy() {
+      return new DefaultRedirectStrategy();
+    }
 
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter()
-		{
-			return new TwoFactorAuthenticationFilter(authenticationSettings(), twoFactorAuthenticationService(),
-					redirectStrategy(), userAccountService());
-		}
+    @Bean
+    public UserAccountService userAccountService() {
+      return mock(UserAccountServiceImpl.class);
+    }
 
-		@Bean
-		public TwoFactorAuthenticationService twoFactorAuthenticationService()
-		{
-			return mock(TwoFactorAuthenticationServiceImpl.class);
-		}
+    @Bean
+    public UserService userService() {
+      return mock(UserServiceImpl.class);
+    }
 
-		@Bean
-		public AuthenticationSettings authenticationSettings()
-		{
-			return mock(AuthenticationSettings.class);
-		}
-
-		@Bean
-		public RedirectStrategy redirectStrategy()
-		{
-			return new DefaultRedirectStrategy();
-		}
-
-		@Bean
-		public UserAccountService userAccountService()
-		{
-			return mock(UserAccountServiceImpl.class);
-		}
-
-		@Bean
-		public UserService userService()
-		{
-			return mock(UserServiceImpl.class);
-		}
-
-		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return new BCryptPasswordEncoder();
-		}
-
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+      return new BCryptPasswordEncoder();
+    }
+  }
 }

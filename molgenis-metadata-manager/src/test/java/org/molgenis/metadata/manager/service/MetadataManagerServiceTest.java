@@ -1,5 +1,15 @@
 package org.molgenis.metadata.manager.service;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.testng.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -17,163 +27,138 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+@ContextConfiguration(classes = {MetadataManagerServiceTest.Config.class})
+public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests {
+  @Autowired private MetadataManagerService metadataManagerService;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.AttributeType.FILE;
-import static org.molgenis.data.meta.AttributeType.MREF;
-import static org.testng.Assert.assertEquals;
+  @Autowired private MetaDataService metaDataService;
 
-@ContextConfiguration(classes = { MetadataManagerServiceTest.Config.class })
-public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
-{
-	@Autowired
-	private MetadataManagerService metadataManagerService;
+  @Autowired private PackageMapper packageMapper;
 
-	@Autowired
-	private MetaDataService metaDataService;
+  @Autowired private EntityTypeMapper entityTypeMapper;
 
-	@Autowired
-	private PackageMapper packageMapper;
+  @Autowired private AttributeMapper attributeMapper;
 
-	@Autowired
-	private EntityTypeMapper entityTypeMapper;
+  @Autowired private EntityTypeFactory entityTypeFactory;
+  private final ArrayList<String> languageCodes =
+      newArrayList("en", "nl", "de", "es", "it", "pt", "fr", "xx");
 
-	@Autowired
-	private AttributeMapper attributeMapper;
+  @Test
+  public void testGetEditorPackages() {
+    Package package_ = mock(Package.class);
+    when(package_.getId()).thenReturn("test");
+    List<Package> packages = newArrayList(package_);
+    when(metaDataService.getPackages()).thenReturn(packages);
 
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
-	private final ArrayList<String> languageCodes = newArrayList("en", "nl", "de", "es", "it", "pt", "fr", "xx");
+    EditorPackageIdentifier editorPackage = getEditorPackageIdentifier();
+    when(packageMapper.toEditorPackage(package_)).thenReturn(editorPackage);
 
-	@Test
-	public void testGetEditorPackages()
-	{
-		Package package_ = mock(Package.class);
-		when(package_.getId()).thenReturn("test");
-		List<Package> packages = newArrayList(package_);
-		when(metaDataService.getPackages()).thenReturn(packages);
+    List<EditorPackageIdentifier> actual = metadataManagerService.getEditorPackages();
+    List<EditorPackageIdentifier> expected = newArrayList(editorPackage);
 
-		EditorPackageIdentifier editorPackage = getEditorPackageIdentifier();
-		when(packageMapper.toEditorPackage(package_)).thenReturn(editorPackage);
+    assertEquals(actual, expected);
+  }
 
-		List<EditorPackageIdentifier> actual = metadataManagerService.getEditorPackages();
-		List<EditorPackageIdentifier> expected = newArrayList(editorPackage);
+  @Test
+  public void testGetEditorEntityType() {
+    EntityType entityType = mock(EntityType.class);
+    Attribute attr1 = mock(Attribute.class);
+    Attribute attr2 = mock(Attribute.class);
+    EditorEntityType editorEntityType = mock(EditorEntityType.class);
 
-		assertEquals(actual, expected);
-	}
+    when(metaDataService.getEntityType("id_1")).thenReturn(entityType);
+    when(metaDataService.getReferringAttributes("id_1")).thenReturn(Stream.of(attr1, attr2));
 
-	@Test
-	public void testGetEditorEntityType()
-	{
-		EntityType entityType = mock(EntityType.class);
-		Attribute attr1 = mock(Attribute.class);
-		Attribute attr2 = mock(Attribute.class);
-		EditorEntityType editorEntityType = mock(EditorEntityType.class);
+    when(attr1.getDataType()).thenReturn(MREF);
+    when(attr2.getDataType()).thenReturn(FILE);
 
-		when(metaDataService.getEntityType("id_1")).thenReturn(entityType);
-		when(metaDataService.getReferringAttributes("id_1")).thenReturn(Stream.of(attr1, attr2));
+    when(entityTypeMapper.toEditorEntityType(entityType, singletonList(attr2)))
+        .thenReturn(editorEntityType);
 
-		when(attr1.getDataType()).thenReturn(MREF);
-		when(attr2.getDataType()).thenReturn(FILE);
+    EditorEntityTypeResponse actual = metadataManagerService.getEditorEntityType("id_1");
+    EditorEntityTypeResponse expected =
+        EditorEntityTypeResponse.create(editorEntityType, languageCodes);
 
-		when(entityTypeMapper.toEditorEntityType(entityType, singletonList(attr2))).thenReturn(editorEntityType);
+    assertEquals(actual, expected);
+  }
 
-		EditorEntityTypeResponse actual = metadataManagerService.getEditorEntityType("id_1");
-		EditorEntityTypeResponse expected = EditorEntityTypeResponse.create(editorEntityType, languageCodes);
+  @Test(
+      expectedExceptions = UnknownEntityTypeException.class,
+      expectedExceptionsMessageRegExp = "id:unknownId")
+  public void testGetNonExistingEditorEntityType() {
+    metadataManagerService.getEditorEntityType("unknownId");
+  }
 
-		assertEquals(actual, expected);
-	}
+  @Test
+  public void testCreateEditorEntityType() {
+    EditorEntityType editorEntityType = mock(EditorEntityType.class);
+    when(entityTypeMapper.createEditorEntityType()).thenReturn(editorEntityType);
 
-	@Test(expectedExceptions = UnknownEntityTypeException.class, expectedExceptionsMessageRegExp = "id:unknownId")
-	public void testGetNonExistingEditorEntityType()
-	{
-		metadataManagerService.getEditorEntityType("unknownId");
-	}
+    EditorEntityTypeResponse actual = metadataManagerService.createEditorEntityType();
+    EditorEntityTypeResponse expected =
+        EditorEntityTypeResponse.create(editorEntityType, languageCodes);
 
-	@Test
-	public void testCreateEditorEntityType()
-	{
-		EditorEntityType editorEntityType = mock(EditorEntityType.class);
-		when(entityTypeMapper.createEditorEntityType()).thenReturn(editorEntityType);
+    assertEquals(actual, expected);
+  }
 
-		EditorEntityTypeResponse actual = metadataManagerService.createEditorEntityType();
-		EditorEntityTypeResponse expected = EditorEntityTypeResponse.create(editorEntityType, languageCodes);
+  @Test
+  public void testUpsertEntityType() {
+    EditorEntityType editorEntityType = mock(EditorEntityType.class);
+    EntityType entityType = mock(EntityType.class);
 
-		assertEquals(actual, expected);
-	}
+    when(entityTypeMapper.toEntityType(editorEntityType)).thenReturn(entityType);
 
-	@Test
-	public void testUpsertEntityType()
-	{
-		EditorEntityType editorEntityType = mock(EditorEntityType.class);
-		EntityType entityType = mock(EntityType.class);
+    metadataManagerService.upsertEntityType(editorEntityType);
+    verify(metaDataService, times(1)).upsertEntityTypes(newArrayList(entityType));
+  }
 
-		when(entityTypeMapper.toEntityType(editorEntityType)).thenReturn(entityType);
+  @Test
+  public void testCreateEditorAttribute() {
+    EditorAttribute editorAttribute = mock(EditorAttribute.class);
+    when(attributeMapper.createEditorAttribute()).thenReturn(editorAttribute);
 
-		metadataManagerService.upsertEntityType(editorEntityType);
-		verify(metaDataService, times(1)).upsertEntityTypes(newArrayList(entityType));
-	}
+    EditorAttributeResponse actual = metadataManagerService.createEditorAttribute();
+    EditorAttributeResponse expected =
+        EditorAttributeResponse.create(editorAttribute, languageCodes);
 
-	@Test
-	public void testCreateEditorAttribute()
-	{
-		EditorAttribute editorAttribute = mock(EditorAttribute.class);
-		when(attributeMapper.createEditorAttribute()).thenReturn(editorAttribute);
+    assertEquals(actual, expected);
+  }
 
-		EditorAttributeResponse actual = metadataManagerService.createEditorAttribute();
-		EditorAttributeResponse expected = EditorAttributeResponse.create(editorAttribute, languageCodes);
+  private EditorPackageIdentifier getEditorPackageIdentifier() {
+    return EditorPackageIdentifier.create("test", "test");
+  }
 
-		assertEquals(actual, expected);
-	}
+  @Configuration
+  public static class Config {
+    @Bean
+    public MetaDataService metaDataService() {
+      return mock(MetaDataService.class);
+    }
 
-	private EditorPackageIdentifier getEditorPackageIdentifier()
-	{
-		return EditorPackageIdentifier.create("test", "test");
-	}
+    @Bean
+    public PackageMapper packageMapper() {
+      return mock(PackageMapper.class);
+    }
 
-	@Configuration
-	public static class Config
-	{
-		@Bean
-		public MetaDataService metaDataService()
-		{
-			return mock(MetaDataService.class);
-		}
+    @Bean
+    public EntityTypeMapper entityTypeMapper() {
+      return mock(EntityTypeMapper.class);
+    }
 
-		@Bean
-		public PackageMapper packageMapper()
-		{
-			return mock(PackageMapper.class);
-		}
+    @Bean
+    public AttributeMapper attributeMapper() {
+      return mock(AttributeMapper.class);
+    }
 
-		@Bean
-		public EntityTypeMapper entityTypeMapper()
-		{
-			return mock(EntityTypeMapper.class);
-		}
+    @Bean
+    public EntityTypeFactory entityTypeFactory() {
+      return mock(EntityTypeFactory.class);
+    }
 
-		@Bean
-		public AttributeMapper attributeMapper()
-		{
-			return mock(AttributeMapper.class);
-		}
-
-		@Bean
-		public EntityTypeFactory entityTypeFactory()
-		{
-			return mock(EntityTypeFactory.class);
-		}
-
-		@Bean
-		public MetadataManagerService metadataManagerService()
-		{
-			return new MetadataManagerServiceImpl(metaDataService(), packageMapper(), entityTypeMapper(),
-					attributeMapper());
-		}
-	}
+    @Bean
+    public MetadataManagerService metadataManagerService() {
+      return new MetadataManagerServiceImpl(
+          metaDataService(), packageMapper(), entityTypeMapper(), attributeMapper());
+    }
+  }
 }

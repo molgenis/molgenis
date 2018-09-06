@@ -1,32 +1,24 @@
 package org.molgenis.data.security.user;
 
+import java.util.List;
 import org.molgenis.data.security.auth.User;
 
-import java.util.List;
+public interface UserService {
+  List<User> getUsers();
 
-public interface UserService
-{
-	List<User> getUsers();
+  /** Returns e-mail addresses of super users */
+  List<String> getSuEmailAddresses();
 
-	/**
-	 * Returns e-mail addresses of super users
-	 */
-	List<String> getSuEmailAddresses();
+  /** Returns the given user */
+  User getUser(String username);
 
-	/**
-	 * Returns the given user
-	 */
-	User getUser(String username);
+  /**
+   * Find a user by it's email.
+   *
+   * @return the user or null if not found
+   */
+  User getUserByEmail(String email);
 
-	/**
-	 * Find a user by it's email.
-	 *
-	 * @return the user or null if not found
-	 */
-	User getUserByEmail(String email);
-
-	/**
-	 * Update user
-	 */
-	void update(User user);
+  /** Update user */
+  void update(User user);
 }

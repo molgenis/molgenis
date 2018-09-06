@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ EntityBaseTestConfig.class, L10nStringMetaData.class, L10nStringFactory.class, LanguageMetadata.class,
-		LanguageFactory.class })
-public class I18nTestConfig
-{
-
-}
+@Import({
+  EntityBaseTestConfig.class,
+  L10nStringMetaData.class,
+  L10nStringFactory.class,
+  LanguageMetadata.class,
+  LanguageFactory.class
+})
+public class I18nTestConfig {}

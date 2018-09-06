@@ -5,11 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class FairConfig
-{
-	@Bean
-	public SimpleValueFactory simpleValueFactory()
-	{
-		return SimpleValueFactory.getInstance();
-	}
+public class FairConfig {
+  @Bean
+  public SimpleValueFactory simpleValueFactory() {
+    return SimpleValueFactory.getInstance();
+  }
 }

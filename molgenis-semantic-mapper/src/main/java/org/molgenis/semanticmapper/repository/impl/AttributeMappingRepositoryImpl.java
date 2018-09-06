@@ -1,6 +1,14 @@
 package org.molgenis.semanticmapper.repository.impl;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+
 import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -12,115 +20,102 @@ import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
 import org.molgenis.semanticmapper.repository.AttributeMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+public class AttributeMappingRepositoryImpl implements AttributeMappingRepository {
+  private final AttributeMappingMetaData attributeMappingMetaData;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+  @Autowired private IdGenerator idGenerator;
 
-public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
-{
-	private final AttributeMappingMetaData attributeMappingMetaData;
+  private final DataService dataService;
 
-	@Autowired
-	private IdGenerator idGenerator;
+  public AttributeMappingRepositoryImpl(
+      DataService dataService, AttributeMappingMetaData attributeMappingMetaData) {
+    this.dataService = requireNonNull(dataService);
+    this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
+  }
 
-	private final DataService dataService;
+  @Override
+  public List<Entity> upsert(Collection<AttributeMapping> attributeMappings) {
+    List<Entity> result = Lists.newArrayList();
+    for (AttributeMapping attributeMapping : attributeMappings) {
+      result.add(upsert(attributeMapping));
+    }
+    return result;
+  }
 
-	public AttributeMappingRepositoryImpl(DataService dataService, AttributeMappingMetaData attributeMappingMetaData)
-	{
-		this.dataService = requireNonNull(dataService);
-		this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
-	}
+  private Entity upsert(AttributeMapping attributeMapping) {
+    Entity result;
+    if (attributeMapping.getIdentifier() == null) {
+      attributeMapping.setIdentifier(idGenerator.generateId());
+      result = toAttributeMappingEntity(attributeMapping);
+      dataService.add(attributeMappingMetaData.getId(), result);
+    } else {
+      result = toAttributeMappingEntity(attributeMapping);
+      dataService.update(attributeMappingMetaData.getId(), result);
+    }
+    return result;
+  }
 
-	@Override
-	public List<Entity> upsert(Collection<AttributeMapping> attributeMappings)
-	{
-		List<Entity> result = Lists.newArrayList();
-		for (AttributeMapping attributeMapping : attributeMappings)
-		{
-			result.add(upsert(attributeMapping));
-		}
-		return result;
-	}
+  @Override
+  public List<AttributeMapping> getAttributeMappings(
+      List<Entity> attributeMappingEntities,
+      EntityType sourceEntityType,
+      EntityType targetEntityType) {
+    return Lists.transform(
+        attributeMappingEntities,
+        attributeMappingEntity ->
+            toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType));
+  }
 
-	private Entity upsert(AttributeMapping attributeMapping)
-	{
-		Entity result;
-		if (attributeMapping.getIdentifier() == null)
-		{
-			attributeMapping.setIdentifier(idGenerator.generateId());
-			result = toAttributeMappingEntity(attributeMapping);
-			dataService.add(attributeMappingMetaData.getId(), result);
-		}
-		else
-		{
-			result = toAttributeMappingEntity(attributeMapping);
-			dataService.update(attributeMappingMetaData.getId(), result);
-		}
-		return result;
-	}
+  @Override
+  public List<Attribute> retrieveAttributesFromAlgorithm(
+      String algorithm, EntityType sourceEntityType) {
+    List<Attribute> sourceAttributes = Lists.newArrayList();
 
-	@Override
-	public List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
-			EntityType sourceEntityType, EntityType targetEntityType)
-	{
-		return Lists.transform(attributeMappingEntities,
-				attributeMappingEntity -> toAttributeMapping(attributeMappingEntity, sourceEntityType,
-						targetEntityType));
+    Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
+    Matcher matcher = pattern.matcher(algorithm);
 
-	}
+    while (matcher.find()) {
+      String sourceAttribute = matcher.group(1).split("\\.")[0];
+      Attribute attribute = sourceEntityType.getAttribute(sourceAttribute);
+      if (!sourceAttributes.contains(attribute)) {
+        sourceAttributes.add(attribute);
+      }
+    }
 
-	@Override
-	public List<Attribute> retrieveAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType)
-	{
-		List<Attribute> sourceAttributes = Lists.newArrayList();
+    return sourceAttributes;
+  }
 
-		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
-		Matcher matcher = pattern.matcher(algorithm);
+  private AttributeMapping toAttributeMapping(
+      Entity attributeMappingEntity, EntityType sourceEntityType, EntityType targetEntityType) {
+    String identifier = attributeMappingEntity.getString(IDENTIFIER);
+    String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
+    Attribute targetAttribute = targetEntityType.getAttribute(targetAttributeName);
+    String algorithm = attributeMappingEntity.getString(ALGORITHM);
+    String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
+    List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm, sourceEntityType);
 
-		while (matcher.find())
-		{
-			String sourceAttribute = matcher.group(1).split("\\.")[0];
-			Attribute attribute = sourceEntityType.getAttribute(sourceAttribute);
-			if (!sourceAttributes.contains(attribute))
-			{
-				sourceAttributes.add(attribute);
-			}
-		}
+    return new AttributeMapping(
+        identifier,
+        targetAttributeName,
+        targetAttribute,
+        algorithm,
+        sourceAttributes,
+        algorithmState);
+  }
 
-		return sourceAttributes;
-	}
-
-	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityType sourceEntityType,
-			EntityType targetEntityType)
-	{
-		String identifier = attributeMappingEntity.getString(IDENTIFIER);
-		String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
-		Attribute targetAttribute = targetEntityType.getAttribute(targetAttributeName);
-		String algorithm = attributeMappingEntity.getString(ALGORITHM);
-		String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
-		List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm, sourceEntityType);
-
-		return new AttributeMapping(identifier, targetAttributeName, targetAttribute, algorithm, sourceAttributes,
-				algorithmState);
-	}
-
-	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
-	{
-		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
-		attributeMappingEntity.set(IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(TARGET_ATTRIBUTE, attributeMapping.getTargetAttributeName());
-		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(SOURCE_ATTRIBUTES, attributeMapping.getSourceAttributes()
-																	  .stream()
-																	  .map(Attribute::getName)
-																	  .collect(Collectors.joining(",")));
-		attributeMappingEntity.set(ALGORITHM_STATE, attributeMapping.getAlgorithmState().toString());
-		return attributeMappingEntity;
-	}
-
+  private Entity toAttributeMappingEntity(AttributeMapping attributeMapping) {
+    Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
+    attributeMappingEntity.set(IDENTIFIER, attributeMapping.getIdentifier());
+    attributeMappingEntity.set(TARGET_ATTRIBUTE, attributeMapping.getTargetAttributeName());
+    attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
+    attributeMappingEntity.set(
+        SOURCE_ATTRIBUTES,
+        attributeMapping
+            .getSourceAttributes()
+            .stream()
+            .map(Attribute::getName)
+            .collect(Collectors.joining(",")));
+    attributeMappingEntity.set(ALGORITHM_STATE, attributeMapping.getAlgorithmState().toString());
+    return attributeMappingEntity;
+  }
 }

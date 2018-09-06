@@ -5,12 +5,12 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermDynamicAnnotationFactory extends
-		AbstractSystemEntityFactory<OntologyTermDynamicAnnotation, OntologyTermDynamicAnnotationMetaData, String>
-{
-	OntologyTermDynamicAnnotationFactory(OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMeta,
-			EntityPopulator entityPopulator)
-	{
-		super(OntologyTermDynamicAnnotation.class, ontologyTermDynamicAnnotationMeta, entityPopulator);
-	}
+public class OntologyTermDynamicAnnotationFactory
+    extends AbstractSystemEntityFactory<
+        OntologyTermDynamicAnnotation, OntologyTermDynamicAnnotationMetaData, String> {
+  OntologyTermDynamicAnnotationFactory(
+      OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMeta,
+      EntityPopulator entityPopulator) {
+    super(OntologyTermDynamicAnnotation.class, ontologyTermDynamicAnnotationMeta, entityPopulator);
+  }
 }
