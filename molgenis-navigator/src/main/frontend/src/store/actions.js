@@ -1,9 +1,20 @@
 // @flow
-import type {Entity, Package} from '../flow.types'
-import {INITIAL_STATE} from './state'
+import type { Entity, Package, State } from '../flow.types'
+import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
-import {RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY} from './mutations'
+// $FlowFixMe
+import { transformToRSQL, encodeRsqlValue } from '@molgenis/rsql'
+import {
+  RESET_PATH,
+  SET_ENTITIES,
+  SET_ERROR,
+  SET_PACKAGES,
+  SET_PATH,
+  SET_QUERY,
+  SET_SELECTED_ENTITY_TYPES,
+  SET_SELECTED_PACKAGES
+} from './mutations'
 
 export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
 export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
@@ -11,8 +22,18 @@ export const RESET_STATE = '__RESET_STATE__'
 export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
 export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
 export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
+export const SELECT_ALL_PACKAGES_AND_ENTITY_TYPES = '__SELECT_ALL_PACKAGES_AND_ENTITY_TYPES__'
+export const SELECT_ENTITY_TYPE = '__SELECT_ENTITY_TYPE__'
+export const SELECT_PACKAGE = '__SELECT_PACKAGE__'
+export const DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES = '__DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES__'
+export const DESELECT_ENTITY_TYPE = '__DESELECT_ENTITY_TYPE__'
+export const DESELECT_PACKAGE = '__DESELECT_PACKAGE__'
+export const DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES = '__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__'
 
 const SYS_PACKAGE_ID = 'sys'
+const REST_API_V2 = '/api/v2'
+const PACKAGE_ENDPOINT = REST_API_V2 + '/sys_md_Package'
+const ENTITY_TYPE_ENDPOINT = REST_API_V2 + '/sys_md_EntityType'
 
 /**
  * Recursively build the path, going backwards starting at the currentPackage
@@ -56,7 +77,16 @@ function toEntity (item: any) {
  * @param query
  */
 function getPackageQuery (query: string) {
-  return '/api/v2/sys_md_Package?sort=label&num=1000&q=id=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '",label=q="' + encodeURIComponent(query) + '"'
+  const rsql = transformToRSQL({
+    operator: 'OR',
+    operands: [
+      {selector: 'id', comparison: '=q=', arguments: query},
+      {selector: 'label', comparison: '=q=', arguments: query},
+      {selector: 'description', comparison: '=q=', arguments: query}
+    ]
+  })
+
+  return PACKAGE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql)
 }
 
 /**
@@ -66,7 +96,20 @@ function getPackageQuery (query: string) {
  * @param query
  */
 function getEntityTypeQuery (query: string) {
-  return '/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q="' + encodeURIComponent(query) + '",description=q="' + encodeURIComponent(query) + '");isAbstract==false'
+  const rsql = transformToRSQL({
+    operator: 'AND',
+    operands: [
+      {
+        operator: 'OR',
+        operands: [
+          {selector: 'label', comparison: '=q=', arguments: query},
+          {selector: 'description', comparison: '=q=', arguments: query}
+        ]
+      },
+      {selector: 'isAbstract', comparison: '==', arguments: 'false'}]
+  })
+
+  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql)
 }
 
 /**
@@ -114,7 +157,7 @@ export default {
     let uri
 
     if (!query) {
-      uri = '/api/v2/sys_md_Package?sort=label&num=1000'
+      uri = PACKAGE_ENDPOINT + '?sort=label&num=1000'
     } else {
       try {
         validateQuery(query)
@@ -145,7 +188,7 @@ export default {
     }
   },
   [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function }, packageId: string) {
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
       const entities = response.items.map(toEntity)
       commit(SET_ENTITIES, entities)
     }, error => {
@@ -153,13 +196,13 @@ export default {
     })
   },
   [RESET_STATE] ({commit}: { commit: Function }) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==""').then(response => {
+    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000&&q=parent==%22%22').then(response => {
       const visibleRootPackages = filterNonVisiblePackages(response.items)
       commit(SET_PACKAGES, visibleRootPackages)
     }, error => {
       commit(SET_ERROR, error)
     })
-    api.get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==""').then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==%22%22').then(response => {
       const entities = response.items.map(toEntity)
       const visibleRootEntities = filterNonVisibleEntities(entities)
       commit(SET_ENTITIES, visibleRootEntities)
@@ -170,7 +213,7 @@ export default {
     commit(RESET_PATH)
   },
   [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function }, lookupId: string) {
-    api.get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
+    api.get(ENTITY_TYPE_ENDPOINT + '?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
       // At the moment each entity is stored in either a single package, or no package at all
       if (response.items.length > 0) {
         const entityType = response.items[0]
@@ -191,7 +234,7 @@ export default {
     })
   },
   [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, selectedPackageId: ?string) {
-    api.get('/api/v2/sys_md_Package?sort=label&num=1000').then(response => {
+    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000').then(response => {
       const packages = filterNonVisiblePackages(response.items)
 
       if (!selectedPackageId) {
@@ -209,6 +252,7 @@ export default {
           const childPackages = packages.filter(function (packageItem) {
             return packageItem.parent && packageItem.parent.id === selectedPackage.id
           })
+
           commit(SET_PACKAGES, childPackages)
 
           const path = buildPath(packages, selectedPackage, [])
@@ -216,6 +260,42 @@ export default {
           dispatch(GET_ENTITIES_IN_PACKAGE, selectedPackageId)
         }
       }
+    }, error => {
+      commit(SET_ERROR, error)
+    })
+  },
+  [SELECT_ALL_PACKAGES_AND_ENTITY_TYPES] ({commit, state}: { commit: Function, state: State }) {
+    commit(SET_SELECTED_PACKAGES, state.packages.map(aPackage => aPackage.id))
+    commit(SET_SELECTED_ENTITY_TYPES, state.entities.map(entityType => entityType.id))
+  },
+  [DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES] ({commit}: { commit: Function }) {
+    commit(SET_SELECTED_PACKAGES, [])
+    commit(SET_SELECTED_ENTITY_TYPES, [])
+  },
+  [SELECT_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, entityTypeId: string) {
+    commit(SET_SELECTED_ENTITY_TYPES, state.selectedEntityTypeIds.concat([entityTypeId]))
+  },
+  [DESELECT_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }, entityTypeId: string) {
+    var selectedEntityTypeIds = state.selectedEntityTypeIds.slice()
+    selectedEntityTypeIds.splice(selectedEntityTypeIds.indexOf(entityTypeId), 1)
+    commit(SET_SELECTED_ENTITY_TYPES, selectedEntityTypeIds)
+  },
+  [SELECT_PACKAGE] ({commit, state}: { commit: Function, state: State }, packageId: string) {
+    commit(SET_SELECTED_PACKAGES, state.selectedPackageIds.concat([packageId]))
+  },
+  [DESELECT_PACKAGE] ({commit, state}: { commit: Function, state: State }, packageId: string) {
+    var selectedPackageIds = state.selectedPackageIds.slice()
+    selectedPackageIds.splice(selectedPackageIds.indexOf(packageId), 1)
+    commit(SET_SELECTED_PACKAGES, selectedPackageIds)
+  },
+  [DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
+    api.delete_('/plugin/navigator/delete', {
+      body: JSON.stringify({
+        packageIds: state.selectedPackageIds,
+        entityTypeIds: state.selectedEntityTypeIds
+      })
+    }).then(() => {
+      dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
     }, error => {
       commit(SET_ERROR, error)
     })

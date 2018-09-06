@@ -27,7 +27,10 @@ module.exports = {
       },
       '/menu/main/dataexplorer': {
         target: 'http://localhost:8080'
-      }
+      },
+      '/plugin': {
+        target: 'http://localhost:8080'
+      },
     },
     cssSourceMap: false
   }
