@@ -1,15 +1,18 @@
 package org.molgenis.data;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Iterator;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
@@ -65,7 +68,7 @@ public class DataConverterTest {
   public void toListString() throws ParseException {
     String id0 = "0";
     String id1 = "1";
-    assertEquals(DataConverter.toList(Arrays.asList(id0, id1)), Arrays.asList(id0, id1));
+    assertEquals(DataConverter.toList(asList(id0, id1)), asList(id0, id1));
   }
 
   @Test
@@ -74,14 +77,14 @@ public class DataConverterTest {
     String id1 = "1";
     Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
     Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
-    assertEquals(DataConverter.toList(Arrays.asList(entity0, entity1)), Arrays.asList(id0, id1));
+    assertEquals(DataConverter.toList(asList(entity0, entity1)), asList(id0, id1));
   }
 
   @Test
   public void toIntListInteger() throws ParseException {
     Integer id0 = 0;
     Integer id1 = 1;
-    assertEquals(DataConverter.toIntList(Arrays.asList(id0, id1)), Arrays.asList(id0, id1));
+    assertEquals(DataConverter.toIntList(asList(id0, id1)), asList(id0, id1));
   }
 
   @Test
@@ -90,7 +93,7 @@ public class DataConverterTest {
     Integer id1 = 1;
     Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
     Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
-    assertEquals(DataConverter.toIntList(Arrays.asList(entity0, entity1)), Arrays.asList(id0, id1));
+    assertEquals(DataConverter.toIntList(asList(entity0, entity1)), asList(id0, id1));
   }
 
   @Test(
@@ -106,5 +109,13 @@ public class DataConverterTest {
     when(attr.getEntity()).thenReturn(entityType);
 
     DataConverter.convert("test", attr);
+  }
+
+  // regression test for https://github.com/molgenis/molgenis/issues/7752
+  @Test
+  public void toStringIterable()
+  {
+    Iterable<String> iterable = () -> asList("str1", "str2").iterator();
+    assertEquals(DataConverter.toString(iterable), "str1,str2");
   }
 }

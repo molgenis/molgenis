@@ -99,9 +99,9 @@ public class DataConverter {
       Object labelValue = ((Entity) source).getLabelValue();
       return labelValue != null ? labelValue.toString() : null;
     }
-    if (source instanceof List) {
+    if (source instanceof Iterable<?>) {
       StringBuilder sb = new StringBuilder();
-      for (Object obj : (List<?>) source) {
+      for (Object obj : (Iterable<?>) source) {
         if (sb.length() > 0) sb.append(",");
         sb.append(toString(obj));
       }
