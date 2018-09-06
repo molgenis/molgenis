@@ -1,23 +1,19 @@
 package org.molgenis.ontology.core.ic;
 
-public class PubMedTFEntity
-{
-	private final int occurrence;
-	private final double frequency;
+public class PubMedTFEntity {
+  private final int occurrence;
+  private final double frequency;
 
-	public PubMedTFEntity(int occurrence, double frequency)
-	{
-		this.occurrence = occurrence;
-		this.frequency = frequency;
-	}
+  public PubMedTFEntity(int occurrence, double frequency) {
+    this.occurrence = occurrence;
+    this.frequency = frequency;
+  }
 
-	public int getOccurrence()
-	{
-		return occurrence;
-	}
+  public int getOccurrence() {
+    return occurrence;
+  }
 
-	public double getFrequency()
-	{
-		return frequency;
-	}
+  public double getFrequency() {
+    return frequency;
+  }
 }

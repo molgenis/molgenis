@@ -8,16 +8,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LanguageRepositoryDecoratorFactory
-		extends AbstractSystemRepositoryDecoratorFactory<Language, LanguageMetadata>
-{
-	public LanguageRepositoryDecoratorFactory(LanguageMetadata languageMetadata)
-	{
-		super(languageMetadata);
-	}
+    extends AbstractSystemRepositoryDecoratorFactory<Language, LanguageMetadata> {
+  public LanguageRepositoryDecoratorFactory(LanguageMetadata languageMetadata) {
+    super(languageMetadata);
+  }
 
-	@Override
-	public Repository<Language> createDecoratedRepository(Repository<Language> repository)
-	{
-		return new LanguageRepositoryDecorator(repository);
-	}
+  @Override
+  public Repository<Language> createDecoratedRepository(Repository<Language> repository) {
+    return new LanguageRepositoryDecorator(repository);
+  }
 }

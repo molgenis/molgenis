@@ -1,49 +1,45 @@
 package org.molgenis.js.nashorn;
 
+import static org.testng.Assert.assertEquals;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import javax.script.ScriptException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.script.ScriptException;
-import java.time.LocalDate;
-import java.time.ZoneId;
+/** Created by Dennis on 2/17/2017. */
+public class NashornScriptEngineTest {
+  private static NashornScriptEngine nashornScriptEngine;
 
-import static org.testng.Assert.assertEquals;
+  @BeforeClass
+  public static void setUpBeforeClass() {
+    nashornScriptEngine = new NashornScriptEngine();
+  }
 
-/**
- * Created by Dennis on 2/17/2017.
- */
-public class NashornScriptEngineTest
-{
-	private static NashornScriptEngine nashornScriptEngine;
+  @Test
+  public void testInvokeFunction() throws Exception {
+    long epoch = 1487342481434L;
+    assertEquals(nashornScriptEngine.eval("new Date(" + epoch + ")"), epoch);
+  }
 
-	@BeforeClass
-	public static void setUpBeforeClass()
-	{
-		nashornScriptEngine = new NashornScriptEngine();
-	}
+  @Test
+  public void testInvokeDateDMY() throws Exception {
+    LocalDate localDate = LocalDate.now();
+    String script =
+        String.format(
+            "new Date(%d,%d,%d)",
+            localDate.getYear(), localDate.getMonth().getValue() - 1, localDate.getDayOfMonth());
+    long epochMilli = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    assertEquals(nashornScriptEngine.eval(script), epochMilli);
+  }
 
-	@Test
-	public void testInvokeFunction() throws Exception
-	{
-		long epoch = 1487342481434L;
-		assertEquals(nashornScriptEngine.eval("new Date(" + epoch + ")"), epoch);
-	}
-
-	@Test
-	public void testInvokeDateDMY() throws Exception
-	{
-		LocalDate localDate = LocalDate.now();
-		String script = String.format("new Date(%d,%d,%d)", localDate.getYear(), localDate.getMonth().getValue() - 1,
-				localDate.getDayOfMonth());
-		long epochMilli = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		assertEquals(nashornScriptEngine.eval(script), epochMilli);
-	}
-
-	@Test(expectedExceptions = ScriptException.class, expectedExceptionsMessageRegExp = "ReferenceError: \"piet\" is not defined in <eval> at line number 1")
-	public void doesntDirtyContext() throws ScriptException
-	{
-		nashornScriptEngine.eval("piet = 3");
-		nashornScriptEngine.eval("piet");
-	}
-
+  @Test(
+      expectedExceptions = ScriptException.class,
+      expectedExceptionsMessageRegExp =
+          "ReferenceError: \"piet\" is not defined in <eval> at line number 1")
+  public void doesntDirtyContext() throws ScriptException {
+    nashornScriptEngine.eval("piet = 3");
+    nashornScriptEngine.eval("piet");
+  }
 }

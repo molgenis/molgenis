@@ -1,6 +1,16 @@
 package org.molgenis.data.security.permission;
 
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.stream.Stream;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -15,159 +25,142 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.stream.Stream;
+public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
+  @Mock private UserService userService;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+  @Mock private RoleMembershipFactory roleMembershipFactory;
 
-public class RoleMembershipServiceImplTest extends AbstractMockitoTest
-{
-	@Mock
-	private UserService userService;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private DataService dataService;
 
-	@Mock
-	private RoleMembershipFactory roleMembershipFactory;
+  @Mock private UserMetaData userMetaData;
 
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	private DataService dataService;
+  @Mock private RoleMetadata roleMetadata;
+  @Mock private RoleMembership roleMembership;
+  @Mock private RoleMembership oldRoleMembership;
+  @Mock private Role viewer;
+  @Mock private Role editor;
 
-	@Mock
-	private UserMetaData userMetaData;
+  @Captor private ArgumentCaptor<Instant> instantCaptor;
 
-	@Mock
-	private RoleMetadata roleMetadata;
-	@Mock
-	private RoleMembership roleMembership;
-	@Mock
-	private RoleMembership oldRoleMembership;
-	@Mock
-	private Role viewer;
-	@Mock
-	private Role editor;
+  private RoleMembershipServiceImpl roleMembershipService;
 
-	@Captor
-	private ArgumentCaptor<Instant> instantCaptor;
+  @BeforeMethod
+  public void beforeMethod() {
+    roleMembershipService =
+        new RoleMembershipServiceImpl(
+            userService, roleMembershipFactory, dataService, userMetaData, roleMetadata);
+  }
 
-	private RoleMembershipServiceImpl roleMembershipService;
+  @Test
+  public void addUserToRole() {
+    String username = "henk";
+    User user = mock(User.class);
+    when(userService.getUser(username)).thenReturn(user);
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		roleMembershipService = new RoleMembershipServiceImpl(userService, roleMembershipFactory, dataService,
-				userMetaData, roleMetadata);
-	}
+    Role role = mock(Role.class);
+    String rolename = "GCC_MANAGER";
+    when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne())
+        .thenReturn(role);
 
-	@Test
-	public void addUserToRole()
-	{
-		String username = "henk";
-		User user = mock(User.class);
-		when(userService.getUser(username)).thenReturn(user);
+    RoleMembership roleMembership = mock(RoleMembership.class);
+    when(roleMembershipFactory.create()).thenReturn(roleMembership);
 
-		Role role = mock(Role.class);
-		String rolename = "GCC_MANAGER";
-		when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne()).thenReturn(
-				role);
+    roleMembershipService.addUserToRole(username, rolename);
 
-		RoleMembership roleMembership = mock(RoleMembership.class);
-		when(roleMembershipFactory.create()).thenReturn(roleMembership);
+    verify(dataService, times(1)).add(eq(ROLE_MEMBERSHIP), any(RoleMembership.class));
+    verify(roleMembership).setRole(role);
+    verify(roleMembership).setUser(user);
+    verify(roleMembership).setFrom(instantCaptor.capture());
 
-		roleMembershipService.addUserToRole(username, rolename);
+    assertTrue(Duration.between(Instant.now(), instantCaptor.getValue()).getSeconds() < 1);
+  }
 
-		verify(dataService, times(1)).add(eq(ROLE_MEMBERSHIP), any(RoleMembership.class));
-		verify(roleMembership).setRole(role);
-		verify(roleMembership).setUser(user);
-		verify(roleMembership).setFrom(instantCaptor.capture());
+  @Test(
+      expectedExceptions = UnknownEntityException.class,
+      expectedExceptionsMessageRegExp = "type:sys_sec_Role id:GCC_DELETER attribute:name")
+  public void addUserToNonExistingRole() {
+    Attribute roleNameAttr = mock(Attribute.class);
+    when(roleNameAttr.getName()).thenReturn("name");
+    when(roleMetadata.getAttribute(RoleMetadata.NAME)).thenReturn(roleNameAttr);
+    when(roleMetadata.getId()).thenReturn("sys_sec_Role");
 
-		assertTrue(Duration.between(Instant.now(), instantCaptor.getValue()).getSeconds() < 1);
-	}
+    String username = "henk";
+    User user = mock(User.class);
+    when(userService.getUser(username)).thenReturn(user);
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_Role id:GCC_DELETER attribute:name")
-	public void addUserToNonExistingRole()
-	{
-		Attribute roleNameAttr = mock(Attribute.class);
-		when(roleNameAttr.getName()).thenReturn("name");
-		when(roleMetadata.getAttribute(RoleMetadata.NAME)).thenReturn(roleNameAttr);
-		when(roleMetadata.getId()).thenReturn("sys_sec_Role");
+    String rolename = "GCC_DELETER";
+    when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne())
+        .thenReturn(null);
 
-		String username = "henk";
-		User user = mock(User.class);
-		when(userService.getUser(username)).thenReturn(user);
+    roleMembershipService.addUserToRole(username, rolename);
+  }
 
-		String rolename = "GCC_DELETER";
-		when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne()).thenReturn(
-				null);
+  @Test(
+      expectedExceptions = UnknownEntityException.class,
+      expectedExceptionsMessageRegExp = "type:sys_sec_User id:henk attribute:username")
+  public void addNonExistingUserToRole() {
+    Attribute userNameAttr = mock(Attribute.class);
+    when(userNameAttr.getName()).thenReturn("username");
+    when(userMetaData.getAttribute(USERNAME)).thenReturn(userNameAttr);
+    when(userMetaData.getId()).thenReturn("sys_sec_User");
 
-		roleMembershipService.addUserToRole(username, rolename);
-	}
+    String username = "henk";
+    when(userService.getUser(username)).thenReturn(null);
 
-	@Test(expectedExceptions = UnknownEntityException.class, expectedExceptionsMessageRegExp = "type:sys_sec_User id:henk attribute:username")
-	public void addNonExistingUserToRole()
-	{
-		Attribute userNameAttr = mock(Attribute.class);
-		when(userNameAttr.getName()).thenReturn("username");
-		when(userMetaData.getAttribute(USERNAME)).thenReturn(userNameAttr);
-		when(userMetaData.getId()).thenReturn("sys_sec_User");
+    roleMembershipService.addUserToRole(username, "GCC_MANAGER");
+  }
 
-		String username = "henk";
-		when(userService.getUser(username)).thenReturn(null);
+  @Test
+  public void testRemoveMembership() {
+    roleMembershipService.removeMembership(roleMembership);
 
-		roleMembershipService.addUserToRole(username, "GCC_MANAGER");
-	}
+    verify(dataService).delete(ROLE_MEMBERSHIP, roleMembership);
+  }
 
-	@Test
-	public void testRemoveMembership()
-	{
-		roleMembershipService.removeMembership(roleMembership);
+  @Test
+  public void testUpdateMembership() {
+    when(roleMembership.getId()).thenReturn("membershipId");
+    when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class))
+        .thenReturn(roleMembership);
 
-		verify(dataService).delete(ROLE_MEMBERSHIP, roleMembership);
-	}
+    roleMembershipService.updateMembership(roleMembership, editor);
 
-	@Test
-	public void testUpdateMembership()
-	{
-		when(roleMembership.getId()).thenReturn("membershipId");
-		when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class)).thenReturn(roleMembership);
+    verify(roleMembership).setRole(editor);
+    verify(dataService).update(ROLE_MEMBERSHIP, roleMembership);
+  }
 
-		roleMembershipService.updateMembership(roleMembership, editor);
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testUpdateMembershipNotAMember() {
+    when(roleMembership.getId()).thenReturn("membershipId");
+    when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class))
+        .thenReturn(null);
 
-		verify(roleMembership).setRole(editor);
-		verify(dataService).update(ROLE_MEMBERSHIP, roleMembership);
-	}
+    roleMembershipService.updateMembership(roleMembership, editor);
+  }
 
-	@Test(expectedExceptions = UnknownEntityException.class)
-	public void testUpdateMembershipNotAMember()
-	{
-		when(roleMembership.getId()).thenReturn("membershipId");
-		when(dataService.findOneById(ROLE_MEMBERSHIP, "membershipId", RoleMembership.class)).thenReturn(null);
+  @Test
+  public void testGetMemberships() {
+    Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
+    Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+    Fetch fetch =
+        new Fetch()
+            .field(RoleMembershipMetadata.ROLE, roleFetch)
+            .field(RoleMembershipMetadata.USER, userFetch)
+            .field(RoleMembershipMetadata.FROM)
+            .field(RoleMembershipMetadata.TO)
+            .field(RoleMembershipMetadata.ID);
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .in(RoleMembershipMetadata.ROLE, ImmutableList.of(editor, viewer))
+            .fetch(fetch)
+            .findAll())
+        .thenReturn(Stream.of(oldRoleMembership, roleMembership));
 
-		roleMembershipService.updateMembership(roleMembership, editor);
-	}
+    when(roleMembership.isCurrent()).thenReturn(true);
 
-	@Test
-	public void testGetMemberships()
-	{
-		Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
-		Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
-		Fetch fetch = new Fetch().field(RoleMembershipMetadata.ROLE, roleFetch)
-								 .field(RoleMembershipMetadata.USER, userFetch)
-								 .field(RoleMembershipMetadata.FROM)
-								 .field(RoleMembershipMetadata.TO)
-								 .field(RoleMembershipMetadata.ID);
-		when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-						.in(RoleMembershipMetadata.ROLE, ImmutableList.of(editor, viewer))
-						.fetch(fetch)
-						.findAll()).thenReturn(Stream.of(oldRoleMembership, roleMembership));
-
-		when(roleMembership.isCurrent()).thenReturn(true);
-
-		assertEquals(roleMembershipService.getMemberships(ImmutableList.of(editor, viewer)),
-				singletonList(roleMembership));
-	}
+    assertEquals(
+        roleMembershipService.getMemberships(ImmutableList.of(editor, viewer)),
+        singletonList(roleMembership));
+  }
 }

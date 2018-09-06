@@ -1,8 +1,7 @@
 package org.molgenis.data;
 
-public interface SystemRepositoryDecoratorRegistry
-{
-	void addFactory(SystemRepositoryDecoratorFactory factory);
+public interface SystemRepositoryDecoratorRegistry {
+  void addFactory(SystemRepositoryDecoratorFactory factory);
 
-	Repository<Entity> decorate(Repository<Entity> repository);
+  Repository<Entity> decorate(Repository<Entity> repository);
 }

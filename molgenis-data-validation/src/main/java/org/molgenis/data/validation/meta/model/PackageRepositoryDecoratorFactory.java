@@ -1,5 +1,7 @@
 package org.molgenis.data.validation.meta.model;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -13,36 +15,34 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.requireNonNull;
-
-/**
- * Due to a circular dependency this decorator factory is not stored in molgenis-data.
- */
+/** Due to a circular dependency this decorator factory is not stored in molgenis-data. */
 @Component
 public class PackageRepositoryDecoratorFactory
-		extends AbstractSystemRepositoryDecoratorFactory<Package, PackageMetadata>
-{
-	private final DataService dataService;
-	private final PackageValidator packageValidator;
-	private final MutableAclService mutableAclService;
-	private final UserPermissionEvaluator userPermissionEvaluator;
+    extends AbstractSystemRepositoryDecoratorFactory<Package, PackageMetadata> {
+  private final DataService dataService;
+  private final PackageValidator packageValidator;
+  private final MutableAclService mutableAclService;
+  private final UserPermissionEvaluator userPermissionEvaluator;
 
-	public PackageRepositoryDecoratorFactory(PackageMetadata packageMetadata, DataService dataService,
-			PackageValidator packageValidator, MutableAclService mutableAclService,
-			UserPermissionEvaluator userPermissionEvaluator)
-	{
-		super(packageMetadata);
-		this.dataService = requireNonNull(dataService);
-		this.packageValidator = requireNonNull(packageValidator);
-		this.mutableAclService = requireNonNull(mutableAclService);
-		this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
-	}
+  public PackageRepositoryDecoratorFactory(
+      PackageMetadata packageMetadata,
+      DataService dataService,
+      PackageValidator packageValidator,
+      MutableAclService mutableAclService,
+      UserPermissionEvaluator userPermissionEvaluator) {
+    super(packageMetadata);
+    this.dataService = requireNonNull(dataService);
+    this.packageValidator = requireNonNull(packageValidator);
+    this.mutableAclService = requireNonNull(mutableAclService);
+    this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+  }
 
-	@Override
-	public Repository<Package> createDecoratedRepository(Repository<Package> repository)
-	{
-		repository = new PackageRepositoryDecorator(repository, dataService);
-		repository = new PackageRepositorySecurityDecorator(repository, mutableAclService, userPermissionEvaluator);
-		return new PackageRepositoryValidationDecorator(repository, packageValidator);
-	}
+  @Override
+  public Repository<Package> createDecoratedRepository(Repository<Package> repository) {
+    repository = new PackageRepositoryDecorator(repository, dataService);
+    repository =
+        new PackageRepositorySecurityDecorator(
+            repository, mutableAclService, userPermissionEvaluator);
+    return new PackageRepositoryValidationDecorator(repository, packageValidator);
+  }
 }

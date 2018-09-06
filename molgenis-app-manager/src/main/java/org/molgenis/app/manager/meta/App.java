@@ -1,140 +1,112 @@
 package org.molgenis.app.manager.meta;
 
+import static org.molgenis.app.manager.meta.AppMetadata.*;
+
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import javax.annotation.Nullable;
+public class App extends StaticEntity {
+  public App(Entity entity) {
+    super(entity);
+  }
 
-import static org.molgenis.app.manager.meta.AppMetadata.*;
+  public App(EntityType entityType) {
+    super(entityType);
+  }
 
-public class App extends StaticEntity
-{
-	public App(Entity entity)
-	{
-		super(entity);
-	}
+  public App(String label, EntityType entityType) {
+    super(entityType);
+    setLabel(label);
+  }
 
-	public App(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public App(String label, EntityType entityType)
-	{
-		super(entityType);
-		setLabel(label);
-	}
+  public void setId(String id) {
+    set(ID, id);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  public String getName() {
+    return getString(NAME);
+  }
 
-	public void setId(String id)
-	{
-		set(ID, id);
-	}
+  public void setName(String name) {
+    set(NAME, name);
+  }
 
-	public String getName()
-	{
-		return getString(NAME);
-	}
+  public String getLabel() {
+    return getString(LABEL);
+  }
 
-	public void setName(String name)
-	{
-		set(NAME, name);
-	}
+  public void setLabel(String label) {
+    set(LABEL, label);
+  }
 
-	public String getLabel()
-	{
-		return getString(LABEL);
-	}
+  @Nullable
+  public String getDescription() {
+    return getString(DESCRIPTION);
+  }
 
-	public void setLabel(String label)
-	{
-		set(LABEL, label);
-	}
+  public void setDescription(String description) {
+    set(DESCRIPTION, description);
+  }
 
-	@Nullable
-	public String getDescription()
-	{
-		return getString(DESCRIPTION);
-	}
+  public boolean isActive() {
+    return getBoolean(IS_ACTIVE);
+  }
 
-	public void setDescription(String description)
-	{
-		set(DESCRIPTION, description);
-	}
+  public void setActive(boolean isActive) {
+    set(IS_ACTIVE, isActive);
+  }
 
-	public boolean isActive()
-	{
-		return getBoolean(IS_ACTIVE);
-	}
+  public boolean includeMenuAndFooter() {
+    return getBoolean(INCLUDE_MENU_AND_FOOTER);
+  }
 
-	public void setActive(boolean isActive)
-	{
-		set(IS_ACTIVE, isActive);
-	}
+  public void setIncludeMenuAndFooter(boolean includeMenuAndFooter) {
+    set(INCLUDE_MENU_AND_FOOTER, includeMenuAndFooter);
+  }
 
-	public boolean includeMenuAndFooter()
-	{
-		return getBoolean(INCLUDE_MENU_AND_FOOTER);
-	}
+  public String getTemplateContent() {
+    return getString(TEMPLATE_CONTENT);
+  }
 
-	public void setIncludeMenuAndFooter(boolean includeMenuAndFooter)
-	{
-		set(INCLUDE_MENU_AND_FOOTER, includeMenuAndFooter);
-	}
+  public void setTemplateContent(String templateContent) {
+    set(TEMPLATE_CONTENT, templateContent);
+  }
 
-	public String getTemplateContent()
-	{
-		return getString(TEMPLATE_CONTENT);
-	}
+  public String getAppVersion() {
+    return getString(APP_VERSION);
+  }
 
-	public void setTemplateContent(String templateContent)
-	{
-		set(TEMPLATE_CONTENT, templateContent);
-	}
+  public void setAppVersion(String appVersion) {
+    set(APP_VERSION, appVersion);
+  }
 
-	public String getAppVersion()
-	{
-		return getString(APP_VERSION);
-	}
+  public String getApiDependency() {
+    return getString(API_DEPENDENCY);
+  }
 
-	public void setAppVersion(String appVersion)
-	{
-		set(APP_VERSION, appVersion);
-	}
+  public void setApiDependency(String apiDependency) {
+    set(API_DEPENDENCY, apiDependency);
+  }
 
-	public String getApiDependency()
-	{
-		return getString(API_DEPENDENCY);
-	}
+  public String getAppConfig() {
+    return getString(APP_CONFIG);
+  }
 
-	public void setApiDependency(String apiDependency)
-	{
-		set(API_DEPENDENCY, apiDependency);
-	}
+  public void setAppConfig(String appConfig) {
+    set(APP_CONFIG, appConfig);
+  }
 
-	public String getAppConfig()
-	{
-		return getString(APP_CONFIG);
-	}
+  public String getResourceFolder() {
+    return getString(RESOURCE_FOLDER);
+  }
 
-	public void setAppConfig(String appConfig)
-	{
-		set(APP_CONFIG, appConfig);
-	}
-
-	public String getResourceFolder()
-	{
-		return getString(RESOURCE_FOLDER);
-	}
-
-	public void setResourceFolder(String resourceFolder)
-	{
-		set(RESOURCE_FOLDER, resourceFolder);
-	}
+  public void setResourceFolder(String resourceFolder) {
+    set(RESOURCE_FOLDER, resourceFolder);
+  }
 }
-

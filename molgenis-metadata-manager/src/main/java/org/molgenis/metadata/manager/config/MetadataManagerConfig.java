@@ -5,11 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MetadataManagerConfig
-{
-	@Bean
-	public PropertiesMessageSource metadataManagerMessageSource()
-	{
-		return new PropertiesMessageSource("metadata-manager");
-	}
+public class MetadataManagerConfig {
+  @Bean
+  public PropertiesMessageSource metadataManagerMessageSource() {
+    return new PropertiesMessageSource("metadata-manager");
+  }
 }

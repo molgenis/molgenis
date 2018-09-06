@@ -1,6 +1,18 @@
 package org.molgenis.integrationtest.platform.importservice;
 
+import static java.util.Collections.emptySet;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.DataAction.ADD;
+import static org.molgenis.security.core.SidUtils.createUserSid;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableMap;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.support.FileRepositoryCollection;
 import org.molgenis.data.importer.EntityImportReport;
@@ -16,186 +28,203 @@ import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
+public class OntologyImportServiceIT extends ImportServiceIT {
+  private static final String USERNAME = "ontology_user";
 
-import static java.util.Collections.emptySet;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.DataAction.ADD;
-import static org.molgenis.security.core.SidUtils.createUserSid;
-import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+  @Override
+  User getTestUser() {
+    User user = userFactory.create();
+    user.setUsername(USERNAME);
+    user.setPassword("password");
+    user.setEmail("o@mail.com");
+    return user;
+  }
 
-public class OntologyImportServiceIT extends ImportServiceIT
-{
-	private static final String USERNAME = "ontology_user";
+  @WithMockUser(username = USERNAME)
+  @Test
+  public void testDoImportOboAsNonSuperuser() {
+    populateUserPermissions();
+    testDoImportObo();
+  }
 
-	@Override
-	User getTestUser()
-	{
-		User user = userFactory.create();
-		user.setUsername(USERNAME);
-		user.setPassword("password");
-		user.setEmail("o@mail.com");
-		return user;
-	}
+  @WithMockUser(
+      username = USERNAME,
+      roles = {ROLE_SU})
+  @Test
+  public void testDoImportOboAsSuperuser() {
+    testDoImportObo();
+  }
 
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void testDoImportOboAsNonSuperuser()
-	{
-		populateUserPermissions();
-		testDoImportObo();
-	}
+  private void testDoImportObo() {
+    String fileName = "ontology-small.obo.zip";
+    File file = getFile("/obo/" + fileName);
+    FileRepositoryCollection repoCollection =
+        fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+    ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+    EntityImportReport importReport =
+        importService.doImport(repoCollection, MetadataAction.IGNORE, ADD, null);
+    validateImportReport(
+        importReport,
+        ImmutableMap.of(
+            "sys_ont_OntologyTermDynamicAnnotation",
+            0,
+            "sys_ont_OntologyTermSynonym",
+            5,
+            "sys_ont_OntologyTermNodePath",
+            5,
+            "sys_ont_Ontology",
+            1,
+            "sys_ont_OntologyTerm",
+            5),
+        emptySet());
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportOboAsSuperuser()
-	{
-		testDoImportObo();
-	}
+    // Verify the import as system as we need write permissions on sys tables to carry out the
+    // verification
+    runAsSystem(this::verifyOboAsSystem);
+  }
 
-	private void testDoImportObo()
-	{
-		String fileName = "ontology-small.obo.zip";
-		File file = getFile("/obo/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, MetadataAction.IGNORE, ADD, null);
-		validateImportReport(importReport,
-				ImmutableMap.of("sys_ont_OntologyTermDynamicAnnotation", 0, "sys_ont_OntologyTermSynonym", 5,
-						"sys_ont_OntologyTermNodePath", 5, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 5),
-				emptySet());
+  private void verifyOboAsSystem() {
+    List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
+    Ontology ontology = (Ontology) ontologies.get(0);
+    assertEquals(ontology.getOntologyName(), "ontology-small");
 
-		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		runAsSystem(this::verifyOboAsSystem);
-	}
+    List<Entity> synonyms =
+        dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
 
-	private void verifyOboAsSystem()
-	{
-		List<Entity> ontologies = dataService.findAll("sys_ont_Ontology").collect(Collectors.toList());
-		Ontology ontology = (Ontology) ontologies.get(0);
-		assertEquals(ontology.getOntologyName(), "ontology-small");
+    verifyOboRow(
+        synonyms,
+        "molgenis ontology core",
+        "http://purl.obolibrary.org/obo/TEMP#molgenis-ontology-core");
 
-		List<Entity> synonyms = dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
+    verifyOboRow(synonyms, "molgenis", "http://purl.obolibrary.org/obo/TEMP#molgenis");
 
-		verifyOboRow(synonyms, "molgenis ontology core", "http://purl.obolibrary.org/obo/TEMP#molgenis-ontology-core");
+    verifyOboRow(synonyms, "Thing", "http://purl.obolibrary.org/obo/TEMP#Thing");
+  }
 
-		verifyOboRow(synonyms, "molgenis", "http://purl.obolibrary.org/obo/TEMP#molgenis");
+  private void verifyOboRow(
+      List<Entity> synonyms, String ontologyTermName, String ontologyTermIRI) {
+    Optional<Entity> molOntCoreOpt =
+        synonyms
+            .stream()
+            .filter(s -> s.getString("ontologyTermName").equals(ontologyTermName))
+            .findFirst();
+    assertTrue(molOntCoreOpt.isPresent());
+    assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
+  }
 
-		verifyOboRow(synonyms, "Thing", "http://purl.obolibrary.org/obo/TEMP#Thing");
-	}
+  @WithMockUser(username = USERNAME)
+  @Test
+  public void testDoImportOwlAsNonSuperuser() {
+    populateUserPermissions();
+    testDoImportOwl();
+  }
 
-	private void verifyOboRow(List<Entity> synonyms, String ontologyTermName, String ontologyTermIRI)
-	{
-		Optional<Entity> molOntCoreOpt = synonyms.stream()
-												 .filter(s -> s.getString("ontologyTermName").equals(ontologyTermName))
-												 .findFirst();
-		assertTrue(molOntCoreOpt.isPresent());
-		assertEquals(molOntCoreOpt.get().getString("ontologyTermIRI"), ontologyTermIRI);
-	}
+  @WithMockUser(
+      username = USERNAME,
+      roles = {ROLE_SU})
+  @Test
+  public void testDoImportOwlAsSuperuser() {
+    testDoImportOwl();
+  }
 
-	@WithMockUser(username = USERNAME)
-	@Test
-	public void testDoImportOwlAsNonSuperuser()
-	{
-		populateUserPermissions();
-		testDoImportOwl();
-	}
+  private void testDoImportOwl() {
+    String fileName = "ontology-small.owl.zip";
+    File file = getFile("/owl/" + fileName);
+    FileRepositoryCollection repoCollection =
+        fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+    ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+    EntityImportReport importReport =
+        importService.doImport(repoCollection, MetadataAction.IGNORE, ADD, null);
+    validateImportReport(
+        importReport,
+        ImmutableMap.of(
+            "sys_ont_OntologyTermDynamicAnnotation",
+            4,
+            "sys_ont_OntologyTermSynonym",
+            9,
+            "sys_ont_OntologyTermNodePath",
+            10,
+            "sys_ont_Ontology",
+            1,
+            "sys_ont_OntologyTerm",
+            9),
+        emptySet());
 
-	@WithMockUser(username = USERNAME, roles = { ROLE_SU })
-	@Test
-	public void testDoImportOwlAsSuperuser()
-	{
-		testDoImportOwl();
-	}
+    // Verify the import as system as we need write permissions on sys tables to carry out the
+    // verification
+    runAsSystem(this::verifyOwlAsSystem);
+  }
 
-	private void testDoImportOwl()
-	{
-		String fileName = "ontology-small.owl.zip";
-		File file = getFile("/owl/" + fileName);
-		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport importReport = importService.doImport(repoCollection, MetadataAction.IGNORE, ADD, null);
-		validateImportReport(importReport,
-				ImmutableMap.of("sys_ont_OntologyTermDynamicAnnotation", 4, "sys_ont_OntologyTermSynonym", 9,
-						"sys_ont_OntologyTermNodePath", 10, "sys_ont_Ontology", 1, "sys_ont_OntologyTerm", 9),
-				emptySet());
+  private void verifyOwlAsSystem() {
+    // Verify two imported rows (organization and team, as these are interesting examples)
+    List<Entity> entities =
+        dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
+    Optional<Entity> organizationOpt =
+        entities
+            .stream()
+            .filter(e -> e.getString("ontologyTermName").equals("organization"))
+            .findFirst();
+    assertTrue(organizationOpt.isPresent());
+    Entity organization = organizationOpt.get();
 
-		// Verify the import as system as we need write permissions on sys tables to carry out the verification
-		runAsSystem(this::verifyOwlAsSystem);
-	}
+    Optional<Entity> teamOpt =
+        entities.stream().filter(e -> e.getString("ontologyTermName").equals("team")).findFirst();
+    assertTrue(teamOpt.isPresent());
+    Entity team = teamOpt.get();
 
-	private void verifyOwlAsSystem()
-	{
-		// Verify two imported rows (organization and team, as these are interesting examples)
-		List<Entity> entities = dataService.findAll("sys_ont_OntologyTerm").collect(Collectors.toList());
-		Optional<Entity> organizationOpt = entities.stream()
-												   .filter(e -> e.getString("ontologyTermName").equals("organization"))
-												   .findFirst();
-		assertTrue(organizationOpt.isPresent());
-		Entity organization = organizationOpt.get();
+    // Verify organization
+    assertEquals(organization.getString("ontologyTermIRI"), "http://www.molgenis.org#Organization");
+    assertEquals(organization.getString("ontologyTermName"), "organization");
 
-		Optional<Entity> teamOpt = entities.stream()
-										   .filter(e -> e.getString("ontologyTermName").equals("team"))
-										   .findFirst();
-		assertTrue(teamOpt.isPresent());
-		Entity team = teamOpt.get();
+    // verify organization ontologyTermSynonym
+    Iterable<Entity> ontologyTermSynonym = organization.getEntities("ontologyTermSynonym");
+    List<Entity> termSynonymRefList = new ArrayList<>();
+    ontologyTermSynonym.forEach(termSynonymRefList::add);
+    assertEquals(termSynonymRefList.size(), 1);
+    Entity organizationOntologyTermSynonym =
+        dataService.findOneById(
+            "sys_ont_OntologyTermSynonym", termSynonymRefList.get(0).getIdValue());
+    assertEquals(organizationOntologyTermSynonym.getString("ontologyTermSynonym"), "organization");
 
-		// Verify organization
-		assertEquals(organization.getString("ontologyTermIRI"), "http://www.molgenis.org#Organization");
-		assertEquals(organization.getString("ontologyTermName"), "organization");
+    // verify organization ontology
+    Ontology ontology = (Ontology) organization.get("ontology");
+    assertEquals(ontology.getOntologyName(), "ontology-small");
 
-		// verify organization ontologyTermSynonym
-		Iterable<Entity> ontologyTermSynonym = organization.getEntities("ontologyTermSynonym");
-		List<Entity> termSynonymRefList = new ArrayList<>();
-		ontologyTermSynonym.forEach(termSynonymRefList::add);
-		assertEquals(termSynonymRefList.size(), 1);
-		Entity organizationOntologyTermSynonym = dataService.findOneById("sys_ont_OntologyTermSynonym",
-				termSynonymRefList.get(0).getIdValue());
-		assertEquals(organizationOntologyTermSynonym.getString("ontologyTermSynonym"), "organization");
+    // Verify the team row
+    assertEquals(team.getString("ontologyTermIRI"), "http://www.molgenis.org#Team");
+    assertEquals(team.getString("ontologyTermName"), "team");
 
-		// verify organization ontology
-		Ontology ontology = (Ontology) organization.get("ontology");
-		assertEquals(ontology.getOntologyName(), "ontology-small");
+    // verify team dynamic annotations
+    Iterable<Entity> dynamicAnnotationItr = team.getEntities("ontologyTermDynamicAnnotation");
+    List<Entity> dynamicAnnotations = new ArrayList<>();
+    dynamicAnnotationItr.forEach(dynamicAnnotations::add);
+    assertEquals(dynamicAnnotations.size(), 2);
+    Entity annotationOne =
+        dataService.findOneById(
+            "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(0).getIdValue());
+    assertEquals(annotationOne.getString("label"), "friday:2412423");
+    Entity annotationTwo =
+        dataService.findOneById(
+            "sys_ont_OntologyTermDynamicAnnotation", dynamicAnnotations.get(1).getIdValue());
+    assertEquals(annotationTwo.getString("label"), "molgenis:1231424");
 
-		// Verify the team row
-		assertEquals(team.getString("ontologyTermIRI"), "http://www.molgenis.org#Team");
-		assertEquals(team.getString("ontologyTermName"), "team");
+    // verify team ontology
+    ontology = (Ontology) team.get("ontology");
+    assertEquals(ontology.getOntologyName(), "ontology-small");
+  }
 
-		// verify team dynamic annotations
-		Iterable<Entity> dynamicAnnotationItr = team.getEntities("ontologyTermDynamicAnnotation");
-		List<Entity> dynamicAnnotations = new ArrayList<>();
-		dynamicAnnotationItr.forEach(dynamicAnnotations::add);
-		assertEquals(dynamicAnnotations.size(), 2);
-		Entity annotationOne = dataService.findOneById("sys_ont_OntologyTermDynamicAnnotation",
-				dynamicAnnotations.get(0).getIdValue());
-		assertEquals(annotationOne.getString("label"), "friday:2412423");
-		Entity annotationTwo = dataService.findOneById("sys_ont_OntologyTermDynamicAnnotation",
-				dynamicAnnotations.get(1).getIdValue());
-		assertEquals(annotationTwo.getString("label"), "molgenis:1231424");
+  @Autowired private PermissionService testPermissionService;
 
-		// verify team ontology
-		ontology = (Ontology) team.get("ontology");
-		assertEquals(ontology.getOntologyName(), "ontology-small");
-	}
+  private void populateUserPermissions() {
+    Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+    permissionMap.put(
+        new EntityTypeIdentity("sys_ont_OntologyTermDynamicAnnotation"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermNodePath"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermSynonym"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_ont_Ontology"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTerm"), PermissionSet.WRITE);
+    permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
 
-	@Autowired
-	private PermissionService testPermissionService;
-
-	private void populateUserPermissions()
-	{
-		Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
-		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermDynamicAnnotation"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermNodePath"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTermSynonym"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_ont_Ontology"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_ont_OntologyTerm"), PermissionSet.WRITE);
-		permissionMap.put(new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
-
-		testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
-	}
+    testPermissionService.grant(permissionMap, createUserSid(requireNonNull(getCurrentUsername())));
+  }
 }

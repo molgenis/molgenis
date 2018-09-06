@@ -1,5 +1,17 @@
 package org.molgenis.oneclickimporter.service;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -17,140 +29,127 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+public class EntityServiceImplTest {
+  @Mock private EntityTypeFactory entityTypeFactory;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
-import static org.testng.Assert.assertEquals;
+  @Mock private AttributeFactory attributeFactory;
 
-public class EntityServiceImplTest
-{
-	@Mock
-	private EntityTypeFactory entityTypeFactory;
+  @Mock private IdGenerator idGenerator;
 
-	@Mock
-	private AttributeFactory attributeFactory;
+  @Mock private DataService dataService;
 
-	@Mock
-	private IdGenerator idGenerator;
+  @Mock private MetaDataService metaDataService;
 
-	@Mock
-	private DataService dataService;
+  @Mock private EntityManager entityManager;
 
-	@Mock
-	private MetaDataService metaDataService;
+  @Mock private AttributeTypeService attributeTypeService;
 
-	@Mock
-	private EntityManager entityManager;
+  @Mock private OneClickImporterService oneClickImporterService;
 
-	@Mock
-	private AttributeTypeService attributeTypeService;
+  @Mock private OneClickImporterNamingService oneClickImporterNamingService;
 
-	@Mock
-	private OneClickImporterService oneClickImporterService;
+  @Mock private PackageFactory packageFactory;
 
-	@Mock
-	private OneClickImporterNamingService oneClickImporterNamingService;
+  @Mock private PermissionSystemService permissionSystemService;
 
-	@Mock
-	private PackageFactory packageFactory;
+  @Mock private UserPermissionEvaluator userPermissionEvaluator;
 
-	@Mock
-	private PermissionSystemService permissionSystemService;
+  private EntityService entityService;
 
-	@Mock
-	private UserPermissionEvaluator userPermissionEvaluator;
+  @BeforeClass
+  public void beforeClass() {
+    initMocks(this);
+  }
 
-	private EntityService entityService;
+  @Test
+  public void testCreateEntity() {
+    String tableName = "super-powers";
+    List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
+    List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
+    List<Column> columns =
+        Arrays.asList(
+            Column.create("user name", 0, userNames), Column.create("super power", 1, superPowers));
+    DataCollection dataCollection = DataCollection.create(tableName, columns);
 
-	@BeforeClass
-	public void beforeClass()
-	{
-		initMocks(this);
-	}
+    // mock auto id
+    String generatedId = "id_0";
+    when(idGenerator.generateId()).thenReturn(generatedId);
 
-	@Test
-	public void testCreateEntity()
-	{
-		String tableName = "super-powers";
-		List<Object> userNames = Arrays.asList("Mark", "Mariska", "Bart");
-		List<Object> superPowers = Arrays.asList("Arrow functions", "Cookies", "Knots");
-		List<Column> columns = Arrays.asList(Column.create("user name", 0, userNames),
-				Column.create("super power", 1, superPowers));
-		DataCollection dataCollection = DataCollection.create(tableName, columns);
+    // mock attributes
+    Attribute idAttr = mock(Attribute.class);
+    when(idAttr.setName(anyString())).thenReturn(idAttr);
+    when(idAttr.setVisible(anyBoolean())).thenReturn(idAttr);
+    when(idAttr.setAuto(anyBoolean())).thenReturn(idAttr);
+    when(idAttr.setIdAttribute(anyBoolean())).thenReturn(idAttr);
 
-		// mock auto id
-		String generatedId = "id_0";
-		when(idGenerator.generateId()).thenReturn(generatedId);
+    Attribute nameAttr = mock(Attribute.class);
+    when(nameAttr.getDataType()).thenReturn(STRING);
 
-		// mock attributes
-		Attribute idAttr = mock(Attribute.class);
-		when(idAttr.setName(anyString())).thenReturn(idAttr);
-		when(idAttr.setVisible(anyBoolean())).thenReturn(idAttr);
-		when(idAttr.setAuto(anyBoolean())).thenReturn(idAttr);
-		when(idAttr.setIdAttribute(anyBoolean())).thenReturn(idAttr);
+    Attribute powerAttr = mock(Attribute.class);
+    when(powerAttr.getDataType()).thenReturn(STRING);
 
-		Attribute nameAttr = mock(Attribute.class);
-		when(nameAttr.getDataType()).thenReturn(STRING);
+    when(attributeFactory.create()).thenReturn(idAttr, nameAttr, powerAttr);
 
-		Attribute powerAttr = mock(Attribute.class);
-		when(powerAttr.getDataType()).thenReturn(STRING);
+    // mock table
+    EntityType table = mock(EntityType.class);
+    when(entityTypeFactory.create()).thenReturn(table);
+    when(table.getId()).thenReturn(generatedId);
 
-		when(attributeFactory.create()).thenReturn(idAttr, nameAttr, powerAttr);
+    when(table.getAttribute("user_name")).thenReturn(nameAttr);
+    when(table.getAttribute("super_power")).thenReturn(powerAttr);
 
-		// mock table
-		EntityType table = mock(EntityType.class);
-		when(entityTypeFactory.create()).thenReturn(table);
-		when(table.getId()).thenReturn(generatedId);
+    // mock package
+    Package package_ = mock(Package.class);
+    when(metaDataService.getPackage("parent_package_")).thenReturn(package_);
 
-		when(table.getAttribute("user_name")).thenReturn(nameAttr);
-		when(table.getAttribute("super_power")).thenReturn(powerAttr);
+    when(dataService.getMeta()).thenReturn(metaDataService);
 
-		// mock package
-		Package package_ = mock(Package.class);
-		when(metaDataService.getPackage("parent_package_")).thenReturn(package_);
+    // mock rows
+    Entity row1 = mock(Entity.class);
+    when(row1.getEntityType()).thenReturn(table);
 
-		when(dataService.getMeta()).thenReturn(metaDataService);
+    Entity row2 = mock(Entity.class);
+    when(row2.getEntityType()).thenReturn(table);
 
-		// mock rows
-		Entity row1 = mock(Entity.class);
-		when(row1.getEntityType()).thenReturn(table);
+    Entity row3 = mock(Entity.class);
+    when(row3.getEntityType()).thenReturn(table);
 
-		Entity row2 = mock(Entity.class);
-		when(row2.getEntityType()).thenReturn(table);
+    when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
 
-		Entity row3 = mock(Entity.class);
-		when(row3.getEntityType()).thenReturn(table);
+    when(oneClickImporterNamingService.asValidColumnName("user name")).thenReturn("user_name");
+    when(oneClickImporterNamingService.asValidColumnName("super power")).thenReturn("super_power");
+    when(oneClickImporterNamingService.getLabelWithPostFix("super-powers"))
+        .thenReturn("super-powers");
 
-		when(entityManager.create(table, NO_POPULATE)).thenReturn(row1, row2, row3);
+    when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
 
-		when(oneClickImporterNamingService.asValidColumnName("user name")).thenReturn("user_name");
-		when(oneClickImporterNamingService.asValidColumnName("super power")).thenReturn("super_power");
-		when(oneClickImporterNamingService.getLabelWithPostFix("super-powers")).thenReturn("super-powers");
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new PackageIdentity("parent"), ADD_PACKAGE);
+    when(metaDataService.getPackages()).thenReturn(Collections.singletonList(package_));
+    when(package_.getId()).thenReturn("parent");
 
-		when(attributeTypeService.guessAttributeType(any())).thenReturn(STRING);
+    entityService =
+        new EntityServiceImpl(
+            entityTypeFactory,
+            attributeFactory,
+            idGenerator,
+            dataService,
+            metaDataService,
+            entityManager,
+            attributeTypeService,
+            oneClickImporterService,
+            oneClickImporterNamingService,
+            packageFactory,
+            permissionSystemService,
+            userPermissionEvaluator);
 
-		doReturn(true).when(userPermissionEvaluator).hasPermission(new PackageIdentity("parent"), ADD_PACKAGE);
-		when(metaDataService.getPackages()).thenReturn(Collections.singletonList(package_));
-		when(package_.getId()).thenReturn("parent");
+    EntityType entityType = entityService.createEntityType(dataCollection, "package_");
+    assertEquals(entityType.getId(), generatedId);
 
-		entityService = new EntityServiceImpl(entityTypeFactory, attributeFactory, idGenerator, dataService,
-				metaDataService, entityManager, attributeTypeService, oneClickImporterService,
-				oneClickImporterNamingService, packageFactory, permissionSystemService, userPermissionEvaluator);
-
-		EntityType entityType = entityService.createEntityType(dataCollection, "package_");
-		assertEquals(entityType.getId(), generatedId);
-
-		verify(table).setPackage(package_);
-		verify(table).setId(generatedId);
-		verify(table).setLabel(tableName);
-		verify(permissionSystemService).giveUserWriteMetaPermissions(table);
-	}
+    verify(table).setPackage(package_);
+    verify(table).setId(generatedId);
+    verify(table).setLabel(tableName);
+    verify(permissionSystemService).giveUserWriteMetaPermissions(table);
+  }
 }

@@ -5,12 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class FileConfig
-{
-	@Bean
-	public PropertiesMessageSource fileMessageSource()
-	{
-		return new PropertiesMessageSource("file");
-	}
-
+public class FileConfig {
+  @Bean
+  public PropertiesMessageSource fileMessageSource() {
+    return new PropertiesMessageSource("file");
+  }
 }

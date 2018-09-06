@@ -1,5 +1,7 @@
 package org.molgenis.semanticmapper.config;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -28,102 +30,103 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import static java.util.Objects.requireNonNull;
-
 @Configuration
 @Import(OntologyConfig.class)
-public class MappingConfig
-{
-	private final DataService dataService;
-	private final OntologyTagService ontologyTagService;
-	private final SemanticSearchService semanticSearchService;
-	private final OntologyService ontologyService;
-	private final IdGenerator idGenerator;
-	private final PermissionSystemService permissionSystemService;
-	private final OntologyTermRepository ontologyTermRepository;
-	private final AttributeMappingMetaData attributeMappingMetaData;
-	private final AttributeFactory attrMetaFactory;
-	private final MappingProjectMetaData mappingProjectMeta;
-	private final EntityManager entityManager;
-	private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
-	private final SystemPackageRegistry systemPackageRegistry;
+public class MappingConfig {
+  private final DataService dataService;
+  private final OntologyTagService ontologyTagService;
+  private final SemanticSearchService semanticSearchService;
+  private final OntologyService ontologyService;
+  private final IdGenerator idGenerator;
+  private final PermissionSystemService permissionSystemService;
+  private final OntologyTermRepository ontologyTermRepository;
+  private final AttributeMappingMetaData attributeMappingMetaData;
+  private final AttributeFactory attrMetaFactory;
+  private final MappingProjectMetaData mappingProjectMeta;
+  private final EntityManager entityManager;
+  private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
+  private final SystemPackageRegistry systemPackageRegistry;
 
-	public MappingConfig(PermissionSystemService permissionSystemService, DataService dataService,
-			SystemPackageRegistry systemPackageRegistry, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService, OntologyService ontologyService, IdGenerator idGenerator,
-			OntologyTermRepository ontologyTermRepository, AttributeMappingMetaData attributeMappingMetaData,
-			AttributeFactory attrMetaFactory, MappingProjectMetaData mappingProjectMeta, EntityManager entityManager,
-			JsMagmaScriptEvaluator jsMagmaScriptEvaluator)
-	{
-		this.permissionSystemService = requireNonNull(permissionSystemService);
-		this.dataService = requireNonNull(dataService);
-		this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
-		this.ontologyTagService = requireNonNull(ontologyTagService);
-		this.semanticSearchService = requireNonNull(semanticSearchService);
-		this.ontologyService = requireNonNull(ontologyService);
-		this.idGenerator = requireNonNull(idGenerator);
-		this.ontologyTermRepository = requireNonNull(ontologyTermRepository);
-		this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
-		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
-		this.entityManager = requireNonNull(entityManager);
-		this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
-	}
+  public MappingConfig(
+      PermissionSystemService permissionSystemService,
+      DataService dataService,
+      SystemPackageRegistry systemPackageRegistry,
+      OntologyTagService ontologyTagService,
+      SemanticSearchService semanticSearchService,
+      OntologyService ontologyService,
+      IdGenerator idGenerator,
+      OntologyTermRepository ontologyTermRepository,
+      AttributeMappingMetaData attributeMappingMetaData,
+      AttributeFactory attrMetaFactory,
+      MappingProjectMetaData mappingProjectMeta,
+      EntityManager entityManager,
+      JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
+    this.permissionSystemService = requireNonNull(permissionSystemService);
+    this.dataService = requireNonNull(dataService);
+    this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
+    this.ontologyTagService = requireNonNull(ontologyTagService);
+    this.semanticSearchService = requireNonNull(semanticSearchService);
+    this.ontologyService = requireNonNull(ontologyService);
+    this.idGenerator = requireNonNull(idGenerator);
+    this.ontologyTermRepository = requireNonNull(ontologyTermRepository);
+    this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
+    this.attrMetaFactory = requireNonNull(attrMetaFactory);
+    this.mappingProjectMeta = requireNonNull(mappingProjectMeta);
+    this.entityManager = requireNonNull(entityManager);
+    this.jsMagmaScriptEvaluator = requireNonNull(jsMagmaScriptEvaluator);
+  }
 
-	@Bean
-	public MappingService mappingService()
-	{
-		return new MappingServiceImpl(dataService, algorithmServiceImpl(), mappingProjectRepository(),
-				permissionSystemService, attrMetaFactory, entityManager);
-	}
+  @Bean
+  public MappingService mappingService() {
+    return new MappingServiceImpl(
+        dataService,
+        algorithmServiceImpl(),
+        mappingProjectRepository(),
+        permissionSystemService,
+        attrMetaFactory,
+        entityManager);
+  }
 
-	@Bean
-	public AlgorithmGeneratorService algorithmGeneratorService()
-	{
-		return new AlgorithmGeneratorServiceImpl(dataService, unitResolver(), algorithmTemplateServiceImpl());
-	}
+  @Bean
+  public AlgorithmGeneratorService algorithmGeneratorService() {
+    return new AlgorithmGeneratorServiceImpl(
+        dataService, unitResolver(), algorithmTemplateServiceImpl());
+  }
 
-	@Bean
-	public AlgorithmService algorithmServiceImpl()
-	{
-		return new AlgorithmServiceImpl(semanticSearchService, algorithmGeneratorService(), entityManager,
-				jsMagmaScriptEvaluator);
-	}
+  @Bean
+  public AlgorithmService algorithmServiceImpl() {
+    return new AlgorithmServiceImpl(
+        semanticSearchService, algorithmGeneratorService(), entityManager, jsMagmaScriptEvaluator);
+  }
 
-	@Bean
-	public AlgorithmTemplateService algorithmTemplateServiceImpl()
-	{
-		return new AlgorithmTemplateServiceImpl(dataService);
-	}
+  @Bean
+  public AlgorithmTemplateService algorithmTemplateServiceImpl() {
+    return new AlgorithmTemplateServiceImpl(dataService);
+  }
 
-	@Bean
-	public MappingProjectRepositoryImpl mappingProjectRepository()
-	{
-		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), idGenerator,
-				mappingProjectMeta);
-	}
+  @Bean
+  public MappingProjectRepositoryImpl mappingProjectRepository() {
+    return new MappingProjectRepositoryImpl(
+        dataService, mappingTargetRepository(), idGenerator, mappingProjectMeta);
+  }
 
-	@Bean
-	public MappingTargetRepositoryImpl mappingTargetRepository()
-	{
-		return new MappingTargetRepositoryImpl(entityMappingRepository());
-	}
+  @Bean
+  public MappingTargetRepositoryImpl mappingTargetRepository() {
+    return new MappingTargetRepositoryImpl(entityMappingRepository());
+  }
 
-	@Bean
-	public EntityMappingRepositoryImpl entityMappingRepository()
-	{
-		return new EntityMappingRepositoryImpl(attributeMappingRepository());
-	}
+  @Bean
+  public EntityMappingRepositoryImpl entityMappingRepository() {
+    return new EntityMappingRepositoryImpl(attributeMappingRepository());
+  }
 
-	@Bean
-	public AttributeMappingRepositoryImpl attributeMappingRepository()
-	{
-		return new AttributeMappingRepositoryImpl(dataService, attributeMappingMetaData);
-	}
+  @Bean
+  public AttributeMappingRepositoryImpl attributeMappingRepository() {
+    return new AttributeMappingRepositoryImpl(dataService, attributeMappingMetaData);
+  }
 
-	@Bean
-	public UnitResolver unitResolver()
-	{
-		return new UnitResolverImpl(ontologyService);
-	}
+  @Bean
+  public UnitResolver unitResolver() {
+    return new UnitResolverImpl(ontologyService);
+  }
 }

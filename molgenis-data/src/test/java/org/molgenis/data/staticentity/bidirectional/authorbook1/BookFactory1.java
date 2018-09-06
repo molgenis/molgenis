@@ -7,11 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BookFactory1 extends AbstractSystemEntityFactory<Book, BookMetaData1, String>
-{
-	@Autowired
-	BookFactory1(BookMetaData1 myRefEntityMeta, EntityPopulator entityPopulator)
-	{
-		super(Book.class, myRefEntityMeta, entityPopulator);
-	}
+public class BookFactory1 extends AbstractSystemEntityFactory<Book, BookMetaData1, String> {
+  @Autowired
+  BookFactory1(BookMetaData1 myRefEntityMeta, EntityPopulator entityPopulator) {
+    super(Book.class, myRefEntityMeta, entityPopulator);
+  }
 }

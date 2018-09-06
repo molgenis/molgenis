@@ -6,11 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * <p>This class still uses {@link ComponentScan} because of class visibility in postgresql package.</p>
+ * This class still uses {@link ComponentScan} because of class visibility in postgresql package.
  */
 @Configuration
 @Import(PostgreSqlConfiguration.class)
 @ComponentScan("org.molgenis.data.postgresql")
-public class PostgreSqlTestConfig
-{
-}
+public class PostgreSqlTestConfig {}

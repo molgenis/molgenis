@@ -7,8 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({ EntityBaseTestConfig.class, MappingProjectMetaData.class, MappingTargetMetaData.class,
-		EntityMappingMetaData.class, AttributeMappingMetaData.class, UserTestConfig.class, MapperPackage.class })
-public class MapperTestConfig
-{
-}
+@Import({
+  EntityBaseTestConfig.class,
+  MappingProjectMetaData.class,
+  MappingTargetMetaData.class,
+  EntityMappingMetaData.class,
+  AttributeMappingMetaData.class,
+  UserTestConfig.class,
+  MapperPackage.class
+})
+public class MapperTestConfig {}

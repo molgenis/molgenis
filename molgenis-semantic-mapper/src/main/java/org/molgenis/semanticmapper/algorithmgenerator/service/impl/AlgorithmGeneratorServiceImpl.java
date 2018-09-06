@@ -1,5 +1,15 @@
 package org.molgenis.semanticmapper.algorithmgenerator.service.impl;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
+import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -20,141 +30,152 @@ import org.molgenis.semanticmapper.utils.MagmaUnitConverter;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.semantic.Hits;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService {
+  private final List<AlgorithmGenerator> generators;
+  private final AlgorithmTemplateService algorithmTemplateService;
+  private final UnitResolver unitResolver;
+  private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
-import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
+  public AlgorithmGeneratorServiceImpl(
+      DataService dataService,
+      UnitResolver unitResolver,
+      AlgorithmTemplateService algorithmTemplateService) {
+    this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
+    this.unitResolver = requireNonNull(unitResolver);
+    this.generators =
+        Arrays.asList(
+            new OneToOneCategoryAlgorithmGenerator(dataService),
+            new OneToManyCategoryAlgorithmGenerator(dataService),
+            new NumericAlgorithmGenerator(unitResolver));
+  }
 
-public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
-{
-	private final List<AlgorithmGenerator> generators;
-	private final AlgorithmTemplateService algorithmTemplateService;
-	private final UnitResolver unitResolver;
-	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
+  @Override
+  public String generate(
+      Attribute targetAttribute,
+      List<Attribute> sourceAttributes,
+      EntityType targetEntityType,
+      EntityType sourceEntityType) {
+    if (targetAttribute.hasExpression()) {
+      throw new AlgorithmException(
+          format(
+              "Algorithm generation for expressed attribute '%s' is not allowed",
+              targetAttribute.getName()));
+    }
+    if (!sourceAttributes.isEmpty()) {
+      for (AlgorithmGenerator generator : generators) {
+        if (generator.isSuitable(targetAttribute, sourceAttributes)) {
+          return generator.generate(
+              targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+        }
+      }
+      return generateMixedTypes(
+          targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
+    }
 
-	public AlgorithmGeneratorServiceImpl(DataService dataService, UnitResolver unitResolver,
-			AlgorithmTemplateService algorithmTemplateService)
-	{
-		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
-		this.unitResolver = requireNonNull(unitResolver);
-		this.generators = Arrays.asList(new OneToOneCategoryAlgorithmGenerator(dataService),
-				new OneToManyCategoryAlgorithmGenerator(dataService), new NumericAlgorithmGenerator(unitResolver));
-	}
+    return StringUtils.EMPTY;
+  }
 
-	@Override
-	public String generate(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
-			EntityType sourceEntityType)
-	{
-		if (targetAttribute.hasExpression())
-		{
-			throw new AlgorithmException(format("Algorithm generation for expressed attribute '%s' is not allowed",
-					targetAttribute.getName()));
-		}
-		if (!sourceAttributes.isEmpty())
-		{
-			for (AlgorithmGenerator generator : generators)
-			{
-				if (generator.isSuitable(targetAttribute, sourceAttributes))
-				{
-					return generator.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
-				}
-			}
-			return generateMixedTypes(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
-		}
+  String generateMixedTypes(
+      Attribute targetAttribute,
+      List<Attribute> sourceAttributes,
+      EntityType targetEntityType,
+      EntityType sourceEntityType) {
+    StringBuilder stringBuilder = new StringBuilder();
 
-		return StringUtils.EMPTY;
-	}
+    if (sourceAttributes.size() == 1) {
+      stringBuilder.append(format("$('%s').value();", sourceAttributes.get(0).getName()));
+    } else if (sourceAttributes.size() > 1) {
+      for (Attribute sourceAttribute : sourceAttributes) {
+        stringBuilder.append(
+            generate(
+                targetAttribute,
+                Arrays.asList(sourceAttribute),
+                targetEntityType,
+                sourceEntityType));
+      }
+    }
 
-	String generateMixedTypes(Attribute targetAttribute, List<Attribute> sourceAttributes, EntityType targetEntityType,
-			EntityType sourceEntityType)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
+    return stringBuilder.toString();
+  }
 
-		if (sourceAttributes.size() == 1)
-		{
-			stringBuilder.append(format("$('%s').value();", sourceAttributes.get(0).getName()));
-		}
-		else if (sourceAttributes.size() > 1)
-		{
-			for (Attribute sourceAttribute : sourceAttributes)
-			{
-				stringBuilder.append(
-						generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType, sourceEntityType));
-			}
-		}
+  @Override
+  public GeneratedAlgorithm generate(
+      Attribute targetAttribute,
+      Hits<ExplainedAttribute> sourceAttributes,
+      EntityType targetEntityType,
+      EntityType sourceEntityType) {
+    if (targetAttribute.hasExpression()) {
+      throw new AlgorithmException(
+          format(
+              "Algorithm generation for expressed attribute '%s' is not allowed",
+              targetAttribute.getName()));
+    }
 
-		return stringBuilder.toString();
-	}
+    String algorithm = StringUtils.EMPTY;
+    AlgorithmState algorithmState = null;
+    Set<Attribute> mappedSourceAttributes = null;
 
-	@Override
-	public GeneratedAlgorithm generate(Attribute targetAttribute, Hits<ExplainedAttribute> sourceAttributes,
-			EntityType targetEntityType, EntityType sourceEntityType)
-	{
-		if (targetAttribute.hasExpression())
-		{
-			throw new AlgorithmException(format("Algorithm generation for expressed attribute '%s' is not allowed",
-					targetAttribute.getName()));
-		}
+    if (!sourceAttributes.getHits().isEmpty()) {
+      AlgorithmTemplate algorithmTemplate =
+          algorithmTemplateService.find(sourceAttributes).findFirst().orElse(null);
+      if (algorithmTemplate != null) {
+        algorithm = algorithmTemplate.render();
+        mappedSourceAttributes =
+            AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(
+                algorithm, sourceEntityType);
+        algorithm =
+            convertUnitForTemplateAlgorithm(
+                algorithm,
+                targetAttribute,
+                targetEntityType,
+                mappedSourceAttributes,
+                sourceEntityType);
+        algorithmState = GENERATED_HIGH;
+      } else {
+        ExplainedAttribute attributeSearchHit =
+            sourceAttributes.getHits().iterator().next().getResult();
+        Attribute sourceAttribute = attributeSearchHit.getAttribute();
+        algorithm =
+            generate(
+                targetAttribute,
+                Arrays.asList(sourceAttribute),
+                targetEntityType,
+                sourceEntityType);
+        mappedSourceAttributes =
+            AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(
+                algorithm, sourceEntityType);
+        algorithmState = attributeSearchHit.isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
+      }
+    }
 
-		String algorithm = StringUtils.EMPTY;
-		AlgorithmState algorithmState = null;
-		Set<Attribute> mappedSourceAttributes = null;
+    return GeneratedAlgorithm.create(algorithm, mappedSourceAttributes, algorithmState);
+  }
 
-		if (!sourceAttributes.getHits().isEmpty())
-		{
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(sourceAttributes)
-																		  .findFirst()
-																		  .orElse(null);
-			if (algorithmTemplate != null)
-			{
-				algorithm = algorithmTemplate.render();
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityType);
-				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityType,
-						mappedSourceAttributes, sourceEntityType);
-				algorithmState = GENERATED_HIGH;
-			}
-			else
-			{
-				ExplainedAttribute attributeSearchHit = sourceAttributes.getHits().iterator().next().getResult();
-				Attribute sourceAttribute = attributeSearchHit.getAttribute();
-				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
-						sourceEntityType);
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityType);
-				algorithmState = attributeSearchHit.isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
-			}
-		}
+  String convertUnitForTemplateAlgorithm(
+      String algorithm,
+      Attribute targetAttribute,
+      EntityType targetEntityType,
+      Set<Attribute> sourceAttributes,
+      EntityType sourceEntityType) {
+    Unit<? extends Quantity> targetUnit =
+        unitResolver.resolveUnit(targetAttribute, targetEntityType);
 
-		return GeneratedAlgorithm.create(algorithm, mappedSourceAttributes, algorithmState);
-	}
+    for (Attribute sourceAttribute : sourceAttributes) {
+      Unit<? extends Quantity> sourceUnit =
+          unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
 
-	String convertUnitForTemplateAlgorithm(String algorithm, Attribute targetAttribute, EntityType targetEntityType,
-			Set<Attribute> sourceAttributes, EntityType sourceEntityType)
-	{
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityType);
+      String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
 
-		for (Attribute sourceAttribute : sourceAttributes)
-		{
-			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
+      if (StringUtils.isNotBlank(convertUnit)) {
+        String attrMagamSyntax = format("$('%s')", sourceAttribute.getName());
+        String unitConvertedMagamSyntax =
+            convertUnit.startsWith(".")
+                ? attrMagamSyntax + convertUnit
+                : attrMagamSyntax + "." + convertUnit;
+        algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
+      }
+    }
 
-			String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
-
-			if (StringUtils.isNotBlank(convertUnit))
-			{
-				String attrMagamSyntax = format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ?
-						attrMagamSyntax + convertUnit : attrMagamSyntax + "." + convertUnit;
-				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
-			}
-		}
-
-		return algorithm;
-	}
+    return algorithm;
+  }
 }

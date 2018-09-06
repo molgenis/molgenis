@@ -1,98 +1,80 @@
 package org.molgenis.jobs.model;
 
+import static org.molgenis.jobs.model.ScheduledJobMetadata.*;
+
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import javax.annotation.Nullable;
+public class ScheduledJob extends StaticEntity {
+  public ScheduledJob(Entity entity) {
+    super(entity);
+  }
 
-import static org.molgenis.jobs.model.ScheduledJobMetadata.*;
+  public ScheduledJob(EntityType entityType) {
+    super(entityType);
+  }
 
-public class ScheduledJob extends StaticEntity
-{
-	public ScheduledJob(Entity entity)
-	{
-		super(entity);
-	}
+  public ScheduledJob(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public ScheduledJob(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public void setId(String identifier) {
+    set(ID, identifier);
+  }
 
-	public ScheduledJob(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public String getId() {
+    return getString(ID);
+  }
 
-	public void setId(String identifier)
-	{
-		set(ID, identifier);
-	}
+  public String getName() {
+    return getString(NAME);
+  }
 
-	public String getId()
-	{
-		return getString(ID);
-	}
+  @Nullable
+  public String getDescription() {
+    return getString(DESCRIPTION);
+  }
 
-	public String getName()
-	{
-		return getString(NAME);
-	}
+  public String getCronExpression() {
+    return getString(CRON_EXPRESSION);
+  }
 
-	@Nullable
-	public String getDescription()
-	{
-		return getString(DESCRIPTION);
-	}
+  public boolean isActive() {
+    Boolean active = getBoolean(ACTIVE);
+    return active != null && active;
+  }
 
-	public String getCronExpression()
-	{
-		return getString(CRON_EXPRESSION);
-	}
+  @Nullable
+  public String getFailureEmail() {
+    return getString(FAILURE_EMAIL);
+  }
 
-	public boolean isActive()
-	{
-		Boolean active = getBoolean(ACTIVE);
-		return active != null && active;
-	}
+  @Nullable
+  public String getSuccessEmail() {
+    return getString(SUCCESS_EMAIL);
+  }
 
-	@Nullable
-	public String getFailureEmail()
-	{
-		return getString(FAILURE_EMAIL);
-	}
+  @Nullable
+  public String getUser() {
+    return getString(USER);
+  }
 
-	@Nullable
-	public String getSuccessEmail()
-	{
-		return getString(SUCCESS_EMAIL);
-	}
+  public void setUser(String username) {
+    set(USER, username);
+  }
 
-	@Nullable
-	public String getUser()
-	{
-		return getString(USER);
-	}
+  public String getParameters() {
+    return getString(PARAMETERS);
+  }
 
-	public void setUser(String username)
-	{
-		set(USER, username);
-	}
+  public ScheduledJobType getType() {
+    return getEntity(TYPE, ScheduledJobType.class);
+  }
 
-	public String getParameters()
-	{
-		return getString(PARAMETERS);
-	}
-
-	public ScheduledJobType getType()
-	{
-		return getEntity(TYPE, ScheduledJobType.class);
-	}
-
-	public void setType(ScheduledJobType type)
-	{
-		set(TYPE, type);
-	}
+  public void setType(ScheduledJobType type) {
+    set(TYPE, type);
+  }
 }

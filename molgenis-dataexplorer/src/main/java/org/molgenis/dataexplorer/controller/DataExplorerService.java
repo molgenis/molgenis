@@ -1,10 +1,8 @@
 package org.molgenis.dataexplorer.controller;
 
+import java.util.List;
 import org.molgenis.data.meta.model.EntityType;
 
-import java.util.List;
-
-public interface DataExplorerService
-{
-	List<Module> getModules(EntityType entityType);
+public interface DataExplorerService {
+  List<Module> getModules(EntityType entityType);
 }

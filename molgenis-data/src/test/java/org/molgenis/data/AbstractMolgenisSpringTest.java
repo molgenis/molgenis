@@ -1,5 +1,12 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.reset;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -20,83 +27,67 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
-import java.util.Map;
+@ContextConfiguration(classes = {AbstractMolgenisSpringTest.Config.class})
+@TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
+public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests {
+  @Autowired private Config config;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.mockito.Mockito.mockitoSession;
-import static org.mockito.Mockito.reset;
-import static org.mockito.MockitoAnnotations.initMocks;
+  private final Strictness strictness;
 
-@ContextConfiguration(classes = { AbstractMolgenisSpringTest.Config.class })
-@TestExecutionListeners(listeners = { WithSecurityContextTestExecutionListener.class })
-public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
-{
-	@Autowired
-	private Config config;
+  private MockitoSession mockitoSession;
 
-	private final Strictness strictness;
+  public AbstractMolgenisSpringTest() {
+    this(Strictness.STRICT_STUBS);
+  }
 
-	private MockitoSession mockitoSession;
+  public AbstractMolgenisSpringTest(Strictness strictness) {
+    this.strictness = requireNonNull(strictness);
+  }
 
-	public AbstractMolgenisSpringTest()
-	{
-		this(Strictness.STRICT_STUBS);
-	}
+  // long method name, because if a method annotated with @BeforeClass and the same method name
+  // exists in a subclass then this method is ignored.
+  @BeforeClass
+  public void abstractMolgenisSpringTestBeforeClass() {
+    // bootstrap meta data
+    EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
+    entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
+    applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
+    Map<String, SystemEntityType> systemEntityTypeMap =
+        applicationContext.getBeansOfType(SystemEntityType.class);
+    new GenericDependencyResolver()
+        .resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
+        .forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
+  }
 
-	public AbstractMolgenisSpringTest(Strictness strictness)
-	{
-		this.strictness = requireNonNull(strictness);
-	}
+  // long method name, because if a method annotated with @BeforeMethod and the same method name
+  // exists in a subclass then this method is ignored.
+  @BeforeMethod
+  public void abstractMolgenisSpringTestBeforeMethod() throws Exception {
+    mockitoSession = mockitoSession().initMocks(this).strictness(strictness).startMocking();
+    config.resetMocks();
+  }
 
-	// long method name, because if a method annotated with @BeforeClass and the same method name exists in a subclass then this method is ignored.
-	@BeforeClass
-	public void abstractMolgenisSpringTestBeforeClass()
-	{
-		// bootstrap meta data
-		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
-		entityTypeMeta.setBackendEnumOptions(newArrayList("test"));
-		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext.getBeansOfType(SystemEntityType.class);
-		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
-									   .forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
-	}
+  @AfterMethod
+  public void abstractMolgenisSpringTestAfterMethod() {
+    mockitoSession.finishMocking();
+  }
 
-	// long method name, because if a method annotated with @BeforeMethod and the same method name exists in a subclass then this method is ignored.
-	@BeforeMethod
-	public void abstractMolgenisSpringTestBeforeMethod() throws Exception
-	{
-		mockitoSession = mockitoSession().initMocks(this).strictness(strictness).startMocking();
-		config.resetMocks();
-	}
+  @Configuration
+  @Import(MetadataTestConfig.class)
+  public static class Config {
+    @Mock private DataService dataService;
 
-	@AfterMethod
-	public void abstractMolgenisSpringTestAfterMethod()
-	{
-		mockitoSession.finishMocking();
-	}
+    public Config() {
+      initMocks(this);
+    }
 
-	@Configuration
-	@Import(MetadataTestConfig.class)
-	public static class Config
-	{
-		@Mock
-		private DataService dataService;
+    public void resetMocks() {
+      reset(dataService);
+    }
 
-		public Config()
-		{
-			initMocks(this);
-		}
-
-		public void resetMocks()
-		{
-			reset(dataService);
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return dataService;
-		}
-	}
+    @Bean
+    public DataService dataService() {
+      return dataService;
+    }
+  }
 }

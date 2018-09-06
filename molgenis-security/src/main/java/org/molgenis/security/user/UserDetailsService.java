@@ -1,5 +1,13 @@
 package org.molgenis.security.user;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
@@ -14,69 +22,58 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+public class UserDetailsService
+    implements org.springframework.security.core.userdetails.UserDetailsService {
+  private final DataService dataService;
+  private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
+  public UserDetailsService(
+      DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper) {
+    this.dataService = requireNonNull(dataService);
+    this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);
+  }
 
-public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService
-{
-	private final DataService dataService;
-	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
+  @Override
+  @RunAsSystem
+  public UserDetails loadUserByUsername(String username) {
+    User user =
+        dataService
+            .query(UserMetaData.USER, User.class)
+            .eq(UserMetaData.USERNAME, username)
+            .findOne();
+    if (user == null) {
+      throw new UsernameNotFoundException("unknown user '" + username + "'");
+    }
 
-	public UserDetailsService(DataService dataService, GrantedAuthoritiesMapper grantedAuthoritiesMapper)
-	{
-		this.dataService = requireNonNull(dataService);
-		this.grantedAuthoritiesMapper = requireNonNull(grantedAuthoritiesMapper);
-	}
+    Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
+    return new org.springframework.security.core.userdetails.User(
+        user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
+  }
 
-	@Override
-	@RunAsSystem
-	public UserDetails loadUserByUsername(String username)
-	{
-		User user = dataService.query(UserMetaData.USER, User.class).eq(UserMetaData.USERNAME, username).findOne();
-		if (user == null)
-		{
-			throw new UsernameNotFoundException("unknown user '" + username + "'");
-		}
+  @RunAsSystem
+  public Collection<? extends GrantedAuthority> getAuthorities(User user) {
+    Set<GrantedAuthority> authorities = new LinkedHashSet<>();
 
-		Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-				user.isActive(), true, true, true, authorities);
-	}
+    if (user.isSuperuser() != null && user.isSuperuser()) {
+      authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+    }
+    if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME)) {
+      authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
+    } else {
+      authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
+    }
 
-	@RunAsSystem
-	public Collection<? extends GrantedAuthority> getAuthorities(User user)
-	{
-		Set<GrantedAuthority> authorities = new LinkedHashSet<>();
+    dataService
+        .query(ROLE_MEMBERSHIP, RoleMembership.class)
+        .eq(USER, user)
+        .findAll()
+        .filter(RoleMembership::isCurrent)
+        .map(RoleMembership::getRole)
+        .map(Role::getName)
+        .map(SidUtils::createRoleAuthority)
+        .map(SimpleGrantedAuthority::new)
+        .forEach(authorities::add);
 
-		if (user.isSuperuser() != null && user.isSuperuser())
-		{
-			authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
-		}
-		if (user.getUsername().equals(SecurityUtils.ANONYMOUS_USERNAME))
-		{
-			authorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_ANONYMOUS));
-		}
-		else
-		{
-			authorities.add(new SimpleGrantedAuthority(AUTHORITY_USER));
-		}
-
-		dataService.query(ROLE_MEMBERSHIP, RoleMembership.class)
-				   .eq(USER, user)
-				   .findAll()
-				   .filter(RoleMembership::isCurrent)
-				   .map(RoleMembership::getRole)
-				   .map(Role::getName)
-				   .map(SidUtils::createRoleAuthority)
-				   .map(SimpleGrantedAuthority::new)
-				   .forEach(authorities::add);
-
-		return grantedAuthoritiesMapper.mapAuthorities(authorities);
-	}
+    return grantedAuthoritiesMapper.mapAuthorities(authorities);
+  }
 }

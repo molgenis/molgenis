@@ -1,70 +1,58 @@
 package org.molgenis.data.plugin.model;
 
+import static org.molgenis.data.plugin.model.PluginMetadata.PATH;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.data.plugin.model.PluginMetadata.PATH;
+public class Plugin extends StaticEntity {
+  public Plugin(Entity entity) {
+    super(entity);
+  }
 
-public class Plugin extends StaticEntity
-{
-	public Plugin(Entity entity)
-	{
-		super(entity);
-	}
+  public Plugin(EntityType entityType) {
+    super(entityType);
+  }
 
-	public Plugin(EntityType entityType)
-	{
-		super(entityType);
-	}
+  public Plugin(String id, EntityType entityType) {
+    super(entityType);
+    setId(id);
+  }
 
-	public Plugin(String id, EntityType entityType)
-	{
-		super(entityType);
-		setId(id);
-	}
+  public String getId() {
+    return getString(PluginMetadata.ID);
+  }
 
-	public String getId()
-	{
-		return getString(PluginMetadata.ID);
-	}
+  public Plugin setId(String id) {
+    set(PluginMetadata.ID, id);
+    return this;
+  }
 
-	public Plugin setId(String id)
-	{
-		set(PluginMetadata.ID, id);
-		return this;
-	}
+  public String getLabel() {
+    return getString(PluginMetadata.LABEL);
+  }
 
-	public String getLabel()
-	{
-		return getString(PluginMetadata.LABEL);
-	}
+  public Plugin setLabel(String label) {
+    set(PluginMetadata.LABEL, label);
+    return this;
+  }
 
-	public Plugin setLabel(String label)
-	{
-		set(PluginMetadata.LABEL, label);
-		return this;
-	}
+  public String getPath() {
+    return getString(PATH);
+  }
 
-	public String getPath()
-	{
-		return getString(PATH);
-	}
+  public Plugin setPath(String path) {
+    set(PATH, path);
+    return this;
+  }
 
-	public Plugin setPath(String path)
-	{
-		set(PATH, path);
-		return this;
-	}
+  public String getDescription() {
+    return getString(PluginMetadata.DESCRIPTION);
+  }
 
-	public String getDescription()
-	{
-		return getString(PluginMetadata.DESCRIPTION);
-	}
-
-	public Plugin setDescription(String description)
-	{
-		set(PluginMetadata.DESCRIPTION, description);
-		return this;
-	}
+  public Plugin setDescription(String description) {
+    set(PluginMetadata.DESCRIPTION, description);
+    return this;
+  }
 }

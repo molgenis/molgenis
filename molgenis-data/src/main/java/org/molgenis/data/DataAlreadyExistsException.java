@@ -8,15 +8,12 @@ import javax.annotation.Nullable;
  * @see EntityAlreadyExistsException
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public abstract class DataAlreadyExistsException extends ErrorCodedDataAccessException
-{
-	DataAlreadyExistsException(String errorCode)
-	{
-		super(errorCode);
-	}
+public abstract class DataAlreadyExistsException extends ErrorCodedDataAccessException {
+  DataAlreadyExistsException(String errorCode) {
+    super(errorCode);
+  }
 
-	DataAlreadyExistsException(String errorCode, @Nullable Throwable cause)
-	{
-		super(errorCode, cause);
-	}
+  DataAlreadyExistsException(String errorCode, @Nullable Throwable cause) {
+    super(errorCode, cause);
+  }
 }

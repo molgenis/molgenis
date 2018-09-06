@@ -64,9 +64,13 @@ Molgenis now should compile and test. In particular the molgenis-core-ui module 
 Build, Make project should work fine now and spew out no errors, only warnings.
 
 ## Java Code Style settings
-* In the root folder of the molgenis project, you'll find eclipse-java-molgenis-style.xml.
-Open Settings, Editor, Code Style, and import it as the molgenis profile.
-Select it for the molgenis project.
+We format our code according to the Google Java Format.
+You can run the formatter in maven using target `fmt:format`.
+Maven will invoke `fmt:check` at build time and fail if the code isn't formatted properly.
+
+Follow these [instructions to configure IntelliJ](https://github.com/google/google-java-format#intellij):
+* Install and enable the IntelliJ plugin which replaces the Reformat Code action.
+* Download and import the IntelliJ Java Google Style file to fix the import order.
 
 ## Use MOLGENIS file-templates
 

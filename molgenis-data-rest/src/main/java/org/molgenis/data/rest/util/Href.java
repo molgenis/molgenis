@@ -1,105 +1,97 @@
 package org.molgenis.data.rest.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.springframework.web.util.UriUtils;
 
-import java.util.List;
-import java.util.stream.Collectors;
+public class Href {
+  private final String href;
+  private final String hrefCollection;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+  public Href(String href, String hrefCollection) {
+    this.href = href;
+    this.hrefCollection = hrefCollection;
+  }
 
-public class Href
-{
-	private final String href;
-	private final String hrefCollection;
+  public String getHref() {
+    return href;
+  }
 
-	public Href(String href, String hrefCollection)
-	{
-		this.href = href;
-		this.hrefCollection = hrefCollection;
-	}
+  public String getHrefCollection() {
+    return hrefCollection;
+  }
 
-	public String getHref()
-	{
-		return href;
-	}
+  /** Create an encoded href for an attribute */
+  public static String concatAttributeHref(
+      String baseUri, String qualifiedEntityName, Object entityIdValue, String attributeName) {
+    return String.format(
+        "%s/%s/%s/%s",
+        baseUri,
+        encodePathSegment(qualifiedEntityName),
+        encodePathSegment(DataConverter.toString(entityIdValue)),
+        encodePathSegment(attributeName));
+  }
 
-	public String getHrefCollection()
-	{
-		return hrefCollection;
-	}
+  /** Create an encoded href for an attribute meta */
+  public static String concatMetaAttributeHref(
+      String baseUri, String entityParentName, String attributeName) {
+    return String.format(
+        "%s/%s/meta/%s",
+        baseUri, encodePathSegment(entityParentName), encodePathSegment(attributeName));
+  }
 
-	/**
-	 * Create an encoded href for an attribute
-	 */
-	public static String concatAttributeHref(String baseUri, String qualifiedEntityName, Object entityIdValue,
-			String attributeName)
-	{
-		return String.format("%s/%s/%s/%s", baseUri, encodePathSegment(qualifiedEntityName),
-				encodePathSegment(DataConverter.toString(entityIdValue)), encodePathSegment(attributeName));
-	}
+  public static String concatEntityHref(Entity entity) {
+    return concatEntityHref("/api/v2", entity.getEntityType().getId(), entity.getIdValue());
+  }
 
-	/**
-	 * Create an encoded href for an attribute meta
-	 */
-	public static String concatMetaAttributeHref(String baseUri, String entityParentName, String attributeName)
-	{
-		return String.format("%s/%s/meta/%s", baseUri, encodePathSegment(entityParentName),
-				encodePathSegment(attributeName));
-	}
+  /** Create an encoded href for an entity */
+  public static String concatEntityHref(
+      String baseUri, String qualifiedEntityName, Object entityIdValue) {
+    if (null == qualifiedEntityName) {
+      qualifiedEntityName = "";
+    }
 
-	public static String concatEntityHref(Entity entity)
-	{
-		return concatEntityHref("/api/v2", entity.getEntityType().getId(), entity.getIdValue());
-	}
+    return String.format(
+        "%s/%s/%s",
+        baseUri,
+        encodePathSegment(qualifiedEntityName),
+        encodePathSegment(DataConverter.toString(entityIdValue)));
+  }
 
-	/**
-	 * Create an encoded href for an entity
-	 */
-	public static String concatEntityHref(String baseUri, String qualifiedEntityName, Object entityIdValue)
-	{
-		if (null == qualifiedEntityName)
-		{
-			qualifiedEntityName = "";
-		}
+  /** Create an encoded href for an entity meta */
+  public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName) {
+    return String.format("%s/%s/meta", baseUri, encodePathSegment(qualifiedEntityName));
+  }
 
-		return String.format("%s/%s/%s", baseUri, encodePathSegment(qualifiedEntityName),
-				encodePathSegment(DataConverter.toString(entityIdValue)));
-	}
+  public static String concatMetaEntityHrefV2(String baseUri, String qualifiedEntityName) {
+    return String.format("%s/%s", baseUri, encodePathSegment(qualifiedEntityName));
+  }
 
-	/**
-	 * Create an encoded href for an entity meta
-	 */
-	public static String concatMetaEntityHref(String baseUri, String qualifiedEntityName)
-	{
-		return String.format("%s/%s/meta", baseUri, encodePathSegment(qualifiedEntityName));
-	}
+  /** Create an encoded href for an entity collection */
+  public static String concatEntityCollectionHref(
+      String baseUri,
+      String qualifiedEntityName,
+      String qualifiedIdAttributeName,
+      List<String> entitiesIds) {
+    String ids;
+    ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
+    return String.format(
+        "%s/%s?q=%s=in=(%s)",
+        baseUri,
+        encodePathSegment(qualifiedEntityName),
+        encodePathSegment(qualifiedIdAttributeName),
+        ids);
+  }
 
-	public static String concatMetaEntityHrefV2(String baseUri, String qualifiedEntityName)
-	{
-		return String.format("%s/%s", baseUri, encodePathSegment(qualifiedEntityName));
-	}
+  private static String encodeIdToRSQL(String id) {
+    return '"' + encodePathSegment(id) + '"';
+  }
 
-	/**
-	 * Create an encoded href for an entity collection
-	 */
-	public static String concatEntityCollectionHref(String baseUri, String qualifiedEntityName,
-			String qualifiedIdAttributeName, List<String> entitiesIds)
-	{
-		String ids;
-		ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
-		return String.format("%s/%s?q=%s=in=(%s)", baseUri, encodePathSegment(qualifiedEntityName),
-				encodePathSegment(qualifiedIdAttributeName), ids);
-	}
-
-	private static String encodeIdToRSQL(String id)
-	{
-		return '"' + encodePathSegment(id) + '"';
-	}
-
-	private static String encodePathSegment(String pathSegment)
-	{
-		return UriUtils.encodePathSegment(pathSegment, UTF_8.name());
-	}
+  private static String encodePathSegment(String pathSegment) {
+    return UriUtils.encodePathSegment(pathSegment, UTF_8.name());
+  }
 }

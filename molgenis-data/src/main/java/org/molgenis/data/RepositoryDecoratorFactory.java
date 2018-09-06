@@ -5,13 +5,12 @@ package org.molgenis.data;
  *
  * @see SystemRepositoryDecoratorFactory
  */
-public interface RepositoryDecoratorFactory
-{
-	/**
-	 * Creates a decorated repository based on the given {@link Repository}
-	 *
-	 * @param repository undecorated repository
-	 * @return decorated repository
-	 */
-	Repository<Entity> createDecoratedRepository(Repository<Entity> repository);
+public interface RepositoryDecoratorFactory {
+  /**
+   * Creates a decorated repository based on the given {@link Repository}
+   *
+   * @param repository undecorated repository
+   * @return decorated repository
+   */
+  Repository<Entity> createDecoratedRepository(Repository<Entity> repository);
 }

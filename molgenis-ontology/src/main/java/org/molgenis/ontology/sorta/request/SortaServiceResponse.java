@@ -1,57 +1,50 @@
 package org.molgenis.ontology.sorta.request;
 
-import org.molgenis.data.Entity;
-import org.molgenis.ontology.utils.SortaServiceUtil;
-
 import java.util.List;
 import java.util.Map;
+import org.molgenis.data.Entity;
+import org.molgenis.ontology.utils.SortaServiceUtil;
 
 /**
  * This function is used to parse the results from OntologyService
  *
  * @author chaopang
  */
-public class SortaServiceResponse
-{
-	private String message;
-	private Map<String, Object> inputData;
-	private List<Map<String, Object>> ontologyTerms;
-	private long totalHitCount;
+public class SortaServiceResponse {
+  private String message;
+  private Map<String, Object> inputData;
+  private List<Map<String, Object>> ontologyTerms;
+  private long totalHitCount;
 
-	public SortaServiceResponse(String message)
-	{
-		this.message = message;
-	}
+  public SortaServiceResponse(String message) {
+    this.message = message;
+  }
 
-	public SortaServiceResponse(Entity inputData, Iterable<? extends Entity> ontologyTerms)
-	{
-		this(SortaServiceUtil.getEntityAsMap(inputData), SortaServiceUtil.getEntityAsMap(ontologyTerms));
-	}
+  public SortaServiceResponse(Entity inputData, Iterable<? extends Entity> ontologyTerms) {
+    this(
+        SortaServiceUtil.getEntityAsMap(inputData), SortaServiceUtil.getEntityAsMap(ontologyTerms));
+  }
 
-	public SortaServiceResponse(Map<String, Object> inputData, List<Map<String, Object>> ontologyTerms)
-	{
-		this.inputData = inputData;
-		this.ontologyTerms = ontologyTerms;
-		this.totalHitCount = ontologyTerms.size();
-	}
+  public SortaServiceResponse(
+      Map<String, Object> inputData, List<Map<String, Object>> ontologyTerms) {
+    this.inputData = inputData;
+    this.ontologyTerms = ontologyTerms;
+    this.totalHitCount = ontologyTerms.size();
+  }
 
-	public Map<String, Object> getInputData()
-	{
-		return inputData;
-	}
+  public Map<String, Object> getInputData() {
+    return inputData;
+  }
 
-	public long getTotalHitCount()
-	{
-		return totalHitCount;
-	}
+  public long getTotalHitCount() {
+    return totalHitCount;
+  }
 
-	public String getMessage()
-	{
-		return message;
-	}
+  public String getMessage() {
+    return message;
+  }
 
-	public List<Map<String, Object>> getOntologyTerms()
-	{
-		return ontologyTerms;
-	}
+  public List<Map<String, Object>> getOntologyTerms() {
+    return ontologyTerms;
+  }
 }

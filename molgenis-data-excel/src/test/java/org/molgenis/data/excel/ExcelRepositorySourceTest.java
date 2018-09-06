@@ -1,6 +1,12 @@
 package org.molgenis.data.excel;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -12,62 +18,47 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest {
+  @Autowired private EntityTypeFactory entityTypeFactory;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+  @Autowired private AttributeFactory attrMetaFactory;
 
-public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
-{
-	@Autowired
-	private EntityTypeFactory entityTypeFactory;
+  private InputStream is;
+  private ExcelRepositoryCollection excelRepositoryCollection;
 
-	@Autowired
-	private AttributeFactory attrMetaFactory;
+  @BeforeMethod
+  public void beforeMethod() throws MolgenisInvalidFormatException, IOException {
+    is = getClass().getResourceAsStream("/test.xls");
+    excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
+    excelRepositoryCollection.setEntityTypeFactory(entityTypeFactory);
+    excelRepositoryCollection.setAttributeFactory(attrMetaFactory);
+  }
 
-	private InputStream is;
-	private ExcelRepositoryCollection excelRepositoryCollection;
+  @AfterMethod
+  public void afterMethod() throws IOException {
+    is.close();
+  }
 
-	@BeforeMethod
-	public void beforeMethod() throws MolgenisInvalidFormatException, IOException
-	{
-		is = getClass().getResourceAsStream("/test.xls");
-		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
-		excelRepositoryCollection.setEntityTypeFactory(entityTypeFactory);
-		excelRepositoryCollection.setAttributeFactory(attrMetaFactory);
-	}
+  @Test
+  public void getNumberOfSheets() {
+    assertEquals(excelRepositoryCollection.getNumberOfSheets(), 3);
+  }
 
-	@AfterMethod
-	public void afterMethod() throws IOException
-	{
-		is.close();
-	}
+  @Test
+  public void getRepositories() {
+    List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityTypeIds());
+    assertNotNull(repositories);
+    assertEquals(repositories.size(), 3);
+  }
 
-	@Test
-	public void getNumberOfSheets()
-	{
-		assertEquals(excelRepositoryCollection.getNumberOfSheets(), 3);
-	}
+  @Test
+  public void getRepository() {
+    Repository<Entity> test = excelRepositoryCollection.getRepository("test");
+    assertNotNull(test);
+    assertEquals(test.getName(), "test");
 
-	@Test
-	public void getRepositories()
-	{
-		List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityTypeIds());
-		assertNotNull(repositories);
-		assertEquals(repositories.size(), 3);
-	}
-
-	@Test
-	public void getRepository()
-	{
-		Repository<Entity> test = excelRepositoryCollection.getRepository("test");
-		assertNotNull(test);
-		assertEquals(test.getName(), "test");
-
-		Repository<Entity> blad2 = excelRepositoryCollection.getRepository("Blad2");
-		assertNotNull(blad2);
-		assertEquals(blad2.getName(), "Blad2");
-	}
+    Repository<Entity> blad2 = excelRepositoryCollection.getRepository("Blad2");
+    assertNotNull(blad2);
+    assertEquals(blad2.getName(), "Blad2");
+  }
 }

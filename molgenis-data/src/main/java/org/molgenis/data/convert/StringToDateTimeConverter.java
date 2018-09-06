@@ -1,16 +1,13 @@
 package org.molgenis.data.convert;
 
+import java.time.Instant;
 import org.molgenis.data.util.MolgenisDateFormat;
 import org.springframework.core.convert.converter.Converter;
 
-import java.time.Instant;
+public class StringToDateTimeConverter implements Converter<String, Instant> {
 
-public class StringToDateTimeConverter implements Converter<String, Instant>
-{
-
-	@Override
-	public Instant convert(String source)
-	{
-		return MolgenisDateFormat.parseInstant(source);
-	}
+  @Override
+  public Instant convert(String source) {
+    return MolgenisDateFormat.parseInstant(source);
+  }
 }
