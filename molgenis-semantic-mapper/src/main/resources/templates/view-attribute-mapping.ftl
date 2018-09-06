@@ -26,7 +26,7 @@
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
                value="${attributeMapping.targetAttribute.dataType?html}"/>
         <input id="sourceAttributeSize" type="hidden" value="${sourceAttributesSize?html}"/>
-        <input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
+        <input id="dataExplorerUri" type="hidden" value="<#if dataExplorerUri??>${dataExplorerUri?html}</#if>"/>
     </div>
 </div>
 <div class="row">
