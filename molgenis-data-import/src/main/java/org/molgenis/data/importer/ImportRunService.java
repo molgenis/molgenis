@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import static java.lang.Math.toIntExact;
 import static java.time.Instant.now;
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 import static java.time.format.DateTimeFormatter.ofLocalizedTime;
@@ -8,6 +9,7 @@ import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,7 +32,7 @@ public class ImportRunService {
   private final UserService userService;
   private final ImportRunFactory importRunFactory;
 
-  public ImportRunService(
+  ImportRunService(
       DataService dataService,
       MailSender mailSender,
       UserService userService,
@@ -53,7 +55,7 @@ public class ImportRunService {
     return importRun;
   }
 
-  public void finishImportRun(String importRunId, String message, String importedEntities) {
+  void finishImportRun(String importRunId, String message, String importedEntities) {
     ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
     try {
       importRun.setStatus(ImportStatus.FINISHED.toString());
@@ -104,13 +106,20 @@ public class ImportRunService {
     return "importRun " + importRun.getStatus();
   }
 
-  public void failImportRun(String importRunId, String message) {
+  void failImportRun(String importRunId, String message) {
     ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
     if (importRun != null) {
       try {
+        String persistedMessage;
+        if (message.length() > TEXT.getMaxLength()) {
+          persistedMessage = message.substring(0, toIntExact(TEXT.getMaxLength()));
+        } else {
+          persistedMessage = message;
+        }
+
         importRun.setStatus(ImportStatus.FAILED.toString());
         importRun.setEndDate(now());
-        importRun.setMessage(message);
+        importRun.setMessage(persistedMessage);
         dataService.update(IMPORT_RUN, importRun);
 
       } catch (Exception e) {
