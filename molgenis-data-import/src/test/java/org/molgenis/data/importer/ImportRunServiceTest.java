@@ -1,39 +1,40 @@
 package org.molgenis.data.importer;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
 import static org.molgenis.data.importer.ImportStatus.FAILED;
 import static org.testng.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import org.mockito.Mock;
-import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.data.importer.config.ImportTestConfig;
+import org.molgenis.data.DataService;
 import org.molgenis.data.security.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.MailSender;
-import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {ImportTestConfig.class, ImportRunService.class, ImportRunServiceTest.Config.class})
-public class ImportRunServiceTest extends AbstractMolgenisSpringTest {
-  @Autowired private ImportRunService importRunService;
+public class ImportRunServiceTest extends AbstractMockitoTest {
 
-  @Mock private ImportRun importRun;
+  @Mock private DataService dataService;
+  @Mock private MailSender mailSender;
+  @Mock private UserService userService;
+  @Mock private ImportRunFactory importRunFactory;
+  private ImportRunService importRunService;
 
   @BeforeMethod
-  public void setUp() throws Exception {
-    initMocks(this);
+  public void setUpBeforeMethod() {
+    importRunService = new ImportRunService(dataService, mailSender, userService, importRunFactory);
   }
 
   @Test
   public void testCreateEnglishMailText() {
+    ImportRun importRun = mock(ImportRun.class);
     when(importRun.getMessage()).thenReturn("Entity already exists.");
     when(importRun.getStatus()).thenReturn(FAILED.toString());
     Instant startDate = Instant.parse("2016-02-13T12:34:56.217Z");
@@ -49,16 +50,53 @@ public class ImportRunServiceTest extends AbstractMolgenisSpringTest {
             + "finished on 1:35:12 PM with status: FAILED\nMessage:\nEntity already exists.");
   }
 
-  @Configuration
-  public static class Config {
-    @Bean
-    MailSender mailSender() {
-      return mock(MailSender.class);
-    }
+  @Test
+  public void testFailImportRun() {
+    String importRunId = "importRunId";
+    String mesage = "import run failed";
+    ImportRun importRun = mock(ImportRun.class);
+    when(dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class)).thenReturn(importRun);
 
-    @Bean
-    UserService userService() {
-      return mock(UserService.class);
+    importRunService.failImportRun(importRunId, mesage);
+
+    verify(dataService).update(IMPORT_RUN, importRun);
+    verify(importRun).setMessage(mesage);
+    verify(importRun).setStatus("FAILED");
+    verify(importRun).setEndDate(any());
+  }
+
+  @Test
+  public void testFailImportRunTrancatedMessage() {
+    StringBuilder messageBuilder = new StringBuilder(65545);
+    for (int i = 0; i < 65535; ++i) {
+      messageBuilder.append("x");
     }
+    String truncated64KbMessage = messageBuilder.toString();
+    for (int i = 0; i < 10; ++i) {
+      messageBuilder.append("y");
+    }
+    String moreThan64KbMessage = messageBuilder.toString();
+
+    String importRunId = "importRunId";
+    ImportRun importRun = mock(ImportRun.class);
+    when(dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class)).thenReturn(importRun);
+
+    importRunService.failImportRun(importRunId, moreThan64KbMessage);
+
+    verify(dataService).update(IMPORT_RUN, importRun);
+    verify(importRun).setMessage(truncated64KbMessage);
+    verify(importRun).setStatus("FAILED");
+    verify(importRun).setEndDate(any());
+  }
+
+  @Test
+  public void testFailImportRunDoesNotExist() {
+    String importRunId = "importRunId";
+    String message = "import run failed";
+    when(dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class)).thenReturn(null);
+
+    importRunService.failImportRun(importRunId, message);
+
+    verifyNoMoreInteractions(dataService);
   }
 }
