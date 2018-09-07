@@ -14,7 +14,7 @@ import {
   UPDATE_EDITOR_ENTITY_TYPE
 } from './mutations'
 
-import type { EditorAttribute, EditorEntityType, State } from '../flow.types'
+import type {EditorAttribute, EditorEntityType, State} from '../flow.types'
 
 export const GET_PACKAGES: string = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES: string = '__GET_ENTITY_TYPES__'
@@ -70,6 +70,7 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
     'readonly': attribute.readonly,
     'unique': attribute.unique,
     'tags': attribute.tags,
+    'nullableExpression': attribute.nullableExpression,
     'visibleExpression': attribute.visibleExpression,
     'validationExpression': attribute.validationExpression,
     'defaultValue': attribute.defaultValue,
