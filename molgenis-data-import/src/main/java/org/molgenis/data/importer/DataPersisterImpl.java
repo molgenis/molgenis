@@ -15,7 +15,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl.EntityTypeWithoutMappedByAttributes;
@@ -50,7 +54,7 @@ public class DataPersisterImpl implements DataPersister {
     preProcessEntityTypes(sortedEntityTypes, metadataMode);
     PersistResult persistResult =
         persistFirstPass(dataProvider, metadataMode, dataMode, sortedEntityTypes);
-    persistSecondPass(dataProvider, sortedEntityTypes);
+    persistSecondPass(dataProvider, sortedEntityTypes, metadataMode);
 
     return persistResult;
   }
@@ -96,10 +100,25 @@ public class DataPersisterImpl implements DataPersister {
   }
 
   private void persistSecondPass(
-      DataProvider dataProvider, List<EntityType> topologicalSortedEntityTypes) {
+      DataProvider dataProvider,
+      List<EntityType> topologicalSortedEntityTypes,
+      MetadataMode metadataMode) {
     topologicalSortedEntityTypes.forEach(
         entityType -> {
-          EntityType persistedEntityType = persistEntityTypeSecondPass(entityType);
+          EntityType persistedEntityType;
+          switch (metadataMode) {
+            case ADD:
+            case UPDATE:
+            case UPSERT:
+              persistedEntityType = persistEntityTypeSecondPass(entityType);
+              break;
+            case NONE:
+              persistedEntityType = entityType;
+              break;
+            default:
+              throw new UnexpectedEnumException(metadataMode);
+          }
+
           if (dataProvider.hasEntities(entityType)) {
             Stream<Entity> entities = dataProvider.getEntities(entityType);
             persistEntitiesSecondPass(persistedEntityType, entities);
