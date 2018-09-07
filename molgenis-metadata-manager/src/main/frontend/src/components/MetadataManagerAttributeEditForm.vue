@@ -107,6 +107,14 @@
             </div>
           </div>
 
+          <div class="form-group row">
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-default-value-label' | i18n }}</label>
+            <div class="col">
+              <input v-model="defaultValue" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-default-value-placeholder')">
+            </div>
+          </div>
+
           <div v-if="isReferenceType" class="form-group row">
             <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-reference-entity-label' | i18n
               }}</label>
@@ -346,6 +354,14 @@
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'parent', value: value})
+        }
+      },
+      defaultValue: {
+        get () {
+          return this.selectedAttribute.defaultValue
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'defaultValue', value: value})
         }
       },
       type: {
