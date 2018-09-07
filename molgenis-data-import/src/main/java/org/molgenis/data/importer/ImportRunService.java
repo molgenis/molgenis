@@ -13,11 +13,16 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Locale;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.security.user.UserService;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -106,29 +111,41 @@ public class ImportRunService {
     return "importRun " + importRun.getStatus();
   }
 
-  void failImportRun(String importRunId, String message) {
+  void failImportRun(String importRunId, @Nullable String message) {
     ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
-    if (importRun != null) {
-      try {
-        String persistedMessage;
+    if (importRun == null) {
+      return;
+    }
+
+    try {
+      String persistedMessage;
+      if (message == null) {
+        persistedMessage = getUnknownErrorMessage();
+      } else {
         if (message.length() > TEXT.getMaxLength()) {
           persistedMessage = message.substring(0, toIntExact(TEXT.getMaxLength()));
         } else {
           persistedMessage = message;
         }
-
-        importRun.setStatus(ImportStatus.FAILED.toString());
-        importRun.setEndDate(now());
-        importRun.setMessage(persistedMessage);
-        dataService.update(IMPORT_RUN, importRun);
-
-      } catch (Exception e) {
-        LOG.error("Error updating run status", e);
       }
 
-      if (importRun.getNotify()) {
-        createAndSendStatusMail(importRun);
-      }
+      importRun.setStatus(ImportStatus.FAILED.toString());
+      importRun.setEndDate(now());
+      importRun.setMessage(persistedMessage);
+      dataService.update(IMPORT_RUN, importRun);
+
+    } catch (Exception e) {
+      LOG.error("Error updating run status", e);
     }
+
+    if (importRun.getNotify()) {
+      createAndSendStatusMail(importRun);
+    }
+  }
+
+  private String getUnknownErrorMessage() {
+    Locale locale = LocaleContextHolder.getLocale();
+    MessageSource messageSource = MessageSourceHolder.getMessageSource();
+    return messageSource.getMessage("import_unknown_error", null, locale);
   }
 }
