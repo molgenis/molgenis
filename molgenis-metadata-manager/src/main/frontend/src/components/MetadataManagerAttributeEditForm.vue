@@ -228,6 +228,13 @@
         </div>
         <div class="col">
           <div class="form-group">
+            <label class="text-muted">{{ 'attribute-edit-form-nullable-expression-label' | i18n }}</label>
+            <textarea v-model="nullableExpression" class="form-control" rows="3"
+                      :placeholder="$t('attribute-edit-form-nullable-expression-placeholder')"></textarea>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
             <label class="text-muted">{{ 'attribute-edit-form-visible-expression-label' | i18n }}</label>
             <textarea v-model="visibleExpression" class="form-control" rows="3"
                       :placeholder="$t('attribute-edit-form-visible-expression-placeholder')"></textarea>
@@ -418,6 +425,14 @@
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'expression', value: value})
+        }
+      },
+      nullableExpression: {
+        get () {
+          return this.selectedAttribute.nullableExpression
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'nullableExpression', value: value})
         }
       },
       visibleExpression: {
