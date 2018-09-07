@@ -1,7 +1,16 @@
 package org.molgenis.data.util;
 
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.LABEL;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Fetch;
@@ -35,8 +44,10 @@ public class MetaUtils {
     if (aPackage == null) {
       return false;
     }
-    return aPackage.getId().equals(PACKAGE_SYSTEM)
-        || (aPackage.getRootPackage() != null
-            && aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM));
+    return runAsSystem(
+        () ->
+            aPackage.getId().equals(PACKAGE_SYSTEM)
+                || (aPackage.getRootPackage() != null
+                    && aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM)));
   }
 }
