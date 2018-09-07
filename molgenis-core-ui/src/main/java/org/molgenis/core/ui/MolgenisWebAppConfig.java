@@ -1,7 +1,11 @@
 package org.molgenis.core.ui;
 
 import static freemarker.template.Configuration.VERSION_2_3_23;
-import static org.molgenis.core.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PATH;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
@@ -66,7 +70,12 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
@@ -165,8 +174,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Override
   public void configurePathMatch(PathMatchConfigurer configurer) {
-    // Fix for https://github.com/molgenis/molgenis/issues/5431
-    configurer.setUseRegisteredSuffixPatternMatch(true);
+    configurer.setUseSuffixPatternMatch(false);
   }
 
   @Override

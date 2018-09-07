@@ -31,7 +31,7 @@ public class FileDownloadController {
     this.dataService = dataService;
   }
 
-  @GetMapping("/{id:.+}")
+  @GetMapping("/{id}")
   public void getFile(@PathVariable("id") String id, HttpServletResponse response)
       throws IOException {
     FileMeta fileMeta = dataService.findOneById(FILE_META, id, FileMeta.class);
