@@ -21,14 +21,10 @@ import org.testng.annotations.Test;
 
 public class ImportRunServiceTest extends AbstractMockitoTest {
 
-  @Mock
-  private DataService dataService;
-  @Mock
-  private MailSender mailSender;
-  @Mock
-  private UserService userService;
-  @Mock
-  private ImportRunFactory importRunFactory;
+  @Mock private DataService dataService;
+  @Mock private MailSender mailSender;
+  @Mock private UserService userService;
+  @Mock private ImportRunFactory importRunFactory;
   private ImportRunService importRunService;
 
   @BeforeMethod
