@@ -3,7 +3,26 @@ package org.molgenis.data.validation.meta;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.HTML;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.SCRIPT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
@@ -16,10 +35,18 @@ import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMod
 import com.google.common.collect.Iterables;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -125,6 +152,8 @@ public class AttributeValidator {
     }
 
     // note: mappedBy is a readOnly attribute, no need to verify for updates
+
+    validateUpdateIdAttribute(newAttr, currentAttr);
   }
 
   void validateDefaultValue(Attribute attr, boolean validateEntityReferences) {
@@ -316,6 +345,13 @@ public class AttributeValidator {
           format(
               "Attribute data type update from [%s] to [%s] not allowed, allowed types are %s",
               currentDataType.toString(), newDataType.toString(), allowedDatatypes.toString()));
+    }
+  }
+
+  private static void validateUpdateIdAttribute(Attribute newAttr, Attribute currentAttr) {
+    if (newAttr.isIdAttribute() != currentAttr.isIdAttribute()) {
+      throw new MolgenisValidationException(
+          new ConstraintViolation("ID attribute update not allowed"));
     }
   }
 
