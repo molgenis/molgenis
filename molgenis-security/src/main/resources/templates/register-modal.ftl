@@ -126,86 +126,84 @@
     </div>
 </div>
 <script type="text/javascript">
-    $(function () {
-        var modal = $('#register-modal');
-        var submitBtn = $('#register-btn');
-        var form = $('#register-form');
-        form.validate();
+    var modal = $('#register-modal');
+    var submitBtn = $('#register-btn');
+    var form = $('#register-form');
+    form.validate();
 
-        $('#reg-password').rules('add', {
-            minlength: ${min_password_length?js_string}
-        });
-        $('#reg-password-confirm').rules('add', {
-            equalTo: '#reg-password'
-        });
+    $('#reg-password').rules('add', {
+        minlength: ${min_password_length?js_string}
+    });
+    $('#reg-password-confirm').rules('add', {
+        equalTo: '#reg-password'
+    });
 
-    <#-- captcha events -->
-        $('#reg-captcha').rules('add', {
-            required: true,
-            remote: {
-                url: 'captcha',
-                type: 'POST'
-            }
-        });
-        $('#captcha-href').click(function (e) {
-            e.preventDefault();
-            $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
-            $('captcha').val('');
-        });
+<#-- captcha events -->
+    $('#reg-captcha').rules('add', {
+        required: true,
+        remote: {
+            url: 'captcha',
+            type: 'POST'
+        }
+    });
+    $('#captcha-href').click(function (e) {
+        e.preventDefault();
+        $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+        $('captcha').val('');
+    });
 
-    <#-- modal events -->
-        modal.on('show.bs.modal', function (e) {
-            $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
-        });
+<#-- modal events -->
+    modal.on('show.bs.modal', function (e) {
+        $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+    });
 
-        modal.on('hide.bs.modal', function (e) {
-            e.stopPropagation();
-            form[0].reset();
-            $('.alert', modal).remove();
-        });
-        $('#register-btn-close').click(function () {
-            modal.modal('hide');
-        });
+    modal.on('hide.bs.modal', function (e) {
+        e.stopPropagation();
+        form[0].reset();
+        $('.alert', modal).remove();
+    });
+    $('#register-btn-close').click(function () {
+        modal.modal('hide');
+    });
 
-    <#-- form events -->
-        form.submit(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $('.alert', modal).remove();
+<#-- form events -->
+    form.submit(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('.alert', modal).remove();
 
-            if (form.valid() && !submitBtn.attr('disabled')) {
-                submitBtn.attr('disabled', 'disabled');
+        if (form.valid() && !submitBtn.attr('disabled')) {
+            submitBtn.attr('disabled', 'disabled');
 
-                $.ajax({
-                    type: 'POST',
-                    url: '/account/register',
-                    data: form.serialize(),
-                    global: false, // do not trigger default molgenis error handler
-                    success: function (data) {
-                        $(document).trigger('molgenis-registered', data.message);
-                        modal.modal('hide');
-                        submitBtn.removeAttr('disabled');
-                    },
-                    error: function (xhr) {
-                        if (xhr.responseText) {
-                            molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
-                        }
-                        submitBtn.removeAttr('disabled');
+            $.ajax({
+                type: 'POST',
+                url: '/account/register',
+                data: form.serialize(),
+                global: false, // do not trigger default molgenis error handler
+                success: function (data) {
+                    $(document).trigger('molgenis-registered', data.message);
+                    modal.modal('hide');
+                    submitBtn.removeAttr('disabled');
+                },
+                error: function (xhr) {
+                    if (xhr.responseText) {
+                        molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
                     }
-                });
-            }
-        });
-        submitBtn.click(function (e) {
+                    submitBtn.removeAttr('disabled');
+                }
+            });
+        }
+    });
+    submitBtn.click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        form.submit();
+    });
+    $('input', form).add(submitBtn).keydown(function (e) {
+        if (e.which == 13) {
             e.preventDefault();
             e.stopPropagation();
             form.submit();
-        });
-        $('input', form).add(submitBtn).keydown(function (e) {
-            if (e.which == 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                form.submit();
-            }
-        });
+        }
     });
 </script>
