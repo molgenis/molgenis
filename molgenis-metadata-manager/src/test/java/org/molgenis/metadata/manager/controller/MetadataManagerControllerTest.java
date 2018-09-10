@@ -1,11 +1,18 @@
 package org.molgenis.metadata.manager.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -16,7 +23,12 @@ import org.mockito.MockitoAnnotations;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorAttributeResponse;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
+import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
@@ -195,6 +207,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
             null,
             null,
             null,
+            false,
             null,
             null,
             null,
@@ -223,7 +236,7 @@ public class MetadataManagerControllerTest extends AbstractTestNGSpringContextTe
   }
 
   private String getEditorAttributeResponseJson() {
-    return "{\"attribute\":{\"id\":\"1\",\"nullable\":false,\"auto\":false,\"visible\":false,\"labelI18n\":{},\"descriptionI18n\":{},\"aggregatable\":false,\"enumOptions\":[],\"readonly\":false,\"unique\":false,\"tags\":[],\"sequenceNumber\":1},\"languageCodes\":[\"en\",\"nl\",\"de\",\"es\",\"it\",\"pt\",\"fr\",\"xx\"]}";
+    return "{\"attribute\":{\"id\":\"1\",\"cascadeDelete\":false,\"nullable\":false,\"auto\":false,\"visible\":false,\"labelI18n\":{},\"descriptionI18n\":{},\"aggregatable\":false,\"enumOptions\":[],\"readonly\":false,\"unique\":false,\"tags\":[],\"sequenceNumber\":1},\"languageCodes\":[\"en\",\"nl\",\"de\",\"es\",\"it\",\"pt\",\"fr\",\"xx\"]}";
   }
 
   @Configuration

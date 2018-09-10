@@ -125,6 +125,13 @@
             </div>
           </div>
 
+          <div v-if="isReferenceType" class="form-group row">
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-cascade-delete-label' | i18n }}</label>
+            <div class="col checkbox-column">
+              <input v-model="cascadeDelete" class="form-control" type="checkbox">
+            </div>
+          </div>
+
           <div v-else-if="isNumericType">
             <div class="form-group row">
               <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-minimum-range-label' | i18n
@@ -387,6 +394,14 @@
         },
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value})
+        }
+      },
+      cascadeDelete: {
+        get () {
+          return this.selectedAttribute.cascadeDelete
+        },
+        set (value) {
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'cascadeDelete', value: value})
         }
       },
       nullable: {

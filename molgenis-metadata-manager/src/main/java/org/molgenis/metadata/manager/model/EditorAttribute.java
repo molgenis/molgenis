@@ -25,6 +25,8 @@ public abstract class EditorAttribute {
   @Nullable
   public abstract EditorEntityTypeIdentifier getRefEntityType();
 
+  public abstract boolean isCascadeDelete();
+
   @Nullable
   public abstract EditorAttributeIdentifier getMappedByAttribute();
 
@@ -87,6 +89,7 @@ public abstract class EditorAttribute {
       @Nullable String type,
       EditorAttributeIdentifier parent,
       EditorEntityTypeIdentifier refEntityType,
+      boolean cascadeDelete,
       EditorAttributeIdentifier mappedByAttribute,
       EditorSort orderBy,
       String expression,
@@ -115,6 +118,7 @@ public abstract class EditorAttribute {
         type,
         parent,
         refEntityType,
+        cascadeDelete,
         mappedByAttribute,
         orderBy,
         expression,

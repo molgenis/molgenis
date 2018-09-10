@@ -53,6 +53,7 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
     'type': attribute.type,
     'parent': attribute.parent,
     'refEntityType': attribute.refEntityType,
+    'cascadeDelete': attribute.cascadeDelete,
     'mappedByAttribute': attribute.mappedByAttribute,
     'orderBy': attribute.orderBy,
     'expression': attribute.expression,

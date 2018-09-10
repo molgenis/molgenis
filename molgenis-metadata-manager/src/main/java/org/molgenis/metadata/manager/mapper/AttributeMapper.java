@@ -91,6 +91,7 @@ public class AttributeMapper {
         attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getParent());
     EditorEntityTypeIdentifier refEntityType =
         entityTypeReferenceMapper.toEditorEntityTypeIdentifier(attribute.getRefEntity());
+    boolean cascadeDelete = attribute.getCascadeDelete() != null && attribute.getCascadeDelete();
     EditorAttributeIdentifier mappedByEntityType =
         attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getMappedBy());
     EditorSort orderBy = sortMapper.toEditorSort(attribute.getOrderBy());
@@ -121,6 +122,7 @@ public class AttributeMapper {
         type,
         parent,
         refEntityType,
+        cascadeDelete,
         mappedByEntityType,
         orderBy,
         expression,
@@ -194,7 +196,7 @@ public class AttributeMapper {
       attribute.setRefEntity(
           entityTypeReferenceMapper.toEntityTypeReference(refEntityType.getId()));
     }
-
+    attribute.setCascadeDelete(refEntityType != null ? editorAttribute.isCascadeDelete() : null);
     attribute.setMappedBy(
         attributeReferenceMapper.toAttributeReference(editorAttribute.getMappedByAttribute()));
     attribute.setOrderBy(sortMapper.toSort(editorAttribute.getOrderBy()));
