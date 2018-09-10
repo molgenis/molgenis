@@ -115,6 +115,7 @@ export type EditorAttribute = {
   'readonly': ?boolean,
   'unique': ?boolean,
   'tags': ?Array<Tag>,
+  'nullableExpression': ?string,
   'visibleExpression': ?string,
   'validationExpression': ?string,
   'defaultValue': ?string,

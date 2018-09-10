@@ -11,7 +11,11 @@ import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA
 import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
@@ -20,12 +24,34 @@ import java.io.StringWriter;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DuplicateEntityException;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisQueryException;
+import org.molgenis.data.MolgenisRepositoryCapabilitiesException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.i18n.LocalizationService;
@@ -57,7 +83,18 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -144,7 +181,7 @@ public class RestControllerV2 {
    * Retrieve an entity instance by id, optionally specify which attributes to include in the
    * response.
    */
-  @GetMapping("/{entityTypeId}/{id:.+}")
+  @GetMapping("/{entityTypeId}/{id}")
   public Map<String, Object> retrieveEntity(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("id") String untypedId,
@@ -155,7 +192,7 @@ public class RestControllerV2 {
   }
 
   /** Tunnel retrieveEntity through a POST request */
-  @PostMapping(value = "/{entityTypeId}/{id:.+}", params = "_method=GET")
+  @PostMapping(value = "/{entityTypeId}/{id}", params = "_method=GET")
   public Map<String, Object> retrieveEntityPost(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("id") String untypedId,
@@ -186,7 +223,7 @@ public class RestControllerV2 {
   }
 
   @Transactional
-  @DeleteMapping("/{entityTypeId:^(?!i18n).+}/{id:.+}")
+  @DeleteMapping("/{entityTypeId:^(?!i18n).+}/{id}")
   @ResponseStatus(NO_CONTENT)
   public void deleteEntity(
       @PathVariable("entityTypeId") String entityTypeId, @PathVariable("id") String untypedId) {

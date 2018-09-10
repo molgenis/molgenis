@@ -16,7 +16,12 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetadata;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeIdentifier;
+import org.molgenis.metadata.manager.model.EditorSort;
+import org.molgenis.metadata.manager.model.EditorTagIdentifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -222,6 +227,7 @@ public class AttributeMapper {
     attribute.setReadOnly(editorAttribute.isReadonly());
     attribute.setUnique(editorAttribute.isUnique());
     attribute.setTags(tagMapper.toTagReferences(editorAttribute.getTags()));
+    attribute.setNullableExpression(editorAttribute.getNullableExpression());
     attribute.setVisibleExpression(editorAttribute.getVisibleExpression());
     attribute.setValidationExpression(editorAttribute.getValidationExpression());
     attribute.setDefaultValue(editorAttribute.getDefaultValue());
