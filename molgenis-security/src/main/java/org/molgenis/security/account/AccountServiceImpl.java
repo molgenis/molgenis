@@ -5,7 +5,11 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.molgenis.data.security.auth.UserMetaData.*;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVATIONCODE;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVE;
+import static org.molgenis.data.security.auth.UserMetaData.EMAIL;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 
 import java.net.URI;
 import java.util.List;
@@ -16,6 +20,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.settings.AppSettings;
@@ -24,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -149,7 +155,9 @@ public class AccountServiceImpl implements AccountService {
     if (user == null) {
       throw new MolgenisUserException(format("Unknown user [%s]", username));
     }
-
+    if (!user.isActive()) {
+      throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
+    }
     user.setPassword(newPassword);
     user.setChangePassword(false);
     dataService.update(USER, user);
@@ -163,6 +171,10 @@ public class AccountServiceImpl implements AccountService {
     User user = dataService.query(USER, User.class).eq(EMAIL, userEmail).findOne();
 
     if (user != null) {
+      if (!user.isActive()) {
+        throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
+      }
+
       String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
       user.setPassword(newPassword);
       user.setChangePassword(true);
