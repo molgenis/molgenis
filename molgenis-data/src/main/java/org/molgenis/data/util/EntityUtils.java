@@ -1,12 +1,18 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 import com.google.common.collect.Iterables;
 import java.time.format.DateTimeParseException;
@@ -391,6 +397,9 @@ public class EntityUtils {
       return false;
     }
     if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId())) {
+      return false;
+    }
+    if (!Objects.equals(attr.getCascadeDelete(), otherAttr.getCascadeDelete())) {
       return false;
     }
     if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy(), checkIdentifier)) {
