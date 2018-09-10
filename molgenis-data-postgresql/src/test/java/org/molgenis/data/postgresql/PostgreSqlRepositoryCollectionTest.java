@@ -4,8 +4,20 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
@@ -537,6 +549,26 @@ public class PostgreSqlRepositoryCollectionTest {
     when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
+  }
+
+  // regression test for https://github.com/molgenis/molgenis/issues/7713
+  @Test
+  public void updateAttributeMappedByNotReadonlyToReadonly() {
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+    String attrName = "attr";
+    Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+    when(attr.getIdentifier()).thenReturn("attrId");
+    when(entityType.getAttribute(attrName)).thenReturn(attr);
+    when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(attr.isMappedBy()).thenReturn(true);
+    when(attr.isReadOnly()).thenReturn(false);
+    Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+    when(updatedAttr.getIdentifier()).thenReturn("attrId");
+    when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(updatedAttr.isMappedBy()).thenReturn(true);
+    when(updatedAttr.isReadOnly()).thenReturn(true);
+    postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
+    verifyZeroInteractions(jdbcTemplate);
   }
 
   @Test
