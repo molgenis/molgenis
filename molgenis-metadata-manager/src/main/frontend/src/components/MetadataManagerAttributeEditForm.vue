@@ -265,6 +265,8 @@
   @media (min-width: 768px) {
     .col-md-3.attribute-tree {
       border-right: solid black thin;
+      overflow-x: auto;
+      white-space: nowrap;
     }
   }
 
