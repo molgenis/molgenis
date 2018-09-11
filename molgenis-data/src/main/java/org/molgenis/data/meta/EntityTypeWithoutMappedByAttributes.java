@@ -16,9 +16,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 /**
- * Entity meta data that wraps a entity meta data and hides the mappedBy attributes. In code both
- * a new and an existing entity meta data are provided only the new mappedBy attributes are
- * hidden.
+ * Entity meta data that wraps a entity meta data and hides the mappedBy attributes. In code both a
+ * new and an existing entity meta data are provided only the new mappedBy attributes are hidden.
  */
 public class EntityTypeWithoutMappedByAttributes extends EntityType {
   private final EntityType entityType;
@@ -28,8 +27,7 @@ public class EntityTypeWithoutMappedByAttributes extends EntityType {
     this(entityType, null);
   }
 
-  public EntityTypeWithoutMappedByAttributes(
-      EntityType entityType, EntityType existingEntityType) {
+  public EntityTypeWithoutMappedByAttributes(EntityType entityType, EntityType existingEntityType) {
     this.entityType = requireNonNull(entityType);
     this.existingEntityType = existingEntityType;
   }
