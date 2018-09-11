@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.1.1-RC1</version>
+    <version>7.1.1-SNAPSHOT</version>
     <parent>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
@@ -26,7 +26,7 @@
     <scm>
         <connection>scm:git:https://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
-      <tag>7.1.1-RC1</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
