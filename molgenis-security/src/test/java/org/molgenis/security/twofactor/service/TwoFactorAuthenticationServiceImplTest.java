@@ -1,6 +1,8 @@
 package org.molgenis.security.twofactor.service;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -11,7 +13,6 @@ import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.security.user.UserServiceImpl;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
@@ -118,7 +119,7 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
 
     @Bean
     public DataService dataService() {
-      return mock(DataServiceImpl.class, RETURNS_DEEP_STUBS);
+      return mock(DataService.class, RETURNS_DEEP_STUBS);
     }
 
     @Bean

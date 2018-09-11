@@ -22,7 +22,6 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
@@ -153,8 +152,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
     @Autowired private AttributeMappingMetaData attrMappingMeta;
 
     @Bean
-    DataServiceImpl dataService() {
-      return Mockito.mock(DataServiceImpl.class);
+    DataService dataService() {
+      return Mockito.mock(DataService.class);
     }
 
     @Bean

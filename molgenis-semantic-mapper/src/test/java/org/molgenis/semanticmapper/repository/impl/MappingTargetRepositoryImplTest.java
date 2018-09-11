@@ -3,7 +3,9 @@ package org.molgenis.semanticmapper.repository.impl;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
-import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.*;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.ENTITY_MAPPINGS;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.TARGET;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
@@ -21,7 +23,6 @@ import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
@@ -138,8 +139,8 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest 
   @Import(MapperTestConfig.class)
   public static class Config {
     @Bean
-    DataServiceImpl dataService() {
-      return Mockito.mock(DataServiceImpl.class);
+    DataService dataService() {
+      return Mockito.mock(DataService.class);
     }
 
     @Bean
