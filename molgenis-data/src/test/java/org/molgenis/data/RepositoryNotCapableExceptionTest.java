@@ -1,11 +1,13 @@
 package org.molgenis.data;
 
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class RepositoryAlreadyExistsExceptionTest extends ExceptionMessageTest {
+public class RepositoryNotCapableExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
     messageSource.addMolgenisNamespaces("data");
@@ -15,14 +17,14 @@ public class RepositoryAlreadyExistsExceptionTest extends ExceptionMessageTest {
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
     assertExceptionMessageEquals(
-        new RepositoryAlreadyExistsException("MyRepository"), lang, message);
+        new RepositoryNotCapableException("MyRepository", WRITABLE), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
   @Override
   public Object[][] languageMessageProvider() {
-    Object[] enParams = {"en", "Repository 'MyRepository' already exists."};
-    Object[] nlParams = {"nl", "Opslagplaats 'MyRepository' bestaat al."};
+    Object[] enParams = {"en", "Repository 'MyRepository' does not support 'writing'."};
+    Object[] nlParams = {"nl", "Opslagplaats 'MyRepository' ondersteunt geen 'schrijven'."};
     return new Object[][] {enParams, nlParams};
   }
 }

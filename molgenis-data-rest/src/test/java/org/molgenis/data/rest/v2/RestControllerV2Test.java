@@ -880,7 +880,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-        .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No write capabilities for entity entity")));
+        .andExpect(
+            jsonPath(
+                FIRST_ERROR_MESSAGE, is("Opslagplaats 'entity' ondersteunt geen 'schrijven'.")));
     verifyZeroInteractions(repoCopier);
   }
 

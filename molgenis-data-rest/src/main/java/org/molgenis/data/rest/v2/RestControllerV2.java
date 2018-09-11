@@ -44,11 +44,11 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisQueryException;
-import org.molgenis.data.MolgenisRepositoryCapabilitiesException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryAlreadyExistsException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.RepositoryNotCapableException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -113,12 +113,6 @@ public class RestControllerV2 {
   private final PermissionSystemService permissionSystemService;
   private final RepositoryCopier repoCopier;
   private final LocalizationService localizationService;
-
-  static MolgenisRepositoryCapabilitiesException createNoWriteCapabilitiesOnEntityException(
-      String entityTypeId) {
-    return new MolgenisRepositoryCapabilitiesException(
-        "No write capabilities for entity " + entityTypeId);
-  }
 
   static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(
       String entityTypeId, String attributeName) {
@@ -400,7 +394,10 @@ public class RestControllerV2 {
         dataService
             .getCapabilities(repositoryToCopyFrom.getName())
             .contains(RepositoryCapability.WRITABLE);
-    if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityTypeId);
+    if (!writableCapabilities) {
+      throw new RepositoryNotCapableException(
+          repositoryToCopyFrom.getName(), RepositoryCapability.WRITABLE);
+    }
 
     // Copy
     Repository<Entity> repository =
