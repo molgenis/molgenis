@@ -1,12 +1,12 @@
 package org.molgenis.data;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.StreamSupport.stream;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -27,15 +27,6 @@ public class DataConverter {
   private static ConversionService conversionService;
 
   private DataConverter() {}
-
-  public static boolean canConvert(Object source, Class<?> targetType) {
-    try {
-      convert(source, targetType);
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
-  }
 
   @SuppressWarnings("unchecked")
   public static <T> T convert(Object source, Class<T> targetType) {
@@ -124,7 +115,7 @@ public class DataConverter {
     return convert(source, Integer.class);
   }
 
-  public static Long toLong(Object source) {
+  private static Long toLong(Object source) {
     if (source == null) return null;
     if (source instanceof Long) return (Long) source;
     return convert(source, Long.class);
@@ -138,13 +129,13 @@ public class DataConverter {
     return convert(source, Boolean.class);
   }
 
-  public static Double toDouble(Object source) {
+  private static Double toDouble(Object source) {
     if (source == null) return null;
     if (source instanceof Double) return (Double) source;
     return convert(source, Double.class);
   }
 
-  public static LocalDate toLocalDate(Object source) {
+  static LocalDate toLocalDate(Object source) {
     if (source == null) return null;
     if (source instanceof LocalDate) return (LocalDate) source;
     return convert(source, LocalDate.class);
@@ -160,13 +151,6 @@ public class DataConverter {
     if (source == null) return null;
     if (source instanceof Entity) return (Entity) source;
     return convert(source, Entity.class);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static Iterable<Entity> toEntities(Object source) {
-    if (source == null) return null;
-    if (source instanceof Iterable) return (Iterable<Entity>) source;
-    return null;
   }
 
   @SuppressWarnings("unchecked")
@@ -189,18 +173,7 @@ public class DataConverter {
     else return ListEscapeUtils.toList(source.toString());
   }
 
-  @SuppressWarnings("unchecked")
-  public static List<Object> toObjectList(Object source) {
-    if (source == null) return null;
-    else if (source instanceof List) return (List<Object>) source;
-    else if (source instanceof String) {
-      List<Object> result = new ArrayList<>();
-      result.addAll(Arrays.asList(((String) source).split(",")));
-      return result;
-    } else return Arrays.asList(source);
-  }
-
-  public static List<Integer> toIntList(Object source) {
+  static List<Integer> toIntList(Object source) {
     if (source == null) return null;
     else if (source instanceof String) {
       List<String> stringList = ListEscapeUtils.toList((String) source);
@@ -222,7 +195,7 @@ public class DataConverter {
         intList.add(toInt(o));
       }
       return intList;
-    } else if (source instanceof Integer) return new ArrayList<>(Arrays.asList((Integer) source));
+    } else if (source instanceof Integer) return new ArrayList<>(singletonList((Integer) source));
     else return null;
   }
 
