@@ -5,14 +5,47 @@ import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.RepositoryCollectionCapability.META_DATA_PERSISTABLE;
+import static org.molgenis.data.RepositoryCollectionCapability.UPDATABLE;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.ColumnMode;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.generateSqlColumnDefaultConstraint;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlAddColumn;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateCheckConstraint;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateForeignKey;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateFunctionValidateUpdate;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTable;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateTable;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateUniqueKey;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateUpdateTrigger;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropCheckConstraint;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropColumn;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropColumnDefault;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropForeignKey;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropFunctionValidateUpdate;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropJunctionTable;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropNotNull;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropTable;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUniqueKey;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUpdateTrigger;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetDataType;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetNotNull;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttributesReadonly;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isTableAttribute;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
-import static org.molgenis.data.util.EntityTypeUtils.*;
+import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
@@ -21,12 +54,25 @@ import com.google.common.collect.Iterables;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollectionCapability;
+import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepositoryCollection;
@@ -219,12 +265,10 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
       return;
     }
 
-    if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy())) {
-      if (isMultipleReferenceType(attr)) {
-        dropJunctionTable(entityType, attr);
-      } else {
-        dropColumn(entityType, attr);
-      }
+    if (isMultipleReferenceType(attr)) {
+      dropJunctionTable(entityType, attr);
+    } else {
+      dropColumn(entityType, attr);
     }
   }
 
@@ -239,21 +283,19 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
       return;
     }
 
-    if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy())) {
-      if (isMultipleReferenceType(attr)) {
-        createJunctionTable(entityType, attr);
+    if (isMultipleReferenceType(attr)) {
+      createJunctionTable(entityType, attr);
 
-        if (attr.getDefaultValue() != null && !attr.isNillable()) {
-          @SuppressWarnings("unchecked")
-          Iterable<Entity> defaultRefEntities =
-              (Iterable<Entity>) AttributeUtils.getDefaultTypedValue(attr);
-          if (!Iterables.isEmpty(defaultRefEntities)) {
-            createJunctionTableRows(entityType, attr, defaultRefEntities);
-          }
+      if (attr.getDefaultValue() != null && !attr.isNillable()) {
+        @SuppressWarnings("unchecked")
+        Iterable<Entity> defaultRefEntities =
+            (Iterable<Entity>) AttributeUtils.getDefaultTypedValue(attr);
+        if (!Iterables.isEmpty(defaultRefEntities)) {
+          createJunctionTableRows(entityType, attr, defaultRefEntities);
         }
-      } else {
-        createColumn(entityType, attr);
       }
+    } else {
+      createColumn(entityType, attr);
     }
   }
 
@@ -288,14 +330,16 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
   }
 
   /**
-   * Indicates if the attribute is persisted in the database. Compound attributes and computed
-   * attributes with an expression are not persisted.
+   * Indicates if the attribute is persisted in the database. Compound attributes, computed
+   * attributes with an expression and one-to-many mappedBy attributes are not persisted.
    *
    * @param attr the attribute to check
    * @return boolean indicating if the entity is persisted in the database.
    */
   private static boolean isPersisted(Attribute attr) {
-    return !attr.hasExpression() && attr.getDataType() != COMPOUND;
+    return !attr.hasExpression()
+        && attr.getDataType() != COMPOUND
+        && !(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy());
   }
 
   /**
