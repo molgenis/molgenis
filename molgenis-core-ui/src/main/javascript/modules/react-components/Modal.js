@@ -46,7 +46,7 @@ var Modal = React.createClass({
         });
         var id = 'modal-title-' + new Date().getTime();
         return (
-            div({className: 'modal', tabIndex: -1, role: 'dialog', 'aria-labelledby': id, ref: 'modal'},
+            div({className: 'modal', tabIndex: -1, role: 'dialog', 'aria-labelledby': id, 'data-backdrop': 'static', ref: 'modal'},
                 div({className: modalDialogClasses},
                     div({className: 'modal-content'},
                         div({className: 'modal-header'},
