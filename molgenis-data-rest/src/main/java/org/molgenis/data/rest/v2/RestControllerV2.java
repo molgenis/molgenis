@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DuplicateEntityException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -48,6 +47,7 @@ import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.MolgenisRepositoryCapabilitiesException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryAlreadyExistsException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -118,11 +118,6 @@ public class RestControllerV2 {
       String entityTypeId) {
     return new MolgenisRepositoryCapabilitiesException(
         "No write capabilities for entity " + entityTypeId);
-  }
-
-  static DuplicateEntityException createDuplicateEntityException(String entityTypeId) {
-    return new DuplicateEntityException(
-        "Operation failed. Duplicate entity: '" + entityTypeId + "'");
   }
 
   static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(
@@ -389,7 +384,9 @@ public class RestControllerV2 {
     String newFullName =
         EntityTypeUtils.buildFullName(
             repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
-    if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+    if (dataService.hasRepository(newFullName)) {
+      throw new RepositoryAlreadyExistsException(newFullName);
+    }
 
     // Permission
     boolean readPermission =
