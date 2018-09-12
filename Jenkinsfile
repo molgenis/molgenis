@@ -48,7 +48,7 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
-                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -P!create-it-db -P!create-es"
+                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-es"
                         }
                     }
                 }
@@ -61,7 +61,7 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
-                            sh "mvn verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -P!create-it-db -P!create-es"
+                            sh "mvn verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-es"
                         }
                     }
                 }
