@@ -72,20 +72,6 @@ Follow these [instructions to configure IntelliJ](https://github.com/google/goog
 * Install and enable the IntelliJ plugin which replaces the Reformat Code action.
 * Download and import the IntelliJ Java Google Style file to fix the import order.
 
-### Automagic formatting on save
-The standard intellij formatter sometimes gets the formatting wrong because its configuration is not
-tweakable enough.
-
-You can configure an IntelliJ [File Watcher](https://www.jetbrains.com/help/idea/using-file-watchers.html)
-to format java files using the google-java-format jar when they are saved to disk.
-
-* [Download the formatter](https://github.com/google/google-java-format/releases).
-You need the jar that includes the dependencies.
-* Install and enable the File Watchers plugin.
-* Add a File Watcher to run the formatter jar on changed files:
-![Dialog details](../images/intellij/format-java-files.png?raw=true, "file watcher")
-(Obviously, you'll need to adapt the paths for java and formatter jarfile to match those of your system)
-
 ## Use MOLGENIS file-templates
 
 * Make sure that your .idea project folder lives inside your molgenis git project root! Only then will we be able to auto-share templates.
