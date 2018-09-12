@@ -14,7 +14,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.create;
 import static org.molgenis.semanticmapper.mapping.model.CategoryMapping.createEmpty;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.http.ResponseEntity.created;
 
 import com.google.common.collect.ImmutableMap;
@@ -23,7 +25,15 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,7 +42,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -50,8 +66,13 @@ import org.molgenis.semanticmapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.semanticmapper.data.request.MappingServiceRequest;
 import org.molgenis.semanticmapper.job.MappingJobExecution;
 import org.molgenis.semanticmapper.job.MappingJobExecutionFactory;
-import org.molgenis.semanticmapper.mapping.model.*;
+import org.molgenis.semanticmapper.mapping.model.AlgorithmResult;
+import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.semanticmapper.mapping.model.CategoryMapping;
+import org.molgenis.semanticmapper.mapping.model.EntityMapping;
+import org.molgenis.semanticmapper.mapping.model.MappingProject;
+import org.molgenis.semanticmapper.mapping.model.MappingTarget;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticmapper.service.impl.AlgorithmEvaluation;
@@ -67,7 +88,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
@@ -558,7 +585,7 @@ public class MappingServiceController extends PluginController {
    * @param mappingProjectId ID of the mapping project
    * @param targetEntityTypeId ID of the target entity to create or update
    * @param label label of the target entity to create
-   * @param packageId ID of the package to put the newly created entity in
+   * @param rawPackageId ID of the package to put the newly created entity in
    * @return the href of the created MappingJobExecution
    */
   @PostMapping(value = "/map", produces = TEXT_PLAIN_VALUE)
@@ -566,13 +593,13 @@ public class MappingServiceController extends PluginController {
       @RequestParam String mappingProjectId,
       @RequestParam String targetEntityTypeId,
       @RequestParam(required = false) String label,
-      @RequestParam(required = false, name = "package") String packageId,
+      @RequestParam(required = false, name = "package") String rawPackageId,
       @RequestParam(required = false) Boolean addSourceAttribute)
       throws URISyntaxException {
     mappingProjectId = mappingProjectId.trim();
     targetEntityTypeId = targetEntityTypeId.trim();
     label = trim(label);
-    packageId = trim(packageId);
+    String packageId = trim(rawPackageId);
 
     try {
       validateEntityName(targetEntityTypeId);
@@ -580,10 +607,12 @@ public class MappingServiceController extends PluginController {
         throw new MolgenisDataException("No mapping project found with ID " + mappingProjectId);
       }
       if (packageId != null) {
-        Package aPackage = dataService.getMeta().getPackage(packageId);
-        if (aPackage == null) {
-          throw new MolgenisDataException("No package found with ID " + packageId);
-        }
+        Package aPackage =
+            dataService
+                .getMeta()
+                .getPackage(packageId)
+                .orElseThrow(
+                    () -> new MolgenisDataException("No package found with ID " + packageId));
         if (isSystemPackage(aPackage)) {
           throw new MolgenisDataException(format("Package [{0}] is a system package.", packageId));
         }

@@ -2,7 +2,11 @@ package org.molgenis.oneclickimporter.service;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -12,13 +16,18 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.permission.PermissionSystemService;
@@ -100,7 +109,7 @@ public class EntityServiceImplTest {
 
     // mock package
     Package package_ = mock(Package.class);
-    when(metaDataService.getPackage("parent_package_")).thenReturn(package_);
+    when(metaDataService.getPackage("parent_package_")).thenReturn(Optional.of(package_));
 
     when(dataService.getMeta()).thenReturn(metaDataService);
 

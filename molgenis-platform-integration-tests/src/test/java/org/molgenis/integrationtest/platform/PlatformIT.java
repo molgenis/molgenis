@@ -370,8 +370,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "parent");
-          assertNull(metadataService.getPackage("parent"));
-          assertNull(metadataService.getPackage("parent_sub"));
+          assertEquals(metadataService.getPackage("parent"), Optional.empty());
+          assertEquals(metadataService.getPackage("parent_sub"), Optional.empty());
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
@@ -413,7 +413,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(refEntityType, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "package_onetomany");
-          assertNull(metadataService.getPackage("package_onetomany"));
+          assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
           assertNull(dataService.getEntityType(entityType.getId()));
           assertNull(dataService.getEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);

@@ -3,15 +3,24 @@ package org.molgenis.semanticmapper.controller;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -19,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -29,7 +39,10 @@ import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.semantic.Relation;
@@ -410,7 +423,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     when(mappingService.getMappingProject("mappingProjectId")).thenReturn(mappingProject);
     Package systemPackage = mock(Package.class);
     when(systemPackage.getId()).thenReturn("sys");
-    when(metaDataService.getPackage("sys")).thenReturn(systemPackage);
+    when(metaDataService.getPackage("sys")).thenReturn(Optional.of(systemPackage));
 
     mockMvc
         .perform(
@@ -431,7 +444,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     Package aPackage = mock(Package.class);
     when(aPackage.getId()).thenReturn("base");
     when(aPackage.getRootPackage()).thenReturn(null);
-    when(metaDataService.getPackage("base")).thenReturn(aPackage);
+    when(metaDataService.getPackage("base")).thenReturn(Optional.of(aPackage));
 
     when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
     when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
