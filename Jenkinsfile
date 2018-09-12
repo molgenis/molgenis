@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenisv2'
+            label 'molgenis'
         }
     }
     environment {
@@ -26,112 +26,47 @@ pipeline {
                 }
             }
         }
-        stage('Build [ pull request ]') {
-            when {
-                changeRequest()
-            }
-            environment {
-                //PR-1234-231
-                TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                //0.0.0-SNAPSHOT-PR-1234-231
-                PREVIEW_VERSION = "0.0.0-SNAPSHOT-${TAG}"
-            }
-            steps {
-                container('maven') {
-                    sh "mvn versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/**.xml'
+
+        stage('PR') {
+            parallel {
+                stage('unit test and publish docker container'){
                     container('maven') {
-                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+                        environment {
+                            TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
+                        }
+                        steps {
+                            sh "mvn install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
+                        }
+                    }
+                }
+                stage('integration test') {
+                    agent {
+                        kubernetes {
+                            label 'molgenis-it'
+                        }
+                    }
+                    steps {
+                        container('maven') {
+                            sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
+                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -P!create-it-db"
+                        }
+                    }
+                }
+                stage('api test') {
+                    agent {
+                        kubernetes {
+                            label 'molgenis-it'
+                        }
+                    }
+                    steps {
+                        container('maven') {
+                            sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
+                            sh "mvn verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -P!create-it-db"
+                        }
                     }
                 }
             }
         }
 
-        stage('Build [ master ]') {
-            when {
-                branch 'master'
-            }
-            environment {
-                TAG = 'latest'
-            }
-            steps {
-                container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/**.xml'
-                    container('maven') {
-                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
-                    }
-                }
-            }
-        }
-        stage('Build [ x.x ]') {
-            when {
-                expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
-            }
-            environment {
-                TAG = 'stable'
-            }
-            steps {
-                container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/**.xml'
-                    container('maven') {
-                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
-                    }
-                }
-            }
-        }
-        stage('Release [ x.x ]') {
-            when {
-                expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
-            }
-            environment {
-                TAG = 'lts'
-                ORG = 'molgenis'
-                REPO = 'molgenis'
-                MAVEN_ARTIFACT_ID = 'molgenis'
-                MAVEN_GROUP_ID = 'org.molgenis'
-                PGP_SECRETKEY = "keyfile:/home/jenkins/key.asc"
-            }
-            steps {
-                timeout(time: 40, unit: 'MINUTES') {
-                    script {
-                        env.RELEASE_SCOPE = input(
-                                message: 'Do you want to release?',
-                                ok: 'Release',
-                                parameters: [
-                                        choice(choices: 'candidate\nrelease', description: '', name: 'RELEASE_SCOPE')
-                                ]
-                        )
-                    }
-                }
-                milestone 1
-                container('maven') {
-                    sh "git config --global user.email molgenis+ci@gmail.com"
-                    sh "git config --global user.name molgenis-jenkins"
-                    sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/${ORG}/${REPO}.git"
-                    sh "git checkout -f ${BRANCH_NAME}"
-                    sh ".release/generate_release_properties.bash ${MAVEN_ARTIFACT_ID} ${MAVEN_GROUP_ID} ${RELEASE_SCOPE}"
-                    sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-DskipITs\" -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
-                    sh "git push --tags origin ${BRANCH_NAME}"
-                }
-            }
-        }
     }
 }
