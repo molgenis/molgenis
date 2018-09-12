@@ -1,9 +1,17 @@
 package org.molgenis.security.account;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.molgenis.data.security.auth.UserMetaData.*;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVATIONCODE;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVE;
+import static org.molgenis.data.security.auth.UserMetaData.EMAIL;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 
 import java.net.URISyntaxException;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -58,6 +67,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     when(user.getLastName()).thenReturn("Jansen");
     when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
     when(user.getPassword()).thenReturn("password");
+    when(user.isActive()).thenReturn(true);
   }
 
   @Test
@@ -174,9 +184,23 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     accountService.resetPassword("invalid-user@molgenis.org");
   }
 
+  @Test(expectedExceptions = DisabledException.class)
+  public void testResetPasswordInactiveUser() {
+    when(idGenerator.generateId(SHORT_SECURE_RANDOM)).thenReturn("newPassword");
+
+    User user = mock(User.class);
+
+    @SuppressWarnings("unchecked")
+    Query<User> q = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(dataService.query(USER, User.class)).thenReturn(q);
+    when(q.eq(EMAIL, "user@molgenis.org").findOne()).thenReturn(user);
+
+    accountService.resetPassword("user@molgenis.org");
+  }
+
   @Test
   public void changePassword() {
-    User user = mock(User.class);
+    User user = when(mock(User.class).isActive()).thenReturn(true).getMock();
     when(user.getUsername()).thenReturn("test");
     when(user.getPassword()).thenReturn("oldpass");
 
@@ -190,6 +214,19 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
 
     verify(dataService).update(USER, user);
     verify(user).setPassword("newpass");
+  }
+
+  @Test(expectedExceptions = DisabledException.class)
+  public void changePasswordInactiveUser() {
+    User user = mock(User.class);
+
+    @SuppressWarnings("unchecked")
+    Query<User> q = mock(Query.class);
+    when(q.eq(USERNAME, "test")).thenReturn(q);
+    when(q.findOne()).thenReturn(user);
+    when(dataService.query(USER, User.class)).thenReturn(q);
+
+    accountService.changePassword("test", "newpass");
   }
 
   @Configuration

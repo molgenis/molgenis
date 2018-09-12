@@ -2,7 +2,17 @@ package org.molgenis.data.importer;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -153,6 +163,29 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
     inOrder.verify(dataService).update(eq(entityType1.getId()), any(Stream.class));
     // stream consumed, cannot verify content
     inOrder.verify(dataService).update(eq(entityType0.getId()), any(Stream.class));
+
+    verifyNoMoreInteractions(metaDataService, dataService);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testPersistMetaNoneDataUpdateMappedByAttributes() {
+    when(entityType0.hasMappedByAttributes()).thenReturn(true);
+
+    PersistResult persistResult =
+        dataPersisterImpl.persist(dataProvider, MetadataMode.NONE, DataMode.UPDATE);
+    assertEquals(
+        persistResult,
+        PersistResult.create(ImmutableMap.of(entityType0.getId(), 2L, entityType1.getId(), 3L)));
+
+    InOrder inOrder = inOrder(metaDataService, dataService);
+    // stream consumed, cannot verify content
+    inOrder.verify(dataService).update(eq(entityType1.getId()), any(Stream.class));
+    // stream consumed, cannot verify content
+    inOrder
+        .verify(dataService, times(2))
+        .update(
+            eq(entityType0.getId()), any(Stream.class)); // 2 invocations, because two-pass import
 
     verifyNoMoreInteractions(metaDataService, dataService);
   }
