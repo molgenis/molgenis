@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenisv2'
+            label 'molgenis-it'
         }
     }
     environment {
@@ -27,41 +27,30 @@ pipeline {
             }
         }
 
-        stage('PR') {
+        stage('Build and publish docker container') {
+            environment {
+                TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
+            }
+            steps {
+                container('maven') {
+                    sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4 -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
+                }
+            }
+        }
+
+        stage('Test') {
             parallel {
-                stage('unit test and publish docker container'){
-                    environment {
-                        TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                    }
+                stage('unit test'){
                     steps {
                         container('maven') {
-                            sh "mvn install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
+                            sh "mvn test -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                         }
                     }
                 }
                 stage('integration test') {
-                    agent {
-                        kubernetes {
-                            label 'molgenis-it'
-                        }
-                    }
                     steps {
                         container('maven') {
-                            sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
                             sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
-                        }
-                    }
-                }
-                stage('api test') {
-                    agent {
-                        kubernetes {
-                            label 'molgenis-it'
-                        }
-                    }
-                    steps {
-                        container('maven') {
-                            sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4"
-                            sh "mvn verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password  -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
                         }
                     }
                 }
