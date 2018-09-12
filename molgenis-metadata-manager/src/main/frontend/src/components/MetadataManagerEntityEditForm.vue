@@ -65,7 +65,7 @@
           <div class="col">
             <multiselect v-model="idAttribute" :options="attributes" label="label"
                          selectLabel="" deselectLabel="" :placeholder="$t('entity-edit-form-id-attribute-placeholder')"
-                         :disabled="entityTypeParent !== undefined"></multiselect>
+                         :disabled="entityTypeParent !== undefined || !editorEntityType.isNew"></multiselect>
           </div>
         </div>
 
