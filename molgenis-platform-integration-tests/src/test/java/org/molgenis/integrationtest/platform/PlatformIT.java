@@ -40,6 +40,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySelfXrefTestHarness;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
@@ -163,7 +164,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   @BeforeMethod
   public void beforeMethod() {
-    entityTypeDynamic = runAsSystem(() -> metaDataService.getEntityType(entityTypeDynamic.getId()));
+    entityTypeDynamic =
+        runAsSystem(
+            () ->
+                metaDataService
+                    .getEntityType(entityTypeDynamic.getId())
+                    .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())));
   }
 
   @AfterClass
@@ -233,6 +239,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getAttribute("labelEn")
             .getName(),
         "labelEn");
@@ -240,6 +247,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("en")
             .getName(),
         "label");
@@ -247,6 +255,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("pt")
             .getName(),
         "label");
@@ -254,11 +263,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("nl")
             .getName(),
         "label");
     assertEquals(
-        dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(),
+        dataService
+            .getMeta()
+            .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+            .getLabelAttribute()
+            .getName(),
         "label");
 
     assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");

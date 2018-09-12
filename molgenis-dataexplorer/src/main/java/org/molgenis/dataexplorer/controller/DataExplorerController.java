@@ -15,7 +15,11 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -48,7 +52,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /** Controller class for the data explorer. */
@@ -117,7 +126,7 @@ public class DataExplorerController extends PluginController {
 
     model.addAttribute("entitiesMeta", entitiesMeta);
     if (selectedEntityId != null && selectedEntityName == null) {
-      EntityType entityType = dataService.getMeta().getEntityType(selectedEntityId);
+      EntityType entityType = dataService.getMeta().getEntityType(selectedEntityId).orElse(null);
       if (entityType == null) {
         message.append("Entity does not exist or you do not have permission on this entity");
       } else {
@@ -172,7 +181,7 @@ public class DataExplorerController extends PluginController {
     Map<String, GenomeBrowserTrack> entityTracks;
     switch (moduleId) {
       case MOD_DATA:
-        selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
+        selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
         entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
         model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
         // if multiple tracks are available we assume chrom and pos attribute are the same
@@ -189,7 +198,7 @@ public class DataExplorerController extends PluginController {
         break;
       case MOD_ENTITIESREPORT:
         // TODO: figure out if we need to know pos and chrom attrs here
-        selectedEntityType = dataService.getMeta().getEntityType(entityTypeId);
+        selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
         entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
         model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
         model.addAttribute(

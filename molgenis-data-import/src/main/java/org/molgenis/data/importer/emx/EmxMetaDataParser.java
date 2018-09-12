@@ -15,8 +15,16 @@ import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.AVAILABLE;
+import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.IMPORTABLE;
+import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.REQUIRED;
+import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.UNKNOWN;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.toEnum;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -27,10 +35,24 @@ import static org.molgenis.data.util.EntityTypeUtils.isStringType;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.*;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Range;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownRepositoryCollectionException;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.Language;
@@ -42,8 +64,15 @@ import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.PackageMetadata;
+import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
@@ -641,7 +670,8 @@ public class EmxMetaDataParser implements MetaDataParser {
             extendsEntityType = intermediateResults.getEntityType(emxEntityExtends);
           } else {
             if (dataService != null) {
-              extendsEntityType = dataService.getMeta().getEntityType(emxEntityExtends);
+              extendsEntityType =
+                  dataService.getMeta().getEntityType(emxEntityExtends).orElse(null);
             }
           }
 

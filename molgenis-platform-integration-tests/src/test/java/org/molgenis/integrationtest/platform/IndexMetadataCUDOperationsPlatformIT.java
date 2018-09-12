@@ -1,21 +1,33 @@
 package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.getValueString;
 import static org.molgenis.integrationtest.platform.PlatformIT.waitForWorkToBeFinished;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.SearchService;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.slf4j.Logger;
@@ -36,7 +48,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
     assertEquals(
         searchService.count(
-            metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q1),
+            metaDataService
+                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .orElseThrow(() -> new UnknownEntityTypeException(entityTypeStatic.getId())),
+            q1),
         1);
 
     Query<Entity> q2 = new QueryImpl<>();
@@ -45,7 +60,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
         searchService.count(
-            metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q2),
+            metaDataService
+                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
+            q2),
         1);
   }
 
@@ -64,13 +82,20 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
         searchService.count(
-            metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
+            metaDataService
+                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
+            q),
         1);
 
     // 2. Delete sys_test_TypeTestDynamic metadata and wait on index
     runAsSystem(() -> dataService.getMeta().deleteEntityType(entityTypeDynamic.getId()));
     PlatformIT.waitForIndexToBeStable(
-        metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), indexService, LOG);
+        metaDataService
+            .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
+        indexService,
+        LOG);
     waitForWorkToBeFinished(indexService, LOG);
 
     // 3. Verify that mapping is removed
@@ -94,7 +119,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
     assertEquals(
         searchService.count(
-            metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
+            metaDataService
+                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
+            q),
         1);
 
     // 2. Change dataType value of ATTR_EMAIL
@@ -109,7 +137,14 @@ public class IndexMetadataCUDOperationsPlatformIT {
 
     // 4. Verify metadata changed
     Query<Entity> q2 = new QueryImpl<>();
-    EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
+    EntityType emdActual =
+        metaDataService
+            .getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA)
+            .orElseThrow(
+                () ->
+                    new UnknownEntityException(
+                        EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+                        AttributeMetadata.ATTRIBUTE_META_DATA));
     q2.eq(AttributeMetadata.ID, toUpdateAttributeId);
     q2.and();
     q2.eq(AttributeMetadata.TYPE, getValueString(STRING));
@@ -137,7 +172,11 @@ public class IndexMetadataCUDOperationsPlatformIT {
     q.eq(EntityTypeMetadata.ID, emd.getId()).and().eq(EntityTypeMetadata.PACKAGE, emd.getPackage());
     assertEquals(
         searchService.count(
-            metaDataService.getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA), q),
+            metaDataService
+                .getEntityType(EntityTypeMetadata.ENTITY_TYPE_META_DATA)
+                .orElseThrow(
+                    () -> new UnknownEntityTypeException(EntityTypeMetadata.ENTITY_TYPE_META_DATA)),
+            q),
         1);
 
     // 2. Remove attribute
@@ -151,7 +190,14 @@ public class IndexMetadataCUDOperationsPlatformIT {
 
     // 4. Verify metadata changed
     Query<Entity> q2 = new QueryImpl<>();
-    EntityType emdActual = metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
+    EntityType emdActual =
+        metaDataService
+            .getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA)
+            .orElseThrow(
+                () ->
+                    new UnknownEntityException(
+                        EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+                        AttributeMetadata.ATTRIBUTE_META_DATA));
     q2.eq(AttributeMetadata.ID, toRemoveAttribute.getIdValue());
     assertEquals(searchService.count(emdActual, q2), 0);
 
@@ -182,7 +228,10 @@ public class IndexMetadataCUDOperationsPlatformIT {
     assertTrue(searchService.hasIndex(entityType));
 
     // 2. Verify compound and child got added
-    EntityType afterAddEntityType = metaDataService.getEntityType(entityType.getId());
+    EntityType afterAddEntityType =
+        metaDataService
+            .getEntityType(entityType.getId())
+            .orElseThrow(() -> new UnknownEntityTypeException(entityType.getId()));
     assertNotNull(afterAddEntityType.getAttribute("test_compound"));
     assertNotNull(afterAddEntityType.getAttribute("test_compound_child"));
 
@@ -193,12 +242,24 @@ public class IndexMetadataCUDOperationsPlatformIT {
     assertTrue(searchService.hasIndex(afterAddEntityType));
 
     // 4. Verify that compound + child was removed
-    EntityType afterRemoveEntityType = metaDataService.getEntityType(entityType.getId());
+    EntityType afterRemoveEntityType =
+        metaDataService
+            .getEntityType(entityType.getId())
+            .orElseThrow(
+                () ->
+                    new UnknownEntityException(
+                        EntityTypeMetadata.ENTITY_TYPE_META_DATA, entityType.getId()));
     assertNull(afterRemoveEntityType.getAttribute(compound.getName()));
     assertNull(afterRemoveEntityType.getAttribute(compoundChild.getName()));
 
     EntityType attributeMetadata =
-        metaDataService.getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA);
+        metaDataService
+            .getEntityType(AttributeMetadata.ATTRIBUTE_META_DATA)
+            .orElseThrow(
+                () ->
+                    new UnknownEntityException(
+                        EntityTypeMetadata.ENTITY_TYPE_META_DATA,
+                        AttributeMetadata.ATTRIBUTE_META_DATA));
 
     Query<Entity> compoundQuery = new QueryImpl<>().eq(AttributeMetadata.ID, compound.getIdValue());
     Query<Entity> childQuery =

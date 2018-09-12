@@ -28,7 +28,6 @@ import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNull;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
@@ -473,20 +472,20 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
             eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(Fetch.class), eq(EntityType.class)))
         .thenReturn(entityType);
 
-    assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), entityType);
+    assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), Optional.of(entityType));
     verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
   }
 
   @Test
   public void getEntityTypeNull() {
-    assertNull(metaDataServiceImpl.getEntityType(null));
+    assertEquals(metaDataServiceImpl.getEntityType(null), Optional.empty());
   }
 
   @Test
   public void getEntityTypeUnknownEntity() {
     String entityTypeId = "entity";
 
-    assertNull(metaDataServiceImpl.getEntityType(entityTypeId));
+    assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), Optional.empty());
 
     verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
     verify(dataService)
@@ -500,7 +499,8 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
 
     when(systemEntityTypeRegistry.getSystemEntityType(systemEntityTypeId))
         .thenReturn(systemEntityType);
-    assertEquals(metaDataServiceImpl.getEntityType(systemEntityTypeId), systemEntityType);
+    assertEquals(
+        metaDataServiceImpl.getEntityType(systemEntityTypeId), Optional.of(systemEntityType));
 
     verifyZeroInteractions(dataService);
   }

@@ -24,6 +24,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -191,7 +192,12 @@ public class MappingServiceImpl implements MappingService {
     }
 
     if (dataService.hasRepository(entityTypeId)) {
-      targetMetadata.setPackage(dataService.getMeta().getEntityType(entityTypeId).getPackage());
+      EntityType entityType =
+          dataService
+              .getMeta()
+              .getEntityType(entityTypeId)
+              .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
+      targetMetadata.setPackage(entityType.getPackage());
     } else if (packageId != null) {
       Package aPackage =
           dataService

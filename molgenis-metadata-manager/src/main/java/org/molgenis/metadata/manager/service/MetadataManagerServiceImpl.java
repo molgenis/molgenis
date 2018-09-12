@@ -16,7 +16,11 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeResponse;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
+import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -44,10 +48,10 @@ public class MetadataManagerServiceImpl implements MetadataManagerService {
 
   @Override
   public EditorEntityTypeResponse getEditorEntityType(String entityTypeId) {
-    EntityType entityType = metadataService.getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
+    EntityType entityType =
+        metadataService
+            .getEntityType(entityTypeId)
+            .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
     return createEntityTypeResponse(
         entityType,
         metadataService

@@ -5,8 +5,36 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.EntityTestHarness.*;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
+import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL;
+import static org.molgenis.data.EntityTestHarness.ATTR_CATEGORICAL_MREF;
+import static org.molgenis.data.EntityTestHarness.ATTR_COMPOUND_CHILD_INT;
+import static org.molgenis.data.EntityTestHarness.ATTR_DATE;
+import static org.molgenis.data.EntityTestHarness.ATTR_DATETIME;
+import static org.molgenis.data.EntityTestHarness.ATTR_DECIMAL;
+import static org.molgenis.data.EntityTestHarness.ATTR_EMAIL;
+import static org.molgenis.data.EntityTestHarness.ATTR_ENUM;
+import static org.molgenis.data.EntityTestHarness.ATTR_HTML;
+import static org.molgenis.data.EntityTestHarness.ATTR_HYPERLINK;
+import static org.molgenis.data.EntityTestHarness.ATTR_ID;
+import static org.molgenis.data.EntityTestHarness.ATTR_INT;
+import static org.molgenis.data.EntityTestHarness.ATTR_LONG;
+import static org.molgenis.data.EntityTestHarness.ATTR_MREF;
+import static org.molgenis.data.EntityTestHarness.ATTR_REF_ID;
+import static org.molgenis.data.EntityTestHarness.ATTR_SCRIPT;
+import static org.molgenis.data.EntityTestHarness.ATTR_STRING;
+import static org.molgenis.data.EntityTestHarness.ATTR_XREF;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
@@ -22,10 +50,16 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
@@ -92,7 +126,10 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test
   public void testUpdateEntityType() {
-    EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
     updatedEntityType
         .getAttribute(ATTR_STRING)
         .setDataType(ENUM)
@@ -147,7 +184,11 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
       expectedExceptionsMessageRegExp =
           "Attribute data type update from \\[INT\\] to \\[DATE_TIME\\] not allowed, allowed types are \\[BOOL, CATEGORICAL, DECIMAL, ENUM, LONG, STRING, TEXT, XREF\\]")
   public void testUpdateEntityTypeNotAllowed() {
-    EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     updatedEntityType.getAttribute(ATTR_COMPOUND_CHILD_INT).setDataType(DATE_TIME);
     metaDataService.updateEntityType(updatedEntityType);
   }
@@ -215,36 +256,60 @@ public class MetaDataServiceIT extends AbstractTestNGSpringContextTests {
   @WithMockUser(username = USERNAME)
   @Test(dependsOnMethods = {"testUpdateEntityType", "testUpdateEntityTypeNotAllowed"})
   public void testAddAttribute() {
-    EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType entityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     Attribute attribute = attributeFactory.create().setName("newAttribute");
     attribute.setEntity(entityType);
     metaDataService.addAttribute(attribute);
 
-    EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
   }
 
   @WithMockUser(username = USERNAME)
   @Test(dependsOnMethods = {"testAddAttribute"})
   public void testUpdateAttribute() {
-    EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType entityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     Attribute attribute = entityType.getAttribute("newAttribute");
     attribute.setLabel("updated-label");
     attribute.setEntity(entityType);
     dataService.update(ATTRIBUTE_META_DATA, attribute);
 
-    EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     assertTrue(EntityUtils.equals(attribute, updatedEntityType.getAttribute("newAttribute")));
   }
 
   @WithMockUser(username = USERNAME)
   @Test(dependsOnMethods = {"testUpdateAttribute"})
   public void testDeleteAttribute() {
-    EntityType entityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType entityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     String attributeId = entityType.getAttribute("newAttribute").getIdentifier();
     metaDataService.deleteAttributeById(attributeId);
 
-    EntityType updatedEntityType = metaDataService.getEntityType(ENTITY_TYPE_ID);
+    EntityType updatedEntityType =
+        metaDataService
+            .getEntityType(ENTITY_TYPE_ID)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_ID));
+    ;
     assertNull(updatedEntityType.getAttribute("newAttribute"));
   }
 

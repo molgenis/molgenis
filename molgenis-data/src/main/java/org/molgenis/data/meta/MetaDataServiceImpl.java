@@ -81,10 +81,8 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Override
   public Optional<Repository<Entity>> getRepository(String entityTypeId) {
-    EntityType entityType = getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
+    EntityType entityType =
+        getEntityType(entityTypeId).orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
     return !entityType.isAbstract() ? getRepository(entityType) : Optional.empty();
   }
 
@@ -367,12 +365,13 @@ public class MetaDataServiceImpl implements MetaDataService {
   }
 
   @Override
-  public EntityType getEntityType(String entityTypeId) {
-    EntityType systemEntity = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
-    if (systemEntity != null) {
-      return systemEntity;
+  public Optional<EntityType> getEntityType(String entityTypeId) {
+    EntityType entityType = systemEntityTypeRegistry.getSystemEntityType(entityTypeId);
+    if (entityType != null) {
+      return Optional.of(entityType);
     } else {
-      return getEntityTypeBypassingRegistry(entityTypeId);
+      entityType = getEntityTypeBypassingRegistry(entityTypeId);
+      return entityType != null ? Optional.of(entityType) : Optional.empty();
     }
   }
 

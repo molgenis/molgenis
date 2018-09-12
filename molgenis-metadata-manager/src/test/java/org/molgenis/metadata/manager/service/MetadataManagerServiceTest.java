@@ -2,13 +2,17 @@ package org.molgenis.metadata.manager.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.FILE;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.MetaDataService;
@@ -19,7 +23,11 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.metadata.manager.mapper.AttributeMapper;
 import org.molgenis.metadata.manager.mapper.EntityTypeMapper;
 import org.molgenis.metadata.manager.mapper.PackageMapper;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeResponse;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeResponse;
+import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +74,7 @@ public class MetadataManagerServiceTest extends AbstractTestNGSpringContextTests
     Attribute attr2 = mock(Attribute.class);
     EditorEntityType editorEntityType = mock(EditorEntityType.class);
 
-    when(metaDataService.getEntityType("id_1")).thenReturn(entityType);
+    when(metaDataService.getEntityType("id_1")).thenReturn(Optional.of(entityType));
     when(metaDataService.getReferringAttributes("id_1")).thenReturn(Stream.of(attr1, attr2));
 
     when(attr1.getDataType()).thenReturn(MREF);
