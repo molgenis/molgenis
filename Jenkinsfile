@@ -30,11 +30,11 @@ pipeline {
         stage('PR') {
             parallel {
                 stage('unit test and publish docker container'){
-                    container('maven') {
-                        environment {
-                            TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                        }
-                        steps {
+                    environment {
+                        TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
+                    }
+                    steps {
+                        container('maven') {
                             sh "mvn install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
                         }
                     }
