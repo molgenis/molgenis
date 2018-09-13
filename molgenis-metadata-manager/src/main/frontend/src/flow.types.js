@@ -98,6 +98,7 @@ export type EditorAttribute = {
   'type': ?string,
   'parent': ?EditorAttributeIdentifier,
   'refEntityType': ?EditorEntityTypeIdentifier,
+  'cascadeDelete': ?boolean,
   'mappedByAttribute': ?EditorAttributeIdentifier,
   'orderBy': ?EditorSort,
   'expression': ?string,

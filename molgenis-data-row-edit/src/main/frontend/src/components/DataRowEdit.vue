@@ -116,6 +116,8 @@
           message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message') : message,
           type: 'danger'
         }
+        this.showForm = true
+        this.isSaving = false
       },
       initializeForm (mappedData) {
         this.formFields = mappedData.formFields
