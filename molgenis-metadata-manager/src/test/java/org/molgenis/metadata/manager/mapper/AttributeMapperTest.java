@@ -87,6 +87,7 @@ public class AttributeMapperTest {
             "string",
             null,
             null,
+            false,
             null,
             null,
             null,
@@ -123,6 +124,7 @@ public class AttributeMapperTest {
     String refEntityTypeId = "refId";
     EditorEntityTypeIdentifier editorRefEntityType =
         EditorEntityTypeIdentifier.create(refEntityTypeId, "label");
+    boolean cascadeDelete = false;
     EditorAttributeIdentifier editorMappedByAttribute =
         EditorAttributeIdentifier.create("mappedBy", "mappedByLabel");
     EditorSort editorSort = mock(EditorSort.class);
@@ -189,6 +191,7 @@ public class AttributeMapperTest {
             type,
             editorParentAttributeIdentifier,
             editorRefEntityType,
+            cascadeDelete,
             editorMappedByAttribute,
             editorSort,
             expression,
@@ -218,6 +221,7 @@ public class AttributeMapperTest {
             type,
             null,
             editorRefEntityType,
+            cascadeDelete,
             editorMappedByAttribute,
             editorSort,
             expression,
@@ -255,6 +259,7 @@ public class AttributeMapperTest {
     verify(attribute).setLabelAttribute(true);
     verify(attribute).setLookupAttributeIndex(0);
     verify(attribute).setRefEntity(refEntityType);
+    verify(attribute).setCascadeDelete(false);
     verify(attribute).setMappedBy(mappedByAttribute);
     verify(attribute).setOrderBy(sort);
     verify(attribute).setExpression(expression);
@@ -303,6 +308,7 @@ public class AttributeMapperTest {
     String id = "id";
     String name = "name";
     String type = "categoricalmref";
+    boolean cascadeDelete = false;
     String expression = "expression";
     boolean nullable = false;
     boolean auto = false;
@@ -334,6 +340,7 @@ public class AttributeMapperTest {
     when(attribute.getParent()).thenReturn(parentAttr);
     EntityType refEntityType = mock(EntityType.class);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
+    when(attribute.getCascadeDelete()).thenReturn(cascadeDelete);
     Attribute mappedByAttribute = mock(Attribute.class);
     when(attribute.getMappedBy()).thenReturn(mappedByAttribute);
     Sort sort = mock(Sort.class);
@@ -388,6 +395,7 @@ public class AttributeMapperTest {
             type,
             editorParentAttribute,
             editorRefEntityType,
+            cascadeDelete,
             editorMappedByAttribute,
             editorSort,
             expression,

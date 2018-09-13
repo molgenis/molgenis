@@ -2,11 +2,34 @@ package org.molgenis.data.util;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.HTML;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.SCRIPT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -597,6 +620,24 @@ public class EntityUtilsTest {
       EntityType otherEntityType =
           when(mock(EntityType.class).getId()).thenReturn("otherEntityTypeId").getMock();
       when(otherAttr.getEntity()).thenReturn(otherEntityType);
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
+    { // isCascadeDelete equals
+      Attribute attr = getMockAttr("getCascadeDeleteTrue");
+      Attribute otherAttr = getMockAttr("getCascadeDeleteTrue");
+      when(attr.getCascadeDelete()).thenReturn(true);
+      when(otherAttr.getCascadeDelete()).thenReturn(true);
+
+      testCases.add(new Object[] {attr, otherAttr, true});
+    }
+
+    { // isCascadeDelete not equals
+      Attribute attr = getMockAttr("getCascadeDeleteTrue");
+      Attribute otherAttr = getMockAttr("getCascadeDeleteFalse");
+      when(attr.getCascadeDelete()).thenReturn(true);
+      when(otherAttr.getCascadeDelete()).thenReturn(false);
 
       testCases.add(new Object[] {attr, otherAttr, false});
     }
