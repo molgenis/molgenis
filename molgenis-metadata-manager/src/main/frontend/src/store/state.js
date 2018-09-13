@@ -1,11 +1,12 @@
 // @flow
 export const INITIAL_STATE = window.__INITIAL_STATE__ || {}
 
-import type { State } from '../flow.types'
+import type {State} from '../flow.types'
 
 const state: State = {
   alert: { message: null, type: null },
   packages: [],
+  languageCodes: [],
   entityTypes: [],
   attributeTypes: [],
   selectedEntityTypeId: null,

@@ -27,6 +27,19 @@ describe('mutations', () => {
     })
   })
 
+  describe('Testing mutation SET_LANGUAGE_CODES', () => {
+    it('Sets sorted list of language codes', () => {
+      const state = {
+        languageCodes: []
+      }
+      const languageCodes = ['nl', 'de', 'en']
+      const expectedLanguageCodes = ['de', 'en', 'nl']
+      mutations.__SET_LANGUAGE_CODES__(state, languageCodes)
+
+      expect(state.languageCodes).to.deep.equal(expectedLanguageCodes)
+    })
+  })
+
   describe('Testing mutation CREATE_ALERT', () => {
     it('Updates alert message', () => {
       const state = {

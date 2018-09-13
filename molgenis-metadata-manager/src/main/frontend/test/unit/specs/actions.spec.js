@@ -8,6 +8,7 @@ import {
   SET_ATTRIBUTE_TYPES,
   SET_EDITOR_ENTITY_TYPE,
   SET_ENTITY_TYPES,
+  SET_LANGUAGE_CODES,
   SET_LOADING,
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
@@ -156,6 +157,7 @@ describe('actions', () => {
 
     it('should retrieve the currently selected EditorEntityType and store it in the state via a mutation', done => {
       const response = {
+        languageCodes: ['en', 'nl'],
         entityType: {
           id: '1',
           attributes: []
@@ -172,6 +174,7 @@ describe('actions', () => {
         state: {selectedEntityTypeId: entityTypeId},
         expectedMutations: [
           {type: SET_LOADING, payload: true},
+          {type: SET_LANGUAGE_CODES, payload: ['en', 'nl']},
           {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
         ]
       }
@@ -185,6 +188,7 @@ describe('actions', () => {
 
     it('should retrieve an EditorEntityType based on EntityType ID and store it in the state via a mutation', done => {
       const response = {
+        languageCodes: ['en', 'nl'],
         entityType: {
           id: '1',
           attributes: []
@@ -201,6 +205,7 @@ describe('actions', () => {
         payload: entityTypeId,
         expectedMutations: [
           {type: SET_LOADING, payload: true},
+          {type: SET_LANGUAGE_CODES, payload: ['en', 'nl']},
           {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
         ]
       }
