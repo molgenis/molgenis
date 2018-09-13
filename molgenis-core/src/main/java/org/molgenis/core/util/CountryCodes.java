@@ -261,7 +261,8 @@ public class CountryCodes {
     COUNTRIES.put("AX", "Åland Islands");
   }
 
-  private CountryCodes() {}
+  private CountryCodes() 
+{}
 
   public static Map<String, String> get() {
     // returning Collections.unmodifiableMap results in Freemarker not respecting map iteration
