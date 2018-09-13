@@ -105,7 +105,8 @@ describe('mutations', () => {
     it('Sets selected entity type to edit', () => {
       const state = {
         editorEntityType: {},
-        initialEditorEntityType: {}
+        initialEditorEntityType: {},
+        selectedAttributeId: null
       }
       const editorEntityType = {
         id: 'root_gender',
@@ -158,6 +159,7 @@ describe('mutations', () => {
       mutations.__SET_EDITOR_ENTITY_TYPE__(state, editorEntityType)
       expect(state.editorEntityType).to.deep.equal(editorEntityType)
       expect(state.initialEditorEntityType).to.deep.equal(JSON.parse(JSON.stringify(editorEntityType)))
+      expect(state.selectedAttributeId).to.deep.equal(null)
     })
   })
 

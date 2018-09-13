@@ -23,6 +23,10 @@
           <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
             {{ 'save-changes-button' | i18n }}
           </save-button>
+          <button @click="resetEntityType(editorEntityType.id)" class="btn btn-warning"
+                  :disabled="!isEntityTypeEdited">
+            {{ 'undo-changes-button' | i18n }}
+          </button>
           <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger"
                   :disabled="editorEntityType.isNew">
             {{ 'delete-entity-button' | i18n }}
@@ -119,7 +123,7 @@
 <script>
   import { mapState, mapGetters } from 'vuex'
   import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
-  import { SAVE_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
+  import { SAVE_EDITOR_ENTITY_TYPE, RESET_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
   import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
@@ -130,6 +134,9 @@
     methods: {
       saveEntityType () {
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
+      },
+      resetEntityType () {
+        this.$store.dispatch(RESET_EDITOR_ENTITY_TYPE)
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId, this.$t)).then(() => {

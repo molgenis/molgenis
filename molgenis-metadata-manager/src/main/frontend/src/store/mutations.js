@@ -8,7 +8,7 @@ import type {
   Update,
   UpdateOrder
 } from '../flow.types'
-import { INITIAL_STATE } from './state'
+import {INITIAL_STATE} from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
 export const SET_ENTITY_TYPES: string = '__SET_ENTITY_TYPES__'
@@ -90,6 +90,7 @@ export default {
   [SET_EDITOR_ENTITY_TYPE] (state: State, editorEntityType: EditorEntityType) {
     state.editorEntityType = editorEntityType
     state.initialEditorEntityType = JSON.parse(JSON.stringify(editorEntityType))
+    state.selectedAttributeId = null
   },
   /**
    * Update currently selected EditorEntityType
