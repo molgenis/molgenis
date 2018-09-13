@@ -116,6 +116,8 @@
           message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message') : message,
           type: 'danger'
         }
+        this.showForm = true
+        this.isSaving = false
       },
       initializeForm (formFields, formData) {
         const mappedData = EntityToFormMapper.generateForm(formFields, formData)
