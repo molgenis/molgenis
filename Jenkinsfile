@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenisv2'
+            label 'molgenis'
         }
     }
     environment {
@@ -57,11 +57,12 @@ pipeline {
                 branch 'master'
             }
             environment {
-                TAG = 'experimental'
+                TAG = 'dev'
+                DOCKER_REPOSITORY = 'registry.hub.docker.com/molgenis/molgenis-app'
             }
             steps {
                 container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
+                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
                 }
             }
             post {
@@ -80,10 +81,11 @@ pipeline {
             }
             environment {
                 TAG = 'latest'
+                DOCKER_REPOSITORY = 'registry.hub.docker.com/molgenis/molgenis-app'
             }
             steps {
                 container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
+                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
                 }
             }
             post {
