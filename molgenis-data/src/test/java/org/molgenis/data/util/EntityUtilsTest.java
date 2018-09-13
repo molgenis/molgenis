@@ -65,6 +65,10 @@ public class EntityUtilsTest {
     when(otherLabelEntityType.getLabel()).thenReturn("otherLabel");
     dataList.add(new Object[] {entityType, otherLabelEntityType, false});
 
+    EntityType otherI18nLabelEntityType = createEqualsEntityType();
+    when(otherI18nLabelEntityType.getLabel("en")).thenReturn("otherLabelEn");
+    dataList.add(new Object[] {entityType, otherI18nLabelEntityType, false});
+
     EntityType otherAbstractEntityType = createEqualsEntityType();
     when(otherAbstractEntityType.isAbstract()).thenReturn(false);
     dataList.add(new Object[] {entityType, otherAbstractEntityType, false});
@@ -80,6 +84,10 @@ public class EntityUtilsTest {
     EntityType otherDescriptionEntityType = createEqualsEntityType();
     when(otherDescriptionEntityType.getDescription()).thenReturn("otherDescription");
     dataList.add(new Object[] {entityType, otherDescriptionEntityType, false});
+
+    EntityType otherI18nDescriptionEntityType = createEqualsEntityType();
+    when(otherI18nDescriptionEntityType.getLabel("en")).thenReturn("otherDescriptionEn");
+    dataList.add(new Object[] {entityType, otherI18nDescriptionEntityType, false});
 
     EntityType otherAttributesEntityType = createEqualsEntityType();
     when(otherAttributesEntityType.getOwnAllAttributes())
@@ -106,10 +114,12 @@ public class EntityUtilsTest {
     when(entityType.toString()).thenReturn("entity");
     when(entityType.getId()).thenReturn("id");
     when(entityType.getLabel()).thenReturn("label");
+    when(entityType.getLabel("en")).thenReturn("labelEn");
     when(entityType.isAbstract()).thenReturn(true);
     when(entityType.getBackend()).thenReturn("backend");
     when(entityType.getPackage()).thenReturn(null);
     when(entityType.getDescription()).thenReturn(null);
+    when(entityType.getDescription("en")).thenReturn("descriptionEn");
     when(entityType.getOwnAllAttributes()).thenReturn(emptyList());
     when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
     when(entityType.getTags()).thenReturn(emptyList());
@@ -120,7 +130,7 @@ public class EntityUtilsTest {
 
   @Test(dataProvider = "testEqualsEntityTypeProvider")
   public void testEqualsEntityType(
-      EntityType entityType, EntityType otherEntityType, boolean equals) throws Exception {
+      EntityType entityType, EntityType otherEntityType, boolean equals) {
     assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
   }
 
@@ -319,11 +329,29 @@ public class EntityUtilsTest {
       testCases.add(new Object[] {attr, otherAttr, false});
     }
 
+    { // i18n label not equals
+      Attribute attr = getMockAttr("labelA");
+      Attribute otherAttr = getMockAttr("labelB");
+      when(attr.getLabel("en")).thenReturn("A");
+      when(otherAttr.getLabel("en")).thenReturn("B");
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
     { // description not equals
       Attribute attr = getMockAttr("descriptionA");
       Attribute otherAttr = getMockAttr("descriptionB");
       when(attr.getDescription()).thenReturn("A");
       when(otherAttr.getDescription()).thenReturn("B");
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
+    { // i18n description not equals
+      Attribute attr = getMockAttr("descriptionA");
+      Attribute otherAttr = getMockAttr("descriptionB");
+      when(attr.getDescription("en")).thenReturn("A");
+      when(otherAttr.getDescription("en")).thenReturn("B");
 
       testCases.add(new Object[] {attr, otherAttr, false});
     }

@@ -29,6 +29,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.Pair;
 import org.molgenis.util.UnexpectedEnumException;
@@ -200,8 +201,23 @@ public class EntityUtils {
     if (entityType != null && otherEntityType == null) return false;
     if (!(entityType != null && entityType.getId().equals(otherEntityType.getId()))) return false;
     if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    entityType.getLabel(languageCode), otherEntityType.getLabel(languageCode)))) {
+      return false;
+    }
     if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription()))
       return false;
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    entityType.getDescription(languageCode),
+                    otherEntityType.getDescription(languageCode)))) {
+      return false;
+    }
     if (entityType.isAbstract() != otherEntityType.isAbstract()) return false;
 
     // NB This is at such a low level that we do not know the default backend
@@ -366,7 +382,20 @@ public class EntityUtils {
     if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) {
       return false;
     }
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(attr.getLabel(languageCode), otherAttr.getLabel(languageCode)))) {
+      return false;
+    }
     if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) {
+      return false;
+    }
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    attr.getDescription(languageCode), otherAttr.getDescription(languageCode)))) {
       return false;
     }
     if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) {
