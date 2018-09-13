@@ -147,11 +147,11 @@ describe('DataRowEdit component', () => {
     it('initializeForm should setup the form and set showForm to true', () => {
       const mappedData = {
         formFields: ['abc'],
-        formData: {foo: 'bar' }
+        formData: {foo: 'bar'}
       }
       wrapper.vm.initializeForm(mappedData)
       expect(wrapper.vm.formFields).to.deep.equal(['abc'])
-      expect(wrapper.vm.formData).to.deep.equal({foo: 'bar' })
+      expect(wrapper.vm.formData).to.deep.equal({foo: 'bar'})
       expect(wrapper.vm.showForm).to.equal(true)
     })
 
