@@ -1,7 +1,11 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;
@@ -15,12 +19,17 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.semanticmapper.controller.MappingServiceController;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
 import org.molgenis.semanticmapper.repository.AttributeMappingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
   private final AttributeMappingMetaData attributeMappingMetaData;
 
   @Autowired private IdGenerator idGenerator;
@@ -77,8 +86,19 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
     while (matcher.find()) {
       String sourceAttribute = matcher.group(1).split("\\.")[0];
       Attribute attribute = sourceEntityType.getAttribute(sourceAttribute);
-      if (!sourceAttributes.contains(attribute)) {
-        sourceAttributes.add(attribute);
+      if (attribute != null) {
+        if (!sourceAttributes.contains(attribute)) {
+          sourceAttributes.add(attribute);
+        }
+      } else {
+        // When fixing the mapping of an entity we need to be able to save fixed mappings
+        // Since all mappings of a source pass through this code when saving a single mapping, a
+        // exception at this point will make fixing the mappings impossible.
+        LOG.warn(
+            "SourceEntityType {} does not contain a attribute with name {}, algorithm {}",
+            sourceEntityType.getLabel(),
+            sourceAttribute,
+            algorithm);
       }
     }
 

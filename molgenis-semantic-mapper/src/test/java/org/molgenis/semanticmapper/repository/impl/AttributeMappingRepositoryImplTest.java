@@ -6,7 +6,11 @@ import static org.mockito.Mockito.mock;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
@@ -175,6 +179,23 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     List<Attribute> sourceAttributes = newArrayList();
     sourceAttributes.add(attr1);
     sourceAttributes.add(attr2);
+
+    assertEquals(
+        attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
+        sourceAttributes);
+  }
+
+  @Test
+  public void testRetrieveAttributesFromAlgorithmMissingAttr() {
+    String algorithm = "$('attribute_1').value()$('attribute_2').value()";
+
+    Attribute attr1 = attrMetaFactory.create().setName("attribute_1");
+
+    EntityType sourceEntityType = entityTypeFactory.create("source");
+    sourceEntityType.addAttribute(attr1);
+
+    List<Attribute> sourceAttributes = newArrayList();
+    sourceAttributes.add(attr1);
 
     assertEquals(
         attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
