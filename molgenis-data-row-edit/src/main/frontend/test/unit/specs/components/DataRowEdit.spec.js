@@ -145,9 +145,13 @@ describe('DataRowEdit component', () => {
     })
 
     it('initializeForm should setup the form and set showForm to true', () => {
-      wrapper.vm.initializeForm('a', 'b')
-      expect(wrapper.vm.formFields).to.deep.equal(['a'])
-      expect(wrapper.vm.formData).to.deep.equal({b: 'c'})
+      const mappedData = {
+        formFields: ['abc'],
+        formData: {foo: 'bar' }
+      }
+      wrapper.vm.initializeForm(mappedData)
+      expect(wrapper.vm.formFields).to.deep.equal(['abc'])
+      expect(wrapper.vm.formData).to.deep.equal({foo: 'bar' })
       expect(wrapper.vm.showForm).to.equal(true)
     })
 
@@ -168,32 +172,6 @@ describe('DataRowEdit component', () => {
           a: 'a',
           b: 'b'
         }
-      }
-      expect(result).to.deep.equal(expected)
-    })
-
-    it('parseAddResponse should transform the addResponse and set readOnly fields to false', () => {
-      const mockEditResponse = {
-        meta: {
-          label: 'label',
-          foo: 'bar',
-          attributes: [
-            { readOnly: true },
-            { readOnly: false },
-            {}
-          ]
-        },
-        href: 'http://foo.bar.com'
-      }
-      const result = wrapper.vm.parseAddResponse(mockEditResponse)
-      const expected = {
-        label: 'label',
-        foo: 'bar',
-        attributes: [
-          { readOnly: false },
-          { readOnly: false },
-          { readOnly: false }
-        ]
       }
       expect(result).to.deep.equal(expected)
     })

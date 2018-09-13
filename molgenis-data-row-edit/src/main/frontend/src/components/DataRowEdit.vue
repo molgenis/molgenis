@@ -117,37 +117,35 @@
           type: 'danger'
         }
       },
-      initializeForm (formFields, formData) {
-        const mappedData = EntityToFormMapper.generateForm(formFields, formData)
+      initializeForm (mappedData) {
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
         this.showForm = true
       },
+      /**
+       * response mixes data and metadata, this function creates a new object with separate properties for data and metadata
+       * @param response
+       * @returns {{_meta: *, rowData: *}}
+       */
       parseEditResponse (response) {
         // noinspection JSUnusedLocalSymbols
         const { _meta, _href, ...rowData } = response
-        this.dataTableLabel = _meta.label
         return {_meta, rowData}
-      },
-      parseAddResponse (response) {
-        let meta = response.meta
-        meta.attributes = meta.attributes.map(attribute => {
-          attribute.readOnly = false
-          return attribute
-        })
-        return meta
       }
     },
     created: function () {
       if (this.dataRowId !== null) {
         api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
+          this.dataTableLabel = response._meta.label
           const { _meta, rowData } = this.parseEditResponse(response)
-          this.initializeForm(_meta, rowData)
+          const mappedData = EntityToFormMapper.generateForm(_meta, rowData, { mapperMode: 'UPDATE' })
+          this.initializeForm(mappedData)
         }, this.handleError)
       } else {
         api.get('/api/v2/' + this.dataTableId + '?num=0').then((response) => {
-          const meta = this.parseAddResponse(response)
-          this.initializeForm(meta, {})
+          this.dataTableLabel = response.meta.label
+          const mappedData = EntityToFormMapper.generateForm(response.meta, {}, { mapperMode: 'CREATE' })
+          this.initializeForm(mappedData)
         }, this.handleError)
       }
     },
