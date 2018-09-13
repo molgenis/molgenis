@@ -2,7 +2,7 @@
 EMX (entity model extensible) is a flexible spreadsheet format to easily upload any tabular data using Excel or a zipfile of tab-delimited *.tsv files. This works because you can tell MOLGENIS the 'model' of your data via a special sheet named 'attributes'. Optionally, you can also add metadata on entities (i.e., classes, tables), and packages (i.e, models and submodels)
 
 ## Minimal example 
-([download](../../data/simple_data_example_v20160915.xlsx))
+([download](../../data/simple_data_example_v20180912.xlsx))
 
 For example, if you want to upload an Excel with sheet 'patients':
 
