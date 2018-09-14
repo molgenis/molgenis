@@ -5,16 +5,51 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.HTML;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.SCRIPT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.reporters.Files.readFile;
@@ -22,18 +57,37 @@ import static org.testng.reporters.Files.readFile;
 import com.google.common.collect.Sets;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.i18n.LocalizationService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.service.RestService;
@@ -70,7 +124,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = {RestControllerV2Config.class, GsonConfig.class})
@@ -767,12 +825,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
     String content = "{newEntityName: 'duplicateEntity'}";
     mockMvc
         .perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
+        .andExpect(status().isConflict())
         .andExpect(content().contentType(APPLICATION_JSON_UTF8))
         .andExpect(
             jsonPath(
                 FIRST_ERROR_MESSAGE,
-                is("Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'")));
+                is("Opslagplaats 'org_molgenis_blah_duplicateEntity' bestaat al.")));
     verifyZeroInteractions(repoCopier);
   }
 
@@ -822,7 +880,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-        .andExpect(jsonPath(FIRST_ERROR_MESSAGE, is("No write capabilities for entity entity")));
+        .andExpect(
+            jsonPath(
+                FIRST_ERROR_MESSAGE, is("Opslagplaats 'entity' ondersteunt geen 'schrijven'.")));
     verifyZeroInteractions(repoCopier);
   }
 
