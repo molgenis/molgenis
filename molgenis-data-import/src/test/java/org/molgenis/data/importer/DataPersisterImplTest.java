@@ -29,8 +29,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.importer.DataPersister.DataMode;
 import org.molgenis.data.importer.DataPersister.MetadataMode;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.EntityTypeWithoutMappedByAttributes;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.test.AbstractMockitoTest;
@@ -248,9 +248,7 @@ public class DataPersisterImplTest extends AbstractMockitoTest {
     inOrder.verify(metaDataService).addEntityType(entityType1);
     // stream consumed, cannot verify content
     inOrder.verify(dataService).add(eq(entityType1.getId()), any(Stream.class));
-    inOrder
-        .verify(metaDataService)
-        .addEntityType(any(MetaDataServiceImpl.EntityTypeWithoutMappedByAttributes.class));
+    inOrder.verify(metaDataService).addEntityType(any(EntityTypeWithoutMappedByAttributes.class));
     // stream consumed, cannot verify content
     inOrder.verify(dataService).add(eq(entityType0.getId()), any(Stream.class));
     inOrder.verify(metaDataService).updateEntityType(entityType0);
