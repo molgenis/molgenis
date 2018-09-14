@@ -1,10 +1,14 @@
 package org.molgenis.security.settings;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.MREF;
 
+import java.util.List;
+import org.molgenis.security.oidc.model.OidcClient;
+import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.settings.DefaultSettingsEntity;
 import org.molgenis.settings.DefaultSettingsEntityType;
@@ -25,18 +29,17 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
   public static class Meta extends DefaultSettingsEntityType {
     private static final String SIGNUP = "signup";
     private static final String SIGNUP_MODERATION = "signup_moderation";
-    private static final String GOOGLE_SIGN_IN = "google_sign_in";
-    private static final String GOOGLE_APP_CLIENT_ID = "google_app_client_id";
+    private static final String OIDC_CLIENTS = "oidcClients";
     private static final String SIGN_IN_2FA = "sign_in_2fa";
 
     private static final boolean DEFAULT_SIGNUP = false;
     private static final boolean DEFAULT_SIGNUP_MODERATION = true;
-    private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
-    private static final String DEFAULT_GOOGLE_APP_CLIENT_ID =
-        "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 
-    public Meta() {
+    private final OidcClientMetadata oidcClientMetadata;
+
+    public Meta(OidcClientMetadata oidcClientMetadata) {
       super(ID);
+      this.oidcClientMetadata = requireNonNull(oidcClientMetadata);
     }
 
     @Override
@@ -57,25 +60,17 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setLabel("Sign up moderation")
           .setDescription("Admins must accept sign up requests before account activation")
           .setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
-      addAttribute(GOOGLE_SIGN_IN)
-          .setDataType(BOOL)
-          .setNillable(false)
-          .setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN))
-          .setLabel("Enable Google Sign-In")
-          .setDescription("Enable users to sign in with their existing Google account")
+      addAttribute(OIDC_CLIENTS)
+          .setDataType(MREF)
+          .setRefEntity(oidcClientMetadata)
+          .setLabel("Authentication servers")
+          .setDescription("OpenID Connect authentication servers")
           .setVisibleExpression(
               "$('"
                   + SIGNUP
                   + "').eq(true).value() && $('"
                   + SIGNUP_MODERATION
                   + "').eq(false).value()");
-      addAttribute(GOOGLE_APP_CLIENT_ID)
-          .setDataType(STRING)
-          .setNillable(false)
-          .setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID)
-          .setLabel("Google app client ID")
-          .setDescription("Google app client ID used during Google Sign-In")
-          .setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
       addAttribute(SIGN_IN_2FA)
           .setDataType(ENUM)
           .setNillable(false)
@@ -86,24 +81,22 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
                   TwoFactorAuthenticationSetting.ENABLED.getLabel(),
                   TwoFactorAuthenticationSetting.ENFORCED.getLabel()))
           .setLabel("Two Factor Authentication")
-          .setDescription(
-              "Enable or enforce users to sign in with Google Authenticator. Can not be used when Google Sign-In is enabled.")
+          .setDescription("Enable or enforce users to sign in with Google Authenticator.")
           .setValidationExpression(getSignIn2FAValidationExpression());
     }
 
     /**
-     * SIGN_IN_2FA == DISABLED || !SIGNUP || SIGNUP_MODERATION || !GOOGLE_SIGN_IN
+     * SIGN_IN_2FA == DISABLED || !SIGNUP || SIGNUP_MODERATION
      *
      * @return true if condition is met
      */
     private static String getSignIn2FAValidationExpression() {
       return String.format(
-          "$('%s').eq('%s').or($('%s').not()).or($('%s')).or($('%s').not()).value()",
+          "$('%s').eq('%s').or($('%s').not()).or($('%s')).value()",
           SIGN_IN_2FA,
           TwoFactorAuthenticationSetting.DISABLED.getLabel(),
           SIGNUP,
-          SIGNUP_MODERATION,
-          GOOGLE_SIGN_IN);
+          SIGNUP_MODERATION);
     }
   }
 
@@ -125,29 +118,18 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
   }
 
   @Override
+  public void setOidcClients(List<OidcClient> oidcClients) {
+    set(Meta.OIDC_CLIENTS, oidcClients);
+  }
+
+  @Override
+  public Iterable<OidcClient> getOidcClients() {
+    return getEntities(Meta.OIDC_CLIENTS, OidcClient.class);
+  }
+
+  @Override
   public void setSignUpModeration(boolean signUpModeration) {
     set(Meta.SIGNUP_MODERATION, signUpModeration);
-  }
-
-  @Override
-  public void setGoogleSignIn(boolean googleSignIn) {
-    set(Meta.GOOGLE_SIGN_IN, googleSignIn);
-  }
-
-  @Override
-  public boolean getGoogleSignIn() {
-    Boolean value = getBoolean(Meta.GOOGLE_SIGN_IN);
-    return value != null ? value : false;
-  }
-
-  @Override
-  public void setGoogleAppClientId(String googleAppClientId) {
-    set(Meta.GOOGLE_APP_CLIENT_ID, googleAppClientId);
-  }
-
-  @Override
-  public String getGoogleAppClientId() {
-    return getString(Meta.GOOGLE_APP_CLIENT_ID);
   }
 
   @Override

@@ -3,6 +3,7 @@ package org.molgenis.security.core.utils;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 import java.util.Collection;
+import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +34,8 @@ public class SecurityUtils {
     Object principal = authentication.getPrincipal();
     if (principal instanceof UserDetails) {
       return ((UserDetails) principal).getUsername();
+    } else if (principal instanceof MappedAuthenticatedPrincipal) {
+      return ((MappedAuthenticatedPrincipal) principal).getMappedName();
     }
 
     return principal.toString();

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.core.ui.security.MolgenisAccessDecisionVoter;
 import org.molgenis.data.DataService;
-import org.molgenis.data.config.DataConfig;
 import org.molgenis.data.security.DataserviceRoleHierarchy;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +23,10 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 @Configuration
-@Import({AclConfig.class, DataConfig.class})
+@Import({AclConfig.class, DataServiceImpl.class})
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig {
-
   private final DataService dataService;
 
   public WebAppSecurityConfig(DataService dataService) {

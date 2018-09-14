@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.user.UserService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;
@@ -33,19 +34,19 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean {
     HttpServletResponse httpResponse = (HttpServletResponse) response;
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication instanceof UsernamePasswordAuthenticationToken) {
+      if (authentication.isAuthenticated()
+          && !authentication.getName().equals(ANONYMOUS_USERNAME)
+          && !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI)) {
+        User user = userService.getUser(authentication.getName());
+        if (user == null) {
+          throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
+        }
 
-    if ((authentication != null)
-        && authentication.isAuthenticated()
-        && !authentication.getName().equals(ANONYMOUS_USERNAME)
-        && !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI)) {
-      User user = userService.getUser(authentication.getName());
-      if (user == null) {
-        throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
-      }
-
-      if (user.isChangePassword() != null && user.isChangePassword()) {
-        redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
-        return;
+        if (user.isChangePassword() != null && user.isChangePassword()) {
+          redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
+          return;
+        }
       }
     }
 
