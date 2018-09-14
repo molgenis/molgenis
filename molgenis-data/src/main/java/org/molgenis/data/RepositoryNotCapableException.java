@@ -10,6 +10,7 @@ import org.molgenis.i18n.BadRequestException;
  * @see Repository
  * @see RepositoryCapability
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public class RepositoryNotCapableException extends BadRequestException {
   private static final String ERROR_CODE = "D11";
 
