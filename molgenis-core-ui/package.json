@@ -21,7 +21,7 @@
   "dependencies": {
     "babel-polyfill": "^6.3.13",
     "bootbox": "4.4.0",
-    "bootstrap": "3.3.6",
+    "bootstrap": "3.3.7",
     "bootstrap-fileinput": "4.2.8",
     "brace": "0.5.1",
     "eonasdan-bootstrap-datetimepicker": "4.17.47",
