@@ -17,6 +17,7 @@
         <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
         <dockerfile.tag>${project.version}</dockerfile.tag>
         <dockerfile.skip>true</dockerfile.skip>
+        <dockerfile.repository>registry.molgenis.org/molgenis/molgenis-app</dockerfile.repository>
     </properties>
 
     <build>
@@ -45,7 +46,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>registry.molgenis.org/molgenis/molgenis-app</repository>
+                    <repository>${dockerfile.repository}</repository>
                     <tag>${dockerfile.tag}</tag>
                     <buildArgs>
                         <WAR_FILE>target/${project.build.finalName}.war</WAR_FILE>

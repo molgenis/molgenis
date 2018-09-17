@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'molgenisv2'
+            label 'molgenis'
         }
     }
     environment {
@@ -52,17 +52,17 @@ pipeline {
                 }
             }
         }
-
         stage('Build [ master ]') {
             when {
                 branch 'master'
             }
             environment {
-                TAG = 'latest'
+                TAG = 'dev'
+                DOCKER_REPOSITORY = 'registry.hub.docker.com/molgenis/molgenis-app'
             }
             steps {
                 container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
+                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
                 }
             }
             post {
@@ -80,11 +80,12 @@ pipeline {
                 expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
             }
             environment {
-                TAG = 'stable'
+                TAG = 'latest'
+                DOCKER_REPOSITORY = 'registry.hub.docker.com/molgenis/molgenis-app'
             }
             steps {
                 container('maven') {
-                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
+                    sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
                 }
             }
             post {
@@ -102,12 +103,13 @@ pipeline {
                 expression { BRANCH_NAME ==~ /[0-9]\.[0-9]/ }
             }
             environment {
-                TAG = 'lts'
+                TAG = 'stable'
                 ORG = 'molgenis'
                 REPO = 'molgenis'
                 MAVEN_ARTIFACT_ID = 'molgenis'
                 MAVEN_GROUP_ID = 'org.molgenis'
                 PGP_SECRETKEY = "keyfile:/home/jenkins/key.asc"
+                DOCKER_REPOSITORY = 'registry.hub.docker.com/molgenis/molgenis-app'
             }
             steps {
                 timeout(time: 40, unit: 'MINUTES') {
@@ -128,7 +130,7 @@ pipeline {
                     sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/${ORG}/${REPO}.git"
                     sh "git checkout -f ${BRANCH_NAME}"
                     sh ".release/generate_release_properties.bash ${MAVEN_ARTIFACT_ID} ${MAVEN_GROUP_ID} ${RELEASE_SCOPE}"
-                    sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-DskipITs\" -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false"
+                    sh "mvn release:prepare release:perform -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false -Ddockerfile.repository=${DOCKER_REPOSITORY}\" -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.skip=false -Ddockerfile.repository=${DOCKER_REPOSITORY}"
                     sh "git push --tags origin ${BRANCH_NAME}"
                 }
             }
