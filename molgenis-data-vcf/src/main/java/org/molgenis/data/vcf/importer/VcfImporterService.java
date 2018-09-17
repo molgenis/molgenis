@@ -8,11 +8,25 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
-import org.molgenis.data.*;
-import org.molgenis.data.importer.*;
+import org.molgenis.data.DataAction;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.importer.EntitiesValidationReport;
+import org.molgenis.data.importer.EntitiesValidationReportImpl;
+import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -58,10 +72,10 @@ public class VcfImporterService implements ImportService {
 
     Package importPackage = null;
     if (packageId != null) {
-      importPackage = metaDataService.getPackage(packageId);
-      if (importPackage == null) {
-        throw new UnknownEntityException(PACKAGE, packageId);
-      }
+      importPackage =
+          metaDataService
+              .getPackage(packageId)
+              .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
     }
 
     List<EntityType> addedEntities = new ArrayList<>();

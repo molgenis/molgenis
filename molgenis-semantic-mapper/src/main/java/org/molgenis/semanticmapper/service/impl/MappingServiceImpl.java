@@ -7,6 +7,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.util.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
@@ -17,11 +18,18 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
@@ -184,9 +192,19 @@ public class MappingServiceImpl implements MappingService {
     }
 
     if (dataService.hasRepository(entityTypeId)) {
-      targetMetadata.setPackage(dataService.getMeta().getEntityType(entityTypeId).getPackage());
+      EntityType entityType =
+          dataService
+              .getMeta()
+              .getEntityType(entityTypeId)
+              .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
+      targetMetadata.setPackage(entityType.getPackage());
     } else if (packageId != null) {
-      targetMetadata.setPackage(dataService.getMeta().getPackage(packageId));
+      Package aPackage =
+          dataService
+              .getMeta()
+              .getPackage(packageId)
+              .orElseThrow(() -> new UnknownEntityException(PACKAGE, packageId));
+      targetMetadata.setPackage(aPackage);
     } else {
       throw new MolgenisDataException("Package can't be null");
     }

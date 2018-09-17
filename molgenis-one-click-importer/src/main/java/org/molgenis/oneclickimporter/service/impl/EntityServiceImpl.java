@@ -13,8 +13,12 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.NoWritablePackageException;
 import org.molgenis.data.security.PackagePermissionUtils;
@@ -81,7 +85,10 @@ public class EntityServiceImpl implements EntityService {
 
     final Package parentPackage = getParentPackage().orElseThrow(NoWritablePackageException::new);
     final String fullyQualifiedPackageName = parentPackage.getId() + "_" + packageName;
-    Package aPackage = metaDataService.getPackage(fullyQualifiedPackageName);
+    Package aPackage =
+        metaDataService
+            .getPackage(fullyQualifiedPackageName)
+            .orElseGet(() -> createPackage(fullyQualifiedPackageName));
 
     if (aPackage == null) {
       aPackage = packageFactory.create(fullyQualifiedPackageName);
@@ -139,6 +146,14 @@ public class EntityServiceImpl implements EntityService {
     dataService.add(entityType.getId(), rows.stream());
 
     return entityType;
+  }
+
+  private Package createPackage(String packageName) {
+    Package newPackage = packageFactory.create(packageName);
+    newPackage.setLabel(packageName);
+    newPackage.setParent(getParentPackage().orElseThrow(NoWritablePackageException::new));
+    metaDataService.addPackage(newPackage);
+    return newPackage;
   }
 
   /** @return the first writable package */

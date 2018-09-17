@@ -15,7 +15,12 @@ import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.EntitiesValidationReport;
+import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.MetadataAction;
+import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
@@ -46,7 +51,7 @@ public class EmxImportService implements ImportService {
         if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
         if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
         if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
-        if (dataService.getMeta().getEntityType(entityTypeId) != null) return true;
+        if (dataService.getMeta().hasEntityType(entityTypeId)) return true;
       }
     }
 

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntitySelfXrefTestHarness;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
@@ -163,7 +165,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   @BeforeMethod
   public void beforeMethod() {
-    entityTypeDynamic = runAsSystem(() -> metaDataService.getEntityType(entityTypeDynamic.getId()));
+    entityTypeDynamic =
+        runAsSystem(
+            () ->
+                metaDataService
+                    .getEntityType(entityTypeDynamic.getId())
+                    .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())));
   }
 
   @AfterClass
@@ -233,6 +240,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getAttribute("labelEn")
             .getName(),
         "labelEn");
@@ -240,6 +248,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("en")
             .getName(),
         "label");
@@ -247,6 +256,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("pt")
             .getName(),
         "label");
@@ -254,11 +264,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("nl")
             .getName(),
         "label");
     assertEquals(
-        dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(),
+        dataService
+            .getMeta()
+            .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+            .getLabelAttribute()
+            .getName(),
         "label");
 
     assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
@@ -370,8 +386,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "parent");
-          assertNull(metadataService.getPackage("parent"));
-          assertNull(metadataService.getPackage("parent_sub"));
+          assertEquals(metadataService.getPackage("parent"), Optional.empty());
+          assertEquals(metadataService.getPackage("parent_sub"), Optional.empty());
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
@@ -413,7 +429,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(refEntityType, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "package_onetomany");
-          assertNull(metadataService.getPackage("package_onetomany"));
+          assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
           assertNull(dataService.getEntityType(entityType.getId()));
           assertNull(dataService.getEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);

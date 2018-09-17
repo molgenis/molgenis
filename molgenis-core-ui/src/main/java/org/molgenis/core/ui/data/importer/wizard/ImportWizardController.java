@@ -27,7 +27,12 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.file.FileRepositoryCollectionFactory;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.util.FileExtensionUtils;
-import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.ImportJob;
+import org.molgenis.data.importer.ImportRun;
+import org.molgenis.data.importer.ImportRunService;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.rest.util.Href;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.web.PluginController;
@@ -153,7 +158,7 @@ public class ImportWizardController extends AbstractWizardController {
     ImportRun importRun;
     try {
       File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);
-      if (packageId != null && dataService.getMeta().getPackage(packageId) == null) {
+      if (packageId != null && !dataService.getMeta().getPackage(packageId).isPresent()) {
         return ResponseEntity.badRequest()
             .contentType(TEXT_PLAIN)
             .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
@@ -198,7 +203,7 @@ public class ImportWizardController extends AbstractWizardController {
         tmpFile = fileStore.store(inputStream, filename);
       }
 
-      if (packageId != null && dataService.getMeta().getPackage(packageId) == null) {
+      if (packageId != null && !dataService.getMeta().getPackage(packageId).isPresent()) {
         return ResponseEntity.badRequest()
             .contentType(TEXT_PLAIN)
             .body(MessageFormat.format("Package [{0}] does not exist.", packageId));
