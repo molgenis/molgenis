@@ -5,7 +5,8 @@
       <div class="row">
         <div class="col">
           <strong>{{ 'attribute-tree-title' | i18n }}</strong>
-          <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i class="fa fa-plus"></i></button>
+          <button @click="addAttribute" class="btn btn-primary btn-sm float-right"><i
+            class="fa fa-plus"></i></button>
         </div>
       </div>
 
@@ -13,7 +14,8 @@
 
       <div class="row">
         <div class="col">
-          <div class="btn-toolbar float-right" role="toolbar" :aria-label="$t('button-group-aria-label')">
+          <div class="btn-toolbar float-right" role="toolbar"
+               :aria-label="$t('button-group-aria-label')">
             <div class="btn-group mr-2" role="group">
               <button @click="moveAttribute('up')" class="btn btn-secondary btn-sm"
                       :disabled="!selectedAttribute || selectedAttributeIndex === 0">
@@ -27,7 +29,8 @@
               </button>
             </div>
             <div class="btn-group" role="group">
-              <button @click="deleteAttribute(selectedAttribute)" class="btn btn-danger float-right btn-sm"
+              <button @click="deleteAttribute(selectedAttribute)"
+                      class="btn btn-danger float-right btn-sm"
                       :disabled="!selectedAttribute">
 
                 <i class="fa fa-trash-o"></i>
@@ -41,7 +44,8 @@
                       :onAttributeSelect="onAttributeSelect"></attribute-tree>
 
       <p v-if="editorEntityType.entityTypeParent !== undefined">
-        {{ 'compound-attribute-text' | i18n }} <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
+        {{ 'compound-attribute-text' | i18n }}
+        <strong>{{editorEntityType.entityTypeParent.label}}:</strong><br>
         <span v-for="attribute in editorEntityType.entityTypeParent.attributes">- {{attribute.label}} <br></span>
       </p>
     </div>
@@ -65,7 +69,8 @@
       <div class="row">
         <div class="col-md-6">
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-name-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-name-label' |
+              i18n }}</label>
             <div class="col">
               <input v-model="name" class="form-control" type="text"
                      :placeholder="$t('attribute-edit-form-name-placeholder')">
@@ -73,24 +78,59 @@
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-label-label' | i18n }}</label>
-            <div class="col">
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-label-label' |
+              i18n }}</label>
+            <div class="col input-group">
               <input v-model="label" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-label-placeholder')">
+              <div class="input-group-append">
+                <button @click="showLabelLanguageInputs = !showLabelLanguageInputs" class="btn"><i
+                  class="fa fa-language fa-lg"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="showLabelLanguageInputs" v-for="languageCode in languageCodes"
+               class="form-group row">
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-label-label' | i18n
+              }} ({{ languageCode }})</label>
+            <div class="col">
+              <input :value="labelI18n[languageCode]"
+                     @input="updateLabelI18n(languageCode, $event.target.value)" class="form-control"
+                     type="text"
                      :placeholder="$t('attribute-edit-form-label-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-description-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{
+              'attribute-edit-form-description-label' | i18n }}</label>
+            <div class="col input-group">
+              <input v-model="description" class="form-control" type="text"
+                     :placeholder="$t('attribute-edit-form-description-placeholder')">
+              <div class="input-group-append">
+                <button @click="showDescriptionLanguageInputs = !showDescriptionLanguageInputs" class="btn"><i
+                  class="fa fa-language fa-lg"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="showDescriptionLanguageInputs" v-for="languageCode in languageCodes"
+               class="form-group row">
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-description-label' |
+              i18n
+              }} ({{ languageCode }})</label>
             <div class="col">
-              <textarea v-model="description" class="form-control" rows="2"
-                        :placeholder="$t('attribute-edit-form-description-placeholder')">
-              </textarea>
+              <input :value="descriptionI18n[languageCode]"
+                     @input="updateDescriptionI18n(languageCode, $event.target.value)" class="form-control"
+                     type="text"
+                     :placeholder="$t('attribute-edit-form-description-placeholder')">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-type-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-type-label' |
+              i18n }}</label>
             <div class="col">
               <multiselect v-model="type" :options="attributeTypes"
                            selectLabel="" deselectLabel=""
@@ -99,7 +139,8 @@
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-parent-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-parent-label' |
+              i18n }}</label>
             <div class="col">
               <multiselect v-model="parent" :options="compoundAttributes" label="label"
                            selectLabel="" deselectLabel=""
@@ -108,7 +149,8 @@
           </div>
 
           <div class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-default-value-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{
+              'attribute-edit-form-default-value-label' | i18n }}</label>
             <div class="col">
               <input v-model="defaultValue" class="form-control" type="text"
                      :placeholder="$t('attribute-edit-form-default-value-placeholder')">
@@ -116,7 +158,8 @@
           </div>
 
           <div v-if="isReferenceType" class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-reference-entity-label' | i18n
+            <label class="col-3 col-form-label text-muted">{{
+              'attribute-edit-form-reference-entity-label' | i18n
               }}</label>
             <div class="col">
               <multiselect v-model="refEntityType" :options="entityTypes" label="label"
@@ -134,7 +177,8 @@
 
           <div v-else-if="isNumericType">
             <div class="form-group row">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-minimum-range-label' | i18n
+              <label class="col-3 col-form-label text-muted">{{
+                'attribute-edit-form-minimum-range-label' | i18n
                 }}</label>
               <div class="col">
                 <input v-model.number="rangeMin" class="form-control" type="number"
@@ -143,7 +187,8 @@
             </div>
 
             <div class="form-group row">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-maximum-range-label' | i18n
+              <label class="col-3 col-form-label text-muted">{{
+                'attribute-edit-form-maximum-range-label' | i18n
                 }}</label>
               <div class="col">
                 <input v-model.number="rangeMax" class="form-control" type="number"
@@ -153,7 +198,8 @@
           </div>
 
           <div v-else-if="isEnumType" class="form-group row">
-            <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-enum-options-label' | i18n }}</label>
+            <label class="col-3 col-form-label text-muted">{{
+              'attribute-edit-form-enum-options-label' | i18n }}</label>
             <div class="col">
               <input v-model.lazy="enumOptions" class="form-control" type="text"
                      :placeholder="$t('attribute-edit-form-enum-options-placeholder')">
@@ -162,7 +208,8 @@
 
           <div v-if="isOneToManyType">
             <div class="form-group row">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-mapped-by-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{
+                'attribute-edit-form-mapped-by-label' | i18n }}</label>
               <div class="col">
                 <multiselect v-model="mappedByAttribute" :options="mappedByAttributes"
                              :custom-label="customOneToManyLabel"
@@ -173,7 +220,8 @@
 
             <!-- TODO: make this editable -->
             <div class="form-group row" v-if="orderBy && orderBy.orders">
-              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-order-by-label' | i18n }}</label>
+              <label class="col-3 col-form-label text-muted">{{ 'attribute-edit-form-order-by-label'
+                | i18n }}</label>
               <div class="col">
                 <p class="form-control-static">
                   <span v-for="o in orderBy.orders"> {{o.attributeName}}
@@ -188,21 +236,24 @@
 
         <div class="col-md-3">
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-nullable-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-nullable-label' |
+              i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="nullable" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-auto-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-auto-label' |
+              i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="auto" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-visible-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-visible-label' |
+              i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="visible" class="form-control" type="checkbox">
             </div>
@@ -211,21 +262,24 @@
 
         <div class="col-md-3">
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-unique-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-unique-label' |
+              i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="unique" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-readonly-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-readonly-label' |
+              i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="readonly" class="form-control" type="checkbox">
             </div>
           </div>
 
           <div class="form-group row">
-            <label class="col-6 col-form-label text-muted">{{ 'attribute-edit-form-aggregatable-label' | i18n }}</label>
+            <label class="col-6 col-form-label text-muted">{{
+              'attribute-edit-form-aggregatable-label' | i18n }}</label>
             <div class="col checkbox-column">
               <input v-model="aggregatable" class="form-control" type="checkbox">
             </div>
@@ -236,28 +290,32 @@
       <div class="row">
         <div class="col">
           <div class="form-group">
-            <label class="text-muted">{{ 'attribute-edit-form-computed-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-computed-expression-label' | i18n
+              }}</label>
             <textarea v-model="expression" class="form-control" rows="3"
                       :placeholder="$t('attribute-edit-form-computed-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
-            <label class="text-muted">{{ 'attribute-edit-form-nullable-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-nullable-expression-label' | i18n
+              }}</label>
             <textarea v-model="nullableExpression" class="form-control" rows="3"
                       :placeholder="$t('attribute-edit-form-nullable-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
-            <label class="text-muted">{{ 'attribute-edit-form-visible-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-visible-expression-label' | i18n
+              }}</label>
             <textarea v-model="visibleExpression" class="form-control" rows="3"
                       :placeholder="$t('attribute-edit-form-visible-expression-placeholder')"></textarea>
           </div>
         </div>
         <div class="col">
           <div class="form-group">
-            <label class="text-muted">{{ 'attribute-edit-form-validation-expression-label' | i18n }}</label>
+            <label class="text-muted">{{ 'attribute-edit-form-validation-expression-label' | i18n
+              }}</label>
             <textarea v-model="validationExpression" class="form-control" rows="3"
                       :placeholder="$t('attribute-edit-form-validation-expression-placeholder')"></textarea>
           </div>
@@ -281,7 +339,7 @@
 
 <script>
   import AttributeTree from './generic-components/AttributeTree'
-  import { mapState, mapGetters } from 'vuex'
+  import {mapState, mapGetters} from 'vuex'
   import {
     SET_SELECTED_ATTRIBUTE_ID,
     UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
@@ -289,18 +347,22 @@
     UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE_ORDER
   } from '../store/mutations'
 
-  import { CREATE_ATTRIBUTE } from '../store/actions'
-  import { getConfirmBeforeDeletingProperties } from '../store/getters'
+  import {CREATE_ATTRIBUTE} from '../store/actions'
+  import {getConfirmBeforeDeletingProperties} from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
 
   export default {
     name: 'metadata-manager-attribute-edit-form',
+    data: function () {
+      return {showLabelLanguageInputs: false, showDescriptionLanguageInputs: false}
+    },
     methods: {
       deleteAttribute (selectedAttribute) {
-        this.$swal(getConfirmBeforeDeletingProperties(selectedAttribute.label, this.$t)).then(() => {
-          this.$store.commit(DELETE_SELECTED_ATTRIBUTE, selectedAttribute.id)
-        }).catch(this.$swal.noop)
+        this.$swal(getConfirmBeforeDeletingProperties(selectedAttribute.label, this.$t)).then(
+          () => {
+            this.$store.commit(DELETE_SELECTED_ATTRIBUTE, selectedAttribute.id)
+          }).catch(this.$swal.noop)
       },
       onAttributeSelect (selectedAttribute) {
         this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, selectedAttribute.id)
@@ -316,10 +378,20 @@
       },
       customOneToManyLabel (attr) {
         return `${attr.entity.label} - ${attr.label}`
+      },
+      updateLabelI18n (languageCode, value) {
+        var labelI18n = Object.assign({}, this.selectedAttribute.labelI18n)
+        labelI18n[languageCode] = value
+        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'labelI18n', value: labelI18n})
+      },
+      updateDescriptionI18n (languageCode, value) {
+        var descriptionI18n = Object.assign({}, this.selectedAttribute.descriptionI18n)
+        descriptionI18n[languageCode] = value
+        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'descriptionI18n', value: descriptionI18n})
       }
     },
     computed: {
-      ...mapState(['editorEntityType', 'attributeTypes', 'entityTypes']),
+      ...mapState(['languageCodes', 'editorEntityType', 'attributeTypes', 'entityTypes']),
       ...mapGetters({
         selectedAttributeIndex: 'getIndexOfSelectedAttribute',
         selectedAttribute: 'getSelectedAttribute',
@@ -329,7 +401,8 @@
         mappedByAttributes: 'getMappedByAttributes'
       }),
       isReferenceType: function () {
-        return ['file', 'xref', 'mref', 'categorical', 'categoricalmref', 'onetomany'].includes(this.selectedAttribute.type)
+        return ['file', 'xref', 'mref', 'categorical', 'categoricalmref', 'onetomany'].includes(
+          this.selectedAttribute.type)
       },
       isNumericType: function () {
         return ['int', 'long'].includes(this.selectedAttribute.type)
@@ -356,13 +429,20 @@
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'label', value: value})
         }
       },
+      labelI18n: function () {
+        return this.selectedAttribute.labelI18n
+      },
       description: {
         get () {
           return this.selectedAttribute.description
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'description', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'description', value: value})
         }
+      },
+      descriptionI18n: function () {
+        return this.selectedAttribute.descriptionI18n
       },
       parent: {
         get () {
@@ -377,7 +457,8 @@
           return this.selectedAttribute.defaultValue
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'defaultValue', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'defaultValue', value: value})
         }
       },
       type: {
@@ -393,7 +474,8 @@
           return this.selectedAttribute.refEntityType
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'refEntityType', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'refEntityType', value: value})
         }
       },
       cascadeDelete: {
@@ -449,7 +531,8 @@
           return this.selectedAttribute.aggregatable
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'aggregatable', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'aggregatable', value: value})
         }
       },
       expression: {
@@ -465,7 +548,8 @@
           return this.selectedAttribute.nullableExpression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'nullableExpression', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'nullableExpression', value: value})
         }
       },
       visibleExpression: {
@@ -473,7 +557,8 @@
           return this.selectedAttribute.visibleExpression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'visibleExpression', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'visibleExpression', value: value})
         }
       },
       validationExpression: {
@@ -481,7 +566,8 @@
           return this.selectedAttribute.validationExpression
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'validationExpression', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'validationExpression', value: value})
         }
       },
       enumOptions: {
@@ -489,7 +575,8 @@
           return this.selectedAttribute.enumOptions.join(',')
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'enumOptions', value: value.split(',')})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'enumOptions', value: value.split(',')})
         }
       },
       mappedByAttribute: {
@@ -497,7 +584,8 @@
           return this.selectedAttribute.mappedByAttribute
         },
         set (value) {
-          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE, {key: 'mappedByAttribute', value: value})
+          this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE,
+            {key: 'mappedByAttribute', value: value})
         }
       },
       orderBy: {

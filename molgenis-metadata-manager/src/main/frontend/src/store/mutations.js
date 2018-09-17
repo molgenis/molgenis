@@ -11,6 +11,7 @@ import type {
 import {INITIAL_STATE} from './state'
 
 export const SET_PACKAGES: string = '__SET_PACKAGES__'
+export const SET_LANGUAGE_CODES: string = '__SET_LANGUAGE_CODES__'
 export const SET_ENTITY_TYPES: string = '__SET_ENTITY_TYPES__'
 export const SET_SELECTED_ENTITY_TYPE_ID: string = '__SET_SELECTED_ENTITY_TYPE_ID__'
 export const SET_ATTRIBUTE_TYPES: string = '__SET_ATTRIBUTE_TYPES__'
@@ -70,6 +71,9 @@ export default {
   [SET_PACKAGES] (state: State, packages: Array<EditorPackageIdentifier>) {
     const visiblePackages = filterNonVisiblePackages(packages)
     state.packages = visiblePackages.sort(compareByLabel)
+  },
+  [SET_LANGUAGE_CODES] (state: State, languageCodes: Array<string>) {
+    state.languageCodes = languageCodes.slice().sort()
   },
   [SET_ENTITY_TYPES] (state: State, entityTypes: Array<Object>) {
     const visibleEntities = filterNonVisibleEntities(entityTypes)

@@ -7,6 +7,7 @@ import {
   SET_ATTRIBUTE_TYPES,
   SET_EDITOR_ENTITY_TYPE,
   SET_ENTITY_TYPES,
+  SET_LANGUAGE_CODES,
   SET_LOADING,
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
@@ -26,13 +27,17 @@ export const CREATE_ATTRIBUTE: string = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE: string = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES: string = '__GET_ATTRIBUTE_TYPES__'
 
+export const toLanguageCodes = (languageCodes: Object): Array<string> => {
+  return languageCodes
+}
+
 export const toEntityType = (editorEntityType: Object): EditorEntityType => {
   return {
     'id': editorEntityType.id,
     'label': editorEntityType.label,
-    'i18nLabel': editorEntityType.i18nLabel,
+    'labelI18n': editorEntityType.labelI18n,
     'description': editorEntityType.description,
-    'i18nDescription': editorEntityType.i18nDescription,
+    'descriptionI18n': editorEntityType.descriptionI18n,
     'abstract0': editorEntityType.abstract0,
     'backend': editorEntityType.backend,
     'package0': editorEntityType.package0,
@@ -63,9 +68,9 @@ export const toAttribute = (attribute: Object): EditorAttribute => {
     'auto': attribute.auto,
     'visible': attribute.visible,
     'label': attribute.label,
-    'i18nLabel': attribute.i18nLabel,
+    'labelI18n': attribute.labelI18n,
     'description': attribute.description,
-    'i18nDescription': attribute.i18nDescription,
+    'descriptionI18n': attribute.descriptionI18n,
     'aggregatable': attribute.aggregatable,
     'enumOptions': attribute.enumOptions,
     'rangeMin': attribute.minRange,
@@ -93,6 +98,7 @@ function getEditorEntityType(commit: Function, entityTypeId: string) {
   withSpinner(commit,
     api.get('/plugin/metadata-manager/entityType/' + entityTypeId).then(
       response => {
+        commit(SET_LANGUAGE_CODES, toLanguageCodes(response.languageCodes))
         commit(SET_EDITOR_ENTITY_TYPE, toEntityType(response.entityType))
       }))
 }
