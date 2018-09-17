@@ -5,7 +5,11 @@ import static org.molgenis.data.meta.AttributeType.STRING;
 
 import com.google.common.collect.Iterables;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;

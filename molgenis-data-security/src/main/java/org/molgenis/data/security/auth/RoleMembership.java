@@ -3,8 +3,14 @@ package org.molgenis.data.security.auth;
 import static com.google.common.collect.Range.atLeast;
 import static com.google.common.collect.Range.closedOpen;
 import static java.time.Instant.now;
-import static org.molgenis.data.security.auth.RoleMembership.Status.*;
-import static org.molgenis.data.security.auth.RoleMembershipMetadata.*;
+import static org.molgenis.data.security.auth.RoleMembership.Status.CURRENT;
+import static org.molgenis.data.security.auth.RoleMembership.Status.FUTURE;
+import static org.molgenis.data.security.auth.RoleMembership.Status.PAST;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.FROM;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ID;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.TO;
+import static org.molgenis.data.security.auth.RoleMembershipMetadata.USER;
 
 import com.google.common.collect.Range;
 import java.time.Instant;

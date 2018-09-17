@@ -3,7 +3,9 @@ package org.molgenis.security.permission;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

@@ -1,7 +1,11 @@
 package org.molgenis.data.security.auth;
 
-import static org.molgenis.data.security.auth.GroupService.*;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.data.security.auth.GroupService.EDITOR;
+import static org.molgenis.data.security.auth.GroupService.MANAGER;
+import static org.molgenis.data.security.auth.GroupService.VIEWER;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.molgenis.security.core.SidUtils.createAuthoritySid;
 import static org.molgenis.security.core.SidUtils.createRoleSid;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;

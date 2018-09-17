@@ -1,6 +1,6 @@
 package org.molgenis.data.postgresql;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
 
 import org.mockito.InOrder;
 import org.mockito.Mock;

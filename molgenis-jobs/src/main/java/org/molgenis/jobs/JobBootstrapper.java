@@ -6,7 +6,11 @@ import static org.molgenis.jobs.model.JobExecution.MAX_LOG_LENGTH;
 import static org.molgenis.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.jobs.model.JobExecution.Status.RUNNING;
 import static org.molgenis.jobs.model.JobExecution.TRUNCATION_BANNER;
-import static org.molgenis.jobs.model.JobExecutionMetaData.*;
+import static org.molgenis.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
+import static org.molgenis.jobs.model.JobExecutionMetaData.LOG;
+import static org.molgenis.jobs.model.JobExecutionMetaData.PENDING;
+import static org.molgenis.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.STATUS;
 import static org.molgenis.jobs.model.ScheduledJobTypeMetadata.SCHEDULED_JOB_TYPE;
 import static org.springframework.util.StringUtils.isEmpty;
 

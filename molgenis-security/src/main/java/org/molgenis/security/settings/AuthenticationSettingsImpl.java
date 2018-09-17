@@ -1,7 +1,9 @@
 package org.molgenis.security.settings;
 
 import static java.util.Arrays.asList;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.STRING;
 
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 import org.molgenis.settings.DefaultSettingsEntity;

@@ -2,7 +2,11 @@ package org.molgenis.web.rsql;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import cz.jirutka.rsql.parser.ast.*;
+import cz.jirutka.rsql.parser.ast.AndNode;
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.NoArgRSQLVisitorAdapter;
+import cz.jirutka.rsql.parser.ast.Node;
+import cz.jirutka.rsql.parser.ast.OrNode;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;

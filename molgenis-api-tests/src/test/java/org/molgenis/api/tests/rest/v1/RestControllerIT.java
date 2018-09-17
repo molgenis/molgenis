@@ -2,8 +2,24 @@ package org.molgenis.api.tests.rest.v1;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.molgenis.api.tests.utils.RestTestUtils.*;
-import static org.molgenis.api.tests.utils.RestTestUtils.Permission.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
+import static org.molgenis.api.tests.utils.RestTestUtils.BAD_REQUEST;
+import static org.molgenis.api.tests.utils.RestTestUtils.FORBIDDEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.NOT_FOUND;
+import static org.molgenis.api.tests.utils.RestTestUtils.NO_CONTENT;
+import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.COUNT;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.READ;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITE;
+import static org.molgenis.api.tests.utils.RestTestUtils.Permission.WRITEMETA;
+import static org.molgenis.api.tests.utils.RestTestUtils.UNAUTHORIZED;
+import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
+import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
+import static org.molgenis.api.tests.utils.RestTestUtils.login;
+import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
+import static org.molgenis.api.tests.utils.RestTestUtils.setGrantedRepositoryPermissions;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

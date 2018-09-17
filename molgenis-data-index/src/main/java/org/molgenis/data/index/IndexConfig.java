@@ -5,8 +5,17 @@ import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUT
 
 import javax.annotation.PostConstruct;
 import org.molgenis.data.DataService;
-import org.molgenis.data.index.job.*;
-import org.molgenis.data.index.meta.*;
+import org.molgenis.data.index.job.IndexJobExecution;
+import org.molgenis.data.index.job.IndexJobExecutionFactory;
+import org.molgenis.data.index.job.IndexJobExecutionMeta;
+import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexJobSchedulerImpl;
+import org.molgenis.data.index.job.IndexJobService;
+import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.index.meta.IndexActionGroupFactory;
+import org.molgenis.data.index.meta.IndexActionGroupMetaData;
+import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.index.transaction.IndexTransactionListener;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.transaction.TransactionManager;

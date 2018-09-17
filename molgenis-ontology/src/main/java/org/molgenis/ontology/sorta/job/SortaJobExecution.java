@@ -1,6 +1,12 @@
 package org.molgenis.ontology.sorta.job;
 
-import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.*;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.DELETE_URL;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.NAME;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.ONTOLOGY_IRI;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.RESULT_ENTITY;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_MATCH_JOB_TYPE;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SOURCE_ENTITY;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.THRESHOLD;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

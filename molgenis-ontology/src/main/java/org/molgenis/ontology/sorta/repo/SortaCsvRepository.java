@@ -6,7 +6,11 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;

@@ -1,7 +1,11 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.PermissionSet.COUNT;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.READMETA;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
 import javax.annotation.PostConstruct;
 import org.molgenis.data.security.EntityPermission;

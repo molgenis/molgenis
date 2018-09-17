@@ -1,7 +1,16 @@
 package org.molgenis.semanticsearch.repository;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.TagMetadata.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.model.TagMetadata.CODE_SYSTEM;
+import static org.molgenis.data.meta.model.TagMetadata.OBJECT_IRI;
+import static org.molgenis.data.meta.model.TagMetadata.RELATION_IRI;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 import static org.testng.Assert.assertTrue;
 
 import java.util.UUID;

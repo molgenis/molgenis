@@ -21,7 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.transaction.TransactionInformation;
 
 /**

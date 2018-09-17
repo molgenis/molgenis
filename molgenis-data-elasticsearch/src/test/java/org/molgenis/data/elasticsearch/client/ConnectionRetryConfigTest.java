@@ -1,11 +1,18 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.elasticsearch.client.Client;
 import org.molgenis.data.MolgenisDataException;
 import org.springframework.beans.factory.annotation.Autowired;

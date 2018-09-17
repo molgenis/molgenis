@@ -6,7 +6,11 @@ import static org.mockito.Mockito.mock;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;

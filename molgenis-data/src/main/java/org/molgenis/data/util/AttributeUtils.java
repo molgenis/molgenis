@@ -5,9 +5,16 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
-import static org.molgenis.data.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.springframework.util.StringUtils.capitalize;
 
 import java.time.Instant;

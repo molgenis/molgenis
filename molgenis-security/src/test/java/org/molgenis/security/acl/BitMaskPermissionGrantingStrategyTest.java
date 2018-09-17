@@ -1,7 +1,10 @@
 package org.molgenis.security.acl;
 
 import static java.lang.String.format;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.PermissionSet.COUNT;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

@@ -2,14 +2,20 @@ package org.molgenis.data.importer.emx;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.DataPersister;
+import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetadataAction;
+import org.molgenis.data.importer.ParsedMetaData;
+import org.molgenis.data.importer.PersistResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.security.core.UserPermissionEvaluator;

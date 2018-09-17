@@ -2,7 +2,10 @@ package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonMap;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.testng.Assert.assertEquals;
 
@@ -14,9 +17,18 @@ import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.data.meta.model.Tag;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
+import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
+import org.molgenis.metadata.manager.model.EditorTagIdentifier;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

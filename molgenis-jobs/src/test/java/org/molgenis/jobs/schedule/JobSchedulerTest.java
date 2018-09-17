@@ -1,6 +1,8 @@
 package org.molgenis.jobs.schedule;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
 
@@ -17,7 +19,11 @@ import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobFactory;
 import org.molgenis.jobs.model.ScheduledJobMetadata;
 import org.molgenis.jobs.model.ScheduledJobType;
-import org.quartz.*;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

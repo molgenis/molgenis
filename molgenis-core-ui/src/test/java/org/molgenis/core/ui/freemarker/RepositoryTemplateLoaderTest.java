@@ -2,7 +2,9 @@ package org.molgenis.core.ui.freemarker;
 
 import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.Reader;

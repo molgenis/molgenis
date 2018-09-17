@@ -2,9 +2,21 @@ package org.molgenis.data.security.auth;
 
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.MONTHS;
-import static org.molgenis.data.security.auth.MembershipInvitationMetadata.*;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.DECLINE_REASON;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.EMAIL;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.FROM;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.ID;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.INVITATION_TEXT;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.INVITED_BY;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.ISSUED;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.LAST_UPDATE;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.ROLE;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.STATUS;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status;
 import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status.EXPIRED;
 import static org.molgenis.data.security.auth.MembershipInvitationMetadata.Status.PENDING;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.TO;
+import static org.molgenis.data.security.auth.MembershipInvitationMetadata.TOKEN;
 
 import java.time.Instant;
 import java.util.Optional;

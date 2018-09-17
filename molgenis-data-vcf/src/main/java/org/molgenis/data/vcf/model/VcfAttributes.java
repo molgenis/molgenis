@@ -1,7 +1,9 @@
 package org.molgenis.data.vcf.model;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
 
 import org.molgenis.data.meta.model.Attribute;

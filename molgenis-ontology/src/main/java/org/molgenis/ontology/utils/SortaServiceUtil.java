@@ -1,6 +1,10 @@
 package org.molgenis.ontology.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.molgenis.data.Entity;
 
 public class SortaServiceUtil {

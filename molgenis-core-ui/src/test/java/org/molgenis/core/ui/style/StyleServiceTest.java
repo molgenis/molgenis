@@ -1,6 +1,12 @@
 package org.molgenis.core.ui.style;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.core.ui.style.StyleServiceImpl.BOOTSTRAP_FALL_BACK_THEME;
 import static org.molgenis.core.ui.style.StyleSheetMetadata.STYLE_SHEET;
 import static org.testng.Assert.assertEquals;

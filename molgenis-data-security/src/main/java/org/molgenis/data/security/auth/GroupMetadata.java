@@ -2,8 +2,12 @@ package org.molgenis.data.security.auth;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.security.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;

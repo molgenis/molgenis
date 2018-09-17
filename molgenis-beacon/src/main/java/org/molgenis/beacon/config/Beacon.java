@@ -1,7 +1,14 @@
 package org.molgenis.beacon.config;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.beacon.config.BeaconMetadata.*;
+import static org.molgenis.beacon.config.BeaconMetadata.API_VERSION;
+import static org.molgenis.beacon.config.BeaconMetadata.BEACON_ORGANIZATION;
+import static org.molgenis.beacon.config.BeaconMetadata.DATA_SETS;
+import static org.molgenis.beacon.config.BeaconMetadata.DESCRIPTION;
+import static org.molgenis.beacon.config.BeaconMetadata.ID;
+import static org.molgenis.beacon.config.BeaconMetadata.NAME;
+import static org.molgenis.beacon.config.BeaconMetadata.VERSION;
+import static org.molgenis.beacon.config.BeaconMetadata.WELCOME_URL;
 
 import java.util.List;
 import javax.annotation.Nullable;

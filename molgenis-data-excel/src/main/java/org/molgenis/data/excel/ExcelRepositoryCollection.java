@@ -1,7 +1,11 @@
 package org.molgenis.data.excel;
 
 import com.google.common.collect.Lists;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;

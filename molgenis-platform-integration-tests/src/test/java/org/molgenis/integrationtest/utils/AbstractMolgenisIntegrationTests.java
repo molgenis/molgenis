@@ -10,7 +10,11 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import java.io.IOException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.postgresql.DatabaseConfig;
-import org.molgenis.integrationtest.config.*;
+import org.molgenis.integrationtest.config.BootStrapperTestConfig;
+import org.molgenis.integrationtest.config.FileTestConfig;
+import org.molgenis.integrationtest.config.PostgreSqlTestConfig;
+import org.molgenis.integrationtest.config.SecurityITConfig;
+import org.molgenis.integrationtest.config.WebAppITConfig;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;

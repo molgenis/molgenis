@@ -1,7 +1,12 @@
 package org.molgenis.genomebrowser;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.ALT;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.CHROM;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.POS;
+import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.REF;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettings.TrackType.VARIANT;
 import static org.testng.Assert.assertEquals;
 

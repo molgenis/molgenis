@@ -2,7 +2,13 @@ package org.molgenis.oneclickimporter.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;

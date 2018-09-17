@@ -1,7 +1,11 @@
 package org.molgenis.i18n;
 
-import static java.util.Locale.*;
-import static org.mockito.Mockito.*;
+import static java.util.Locale.ENGLISH;
+import static java.util.Locale.GERMAN;
+import static java.util.Locale.KOREAN;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.molgenis.i18n.LanguageService.DEFAULT_LOCALE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;

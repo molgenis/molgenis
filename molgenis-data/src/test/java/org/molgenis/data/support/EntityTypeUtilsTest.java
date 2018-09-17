@@ -4,8 +4,15 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import java.util.Iterator;

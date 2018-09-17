@@ -1,10 +1,16 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Iterators;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

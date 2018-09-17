@@ -1,6 +1,10 @@
 package org.molgenis.beacon.config;
 
-import static org.molgenis.beacon.config.BeaconDatasetMetadata.*;
+import static org.molgenis.beacon.config.BeaconDatasetMetadata.DATA_SET_ENTITY_TYPE;
+import static org.molgenis.beacon.config.BeaconDatasetMetadata.DESCRIPTION;
+import static org.molgenis.beacon.config.BeaconDatasetMetadata.GENOME_BROWSER_ATTRIBUTES;
+import static org.molgenis.beacon.config.BeaconDatasetMetadata.ID;
+import static org.molgenis.beacon.config.BeaconDatasetMetadata.LABEL;
 
 import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.data.Entity;

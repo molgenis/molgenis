@@ -1,6 +1,9 @@
 package org.molgenis.ontology.core.ic;
 
-import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.*;
+import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.FREQUENCY;
+import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.OCCURRENCE;
+import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.TERM;
+import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.TERM_FREQUENCY;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 

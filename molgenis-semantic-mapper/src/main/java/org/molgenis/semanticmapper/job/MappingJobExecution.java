@@ -1,6 +1,10 @@
 package org.molgenis.semanticmapper.job;
 
-import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.*;
+import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.ADD_SOURCE_ATTRIBUTE;
+import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.LABEL;
+import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.MAPPING_PROJECT_ID;
+import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.PACKAGE_ID;
+import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

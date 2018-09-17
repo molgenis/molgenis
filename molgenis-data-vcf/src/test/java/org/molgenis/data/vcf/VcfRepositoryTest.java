@@ -2,8 +2,13 @@ package org.molgenis.data.vcf;
 
 import static java.nio.file.Files.createTempFile;
 import static java.util.Collections.singleton;
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
 import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 import static org.testng.Assert.assertEquals;
