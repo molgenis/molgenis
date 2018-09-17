@@ -1,6 +1,8 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
