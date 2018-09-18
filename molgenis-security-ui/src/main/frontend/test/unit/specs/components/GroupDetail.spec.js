@@ -1,5 +1,5 @@
 import GroupDetail from '../../../../src/components/GroupDetail'
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import {createLocalVue, shallowMount} from '@vue/test-utils'
 import td from 'testdouble'
 import Vuex from 'vuex'
 
@@ -74,7 +74,8 @@ describe('GroupDetail component', () => {
 
     getters = {
       groupMembers: () => groupMembers,
-      groupPermissions: () => groupPermissions
+      groupPermissions: () => groupPermissions,
+      getLoginUser: () => loginUser
     }
 
     mutations = {
@@ -92,7 +93,7 @@ describe('GroupDetail component', () => {
         propsData: {
           name: 'group1'
         },
-        mocks: { $router, $route },
+        mocks: {$router, $route, $t},
         store,
         stubs,
         localVue
@@ -105,7 +106,7 @@ describe('GroupDetail component', () => {
         propsData: {
           name: 'group1'
         },
-        mocks: { $router, $route },
+        mocks: {$router, $route, $t},
         store,
         stubs,
         localVue
@@ -120,7 +121,7 @@ describe('GroupDetail component', () => {
         propsData: {
           name: 'group1'
         },
-        mocks: { $router, $route },
+        mocks: {$router, $route, $t},
         store,
         stubs,
         localVue

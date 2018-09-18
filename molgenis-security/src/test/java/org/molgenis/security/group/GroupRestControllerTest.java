@@ -673,4 +673,12 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
       return new SpringExceptionHandler();
     }
   }
+
+  @Test
+  public void testDeleteGroup() throws Exception {
+    mockMvc
+        .perform(delete(GROUP_END_POINT + "/devs").contentType(APPLICATION_JSON_UTF8))
+        .andExpect(status().isNoContent());
+    verify(groupService).deleteGroup("devs");
+  }
 }

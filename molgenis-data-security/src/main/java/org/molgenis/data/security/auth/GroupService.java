@@ -94,7 +94,7 @@ public class GroupService {
     roles.values().forEach(role -> addIncludedRoles(role, roles, groupValue.getName()));
 
     Group group = groupFactory.create(groupValue);
-    group.setRootPackage(rootPackage.getId());
+    group.setRootPackage(rootPackage);
     group.setRoles(roles.values());
 
     dataService.add(PACKAGE, rootPackage);
@@ -233,5 +233,15 @@ public class GroupService {
       throw new UnknownEntityException(roleMetadata, roleMetadata.getAttribute(NAME), rolename);
     }
     return result;
+  }
+
+  public void deleteGroup(String groupName) {
+    Group group =
+        dataService
+            .query(GroupMetadata.GROUP, Group.class)
+            .eq(GroupMetadata.NAME, groupName)
+            .findOne();
+
+    dataService.delete(GroupMetadata.GROUP, group);
   }
 }

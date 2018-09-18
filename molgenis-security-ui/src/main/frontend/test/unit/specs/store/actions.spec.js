@@ -461,4 +461,52 @@ describe('actions', () => {
       testUtils.testAction(actions.updateMember, options, done)
     })
   })
+
+  describe('deleteGroup', () => {
+    const groupName = 'my-group'
+
+    it('should delete group and display toast', done => {
+      const delete_ = td.function('api.delete_')
+      td.when(delete_('/api/plugin/security/group/my-group')).thenResolve()
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        payload: {groupName},
+        expectedMutations: [
+          {
+            type: 'setToast',
+            payload: {type: 'success', message: 'Deleted Group'}
+          },
+          {type: 'clearToast'}
+        ]
+      }
+
+      testUtils.testAction(actions.deleteGroup, options, done)
+    })
+
+    it('should commit any errors to the store', done => {
+      const error = {
+        errors: [{
+          message: 'Error when calling',
+          code: 'backend'
+        }]
+      }
+
+      const delete_ = td.function('api.post')
+      td.when(delete_('/api/plugin/security/group/my-group')).thenReject(error)
+      td.replace(api, 'delete_', delete_)
+
+      const options = {
+        payload: {groupName},
+        expectedMutations: [
+          {
+            type: 'setToast',
+            payload: {type: 'danger', message: 'Error when calling (backend)'}
+          }
+        ]
+      }
+
+      testUtils.testAction(actions.deleteGroup, options, done)
+    })
+  })
 })

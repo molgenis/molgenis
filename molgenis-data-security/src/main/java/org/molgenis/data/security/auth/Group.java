@@ -11,6 +11,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.StaticEntity;
 
 public class Group extends StaticEntity {
@@ -91,7 +92,7 @@ public class Group extends StaticEntity {
     set(ROLES, roles);
   }
 
-  public void setRootPackage(String rootPackage) {
+  public void setRootPackage(Package rootPackage) {
     set(ROOT_PACKAGE, rootPackage);
   }
 

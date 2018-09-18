@@ -120,6 +120,17 @@ public class GroupRestController {
     return ResponseEntity.created(location).build();
   }
 
+  @DeleteMapping(GROUP_END_POINT + "/{groupName}")
+  @ApiOperation(value = "Delete a group", response = ResponseEntity.class)
+  @Transactional
+  @ApiResponses({
+    @ApiResponse(code = 204, message = "Group deleted", response = ResponseEntity.class),
+  })
+  public ResponseEntity deleteGroup(@PathVariable(value = "groupName") String groupName) {
+    groupService.deleteGroup(groupName);
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping(GROUP_END_POINT)
   @ApiOperation(value = "Get list with groups", response = ResponseEntity.class)
   @ApiResponses({

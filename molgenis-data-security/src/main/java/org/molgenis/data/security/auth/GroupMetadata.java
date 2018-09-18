@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
@@ -15,6 +16,7 @@ import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 
 import java.util.Set;
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.meta.model.PackageMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,10 +34,12 @@ public class GroupMetadata extends SystemEntityType {
 
   private final SecurityPackage securityPackage;
   private RoleMetadata roleMetadata;
+  private PackageMetadata packageMetadata;
 
-  public GroupMetadata(SecurityPackage securityPackage) {
+  public GroupMetadata(SecurityPackage securityPackage, PackageMetadata packageMetadata) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
+    this.packageMetadata = requireNonNull(packageMetadata);
   }
 
   @Override
@@ -76,8 +80,13 @@ public class GroupMetadata extends SystemEntityType {
         .setCascadeDelete(true);
     addAttribute(ROOT_PACKAGE)
         .setLabel("Root package")
-        .setDescription("Id of the package where this Group's resources reside.")
-        .setNillable(false);
+        .setDescription("Package where this Group's resources reside.")
+        .setDataType(XREF)
+        .setRefEntity(packageMetadata)
+        .setNillable(false)
+        .setReadOnly(true)
+        .setCascadeDelete(true)
+        .setUnique(true);
   }
 
   public void setRoleMetadata(RoleMetadata roleMetadata) {
