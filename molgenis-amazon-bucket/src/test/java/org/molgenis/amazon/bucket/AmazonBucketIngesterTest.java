@@ -1,6 +1,11 @@
 package org.molgenis.amazon.bucket;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 
 import com.amazonaws.services.s3.AmazonS3Client;

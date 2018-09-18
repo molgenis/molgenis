@@ -4,7 +4,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.LONG_SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.*;
+import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.CODE;
+import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.RECOVERY_CODE;
+import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.USER_ID;
 import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECRET;
 
 import java.util.List;

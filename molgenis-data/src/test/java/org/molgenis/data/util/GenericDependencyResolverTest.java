@@ -2,7 +2,9 @@ package org.molgenis.data.util;
 
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 

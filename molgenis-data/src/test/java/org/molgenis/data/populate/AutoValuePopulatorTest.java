@@ -3,7 +3,9 @@ package org.molgenis.data.populate;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 

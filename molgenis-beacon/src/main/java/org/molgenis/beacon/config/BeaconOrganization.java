@@ -1,6 +1,12 @@
 package org.molgenis.beacon.config;
 
-import static org.molgenis.beacon.config.BeaconOrganizationMetadata.*;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.ADDRESS;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.CONTACT_URL;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.DESCRIPTION;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.ID;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.LOGO_URL;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.NAME;
+import static org.molgenis.beacon.config.BeaconOrganizationMetadata.WELCOME_URL;
 
 import javax.annotation.Nullable;
 import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;

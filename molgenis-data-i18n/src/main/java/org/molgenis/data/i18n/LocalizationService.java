@@ -1,11 +1,21 @@
 package org.molgenis.data.i18n;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.*;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
+import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
 
 import com.google.common.collect.Sets;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.model.L10nString;

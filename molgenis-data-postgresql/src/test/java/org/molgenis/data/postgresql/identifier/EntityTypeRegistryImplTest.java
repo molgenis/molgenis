@@ -2,9 +2,14 @@ package org.molgenis.data.postgresql.identifier;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.transaction.TransactionManager.TRANSACTION_ID_RESOURCE_NAME;
-import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.bindResource;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.getResource;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 

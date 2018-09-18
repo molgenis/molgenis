@@ -1,7 +1,12 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 import static org.testng.Assert.assertEquals;
@@ -19,7 +24,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleMembership;
+import org.molgenis.data.security.auth.RoleMembershipFactory;
+import org.molgenis.data.security.auth.RoleMembershipMetadata;
+import org.molgenis.data.security.auth.RoleMetadata;
+import org.molgenis.data.security.auth.User;
+import org.molgenis.data.security.auth.UserMetaData;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;

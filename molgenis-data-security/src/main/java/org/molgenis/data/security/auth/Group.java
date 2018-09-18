@@ -1,6 +1,12 @@
 package org.molgenis.data.security.auth;
 
-import static org.molgenis.data.security.auth.GroupMetadata.*;
+import static org.molgenis.data.security.auth.GroupMetadata.DESCRIPTION;
+import static org.molgenis.data.security.auth.GroupMetadata.ID;
+import static org.molgenis.data.security.auth.GroupMetadata.LABEL;
+import static org.molgenis.data.security.auth.GroupMetadata.NAME;
+import static org.molgenis.data.security.auth.GroupMetadata.PUBLIC;
+import static org.molgenis.data.security.auth.GroupMetadata.ROLES;
+import static org.molgenis.data.security.auth.GroupMetadata.ROOT_PACKAGE;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 import org.molgenis.data.Entity;

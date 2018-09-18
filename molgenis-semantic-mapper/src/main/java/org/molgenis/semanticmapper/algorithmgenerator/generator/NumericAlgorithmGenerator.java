@@ -1,7 +1,9 @@
 package org.molgenis.semanticmapper.algorithmgenerator.generator;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
 
 import java.util.Arrays;
 import java.util.List;

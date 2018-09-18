@@ -1,7 +1,12 @@
 package org.molgenis.data.security;
 
-import static org.mockito.Mockito.*;
-import static org.molgenis.data.security.EntityTypePermission.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
+import static org.molgenis.data.security.EntityTypePermission.AGGREGATE_DATA;
+import static org.molgenis.data.security.EntityTypePermission.COUNT_DATA;
 
 import java.io.IOException;
 import java.util.List;

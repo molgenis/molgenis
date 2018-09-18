@@ -1,7 +1,9 @@
 package org.molgenis.dataexplorer;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
 import javax.annotation.PostConstruct;
 import org.molgenis.security.core.PermissionRegistry;

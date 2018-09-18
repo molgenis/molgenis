@@ -2,7 +2,11 @@ package org.molgenis.data.migrate.version;
 
 import static java.util.Objects.requireNonNull;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import org.molgenis.util.UncheckedSqlException;

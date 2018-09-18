@@ -1,7 +1,9 @@
 package org.molgenis.security.login;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;

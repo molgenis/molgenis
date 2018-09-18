@@ -13,7 +13,11 @@ import static org.molgenis.security.core.GroupValueFactory.createRoleName;
 import static org.molgenis.security.core.SidUtils.createRoleAuthority;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;

@@ -2,7 +2,17 @@ package org.molgenis.api.tests.twofactor;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
-import static org.molgenis.api.tests.utils.RestTestUtils.*;
+import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
+import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_HOST;
+import static org.molgenis.api.tests.utils.RestTestUtils.OKE;
+import static org.molgenis.api.tests.utils.RestTestUtils.UNAUTHORIZED;
+import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
+import static org.molgenis.api.tests.utils.RestTestUtils.cleanupUserToken;
+import static org.molgenis.api.tests.utils.RestTestUtils.createUser;
+import static org.molgenis.api.tests.utils.RestTestUtils.login;
+import static org.molgenis.api.tests.utils.RestTestUtils.removeRightsForUser;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;

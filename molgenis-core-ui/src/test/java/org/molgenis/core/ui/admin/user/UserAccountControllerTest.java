@@ -2,7 +2,10 @@ package org.molgenis.core.ui.admin.user;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

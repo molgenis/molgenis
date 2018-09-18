@@ -2,7 +2,9 @@ package org.molgenis.web.exception;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.web.exception.ExceptionHandlerUtils.*;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.DEVELOPMENT;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.PRODUCTION;
+import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

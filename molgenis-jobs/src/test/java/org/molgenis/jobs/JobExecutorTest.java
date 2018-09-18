@@ -1,6 +1,9 @@
 package org.molgenis.jobs;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.jobs.model.JobExecution.Status.FAILED;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;

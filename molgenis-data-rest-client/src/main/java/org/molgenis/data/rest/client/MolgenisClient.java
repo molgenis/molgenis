@@ -2,12 +2,19 @@ package org.molgenis.data.rest.client;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static java.util.Collections.singletonList;
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.HttpStatus.OK;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.molgenis.data.rest.client.bean.*;
+import org.molgenis.data.rest.client.bean.LoginRequest;
+import org.molgenis.data.rest.client.bean.LoginResponse;
+import org.molgenis.data.rest.client.bean.MetaDataRequest;
+import org.molgenis.data.rest.client.bean.MetaDataResponse;
+import org.molgenis.data.rest.client.bean.QueryResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;

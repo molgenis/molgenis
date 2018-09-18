@@ -2,7 +2,9 @@ package org.molgenis.data.plugin.model;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;

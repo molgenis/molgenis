@@ -2,7 +2,9 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 

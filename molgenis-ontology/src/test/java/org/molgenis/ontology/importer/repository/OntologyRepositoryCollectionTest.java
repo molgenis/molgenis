@@ -10,7 +10,10 @@ import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaD
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +28,11 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.importer.repository.OntologyRepositoryCollection;
-import org.molgenis.ontology.core.meta.*;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.BeanUtils;

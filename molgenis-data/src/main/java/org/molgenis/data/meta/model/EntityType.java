@@ -13,7 +13,14 @@ import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.PACKAGE;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 

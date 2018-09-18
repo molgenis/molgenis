@@ -2,7 +2,14 @@ package org.molgenis.data.platform.decorators;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.data.*;
+import org.molgenis.data.CascadeDeleteRepositoryDecorator;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityReferenceResolverDecorator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.SystemRepositoryDecoratorRegistry;
 import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
@@ -21,7 +28,11 @@ import org.molgenis.data.security.aggregation.AggregateAnonymizerRepositoryDecor
 import org.molgenis.data.security.owned.RowLevelSecurityRepositoryDecoratorFactory;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.transaction.TransactionalRepositoryDecorator;
-import org.molgenis.data.validation.*;
+import org.molgenis.data.validation.DefaultValueReferenceValidator;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.QueryValidationRepositoryDecorator;
+import org.molgenis.data.validation.QueryValidator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;

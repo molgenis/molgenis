@@ -1,6 +1,8 @@
 package org.molgenis.data.security.aggregation;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;

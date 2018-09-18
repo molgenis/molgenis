@@ -12,7 +12,12 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
-import org.molgenis.metadata.manager.model.*;
+import org.molgenis.metadata.manager.model.EditorAttribute;
+import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
+import org.molgenis.metadata.manager.model.EditorEntityType;
+import org.molgenis.metadata.manager.model.EditorEntityTypeParent;
+import org.molgenis.metadata.manager.model.EditorPackageIdentifier;
+import org.molgenis.metadata.manager.model.EditorTagIdentifier;
 import org.springframework.stereotype.Component;
 
 @Component

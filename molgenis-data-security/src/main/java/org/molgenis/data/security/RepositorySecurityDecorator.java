@@ -1,14 +1,23 @@
 package org.molgenis.data.security;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.EntityTypePermission.*;
+import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
+import static org.molgenis.data.security.EntityTypePermission.AGGREGATE_DATA;
+import static org.molgenis.data.security.EntityTypePermission.COUNT_DATA;
+import static org.molgenis.data.security.EntityTypePermission.DELETE_DATA;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
+import static org.molgenis.data.security.EntityTypePermission.UPDATE_DATA;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.EntityType;

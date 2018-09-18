@@ -1,7 +1,14 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.MAX_BATCH_SIZE;
 
 import org.mockito.Mock;

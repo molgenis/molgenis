@@ -1,6 +1,9 @@
 package org.molgenis.dataexplorer.settings;
 
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

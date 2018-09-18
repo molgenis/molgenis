@@ -1,6 +1,8 @@
 package org.molgenis.questionnaires.meta;
 
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.questionnaires.meta.QuestionnaireStatus.SUBMITTED;

@@ -2,7 +2,9 @@ package org.molgenis.security.google;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.UserMetaData.*;
+import static org.molgenis.data.security.auth.UserMetaData.EMAIL;
+import static org.molgenis.data.security.auth.UserMetaData.GOOGLEACCOUNTID;
+import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
 

@@ -6,7 +6,11 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.SIMPLE_NAME;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;

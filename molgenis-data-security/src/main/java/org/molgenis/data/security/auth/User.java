@@ -1,6 +1,29 @@
 package org.molgenis.data.security.auth;
 
-import static org.molgenis.data.security.auth.UserMetaData.*;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVATIONCODE;
+import static org.molgenis.data.security.auth.UserMetaData.ACTIVE;
+import static org.molgenis.data.security.auth.UserMetaData.ADDRESS;
+import static org.molgenis.data.security.auth.UserMetaData.AFFILIATION;
+import static org.molgenis.data.security.auth.UserMetaData.CHANGE_PASSWORD;
+import static org.molgenis.data.security.auth.UserMetaData.CITY;
+import static org.molgenis.data.security.auth.UserMetaData.COUNTRY;
+import static org.molgenis.data.security.auth.UserMetaData.DEPARTMENT;
+import static org.molgenis.data.security.auth.UserMetaData.EMAIL;
+import static org.molgenis.data.security.auth.UserMetaData.FAX;
+import static org.molgenis.data.security.auth.UserMetaData.FIRSTNAME;
+import static org.molgenis.data.security.auth.UserMetaData.GOOGLEACCOUNTID;
+import static org.molgenis.data.security.auth.UserMetaData.ID;
+import static org.molgenis.data.security.auth.UserMetaData.LANGUAGECODE;
+import static org.molgenis.data.security.auth.UserMetaData.LASTNAME;
+import static org.molgenis.data.security.auth.UserMetaData.MIDDLENAMES;
+import static org.molgenis.data.security.auth.UserMetaData.PASSWORD;
+import static org.molgenis.data.security.auth.UserMetaData.PHONE;
+import static org.molgenis.data.security.auth.UserMetaData.ROLE;
+import static org.molgenis.data.security.auth.UserMetaData.SUPERUSER;
+import static org.molgenis.data.security.auth.UserMetaData.TITLE;
+import static org.molgenis.data.security.auth.UserMetaData.TOLLFREEPHONE;
+import static org.molgenis.data.security.auth.UserMetaData.TWO_FACTOR_AUTHENTICATION;
+import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

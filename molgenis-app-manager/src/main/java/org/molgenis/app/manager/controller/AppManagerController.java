@@ -2,7 +2,9 @@ package org.molgenis.app.manager.controller;
 
 import static java.io.File.separator;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.*;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.APPS_DIR;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.ZIP_CONFIG_FILE;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.ZIP_INDEX_FILE;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +19,14 @@ import org.molgenis.data.DataService;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller

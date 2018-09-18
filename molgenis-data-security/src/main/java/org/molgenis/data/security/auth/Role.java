@@ -1,6 +1,11 @@
 package org.molgenis.data.security.auth;
 
-import static org.molgenis.data.security.auth.RoleMetadata.*;
+import static org.molgenis.data.security.auth.RoleMetadata.DESCRIPTION;
+import static org.molgenis.data.security.auth.RoleMetadata.GROUP;
+import static org.molgenis.data.security.auth.RoleMetadata.ID;
+import static org.molgenis.data.security.auth.RoleMetadata.INCLUDES;
+import static org.molgenis.data.security.auth.RoleMetadata.LABEL;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 import org.molgenis.data.Entity;

@@ -1,6 +1,14 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.importer.ImportRunMetaData.*;
+import static org.molgenis.data.importer.ImportRunMetaData.ENDDATE;
+import static org.molgenis.data.importer.ImportRunMetaData.ID;
+import static org.molgenis.data.importer.ImportRunMetaData.IMPORTEDENTITIES;
+import static org.molgenis.data.importer.ImportRunMetaData.MESSAGE;
+import static org.molgenis.data.importer.ImportRunMetaData.NOTIFY;
+import static org.molgenis.data.importer.ImportRunMetaData.PROGRESS;
+import static org.molgenis.data.importer.ImportRunMetaData.STARTDATE;
+import static org.molgenis.data.importer.ImportRunMetaData.STATUS;
+import static org.molgenis.data.importer.ImportRunMetaData.USERNAME;
 
 import java.time.Instant;
 import java.util.ArrayList;

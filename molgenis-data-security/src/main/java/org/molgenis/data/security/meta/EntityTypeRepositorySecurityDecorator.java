@@ -11,7 +11,11 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.security.*;
+import org.molgenis.data.security.EntityIdentityUtils;
+import org.molgenis.data.security.EntityTypeIdentity;
+import org.molgenis.data.security.EntityTypePermission;
+import org.molgenis.data.security.PackageIdentity;
+import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.security.exception.NullPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
@@ -19,7 +23,11 @@ import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.*;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AlreadyExistsException;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
 
 /**
  * Decorator for the entity type repository: - filters requested entities based on the permissions

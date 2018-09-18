@@ -1,6 +1,10 @@
 package org.molgenis.security.token;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Annotation that you can use to bind a String parameter in a handler method to the molgenis token

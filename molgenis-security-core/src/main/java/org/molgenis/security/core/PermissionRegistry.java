@@ -1,7 +1,9 @@
 package org.molgenis.security.core;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toSet;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;

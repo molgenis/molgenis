@@ -2,7 +2,11 @@ package org.molgenis.data.migrate.version;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Properties;
 import org.molgenis.util.AppDataRootProvider;

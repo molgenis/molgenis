@@ -2,7 +2,9 @@ package org.molgenis.security;
 
 import static java.util.Collections.enumeration;
 import static java.util.Collections.singleton;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Enumeration;

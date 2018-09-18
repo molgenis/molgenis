@@ -7,7 +7,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.slf4j.Logger;

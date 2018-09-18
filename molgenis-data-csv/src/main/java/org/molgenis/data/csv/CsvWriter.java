@@ -4,7 +4,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.data.Entity;

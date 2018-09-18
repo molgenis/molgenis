@@ -4,7 +4,11 @@ import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Collections.emptySet;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
-import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ID;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.INDEXING_DEPTH;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.List;

@@ -4,7 +4,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import org.springframework.security.acls.domain.AuditLogger;
-import org.springframework.security.acls.model.*;
+import org.springframework.security.acls.model.AccessControlEntry;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.NotFoundException;
+import org.springframework.security.acls.model.Permission;
+import org.springframework.security.acls.model.PermissionGrantingStrategy;
+import org.springframework.security.acls.model.Sid;
 
 /**
  * Permission granting strategy similar to {@link

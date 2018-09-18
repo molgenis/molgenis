@@ -2,8 +2,12 @@ package org.molgenis.data.importer.emx;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -11,7 +15,11 @@ import java.util.Collections;
 import java.util.Optional;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoTest;

@@ -1,6 +1,8 @@
 package org.molgenis.data.security;
 
-import static org.molgenis.data.security.PackagePermission.*;
+import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
+import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
+import static org.molgenis.data.security.PackagePermission.VIEW;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.MetaUtils;

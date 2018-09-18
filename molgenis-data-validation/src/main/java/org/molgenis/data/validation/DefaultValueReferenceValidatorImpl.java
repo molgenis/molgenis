@@ -1,7 +1,9 @@
 package org.molgenis.data.validation;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.AttributeMetadata.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.DEFAULT_VALUE;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.util.AttributeUtils.getDefaultTypedValue;
 
 import com.google.common.collect.LinkedHashMultimap;
