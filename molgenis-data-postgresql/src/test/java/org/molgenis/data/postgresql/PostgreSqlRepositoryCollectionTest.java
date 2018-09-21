@@ -2,6 +2,7 @@ package org.molgenis.data.postgresql;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.mock;
@@ -17,6 +18,7 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
@@ -569,6 +571,45 @@ public class PostgreSqlRepositoryCollectionTest {
     when(updatedAttr.isReadOnly()).thenReturn(true);
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
     verifyZeroInteractions(jdbcTemplate);
+  }
+
+  // regression test for https://github.com/molgenis/molgenis/issues/7820
+  @Test
+  public void updateAttributeReadonlyTypeUpdate() {
+    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
+    String attrName = "attr";
+    Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+    when(attr.isReadOnly()).thenReturn(true);
+    when(attr.getDataType()).thenReturn(STRING);
+    Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
+    when(updatedAttr.isReadOnly()).thenReturn(true);
+    when(updatedAttr.getDataType()).thenReturn(TEXT);
+    when(entityType.getAtomicAttributes()).thenReturn(singleton(attr));
+
+    String idAttrName = "idAttr";
+    Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn(idAttrName).getMock();
+    when(entityType.getIdAttribute()).thenReturn(idAttr);
+    postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
+    verify(jdbcTemplate)
+        .execute("DROP TRIGGER \"update_trigger_entity#6844280e\" ON \"entity#6844280e\"");
+    verify(jdbcTemplate).execute("DROP FUNCTION \"validate_update_entity#6844280e\"();");
+    verify(jdbcTemplate)
+        .execute(
+            "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE text USING \"attr\"::text");
+    verify(jdbcTemplate)
+        .execute(
+            "CREATE FUNCTION \"validate_update_entity#6844280e\"() RETURNS TRIGGER AS $$\n"
+                + "BEGIN\n"
+                + "  IF OLD.\"attr\" <> NEW.\"attr\" THEN\n"
+                + "    RAISE EXCEPTION 'Updating read-only column \"attr\" of table \"entity#6844280e\" with id [%] is not allowed', OLD.\"idAttr\" USING ERRCODE = '23506';\n"
+                + "  END IF;\n"
+                + "  RETURN NEW;\n"
+                + "END;\n"
+                + "$$ LANGUAGE plpgsql;");
+    verify(jdbcTemplate)
+        .execute(
+            "CREATE TRIGGER \"update_trigger_entity#6844280e\" AFTER UPDATE ON \"entity#6844280e\" FOR EACH ROW WHEN (OLD.\"attr\" IS DISTINCT FROM NEW.\"attr\") EXECUTE PROCEDURE \"validate_update_entity#6844280e\"();");
+    verifyNoMoreInteractions(jdbcTemplate);
   }
 
   @Test
