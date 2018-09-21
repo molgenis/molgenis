@@ -67,6 +67,10 @@
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
 
+  const entityMapperSettings = {
+    showNonVisibleAttributes: true
+  }
+
   export default {
     name: 'DataRowEdit',
     props: {
@@ -140,13 +144,13 @@
         api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
           this.dataTableLabel = response._meta.label
           const { _meta, rowData } = this.parseEditResponse(response)
-          const mappedData = EntityToFormMapper.generateForm(_meta, rowData, { mapperMode: 'UPDATE' })
+          const mappedData = EntityToFormMapper.generateForm(_meta, rowData, { mapperMode: 'UPDATE', ...entityMapperSettings })
           this.initializeForm(mappedData)
         }, this.handleError)
       } else {
         api.get('/api/v2/' + this.dataTableId + '?num=0').then((response) => {
           this.dataTableLabel = response.meta.label
-          const mappedData = EntityToFormMapper.generateForm(response.meta, {}, { mapperMode: 'CREATE' })
+          const mappedData = EntityToFormMapper.generateForm(response.meta, {}, { mapperMode: 'CREATE', ...entityMapperSettings })
           this.initializeForm(mappedData)
         }, this.handleError)
       }
