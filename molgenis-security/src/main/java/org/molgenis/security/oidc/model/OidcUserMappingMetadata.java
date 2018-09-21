@@ -64,6 +64,6 @@ public class OidcUserMappingMetadata extends SystemEntityType {
         .setRefEntity(userMetaData)
         .setNillable(false);
 
-    // TODO decorator with unique constraint on [OIDC_CLIENT, OIDC_USERNAME]
+    // TODO add unique constraint on [OIDC_CLIENT, OIDC_USERNAME] (http://molgenis.org/ticket/3026)
   }
 }

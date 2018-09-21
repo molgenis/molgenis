@@ -1,6 +1,7 @@
 package org.molgenis.security.settings;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.ENUM;
@@ -124,7 +125,8 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
 
   @Override
   public Iterable<OidcClient> getOidcClients() {
-    return getEntities(Meta.OIDC_CLIENTS, OidcClient.class);
+    boolean enableOidc = getSignUp() && !getSignUpModeration();
+    return enableOidc ? getEntities(Meta.OIDC_CLIENTS, OidcClient.class) : emptyList();
   }
 
   @Override

@@ -34,19 +34,18 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean {
     HttpServletResponse httpResponse = (HttpServletResponse) response;
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof UsernamePasswordAuthenticationToken) {
-      if (authentication.isAuthenticated()
-          && !authentication.getName().equals(ANONYMOUS_USERNAME)
-          && !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI)) {
-        User user = userService.getUser(authentication.getName());
-        if (user == null) {
-          throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
-        }
+    if (authentication instanceof UsernamePasswordAuthenticationToken
+        && authentication.isAuthenticated()
+        && !authentication.getName().equals(ANONYMOUS_USERNAME)
+        && !httpRequest.getRequestURI().equalsIgnoreCase(CHANGE_PASSWORD_URI)) {
+      User user = userService.getUser(authentication.getName());
+      if (user == null) {
+        throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
+      }
 
-        if (user.isChangePassword() != null && user.isChangePassword()) {
-          redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
-          return;
-        }
+      if (user.isChangePassword() != null && user.isChangePassword()) {
+        redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
+        return;
       }
     }
 
