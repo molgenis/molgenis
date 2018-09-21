@@ -24,16 +24,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class DefaultSettingsEntity extends StaticEntity implements Entity {
   private final String entityId;
   private final String entityTypeId;
-
-  @Autowired private DataService dataService;
-
-  @Autowired private EntityListenersService entityListenersService;
-
-  private transient Entity cachedEntity;
+  private DataService dataService;
+  private EntityListenersService entityListenersService;
+  private Entity cachedEntity;
 
   public DefaultSettingsEntity(String entityId) {
     this.entityId = requireNonNull(entityId);
     this.entityTypeId = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + entityId;
+  }
+
+  @Autowired
+  public void setDataService(DataService dataService) {
+    this.dataService = requireNonNull(dataService);
+  }
+
+  @Autowired
+  public void setEntityListenersService(EntityListenersService entityListenersService) {
+    this.entityListenersService = requireNonNull(entityListenersService);
   }
 
   public EntityType getEntityType() {

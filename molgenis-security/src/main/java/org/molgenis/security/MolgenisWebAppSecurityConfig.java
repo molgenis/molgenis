@@ -6,13 +6,7 @@ import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
 import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
-import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import javax.servlet.Filter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.TokenFactory;
@@ -22,8 +16,13 @@ import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.login.MolgenisLoginController;
+import org.molgenis.security.oidc.DataServiceClientRegistrationRepository;
+import org.molgenis.security.oidc.MappedOidcUserService;
+import org.molgenis.security.oidc.OidcUserMapper;
+import org.molgenis.security.oidc.OidcUserMapperImpl;
+import org.molgenis.security.oidc.ResettableOAuth2AuthorizedClientService;
+import org.molgenis.security.oidc.model.OidcUserMappingFactory;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
@@ -62,6 +61,8 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
@@ -138,8 +139,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
     http.addFilterBefore(tokenAuthenticationFilter(), AnonymousAuthenticationFilter.class);
 
-    http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
-
     http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
     http.addFilterAfter(twoFactorAuthenticationFilter(), MolgenisChangePasswordFilter.class);
@@ -154,8 +153,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .antMatchers(MolgenisLoginController.URI)
         .permitAll()
         .antMatchers(TwoFactorAuthenticationController.URI + "/**")
-        .permitAll()
-        .antMatchers(GOOGLE_AUTHENTICATION_URL)
         .permitAll()
         .antMatchers("/beacon/**")
         .permitAll()
@@ -214,6 +211,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .formLogin()
         .loginPage(MolgenisLoginController.URI)
         .failureUrl(MolgenisLoginController.URI + "?error")
+        .and()
+        .oauth2Login()
+        .clientRegistrationRepository(clientRegistrationRepository())
+        .authorizedClientService(authorizedClientService())
+        .loginPage(MolgenisLoginController.URI)
+        .failureUrl(MolgenisLoginController.URI)
+        .userInfoEndpoint()
+        .oidcUserService(oidcUserService())
+        .and()
         .and()
         .logout()
         .deleteCookies("JSESSIONID")
@@ -289,26 +295,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public Filter tokenAuthenticationFilter() {
     return new TokenAuthenticationFilter(tokenAuthenticationProvider());
-  }
-
-  @Bean
-  public GooglePublicKeysManager googlePublicKeysManager() {
-    HttpTransport transport = new NetHttpTransport();
-    JsonFactory jsonFactory = new JacksonFactory();
-    return new GooglePublicKeysManager(transport, jsonFactory);
-  }
-
-  @Bean
-  public Filter googleAuthenticationProcessingFilter() throws Exception {
-    GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter =
-        new GoogleAuthenticationProcessingFilter(
-            googlePublicKeysManager(),
-            dataService,
-            (UserDetailsService) userDetailsService(),
-            authenticationSettings,
-            userFactory);
-    googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
-    return googleAuthenticationProcessingFilter;
   }
 
   @Bean
@@ -412,5 +398,27 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public HttpSessionEventPublisher httpSessionEventPublisher() {
     return new HttpSessionEventPublisher();
+  }
+
+  @Bean
+  public ClientRegistrationRepository clientRegistrationRepository() {
+    return new DataServiceClientRegistrationRepository(authenticationSettings);
+  }
+
+  @Bean
+  public ResettableOAuth2AuthorizedClientService authorizedClientService() {
+    return new ResettableOAuth2AuthorizedClientService(clientRegistrationRepository());
+  }
+
+  @Bean
+  public OidcUserService oidcUserService() {
+    return new MappedOidcUserService(oidcUserMapper(), userDetailsService());
+  }
+
+  @Autowired private OidcUserMappingFactory oidcUserMappingFactory;
+
+  @Bean
+  public OidcUserMapper oidcUserMapper() {
+    return new OidcUserMapperImpl(dataService, oidcUserMappingFactory, userFactory);
   }
 }

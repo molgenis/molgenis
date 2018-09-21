@@ -1,5 +1,4 @@
 <#-- Bootstrap login modal -->
-<#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
 <div id="login-modal" class="modal" tabindex="0"<#if disableClose?? && disableClose == "true"><#else>
      tabindex="-1"</#if>
      aria-labelledby="login-modal-label" aria-hidden="true" xmlns="http://www.w3.org/1999/html">
@@ -19,26 +18,16 @@
             <div class="modal-body">
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
-                <#if googleSignIn>
-                <div class="row">
-                    <div class="col-md-5">
-                        <form id="login-google-form" role="form" method="POST" action="/login/google">
-                            <input type="hidden" id="google-id-token" name="id_token" value=""/>
-                            <div class="g-signin2" data-width="200" data-longtitle="true" data-theme="dark"
-                                 data-onsuccess="onSignIn"></div>
-                        </form>
-                        <script>
-                            function onSignIn(googleUser) {
-                                <#if !(errorMessage??)>
-                                    $('#google-id-token').val(googleUser.getAuthResponse().id_token)
-                                    $('#login-google-form').submit()
-                                </#if>
-                            }
-                        </script>
+                <#if authentication_oidc_clients?has_content>
+                    <div class="row">
+                      <div class="col-md-12">
+                    <#list authentication_oidc_clients as clientUrl, clientName>
+                        <a href="${clientUrl}" class="btn btn-primary btn-block" role="button">With ${clientName}</a>
+                    </#list>
+                      </div>
                     </div>
-                <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
+                    <div class="hr-sect">OR</div>
                 </#if>
-                <#-- login form -->
                     <form id="login-form" role="form" method="POST" action="/login">
                         <div class="form-group">
                             <input id="username-field" type="text" placeholder="Username" class="form-control"
@@ -60,18 +49,14 @@
                             </div>
                         </div>
                     </form>
-                <#if googleSignIn>
-                </div>
-                </div>
-                </#if>
-                <#if authentication_settings.signUp>
+                    <#if authentication_sign_up>
                     <div class="row" style="margin-top: 20px;">
-                        <div class="col-md-12 text-center">
-                            <small>Don't have an account? <a class="modal-href" href="/account/register"
-                                                             data-target="register-modal-container">Sign up</a></small>
-                        </div>
+                      <div class="col-md-12 text-center">
+                        <small>Don't have an account? <a class="modal-href" href="/account/register"
+                                                         data-target="register-modal-container">Sign up</a></small>
+                      </div>
                     </div>
-                </#if>
+                    </#if>
                 </div>
             </div>
         </div>
