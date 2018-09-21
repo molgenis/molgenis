@@ -30,7 +30,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   public void testGetForwardPluginUriUnknownPlugin() {
     String pluginId = "pluginA";
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(null);
-    molgenisMenuController.getForwardPluginUri(pluginId, null);
+    molgenisMenuController.getForwardPluginUri(pluginId, null, null);
   }
 
   @Test
@@ -40,8 +40,30 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
     when(plugin.getPath()).thenReturn("app/test");
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
 
-    String uri = molgenisMenuController.getForwardPluginUri(pluginId, "");
+    String uri = molgenisMenuController.getForwardPluginUri(pluginId, "", null);
 
-    assertEquals(uri, "forward:/plugin/app/test/");
+    assertEquals(uri, "forward:/plugin/app/test");
+  }
+
+  @Test
+  public void testGetForwardPluginUriQueryString() {
+    String pluginId = "pluginId";
+    String pluginPath = "pluginPath";
+    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
+    assertEquals(
+        molgenisMenuController.getForwardPluginUri(pluginId, null, "key=value"),
+        "forward:/plugin/pluginPath?key=value");
+  }
+
+  @Test
+  public void testGetForwardPluginUriQueryStringEmpty() {
+    String pluginId = "pluginId";
+    String pluginPath = "pluginPath";
+    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
+    assertEquals(
+        molgenisMenuController.getForwardPluginUri(pluginId, null, ""),
+        "forward:/plugin/pluginPath");
   }
 }

@@ -9,6 +9,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 import java.time.format.DateTimeFormatter;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -45,7 +46,7 @@ public class MolgenisMenuController {
   private final String molgenisBuildData;
   private final DataService dataService;
 
-  public MolgenisMenuController(
+  MolgenisMenuController(
       Ui molgenisUi,
       @Value("${molgenis.version}") String molgenisVersion,
       @Value("${molgenis.build.date}") String molgenisBuildData,
@@ -80,7 +81,21 @@ public class MolgenisMenuController {
     model.addAttribute(KEY_CONTEXT_URL, contextUri);
     model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
     model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
-    return getForwardPluginUri(activeItem.getUrl(), null);
+
+    return getForwardPluginUri(activeItem.getId(), null, getQueryString(activeItem));
+  }
+
+  private @Nullable String getQueryString(UiMenuItem menuItem) {
+    String pathRemainder;
+
+    String url = menuItem.getUrl();
+    int index = url.indexOf('?');
+    if (index != -1) {
+      pathRemainder = url.substring(index + 1);
+    } else {
+      pathRemainder = null;
+    }
+    return pathRemainder;
   }
 
   @RequestMapping("/{menuId}")
@@ -96,7 +111,7 @@ public class MolgenisMenuController {
     model.addAttribute(KEY_CONTEXT_URL, contextUri);
     model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
     model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
-    return getForwardPluginUri(pluginId, null);
+    return getForwardPluginUri(pluginId);
   }
 
   @RequestMapping("/{menuId}/{pluginId}/**")
@@ -117,7 +132,17 @@ public class MolgenisMenuController {
     return getForwardPluginUri(pluginId, remainder);
   }
 
-  String getForwardPluginUri(String pluginId, String pathRemainder) {
+  private String getForwardPluginUri(String pluginId) {
+    return getForwardPluginUri(pluginId, null);
+  }
+
+  private String getForwardPluginUri(String pluginId, @Nullable String pathRemainder) {
+    return getForwardPluginUri(pluginId, pathRemainder, null);
+  }
+
+  /** package-private for testability */
+  String getForwardPluginUri(
+      String pluginId, @Nullable String pathRemainder, @Nullable String queryString) {
     // get plugin path with elevated permissions because the anonymous user can also request plugins
     Plugin plugin = runAsSystem(() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class));
     if (plugin == null) {
@@ -125,8 +150,13 @@ public class MolgenisMenuController {
     }
 
     StringBuilder strBuilder = new StringBuilder("forward:");
-    strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath()).append("/");
-    if (pathRemainder != null) strBuilder.append(pathRemainder);
+    strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath());
+    if (pathRemainder != null && !pathRemainder.isEmpty()) {
+      strBuilder.append('/').append(pathRemainder);
+    }
+    if (queryString != null && !queryString.isEmpty()) {
+      strBuilder.append('?').append(queryString);
+    }
     return strBuilder.toString();
   }
 
