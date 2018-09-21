@@ -30,5 +30,6 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   actions,
   mutations,
-  state
+  state,
+  strict: process.env.NODE_ENV !== 'production'
 })

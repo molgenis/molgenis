@@ -73,7 +73,7 @@
       </template>
     </b-table>
     <b-modal v-if="nrSelectedItems > 0" id="deleteModal" ok-variant="danger" cancel-variant="default"
-             :title="$t('delete-confirmation-title')" @ok="deleteSelectedItems">
+             :title="$t('delete-confirmation-title')" :ok-title="$t('delete-confirmation-ok-text')" :cancel-title="$t('delete-confirmation-cancel-text')" @ok="deleteSelectedItems">
       {{ 'delete-confirmation-text' | i18n }}
     </b-modal>
   </div>

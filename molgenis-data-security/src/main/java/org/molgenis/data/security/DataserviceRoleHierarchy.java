@@ -4,7 +4,9 @@ import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.difference;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.security.auth.RoleMetadata.*;
+import static org.molgenis.data.security.auth.RoleMetadata.INCLUDES;
+import static org.molgenis.data.security.auth.RoleMetadata.NAME;
+import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
 
 import com.google.common.collect.ImmutableList;

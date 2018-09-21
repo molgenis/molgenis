@@ -2,9 +2,17 @@ package org.molgenis.security.twofactor.auth;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
-import org.molgenis.security.twofactor.service.*;
+import org.molgenis.security.twofactor.service.OtpService;
+import org.molgenis.security.twofactor.service.OtpServiceImpl;
+import org.molgenis.security.twofactor.service.RecoveryService;
+import org.molgenis.security.twofactor.service.RecoveryServiceImpl;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
+import org.molgenis.security.twofactor.service.TwoFactorAuthenticationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

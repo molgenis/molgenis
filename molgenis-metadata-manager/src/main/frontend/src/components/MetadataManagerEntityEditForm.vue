@@ -4,7 +4,8 @@
       <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-extends-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-extends-label' | i18n
+            }}</label>
           <div class="col">
             <multiselect v-model="entityTypeParent" :options="abstractEntities" label="label"
                          selectLabel="" deselectLabel=""
@@ -13,7 +14,8 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-abstract-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-abstract-label' | i18n
+            }}</label>
           <div class="col checkbox-column">
             <input v-model="abstract0" class="form-control" type="checkbox">
           </div>
@@ -23,6 +25,10 @@
           <save-button :onClick="saveEntityType" :disabled="!isEntityTypeEdited">
             {{ 'save-changes-button' | i18n }}
           </save-button>
+          <button @click="resetEntityType(editorEntityType.id)" class="btn btn-warning"
+                  :disabled="!isEntityTypeEdited">
+            {{ 'undo-changes-button' | i18n }}
+          </button>
           <button @click="deleteEntityType(editorEntityType.id)" class="btn btn-danger"
                   :disabled="editorEntityType.isNew">
             {{ 'delete-entity-button' | i18n }}
@@ -33,23 +39,58 @@
       <!-- Column containing: Label, Description and Package -->
       <div class="col-md-4 col-sm-12 col-xs-12 inner-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-label' | i18n }}</label>
-          <div class="col">
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-label' | i18n
+            }}</label>
+          <div class="col input-group">
             <input v-model="label" class="form-control" type="text"
+                   :placeholder="$t('entity-edit-form-label-placeholder')">
+            <div class="input-group-append">
+              <button @click="showLabelLanguageInputs = !showLabelLanguageInputs" class="btn"><i
+                class="fa fa-language fa-lg"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="showLabelLanguageInputs" v-for="languageCode in languageCodes"
+             class="form-group row">
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-label' | i18n
+            }} ({{ languageCode }})</label>
+          <div class="col">
+            <input :value="labelI18n[languageCode]"
+                   @input="updateLabelI18n(languageCode, $event.target.value)" class="form-control"
+                   type="text"
                    :placeholder="$t('entity-edit-form-label-placeholder')">
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-description-label' | i18n }}</label>
-          <div class="col">
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-description-label' |
+            i18n }}</label>
+          <div class="col input-group">
             <input v-model="description" class="form-control" type="text"
                    :placeholder="$t('entity-edit-form-description-placeholder')">
+            <div class="input-group-append">
+              <button @click="showDescriptionLanguageInputs = !showDescriptionLanguageInputs" class="btn"><i
+                class="fa fa-language fa-lg"></i></button>
+            </div>
           </div>
         </div>
 
+        <div v-if="showDescriptionLanguageInputs" v-for="languageCode in languageCodes"
+                           class="form-group row">
+        <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-description-label' | i18n
+          }} ({{ languageCode }})</label>
+        <div class="col">
+          <input :value="descriptionI18n[languageCode]"
+                 @input="updateDescriptionI18n(languageCode, $event.target.value)" class="form-control"
+                 type="text"
+                 :placeholder="$t('entity-edit-form-description-placeholder')">
+        </div>
+      </div>
+
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-package-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-package-label' | i18n
+            }}</label>
           <div class="col">
             <multiselect v-model="package0" :options="packages" label="label"
                          selectLabel="" deselectLabel=""
@@ -61,16 +102,18 @@
       <!-- Column containing ID attribute, Label attribute and LookupAttributes -->
       <div class="col-md-4 col-sm-12 col-xs-12 outer-column">
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-id-attribute-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-id-attribute-label' |
+            i18n }}</label>
           <div class="col">
             <multiselect v-model="idAttribute" :options="attributes" label="label"
                          selectLabel="" deselectLabel="" :placeholder="$t('entity-edit-form-id-attribute-placeholder')"
-                         :disabled="entityTypeParent !== undefined"></multiselect>
+                         :disabled="entityTypeParent !== undefined || !editorEntityType.isNew"></multiselect>
           </div>
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-attribute-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-label-attribute-label'
+            | i18n }}</label>
           <div class="col">
             <multiselect v-model="labelAttribute" :options="attributes" label="label"
                          selectLabel="" deselectLabel=""
@@ -79,7 +122,8 @@
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-form-label text-muted">{{ 'entity-edit-form-lookup-attributes-label' | i18n }}</label>
+          <label class="col-4 col-form-label text-muted">{{
+            'entity-edit-form-lookup-attributes-label' | i18n }}</label>
           <div class="col">
             <multiselect
               v-model="lookupAttributes"
@@ -119,26 +163,46 @@
 <script>
   import { mapState, mapGetters } from 'vuex'
   import { UPDATE_EDITOR_ENTITY_TYPE } from '../store/mutations'
-  import { SAVE_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
+  import { SAVE_EDITOR_ENTITY_TYPE, RESET_EDITOR_ENTITY_TYPE, DELETE_ENTITY_TYPE } from '../store/actions'
   import { getConfirmBeforeDeletingProperties } from '../store/getters'
 
   import Multiselect from 'vue-multiselect'
   import SaveButton from './generic-components/SaveButton'
 
   export default {
+    created: function () {
+      console.log('this.$store', this.$store)
+    },
     name: 'metadata-manager-entity-edit-form',
+    data: function () {
+      return {showLabelLanguageInputs: false, showDescriptionLanguageInputs: false}
+    },
     methods: {
       saveEntityType () {
         this.$store.dispatch(SAVE_EDITOR_ENTITY_TYPE, this.$t)
+      },
+      resetEntityType () {
+        this.$store.dispatch(RESET_EDITOR_ENTITY_TYPE)
       },
       deleteEntityType (selectedEntityTypeId) {
         this.$swal(getConfirmBeforeDeletingProperties(selectedEntityTypeId, this.$t)).then(() => {
           this.$store.dispatch(DELETE_ENTITY_TYPE, selectedEntityTypeId)
         }).catch(this.$swal.noop)
+      },
+      updateLabelI18n (languageCode, value) {
+        var labelI18n = Object.assign({}, this.$store.state.editorEntityType.labelI18n)
+        labelI18n[languageCode] = value
+        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'labelI18n', value: labelI18n})
+      },
+      updateDescriptionI18n (languageCode, value) {
+        var descriptionI18n = Object.assign({}, this.$store.state.editorEntityType.descriptionI18n)
+        descriptionI18n[languageCode] = value
+        this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE,
+          {key: 'descriptionI18n', value: descriptionI18n})
       }
     },
     computed: {
-      ...mapState(['editorEntityType', 'packages', 'selectedEntityTypeId']),
+      ...mapState(['languageCodes', 'editorEntityType', 'packages', 'selectedEntityTypeId']),
       ...mapGetters({
         abstractEntities: 'getAbstractEntities',
         attributes: 'getEditorEntityTypeAttributes',
@@ -168,6 +232,9 @@
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'label', value: value})
         }
       },
+      labelI18n: function () {
+        return this.$store.state.editorEntityType.labelI18n
+      },
       description: {
         get () {
           return this.$store.state.editorEntityType.description
@@ -175,6 +242,9 @@
         set (value) {
           this.$store.commit(UPDATE_EDITOR_ENTITY_TYPE, {key: 'description', value: value})
         }
+      },
+      descriptionI18n: function () {
+        return this.$store.state.editorEntityType.descriptionI18n
       },
       package0: {
         get () {

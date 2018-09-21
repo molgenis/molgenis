@@ -1,7 +1,11 @@
 package org.molgenis.security.group;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupPermission.*;
+import static org.molgenis.data.security.auth.GroupPermission.ADD_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.REMOVE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.UPDATE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.VIEW;
+import static org.molgenis.data.security.auth.GroupPermission.VIEW_MEMBERSHIP;
 import static org.molgenis.data.security.auth.GroupService.DEFAULT_ROLES;
 import static org.molgenis.data.security.auth.GroupService.MANAGER;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -17,7 +21,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.molgenis.data.security.GroupIdentity;
-import org.molgenis.data.security.auth.*;
+import org.molgenis.data.security.auth.Group;
+import org.molgenis.data.security.auth.GroupPermission;
+import org.molgenis.data.security.auth.GroupPermissionService;
+import org.molgenis.data.security.auth.GroupService;
+import org.molgenis.data.security.auth.Role;
+import org.molgenis.data.security.auth.RoleService;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.exception.GroupNameNotAvailableException;
 import org.molgenis.data.security.exception.GroupPermissionDeniedException;
 import org.molgenis.data.security.permission.RoleMembershipService;
@@ -32,7 +42,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController

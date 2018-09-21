@@ -7,7 +7,13 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.EntityTestHarness.*;
+import static org.molgenis.data.EntityTestHarness.ATTR_BOOL;
+import static org.molgenis.data.EntityTestHarness.ATTR_DECIMAL;
+import static org.molgenis.data.EntityTestHarness.ATTR_ENUM;
+import static org.molgenis.data.EntityTestHarness.ATTR_INT;
+import static org.molgenis.data.EntityTestHarness.ATTR_REF_STRING;
+import static org.molgenis.data.EntityTestHarness.ATTR_STRING;
+import static org.molgenis.data.EntityTestHarness.ATTR_XREF;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -16,12 +22,26 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.security.core.SidUtils.createUserSid;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntitySelfXrefTestHarness;
+import org.molgenis.data.EntityTestHarness;
+import org.molgenis.data.Query;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
@@ -37,9 +57,11 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -56,7 +78,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {PlatformITConfig.class})
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
@@ -77,7 +103,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
   @Autowired private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
   @Autowired private DataService dataService;
   @Autowired private ElasticsearchService searchService;
-  @Autowired private MetaDataServiceImpl metaDataService;
+  @Autowired private MetaDataService metaDataService;
   @Autowired private EntityListenersService entityListenersService;
   @Autowired private LanguageFactory languageFactory;
   @Autowired private AttributeFactory attributeFactory;
@@ -139,7 +165,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
   @BeforeMethod
   public void beforeMethod() {
-    entityTypeDynamic = runAsSystem(() -> metaDataService.getEntityType(entityTypeDynamic.getId()));
+    entityTypeDynamic =
+        runAsSystem(
+            () ->
+                metaDataService
+                    .getEntityType(entityTypeDynamic.getId())
+                    .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())));
   }
 
   @AfterClass
@@ -209,6 +240,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getAttribute("labelEn")
             .getName(),
         "labelEn");
@@ -216,6 +248,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("en")
             .getName(),
         "label");
@@ -223,6 +256,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("pt")
             .getName(),
         "label");
@@ -230,11 +264,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
         dataService
             .getMeta()
             .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
             .getLabelAttribute("nl")
             .getName(),
         "label");
     assertEquals(
-        dataService.getMeta().getEntityType(ENTITY_TYPE_META_DATA).getLabelAttribute().getName(),
+        dataService
+            .getMeta()
+            .getEntityType(ENTITY_TYPE_META_DATA)
+            .orElseThrow(() -> new UnknownEntityTypeException(ENTITY_TYPE_META_DATA))
+            .getLabelAttribute()
+            .getName(),
         "label");
 
     assertEquals(LanguageService.getCurrentUserLanguageCode(), "en");
@@ -346,8 +386,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(entityTypeInSubPackage, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "parent");
-          assertNull(metadataService.getPackage("parent"));
-          assertNull(metadataService.getPackage("parent_sub"));
+          assertEquals(metadataService.getPackage("parent"), Optional.empty());
+          assertEquals(metadataService.getPackage("parent_sub"), Optional.empty());
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
@@ -389,7 +429,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           assertPresent(refEntityType, newArrayList(refEntities));
 
           dataService.deleteById(PACKAGE, "package_onetomany");
-          assertNull(metadataService.getPackage("package_onetomany"));
+          assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
           assertNull(dataService.getEntityType(entityType.getId()));
           assertNull(dataService.getEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);

@@ -1,6 +1,10 @@
 package org.molgenis.data.file.model;
 
-import static org.molgenis.data.file.model.FileMetaMetaData.*;
+import static org.molgenis.data.file.model.FileMetaMetaData.CONTENT_TYPE;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILENAME;
+import static org.molgenis.data.file.model.FileMetaMetaData.ID;
+import static org.molgenis.data.file.model.FileMetaMetaData.SIZE;
+import static org.molgenis.data.file.model.FileMetaMetaData.URL;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

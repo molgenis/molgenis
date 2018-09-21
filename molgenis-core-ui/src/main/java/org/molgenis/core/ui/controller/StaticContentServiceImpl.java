@@ -2,7 +2,9 @@ package org.molgenis.core.ui.controller;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.settings.StaticContentMeta.STATIC_CONTENT;
-import static org.molgenis.data.security.EntityTypePermission.*;
+import static org.molgenis.data.security.EntityTypePermission.ADD_DATA;
+import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
+import static org.molgenis.data.security.EntityTypePermission.UPDATE_DATA;
 
 import org.molgenis.core.ui.settings.StaticContent;
 import org.molgenis.core.ui.settings.StaticContentFactory;

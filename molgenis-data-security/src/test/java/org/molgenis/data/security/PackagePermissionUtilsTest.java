@@ -1,6 +1,8 @@
 package org.molgenis.data.security;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.PackagePermission.ADD_ENTITY_TYPE;
 import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
 import static org.testng.Assert.assertFalse;

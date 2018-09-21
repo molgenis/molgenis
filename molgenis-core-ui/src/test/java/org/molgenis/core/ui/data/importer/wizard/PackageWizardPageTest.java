@@ -1,7 +1,9 @@
 package org.molgenis.core.ui.data.importer.wizard;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.DataAction.ADD;
 import static org.molgenis.data.importer.MetadataAction.UPSERT;
 import static org.testng.Assert.assertTrue;

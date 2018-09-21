@@ -1,7 +1,9 @@
 package org.molgenis.oneclickimporter.job;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.oneclickimporter.service.utils.OneClickImporterTestUtils.loadFile;
 
@@ -19,7 +21,11 @@ import org.molgenis.jobs.Progress;
 import org.molgenis.oneclickimporter.exceptions.EmptySheetException;
 import org.molgenis.oneclickimporter.exceptions.UnknownFileTypeException;
 import org.molgenis.oneclickimporter.model.DataCollection;
-import org.molgenis.oneclickimporter.service.*;
+import org.molgenis.oneclickimporter.service.CsvService;
+import org.molgenis.oneclickimporter.service.EntityService;
+import org.molgenis.oneclickimporter.service.ExcelService;
+import org.molgenis.oneclickimporter.service.OneClickImporterNamingService;
+import org.molgenis.oneclickimporter.service.OneClickImporterService;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

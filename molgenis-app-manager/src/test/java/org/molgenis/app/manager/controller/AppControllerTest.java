@@ -8,7 +8,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.molgenis.web.bootstrap.PluginPopulator.APP_PREFIX;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.google.common.io.Resources;
 import java.io.File;

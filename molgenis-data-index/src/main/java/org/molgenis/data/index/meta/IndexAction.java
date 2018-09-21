@@ -1,6 +1,12 @@
 package org.molgenis.data.index.meta;
 
-import static org.molgenis.data.index.meta.IndexActionMetaData.*;
+import static org.molgenis.data.index.meta.IndexActionMetaData.ACTION_ORDER;
+import static org.molgenis.data.index.meta.IndexActionMetaData.ENTITY_ID;
+import static org.molgenis.data.index.meta.IndexActionMetaData.ENTITY_TYPE_ID;
+import static org.molgenis.data.index.meta.IndexActionMetaData.ID;
+import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION_GROUP_ATTR;
+import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_STATUS;
+import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

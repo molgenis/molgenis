@@ -1,18 +1,43 @@
 package org.molgenis.data.vcf.importer;
 
-import static java.util.Collections.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.data.*;
+import org.molgenis.data.DataAction;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.MetadataAction;
@@ -113,7 +138,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     String importPackageId = "package";
     Package importPackage = mock(Package.class);
-    when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+    when(metaDataService.getPackage(importPackageId)).thenReturn(Optional.of(importPackage));
     EntityImportReport entityImportReport =
         vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD, importPackageId);
     EntityImportReport expectedEntityImportReport = new EntityImportReport();
@@ -210,7 +235,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
     when(source.getRepository(entityTypeId0)).thenReturn(repo0);
     String importPackageId = "package";
     Package importPackage = mock(Package.class);
-    when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+    when(metaDataService.getPackage(importPackageId)).thenReturn(Optional.of(importPackage));
     EntityImportReport entityImportReport =
         vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD, importPackageId);
     EntityImportReport expectedEntityImportReport = new EntityImportReport();
@@ -241,7 +266,7 @@ public class VcfImporterServiceTest extends AbstractMockitoTest {
     when(dataService.hasRepository(entityTypeId0)).thenReturn(true);
     String importPackageId = "package";
     Package importPackage = mock(Package.class);
-    when(metaDataService.getPackage(importPackageId)).thenReturn(importPackage);
+    when(metaDataService.getPackage(importPackageId)).thenReturn(Optional.of(importPackage));
     vcfImporterService.doImport(source, MetadataAction.ADD, DataAction.ADD, importPackageId);
   }
 

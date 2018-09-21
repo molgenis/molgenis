@@ -1,6 +1,9 @@
 package org.molgenis.file.ingest;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.DataAction.ADD_UPDATE_EXISTING;
 
 import java.io.File;

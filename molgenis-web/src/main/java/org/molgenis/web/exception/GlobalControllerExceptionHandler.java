@@ -1,7 +1,11 @@
 package org.molgenis.web.exception;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAnonymous;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import org.molgenis.data.DataAlreadyExistsException;
 import org.molgenis.data.UnknownDataException;

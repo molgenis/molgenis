@@ -1,6 +1,8 @@
 package org.molgenis.bootstrap.populate;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;

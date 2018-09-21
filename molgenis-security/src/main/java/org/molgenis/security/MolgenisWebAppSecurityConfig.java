@@ -1,6 +1,10 @@
 package org.molgenis.security;
 
-import static org.molgenis.core.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_IMG;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.core.framework.ui.ResourcePathPatterns.PATTERN_SWAGGER;
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
@@ -26,7 +30,11 @@ import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
-import org.molgenis.security.twofactor.auth.*;
+import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProvider;
+import org.molgenis.security.twofactor.auth.RecoveryAuthenticationProviderImpl;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationFilter;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProvider;
+import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationProviderImpl;
 import org.molgenis.security.twofactor.service.OtpService;
 import org.molgenis.security.twofactor.service.RecoveryService;
 import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;

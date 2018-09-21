@@ -8,6 +8,7 @@ import {
   SET_ATTRIBUTE_TYPES,
   SET_EDITOR_ENTITY_TYPE,
   SET_ENTITY_TYPES,
+  SET_LANGUAGE_CODES,
   SET_LOADING,
   SET_PACKAGES,
   SET_SELECTED_ATTRIBUTE_ID,
@@ -15,7 +16,8 @@ import {
   UPDATE_EDITOR_ENTITY_TYPE
 } from 'store/mutations'
 
-import actions, { toAttribute, toEntityType } from 'store/actions'
+import actions, {toAttribute, toEntityType} from 'store/actions'
+import {RESET_EDITOR_ENTITY_TYPE} from "../../../src/store/actions";
 
 const i18n = {
   'save-succes-message': 'Successfully updated metadata for EntityType'
@@ -150,11 +152,43 @@ describe('actions', () => {
     })
   })
 
+  describe('RESET_EDITOR_ENTITY_TYPE', () => {
+    const entityTypeId = '1'
+
+    it('should retrieve the currently selected EditorEntityType and store it in the state via a mutation', done => {
+      const response = {
+        languageCodes: ['en', 'nl'],
+        entityType: {
+          id: '1',
+          attributes: []
+        }
+      }
+
+      const get = td.function('api.get')
+      td.when(get('/plugin/metadata-manager/entityType/' + entityTypeId)).thenResolve(response)
+      td.replace(api, 'get', get)
+
+      const payload = toEntityType(response.entityType)
+
+      const options = {
+        state: {selectedEntityTypeId: entityTypeId},
+        expectedMutations: [
+          {type: SET_LOADING, payload: true},
+          {type: SET_LANGUAGE_CODES, payload: ['en', 'nl']},
+          {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
+        ]
+      }
+
+      utils.testAction(actions.__RESET_EDITOR_ENTITY_TYPE__, options, done)
+    })
+  })
+
   describe('GET_EDITOR_ENTITY_TYPE', () => {
     const entityTypeId = '1'
 
     it('should retrieve an EditorEntityType based on EntityType ID and store it in the state via a mutation', done => {
       const response = {
+        languageCodes: ['en', 'nl'],
         entityType: {
           id: '1',
           attributes: []
@@ -171,6 +205,7 @@ describe('actions', () => {
         payload: entityTypeId,
         expectedMutations: [
           {type: SET_LOADING, payload: true},
+          {type: SET_LANGUAGE_CODES, payload: ['en', 'nl']},
           {type: SET_EDITOR_ENTITY_TYPE, payload: payload}
         ]
       }

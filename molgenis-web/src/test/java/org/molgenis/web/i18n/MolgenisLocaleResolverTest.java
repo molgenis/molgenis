@@ -1,7 +1,9 @@
 package org.molgenis.web.i18n;
 
 import static java.util.Locale.GERMAN;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.testng.Assert.assertEquals;
 

@@ -1,12 +1,18 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.util.MolgenisDateFormat.*;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
+import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 import com.google.common.collect.Iterables;
 import java.time.format.DateTimeParseException;
@@ -23,6 +29,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.ListEscapeUtils;
 import org.molgenis.util.Pair;
 import org.molgenis.util.UnexpectedEnumException;
@@ -194,8 +201,23 @@ public class EntityUtils {
     if (entityType != null && otherEntityType == null) return false;
     if (!(entityType != null && entityType.getId().equals(otherEntityType.getId()))) return false;
     if (!Objects.equals(entityType.getLabel(), otherEntityType.getLabel())) return false;
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    entityType.getLabel(languageCode), otherEntityType.getLabel(languageCode)))) {
+      return false;
+    }
     if (!Objects.equals(entityType.getDescription(), otherEntityType.getDescription()))
       return false;
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    entityType.getDescription(languageCode),
+                    otherEntityType.getDescription(languageCode)))) {
+      return false;
+    }
     if (entityType.isAbstract() != otherEntityType.isAbstract()) return false;
 
     // NB This is at such a low level that we do not know the default backend
@@ -360,7 +382,20 @@ public class EntityUtils {
     if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) {
       return false;
     }
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(attr.getLabel(languageCode), otherAttr.getLabel(languageCode)))) {
+      return false;
+    }
     if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) {
+      return false;
+    }
+    if (!LanguageService.getLanguageCodes()
+        .allMatch(
+            languageCode ->
+                Objects.equals(
+                    attr.getDescription(languageCode), otherAttr.getDescription(languageCode)))) {
       return false;
     }
     if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) {
@@ -391,6 +426,9 @@ public class EntityUtils {
       return false;
     }
     if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId())) {
+      return false;
+    }
+    if (!Objects.equals(attr.getCascadeDelete(), otherAttr.getCascadeDelete())) {
       return false;
     }
     if (!EntityUtils.equals(attr.getMappedBy(), otherAttr.getMappedBy(), checkIdentifier)) {

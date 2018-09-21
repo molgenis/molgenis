@@ -15,9 +15,13 @@ import java.util.Objects;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.*;
+import org.molgenis.data.importer.DataPersister;
 import org.molgenis.data.importer.DataPersister.DataMode;
 import org.molgenis.data.importer.DataPersister.MetadataMode;
+import org.molgenis.data.importer.EntityImportReport;
+import org.molgenis.data.importer.MetadataAction;
+import org.molgenis.data.importer.ParsedMetaData;
+import org.molgenis.data.importer.PersistResult;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -152,10 +156,9 @@ public class ImportWriter {
         () -> {
           Map<String, EntityType> existingEntityTypeMap = new HashMap<>();
           for (EntityType entityType : entities) {
-            EntityType existing = metaDataService.getEntityType(entityType.getId());
-            if (existing != null) {
-              existingEntityTypeMap.put(entityType.getId(), entityType);
-            }
+            metaDataService
+                .getEntityType(entityType.getId())
+                .ifPresent(existing -> existingEntityTypeMap.put(entityType.getId(), entityType));
           }
 
           ImmutableCollection<EntityType> newEntityTypes =

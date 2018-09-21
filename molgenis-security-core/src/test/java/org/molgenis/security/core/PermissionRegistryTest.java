@@ -1,6 +1,8 @@
 package org.molgenis.security.core;
 
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;

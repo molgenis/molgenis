@@ -1,13 +1,27 @@
 package org.molgenis.data.validation.meta;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.Sort.Direction.ASC;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -351,6 +365,28 @@ public class AttributeValidatorTest {
     Entity refEntity = when(mock(Entity.class).getIdValue()).thenReturn("entityId").getMock();
     when(entityManager.getReference(refEntityType, "entityId")).thenReturn(refEntity);
     attributeValidator.validateDefaultValue(attr, true);
+  }
+
+  @Test(
+      expectedExceptions = MolgenisValidationException.class,
+      expectedExceptionsMessageRegExp = "ID attribute update not allowed")
+  public void testUpdateIdAttribute() {
+    String attributeId = "attributeId";
+    String attributeName = "attributeName";
+
+    Attribute currentAttribute = mock(Attribute.class);
+    when(currentAttribute.getIdentifier()).thenReturn(attributeId);
+    when(currentAttribute.getName()).thenReturn(attributeName);
+    when(currentAttribute.isIdAttribute()).thenReturn(true);
+
+    Attribute attribute = mock(Attribute.class);
+    when(attribute.getIdentifier()).thenReturn(attributeId);
+    when(attribute.getName()).thenReturn(attributeName);
+    when(attribute.isIdAttribute()).thenReturn(false);
+
+    when(dataService.findOneById(ATTRIBUTE_META_DATA, attributeId, Attribute.class))
+        .thenReturn(currentAttribute);
+    attributeValidator.validate(attribute, ValidationMode.UPDATE);
   }
 
   @DataProvider(name = "allowedTransitionProvider")

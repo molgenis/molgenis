@@ -6,7 +6,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.PackageMetadata.*;
+import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
+import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
+import static org.molgenis.data.meta.model.PackageMetadata.ID;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

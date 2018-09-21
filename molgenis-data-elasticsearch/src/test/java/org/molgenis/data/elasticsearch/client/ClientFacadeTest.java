@@ -1,8 +1,17 @@
 package org.molgenis.data.elasticsearch.client;
 
-import static ch.qos.logback.classic.Level.*;
+import static ch.qos.logback.classic.Level.DEBUG;
+import static ch.qos.logback.classic.Level.ERROR;
+import static ch.qos.logback.classic.Level.TRACE;
+import static ch.qos.logback.classic.Level.WARN;
 import static java.util.Collections.emptyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import ch.qos.logback.classic.Level;
@@ -43,12 +52,21 @@ import org.elasticsearch.search.SearchShardTarget;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.mockito.Mock;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
-import org.molgenis.data.elasticsearch.generator.model.*;
+import org.molgenis.data.elasticsearch.generator.model.Document;
+import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
+import org.molgenis.data.elasticsearch.generator.model.Index;
+import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
+import org.molgenis.data.elasticsearch.generator.model.Mapping;
+import org.molgenis.data.elasticsearch.generator.model.MappingType;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
 import org.molgenis.data.index.exception.IndexException;
 import org.molgenis.data.index.exception.UnknownIndexException;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Unit tests for the exception flows of the ClientFacade. We assume the other flows are

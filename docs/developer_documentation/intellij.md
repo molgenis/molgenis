@@ -68,23 +68,9 @@ We format our code according to the Google Java Format.
 You can run the formatter in maven using target `fmt:format`.
 Maven will invoke `fmt:check` at build time and fail if the code isn't formatted properly.
 
-Follow these [instructions to configure IntelliJ](https://github.com/google/google-java-format#intellij):
-* Install and enable the IntelliJ plugin which replaces the Reformat Code action.
-* Download and import the IntelliJ Java Google Style file to fix the import order.
-
-### Automagic formatting on save
-The standard intellij formatter sometimes gets the formatting wrong because its configuration is not
-tweakable enough.
-
-You can configure an IntelliJ [File Watcher](https://www.jetbrains.com/help/idea/using-file-watchers.html)
-to format java files using the google-java-format jar when they are saved to disk.
-
-* [Download the formatter](https://github.com/google/google-java-format/releases).
-You need the jar that includes the dependencies.
-* Install and enable the File Watchers plugin.
-* Add a File Watcher to run the formatter jar on changed files:
-![Dialog details](../images/intellij/format-java-files.png?raw=true, "file watcher")
-(Obviously, you'll need to adapt the paths for java and formatter jarfile to match those of your system)
+* Install and enable the [IntelliJ plugin which replaces the Reformat Code action](https://plugins.jetbrains.com/plugin/8527-google-java-format).
+* Download and import the [IntelliJ Java Google Style file](https://github.com/molgenis/intellij-molgenis-style.xml) to fix the import order.
+* Uncheck the reformat checkbox in the git commit dialog, [it is broken](https://github.com/google/google-java-format/issues/228).
 
 ## Use MOLGENIS file-templates
 

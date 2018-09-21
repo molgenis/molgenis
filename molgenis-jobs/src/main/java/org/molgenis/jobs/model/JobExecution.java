@@ -1,7 +1,23 @@
 package org.molgenis.jobs.model;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.molgenis.jobs.model.JobExecutionMetaData.*;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.molgenis.jobs.model.JobExecutionMetaData.END_DATE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.FAILURE_EMAIL;
+import static org.molgenis.jobs.model.JobExecutionMetaData.IDENTIFIER;
+import static org.molgenis.jobs.model.JobExecutionMetaData.LOG;
+import static org.molgenis.jobs.model.JobExecutionMetaData.PROGRESS_INT;
+import static org.molgenis.jobs.model.JobExecutionMetaData.PROGRESS_MAX;
+import static org.molgenis.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.RESULT_URL;
+import static org.molgenis.jobs.model.JobExecutionMetaData.SCHEDULED_JOB_ID;
+import static org.molgenis.jobs.model.JobExecutionMetaData.START_DATE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.STATUS;
+import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.SUCCESS_EMAIL;
+import static org.molgenis.jobs.model.JobExecutionMetaData.TYPE;
+import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 
 import java.time.Instant;
 import javax.annotation.Nullable;

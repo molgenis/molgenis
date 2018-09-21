@@ -1,6 +1,8 @@
 package org.molgenis.data.index;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;

@@ -1,7 +1,10 @@
 package org.molgenis.data.security.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.*;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.CREATE;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.DELETE;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.READ;
+import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
 
 import java.util.LinkedList;
@@ -17,7 +20,11 @@ import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.security.acls.model.*;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.AlreadyExistsException;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
 
 public class PackageRepositorySecurityDecorator
     extends AbstractRowLevelSecurityRepositoryDecorator<Package> {

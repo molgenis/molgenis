@@ -1,11 +1,18 @@
 package org.molgenis.bootstrap.populate;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.GroupService.*;
+import static org.molgenis.data.security.auth.GroupService.AUTHORITY_EDITOR;
+import static org.molgenis.data.security.auth.GroupService.AUTHORITY_MANAGER;
+import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
 import static org.molgenis.security.core.SidUtils.getRoleName;
-import static org.molgenis.security.core.utils.SecurityUtils.*;
+import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_MODIFY_AUDITING;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP;
 
 import com.google.common.collect.ImmutableList;
 import java.util.UUID;

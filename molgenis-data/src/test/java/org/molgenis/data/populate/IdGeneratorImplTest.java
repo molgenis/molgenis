@@ -1,6 +1,10 @@
 package org.molgenis.data.populate;
 
-import static org.molgenis.data.populate.IdGenerator.Strategy.*;
+import static org.molgenis.data.populate.IdGenerator.Strategy.LONG_SECURE_RANDOM;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SEQUENTIAL_UUID;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_RANDOM;
+import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.base.Stopwatch;

@@ -10,9 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCreationException;
+import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.UnknownRepositoryCollectionException;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Tag;
 
 public interface MetaDataService extends Iterable<RepositoryCollection> {
   /**
@@ -134,9 +142,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
    * Gets the package for a given package identifier.
    *
    * @param packageId package identifier
-   * @return the Package, or <tt>null</tt> if the package does not exist.
+   * @return optional package
    */
-  Package getPackage(String packageId);
+  Optional<Package> getPackage(String packageId);
 
   /**
    * Adds a new Package
@@ -170,9 +178,9 @@ public interface MetaDataService extends Iterable<RepositoryCollection> {
    * Gets the entity type for a given entity type identifier.
    *
    * @param entityTypeId the identifier of the entity
-   * @return EntityType of the entity, or null if the entity does not exist
+   * @return @return optional entity type
    */
-  EntityType getEntityType(String entityTypeId);
+  Optional<EntityType> getEntityType(String entityTypeId);
 
   /**
    * Returns a stream of all {@link EntityType entity type}.

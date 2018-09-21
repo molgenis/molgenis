@@ -1,6 +1,9 @@
 package org.molgenis.data.decorator.meta;
 
-import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.*;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.DESCRIPTION;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.ID;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.LABEL;
+import static org.molgenis.data.decorator.meta.DynamicDecoratorMetadata.SCHEMA;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

@@ -8,9 +8,15 @@ import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.*;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.testng.Assert.assertEquals;
@@ -20,16 +26,31 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
-import org.molgenis.data.*;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.security.config.UserTestConfig;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
@@ -277,7 +298,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     targetRepositoryMetaData.addAttribute(
         attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
     targetRepositoryMetaData.setPackage(package_);
-    when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+    when(metaDataService.getEntityType(targetRepositoryName))
+        .thenReturn(Optional.of(targetRepositoryMetaData));
 
     EntityType targetMetadata =
         mappingService.createTargetMetadata(mappingTarget, targetRepositoryName, null, null, null);
@@ -294,7 +316,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     when(mappingTarget.getTarget()).thenReturn(hopMetaData);
 
     Package targetPackage = mock(Package.class);
-    when(metaDataService.getPackage("targetPackage")).thenReturn(targetPackage);
+    when(metaDataService.getPackage("targetPackage")).thenReturn(Optional.of(targetPackage));
 
     EntityType targetMetadata =
         mappingService.createTargetMetadata(
@@ -352,8 +374,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(mappedEntity);
 
     // apply mapping again
+    String packageId = "packageId";
+    Package aPackage = mock(Package.class);
+    when(metaDataService.getPackage(packageId)).thenReturn(Optional.of(aPackage));
     assertEquals(
-        mappingService.applyMappings("TestRun", entityTypeId, true, "packageId", "label", progress),
+        mappingService.applyMappings("TestRun", entityTypeId, true, packageId, "label", progress),
         4);
 
     Mockito.verify(geneRepo)
@@ -389,7 +414,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
     when(dataService.hasRepository(entityTypeId)).thenReturn(true);
     when(dataService.getRepository(entityTypeId)).thenReturn(updateEntityRepo);
-    when(metaDataService.getEntityType(entityTypeId)).thenReturn(targetMeta);
+    when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.of(targetMeta));
 
     when(updateEntityRepo.getEntityType()).thenReturn(targetMeta);
     when(metaDataService.createRepository(argThat(obj -> obj.getLabel().equals(entityTypeId))))
@@ -550,7 +575,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
 
     when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
     when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
-    when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+    when(metaDataService.getEntityType(targetRepositoryName))
+        .thenReturn(Optional.of(targetRepositoryMetaData));
     when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
     EntityType mappingTargetMetaData = entityTypeFactory.create("mapping_target");
@@ -588,7 +614,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
     when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
     when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
-    when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+    when(metaDataService.getEntityType(targetRepositoryName))
+        .thenReturn(Optional.of(targetRepositoryMetaData));
 
     when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
 
@@ -636,7 +663,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
     when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
     when(targetRepository.getEntityType()).thenReturn(targetRepositoryMetaData);
-    when(metaDataService.getEntityType(targetRepositoryName)).thenReturn(targetRepositoryMetaData);
+    when(metaDataService.getEntityType(targetRepositoryName))
+        .thenReturn(Optional.of(targetRepositoryMetaData));
 
     EntityType mappingTargetRefEntity = entityTypeFactory.create(mappingTargetRefEntityName);
 

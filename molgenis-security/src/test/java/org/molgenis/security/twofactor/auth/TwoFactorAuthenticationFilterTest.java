@@ -1,6 +1,8 @@
 package org.molgenis.security.twofactor.auth;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.DISABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.testng.Assert.assertEquals;

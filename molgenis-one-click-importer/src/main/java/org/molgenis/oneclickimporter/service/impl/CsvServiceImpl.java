@@ -4,7 +4,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.text.MessageFormat.format;
 
 import au.com.bytecode.opencsv.CSVReader;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import org.apache.commons.io.input.BOMInputStream;
 import org.molgenis.data.MolgenisDataException;

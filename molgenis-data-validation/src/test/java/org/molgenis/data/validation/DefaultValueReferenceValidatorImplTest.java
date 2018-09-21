@@ -1,6 +1,8 @@
 package org.molgenis.data.validation;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetadata.DEFAULT_VALUE;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;

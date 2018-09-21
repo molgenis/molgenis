@@ -76,7 +76,6 @@
 
         // The route change changed the EntityType we are looking at
         if (toEntityTypeId && fromEntityTypeId !== toEntityTypeId) {
-          this.$store.commit(SET_SELECTED_ATTRIBUTE_ID, null)
           this.$store.dispatch(GET_EDITOR_ENTITY_TYPE, toEntityTypeId)
         }
       }

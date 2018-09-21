@@ -21,7 +21,7 @@ public class UserManagerServiceImpl implements UserManagerService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
   @Transactional(readOnly = true)
   public List<UserViewData> getAllUsers() {
     Stream<User> users = dataService.findAll(USER, User.class);
@@ -29,7 +29,7 @@ public class UserManagerServiceImpl implements UserManagerService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU','ROLE_MANAGER')")
   @Transactional
   public void setActivationUser(String userId, Boolean active) {
     User mu = this.dataService.findOneById(USER, userId, User.class);

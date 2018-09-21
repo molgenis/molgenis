@@ -1,6 +1,9 @@
 package org.molgenis.oneclickimporter.job;
 
-import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.*;
+import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ENTITY_TYPES;
+import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.FILE;
+import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ONE_CLICK_IMPORT_JOB_TYPE;
+import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.PACKAGE;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

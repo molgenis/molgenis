@@ -1,6 +1,16 @@
 package org.molgenis.app.manager.meta;
 
-import static org.molgenis.app.manager.meta.AppMetadata.*;
+import static org.molgenis.app.manager.meta.AppMetadata.API_DEPENDENCY;
+import static org.molgenis.app.manager.meta.AppMetadata.APP_CONFIG;
+import static org.molgenis.app.manager.meta.AppMetadata.APP_VERSION;
+import static org.molgenis.app.manager.meta.AppMetadata.DESCRIPTION;
+import static org.molgenis.app.manager.meta.AppMetadata.ID;
+import static org.molgenis.app.manager.meta.AppMetadata.INCLUDE_MENU_AND_FOOTER;
+import static org.molgenis.app.manager.meta.AppMetadata.IS_ACTIVE;
+import static org.molgenis.app.manager.meta.AppMetadata.LABEL;
+import static org.molgenis.app.manager.meta.AppMetadata.NAME;
+import static org.molgenis.app.manager.meta.AppMetadata.RESOURCE_FOLDER;
+import static org.molgenis.app.manager.meta.AppMetadata.TEMPLATE_CONTENT;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

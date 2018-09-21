@@ -5,7 +5,12 @@ import static java.util.Objects.requireNonNull;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
@@ -24,7 +29,7 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public EntityType getEntityType(String entityTypeId) {
-    return metaDataService.getEntityType(entityTypeId);
+    return metaDataService.getEntityType(entityTypeId).orElse(null);
   }
 
   @Override

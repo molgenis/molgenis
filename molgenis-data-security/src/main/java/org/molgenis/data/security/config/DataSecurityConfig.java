@@ -1,7 +1,13 @@
 package org.molgenis.data.security.config;
 
-import static org.molgenis.data.security.auth.GroupPermission.*;
-import static org.molgenis.security.core.PermissionSet.*;
+import static org.molgenis.data.security.auth.GroupPermission.ADD_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.REMOVE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.UPDATE_MEMBERSHIP;
+import static org.molgenis.data.security.auth.GroupPermission.VIEW;
+import static org.molgenis.data.security.auth.GroupPermission.VIEW_MEMBERSHIP;
+import static org.molgenis.security.core.PermissionSet.READ;
+import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.PermissionSet.WRITEMETA;
 
 import javax.annotation.PostConstruct;
 import org.molgenis.i18n.PropertiesMessageSource;

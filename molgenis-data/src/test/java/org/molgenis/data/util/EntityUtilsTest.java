@@ -2,11 +2,34 @@ package org.molgenis.data.util;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.*;
-import static org.testng.Assert.*;
+import static org.molgenis.data.meta.AttributeType.BOOL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DATE;
+import static org.molgenis.data.meta.AttributeType.DATE_TIME;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.EMAIL;
+import static org.molgenis.data.meta.AttributeType.ENUM;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.HTML;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
+import static org.molgenis.data.meta.AttributeType.INT;
+import static org.molgenis.data.meta.AttributeType.LONG;
+import static org.molgenis.data.meta.AttributeType.MREF;
+import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
+import static org.molgenis.data.meta.AttributeType.SCRIPT;
+import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.AttributeType.XREF;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -42,6 +65,10 @@ public class EntityUtilsTest {
     when(otherLabelEntityType.getLabel()).thenReturn("otherLabel");
     dataList.add(new Object[] {entityType, otherLabelEntityType, false});
 
+    EntityType otherI18nLabelEntityType = createEqualsEntityType();
+    when(otherI18nLabelEntityType.getLabel("en")).thenReturn("otherLabelEn");
+    dataList.add(new Object[] {entityType, otherI18nLabelEntityType, false});
+
     EntityType otherAbstractEntityType = createEqualsEntityType();
     when(otherAbstractEntityType.isAbstract()).thenReturn(false);
     dataList.add(new Object[] {entityType, otherAbstractEntityType, false});
@@ -57,6 +84,10 @@ public class EntityUtilsTest {
     EntityType otherDescriptionEntityType = createEqualsEntityType();
     when(otherDescriptionEntityType.getDescription()).thenReturn("otherDescription");
     dataList.add(new Object[] {entityType, otherDescriptionEntityType, false});
+
+    EntityType otherI18nDescriptionEntityType = createEqualsEntityType();
+    when(otherI18nDescriptionEntityType.getLabel("en")).thenReturn("otherDescriptionEn");
+    dataList.add(new Object[] {entityType, otherI18nDescriptionEntityType, false});
 
     EntityType otherAttributesEntityType = createEqualsEntityType();
     when(otherAttributesEntityType.getOwnAllAttributes())
@@ -83,10 +114,12 @@ public class EntityUtilsTest {
     when(entityType.toString()).thenReturn("entity");
     when(entityType.getId()).thenReturn("id");
     when(entityType.getLabel()).thenReturn("label");
+    when(entityType.getLabel("en")).thenReturn("labelEn");
     when(entityType.isAbstract()).thenReturn(true);
     when(entityType.getBackend()).thenReturn("backend");
     when(entityType.getPackage()).thenReturn(null);
     when(entityType.getDescription()).thenReturn(null);
+    when(entityType.getDescription("en")).thenReturn("descriptionEn");
     when(entityType.getOwnAllAttributes()).thenReturn(emptyList());
     when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
     when(entityType.getTags()).thenReturn(emptyList());
@@ -97,7 +130,7 @@ public class EntityUtilsTest {
 
   @Test(dataProvider = "testEqualsEntityTypeProvider")
   public void testEqualsEntityType(
-      EntityType entityType, EntityType otherEntityType, boolean equals) throws Exception {
+      EntityType entityType, EntityType otherEntityType, boolean equals) {
     assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
   }
 
@@ -296,11 +329,29 @@ public class EntityUtilsTest {
       testCases.add(new Object[] {attr, otherAttr, false});
     }
 
+    { // i18n label not equals
+      Attribute attr = getMockAttr("labelA");
+      Attribute otherAttr = getMockAttr("labelB");
+      when(attr.getLabel("en")).thenReturn("A");
+      when(otherAttr.getLabel("en")).thenReturn("B");
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
     { // description not equals
       Attribute attr = getMockAttr("descriptionA");
       Attribute otherAttr = getMockAttr("descriptionB");
       when(attr.getDescription()).thenReturn("A");
       when(otherAttr.getDescription()).thenReturn("B");
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
+    { // i18n description not equals
+      Attribute attr = getMockAttr("descriptionA");
+      Attribute otherAttr = getMockAttr("descriptionB");
+      when(attr.getDescription("en")).thenReturn("A");
+      when(otherAttr.getDescription("en")).thenReturn("B");
 
       testCases.add(new Object[] {attr, otherAttr, false});
     }
@@ -597,6 +648,24 @@ public class EntityUtilsTest {
       EntityType otherEntityType =
           when(mock(EntityType.class).getId()).thenReturn("otherEntityTypeId").getMock();
       when(otherAttr.getEntity()).thenReturn(otherEntityType);
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
+    { // isCascadeDelete equals
+      Attribute attr = getMockAttr("getCascadeDeleteTrue");
+      Attribute otherAttr = getMockAttr("getCascadeDeleteTrue");
+      when(attr.getCascadeDelete()).thenReturn(true);
+      when(otherAttr.getCascadeDelete()).thenReturn(true);
+
+      testCases.add(new Object[] {attr, otherAttr, true});
+    }
+
+    { // isCascadeDelete not equals
+      Attribute attr = getMockAttr("getCascadeDeleteTrue");
+      Attribute otherAttr = getMockAttr("getCascadeDeleteFalse");
+      when(attr.getCascadeDelete()).thenReturn(true);
+      when(otherAttr.getCascadeDelete()).thenReturn(false);
 
       testCases.add(new Object[] {attr, otherAttr, false});
     }

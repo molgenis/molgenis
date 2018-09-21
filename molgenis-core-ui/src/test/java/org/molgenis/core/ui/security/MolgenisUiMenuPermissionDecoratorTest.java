@@ -1,7 +1,9 @@
 package org.molgenis.core.ui.security;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
 import static org.molgenis.web.UiMenuItemType.MENU;
 import static org.molgenis.web.UiMenuItemType.PLUGIN;

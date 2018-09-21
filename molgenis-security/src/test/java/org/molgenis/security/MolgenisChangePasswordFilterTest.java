@@ -1,6 +1,8 @@
 package org.molgenis.security;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.security.account.AccountController.CHANGE_PASSWORD_URI;
 import static org.testng.Assert.assertEquals;
 

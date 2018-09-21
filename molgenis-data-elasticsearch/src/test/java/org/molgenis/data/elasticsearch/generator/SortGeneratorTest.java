@@ -2,7 +2,9 @@ package org.molgenis.data.elasticsearch.generator;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.elasticsearch.generator.model.SortDirection.ASC;
 import static org.molgenis.data.elasticsearch.generator.model.SortDirection.DESC;
 import static org.molgenis.data.meta.AttributeType.INT;

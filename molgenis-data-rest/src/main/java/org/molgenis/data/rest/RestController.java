@@ -18,7 +18,6 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENFORCED;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -55,7 +54,6 @@ import org.molgenis.data.EntityCollection;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
@@ -917,14 +915,6 @@ public class RestController {
   @ResponseStatus(UNAUTHORIZED)
   public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e) {
     LOG.info("", e);
-    return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-  }
-
-  @ExceptionHandler(MolgenisReferencedEntityException.class)
-  @ResponseStatus(INTERNAL_SERVER_ERROR)
-  public ErrorMessageResponse handleMolgenisReferencingEntityException(
-      MolgenisReferencedEntityException e) {
-    LOG.error("", e);
     return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
   }
 

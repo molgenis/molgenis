@@ -1,6 +1,9 @@
 package org.molgenis.core.ui.style;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 import org.molgenis.data.MolgenisDataException;

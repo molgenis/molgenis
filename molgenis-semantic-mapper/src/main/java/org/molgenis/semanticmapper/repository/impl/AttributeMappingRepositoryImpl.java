@@ -1,7 +1,11 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.*;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;

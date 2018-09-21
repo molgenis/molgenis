@@ -1,10 +1,13 @@
 package org.molgenis.semanticsearch.repository;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.TagMetadata.*;
+import static org.molgenis.data.meta.model.TagMetadata.CODE_SYSTEM;
+import static org.molgenis.data.meta.model.TagMetadata.OBJECT_IRI;
+import static org.molgenis.data.meta.model.TagMetadata.RELATION_IRI;
+import static org.molgenis.data.meta.model.TagMetadata.TAG;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetadata;
@@ -13,7 +16,7 @@ import org.molgenis.data.semantic.Relation;
 
 /**
  * Helper class around the {@link TagMetadata} repository. Internal implementation class, use {@link
- * MetaDataServiceImpl} instead.
+ * MetaDataService} instead.
  */
 public class TagRepository {
   private final DataService dataService;

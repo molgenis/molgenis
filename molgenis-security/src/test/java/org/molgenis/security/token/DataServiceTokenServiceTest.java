@@ -1,7 +1,10 @@
 package org.molgenis.security.token;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN_ATTR;
 import static org.molgenis.data.security.auth.UserMetaData.USER;

@@ -1,6 +1,8 @@
 package org.molgenis.dataexplorer.negotiator.config;
 
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMeta.*;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMeta.NEGOTIATOR_URL;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMeta.PASSWORD;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorConfigMeta.USERNAME;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
