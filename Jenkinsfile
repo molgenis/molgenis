@@ -26,45 +26,32 @@ pipeline {
                 }
             }
         }
-        stage('Build [ pull request ]') {
-            when {
-                changeRequest()
-            }
+
+        stage('Build and publish docker container') {
             environment {
-                //PR-1234-231
                 TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                //0.0.0-SNAPSHOT-PR-1234-231
-                PREVIEW_VERSION = "0.0.0-SNAPSHOT-${TAG}"
             }
             steps {
                 container('maven') {
-                    sh "mvn versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
                     sh "mvn install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4 -Ddockerfile.tag=${TAG} -Ddockerfile.skip=false"
                 }
+            }
+        }
 
-                parallel {
-                    stage('unit test'){
-                        steps {
-                            container('maven') {
-                                sh "mvn test -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
-                            }
-                        }
-                    }
-                    stage('integration test') {
-                        steps {
-                            container('maven') {
-                                sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
-                            }
+        stage('Test') {
+            parallel {
+                stage('unit test'){
+                    steps {
+                        container('maven') {
+                            sh "mvn test -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                         }
                     }
                 }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/**.xml'
-                    container('maven') {
-                        sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+                stage('integration test') {
+                    steps {
+                        container('maven') {
+                            sh "mvn verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
+                        }
                     }
                 }
             }
