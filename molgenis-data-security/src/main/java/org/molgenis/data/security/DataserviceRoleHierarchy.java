@@ -2,12 +2,14 @@ package org.molgenis.data.security;
 
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Sets.difference;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.security.auth.RoleMetadata.INCLUDES;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.security.core.SidUtils.ROLE_PREFIX;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -22,7 +24,6 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.SidUtils;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -36,51 +37,54 @@ public class DataserviceRoleHierarchy implements RoleHierarchy {
   private static final Logger LOG = LoggerFactory.getLogger(DataserviceRoleHierarchy.class);
   private static final int PAGE_SIZE = 1000;
 
-  private DataService dataService;
+  private final DataService dataService;
 
   public DataserviceRoleHierarchy(DataService dataService) {
-    this.dataService = dataService;
+    this.dataService = requireNonNull(dataService);
   }
 
   @Override
-  @RunAsSystem
   public Collection<? extends GrantedAuthority> getReachableGrantedAuthorities(
       Collection<? extends GrantedAuthority> authorities) {
-    if (authorities == null || authorities.isEmpty()) {
-      return AuthorityUtils.NO_AUTHORITIES;
-    }
+    // TODO RunAsSystem annotation not hit via OIDC route (but why?!)
+    return runAsSystem(
+        () -> {
+          if (authorities == null || authorities.isEmpty()) {
+            return AuthorityUtils.NO_AUTHORITIES;
+          }
 
-    Set<String> roleNames =
-        authorities
-            .stream()
-            .map(GrantedAuthority::getAuthority)
-            .filter(name -> name.startsWith(ROLE_PREFIX))
-            .map(name -> name.substring(ROLE_PREFIX.length()))
-            .collect(toSet());
+          Set<String> roleNames =
+              authorities
+                  .stream()
+                  .map(GrantedAuthority::getAuthority)
+                  .filter(name -> name.startsWith(ROLE_PREFIX))
+                  .map(name -> name.substring(ROLE_PREFIX.length()))
+                  .collect(toSet());
 
-    Multimap<String, String> allRoleInclusions = getAllRoleInclusions();
-    Set<String> newlyDiscovered = roleNames;
-    while (!newlyDiscovered.isEmpty()) {
-      Set<String> included =
-          newlyDiscovered
-              .stream()
-              .flatMap(role -> allRoleInclusions.get(role).stream())
-              .collect(toSet());
-      newlyDiscovered = copyOf(difference(included, roleNames));
-      roleNames.addAll(newlyDiscovered);
-    }
+          Multimap<String, String> allRoleInclusions = getAllRoleInclusions();
+          Set<String> newlyDiscovered = roleNames;
+          while (!newlyDiscovered.isEmpty()) {
+            Set<String> included =
+                newlyDiscovered
+                    .stream()
+                    .flatMap(role -> allRoleInclusions.get(role).stream())
+                    .collect(toSet());
+            newlyDiscovered = copyOf(difference(included, roleNames));
+            roleNames.addAll(newlyDiscovered);
+          }
 
-    Set<SimpleGrantedAuthority> reachableRoles =
-        roleNames
-            .stream()
-            .map(SidUtils::createRoleAuthority)
-            .map(SimpleGrantedAuthority::new)
-            .collect(toSet());
-    LOG.debug(
-        "getReachableGrantedAuthorities() - From the roles {} one can reach {} in zero or more steps.",
-        authorities,
-        reachableRoles);
-    return reachableRoles;
+          Set<SimpleGrantedAuthority> reachableRoles =
+              roleNames
+                  .stream()
+                  .map(SidUtils::createRoleAuthority)
+                  .map(SimpleGrantedAuthority::new)
+                  .collect(toSet());
+          LOG.debug(
+              "getReachableGrantedAuthorities() - From the roles {} one can reach {} in zero or more steps.",
+              authorities,
+              reachableRoles);
+          return reachableRoles;
+        });
   }
 
   private Multimap<String, String> getAllRoleInclusions() {

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public final class EntityListenersService {
+public class EntityListenersService {
   private final Logger LOG = LoggerFactory.getLogger(EntityListenersService.class);
   private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private final Map<String, SetMultimap<Object, EntityListener>> entityListeners = new HashMap<>();

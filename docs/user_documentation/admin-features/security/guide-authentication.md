@@ -1,7 +1,7 @@
-# User authentication in MOLGENIS
+# Authentication
 In MOLGENIS you can sign in using three methods. 
- * Username/password sign in *(default)*
- * Google-sign in
+ * Username/password sign in
+ * Single sign-on
  * Token-authentication
 
 ## Username/password sign in
@@ -10,7 +10,7 @@ The default way to authenticate in MOLGENIS is to click 'Sign in'. You can regis
 ### Two-factor authentication
 If you have an existing MOLGENIS-account you can secure it with two-factor authentication, depending on the server's settings. 
 
-**prompted:** you can not use Google-Authentication in combination with two-factor authentication in MOLGENIS
+**prompted:** Two-factor authentication cannot be combined with single sign-on
 
 When two-factor authentication is enabled and you sign in for the first time, you will be promted to secure your account with an authenticator app. The authentication can be configured by scanning a QR-code.
 
@@ -45,24 +45,39 @@ When you have lost your phone or misplaced it, you have to use one of the recove
 in the *Account-Security*-tab. Make sure to store the recovery codes somewhere outside MOLGENIS. You can click on the 'Enter a recovery code'-link, 
 in the screen where you have to enter the verification code. You can then enter the recovery code to unlock your account.
 
-## Google-sign in
-When your administrator has enabled 'Google Sign in' you can use your Google-account to authenticate in MOLGENIS. In the login-screen you can 
-see an additional button. Click on it to authenticate with your Google-account. 
+## Single sign-on
+In addition to username/password authentication MOLGENIS supports authentication with identity providers that support [OpenID Connect](https://openid.net/connect/) 
+such as [Google](https://developers.google.com/identity/protocols/OpenIDConnect) and [SURFconext](https://wiki.surfnet.nl/display/surfconextdev/OpenID+Connect+reference).
 
-![Google_sign in](../../../images/molgenis_google_signin.png?raw=true, "Google Sign in")
+Once enabled the sign in dialog will display additional sign in options:
 
-This will create a user which has only rights to the *Account*-tab. You have to ask your administrator to set the permissions you need in MOLGENIS.
+![Single sign-on dialog](../../../images/security/authentication/signin_dialog_oidc.png?raw=true, "Single sign-on dialog")
 
-When your administrator has enabled 'Google Sign in' you can use your Google-account to authenticate in MOLGENIS. In the login screen you can 
-see an additional button. Click it to authenticate with your Google account.
+Selecting e.g. Google will redirect the browser to their website so the user can authenticate there and return to MOLGENIS once authentication has successfully completed.
+The permissions you have once authenticated are the default user permissions set by an administrator.   
+ 
+### Configuring single sign-on   
+As administrator single sign-on configuration consists of the following one-time steps:
+1. Configuring one or more OpenID Connect client
+2. Modify authentication settings
 
-### Link your Google-account
-When you already have a MOLGENIS account you can link it to your Google account. This way you can use your Google account to authenticate in MOLGENIS. 
-Before you 'Sign in' with your Google account, make sure your MOLGENIS account has the same email address as your Google account. This way the 
-MOLGENIS account will automatically be linked to your Google account.
+#### Configuring OpenID Connect clients
+OpenID Connect clients can be configured by adding entities to the 'OIDC client' entity type (e.g. using the data explorer, importer or REST API).
+The required information is provided by the identity provider. MOLGENIS requires at least the 'sub' and 'email' claims and ideally the 
+'given_name' and 'family_name' claims as well. These claimes are requested by specifying the scopes 'openid,email,profile'.  
+ 
+#### Activating OpenID Connect clients
+Configured OpenID Connect clients can be selected in the 'Authentication settings' part of the 'Settings manager' plugin. Activating clients
+requires 'Allow users to sign up' to be set to 'Yes' and 'Sign up moderation' to be set to 'No'.
 
-When you've already signed in with your Google account and did not use the same email address as your MOLGENIS account you have to contact your administrator.
+![Single sign-on authentication settings](../../../images/security/authentication/authentication_settings_oidc.png?raw=true, "Single sign-on authentication settings")
 
+### Advanced: OpenID Connect user to MOLGENIS user mapping
+When a user signs in through e.g. Google the user is automatically mapped to a MOLGENIS user based on the email address. If no MOLGENIS user exists 
+a new MOLGENIS user is created. The mapping from an OpenID client user to MOLGENIS user is persisted in the 'OIDC user mapping' entity type and can 
+be modified by an administrator if required. Multiple mappings to the same user are allowed such that when a user signs in with e.g. either a Google 
+and SURFconext account will be identified as the same MOLGENIS user.
+  
 ## Token-authentication
 When you use the REST API you have to authenticate using a token. There are 3 ways you can generate a token.
  * Create a token via the REST API v1 /login route (only available without two-factor authentication)

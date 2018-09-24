@@ -13,7 +13,8 @@ public class PluginAttributes {
   public static final String KEY_RESOURCE_FINGERPRINT_REGISTRY = "resource_fingerprint_registry";
   public static final String KEY_THEME_FINGERPRINT_REGISTRY = "theme_fingerprint_registry";
   public static final String KEY_APP_SETTINGS = "app_settings";
-  public static final String KEY_AUTHENTICATION_SETTINGS = "authentication_settings";
+  public static final String KEY_AUTHENTICATION_OIDC_CLIENTS = "authentication_oidc_clients";
+  public static final String KEY_AUTHENTICATION_SIGN_UP = "authentication_sign_up";
   public static final String KEY_PLUGIN_SETTINGS = "plugin_settings";
   /** Whether or not the current user can edit settings for the requested plugin */
   static final String KEY_PLUGIN_SHOW_SETTINGS_COG = "plugin_show_settings_cog";

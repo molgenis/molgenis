@@ -6,7 +6,6 @@
 <#include "polyfill-macros.ftl">
 <#macro header css=[] js=[] version=1>
     <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
-    <#assign googleSignIn = authentication_settings.googleSignIn && authentication_settings.signUp && !authentication_settings.signUpModeration>
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,7 +14,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <#if googleSignIn><meta name="google-signin-client_id" content="${authentication_settings.googleAppClientId?html}"></#if>
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
     <#if !version?? || version == 1>
@@ -77,20 +75,6 @@
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
     </#if>
-
-    <#if googleSignIn>
-        <#if authenticated?? && authenticated>
-        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
-        <script>
-            function onLoad() {
-                gapi.load('auth2', function () {
-                    gapi.auth2.init();
-                });
-            }
-        </script>
-        </#if>
-        <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
-    </#if>
     
     <#-- Load css specified by plugins -->
     <#list css as css_file_name>
@@ -125,11 +109,6 @@
                 <#if plugin_id??>, selectedPlugin: '${plugin_id}'</#if>
                 , authenticated: ${authenticated?c}
                 , loginHref: '/login'
-                <#if googleSignIn>, logoutFunction: function () {
-                    var auth2 = gapi.auth2.getAuthInstance()
-                    auth2.signOut()
-                }</#if>
-                , googleSignIn: ${googleSignIn?c}
                 , helpLink: {label: 'Help', href: 'https://molgenis.gitbooks.io/molgenis/content/'}
             }
         </script>
@@ -275,14 +254,7 @@
 
                 <script>
                      $("#signout-button").click(function () {
-                    <#if googleSignIn>
-                        var auth2 = gapi.auth2.getAuthInstance();
-                        auth2.signOut().then(function () {
-                    </#if>
                             $('#logout-form').submit();
-                    <#if googleSignIn>
-                        });
-                    </#if>
                      });
                 </script>
 

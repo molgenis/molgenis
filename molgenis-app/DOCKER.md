@@ -51,5 +51,11 @@ $env:TAG="PR-7492-3"; docker-compose up
 In normal (IntelliJ or Windows `cmd`) prompt:
 
 ```bash
-SET TAG=PR-7492-3 && docker-compose up
+SET TAG=PR-7492-3&& docker-compose up
 ```
+
+> Beware of spaces, if you put a space between the tag and the `&&` you'll get an error!
+```
+SET TAG=PR-7817 && docker-compose up
+ERROR: no such image: registry.molgenis.org/molgenis/molgenis-app:PR-7817 : invalid reference format
+``` 

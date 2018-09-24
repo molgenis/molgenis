@@ -1,5 +1,7 @@
 package org.molgenis.security.settings;
 
+import java.util.List;
+import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
 
 public interface AuthenticationSettings {
@@ -12,20 +14,13 @@ public interface AuthenticationSettings {
   /** @return whether sign up is moderated */
   boolean getSignUpModeration();
 
+  @SuppressWarnings("unused")
+  void setOidcClients(List<OidcClient> oidcClients);
+
+  Iterable<OidcClient> getOidcClients();
+
   /** @param signUpModeration <code>true</code> if sign up is moderated */
   void setSignUpModeration(boolean signUpModeration);
-
-  /** @param signIn whether sign in is enabled */
-  void setGoogleSignIn(boolean signIn);
-
-  /** @return <code>true</code> if sign in is enabled */
-  boolean getGoogleSignIn();
-
-  /** @param googleAppClientId Google app client ID used during Google Sign-In */
-  void setGoogleAppClientId(String googleAppClientId);
-
-  /** @return Google app client ID used during Google Sign-In */
-  String getGoogleAppClientId();
 
   /**
    * @param twoFactorAuthentication whether two factor authentication is disabled, enabled or
