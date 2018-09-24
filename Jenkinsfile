@@ -63,6 +63,7 @@ pipeline {
             steps {
                 container('maven') {
                     sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
+                    sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                 }
             }
             post {
@@ -70,7 +71,6 @@ pipeline {
                     junit '**/target/surefire-reports/**.xml'
                     container('maven') {
                         sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                     }
                 }
             }
@@ -86,6 +86,7 @@ pipeline {
             steps {
                 container('maven') {
                     sh "mvn clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Ddockerfile.tag=${BRANCH_NAME}-${TAG} -Ddockerfile.repository=${DOCKER_REPOSITORY} -Ddockerfile.skip=false"
+                    sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                 }
             }
             post {
@@ -93,7 +94,6 @@ pipeline {
                     junit '**/target/surefire-reports/**.xml'
                     container('maven') {
                         sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} --batch-mode --quiet -Dsonar.ws.timeout=120"
                     }
                 }
             }
