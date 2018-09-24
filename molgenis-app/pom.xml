@@ -18,7 +18,7 @@
     <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.skip>true</dockerfile.skip>
-    <dockerfile.repository>registry.molgenis.org/molgenis/molgenis-app</dockerfile.repository>
+    <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
   </properties>
 
   <build>
