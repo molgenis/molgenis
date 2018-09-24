@@ -21,7 +21,7 @@
     "@molgenis/molgenis-i18n-js": "^0.0.5",
     "@molgenis/molgenis-vue-test-utils": "^1.0.0",
     "@molgenis/rsql": "^0.1.1",
-    "bootstrap-vue": "2.0.0-rc.2",
+    "bootstrap-vue": "^2.0.0-rc.11",
     "flow": "^0.2.3",
     "font-awesome": "^4.7.0",
     "isomorphic-fetch": "^2.2.1",
