@@ -160,11 +160,11 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<RoleMembership> members2 = Arrays.asList(member3);
 
     doAnswer(
-        invocation -> {
-          Consumer<List<Entity>> consumer = invocation.getArgument(1);
-          consumer.accept(asList(group, group2));
-          return null;
-        })
+            invocation -> {
+              Consumer<List<Entity>> consumer = invocation.getArgument(1);
+              consumer.accept(asList(group, group2));
+              return null;
+            })
         .when(delegateRepository)
         .forEachBatched(any(), any(), eq(1000));
 
