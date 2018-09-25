@@ -9,7 +9,12 @@ import MemberAdd from './components/MemberAdd'
 import MemberDetail from './components/MemberDetail'
 import i18n from '@molgenis/molgenis-i18n-js'
 
+import BootstrapVue from 'bootstrap-vue'
+
+import 'font-awesome/css/font-awesome.min.css'
+
 Vue.use(Router)
+Vue.use(BootstrapVue)
 
 const {lng, fallbackLng, baseUrl, isSuperUser} = window.__INITIAL_STATE__
 

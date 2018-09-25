@@ -330,4 +330,15 @@ public class GroupServiceTest extends AbstractMockitoTest {
 
     assertFalse(groupService.isGroupNameAvailable(groupValue));
   }
+
+  @Test
+  public void deleteGroupTest() {
+    when(dataService
+            .query(GroupMetadata.GROUP, Group.class)
+            .eq(GroupMetadata.NAME, "devs")
+            .findOne())
+        .thenReturn(group);
+    groupService.deleteGroup("devs");
+    verify(dataService).delete(GroupMetadata.GROUP, group);
+  }
 }

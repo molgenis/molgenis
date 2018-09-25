@@ -8,7 +8,9 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">
-              <router-link :to="{ name: 'groupOverView' }">{{ 'security-ui-breadcrumb-groups' | i18n }}</router-link>
+              <router-link :to="{ name: 'groupOverView' }">{{ 'security-ui-breadcrumb-groups' | i18n
+                }}
+              </router-link>
             </li>
             <li class="breadcrumb-item active text-capitalize" aria-current="page">{{name}}</li>
           </ol>
@@ -18,15 +20,20 @@
 
     <div class="row mb-3  ">
       <div class="col">
-        <h1>{{ 'security-ui-members-page-title' | i18n }}</h1>
+        <h1>{{ 'security-ui-members-page-title' | i18n }} {{name}}</h1>
+        <b-button id="delete-group-btn" variant="danger" v-if="getLoginUser.isSuperUser"
+                  v-b-modal.deleteModal>
+          <i :class="['fa', 'fa-trash', 'fa-lg', 'fa-enabled']"></i></b-button>
       </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <button id="add-member-btn" v-if="canAddMember" @click="addMember" type="button"
-                class="btn btn-primary float-right"><i class="fa fa-plus"></i> {{'security-ui-add-member' | i18n}}
-        </button>
+        <span class="float-right">
+          <button id="add-member-btn" v-if="canAddMember" @click="addMember" type="button"
+                  class="btn btn-primary"><i class="fa fa-plus"></i> {{'security-ui-add-member' | i18n}}
+          </button>
+        </span>
         <h3 class="mt-2">{{'security-ui-members-header' | i18n}}</h3>
       </div>
     </div>
@@ -39,18 +46,23 @@
           :to="{ name: 'memberDetail', params: { groupName: name, memberName: member.username } }"
           class="list-group-item list-group-item-action">
           <div>
-            <h5 class="text-capitalize">{{member.username}}  <small class="font-weight-light text-uppercase"> ({{member.roleLabel}})</small></h5>
+            <h5 class="text-capitalize">{{member.username}}
+              <small class="font-weight-light text-uppercase"> ({{member.roleLabel}})</small>
+            </h5>
           </div>
         </router-link>
       </div>
     </div>
-
+    <b-modal id="deleteModal" ok-variant="danger" cancel-variant="default"
+             :title="$t('security-ui-delete-confirmation-title')" :ok-title="$t('security-ui-delete-confirmation-ok-text')" :cancel-title="$t('security-ui-delete-confirmation-cancel-text')" @ok="deleteGroup">
+      {{ 'security-ui-delete-confirmation-text' | i18n }}
+    </b-modal>
   </div>
 </template>
 
 <script>
   import Toast from './Toast'
-  import { mapGetters, mapMutations } from 'vuex'
+  import {mapGetters, mapMutations} from 'vuex'
 
   export default {
     name: 'GroupDetail',
@@ -63,7 +75,8 @@
     computed: {
       ...mapGetters([
         'groupMembers',
-        'groupPermissions'
+        'groupPermissions',
+        'getLoginUser'
       ]),
       sortedMembers () {
         const members = this.groupMembers[this.name] || []
@@ -80,7 +93,13 @@
       ]),
       addMember () {
         this.clearToast()
-        this.$router.push({name: 'addMember', params: { groupName: this.name }})
+        this.$router.push({name: 'addMember', params: {groupName: this.name}})
+      },
+      deleteGroup () {
+        this.$store.dispatch('deleteGroup', {groupName: this.name})
+          .then(() => {
+            this.$router.push({name: 'groupOverView'})
+          })
       }
     },
     created () {

@@ -155,6 +155,21 @@ const actions = {
         reject(response)
       })
     })
+  },
+  'deleteGroup' ({commit, dispatch}: { commit: Function, dispatch: Function },
+    {groupName}) {
+    const url = GROUP_ENDPOINT + '/' + encodeURIComponent(groupName)
+
+    return new Promise((resolve, reject) => {
+      api.delete_(url).then(() => {
+        handleSuccess(commit, 'Deleted Group')
+        resolve()
+      }, (response) => {
+        commit('setToast',
+          {type: 'danger', message: buildErrorMessage(response)})
+        reject(response)
+      })
+    })
   }
 }
 export default actions

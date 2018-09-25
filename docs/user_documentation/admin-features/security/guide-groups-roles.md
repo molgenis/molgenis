@@ -70,6 +70,11 @@ Fill out the necessary field and click on **Create**.
 
 When you've added the group a folder is created and the default roles are created for that group. The user who creates the group becomes manager of the group.
 
+## Deleting groups
+
+You can delete a group by clicking it on the detail screen to see the details, and than use the delete button (recycle bin icon) to delete the group.
+When deleting a group the package, groups specific roles and group memberships are deleted as well.
+
 ## Adding members to a group
 *note: you need to be superuser or group manager to add members to a group*
 
