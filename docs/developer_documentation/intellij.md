@@ -69,7 +69,7 @@ You can run the formatter in maven using target `fmt:format`.
 Maven will invoke `fmt:check` at build time and fail if the code isn't formatted properly.
 
 * Install and enable the [IntelliJ plugin which replaces the Reformat Code action](https://plugins.jetbrains.com/plugin/8527-google-java-format).
-* Download and import the [IntelliJ Java Google Style file](https://github.com/molgenis/intellij-molgenis-style.xml) to fix the import order.
+* Download and import the [IntelliJ Java Google Style file](https://github.com/molgenis/molgenis/blob/master/intellij-molgenis-style.xml) to fix the import order.
 * Uncheck the reformat checkbox in the git commit dialog, [it is broken](https://github.com/google/google-java-format/issues/228).
 
 ## Use MOLGENIS file-templates
