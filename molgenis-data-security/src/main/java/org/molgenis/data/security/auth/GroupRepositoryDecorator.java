@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.GroupIdentity;
 import org.springframework.security.acls.model.MutableAclService;
@@ -16,7 +15,7 @@ public class GroupRepositoryDecorator extends AbstractRepositoryDecorator<Group>
   private final DataService dataService;
   private final MutableAclService mutableAclService;
 
-  public GroupRepositoryDecorator(
+  GroupRepositoryDecorator(
       Repository<Group> delegateRepository,
       DataService dataService,
       MutableAclService mutableAclService) {
@@ -60,9 +59,9 @@ public class GroupRepositoryDecorator extends AbstractRepositoryDecorator<Group>
   }
 
   private void removeMembers(Role role) {
-    Stream<Entity> memberships =
+    Stream<RoleMembership> memberships =
         dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP)
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
             .eq(RoleMembershipMetadata.ROLE, role.getId())
             .findAll();
     dataService.delete(RoleMembershipMetadata.ROLE_MEMBERSHIP, memberships);

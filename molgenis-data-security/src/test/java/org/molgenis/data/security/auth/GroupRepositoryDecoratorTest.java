@@ -3,7 +3,10 @@ package org.molgenis.data.security.auth;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -12,16 +15,16 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.GroupIdentity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.acls.model.MutableAclService;
 import org.testng.annotations.BeforeMethod;
@@ -29,9 +32,11 @@ import org.testng.annotations.Test;
 
 public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
 
-  @Mock private DataService dataService;
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  private DataService dataService;
+
   @Mock private MutableAclService aclService;
-  @Mock private Repository repository;
+  @Mock private Repository<Group> delegateRepository;
 
   @Captor private ArgumentCaptor<Stream<Role>> roleCaptor;
   @Captor private ArgumentCaptor<Stream<RoleMembership>> memberCaptor;
@@ -42,7 +47,8 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
 
   @BeforeMethod
   public void setUp() {
-    groupRepositoryDecorator = new GroupRepositoryDecorator(repository, dataService, aclService);
+    groupRepositoryDecorator =
+        new GroupRepositoryDecorator(delegateRepository, dataService, aclService);
   }
 
   @Test
@@ -56,27 +62,24 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     Role role2 = mock(Role.class);
     when(role2.getId()).thenReturn("role2");
     List<Role> roles = Arrays.asList(role1, role2);
+    when(group.getRoles()).thenReturn(roles);
 
     RoleMembership member1 = mock(RoleMembership.class);
     RoleMembership member2 = mock(RoleMembership.class);
     List<RoleMembership> members = Arrays.asList(member1, member2);
 
     when(dataService.findOneById(GroupMetadata.GROUP, "test", Group.class)).thenReturn(group);
-    when(dataService.findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test"), Role.class))
-        .thenReturn(roles.stream());
-    doReturn(members.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role1"),
-            RoleMembership.class);
-    doReturn(Collections.<RoleMembership>emptyList().stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role2"),
-            RoleMembership.class);
+
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role1")
+            .findAll())
+        .thenReturn(members.stream());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role2")
+            .findAll())
+        .thenReturn(Stream.empty());
 
     groupRepositoryDecorator.delete(group);
 
@@ -87,7 +90,7 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     assertEquals(values.get(0).collect(toList()), asList(member1, member2));
     verify(dataService).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
     assertEquals(roleCaptor.getValue().collect(toList()), asList(role1, role2));
-    verify(repository).deleteById("test");
+    verify(delegateRepository).deleteById("test");
     verify(aclService).deleteAcl(new GroupIdentity("name"), true);
   }
 
@@ -107,21 +110,17 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<RoleMembership> members = Arrays.asList(member1, member2);
 
     when(dataService.findOneById(GroupMetadata.GROUP, "test", Group.class)).thenReturn(group);
-    when(dataService.findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test"), Role.class))
-        .thenReturn(roles.stream());
-    doReturn(members.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role1"),
-            RoleMembership.class);
-    doReturn(Collections.<RoleMembership>emptyList().stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role2"),
-            RoleMembership.class);
+    when(group.getRoles()).thenReturn(roles);
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role1")
+            .findAll())
+        .thenReturn(members.stream());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role2")
+            .findAll())
+        .thenReturn(Stream.empty());
 
     groupRepositoryDecorator.deleteById("test");
 
@@ -132,7 +131,7 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     assertEquals(values.get(0).collect(toList()), asList(member1, member2));
     verify(dataService).delete(eq(RoleMetadata.ROLE), roleCaptor.capture());
     assertEquals(roleCaptor.getValue().collect(toList()), asList(role1, role2));
-    verify(repository).deleteById("test");
+    verify(delegateRepository).deleteById("test");
     verify(aclService).deleteAcl(new GroupIdentity("name"), true);
   }
 
@@ -160,35 +159,35 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     RoleMembership member3 = mock(RoleMembership.class);
     List<RoleMembership> members2 = Arrays.asList(member3);
 
-    doReturn(Stream.of(group, group2)).when(dataService).findAll(GroupMetadata.GROUP, Group.class);
+    doAnswer(
+        invocation -> {
+          Consumer<List<Entity>> consumer = invocation.getArgument(1);
+          consumer.accept(asList(group, group2));
+          return null;
+        })
+        .when(delegateRepository)
+        .forEachBatched(any(), any(), eq(1000));
+
     doReturn(group).when(dataService).findOneById(GroupMetadata.GROUP, "test", Group.class);
+    when(group.getRoles()).thenReturn(roles);
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
-    doReturn(roles.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test"), Role.class);
-    doReturn(roles2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test2"), Role.class);
-    doReturn(members.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role1"),
-            RoleMembership.class);
-    doReturn(Collections.<RoleMembership>emptyList().stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role2"),
-            RoleMembership.class);
-    doReturn(members2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role3"),
-            RoleMembership.class);
+    when(group2.getRoles()).thenReturn(roles2);
+
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role1")
+            .findAll())
+        .thenReturn(members.stream());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role2")
+            .findAll())
+        .thenReturn(Stream.empty());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role3")
+            .findAll())
+        .thenReturn(members2.stream());
 
     groupRepositoryDecorator.deleteAll();
 
@@ -202,7 +201,7 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
     assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
     assertEquals(roleValues.get(1).collect(toList()), asList(role3));
-    verify(repository, times(2)).deleteById(groupCaptor.capture());
+    verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
     assertEquals(groupValues.get(0), "test");
     assertEquals(groupValues.get(1), "test2");
@@ -237,33 +236,24 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<RoleMembership> members2 = Arrays.asList(member3);
 
     doReturn(group).when(dataService).findOneById(GroupMetadata.GROUP, "test", Group.class);
+    when(group.getRoles()).thenReturn(roles);
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
-    doReturn(roles.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test"), Role.class);
-    doReturn(roles2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test2"), Role.class);
-    doReturn(members.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role1"),
-            RoleMembership.class);
-    doReturn(Collections.<RoleMembership>emptyList().stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role2"),
-            RoleMembership.class);
-    doReturn(members2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role3"),
-            RoleMembership.class);
+    when(group2.getRoles()).thenReturn(roles2);
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role1")
+            .findAll())
+        .thenReturn(members.stream());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role2")
+            .findAll())
+        .thenReturn(Stream.empty());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role3")
+            .findAll())
+        .thenReturn(members2.stream());
 
     groupRepositoryDecorator.delete(Stream.of(group, group2));
 
@@ -277,7 +267,7 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
     assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
     assertEquals(roleValues.get(1).collect(toList()), asList(role3));
-    verify(repository, times(2)).deleteById(groupCaptor.capture());
+    verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
     assertEquals(groupValues.get(0), "test");
     assertEquals(groupValues.get(1), "test2");
@@ -310,33 +300,24 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<RoleMembership> members2 = Arrays.asList(member3);
 
     doReturn(group).when(dataService).findOneById(GroupMetadata.GROUP, "test", Group.class);
+    when(group.getRoles()).thenReturn(roles);
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
-    doReturn(roles.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test"), Role.class);
-    doReturn(roles2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMetadata.ROLE, new QueryImpl<Role>().eq(RoleMetadata.GROUP, "test2"), Role.class);
-    doReturn(members.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role1"),
-            RoleMembership.class);
-    doReturn(Collections.<RoleMembership>emptyList().stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role2"),
-            RoleMembership.class);
-    doReturn(members2.stream())
-        .when(dataService)
-        .findAll(
-            RoleMembershipMetadata.ROLE_MEMBERSHIP,
-            new QueryImpl<RoleMembership>().eq(RoleMembershipMetadata.ROLE, "role3"),
-            RoleMembership.class);
+    when(group2.getRoles()).thenReturn(roles2);
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role1")
+            .findAll())
+        .thenReturn(members.stream());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role2")
+            .findAll())
+        .thenReturn(Stream.empty());
+    when(dataService
+            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+            .eq(RoleMembershipMetadata.ROLE, "role3")
+            .findAll())
+        .thenReturn(members2.stream());
 
     groupRepositoryDecorator.deleteAll(Stream.of("test", "test2"));
 
@@ -350,7 +331,7 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     List<Stream<Role>> roleValues = roleCaptor.getAllValues();
     assertEquals(roleValues.get(0).collect(toList()), asList(role1, role2));
     assertEquals(roleValues.get(1).collect(toList()), asList(role3));
-    verify(repository, times(2)).deleteById(groupCaptor.capture());
+    verify(delegateRepository, times(2)).deleteById(groupCaptor.capture());
     List<String> groupValues = groupCaptor.getAllValues();
     assertEquals(groupValues.get(0), "test");
     assertEquals(groupValues.get(1), "test2");
