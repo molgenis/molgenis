@@ -67,6 +67,24 @@ const filterNonVisiblePackages = (packages: Array<EditorPackageIdentifier>) => {
 
 const compareByLabel = (a, b) => a.label && b.label ? a.label.localeCompare(b.label) : 0
 
+const isReferenceType = (type: string) => {
+  var isReferenceType
+  switch(type) {
+    case 'categorical':
+    case 'categorical_mref':
+    case 'file':
+    case 'mref':
+    case 'onetomany':
+    case 'xref':
+      isReferenceType = true
+      break;
+    default:
+      isReferenceType = false
+      break;
+  }
+  return isReferenceType
+}
+
 export default {
   [SET_PACKAGES] (state: State, packages: Array<EditorPackageIdentifier>) {
     const visiblePackages = filterNonVisiblePackages(packages)
@@ -126,14 +144,17 @@ export default {
    * Updates an editorEntityType attribute via index
    */
   [UPDATE_EDITOR_ENTITY_TYPE_ATTRIBUTE] (state: State, update: Update) {
-    const index = state.editorEntityType.attributes.findIndex(attribute => attribute.id === state.selectedAttributeId)
+    const index = state.editorEntityType.attributes.findIndex(
+      attribute => attribute.id === state.selectedAttributeId)
     const key = update.key
 
     const attr = state.editorEntityType.attributes[index]
     if (key === 'type') {
+      if (isReferenceType(attr.type) && !isReferenceType(update.value)) {
+        attr.refEntityType = null
+      }
       if (attr.type === 'onetomany' || update.value === 'onetomany') {
         attr.mappedByAttribute = null
-        attr.refEntityType = null
         attr.orderBy = null
       }
       attr[key] = update.value

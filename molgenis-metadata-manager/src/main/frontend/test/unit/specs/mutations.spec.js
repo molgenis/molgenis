@@ -291,7 +291,7 @@ describe('mutations', () => {
       }
 
       const expected = [
-        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: null, orderBy: null},
+        {id: '1', name: 'attribute 1', type: 'xref', mappedByAttribute: null, refEntityType: {id: 'refEntityId'}, orderBy: null},
         {id: '2', name: 'attribute 2', type: 'int', mappedByAttribute: null, refEntityType: null},
         {id: '3', name: 'attribute 3', type: 'string', mappedByAttribute: null, refEntityType: null}
       ]
