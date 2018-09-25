@@ -27,11 +27,6 @@ public class JavaMailSenderFactory implements MailSenderFactory {
   @Override
   public JavaMailSenderImpl createMailSender(MailSettings mailSettings) {
     LOG.trace("createMailSender");
-    if (mailSettings.getUsername() == null || mailSettings.getPassword() == null) {
-      throw new IllegalStateException(
-          "Cannot create mail sender. Username or password of the mail account not specified in the system mail settings.");
-    }
-
     JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
     mailSender.setHost(mailSettings.getHost());
     mailSender.setPort(mailSettings.getPort());
