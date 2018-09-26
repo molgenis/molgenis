@@ -41,6 +41,20 @@ public class JavaMailSenderFactoryTest extends AbstractMockitoTest {
     assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
   }
 
+  // regression test for https://github.com/molgenis/molgenis/issues/6516
+  @Test
+  public void testCreateMailSenderWithoutUsernamePassword() {
+    JavaMailSenderImpl actual = javaMailSenderFactory.createMailSender(mailSettings);
+
+    assertEquals(actual.getHost(), "host");
+    assertEquals(actual.getPort(), 1234);
+    assertEquals(actual.getDefaultEncoding(), "UTF-8");
+    final Properties actualProperties = actual.getJavaMailProperties();
+    assertEquals(actualProperties.getProperty("mail.smtp.starttls.enable"), "true");
+    assertEquals(actualProperties.getProperty("mail.smtp.quitwait"), "false");
+    assertEquals(actualProperties.getProperty("mail.smtp.auth"), "true");
+  }
+
   @Test
   public void testCreateMailSenderWithSpecifiedProperties() {
     final Properties javaMailProps = new Properties();
