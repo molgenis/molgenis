@@ -104,15 +104,16 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.12.0.tgz#18f3ad5335dd389b2a4216659ce0365d5d129681"
+"@molgenis/molgenis-ui-form@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-1.1.0.tgz#48648a949fce0cbbf7d6280004aea7e30920f618"
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
+    "@molgenis/rsql" "^0.1.1"
     debounce "^1.1.0"
     moment "^2.20.1"
     vue-code "^1.2.3"
-    vue-flatpickr-component "^7.0.4"
+    vue-flatpickr-component "^8.0.0"
     vue-form "^4.10.1"
     vue-select ConnorStroomberg/vue-select.git#release/patch-for-update-issue
 
@@ -121,6 +122,12 @@
   resolved "https://registry.yarnpkg.com/@molgenis/molgenis-vue-test-utils/-/molgenis-vue-test-utils-1.1.0.tgz#d3fac7884b60da899c30064050ea56a36ca29d40"
   dependencies:
     babel-runtime "^6.11.6"
+
+"@molgenis/rsql@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/rsql/-/rsql-0.1.1.tgz#de234a5f8de71ab1405cce48bb5c5c76c4525ca4"
+  dependencies:
+    mdurl "^1.0.1"
 
 "@sinonjs/formatio@^2.0.0":
   version "2.0.0"
@@ -1655,8 +1662,8 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
 codemirror@5.x:
-  version "5.40.0"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.40.0.tgz#2f5ed47366e514f41349ba0fe34daaa39be4e257"
+  version "5.40.2"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.40.2.tgz#f4a41fee2d84e679543591b3680af259d903330b"
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -4863,6 +4870,10 @@ md5.js@^1.3.4:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
+mdurl@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
+
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
@@ -7717,9 +7728,9 @@ vue-code@^1.2.3:
   dependencies:
     codemirror "5.x"
 
-vue-flatpickr-component@^7.0.4:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.6.tgz#f0e750f5c43c59471eb07dd88f7e534391305815"
+vue-flatpickr-component@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-8.0.0.tgz#d5ce18981ad1c6fdf32106ae441f5160978e46b3"
   dependencies:
     flatpickr "^4.5.1"
 
