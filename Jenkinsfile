@@ -72,7 +72,7 @@ pipeline {
                     sh "helm init --client-only"
                     sh "helm repo add molgenis ${HELM_REPO}"
                     sh "helm repo update"
-                    sh "helm upgrade molgenis-dev molgenis/molgenis-preview --reuse-values --set molgenis.molgenis.image.tag=${TAG}-${BUILD_NUMBER} --set molgenis.molgenis.image.repository=${DOCKER_LOCAL}"
+                    sh "helm upgrade molgenis-dev molgenis/molgenis-preview --reuse-values --set molgenis.image.tag=${TAG}-${BUILD_NUMBER} --set molgenis.image.repository=${DOCKER_LOCAL}"
                 }
             }
             post {
