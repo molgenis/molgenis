@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
@@ -44,25 +43,13 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository {
   private EntityMapping toEntityMapping(Entity entityMappingEntity) {
     String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
 
-    EntityType targetEntityType;
-    try {
-      targetEntityType =
-          dataService.getEntityType(
-              entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
-    } catch (UnknownEntityTypeException uee) {
-      LOG.error(uee.getMessage());
-      targetEntityType = null;
-    }
+    EntityType targetEntityType =
+        dataService.getEntityType(
+            entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
 
-    EntityType sourceEntityType;
-    try {
-      sourceEntityType =
-          dataService.getEntityType(
-              entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
-    } catch (UnknownEntityTypeException uee) {
-      LOG.error(uee.getMessage());
-      sourceEntityType = null;
-    }
+    EntityType sourceEntityType =
+        dataService.getEntityType(
+            entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
 
     List<Entity> attributeMappingEntities =
         Lists.newArrayList(
