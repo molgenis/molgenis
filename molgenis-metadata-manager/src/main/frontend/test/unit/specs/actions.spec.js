@@ -16,8 +16,7 @@ import {
   UPDATE_EDITOR_ENTITY_TYPE
 } from 'store/mutations'
 
-import actions, {toAttribute, toEntityType} from 'store/actions'
-import {RESET_EDITOR_ENTITY_TYPE} from "../../../src/store/actions";
+import actions, { toAttribute, toEntityType } from 'store/actions'
 
 const i18n = {
   'save-succes-message': 'Successfully updated metadata for EntityType'
