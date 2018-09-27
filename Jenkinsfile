@@ -116,7 +116,7 @@ pipeline {
                             unstash 'maven-settings'
                         }
                         container('maven') {
-                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
                                 sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest"
