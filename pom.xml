@@ -99,7 +99,7 @@
     <mapdb.version>1.0.6</mapdb.version>
     <simplecaptcha.version>1.2.2</simplecaptcha.version>
     <zip4j.version>1.3.2</zip4j.version>
-
+    <handlebars.version>4.1.0</handlebars.version>
     <node.version>v8.12.0</node.version>
     <yarn.version>v1.7.0</yarn.version>
 
@@ -989,6 +989,11 @@
         <groupId>org.zeroturnaround</groupId>
         <artifactId>zt-zip</artifactId>
         <version>${zt-zip.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.jknack</groupId>
+        <artifactId>handlebars</artifactId>
+        <version>${handlebars.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -2,6 +2,7 @@ package org.molgenis.api.tests.rest.v2;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.restassured.RestAssured.given;
+import static java.lang.String.format;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_NAME;
 import static org.molgenis.api.tests.utils.RestTestUtils.DEFAULT_ADMIN_PW;
@@ -30,6 +31,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
 import java.util.List;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -90,7 +92,12 @@ public class RestControllerV2IT {
     RestTestUtils.createPackage(adminToken, "base");
 
     LOG.info("Importing RestControllerV2_TestEMX.xlsx...");
-    uploadEMX(adminToken, "/RestControllerV2_TestEMX.xlsx");
+    String fileName = "/RestControllerV2_TestEMX.xlsx";
+    String status = uploadEMX(adminToken, fileName);
+    if (!status.equals("FINISHED")) {
+      throw new RuntimeException(
+          format("Import '%s' completed with status '%s'", fileName, status));
+    }
     LOG.info("Importing Done");
 
     testUsername = "rest_test_v2" + System.currentTimeMillis();
@@ -127,6 +134,32 @@ public class RestControllerV2IT {
         .header("Access-Control-Allow-Methods", "DELETE")
         .header("Access-Control-Allow-Headers", "x-molgenis-token")
         .header("Access-Control-Max-Age", "1800");
+  }
+
+  @Test
+  public void batchRetrieveEntityCollectionTemplateExpression() {
+    ValidatableResponse response =
+        given()
+            .log()
+            .all()
+            .header(X_MOLGENIS_TOKEN, testUserToken)
+            .get(API_V2 + "it_emx_datatypes_TypeTestv2")
+            .then()
+            .log()
+            .all();
+
+    response.statusCode(OKE);
+    response.body(
+        "href",
+        Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2"),
+        "items[1]._href",
+        Matchers.equalTo("/api/v2/it_emx_datatypes_TypeTestv2/2"),
+        "items[1].xstring_template0",
+        Matchers.equalTo("lorum str2 ipsum"),
+        "items[1].xstring_template1",
+        Matchers.equalTo("lorum label2 ipsum ref2"),
+        "items[1].xstring_template2",
+        Matchers.equalTo("lorum label2,label3 ipsum ref2,ref3"));
   }
 
   @Test
