@@ -63,13 +63,9 @@
 </template>
 
 <script>
-  import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
+  import { FormComponent } from '@molgenis/molgenis-ui-form'
   import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
-  import api from '@molgenis/molgenis-api-client'
-
-  const entityMapperSettings = {
-    showNonVisibleAttributes: true
-  }
+  import * as repository from '@/repository/dataRowRepository'
 
   export default {
     name: 'DataRowEdit',
@@ -102,12 +98,9 @@
       },
       onSubmit () {
         this.isSaving = true
-        const options = {
-          body: JSON.stringify(this.formData)
-        }
-        const postDetails = this.dataRowId !== null ? this.dataTableId + '/' + this.dataRowId : this.dataTableId
-        const uri = '/api/v1/' + postDetails + '?_method=PUT'
-        api.post(uri, options).then(this.goBackToPluginCaller, this.handleError)
+        repository
+          .save(this.formData, this.formFields, this.dataTableId, this.dataRowId)
+          .then(this.goBackToPluginCaller, this.handleError)
       },
       goBackToPluginCaller () {
         window.history.go(-1)
@@ -126,34 +119,12 @@
       initializeForm (mappedData) {
         this.formFields = mappedData.formFields
         this.formData = mappedData.formData
+        this.dataTableLabel = mappedData.formLabel
         this.showForm = true
-      },
-      /**
-       * response mixes data and metadata, this function creates a new object with separate properties for data and metadata
-       * @param response
-       * @returns {{_meta: *, rowData: *}}
-       */
-      parseEditResponse (response) {
-        // noinspection JSUnusedLocalSymbols
-        const { _meta, _href, ...rowData } = response
-        return {_meta, rowData}
       }
     },
     created: function () {
-      if (this.dataRowId !== null) {
-        api.get('/api/v2/' + this.dataTableId + '/' + this.dataRowId).then((response) => {
-          this.dataTableLabel = response._meta.label
-          const { _meta, rowData } = this.parseEditResponse(response)
-          const mappedData = EntityToFormMapper.generateForm(_meta, rowData, { mapperMode: 'UPDATE', ...entityMapperSettings })
-          this.initializeForm(mappedData)
-        }, this.handleError)
-      } else {
-        api.get('/api/v2/' + this.dataTableId + '?num=0').then((response) => {
-          this.dataTableLabel = response.meta.label
-          const mappedData = EntityToFormMapper.generateForm(response.meta, {}, { mapperMode: 'CREATE', ...entityMapperSettings })
-          this.initializeForm(mappedData)
-        }, this.handleError)
-      }
+      repository.fetch(this.dataTableId, this.dataRowId).then(this.initializeForm, this.handleError)
     },
     components: {
       FormComponent
