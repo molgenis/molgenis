@@ -59,7 +59,7 @@ pipeline {
             }
             environment {
                 TAG = 'dev'
-                HELM_REPO = 'https://registry.molgenis.org/repository/helm/molgenis/'
+                HELM_REPO = 'https://registry.molgenis.org/repository/helm/'
             }
             steps {
                 container('maven') {
