@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
         npm_config_registry = 'http://nexus.molgenis-nexus:8081/repository/npm-central/'
-        HELM_REPO = 'https://registry.molgenis.org/repository/helm/molgenis/'
+        HELM_REPO = 'https://registry.molgenis.org/repository/helm/'
         LOCAL_REGISTRY = 'registry.molgenis.org'
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
     }
