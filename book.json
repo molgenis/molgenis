@@ -21,11 +21,6 @@
       "gitbookConfigURL": "https://raw.githubusercontent.com/molgenis/molgenis/master/book.json",
       "options": [
         {
-          "value": "https://molgenis.gitbooks.io/molgenis/content/v/master/",
-          "text": "MOLGENIS version currently under development",
-          "selected": true
-        },
-        {
           "value": "https://molgenis.gitbooks.io/molgenis/content/v/7.2/",
           "text": "MOLGENIS 7.2"
         },
