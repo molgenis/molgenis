@@ -84,7 +84,7 @@
               <input v-model="label" class="form-control" type="text"
                      :placeholder="$t('attribute-edit-form-label-placeholder')">
               <div class="input-group-append">
-                <button @click="showLabelLanguageInputs = !showLabelLanguageInputs" class="btn"><i
+                <button @click="showLabelLanguageInputs = !showLabelLanguageInputs" class="btn btn-outline-secondary"><i
                   class="fa fa-language fa-lg"></i></button>
               </div>
             </div>
@@ -109,7 +109,7 @@
               <input v-model="description" class="form-control" type="text"
                      :placeholder="$t('attribute-edit-form-description-placeholder')">
               <div class="input-group-append">
-                <button @click="showDescriptionLanguageInputs = !showDescriptionLanguageInputs" class="btn"><i
+                <button @click="showDescriptionLanguageInputs = !showDescriptionLanguageInputs" class="btn btn-outline-secondary"><i
                   class="fa fa-language fa-lg"></i></button>
               </div>
             </div>
