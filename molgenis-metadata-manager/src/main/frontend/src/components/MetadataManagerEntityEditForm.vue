@@ -44,7 +44,7 @@
           <div class="col input-group">
             <input v-model="label" class="form-control" type="text"
                    :placeholder="$t('entity-edit-form-label-placeholder')">
-            <div class="input-group-append">
+            <div class="input-group-append" style="z-index: -1"><!-- -1, because otherwise append overlaps entity type dropdown -->
               <button @click="showLabelLanguageInputs = !showLabelLanguageInputs" class="btn btn-outline-secondary"><i
                 class="fa fa-language fa-lg"></i></button>
             </div>
@@ -69,7 +69,7 @@
           <div class="col input-group">
             <input v-model="description" class="form-control" type="text"
                    :placeholder="$t('entity-edit-form-description-placeholder')">
-            <div class="input-group-append">
+            <div class="input-group-append" style="z-index: -1"><!-- -1, because otherwise append overlaps entity type dropdown -->
               <button @click="showDescriptionLanguageInputs = !showDescriptionLanguageInputs" class="btn btn-outline-secondary"><i
                 class="fa fa-language fa-lg"></i></button>
             </div>
