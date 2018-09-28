@@ -1,8 +1,11 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
@@ -15,7 +18,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.List;
-import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -146,7 +148,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
                 sourceAttributes,
                 CURATED.toString()));
 
-    Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
+    when(idGenerator.generateId()).thenReturn("attributeMappingID");
 
     List<Entity> result = newArrayList();
     Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
@@ -210,6 +212,29 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     assertEquals(
         attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
         expectedSourceAttributes);
+  }
+
+  // regression test for https://github.com/molgenis/molgenis/issues/7831
+  @Test
+  public void testGetAttributeMappingsUnknownSourceAndTargetEntityType() {
+    String identifier = "identifier";
+    String targetAttribute = "targetAttribute";
+    String algorithm = "algorithm";
+    String algorithmState = "algorithmState";
+
+    Entity attributeMappingEntity = mock(Entity.class);
+    doReturn(identifier).when(attributeMappingEntity).getString("identifier");
+    doReturn(targetAttribute).when(attributeMappingEntity).getString("targetAttribute");
+    doReturn(algorithm).when(attributeMappingEntity).getString("algorithm");
+    doReturn(algorithmState).when(attributeMappingEntity).getString("algorithmState");
+
+    AttributeMapping attributeMapping =
+        new AttributeMapping(
+            identifier, targetAttribute, null, algorithm, emptyList(), algorithmState);
+    assertEquals(
+        attributeMappingRepository.getAttributeMappings(
+            singletonList(attributeMappingEntity), null, null),
+        singletonList(attributeMapping));
   }
 
   @Configuration
