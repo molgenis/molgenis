@@ -56,7 +56,7 @@ public class OneClickImportJob {
       throws UnknownFileTypeException, IOException, InvalidFormatException, EmptySheetException {
     File file = fileStore.getFile(filename);
     String fileExtension =
-        findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
+        findExtensionFromPossibilities(filename, newHashSet("csv", "tsv", "xlsx", "zip", "xls"));
 
     progress.status("Preparing import");
     List<DataCollection> dataCollections = newArrayList();
@@ -68,7 +68,7 @@ public class OneClickImportJob {
     } else if (fileExtension.equals("xls") || fileExtension.equals("xlsx")) {
       List<Sheet> sheets = excelService.buildExcelSheetsFromFile(file);
       dataCollections.addAll(oneClickImporterService.buildDataCollectionsFromExcel(sheets));
-    } else if (fileExtension.equals("csv")) {
+    } else if (fileExtension.equals("csv") || fileExtension.equals("tsv")) {
       List<String[]> lines = csvService.buildLinesFromFile(file);
       dataCollections.add(
           oneClickImporterService.buildDataCollectionFromCsv(
