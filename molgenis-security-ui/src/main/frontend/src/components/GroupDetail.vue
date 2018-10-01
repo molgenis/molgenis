@@ -53,7 +53,7 @@
         </router-link>
       </div>
     </div>
-    <b-modal id="deleteModal" ok-variant="danger" cancel-variant="default"
+    <b-modal id="deleteModal" ok-variant="danger" cancel-variant="secondary"
              :title="$t('security-ui-delete-confirmation-title')" :ok-title="$t('security-ui-delete-confirmation-ok-text')" :cancel-title="$t('security-ui-delete-confirmation-cancel-text')" @ok="deleteGroup">
       {{ 'security-ui-delete-confirmation-text' | i18n }}
     </b-modal>

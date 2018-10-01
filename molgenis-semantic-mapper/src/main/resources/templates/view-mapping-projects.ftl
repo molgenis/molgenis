@@ -39,16 +39,6 @@
             </thead>
             <tbody>
                 <#list mappingProjects as project>
-                    <#assign broken = false>
-                    <#if project.mappingTargets[0]??>
-                        <#list project.mappingTargets[0].entityMappings as mapping>
-                            <#if !mapping.name??><#assign broken = true></#if>
-                        </#list>
-                    <#else>
-                        <#assign broken = true>
-                    </#if>
-
-                    <#if broken == false>
                     <tr>
                         <td>
                             <form method="post" action="${context_url}/removeMappingProject"
@@ -66,31 +56,25 @@
                         <td>
                             <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
                         <td>
+                          <#if project.mappingTargets?size != 0>
                             <#list project.mappingTargets as target>
-                                ${target.name?html}<#if target_has_next>, </#if>
+                              <#if target??>${target.name?html}<#else><span class="bg-danger text-white">Target undefined or unknown</span></#if><#if target_has_next>, </#if>
                             </#list>
+                          <#else>
+                            <span class="bg-danger text-white">Targets undefined or unknown</span>
+                          </#if>
                         </td>
                         <td>
-                            <#list project.mappingTargets[0].entityMappings as mapping>
-                            ${mapping.name}<#if mapping_has_next>, </#if>
-                            </#list>
+                          <#list project.mappingTargets as target>
+                            <#if target??>
+                              <#list target.entityMappings as mapping>
+                                <#if mapping.name??>${mapping.name?html}<#else><span class="bg-danger text-white">Source undefined or unknown</span></#if><#if mapping_has_next>, </#if>
+                              </#list>
+                            </#if>
+                            <#break>
+                          </#list>
                         </td>
                     </tr>
-                    <#else>
-                    <tr class="danger">
-                        <td>
-                            <form method="post" action="${context_url}/removeMappingProject"
-                                  class="pull-left verify">
-                                <input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
-                                <button type="submit" class="btn btn-danger btn-xs"><span
-                                        class="glyphicon glyphicon-trash"></span></button>
-                            </form>
-                        </td>
-                        <td>${project.name?html}</td>
-                        <td colspan="2"><b>Broken project: some entities are missing</b></td>
-                    </tr>
-                    </#if>
-
                 </#list>
             </tbody>
         </table>
