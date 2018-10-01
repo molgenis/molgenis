@@ -42,12 +42,12 @@ public class CsvServiceImpl implements CsvService {
   private CSVReader createCsvReader(String fileName, InputStream in) {
     Reader reader = new InputStreamReader(in, UTF_8);
 
-    if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.CSV.toString())
-        || fileName.toLowerCase().endsWith('.' + CsvFileExtensions.TXT.toString())) {
+    if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.CSV.toString())) {
       return new CSVReader(reader);
     }
 
-    if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.TSV.toString())) {
+    if (fileName.toLowerCase().endsWith('.' + CsvFileExtensions.TSV.toString())
+        || fileName.toLowerCase().endsWith('.' + CsvFileExtensions.TXT.toString())) {
       return new CSVReader(reader, '\t');
     }
 

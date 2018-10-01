@@ -65,6 +65,7 @@ public class OneClickImporterControllerAPIIT {
 
   private static final String ONE_CLICK_IMPORT_EXCEL_FILE = "/OneClickImport_complex-valid.xlsx";
   private static final String ONE_CLICK_IMPORT_CSV_FILE = "/OneClickImport_complex-valid.csv";
+  private static final String ONE_CLICK_IMPORT_TXT_FILE = "/OneClickImport_complex-valid.txt";
 
   private String testUserToken;
   private String adminToken;
@@ -125,6 +126,11 @@ public class OneClickImporterControllerAPIIT {
   @Test
   public void testOneClickImportCsvFile() throws IOException, URISyntaxException {
     oneClickImportTest(ONE_CLICK_IMPORT_CSV_FILE);
+  }
+
+  @Test
+  public void testOneClickImportTxtAsCsvFile() throws IOException, URISyntaxException {
+    oneClickImportTest(ONE_CLICK_IMPORT_TXT_FILE);
   }
 
   private void oneClickImportTest(String fileToImport) throws URISyntaxException, IOException {

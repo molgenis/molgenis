@@ -20,12 +20,17 @@ public class CsvServiceTest {
       throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
     List<String[]> actual =
         csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/simple-valid.csv"));
-    List<String[]> expected = new ArrayList<>();
-    expected.add(new String[] {"name", "superpower"});
-    expected.add(new String[] {"Mark", "arrow functions"});
-    expected.add(new String[] {"Connor", "Oldschool syntax"});
-    expected.add(new String[] {"Fleur", "Lambda Magician"});
-    expected.add(new String[] {"Dennis", "Root access"});
+    List<String[]> expected = expectedLines();
+
+    assertEquals(actual, expected);
+  }
+
+  @Test
+  public void buildLinesFromTsvFileTestWithTxtExtention()
+          throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
+    List<String[]> actual =
+            csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/simple-valid.txt"));
+    List<String[]> expected = expectedLines();
 
     assertEquals(actual, expected);
   }
@@ -45,5 +50,16 @@ public class CsvServiceTest {
   public void buildLinesWithHeaderOnly()
       throws InvalidFormatException, IOException, URISyntaxException, MolgenisDataException {
     csvService.buildLinesFromFile(loadFile(CsvServiceTest.class, "/header-without-data.csv"));
+  }
+
+  private List<String[]> expectedLines()
+  {
+    List<String[]> expected = new ArrayList<>();
+    expected.add(new String[] { "name", "superpower" });
+    expected.add(new String[] { "Mark", "arrow functions" });
+    expected.add(new String[] { "Connor", "Oldschool syntax" });
+    expected.add(new String[] { "Fleur", "Lambda Magician" });
+    expected.add(new String[] { "Dennis", "Root access" });
+    return expected;
   }
 }
