@@ -206,9 +206,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 
   @Test
   public void testEnableTwoFactorAuthentication() {
-    assertEquals(userAccountController.enableTwoFactorAuthentication(), "redirect:/login");
-
-    verify(twoFactorAuthenticationService).enableForUser();
+    assertEquals(userAccountController.enableTwoFactorAuthentication(), "redirect:/2fa/activation");
   }
 
   @Test
