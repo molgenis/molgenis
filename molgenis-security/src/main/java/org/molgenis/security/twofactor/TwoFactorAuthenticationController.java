@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/2fa")
 public class TwoFactorAuthenticationController {
   public static final String URI = "/2fa";
-  public static final String TWO_FACTOR_CONFIGURED_URI = "/authenticate";
   public static final String TWO_FACTOR_ACTIVATION_URI = "/activation";
-  public static final String ATTRIBUTE_2FA_RECOVER_MODE = "isRecoverMode";
   public static final String ATTRIBUTE_2FA_SECRET_KEY = "secretKey";
-  public static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
+  public static final String TWO_FACTOR_CONFIGURED_URI = "/authenticate";
+  private static final String ATTRIBUTE_2FA_RECOVER_MODE = "isRecoverMode";
+  private static final String ATTRIBUTE_2FA_AUTHENTICATOR_URI = "authenticatorURI";
   private static final String TWO_FACTOR_ACTIVATION_AUTHENTICATE_URI =
       TWO_FACTOR_ACTIVATION_URI + "/authenticate";
   private static final String TWO_FACTOR_VALIDATION_URI = "/validate";
@@ -56,7 +56,7 @@ public class TwoFactorAuthenticationController {
   }
 
   @GetMapping(TWO_FACTOR_CONFIGURED_URI)
-  public String configured(Model model) {
+  public String configured() {
     return VIEW_2FA_CONFIGURED_MODAL;
   }
 
@@ -102,6 +102,7 @@ public class TwoFactorAuthenticationController {
           new TwoFactorAuthenticationToken(verificationCode, secretKey);
       Authentication authentication = authenticationProvider.authenticate(authToken);
       SecurityContextHolder.getContext().setAuthentication(authentication);
+      twoFactorAuthenticationService.enableForUser();
     } catch (AuthenticationException err) {
       model.addAttribute(ATTRIBUTE_2FA_SECRET_KEY, secretKey);
       model.addAttribute(
@@ -132,7 +133,7 @@ public class TwoFactorAuthenticationController {
   }
 
   private String determineErrorMessage(Exception err) {
-    String message = "Signin failed";
+    String message = "Sign in failed";
     if (err instanceof BadCredentialsException
         || err instanceof InvalidVerificationCodeException
         || err instanceof TooManyLoginAttemptsException

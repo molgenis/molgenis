@@ -26,7 +26,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.util.CountryCodes;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.i18n.LanguageService;
-import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.twofactor.TwoFactorAuthenticationController;
 import org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting;
@@ -62,10 +61,12 @@ import org.springframework.web.servlet.LocaleResolver;
 @Controller
 @RequestMapping(URI)
 public class UserAccountController extends PluginController {
+
   private static final Logger LOG = LoggerFactory.getLogger(UserAccountController.class);
 
   public static final String ID = "useraccount";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
+  public static final String TWO_FACTOR_AUTHENTICATION = "2fa";
 
   private final UserAccountService userAccountService;
   private final RecoveryService recoveryService;
@@ -206,11 +207,11 @@ public class UserAccountController extends PluginController {
     @ApiResponse(code = 200, message = "Two factor authentication enabled"),
     @ApiResponse(code = 400, message = "Could not enable two factor authentication for user")
   })
-  @PostMapping(TwoFactorAuthenticationController.URI + "/enable")
+  @PostMapping(TWO_FACTOR_AUTHENTICATION + "/enable")
   public String enableTwoFactorAuthentication() {
-    twoFactorAuthenticationService.enableForUser();
-
-    return "redirect:" + MolgenisLoginController.URI;
+    return "redirect:"
+        + TwoFactorAuthenticationController.URI
+        + TwoFactorAuthenticationController.TWO_FACTOR_ACTIVATION_URI;
   }
 
   @ApiOperation("Disable two factor authentication")
@@ -221,7 +222,7 @@ public class UserAccountController extends PluginController {
         message = "Could not disable two factor authentication for user",
         response = ErrorMessageResponse.class)
   })
-  @PostMapping(TwoFactorAuthenticationController.URI + "/disable")
+  @PostMapping(TWO_FACTOR_AUTHENTICATION + "/disable")
   public String disableTwoFactorAuthentication(Model model) {
     twoFactorAuthenticationService.disableForUser();
     downgradeUserAuthentication();
@@ -237,7 +238,7 @@ public class UserAccountController extends PluginController {
         message = "Could not rest two factor authentication for user",
         response = ErrorMessageResponse.class)
   })
-  @PostMapping(TwoFactorAuthenticationController.URI + "/reset")
+  @PostMapping(TWO_FACTOR_AUTHENTICATION + "/reset")
   public String resetTwoFactorAuthentication() {
     twoFactorAuthenticationService.resetSecretForUser();
 
