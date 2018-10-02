@@ -265,7 +265,7 @@ public class PostgreSqlRepositoryCollectionTest {
         captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#00c877f0\"(\"refIdAttr\")"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity#00c877f0\"(\"refIdAttr\") DEFERRABLE INITIALLY DEFERRED"));
   }
 
   @Test(expectedExceptions = MolgenisDataException.class)
@@ -474,7 +474,7 @@ public class PostgreSqlRepositoryCollectionTest {
         captor.getAllValues(),
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_fkey\"",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\")"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"));
   }
 
   @Test
@@ -515,7 +515,7 @@ public class PostgreSqlRepositoryCollectionTest {
         newArrayList(
             "ALTER TABLE \"entity#6844280e\" DROP CONSTRAINT \"entity#6844280e_attr_fkey\"",
             "ALTER TABLE \"entity#6844280e\" ALTER COLUMN \"attr\" SET DATA TYPE character varying(255) USING \"attr\"::character varying(255)",
-            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\")"));
+            "ALTER TABLE \"entity#6844280e\" ADD CONSTRAINT \"entity#6844280e_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1#7f982c83\"(\"refIdAttr1\") DEFERRABLE INITIALLY DEFERRED"));
   }
 
   @Test(
