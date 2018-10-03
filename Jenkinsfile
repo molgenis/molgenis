@@ -135,8 +135,8 @@ pipeline {
                             script {
                                 env.TAG = sh(script: "grep project.rel release.properties | cut -d'=' -f2", returnStdout: true)
                             }
-                            dir('molgenis-app'){
-                                sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            dir('molgenis-app') {
+                                sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}-SNAPSHOT"
                             }
                         }
                     }
