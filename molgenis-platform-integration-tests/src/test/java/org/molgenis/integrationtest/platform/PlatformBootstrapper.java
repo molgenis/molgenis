@@ -12,6 +12,7 @@ import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
 import org.molgenis.data.postgresql.identifier.EntityTypeRegistryPopulator;
+import org.molgenis.data.transaction.TransactionExceptionTranslatorRegistrar;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.jobs.JobFactoryRegistrar;
 import org.molgenis.security.acl.DataSourceAclTablesPopulator;
@@ -28,6 +29,7 @@ public class PlatformBootstrapper {
   private static final Logger LOG = LoggerFactory.getLogger(PlatformITConfig.class);
 
   private final DataSourceAclTablesPopulator dataSourceAclTablesPopulator;
+  private final TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar;
   private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;
   private final SystemEntityTypeRegistrar systemEntityTypeRegistrar;
   private final SystemPackageRegistrar systemPackageRegistrar;
@@ -42,6 +44,7 @@ public class PlatformBootstrapper {
 
   PlatformBootstrapper(
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
+      TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
       RepositoryCollectionBootstrapper repoCollectionBootstrapper,
       SystemEntityTypeRegistrar systemEntityTypeRegistrar,
       SystemPackageRegistrar systemPackageRegistrar,
@@ -53,6 +56,7 @@ public class PlatformBootstrapper {
       BootstrappingEventPublisher bootstrappingEventPublisher,
       TransactionManager transactionManager) {
     this.dataSourceAclTablesPopulator = dataSourceAclTablesPopulator;
+    this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
     this.repoCollectionBootstrapper = repoCollectionBootstrapper;
     this.systemEntityTypeRegistrar = systemEntityTypeRegistrar;
     this.systemPackageRegistrar = systemPackageRegistrar;
@@ -79,6 +83,10 @@ public class PlatformBootstrapper {
                   LOG.trace("Populating data source with ACL tables ...");
                   dataSourceAclTablesPopulator.populate();
                   LOG.debug("Populated data source with ACL tables");
+
+                  LOG.trace("Bootstrapping transaction exception translators ...");
+                  transactionExceptionTranslatorRegistrar.register(event.getApplicationContext());
+                  LOG.debug("Bootstrapped transaction exception translators");
 
                   LOG.trace("Registering repository collections ...");
                   repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
