@@ -44,8 +44,16 @@
       </div>
       <div class="col-1">
         <div class="float-right">
+          <b-dropdown variant="secondary" right>
+            <template slot="button-content">
+              <font-awesome-icon icon="plus" size="lg"/>
+            </template>
+            <b-dropdown-item to="/create/package">{{ 'action-create-package' | i18n }}</b-dropdown-item>
+            <b-dropdown-item to="/create/entity-type">{{ 'action-create-entity-type' | i18n }}</b-dropdown-item>
+          </b-dropdown>
           <b-button :disable="nrSelectedItems > 0 ? false : true" variant="danger" v-b-modal.deleteModal>
-            <i :class="['fa', 'fa-trash', 'fa-lg', nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled']"></i></b-button>
+            <font-awesome-icon icon="trash" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
+          </b-button>
         </div>
       </div>
     </div>

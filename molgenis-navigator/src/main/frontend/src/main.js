@@ -6,12 +6,18 @@ import router from './router'
 
 import BootstrapVue from 'bootstrap-vue'
 
-import 'font-awesome/css/font-awesome.min.css'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
 import { INITIAL_STATE } from './store/state'
 // Keeps the router and the store in sync @https://github.com/vuejs/vuex-router-sync
 sync(store, router)
+
+library.add(faPlus, faTrash)
+
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.use(BootstrapVue)
 
