@@ -38,13 +38,13 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService {
   @Override
   public boolean upgrade() {
     int schemaVersion = versionService.getSchemaVersion();
-    if (schemaVersion < 19) {
+    if (schemaVersion < 32) {
       throw new UnsupportedOperationException(
-          "Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
+          "Upgrading from schema version below 32 is not supported");
     }
     if (schemaVersion < versionService.getAppVersion()) {
       LOG.info(
-          "MetaData version:{}, current version:{} upgrade needed",
+          "Metadata version:{}, current version:{} upgrade needed",
           schemaVersion,
           versionService.getAppVersion());
 
@@ -55,11 +55,11 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService {
 
       versionService.setSchemaVersion(versionService.getAppVersion());
 
-      LOG.info("MetaData upgrade done.");
+      LOG.info("Metadata upgrade done.");
       return true;
     } else {
       LOG.debug(
-          "MetaData version:{}, current version:{} upgrade not needed",
+          "Metadata version:{}, current version:{} upgrade not needed",
           schemaVersion,
           versionService.getAppVersion());
       return false;
