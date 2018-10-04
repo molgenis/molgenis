@@ -1,16 +1,17 @@
 // @flow
 <template>
-  <div>
-
+  <div v-else>
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
-      <button @click="error=null" type="button" class="close"><span aria-hidden="true">&times;</span></button>
+      <button @click="error=null" type="button" class="close"><span
+        aria-hidden="true">&times;</span></button>
       {{error}}
     </div>
 
     <!-- Search element -->
     <div class="navigator-search row justify-content-center">
       <div class="input-group col-lg-6">
-        <input v-model="query" type="text" class="form-control" :placeholder="$t('search-input-placeholder')">
+        <input v-model="query" type="text" class="form-control"
+               :placeholder="$t('search-input-placeholder')">
         <div class="input-group-append">
 
           <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query"
@@ -26,11 +27,11 @@
 
     <!-- Breadcrumb element -->
     <div class="navigator-path row">
-      <div class="col-11 input-group">
+      <div class="col-10 input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
             <a :href="homeUrl" v-on:click="reset">
-              <i class="fa fa-home" aria-hidden="true"></i>
+              <font-awesome-icon icon="home"/>
             </a>
           </li>
           <li class="breadcrumb-item" v-for="package in path">
@@ -42,26 +43,14 @@
           </li>
         </ol>
       </div>
-      <div class="col-1">
-        <div class="float-right">
-          <b-dropdown variant="secondary" right>
-            <template slot="button-content">
-              <font-awesome-icon icon="plus" size="lg"/>
-            </template>
-            <b-dropdown-item to="/create/package">{{ 'action-create-package' | i18n }}</b-dropdown-item>
-            <b-dropdown-item to="/create/entity-type">{{ 'action-create-entity-type' | i18n }}</b-dropdown-item>
-          </b-dropdown>
-          <b-button :disable="nrSelectedItems > 0 ? false : true" variant="danger" v-b-modal.deleteModal>
-            <font-awesome-icon icon="trash" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
-          </b-button>
-        </div>
-      </div>
     </div>
 
+    <NavigatorActions style="margin-bottom: 1rem;"/>
     <!-- Main table element -->
     <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
       <template slot="HEAD_selected" scope="data">
-        <b-form-checkbox @click.native.stop v-model="allSelected" @change="toggleAllSelected"></b-form-checkbox>
+        <b-form-checkbox @click.native.stop v-model="allSelected"
+                         @change="toggleAllSelected"></b-form-checkbox>
       </template>
       <template slot="selected" scope="row">
         <b-form-checkbox @click.native.stop :checked="isSelected(row.item)"
@@ -70,20 +59,16 @@
       <template slot="label" scope="label">
         <span v-if="label.item.type === 'entity'">
             <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
-              <i class="fa fa-list" aria-hidden="true"></i> {{label.item.label}}
+              <font-awesome-icon icon="list"/> {{label.item.label}}
             </a>
           </span>
         <span v-else>
           <router-link :to="label.item.id">
-            <i class="fa fa-folder-open-o" aria-hidden="true"></i> {{label.item.label}}
+            <font-awesome-icon :icon="['far', 'folder-open']"/> {{label.item.label}}
           </router-link>
         </span>
       </template>
     </b-table>
-    <b-modal v-if="nrSelectedItems > 0" id="deleteModal" ok-variant="danger" cancel-variant="secondary"
-             :title="$t('delete-confirmation-title')" :ok-title="$t('delete-confirmation-ok-text')" :cancel-title="$t('delete-confirmation-cancel-text')" @ok="deleteSelectedItems">
-      {{ 'delete-confirmation-text' | i18n }}
-    </b-modal>
   </div>
 </template>
 
@@ -94,17 +79,6 @@
 
   .navigator-path .breadcrumb {
     background-color: transparent;
-  }
-
-  button[disable=true] {
-    cursor: not-allowed !important;
-  }
-
-  .fa-enabled {
-  }
-
-  .fa-disabled {
-    opacity: 0.6;
   }
 </style>
 
@@ -120,15 +94,16 @@
     DESELECT_PACKAGE,
     SELECT_PACKAGE,
     DESELECT_ENTITY_TYPE,
-    SELECT_ENTITY_TYPE,
-    DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES
+    SELECT_ENTITY_TYPE
   } from '../store/actions'
   import { SET_QUERY, SET_ERROR, RESET_PATH, SET_PACKAGES } from '../store/mutations'
   import { Package, INITIAL_STATE } from '../store/state'
   import { mapState } from 'vuex'
+  import NavigatorActions from './NavigatorActions'
 
   export default {
     name: 'Navigator',
+    components: {NavigatorActions},
     data () {
       return {
         fields: {
@@ -177,23 +152,23 @@
       },
       toggleSelected: function (item, checked) {
         if (checked) {
-          this.$store.dispatch(item.type === 'entity' ? SELECT_ENTITY_TYPE : SELECT_PACKAGE, item.id)
+          this.$store.dispatch(item.type === 'entity' ? SELECT_ENTITY_TYPE : SELECT_PACKAGE,
+            item.id)
           this.allSelected = this.nrItems === this.nrSelectedItems
         } else {
-          this.$store.dispatch(item.type === 'entity' ? DESELECT_ENTITY_TYPE : DESELECT_PACKAGE, item.id)
+          this.$store.dispatch(item.type === 'entity' ? DESELECT_ENTITY_TYPE : DESELECT_PACKAGE,
+            item.id)
           this.allSelected = false
         }
       },
       isSelected: function (item) {
-        const itemIds = item.type === 'entity' ? this.$store.state.selectedEntityTypeIds : this.$store.state.selectedPackageIds
+        const itemIds = item.type === 'entity' ? this.$store.state.selectedEntityTypeIds
+          : this.$store.state.selectedPackageIds
         return itemIds.indexOf(item.id) !== -1
       },
       toggleAllSelected: function (checked) {
-        this.$store.dispatch(checked ? SELECT_ALL_PACKAGES_AND_ENTITY_TYPES : DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES)
-      },
-      deleteSelectedItems: function () {
-        this.$store.dispatch(DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES)
-        this.allSelected = false
+        this.$store.dispatch(
+          checked ? SELECT_ALL_PACKAGES_AND_ENTITY_TYPES : DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES)
       }
     },
     computed: {
@@ -208,8 +183,12 @@
       },
       ...mapState(['packages', 'entities', 'path', 'selectedEntityTypeIds', 'selectedPackageIds']),
       items () {
-        var packages = this.packages.map(aPackage => Object.assign(this.selectedPackageIds.indexOf(aPackage.id) === -1 ? {} : {toggleSelected: this.toggleSelected}, aPackage))
-        var entityTypes = this.entities.map(entityType => Object.assign(this.selectedEntityTypeIds.indexOf(entityType.id) === -1 ? {} : {toggleSelected: this.toggleSelected}, entityType))
+        var packages = this.packages.map(aPackage => Object.assign(
+          this.selectedPackageIds.indexOf(aPackage.id) === -1 ? {}
+            : {toggleSelected: this.toggleSelected}, aPackage))
+        var entityTypes = this.entities.map(entityType => Object.assign(
+          this.selectedEntityTypeIds.indexOf(entityType.id) === -1 ? {}
+            : {toggleSelected: this.toggleSelected}, entityType))
         return packages.concat(entityTypes)
       },
       error: {
@@ -228,7 +207,8 @@
       }
     },
     mounted: function () {
-      this.$route.params.package ? this.selectPackage(this.$route.params.package) : this.$store.dispatch(RESET_STATE)
+      this.$route.params.package ? this.selectPackage(this.$route.params.package)
+        : this.$store.dispatch(RESET_STATE)
     },
     watch: {
       '$route' (to, from) {

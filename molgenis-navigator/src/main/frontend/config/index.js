@@ -25,12 +25,12 @@ module.exports = {
       '/api': {
         target: 'http://localhost:8080'
       },
-      '/menu/main/dataexplorer': {
+      '/menu': {
         target: 'http://localhost:8080'
       },
       '/plugin': {
         target: 'http://localhost:8080'
-      },
+      }
     },
     cssSourceMap: false
   }
