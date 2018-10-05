@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-1">
-        <b-dropdown variant="primary">
+        <b-dropdown variant="primary" class="create-dropdown">
           <template slot="button-content">
             <font-awesome-icon icon="plus" size="lg"/>
           </template>
@@ -13,16 +13,19 @@
             {{'action-create-entity-type' | i18n }}
           </b-dropdown-item>
         </b-dropdown>
+        <b-button variant="secondary" to="/menu/importdata/importwizard">
+          <font-awesome-icon icon="file-import" size="lg"/>
+        </b-button>
       </div>
       <div class="col-11">
         <div class="float-right">
-          <b-button v-if="nrSelectedPackages === 1" v-b-modal.packageUpdateModal variant="secondary" class="button-delete">
+          <b-button v-if="nrSelectedPackages === 1" v-b-modal.packageUpdateModal variant="secondary">
             <font-awesome-icon icon="edit" size="lg"/>
           </b-button>
-          <b-button v-else-if="nrSelectedEntityTypes === 1" @click="editSelectedItem" variant="secondary" class="button-delete">
+          <b-button v-else-if="nrSelectedEntityTypes === 1" @click="editSelectedItem" variant="secondary">
             <font-awesome-icon icon="edit" size="lg"/>
           </b-button>
-          <b-button v-else :disable="true" variant="secondary" class="button-delete">
+          <b-button v-else :disable="true" variant="secondary">
             <font-awesome-icon icon="edit" size="lg" class="fa-disabled"/>
           </b-button>
           <b-button :disable="nrSelectedItems > 0 ? false : true" variant="danger"
@@ -77,6 +80,10 @@
 </script>
 
 <style scoped>
+  .create-dropdown {
+    margin-right: 1rem;
+  }
+
   button[disable=true] {
     cursor: not-allowed !important;
   }
