@@ -16,6 +16,8 @@
     <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     <dockerfile.tag>${project.version}</dockerfile.tag>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
+    <dockerfile.warfile.version>${project.version}</dockerfile.warfile.version>
+    <dockerfile.warfile>target/${project.artifactId}-${dockerfile.warfile.version}.war</dockerfile.warfile>
   </properties>
 
   <build>
@@ -36,7 +38,7 @@
           <repository>${dockerfile.repository}</repository>
           <tag>${dockerfile.tag}</tag>
           <buildArgs>
-            <WAR_FILE>target/${project.build.finalName}.war</WAR_FILE>
+            <WAR_FILE>${dockerfile.warfile}</WAR_FILE>
           </buildArgs>
           <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
         </configuration>
