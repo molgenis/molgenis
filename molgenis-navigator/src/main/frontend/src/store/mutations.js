@@ -9,6 +9,8 @@ export const SET_QUERY = '__SET_QUERY__'
 export const SET_ERROR = '__SET_ERROR__'
 export const SET_SELECTED_PACKAGES = '__SET_SELECTED_PACKAGES__'
 export const SET_SELECTED_ENTITY_TYPES = '__SET_SELECTED_ENTITY_TYPES__'
+export const SET_CLIPBOARD = '__SET_CLIPBOARD__'
+export const RESET_CLIPBOARD = '__RESET_CLIPBOARD__'
 
 export default {
   [SET_PACKAGES] (state: State, packages: Array<Package>) {
@@ -36,5 +38,11 @@ export default {
   },
   [SET_SELECTED_ENTITY_TYPES] (state: State, entityTypeIds: Array<string>) {
     state.selectedEntityTypeIds = entityTypeIds
+  },
+  [SET_CLIPBOARD] (state: State, clipboard: Object) { // TODO flow type for clipboard
+    state.clipboard = clipboard
+  },
+  [RESET_CLIPBOARD] (state: State) {
+    state.clipboard = {}
   }
 }

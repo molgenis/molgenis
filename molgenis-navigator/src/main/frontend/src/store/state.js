@@ -11,7 +11,8 @@ const state: State = {
   entities: [],
   path: [],
   selectedPackageIds: [],
-  selectedEntityTypeIds: []
+  selectedEntityTypeIds: [],
+  clipboard: {}
 }
 
 export default state

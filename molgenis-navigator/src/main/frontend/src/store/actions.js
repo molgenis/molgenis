@@ -31,6 +31,7 @@ export const DESELECT_PACKAGE = '__DESELECT_PACKAGE__'
 export const DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES = '__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__'
 export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
 export const UPDATE_PACKAGE = '__UPDATE_PACKAGE__'
+export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
 
 const SYS_PACKAGE_ID = 'sys'
 const REST_API_V2 = '/api/v2'
@@ -336,5 +337,22 @@ export default {
     }, error => {
       commit(SET_ERROR, error)
     })
+  },
+  [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    targetPackageId: string) {
+    if (state.clipboard.packageIds && state.clipboard.packageIds.length > 0) {
+      const uri = REST_API_V2 + '/sys_md_Package/parent'
+      const options = {
+        body: JSON.stringify({
+          entities: state.clipboard.packageIds.map(
+            packageId => ({id: packageId, parent: targetPackageId}))
+        })
+      }
+      api.put(uri, options).then(() => {
+        dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
+      }, error => {
+        commit(SET_ERROR, error)
+      })
+    }
   }
 }

@@ -508,7 +508,7 @@ public class RestControllerV2 {
           throw new UnknownEntityException(meta, id);
         }
 
-        Object value = this.restService.toEntityValue(attr, entity.get(attributeName), id);
+        Object value = entity.get(attributeName);
         originalEntity.set(attributeName, value);
         updatedEntities.add(originalEntity);
         count++;

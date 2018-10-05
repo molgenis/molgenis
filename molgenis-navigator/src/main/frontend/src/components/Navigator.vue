@@ -1,6 +1,6 @@
 // @flow
 <template>
-  <div v-else>
+  <div class="container navigator">
     <div v-if="error != undefined" class="alert alert-danger" role="alert">
       <button @click="error=null" type="button" class="close"><span
         aria-hidden="true">&times;</span></button>
@@ -13,13 +13,8 @@
         <input v-model="query" type="text" class="form-control"
                :placeholder="$t('search-input-placeholder')">
         <div class="input-group-append">
-
-          <button @click="submitQuery()" class="btn btn-outline-secondary" :disabled="!query"
-                  type="button">{{ 'search-button' | i18n }}
-          </button>
-
-          <button @click="reset()" class="btn btn-outline-secondary" :disabled="!query"
-                  type="button">{{ 'clear-button' | i18n }}
+          <button @click="submitQuery()" class="btn btn-primary" :disabled="!query"
+                  type="button"><font-awesome-icon icon="search" size="lg"/>
           </button>
         </div>
       </div>
@@ -30,7 +25,7 @@
       <div class="col-10 input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a :href="homeUrl" v-on:click="reset">
+            <a :href="homeUrl" v-on:click="reset"><!-- TODO replace with router-link -->
               <font-awesome-icon icon="home"/>
             </a>
           </li>
@@ -45,7 +40,7 @@
       </div>
     </div>
 
-    <NavigatorActions style="margin-bottom: 1rem;"/>
+    <NavigatorActions class="navigator-actions"/>
     <!-- Main table element -->
     <b-table bordered :items="items" :fields="fields" :filter="filter" class="text-left">
       <template slot="HEAD_selected" scope="data">
@@ -72,9 +67,19 @@
   </div>
 </template>
 
-<style>
-  .navigator-path {
-    margin-top: 2rem;
+<style scoped>
+  @media (min-width: 1200px) {
+    .navigator {
+      width: 1199px;
+    }
+  }
+
+  .navigator-actions {
+    margin-bottom: 10px;
+  }
+
+  .navigator-search {
+    margin-bottom: 10px;
   }
 
   .navigator-path .breadcrumb {
