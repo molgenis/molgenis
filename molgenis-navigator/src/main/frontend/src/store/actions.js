@@ -345,7 +345,7 @@ export default {
       const options = {
         body: JSON.stringify({
           entities: state.clipboard.packageIds.map(
-            packageId => ({id: packageId, parent: targetPackageId}))
+            packageId => ({id: packageId, parent: targetPackageId !== undefined ? targetPackageId : null}))
         })
       }
       api.put(uri, options).then(() => {

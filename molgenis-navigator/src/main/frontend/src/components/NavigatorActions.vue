@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-10">
-        <b-dropdown variant="primary" class="button-last">
+        <b-dropdown variant="primary" v-b-tooltip.hover title="Create" class="button-last">
           <template slot="button-content">
             <font-awesome-icon icon="plus" size="lg"/>
           </template>
@@ -13,37 +13,35 @@
             {{'action-create-entity-type' | i18n }}
           </b-dropdown-item>
         </b-dropdown>
-        <b-button variant="secondary" to="/menu/importdata/importwizard">
+        <b-button variant="secondary" to="/menu/importdata/importwizard" v-b-tooltip.hover title="Upload">
           <font-awesome-icon icon="upload" size="lg"/>
         </b-button>
-        <b-button :disable="nrSelectedItems > 0 ? false : true" variant="secondary" class="button-last" @click="downloadSelectedItems">
+        <b-button variant="secondary" :disable="nrSelectedItems > 0 ? false : true" class="button-last" v-b-tooltip.hover title="Download" @click="downloadSelectedItems">
           <font-awesome-icon icon="download" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
         </b-button>
-        <b-button :disable="nrSelectedItems > 0 ? false : true" variant="secondary" @click="selectClipboardItems('cut')">
+        <b-button variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover title="Cut" @click="selectClipboardItems('cut')">
           <font-awesome-icon icon="cut" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
         </b-button>
-        <b-button :disable="nrSelectedItems > 0 ? false : true" variant="secondary" @click="cloneSelectedItems">
+        <b-button variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover title="Copy" @click="cloneSelectedItems">
           <font-awesome-icon icon="clone" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
         </b-button>
-        <b-button :disable="canMoveItems() ? false : true" variant="secondary" class="button-last" @click="moveClipboardItems">
+        <b-button variant="secondary" :disable="canMoveItems() ? false : true" v-b-tooltip.hover title="Paste" class="button-last" @click="moveClipboardItems">
           <font-awesome-icon icon="paste" size="lg" :class="canMoveItems() ? 'fa-enabled' : 'fa-disabled'"/>
         </b-button>
       </div>
       <div class="col-2">
         <div class="float-right">
-          <b-button v-if="nrSelectedPackages === 1" v-b-modal.packageUpdateModal variant="secondary" class="button-last">
+          <b-button variant="secondary" v-if="nrSelectedPackages === 1" v-b-modal.packageUpdateModal v-b-tooltip.hover title="Edit" class="button-last">
             <font-awesome-icon icon="edit" size="lg"/>
           </b-button>
-          <b-button v-else-if="nrSelectedEntityTypes === 1" :to="'/menu/dataintegration/metadata-manager/' + selectedEntityTypeIds[0]" variant="secondary" class="button-last">
-            <font-awesome-icon icon="edit" size="lg"/>
+          <b-button variant="secondary" v-else-if="nrSelectedEntityTypes === 1" :to="'/menu/dataintegration/metadata-manager/' + selectedEntityTypeIds[0]" class="button-last">
+            <font-awesome-icon icon="edit" size="lg" v-b-tooltip.hover title="Edit"/>
           </b-button>
-          <b-button v-else :disable="true" variant="secondary" class="button-last">
+          <b-button variant="secondary" v-else :disable="true" v-b-tooltip.hover title="Edit" class="button-last">
             <font-awesome-icon icon="edit" size="lg" class="fa-disabled"/>
           </b-button>
-          <b-button :disable="nrSelectedItems > 0 ? false : true" variant="danger"
-                    v-b-modal.itemDeleteModal>
-            <font-awesome-icon icon="trash" size="lg"
-                               :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
+          <b-button variant="danger" :disable="nrSelectedItems > 0 ? false : true" v-b-modal.itemDeleteModal v-b-tooltip.hover title="Delete">
+            <font-awesome-icon icon="trash" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
           </b-button>
         </div>
       </div>

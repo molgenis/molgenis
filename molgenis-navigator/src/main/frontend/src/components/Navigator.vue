@@ -25,9 +25,7 @@
       <div class="col-10 input-group">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a :href="homeUrl" v-on:click="reset"><!-- TODO replace with router-link -->
-              <font-awesome-icon icon="home"/>
-            </a>
+            <router-link to="/"><font-awesome-icon icon="home"/></router-link>
           </li>
           <li class="breadcrumb-item" v-for="package in path">
             <a v-if="isLast(path, package)">{{package.label}}</a>
