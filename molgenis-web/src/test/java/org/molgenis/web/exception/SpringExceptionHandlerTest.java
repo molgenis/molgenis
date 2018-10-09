@@ -2,19 +2,21 @@ package org.molgenis.web.exception;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import javax.servlet.http.HttpServletRequest;
 import org.mockito.Mock;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
-import org.molgenis.test.AbstractMockitoTest;
 import org.molgenis.web.ErrorMessageResponse;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -23,6 +25,11 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -42,7 +49,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class SpringExceptionHandlerTest extends AbstractMockitoTest {
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+public class SpringExceptionHandlerTest extends AbstractMolgenisSpringTest {
   private SpringExceptionHandler handler;
   private ObjectError globalError;
   private FieldError fieldError;
@@ -63,6 +71,7 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
   @Mock private ConversionNotSupportedException conversionNotSupportedException;
   @Mock private MissingServletRequestParameterException missingServletRequestParameterException;
   @Mock private MissingPathVariableException missingPathVariableException;
+  @Mock private AccessDeniedException accessDeniedException;
 
   @BeforeClass
   public void beforeClass() {
@@ -108,6 +117,30 @@ public class SpringExceptionHandlerTest extends AbstractMockitoTest {
         new ResponseEntity<>(
             new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
             NOT_FOUND));
+  }
+
+  @Test
+  @WithAnonymousUser
+  public void testAccessDeniedExceptionJsonAnonymous() {
+    when(handlerMethod.hasMethodAnnotation(ResponseBody.class)).thenReturn(true);
+    when(accessDeniedException.getLocalizedMessage()).thenReturn("localized message");
+    assertEquals(
+        handler.handleSpringException(accessDeniedException, handlerMethod),
+        new ResponseEntity<>(
+            new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
+            UNAUTHORIZED));
+  }
+
+  @Test
+  @WithMockUser
+  public void testAccessDeniedExceptionJsonAuthenticated() {
+    when(handlerMethod.hasMethodAnnotation(ResponseBody.class)).thenReturn(true);
+    when(accessDeniedException.getLocalizedMessage()).thenReturn("localized message");
+    assertEquals(
+        handler.handleSpringException(accessDeniedException, handlerMethod),
+        new ResponseEntity<>(
+            new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage("localized message")),
+            FORBIDDEN));
   }
 
   @Test

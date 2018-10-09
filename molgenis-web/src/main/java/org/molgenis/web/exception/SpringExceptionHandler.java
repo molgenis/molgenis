@@ -1,7 +1,10 @@
 package org.molgenis.web.exception;
 
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsAnonymous;
 import static org.molgenis.web.exception.ExceptionHandlerUtils.handleException;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
@@ -13,6 +16,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -54,10 +58,15 @@ public class SpringExceptionHandler {
     MissingServletRequestPartException.class,
     BindException.class,
     AsyncRequestTimeoutException.class,
-    ConstraintViolationException.class
+    ConstraintViolationException.class,
+    AccessDeniedException.class
   })
   public final Object handleSpringException(Exception ex, HandlerMethod handlerMethod) {
     HttpStatus status;
+    if (ex instanceof AccessDeniedException) {
+      status = currentUserIsAnonymous() ? UNAUTHORIZED : FORBIDDEN;
+      return handleException(ex, handlerMethod, status, null);
+    }
     if (ex instanceof HttpRequestMethodNotSupportedException) {
       status = HttpStatus.METHOD_NOT_ALLOWED;
       return handleException(ex, handlerMethod, status, null);
