@@ -2,6 +2,7 @@ package org.molgenis.bootstrap;
 
 import static java.util.Objects.requireNonNull;
 
+import io.micrometer.core.annotation.Timed;
 import org.molgenis.bootstrap.populate.PermissionPopulator;
 import org.molgenis.bootstrap.populate.RepositoryPopulator;
 import org.molgenis.core.ui.style.BootstrapThemePopulator;
@@ -74,6 +75,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
   @Transactional
   @RunAsSystem
+  @Timed(value = "bootstrap", description = "Timing information for the bootstrapping event.")
   @Override
   public void onApplicationEvent(ContextRefreshedEvent event) {
     LOG.info("Bootstrapping application ...");

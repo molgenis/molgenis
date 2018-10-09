@@ -10,6 +10,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
+import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -46,6 +47,10 @@ public class IndexJobService {
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
   }
 
+  @Timed(
+      value = "service.index",
+      description = "Timing information for the index service.",
+      histogram = true)
   public Void executeJob(Progress progress, String transactionId) {
     requireNonNull(progress);
     IndexActionGroup indexActionGroup =
