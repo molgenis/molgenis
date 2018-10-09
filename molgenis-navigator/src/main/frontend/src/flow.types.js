@@ -17,6 +17,12 @@ export type Entity = {
   abstract: boolean
 }
 
+export type Item = {
+  type: string,
+  id: string,
+  label: string
+}
+
 export type State = {
   error: ?string,
   token: ?string,

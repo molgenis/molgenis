@@ -1,34 +1,25 @@
 // @flow
-import type { Entity, Package, State } from '../flow.types'
+import type { Item, Entity, Package, State } from '../flow.types'
 import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 // $FlowFixMe
 import { encodeRsqlValue, transformToRSQL } from '@molgenis/rsql'
 import {
-  RESET_PATH,
-  SET_ENTITIES,
   SET_ERROR,
-  SET_PACKAGES,
   SET_PATH,
-  SET_QUERY,
-  SET_SELECTED_ENTITY_TYPES,
-  SET_SELECTED_PACKAGES
+  SET_ITEMS,
+  SET_SELECTED_ITEMS
 } from './mutations'
 
-export const QUERY_PACKAGES = '__QUERY_PACKAGES__'
-export const QUERY_ENTITIES = '__QUERY_ENTITIES__'
-export const RESET_STATE = '__RESET_STATE__'
-export const GET_STATE_FOR_PACKAGE = '__GET_STATE_FOR_PACKAGE__'
-export const GET_ENTITIES_IN_PACKAGE = '__GET_ENTITIES_IN_PACKAGE__'
-export const GET_ENTITY_PACKAGES = '__GET_ENTITY_PACKAGES__'
-export const SELECT_ALL_PACKAGES_AND_ENTITY_TYPES = '__SELECT_ALL_PACKAGES_AND_ENTITY_TYPES__'
-export const SELECT_ENTITY_TYPE = '__SELECT_ENTITY_TYPE__'
-export const SELECT_PACKAGE = '__SELECT_PACKAGE__'
-export const DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES = '__DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES__'
-export const DESELECT_ENTITY_TYPE = '__DESELECT_ENTITY_TYPE__'
-export const DESELECT_PACKAGE = '__DESELECT_PACKAGE__'
-export const DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES = '__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__'
+export const FETCH_ITEMS = '__FETCH_ITEMS__'
+export const FETCH_ITEMS_BY_QUERY = '__FETCH_ITEMS_BY_QUERY__'
+export const FETCH_ITEMS_BY_PACKAGE = '__FETCH_ITEMS_BY_PACKAGE__'
+export const SELECT_ITEM = '__SELECT_ITEM__'
+export const DESELECT_ITEM = '__DESELECT_ITEM__'
+export const SELECT_ALL_ITEMS = '__SELECT_ALL_ITEMS__'
+export const DESELECT_ALL_ITEMS = '__DESELECT_ALL_ITEMS__'
+export const DELETE_SELECTED_ITEMS = '__DELETE_SELECTED_ITEMS__'
 export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
 export const UPDATE_PACKAGE = '__UPDATE_PACKAGE__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
@@ -38,82 +29,44 @@ const REST_API_V2 = '/api/v2'
 const PACKAGE_ENDPOINT = REST_API_V2 + '/sys_md_Package'
 const ENTITY_TYPE_ENDPOINT = REST_API_V2 + '/sys_md_EntityType'
 
-/**
- * Recursively build the path, going backwards starting at the currentPackage
- *
- * @param packages, the complete list of packages
- * @param currentPackage, the tail
- * @param path the path where building
- * @returns path, in order array of packages (grandparent, parent, child, ....)
- */
-function buildPath (packages, currentPackage: Package, path: Array<Package>) {
-  if (currentPackage.parent) {
-    const currentParent = currentPackage.parent
-    const parentPackage = packages.find(function (packageItem) {
-      return packageItem.id === currentParent.id
-    })
-    path = buildPath(packages, parentPackage, path)
+function getEntityTypeUriByParentPackage (packageId: ?string) {
+  let rsql
+  if (packageId) {
+    rsql = encodeRsqlValue(packageId)
+  } else {
+    rsql = '%22%22'
   }
-  path.push(currentPackage)
-  return path
-}
 
-/**
- * Transform the result to an Entity object
- *
- * @param item result row form query to backend
- * @returns {{id: *, type: string, label: *, description: *}}
- */
-function toEntity (item: any) {
-  return {
-    'id': item.id,
-    'type': 'entity',
-    'label': item.label,
-    'description': item.description
-  }
-}
-
-/**
- * Get a MOLGENIS rest api encoded query for the Package table
- * The query retrieves the first 1000 packages
- *
- * @param query
- */
-function getPackageQuery (query: string) {
-  const rsql = transformToRSQL({
-    operator: 'OR',
-    operands: [
-      {selector: 'id', comparison: '=q=', arguments: query},
-      {selector: 'label', comparison: '=q=', arguments: query},
-      {selector: 'description', comparison: '=q=', arguments: query}
-    ]
-  })
-
-  return PACKAGE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(rsql)
+  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=isAbstract==false;package==' + rsql
 }
 
 /**
  * Get a MOLGENIS rest api encoded query for the EntityType table
  * The query retrieves the first 1000 EntityTypes
- *
- * @param query
  */
-function getEntityTypeQuery (query: string) {
-  const rsql = transformToRSQL({
-    operator: 'AND',
-    operands: [
-      {
-        operator: 'OR',
-        operands: [
-          {selector: 'label', comparison: '=q=', arguments: query},
-          {selector: 'description', comparison: '=q=', arguments: query}
-        ]
-      },
-      {selector: 'isAbstract', comparison: '==', arguments: 'false'}]
-  })
+function getEntityTypeUriByQuery (query: ?string) {
+  const baseEntityTypeUri = ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000'
 
-  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=' + encodeRsqlValue(
-    rsql)
+  let entityTypeUri
+  if (query) {
+    const rsql = transformToRSQL({
+      operator: 'AND',
+      operands: [
+        {
+          operator: 'OR',
+          operands: [
+            {selector: 'label', comparison: '=q=', arguments: query},
+            {selector: 'description', comparison: '=q=', arguments: query}
+          ]
+        },
+        {selector: 'isAbstract', comparison: '==', arguments: 'false'}]
+    })
+    entityTypeUri = baseEntityTypeUri + '&q=' + encodeRsqlValue(rsql)
+  } else {
+    entityTypeUri = getEntityTypeUriByParentPackage(null)
+  }
+
+  return entityTypeUri
 }
 
 /**
@@ -134,7 +87,7 @@ function validateQuery (query: string) {
  * @param packages
  * @returns {Array.<Package>}
  */
-function filterNonVisiblePackages (packages: Array<Package>) {
+function filterPackages (packages: Array<Package>) {
   if (INITIAL_STATE.isSuperUser) {
     return packages
   }
@@ -149,7 +102,7 @@ function filterNonVisiblePackages (packages: Array<Package>) {
  * @param entities
  * @returns {Array.<Entity>}
  */
-function filterNonVisibleEntities (entities: Array<Entity>) {
+function filterEntityTypes (entities: Array<Entity>) {
   if (INITIAL_STATE.isSuperUser) {
     return entities
   }
@@ -157,159 +110,165 @@ function filterNonVisibleEntities (entities: Array<Entity>) {
   return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
-export default {
-  [QUERY_PACKAGES] ({commit}: { commit: Function }, query: ?string) {
-    let uri
+function fetchPackagesByParentPackage (packageId: ?string) {
+  const uri = getPackageUriByParentPackage(packageId)
+  return fetchPackages(uri)
+}
 
-    if (!query) {
-      uri = PACKAGE_ENDPOINT + '?sort=label&num=1000'
+function getPackageUriByParentPackage (packageId: ?string) {
+  let rsql
+  if (packageId) {
+    rsql = encodeRsqlValue(packageId)
+  } else {
+    rsql = '%22%22'
+  }
+
+  return PACKAGE_ENDPOINT + '?sort=label&num=1000&q=parent==' + rsql
+}
+
+function fetchPackagesByQuery (query: ?string) {
+  const uri = getPackageUriByQuery(query)
+  return fetchPackages(uri)
+}
+
+/**
+ * Get a MOLGENIS rest api encoded query for the Package table
+ * The query retrieves the first 1000 packages
+ */
+function getPackageUriByQuery (query: ?string) {
+  let packageUri
+
+  if (query) {
+    const rsql = transformToRSQL({
+      operator: 'OR',
+      operands: [
+        {selector: 'id', comparison: '=q=', arguments: query},
+        {selector: 'label', comparison: '=q=', arguments: query},
+        {selector: 'description', comparison: '=q=', arguments: query}
+      ]
+    })
+    packageUri = PACKAGE_ENDPOINT + '?sort=label&num=1000' + '&q=' + encodeRsqlValue(rsql)
+  } else {
+    packageUri = getPackageUriByParentPackage(null)
+  }
+
+  return packageUri
+}
+
+function createPackageItem (aPackage: Package) {
+  return {
+    type: 'package',
+    id: aPackage.id,
+    label: aPackage.label,
+    description: aPackage.description
+  }
+}
+
+function fetchPackages (uri: string) {
+  return api.get(uri).then(response => filterPackages(response.items).map(createPackageItem))
+}
+
+function fetchEntityTypesByParentPackage (packageId: ?string) {
+  const uri = getEntityTypeUriByParentPackage(packageId)
+  return fetchEntityTypes(uri)
+}
+
+function fetchEntityTypesByQuery (query: ?string) {
+  const uri = getEntityTypeUriByQuery(query)
+  return fetchEntityTypes(uri)
+}
+
+function createEntityTypeItem (aPackage: Package) {
+  return {
+    type: 'entityType',
+    id: aPackage.id,
+    label: aPackage.label,
+    description: aPackage.description
+  }
+}
+
+function fetchEntityTypes (uri: string) {
+  return api.get(uri).then(response => filterEntityTypes(response.items).map(createEntityTypeItem))
+}
+
+function getPackagePath (aPackage: Package) {
+  let path = []
+  getPackagePathRec(aPackage, path)
+  return path.reverse()
+}
+
+function getPackagePathRec (aPackage: Package, path: Array<Package>) {
+  path.push({id: aPackage.id, label: aPackage.label})
+  if (aPackage.parent) {
+    getPackagePathRec(aPackage.parent, path)
+  }
+}
+
+function fetchPackagePath (packageId: ?string) {
+  if (packageId) {
+    const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
+    return api.get(uri).then(response => getPackagePath(response))
+  } else {
+    return new Promise((resolve, reject) => { resolve([]) })
+  }
+}
+
+export default {
+  [FETCH_ITEMS] ({state, dispatch}: { state: State, dispatch: Function }) {
+    if (state.query) {
+      dispatch(FETCH_ITEMS_BY_QUERY, state.query)
     } else {
-      try {
-        validateQuery(query)
-        uri = getPackageQuery(query)
-        api.get(uri).then(response => {
-          commit(SET_PACKAGES, filterNonVisiblePackages(response.items))
-        }, error => {
-          commit(SET_ERROR, error)
-        })
-      } catch (error) {
-        commit(SET_ERROR, error.message)
-      }
+      dispatch(FETCH_ITEMS_BY_PACKAGE, state.route.params.package)
     }
   },
-  [QUERY_ENTITIES] ({commit}: { commit: Function }, query: string) {
+  [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: ?string) {
     if (query) {
       try {
         validateQuery(query)
-        api.get(getEntityTypeQuery(query)).then(response => {
-          const entities = response.items.map(toEntity)
-          commit(SET_ENTITIES, filterNonVisibleEntities(entities))
-        }, error => {
-          commit(SET_ERROR, error)
-        })
       } catch (error) {
         commit(SET_ERROR, error.message)
       }
     }
-  },
-  [GET_ENTITIES_IN_PACKAGE] ({commit}: { commit: Function },
-    packageId: string) {
-    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==' + packageId).then(response => {
-      const entities = response.items.map(toEntity)
-      commit(SET_ENTITIES, entities)
-    }, error => {
+
+    const packageFetch = fetchPackagesByQuery(query)
+    const entityTypeFetch = fetchEntityTypesByQuery(query)
+    Promise.all([packageFetch, entityTypeFetch]).then(responses => {
+      commit(SET_ITEMS, responses[0].concat(responses[1]))
+    }).catch(error => {
       commit(SET_ERROR, error)
     })
   },
-  [RESET_STATE] ({commit}: { commit: Function }) {
-    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000&&q=parent==%22%22').then(response => {
-      const visibleRootPackages = filterNonVisiblePackages(response.items)
-      commit(SET_PACKAGES, visibleRootPackages)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
-    api.get(ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&&q=isAbstract==false;package==%22%22').then(response => {
-      const entities = response.items.map(toEntity)
-      const visibleRootEntities = filterNonVisibleEntities(entities)
-      commit(SET_ENTITIES, visibleRootEntities)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
-
-    commit(RESET_PATH)
-  },
-  [GET_ENTITY_PACKAGES] ({commit, dispatch}: { commit: Function, dispatch: Function },
-    lookupId: string) {
-    api.get(ENTITY_TYPE_ENDPOINT + '?num=1000&&q=isAbstract==false;id==' + lookupId).then(response => {
-      // At the moment each entity is stored in either a single package, or no package at all
-      if (response.items.length > 0) {
-        const entityType = response.items[0]
-        const _package = entityType['package']
-        if (_package) {
-          dispatch(GET_STATE_FOR_PACKAGE, _package.id)
-        } else {
-          // In case entity is not in package fallback to searching for entity name.
-          const entityLabel = entityType.label
-          commit(SET_QUERY, entityLabel)
-          dispatch(QUERY_ENTITIES, entityLabel)
-        }
-      } else {
-        dispatch(RESET_STATE)
-      }
-    }, error => {
+  [FETCH_ITEMS_BY_PACKAGE] ({commit}: { commit: Function }, packageId: ?string) {
+    const pathFetch = fetchPackagePath(packageId)
+    const packageFetch = fetchPackagesByParentPackage(packageId)
+    const entityTypeFetch = fetchEntityTypesByParentPackage(packageId)
+    Promise.all([pathFetch, packageFetch, entityTypeFetch]).then(responses => {
+      commit(SET_PATH, responses[0])
+      commit(SET_ITEMS, responses[1].concat(responses[2]))
+    }).catch(error => {
       commit(SET_ERROR, error)
     })
   },
-  [GET_STATE_FOR_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function },
-    selectedPackageId: ?string) {
-    api.get(PACKAGE_ENDPOINT + '?sort=label&num=1000').then(response => {
-      const packages = filterNonVisiblePackages(response.items)
-
-      if (!selectedPackageId) {
-        dispatch(RESET_STATE)
-      } else {
-        const selectedPackage = packages.find(function (packageItem) {
-          return packageItem.id === selectedPackageId
-        })
-
-        if (!selectedPackage) {
-          commit(SET_ERROR, 'couldn\'t find package.')
-          dispatch(RESET_STATE)
-        } else {
-          // Find child packages.
-          const childPackages = packages.filter(function (packageItem) {
-            return packageItem.parent && packageItem.parent.id === selectedPackage.id
-          })
-
-          commit(SET_PACKAGES, childPackages)
-
-          const path = buildPath(packages, selectedPackage, [])
-          commit(SET_PATH, path)
-          dispatch(GET_ENTITIES_IN_PACKAGE, selectedPackageId)
-        }
-      }
-    }, error => {
-      commit(SET_ERROR, error)
-    })
+  [SELECT_ALL_ITEMS] ({commit, state}: { commit: Function, state: State }) {
+    commit(SET_SELECTED_ITEMS, state.items.slice())
   },
-  [SELECT_ALL_PACKAGES_AND_ENTITY_TYPES] ({commit, state}: { commit: Function, state: State }) {
-    commit(SET_SELECTED_PACKAGES, state.packages.map(aPackage => aPackage.id))
-    commit(SET_SELECTED_ENTITY_TYPES,
-      state.entities.map(entityType => entityType.id))
+  [DESELECT_ALL_ITEMS] ({commit}: { commit: Function }) {
+    commit(SET_SELECTED_ITEMS, [])
   },
-  [DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES] ({commit}: { commit: Function }) {
-    commit(SET_SELECTED_PACKAGES, [])
-    commit(SET_SELECTED_ENTITY_TYPES, [])
+  [SELECT_ITEM] ({commit, state}: { commit: Function, state: State }, item: Item) {
+    commit(SET_SELECTED_ITEMS, state.selectedItems.concat(item))
   },
-  [SELECT_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State },
-    entityTypeId: string) {
-    commit(SET_SELECTED_ENTITY_TYPES,
-      state.selectedEntityTypeIds.concat([entityTypeId]))
+  [DESELECT_ITEM] ({commit, state}: { commit: Function, state: State }, item: Item) {
+    commit(SET_SELECTED_ITEMS, state.selectedItems.filter(selectedItem => !(selectedItem.type === item.type && selectedItem.id === item.id)))
   },
-  [DESELECT_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State },
-    entityTypeId: string) {
-    var selectedEntityTypeIds = state.selectedEntityTypeIds.slice()
-    selectedEntityTypeIds.splice(selectedEntityTypeIds.indexOf(entityTypeId), 1)
-    commit(SET_SELECTED_ENTITY_TYPES, selectedEntityTypeIds)
-  },
-  [SELECT_PACKAGE] ({commit, state}: { commit: Function, state: State },
-    packageId: string) {
-    commit(SET_SELECTED_PACKAGES, state.selectedPackageIds.concat([packageId]))
-  },
-  [DESELECT_PACKAGE] ({commit, state}: { commit: Function, state: State },
-    packageId: string) {
-    var selectedPackageIds = state.selectedPackageIds.slice()
-    selectedPackageIds.splice(selectedPackageIds.indexOf(packageId), 1)
-    commit(SET_SELECTED_PACKAGES, selectedPackageIds)
-  },
-  [DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
+  [DELETE_SELECTED_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
     api.delete_('/plugin/navigator/delete', {
       body: JSON.stringify({
-        packageIds: state.selectedPackageIds,
-        entityTypeIds: state.selectedEntityTypeIds
+        packageIds: state.selectedItems.filter(item => item.type === 'package').map(item => item.id),
+        entityTypeIds: state.selectedItems.filter(item => item.type === 'entityType').map(item => item.id)
       })
     }).then(() => {
-      dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
+      dispatch(FETCH_ITEMS)
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -321,7 +280,7 @@ export default {
       body: JSON.stringify({entities: [aPackage]})
     }
     api.post(uri, options).then(() => {
-      dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
+      dispatch(FETCH_ITEMS)
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -333,7 +292,7 @@ export default {
       body: JSON.stringify({entities: [aPackage]})
     }
     api.put(uri, options).then(() => {
-      dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
+      dispatch(FETCH_ITEMS)
     }, error => {
       commit(SET_ERROR, error)
     })
@@ -349,7 +308,7 @@ export default {
         })
       }
       api.put(uri, options).then(() => {
-        dispatch(GET_STATE_FOR_PACKAGE, state.route.params.package)
+        dispatch(FETCH_ITEMS)
       }, error => {
         commit(SET_ERROR, error)
       })

@@ -8,13 +8,13 @@
 </template>
 
 <script>
-  import { DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES } from '../store/actions'
+  import { DELETE_SELECTED_ITEMS } from '../store/actions'
 
   export default {
     name: 'NavigatorDeleteModal',
     methods: {
       deleteSelectedItems: function () {
-        this.$store.dispatch(DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES)
+        this.$store.dispatch(DELETE_SELECTED_ITEMS)
       }
     }
   }
