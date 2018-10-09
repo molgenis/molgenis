@@ -189,16 +189,16 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest {
       OntologyService ontologyService = mock(OntologyService.class);
       when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);
 
-      when(ontologyService.findExcatOntologyTerms(
+      when(ontologyService.findExactOntologyTerms(
               ontologyIds, Sets.newLinkedHashSet(asList("weight", "kilogram")), Integer.MAX_VALUE))
           .thenReturn(singletonList(KG_ONTOLOGY_TERM));
-      when(ontologyService.findExcatOntologyTerms(
+      when(ontologyService.findExactOntologyTerms(
               ontologyIds,
               Sets.newLinkedHashSet(asList("label", "height", "centimeter")),
               Integer.MAX_VALUE))
           .thenReturn(singletonList(CM_ONTOLOGY_TERM));
 
-      when(ontologyService.findExcatOntologyTerms(
+      when(ontologyService.findExactOntologyTerms(
               ontologyIds, newHashSet(kgTerm, cmTerm), Integer.MAX_VALUE))
           .thenReturn(asList(KG_ONTOLOGY_TERM, CM_ONTOLOGY_TERM));
       return ontologyService;

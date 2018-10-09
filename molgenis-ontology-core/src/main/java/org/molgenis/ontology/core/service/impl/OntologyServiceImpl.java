@@ -56,7 +56,7 @@ public class OntologyServiceImpl implements OntologyService {
   }
 
   @Override
-  public List<OntologyTerm> findExcatOntologyTerms(
+  public List<OntologyTerm> findExactOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize) {
     if (null == terms || terms.isEmpty()) {
       return Lists.newArrayList();

@@ -217,7 +217,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
               .map(QueryParser::escape)
               .collect(Collectors.toSet());
       ontologyTerms =
-          ontologyService.findExcatOntologyTerms(
+          ontologyService.findExactOntologyTerms(
               ontologyService.getAllOntologiesIds(), escapedSearchTerms, MAX_NUM_TAGS);
     } else if (null == ontologyTerms || ontologyTerms.isEmpty()) {
       List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
