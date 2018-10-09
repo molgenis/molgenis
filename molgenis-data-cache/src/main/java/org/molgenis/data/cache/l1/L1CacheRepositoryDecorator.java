@@ -13,12 +13,12 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
@@ -106,15 +106,17 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
     Map<Object, Entity> missingEntities =
         delegate().findAll(missingIds.stream()).collect(toMap(Entity::getIdValue, e -> e));
 
-    return Lists.transform(
-        batch,
-        id -> {
-          Optional<Entity> result = l1Cache.get(entityId, id, getEntityType());
-          if (result == null) {
-            return missingEntities.get(id);
-          }
-          return result.orElse(null);
-        });
+    return batch
+        .stream()
+        .map(
+            id -> {
+              Optional<Entity> result = l1Cache.get(entityId, id, getEntityType());
+              if (result == null) {
+                return missingEntities.get(id);
+              }
+              return result.orElse(null);
+            })
+        .collect(Collectors.toList());
   }
 
   @Override
