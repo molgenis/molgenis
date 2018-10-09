@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -226,8 +224,7 @@ public class ImportWizardController extends AbstractWizardController {
 
   private File fileLocationToStoredRenamedFile(String fileLocation, String entityTypeId)
       throws IOException {
-    Path path = Paths.get(fileLocation);
-    String filename = path.getFileName().toString();
+    String filename = fileLocation.substring(fileLocation.lastIndexOf('/') + 1);
     URL url = new URL(fileLocation);
 
     try (InputStream is = url.openStream()) {

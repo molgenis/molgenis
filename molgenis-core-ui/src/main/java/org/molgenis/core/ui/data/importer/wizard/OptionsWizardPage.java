@@ -98,6 +98,9 @@ public class OptionsWizardPage extends AbstractWizardPage {
                   .createFileRepositoryCollection(tmpFile)
                   .getFileNameExtensions());
 
+      // userGivenName has already been validated by the NameValidator and can't contain any
+      // characters that have special meaning for the file system
+      @SuppressWarnings("squid:S2083")
       File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
       if (!tmpFile.renameTo(file)) {
         LOG.error("Failed to rename '{}' to '{}'", tmpFile.getName(), file.getName());
