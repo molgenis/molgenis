@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.jobs.JobExecutor;
+import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -47,13 +49,20 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Mock private NavigatorService navigatorService;
 
+  @Mock private DownloadJobExecutionFactory downloadJobExecutionFactory;
+
+  @Mock private JobExecutor jobExecutor;
+
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
   @BeforeMethod
   public void before() {
     NavigatorController navigatorController =
         new NavigatorController(
-            menuReaderService, appSettings, userAccountService, navigatorService);
+            menuReaderService,
+            appSettings,
+            userAccountService,
+            navigatorService);
     mockMvc =
         MockMvcBuilders.standaloneSetup(navigatorController)
             .setMessageConverters(gsonHttpMessageConverter)
