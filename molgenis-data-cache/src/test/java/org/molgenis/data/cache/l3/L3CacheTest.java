@@ -15,6 +15,8 @@ import static org.testng.Assert.fail;
 
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -57,6 +59,8 @@ public class L3CacheTest extends AbstractMolgenisSpringTest {
 
   @Mock private TransactionManager transactionManager;
 
+  private MeterRegistry meterRegistry = new SimpleMeterRegistry();
+
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attributeFactory;
@@ -93,7 +97,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest {
     when(decoratedRepository.getName()).thenReturn(repositoryName);
     when(decoratedRepository.getEntityType()).thenReturn(entityType);
 
-    l3Cache = new L3Cache(transactionManager, transactionInformation);
+    l3Cache = new L3Cache(transactionManager, transactionInformation, meterRegistry);
   }
 
   @Test

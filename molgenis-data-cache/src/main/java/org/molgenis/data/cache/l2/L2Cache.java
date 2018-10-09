@@ -11,6 +11,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,13 +46,16 @@ public class L2Cache extends DefaultMolgenisTransactionListener {
 
   private final EntityHydration entityHydration;
   private final TransactionInformation transactionInformation;
+  private final MeterRegistry meterRegistry;
 
   public L2Cache(
       TransactionManager transactionManager,
       EntityHydration entityHydration,
-      TransactionInformation transactionInformation) {
+      TransactionInformation transactionInformation,
+      MeterRegistry meterRegistry) {
     this.entityHydration = requireNonNull(entityHydration);
     this.transactionInformation = requireNonNull(transactionInformation);
+    this.meterRegistry = requireNonNull(meterRegistry);
     caches = newConcurrentMap();
     requireNonNull(transactionManager).addTransactionListener(this);
   }
@@ -157,7 +162,10 @@ public class L2Cache extends DefaultMolgenisTransactionListener {
     if (!MetaDataService.isMetaEntityType(repository.getEntityType())) {
       cacheBuilder.maximumSize(MAX_CACHE_SIZE_PER_ENTITY);
     }
-    return CaffeinatedGuava.build(cacheBuilder, createCacheLoader(repository));
+    LoadingCache<Object, Optional<Map<String, Object>>> cache =
+        CaffeinatedGuava.build(cacheBuilder, createCacheLoader(repository));
+    GuavaCacheMetrics.monitor(meterRegistry, cache, "l2." + repository.getEntityType().getId());
+    return cache;
   }
 
   /**

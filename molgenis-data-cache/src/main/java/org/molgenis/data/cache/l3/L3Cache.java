@@ -10,6 +10,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -38,9 +40,14 @@ public class L3Cache extends DefaultMolgenisTransactionListener {
 
   private final TransactionInformation transactionInformation;
 
+  private final MeterRegistry meterRegistry;
+
   public L3Cache(
-      TransactionManager transactionManager, TransactionInformation transactionInformation) {
+      TransactionManager transactionManager,
+      TransactionInformation transactionInformation,
+      MeterRegistry meterRegistry) {
     this.transactionInformation = requireNonNull(transactionInformation);
+    this.meterRegistry = requireNonNull(meterRegistry);
     requireNonNull(transactionManager).addTransactionListener(this);
   }
 
@@ -68,12 +75,15 @@ public class L3Cache extends DefaultMolgenisTransactionListener {
   private LoadingCache<Query<Entity>, List<Object>> createQueryCache(
       Repository<Entity> repository) {
     LOG.trace("Creating Query cache for repository {}", repository.getName());
-    return CaffeinatedGuava.build(
-        Caffeine.newBuilder()
-            .recordStats()
-            .maximumSize(MAX_CACHE_SIZE_PER_QUERY)
-            .expireAfterAccess(10, MINUTES),
-        createCacheLoader(repository));
+    LoadingCache<Query<Entity>, List<Object>> cache =
+        CaffeinatedGuava.build(
+            Caffeine.newBuilder()
+                .recordStats()
+                .maximumSize(MAX_CACHE_SIZE_PER_QUERY)
+                .expireAfterAccess(10, MINUTES),
+            createCacheLoader(repository));
+    GuavaCacheMetrics.monitor(meterRegistry, cache, "l3." + repository.getEntityType().getId());
+    return cache;
   }
 
   /**
