@@ -140,6 +140,7 @@
     <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.12</checkstyle.version>
+    <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
   </properties>
 
   <distributionManagement>
@@ -605,6 +606,11 @@
           <configuration>
             <xmlOutput>true</xmlOutput>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
