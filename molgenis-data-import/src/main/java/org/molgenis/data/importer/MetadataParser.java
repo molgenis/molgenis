@@ -3,7 +3,7 @@ package org.molgenis.data.importer;
 import javax.annotation.Nullable;
 import org.molgenis.data.RepositoryCollection;
 
-public interface MetaDataParser {
+public interface MetadataParser {
   /**
    * Parses the metadata of the entities to import.
    *

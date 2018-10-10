@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.importer.emx.EmxMetaDataParser.EmxAttribute;
+import org.molgenis.data.importer.emx.EmxMetadataParser.EmxAttribute;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -19,7 +19,7 @@ import org.molgenis.data.meta.model.Tag;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the
- * parsed objects. Is used by the {@link EmxMetaDataParser}
+ * parsed objects. Is used by the {@link EmxMetadataParser}
  */
 public final class IntermediateParseResults {
   /** Maps full name to EntityType */

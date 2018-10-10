@@ -18,8 +18,8 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReport;
 import org.molgenis.data.importer.EntityImportReport;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.importer.MetadataAction;
+import org.molgenis.data.importer.MetadataParser;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -33,11 +33,11 @@ import org.springframework.util.StringUtils;
 public class EmxImportService implements ImportService {
   private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
-  private final MetaDataParser parser;
+  private final MetadataParser parser;
   private final ImportWriter writer;
   private final DataService dataService;
 
-  public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService) {
+  public EmxImportService(MetadataParser parser, ImportWriter writer, DataService dataService) {
     this.parser = requireNonNull(parser);
     this.writer = requireNonNull(writer);
     this.dataService = requireNonNull(dataService);
@@ -48,9 +48,15 @@ public class EmxImportService implements ImportService {
     String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
     if (getSupportedFileExtensions().contains(fileNameExtension.toLowerCase())) {
       for (String entityTypeId : source.getEntityTypeIds()) {
-        if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
-        if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
-        if (entityTypeId.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
+        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)) {
+          return true;
+        }
+        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)) {
+          return true;
+        }
+        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS)) {
+          return true;
+        }
         if (dataService.getMeta().hasEntityType(entityTypeId)) return true;
       }
     }
@@ -123,10 +129,10 @@ public class EmxImportService implements ImportService {
       String selectedPackage) {
     List<String> skipEntities =
         newArrayList(
-            EmxMetaDataParser.EMX_ATTRIBUTES,
-            EmxMetaDataParser.EMX_PACKAGES,
-            EmxMetaDataParser.EMX_ENTITIES,
-            EmxMetaDataParser.EMX_TAGS);
+            EmxMetadataParser.EMX_ATTRIBUTES,
+            EmxMetadataParser.EMX_PACKAGES,
+            EmxMetadataParser.EMX_ENTITIES,
+            EmxMetadataParser.EMX_TAGS);
     ImmutableMap<String, EntityType> entityTypeMap =
         parser.parse(repositoryCollection, selectedPackage).getEntityMap();
 
