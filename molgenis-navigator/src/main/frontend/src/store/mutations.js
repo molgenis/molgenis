@@ -1,5 +1,5 @@
 // @flow
-import type { Item, Package, State } from '../flow.types'
+import type { Clipboard, Item, Package, State } from '../flow.types'
 
 export const SET_ERROR = '__SET_ERROR__'
 export const SET_PATH = '__SET_PATH__'
@@ -14,6 +14,7 @@ export default {
   },
   [SET_PATH] (state: State, packages: Array<Package>) {
     state.path = packages
+    state.route.query.q = undefined
   },
   [SET_ITEMS] (state: State, items: Array<Item>) {
     state.selectedItems = []
@@ -22,7 +23,7 @@ export default {
   [SET_SELECTED_ITEMS] (state: State, items: Array<Item>) {
     state.selectedItems = items
   },
-  [SET_CLIPBOARD] (state: State, clipboard: Object) { // TODO flow type for clipboard
+  [SET_CLIPBOARD] (state: State, clipboard: Clipboard) {
     state.clipboard = clipboard
   },
   [RESET_CLIPBOARD] (state: State) {

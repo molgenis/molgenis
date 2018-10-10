@@ -23,13 +23,17 @@ export type Item = {
   label: string
 }
 
+export type Clipboard = {
+  mode: "cut" | "copy",
+  items: Array<Item>
+}
+
 export type State = {
   error: ?string,
   token: ?string,
   query: ?string,
-  packages: Array<Package>,
-  selectedPackageIds: Array<string>,
-  entities: Array<Entity>,
-  selectedEntityTypeIds: Array<string>,
-  path: Array<Package>
+  path: Array<Package>,
+  items: Array<Item>,
+  selectedItems: Array<Item>,
+  clipboard: Array<Item>
 }

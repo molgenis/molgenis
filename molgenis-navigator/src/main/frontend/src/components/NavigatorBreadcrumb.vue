@@ -7,7 +7,7 @@
         </li>
         <li v-if="!query" class="breadcrumb-item" v-for="(package, index) in path">
           <a v-if="index == path.length - 1">{{package.label}}</a>
-          <router-link v-else :to="package.id">{{package.label}}</router-link>
+          <router-link v-else :to="{params: {package: package.id}}">{{package.label}}</router-link>
         </li>
         <li v-show="query" class="breadcrumb-item">
           <span>{{ 'search-query-label' | i18n }}: <b>{{query}}</b></span>
@@ -18,12 +18,13 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
 
   export default {
     name: 'NavigatorBreadcrumb',
     computed: {
-      ...mapState(['path', 'query'])
+      ...mapGetters(['query']),
+      ...mapState(['path'])
     }
   }
 </script>

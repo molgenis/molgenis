@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-10">
-        <b-dd :class="query ? 'invisible' : ''" variant="primary" v-b-tooltip.hover :title="$t('action-create')">
+        <b-dd variant="primary" v-b-tooltip.hover :title="$t('action-create')" :class="query ? 'invisible' : ''">
           <template slot="button-content">
             <font-awesome-icon icon="plus" size="lg"/>
           </template>
@@ -22,20 +22,12 @@
         <b-btn variant="secondary" v-else :disable="true" v-b-tooltip.hover :title="$t('action-edit')" class="button-last">
           <font-awesome-icon icon="edit" size="lg" class="fa-disabled"/>
         </b-btn>
-        <b-btn variant="secondary" to="/menu/importdata/importwizard" v-b-tooltip.hover :title="$t('action-upload')">
+        <NavigatorActionsClipboard class="button-last"/>
+        <b-btn variant="secondary" to="/menu/importdata/importwizard" v-b-tooltip.hover :title="$t('action-upload')" :class="query ? 'invisible' : ''">
           <font-awesome-icon icon="upload" size="lg"/>
         </b-btn>
         <b-btn variant="secondary" :disable="nrSelectedItems > 0 ? false : true" class="button-last" v-b-tooltip.hover :title="$t('action-download')" @click="downloadSelectedItems">
           <font-awesome-icon icon="download" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
-        </b-btn>
-        <b-btn variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-cut')" @click="selectClipboardItems('cut')">
-          <font-awesome-icon icon="cut" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
-        </b-btn>
-        <b-btn variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-copy')" @click="cloneSelectedItems">
-          <font-awesome-icon icon="clone" size="lg" :class="nrSelectedItems > 0 ? 'fa-enabled' : 'fa-disabled'"/>
-        </b-btn>
-        <b-btn variant="secondary" :disable="canMoveItems() ? false : true" v-b-tooltip.hover :title="$t('action-paste')" class="button-last" @click="moveClipboardItems">
-          <font-awesome-icon icon="paste" size="lg" :class="canMoveItems() ? 'fa-enabled' : 'fa-disabled'"/>
         </b-btn>
       </div>
       <div class="col-2">
@@ -53,26 +45,28 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import { MOVE_CLIPBOARD_ITEMS } from '../store/actions'
-  import { SET_CLIPBOARD, RESET_CLIPBOARD } from '../store/mutations'
+  import { mapGetters, mapState } from 'vuex'
   import NavigatorModalPackageCreate from './NavigatorModalPackageCreate'
   import NavigatorModalPackageUpdate from './NavigatorModalPackageUpdate'
   import NavigatorModalItemDelete from './NavigatorModalItemDelete'
+  import NavigatorActionsClipboard from './NavigatorActionsClipboard'
 
   export default {
     name: 'NavigatorActions',
-    components: {NavigatorModalPackageCreate, NavigatorModalPackageUpdate, NavigatorModalItemDelete},
+    components: {
+      NavigatorActionsClipboard,
+      NavigatorModalPackageCreate,
+      NavigatorModalPackageUpdate,
+      NavigatorModalItemDelete
+    },
     data () {
       return {
         selectedMoveItems: []
       }
     },
     computed: {
-      ...mapState(['query', 'selectedItems', 'clipboard']),
-      nrSelectedItems () {
-        return Object.keys(this.selectedItems).length
-      },
+      ...mapGetters(['nrSelectedItems', 'query']),
+      ...mapState(['selectedItems', 'clipboard']),
       getSelectedItemType () {
         return Object.keys(this.selectedItems)[0]
       },
@@ -90,26 +84,6 @@
     methods: {
       downloadSelectedItems: function () {
         alert('TODO download selection as EMX')
-      },
-      cloneSelectedItems: function () {
-        alert('TODO clone selection (=dataexplorer copy button)')
-      },
-      selectClipboardItems: function (mode) {
-        // TODO render cut rows differently or show number as overlay on icon?
-        const clipboard = {
-          mode: mode,
-          source: this.$route.params.package,
-          packageIds: this.selectedPackageIds,
-          entityTypeIds: this.selectedEntityTypeIds
-        }
-        this.$store.commit(SET_CLIPBOARD, clipboard)
-      },
-      canMoveItems: function () {
-        return this.nrMovableItems > 0 && this.clipboard.source !== this.$route.params.package
-      },
-      moveClipboardItems: function () {
-        this.$store.dispatch(MOVE_CLIPBOARD_ITEMS, this.$route.params.package)
-        this.$store.commit(RESET_CLIPBOARD)
       }
     }
   }
@@ -126,12 +100,5 @@
 
   button[disable=true] {
     cursor: not-allowed !important;
-  }
-
-  .fa-enabled {
-  }
-
-  .fa-disabled {
-    opacity: 0.6;
   }
 </style>

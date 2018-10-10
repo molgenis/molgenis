@@ -14,14 +14,18 @@
 <script>
   export default {
     name: 'NavigatorSearch',
-    data () {
-      return {
-        query: this.$route.query.q
-      }
-    },
-    watch: {
-      query (newVal) {
-        this.$router.push({query: newVal ? {...this.$route.query, q: newVal} : undefined})
+    computed: {
+      query: {
+        get: function () {
+          return this.$store.state.route.query.q
+        },
+        set: function (query) {
+          this.$router.push({
+            path: '/',
+            params: {...this.$route.params, package: undefined},
+            query: query ? {...this.$route.query, q: query} : undefined
+          })
+        }
       }
     }
   }

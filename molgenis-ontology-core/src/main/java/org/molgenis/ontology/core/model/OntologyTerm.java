@@ -8,6 +8,7 @@ import com.google.auto.value.AutoValue;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -22,6 +23,7 @@ public abstract class OntologyTerm {
   @Nullable
   public abstract String getDescription();
 
+  @NotEmpty
   public abstract List<String> getSynonyms();
 
   public static OntologyTerm create(String iri, String label) {

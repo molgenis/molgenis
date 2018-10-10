@@ -9,7 +9,8 @@ import {
   SET_ERROR,
   SET_PATH,
   SET_ITEMS,
-  SET_SELECTED_ITEMS
+  SET_SELECTED_ITEMS,
+  RESET_CLIPBOARD
 } from './mutations'
 
 export const FETCH_ITEMS = '__FETCH_ITEMS__'
@@ -299,17 +300,45 @@ export default {
   },
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     targetPackageId: string) {
-    if (state.clipboard.packageIds && state.clipboard.packageIds.length > 0) {
-      const uri = REST_API_V2 + '/sys_md_Package/parent'
-      const options = {
-        body: JSON.stringify({
-          entities: state.clipboard.packageIds.map(
-            packageId => ({id: packageId, parent: targetPackageId !== undefined ? targetPackageId : null}))
-        })
+    if (state.clipboard.items) {
+      let promises = []
+
+      const packages = state.clipboard.items.filter(
+        item => item.type === 'package')
+      if (packages.length > 0) {
+        const uri = REST_API_V2 + '/sys_md_Package/parent'
+        const options = {
+          body: JSON.stringify({
+            entities: packages.map(
+              item => ({
+                id: item.id,
+                parent: targetPackageId !== undefined ? targetPackageId : null
+              }))
+          })
+        }
+        promises.push(api.put(uri, options))
       }
-      api.put(uri, options).then(() => {
+
+      const entityTypes = state.clipboard.items.filter(
+        item => item.type === 'entityType')
+      if (entityTypes.length > 0) {
+        const uri = REST_API_V2 + '/sys_md_EntityType/package'
+        const options = {
+          body: JSON.stringify({
+            entities: entityTypes.map(
+              item => ({
+                id: item.id,
+                package: targetPackageId !== undefined ? targetPackageId : null
+              }))
+          })
+        }
+        promises.push(api.put(uri, options))
+      }
+
+      Promise.all(promises).then(responses => {
+        commit(RESET_CLIPBOARD)
         dispatch(FETCH_ITEMS)
-      }, error => {
+      }).catch(error => {
         commit(SET_ERROR, error)
       })
     }

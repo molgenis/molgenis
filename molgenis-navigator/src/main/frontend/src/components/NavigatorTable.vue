@@ -38,17 +38,20 @@
       return {
         fields: {
           selected: {
-            'class': 'compact'
+            'class': 'compact',
+            tdClass: this.cellClass
           },
           label: {
             label: this.$t('table-col-header-name'),
             sortable: true,
-            'class': 'text-nowrap'
+            'class': 'text-nowrap',
+            tdClass: this.cellClass
           },
           description: {
             label: this.$t('table-col-header-description'),
             sortable: false,
-            'class': 'd-none d-md-table-cell'
+            'class': 'd-none d-md-table-cell',
+            tdClass: this.cellClass
           }
         },
         filter: null,
@@ -56,7 +59,7 @@
       }
     },
     computed: {
-      ...mapState(['items', 'selectedItems']),
+      ...mapState(['items', 'selectedItems', 'clipboard']),
       tableItems () {
         return this.items.map(item => Object.assign({}, item))
       },
@@ -89,6 +92,13 @@
       },
       isAllSelected: function (item) {
         return this.items.length === this.selectedItems.length
+      },
+      isClipboardItem: function (item) {
+        return this.clipboard.items && this.clipboard.items.some(
+          clipboardItem => clipboardItem.type === item.type && clipboardItem.id === item.id)
+      },
+      cellClass: function (value, key, item) {
+        return this.isClipboardItem(item) ? 'bg-warning' : ''
       }
     },
     watch: {
@@ -107,5 +117,9 @@
   .compact {
     width: 1px;
     white-space: nowrap;
+  }
+
+  .clipped {
+    background-color: pink;
   }
 </style>
