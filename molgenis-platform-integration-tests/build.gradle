@@ -1,0 +1,27 @@
+
+description = 'platform-integration-tests'
+dependencies {
+  compile project(':molgenis-data-platform')
+  compile project(':molgenis-security')
+  compile project(':molgenis-data-elasticsearch')
+  compile project(':molgenis-data-postgresql')
+  compile project(':molgenis-data-csv')
+  compile project(':molgenis-data-excel')
+  compile project(':molgenis-data-file')
+  compile project(':molgenis-jobs')
+  compile project(':molgenis-settings')
+  compile project(':molgenis-util')
+  compile project(':molgenis-data-import')
+  compile project(':molgenis-data-vcf')
+  compile project(':molgenis-ontology')
+  compile project(':molgenis-ontology-core')
+    compile group: 'org.springframework', name: 'spring-context-support', version:'5.0.9.RELEASE'
+    compile group: 'commons-io', name: 'commons-io', version:'2.6'
+  compile project(':molgenis-semantic-search')
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version:'2.4.0'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+  testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+  testCompile project(':molgenis-test')
+  testCompile project(':molgenis-ontology-core')
+  testCompile project(':molgenis-data-elasticsearch')
+}

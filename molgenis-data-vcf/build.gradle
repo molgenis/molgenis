@@ -1,0 +1,26 @@
+
+description = 'data-vcf'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-import')
+  compile project(':molgenis-data-validation')
+    compile(group: 'nl.systemsgenetics', name: 'Genotype-IO', version:'1.0.3') {
+exclude(module: 'mockito-all')
+exclude(module: 'log4j')
+exclude(module: 'commons-logging')
+exclude(module: 'trove4j')
+exclude(module: 'commons-cli')
+exclude(module: 'edu-umd-cs-findbugs-annotations')
+    }
+    compile group: 'commons-io', name: 'commons-io', version:'2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+}
+
+task packageTests(type: Jar) {
+  from sourceSets.test.output
+  classifier = 'tests'
+}
+artifacts.archives packageTests

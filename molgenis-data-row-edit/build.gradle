@@ -1,0 +1,10 @@
+
+description = 'data-row-edit'
+dependencies {
+  compile project(':molgenis-web')
+  compile project(':molgenis-i18n')
+  compile project(':molgenis-data-i18n')
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-dataexplorer')
+  testCompile project(':molgenis-test')
+}

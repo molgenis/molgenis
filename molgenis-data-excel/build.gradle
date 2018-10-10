@@ -1,0 +1,15 @@
+
+description = 'data-excel'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-file')
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+    compile group: 'org.apache.poi', name: 'poi', version:'3.17'
+    compile group: 'commons-io', name: 'commons-io', version:'2.6'
+    compile(group: 'org.apache.poi', name: 'poi-ooxml', version:'3.17') {
+exclude(module: 'stax-api')
+    }
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+}

@@ -1,0 +1,12 @@
+
+description = 'r'
+dependencies {
+  compile project(':molgenis-security')
+  compile project(':molgenis-scripts-core')
+    compile(group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.6') {
+exclude(module: 'commons-logging')
+    }
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version:'4.5.6'
+  testCompile project(':molgenis-test')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

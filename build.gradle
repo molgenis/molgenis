@@ -1,0 +1,44 @@
+allprojects {
+    apply plugin: 'maven'
+
+    group = 'org.molgenis'
+    version = '7.3.0-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    configurations.all {
+        it.exclude group: 'commons-logging', module: 'commons-logging'
+        it.exclude group: 'net.lingala.zip4j', module: 'zip4j'
+        it.exclude group: 'org.apache.logging.log4j', module: 'log4j'
+        it.exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        it.exclude group: 'com.google.guava', module: 'guava-jdk5'
+        it.exclude group: 'javax.xml.stream', module: 'stax-api'
+        it.exclude group: 'stax', module: 'stax-api'
+    }
+    dependencies {
+        compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+        compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: '2.0.5.RELEASE'
+        compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
+        compile(group: 'com.google.guava', name: 'guava', version: '25.0-jre') {
+            exclude(module: 'error_prone_annotations')
+            exclude(module: 'j2objc-annotations')
+            exclude(module: 'animal-sniffer-annotations')
+            exclude(module: 'checker-compat-qual')
+        }
+    }
+}

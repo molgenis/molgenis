@@ -1,0 +1,8 @@
+
+description = 'settings'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-security-core')
+  compile project(':molgenis-util')
+  testCompile project(':molgenis-test')
+}

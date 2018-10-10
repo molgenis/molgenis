@@ -1,0 +1,22 @@
+
+description = 'semantic-mapper'
+dependencies {
+  compile project(':molgenis-core')
+  compile project(':molgenis-web')
+  compile project(':molgenis-data')
+  compile project(':molgenis-dataexplorer')
+  compile project(':molgenis-js')
+  compile project(':molgenis-semantic-search')
+  compile project(':molgenis-ontology-core')
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version:'6.0.12.Final'
+    compile group: 'org.glassfish', name: 'javax.el', version:'3.0.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+    compile group: 'org.jscience', name: 'jscience', version:'4.3.1'
+  testCompile project(':molgenis-scripts-core')
+  testCompile project(':molgenis-test')
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-data-security')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}

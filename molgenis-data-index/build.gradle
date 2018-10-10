@@ -1,0 +1,18 @@
+
+description = 'data-index'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-jobs')
+  compile project(':molgenis-security-core')
+    compile group: 'org.springframework', name: 'spring-tx', version:'5.0.9.RELEASE'
+    compile group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+}
+
+task packageTests(type: Jar) {
+  from sourceSets.test.output
+  classifier = 'tests'
+}
+artifacts.archives packageTests

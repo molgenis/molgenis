@@ -1,0 +1,16 @@
+
+description = 'one-click-importer'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-web')
+    compile(group: 'org.apache.poi', name: 'poi-ooxml', version:'3.17') {
+exclude(module: 'stax-api')
+    }
+  compile project(':molgenis-navigator')
+  compile project(':molgenis-dataexplorer')
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
+  testCompile project(':molgenis-test')
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version:'2.4.0'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

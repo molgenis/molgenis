@@ -1,0 +1,6 @@
+
+description = 'navigator'
+dependencies {
+  compile project(':molgenis-core-ui')
+  testCompile project(':molgenis-test')
+}

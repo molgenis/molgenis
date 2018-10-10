@@ -1,0 +1,120 @@
+rootProject.name = 'molgenis'
+include ':molgenis-amazon-bucket'
+include ':molgenis-api-tests'
+include ':molgenis-app'
+include ':molgenis-app-manager'
+include ':molgenis-bootstrap'
+include ':molgenis-core-ui'
+include ':molgenis-core'
+include ':molgenis-data-cache'
+include ':molgenis-data-csv'
+include ':molgenis-data-elasticsearch'
+include ':molgenis-data-excel'
+include ':molgenis-data-file'
+include ':molgenis-data-i18n'
+include ':molgenis-data-icd10'
+include ':molgenis-data-import'
+include ':molgenis-data-index'
+include ':molgenis-data-migrate'
+include ':molgenis-data-platform'
+include ':molgenis-data-plugin'
+include ':molgenis-data-postgresql'
+include ':molgenis-data-rest-client'
+include ':molgenis-data-rest'
+include ':molgenis-data-row-edit'
+include ':molgenis-data-security'
+include ':molgenis-data-validation'
+include ':molgenis-data-vcf'
+include ':molgenis-data'
+include ':molgenis-dataexplorer'
+include ':molgenis-fair'
+include ':molgenis-file-ingester'
+include ':molgenis-genomebrowser'
+include ':molgenis-jobs'
+include ':molgenis-js'
+include ':molgenis-metadata-manager'
+include ':molgenis-navigator'
+include ':molgenis-one-click-importer'
+include ':molgenis-ontology-core'
+include ':molgenis-ontology'
+include ':molgenis-platform-integration-tests'
+include ':molgenis-python'
+include ':molgenis-questionnaires'
+include ':molgenis-r'
+include ':molgenis-searchall'
+include ':molgenis-scripts-core'
+include ':molgenis-scripts'
+include ':molgenis-security-core'
+include ':molgenis-security-ui'
+include ':molgenis-security'
+include ':molgenis-semantic-mapper'
+include ':molgenis-semantic-search'
+include ':molgenis-settings'
+include ':molgenis-settings-ui'
+include ':molgenis-swagger'
+include ':molgenis-test'
+include ':molgenis-util'
+include ':molgenis-validation'
+include ':molgenis-web'
+include ':molgenis-i18n'
+include ':molgenis-beacon'
+
+project(':molgenis-amazon-bucket').projectDir = "$rootDir/molgenis-amazon-bucket" as File
+project(':molgenis-api-tests').projectDir = "$rootDir/molgenis-api-tests" as File
+project(':molgenis-app').projectDir = "$rootDir/molgenis-app" as File
+project(':molgenis-app-manager').projectDir = "$rootDir/molgenis-app-manager" as File
+project(':molgenis-bootstrap').projectDir = "$rootDir/molgenis-bootstrap" as File
+project(':molgenis-core-ui').projectDir = "$rootDir/molgenis-core-ui" as File
+project(':molgenis-core').projectDir = "$rootDir/molgenis-core" as File
+project(':molgenis-data-cache').projectDir = "$rootDir/molgenis-data-cache" as File
+project(':molgenis-data-csv').projectDir = "$rootDir/molgenis-data-csv" as File
+project(':molgenis-data-elasticsearch').projectDir = "$rootDir/molgenis-data-elasticsearch" as File
+project(':molgenis-data-excel').projectDir = "$rootDir/molgenis-data-excel" as File
+project(':molgenis-data-file').projectDir = "$rootDir/molgenis-data-file" as File
+project(':molgenis-data-i18n').projectDir = "$rootDir/molgenis-data-i18n" as File
+project(':molgenis-data-icd10').projectDir = "$rootDir/molgenis-data-icd10" as File
+project(':molgenis-data-import').projectDir = "$rootDir/molgenis-data-import" as File
+project(':molgenis-data-index').projectDir = "$rootDir/molgenis-data-index" as File
+project(':molgenis-data-migrate').projectDir = "$rootDir/molgenis-data-migrate" as File
+project(':molgenis-data-platform').projectDir = "$rootDir/molgenis-data-platform" as File
+project(':molgenis-data-plugin').projectDir = "$rootDir/molgenis-data-plugin" as File
+project(':molgenis-data-postgresql').projectDir = "$rootDir/molgenis-data-postgresql" as File
+project(':molgenis-data-rest-client').projectDir = "$rootDir/molgenis-data-rest-client" as File
+project(':molgenis-data-rest').projectDir = "$rootDir/molgenis-data-rest" as File
+project(':molgenis-data-row-edit').projectDir = "$rootDir/molgenis-data-row-edit" as File
+project(':molgenis-data-security').projectDir = "$rootDir/molgenis-data-security" as File
+project(':molgenis-data-validation').projectDir = "$rootDir/molgenis-data-validation" as File
+project(':molgenis-data-vcf').projectDir = "$rootDir/molgenis-data-vcf" as File
+project(':molgenis-data').projectDir = "$rootDir/molgenis-data" as File
+project(':molgenis-dataexplorer').projectDir = "$rootDir/molgenis-dataexplorer" as File
+project(':molgenis-fair').projectDir = "$rootDir/molgenis-fair" as File
+project(':molgenis-file-ingester').projectDir = "$rootDir/molgenis-file-ingester" as File
+project(':molgenis-genomebrowser').projectDir = "$rootDir/molgenis-genomebrowser" as File
+project(':molgenis-jobs').projectDir = "$rootDir/molgenis-jobs" as File
+project(':molgenis-js').projectDir = "$rootDir/molgenis-js" as File
+project(':molgenis-metadata-manager').projectDir = "$rootDir/molgenis-metadata-manager" as File
+project(':molgenis-navigator').projectDir = "$rootDir/molgenis-navigator" as File
+project(':molgenis-one-click-importer').projectDir = "$rootDir/molgenis-one-click-importer" as File
+project(':molgenis-ontology-core').projectDir = "$rootDir/molgenis-ontology-core" as File
+project(':molgenis-ontology').projectDir = "$rootDir/molgenis-ontology" as File
+project(':molgenis-platform-integration-tests').projectDir = "$rootDir/molgenis-platform-integration-tests" as File
+project(':molgenis-python').projectDir = "$rootDir/molgenis-python" as File
+project(':molgenis-questionnaires').projectDir = "$rootDir/molgenis-questionnaires" as File
+project(':molgenis-r').projectDir = "$rootDir/molgenis-r" as File
+project(':molgenis-searchall').projectDir = "$rootDir/molgenis-searchall" as File
+project(':molgenis-scripts-core').projectDir = "$rootDir/molgenis-scripts-core" as File
+project(':molgenis-scripts').projectDir = "$rootDir/molgenis-scripts" as File
+project(':molgenis-security-core').projectDir = "$rootDir/molgenis-security-core" as File
+project(':molgenis-security-ui').projectDir = "$rootDir/molgenis-security-ui" as File
+project(':molgenis-security').projectDir = "$rootDir/molgenis-security" as File
+project(':molgenis-semantic-mapper').projectDir = "$rootDir/molgenis-semantic-mapper" as File
+project(':molgenis-semantic-search').projectDir = "$rootDir/molgenis-semantic-search" as File
+project(':molgenis-settings').projectDir = "$rootDir/molgenis-settings" as File
+project(':molgenis-settings-ui').projectDir = "$rootDir/molgenis-settings-ui" as File
+project(':molgenis-swagger').projectDir = "$rootDir/molgenis-swagger" as File
+project(':molgenis-test').projectDir = "$rootDir/molgenis-test" as File
+project(':molgenis-util').projectDir = "$rootDir/molgenis-util" as File
+project(':molgenis-validation').projectDir = "$rootDir/molgenis-validation" as File
+project(':molgenis-web').projectDir = "$rootDir/molgenis-web" as File
+project(':molgenis-i18n').projectDir = "$rootDir/molgenis-i18n" as File
+project(':molgenis-beacon').projectDir = "$rootDir/molgenis-beacon" as File

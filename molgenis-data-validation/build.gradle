@@ -1,0 +1,13 @@
+
+description = 'data-validation'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-file')
+  compile project(':molgenis-data-security')
+  compile project(':molgenis-js')
+  compile project(':molgenis-validation')
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version:'6.0.12.Final'
+    compile group: 'org.glassfish', name: 'javax.el', version:'3.0.0'
+  testCompile project(':molgenis-test')
+}

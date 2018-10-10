@@ -1,0 +1,12 @@
+
+description = 'data-platform'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-cache')
+  compile project(':molgenis-data-i18n')
+  compile project(':molgenis-data-index')
+  compile project(':molgenis-data-security')
+  compile project(':molgenis-data-validation')
+  compile project(':molgenis-settings')
+  testCompile project(':molgenis-test')
+}

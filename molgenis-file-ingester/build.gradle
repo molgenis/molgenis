@@ -1,0 +1,15 @@
+
+description = 'file-ingester'
+dependencies {
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-import')
+  compile project(':molgenis-data-file')
+  compile project(':molgenis-jobs')
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-data-security')
+  testCompile project(':molgenis-data-file')
+  testCompile project(':molgenis-jobs')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+}

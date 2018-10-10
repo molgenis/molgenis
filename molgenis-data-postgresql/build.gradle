@@ -1,0 +1,12 @@
+
+description = 'data-postgresql'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-file')
+  compile project(':molgenis-data-validation')
+    compile group: 'org.postgresql', name: 'postgresql', version:'9.4.1211'
+    compile group: 'org.springframework', name: 'spring-jdbc', version:'5.0.9.RELEASE'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+  testCompile project(':molgenis-test')
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}

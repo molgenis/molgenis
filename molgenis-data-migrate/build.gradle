@@ -1,0 +1,7 @@
+
+description = 'data-migrate'
+dependencies {
+  compile project(':molgenis-data')
+    compile group: 'org.springframework', name: 'spring-jdbc', version:'5.0.9.RELEASE'
+  testCompile project(':molgenis-test')
+}

@@ -1,0 +1,12 @@
+
+description = 'swagger'
+dependencies {
+  compile project(':molgenis-web')
+  compile project(':molgenis-data-i18n')
+    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-web', version:'5.0.8.RELEASE'
+    compile group: 'org.webjars', name: 'swagger-ui', version:'3.2.2'
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

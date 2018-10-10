@@ -1,0 +1,24 @@
+
+description = 'web'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-i18n')
+  compile project(':molgenis-data-csv')
+  compile project(':molgenis-data-plugin')
+  compile project(':molgenis-data-security')
+  compile project(':molgenis-data-validation')
+  compile project(':molgenis-security-core')
+  compile project(':molgenis-settings')
+    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-web', version:'5.0.8.RELEASE'
+    compile group: 'cz.jirutka.rsql', name: 'rsql-parser', version:'2.0.0'
+    compile group: 'com.fatboyindustrial.gson-javatime-serialisers', name: 'gson-javatime-serialisers', version:'1.1.1'
+    compile group: 'io.swagger', name: 'swagger-annotations', version:'1.5.16'
+    compile group: 'javax.validation', name: 'validation-api', version:'2.0.1.Final'
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.hibernate.validator', name: 'hibernate-validator', version:'6.0.12.Final'
+    testCompile group: 'org.glassfish', name: 'javax.el', version:'3.0.0'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

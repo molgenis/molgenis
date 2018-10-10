@@ -1,0 +1,21 @@
+
+description = 'dataexplorer'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-csv')
+  compile project(':molgenis-data-excel')
+  compile project(':molgenis-core')
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-genomebrowser')
+    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version:'6.0.12.Final'
+    compile group: 'org.glassfish', name: 'javax.el', version:'3.0.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+    compile(group: 'com.github.jmchilton.blend4j', name: 'blend4j', version:'0.1.0') {
+exclude(module: 'stax-api')
+exclude(module: 'stax-api')
+    }
+  testCompile project(':molgenis-test')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}

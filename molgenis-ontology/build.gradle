@@ -1,0 +1,19 @@
+
+description = 'ontology'
+dependencies {
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-csv')
+  compile project(':molgenis-semantic-search')
+  compile project(':molgenis-jobs')
+  compile project(':molgenis-data-rest')
+  compile project(':molgenis-data-i18n')
+    compile group: 'org.springframework', name: 'spring-context-support', version:'5.0.9.RELEASE'
+    compile group: 'commons-io', name: 'commons-io', version:'2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-ontology-core')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

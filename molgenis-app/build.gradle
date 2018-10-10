@@ -1,0 +1,56 @@
+
+apply plugin: 'war'
+
+jar.enabled = true
+description = 'app'
+dependencies {
+  compile project(':molgenis-app-manager')
+  compile project(':molgenis-beacon')
+  compile project(':molgenis-bootstrap')
+  compile project(':molgenis-core')
+  compile project(':molgenis-data')
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-security')
+  compile project(':molgenis-dataexplorer')
+  compile project(':molgenis-data-plugin')
+  compile project(':molgenis-data-excel')
+  compile project(':molgenis-data-csv')
+  compile project(':molgenis-python')
+  compile project(':molgenis-r')
+  compile project(':molgenis-searchall')
+  compile project(':molgenis-data-rest')
+  compile project(':molgenis-data-row-edit')
+  compile project(':molgenis-jobs')
+  compile project(':molgenis-data-vcf')
+  compile project(':molgenis-semantic-mapper')
+  compile project(':molgenis-data-import')
+  compile project(':molgenis-data-elasticsearch')
+  compile project(':molgenis-ontology')
+  compile project(':molgenis-semantic-search')
+  compile project(':molgenis-data-migrate')
+  compile project(':molgenis-questionnaires')
+  compile project(':molgenis-scripts')
+  compile project(':molgenis-scripts-core')
+  compile project(':molgenis-file-ingester')
+  compile project(':molgenis-genomebrowser')
+  compile project(':molgenis-data-i18n')
+  compile project(':molgenis-data-icd10')
+  compile project(':molgenis-i18n')
+  compile project(':molgenis-data-security')
+  compile project(':molgenis-data-index')
+  compile project(':molgenis-fair')
+  compile project(':molgenis-util')
+  compile project(':molgenis-settings')
+  compile project(':molgenis-settings-ui')
+  compile project(':molgenis-swagger')
+  compile project(':molgenis-amazon-bucket')
+  compile project(':molgenis-navigator')
+  compile project(':molgenis-metadata-manager')
+  compile project(':molgenis-one-click-importer')
+  compile project(':molgenis-web')
+    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-config', version:'5.0.8.RELEASE'
+  compile project(':molgenis-security-ui')
+  testCompile project(':molgenis-test')
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

@@ -1,0 +1,25 @@
+description = 'i18n'
+dependencies {
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile group: 'org.springframework', name: 'spring-tx', version: '5.0.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context-support', version: '5.0.9.RELEASE'
+    testCompile project(path: ':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile group: 'org.mockito', name: 'mockito-core', version:'2.18.3'
+    testCompile group: 'org.testng', name: 'testng', version: '6.8'
+    compileOnly group: 'com.google.code.findbugs', name: 'findbugs-annotations', version: '3.0.1'
+}
+
+task packageTests(type: Jar) {
+    from sourceSets.test.output
+    classifier = 'tests'
+}
+artifacts.archives packageTests
+
+configurations {
+    testArtifacts
+}
+
+artifacts {
+    testArtifacts packageTests
+}

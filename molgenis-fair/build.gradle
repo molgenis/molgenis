@@ -1,0 +1,12 @@
+
+description = 'fair'
+dependencies {
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version:'2.0.2'
+  compile project(':molgenis-data')
+  compile project(':molgenis-core-ui')
+  compile project(':molgenis-semantic-search')
+  compile project(':molgenis-security-core')
+    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
+  testCompile project(':molgenis-test')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}

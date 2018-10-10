@@ -1,0 +1,7 @@
+
+description = 'security-ui'
+dependencies {
+  compile project(':molgenis-web')
+  compile project(':molgenis-core-ui')
+  testCompile project(':molgenis-test')
+}

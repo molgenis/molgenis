@@ -1,0 +1,11 @@
+
+description = 'beacon'
+dependencies {
+  compile project(':molgenis-core')
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-vcf')
+  compile project(':molgenis-web')
+  compile project(':molgenis-genomebrowser')
+  testCompile project(':molgenis-test')
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}

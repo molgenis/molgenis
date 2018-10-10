@@ -1,0 +1,12 @@
+
+description = 'semantic-search'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-data-elasticsearch')
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
+  compile project(':molgenis-ontology-core')
+  testCompile project(':molgenis-data')
+  testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}

@@ -1,0 +1,8 @@
+
+description = 'metadata-manager'
+dependencies {
+  compile project(':molgenis-data')
+  compile project(':molgenis-core-ui')
+  testCompile project(':molgenis-test')
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+}
