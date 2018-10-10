@@ -150,9 +150,11 @@ public class MolgenisMenuController {
     }
 
     StringBuilder strBuilder = new StringBuilder("forward:");
-    strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath());
+    // If you do not append the trailing slash the queryString will be appended by an unknown code snippet.
+    // The trailing slash is needed for clients to serve resources 'relative' to the URI-path.
+    strBuilder.append(PluginController.PLUGIN_URI_PREFIX).append(plugin.getPath()).append('/');
     if (pathRemainder != null && !pathRemainder.isEmpty()) {
-      strBuilder.append('/').append(pathRemainder);
+      strBuilder.append(pathRemainder);
     }
     if (queryString != null && !queryString.isEmpty()) {
       strBuilder.append('?').append(queryString);
