@@ -82,6 +82,7 @@ public class PythonScriptExecutor {
     } catch (IOException e) {
       throw new MolgenisPythonException("Exception executing PythonScipt.", e);
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       throw new MolgenisPythonException("Exception waiting for PythonScipt to finish", e);
     } finally {
       if (tempFile != null) {
