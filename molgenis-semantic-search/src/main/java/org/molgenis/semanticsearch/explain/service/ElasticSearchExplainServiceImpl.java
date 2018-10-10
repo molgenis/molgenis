@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.Entity;
@@ -49,18 +48,22 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
       Map<String, Double> matchedQueryRule =
           explainServiceHelper.findMatchQueries(matchedQueryTerm, originalQueryInMap);
 
-      Optional<Entry<String, Double>> optionalEntry =
-          matchedQueryRule.entrySet().stream().max(Comparator.comparingDouble(Entry::getValue));
+      Entry<String, Double> entry =
+          matchedQueryRule
+              .entrySet()
+              .stream()
+              .max(Comparator.comparingDouble(Entry::getValue))
+              .orElseThrow(
+                  () ->
+                      new IllegalStateException(
+                          "matchedQueryRule.entrySet() shouldn't return an empty Set"));
 
-      if (optionalEntry.isPresent()) {
-        Entry<String, Double> entry = optionalEntry.get();
-        matchedQueryStrings.add(
-            ExplainedQueryString.create(
-                matchedQueryTerm,
-                entry.getKey(),
-                originalQueryInMap.get(entry.getKey()),
-                entry.getValue()));
-      }
+      matchedQueryStrings.add(
+          ExplainedQueryString.create(
+              matchedQueryTerm,
+              entry.getKey(),
+              originalQueryInMap.get(entry.getKey()),
+              entry.getValue()));
     }
     return matchedQueryStrings;
   }

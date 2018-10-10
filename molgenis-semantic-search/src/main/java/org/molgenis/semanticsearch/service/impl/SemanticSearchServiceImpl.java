@@ -392,11 +392,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
             .map(synonym -> Hit.create(synonym, distanceFrom(synonym, searchTerms)))
             .max(Comparator.naturalOrder());
 
-    if (bestSynonym.isPresent()) {
-      return bestSynonym.get();
-    } else {
-      throw new IllegalStateException("ontologyTerm.getSynonyms() shouldn't return an empty list");
-    }
+    return bestSynonym.orElseThrow(
+        () ->
+            new IllegalStateException("ontologyTerm.getSynonyms() shouldn't return an empty list"));
   }
 
   float distanceFrom(String synonym, Set<String> searchTerms) {

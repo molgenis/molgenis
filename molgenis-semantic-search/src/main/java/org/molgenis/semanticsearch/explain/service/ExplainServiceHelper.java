@@ -4,13 +4,11 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,18 +64,17 @@ public class ExplainServiceHelper {
         }
       }
     } else if (description.startsWith(Options.MAX_OF.toString())) {
-      Optional<Explanation> optionalMaxExplanation =
+      Explanation maxExplanation =
           newArrayList(explanation.getDetails())
               .stream()
               .max(
                   (explanation1, explanation2) ->
-                      Float.compare(explanation1.getValue(), explanation2.getValue()));
-      if (optionalMaxExplanation.isPresent()) {
-        words.addAll(findMatchedWords(optionalMaxExplanation.get()));
-      } else {
-        throw new IllegalStateException("explanation.getDetails() shouldn't return an empty array");
-      }
-
+                      Float.compare(explanation1.getValue(), explanation2.getValue()))
+              .orElseThrow(
+                  () ->
+                      new IllegalStateException(
+                          "explanation.getDetails() shouldn't return an empty array"));
+      words.addAll(findMatchedWords(maxExplanation));
     } else if (description.startsWith(Options.WEIGHT.toString())) {
       words.add(getMatchedWord(description));
     }
