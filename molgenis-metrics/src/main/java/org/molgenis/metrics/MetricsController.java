@@ -23,7 +23,7 @@ public class MetricsController {
   static final String BASE_URI = "/api/metrics";
   private final PrometheusMeterRegistry meterRegistry;
 
-  public MetricsController(PrometheusMeterRegistry meterRegistry) {
+  MetricsController(PrometheusMeterRegistry meterRegistry) {
     this.meterRegistry = meterRegistry;
   }
 
