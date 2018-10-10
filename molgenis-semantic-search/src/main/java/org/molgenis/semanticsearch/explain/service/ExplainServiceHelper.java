@@ -18,7 +18,8 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 
 public class ExplainServiceHelper {
-  public static final Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
+
+  private static final Pattern REGEXR_PATTERN = Pattern.compile("^weight\\(\\w*:(\\w*)(.*|)\\s.*");
   private final Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 
   public enum Options {
@@ -45,12 +46,12 @@ public class ExplainServiceHelper {
   }
 
   /**
-   * This method is able to recursively collect all the matched words from ElasticSearch Explanation
+   * This method is able to recursively collect all the matched words from Elasticsearch Explanation
    * document
    *
    * @return a set of matched words that are matched to different ontology terms
    */
-  public Set<String> findMatchedWords(Explanation explanation) {
+  Set<String> findMatchedWords(Explanation explanation) {
     Set<String> words = new HashSet<>();
     String description = explanation.getDescription();
     if (description.startsWith(Options.SUM_OF.toString())
@@ -79,7 +80,7 @@ public class ExplainServiceHelper {
     return words;
   }
 
-  public String extractMatchedWords(Explanation[] explanations) {
+  private String extractMatchedWords(Explanation[] explanations) {
     List<String> collect =
         Lists.newArrayList(explanations)
             .stream()
@@ -88,7 +89,7 @@ public class ExplainServiceHelper {
     return StringUtils.join(collect, ' ');
   }
 
-  public boolean reachLastLevel(Explanation explanation) {
+  private boolean reachLastLevel(Explanation explanation) {
     return explanation.getDescription().startsWith(Options.WEIGHT.toString());
   }
 
@@ -98,7 +99,7 @@ public class ExplainServiceHelper {
    *
    * @return a map of potential queries and their matching scores
    */
-  public Map<String, Double> findMatchQueries(
+  Map<String, Double> findMatchQueries(
       String matchedWordsString, Map<String, String> collectExpandedQueryMap) {
     Map<String, Double> qualifiedQueries = new HashMap<>();
     Set<String> matchedWords = splitIntoTerms(matchedWordsString);
@@ -113,11 +114,11 @@ public class ExplainServiceHelper {
     return qualifiedQueries;
   }
 
-  public String removeBoostFromQuery(String description) {
+  String removeBoostFromQuery(String description) {
     return description.replaceAll("\\^\\d*\\.{0,1}\\d+", "");
   }
 
-  public String getMatchedWord(String description) {
+  String getMatchedWord(String description) {
     Matcher matcher = REGEXR_PATTERN.matcher(description);
     if (matcher.find()) {
       return matcher.group(1);
@@ -125,7 +126,7 @@ public class ExplainServiceHelper {
     throw new MolgenisDataAccessException("Failed to find matched word in : " + description);
   }
 
-  Set<String> splitIntoTerms(String description) {
+  private Set<String> splitIntoTerms(String description) {
     return FluentIterable.from(termSplitter.split(description))
         .transform(String::toLowerCase)
         .filter(w -> !StringUtils.isEmpty(w))

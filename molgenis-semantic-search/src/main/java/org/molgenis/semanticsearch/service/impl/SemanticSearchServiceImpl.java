@@ -102,7 +102,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     List<QueryRule> finalQueryRules =
         Lists.newArrayList(new QueryRule(AttributeMetadata.ID, Operator.IN, attributeIdentifiers));
 
-    if (disMaxQueryRule.getNestedRules().size() > 0) {
+    if (!disMaxQueryRule.getNestedRules().isEmpty()) {
       finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
     }
 
@@ -163,11 +163,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     if (!queryTerms.isEmpty()
         && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token))) return true;
 
-    if (!ontologyTermQueries.isEmpty()
-        && ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)))
-      return true;
-
-    return false;
+    return (!ontologyTermQueries.isEmpty()
+        && ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)));
   }
 
   boolean isGoodMatch(Map<String, Double> matchedTags, String label) {
