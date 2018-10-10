@@ -74,7 +74,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
     Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
-            molgenisMenuController.getForwardPluginUri(pluginId, null, null),
-            "forward:/plugin/pluginPath/");
+        molgenisMenuController.getForwardPluginUri(pluginId, null, null),
+        "forward:/plugin/pluginPath/");
   }
 }
