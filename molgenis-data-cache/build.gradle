@@ -1,11 +1,10 @@
-
 description = 'data-cache'
 dependencies {
-  compile project(':molgenis-data')
-    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version:'2.6.2'
-    compile group: 'com.github.ben-manes.caffeine', name: 'guava', version:'2.6.2'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
-    compileOnly group: 'com.google.code.findbugs', name: 'findbugs-annotations', version:'3.0.1'
+    compile project(':molgenis-data')
+    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.6.2'
+    compile group: 'com.github.ben-manes.caffeine', name: 'guava', version: '2.6.2'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compileOnly group: 'com.google.code.findbugs', name: 'findbugs-annotations', version: '3.0.1'
 }

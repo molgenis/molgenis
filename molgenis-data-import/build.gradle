@@ -1,23 +1,22 @@
-
 description = 'data-import'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-data-file')
-  compile project(':molgenis-data-i18n')
-  compile project(':molgenis-data-validation')
-  compile project(':molgenis-data-security')
-    compile group: 'org.springframework', name: 'spring-context-support', version:'5.0.9.RELEASE'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-data-security')
-  testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile project(':molgenis-data')
+    compile project(':molgenis-data-file')
+    compile project(':molgenis-data-i18n')
+    compile project(':molgenis-data-validation')
+    compile project(':molgenis-data-security')
+    compile group: 'org.springframework', name: 'spring-context-support', version: '5.0.9.RELEASE'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-data-security')
+    testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 }
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests

@@ -1,10 +1,9 @@
-
 description = 'data-plugin'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-security-core')
-  compile project(':molgenis-data-security')
-    compile group: 'org.springframework.security', name: 'spring-security-acl', version:'5.0.8.RELEASE'
-  testCompile project(':molgenis-test')
-  testCompile project(':molgenis-i18n')
+    compile project(':molgenis-data')
+    compile project(':molgenis-security-core')
+    compile project(':molgenis-data-security')
+    compile group: 'org.springframework.security', name: 'spring-security-acl', version: '5.0.8.RELEASE'
+    testCompile project(':molgenis-test')
+    testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
 }

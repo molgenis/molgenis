@@ -1,20 +1,27 @@
-
 description = 'data-security'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-security-core')
-  compile project(':molgenis-settings')
-    compile group: 'org.springframework.security', name: 'spring-security-core', version:'5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-acl', version:'5.0.8.RELEASE'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
-  testCompile project(':molgenis-i18n')
-  testCompile project(':molgenis-security-core')
+    compile project(':molgenis-data')
+    compile project(':molgenis-security-core')
+    compile project(':molgenis-settings')
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.0.8.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-acl', version: '5.0.8.RELEASE'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
+    testCompile project(path: ':molgenis-security-core', configuration: 'testArtifacts')
 }
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests
+
+configurations {
+    testArtifacts
+}
+
+artifacts {
+    testArtifacts packageTests
+}

@@ -1,10 +1,9 @@
-
 description = 'data-i18n'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-i18n')
-  compile project(':molgenis-data-security')
-    compile group: 'org.springframework', name: 'spring-tx', version:'5.0.9.RELEASE'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-test')
+    compile project(':molgenis-data')
+    compile project(':molgenis-i18n')
+    compile project(':molgenis-data-security')
+    compile group: 'org.springframework', name: 'spring-tx', version: '5.0.9.RELEASE'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-test')
 }

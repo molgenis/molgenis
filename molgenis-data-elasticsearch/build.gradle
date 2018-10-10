@@ -1,24 +1,23 @@
-
 description = 'data-elasticsearch'
 dependencies {
-  compile project(':molgenis-data')
-    compile group: 'org.springframework.retry', name: 'spring-retry', version:'1.2.2.RELEASE'
-  compile project(':molgenis-data-index')
-    compile group: 'org.springframework.security', name: 'spring-security-core', version:'5.0.8.RELEASE'
-    compile(group: 'org.elasticsearch.client', name: 'transport', version:'5.5.1') {
-exclude(module: 'commons-logging')
+    compile project(':molgenis-data')
+    compile group: 'org.springframework.retry', name: 'spring-retry', version: '1.2.2.RELEASE'
+    compile project(':molgenis-data-index')
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.0.8.RELEASE'
+    compile(group: 'org.elasticsearch.client', name: 'transport', version: '5.5.1') {
+        exclude(module: 'commons-logging')
     }
-    compile group: 'commons-io', name: 'commons-io', version:'2.6'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-data-index')
-  testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-data-index')
+    testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
 }
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests

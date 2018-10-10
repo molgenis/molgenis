@@ -1,21 +1,28 @@
-
 description = 'ontology-core'
 dependencies {
-  compile project(':molgenis-util')
-  compile project(':molgenis-data')
-  compile project(':molgenis-data-import')
-  compile project(':molgenis-data-file')
-    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.7'
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version:'3.4.10'
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version:'3.4.10'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version:'5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+    compile project(':molgenis-util')
+    compile project(':molgenis-data')
+    compile project(':molgenis-data-import')
+    compile project(':molgenis-data-file')
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: '3.4.10'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: '3.4.10'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
+    testCompile project(':molgenis-test')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
 }
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests
+
+configurations {
+    testArtifacts
+}
+
+artifacts {
+    testArtifacts packageTests
+}

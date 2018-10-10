@@ -1,16 +1,23 @@
-
 description = 'scripts-core'
 dependencies {
-  compile project(':molgenis-data')
-    compile group: 'org.freemarker', name: 'freemarker', version:'2.3.28'
-    testCompile group: 'org.testng', name: 'testng', version:'6.8'
-    testCompile group: 'org.mockito', name: 'mockito-core', version:'2.7.22'
-  testCompile project(':molgenis-data')
+    compile project(':molgenis-data')
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
+    testCompile group: 'org.testng', name: 'testng', version: '6.8'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.7.22'
+    testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
 }
 test.useTestNG()
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests
+
+configurations {
+    testArtifacts
+}
+
+artifacts {
+    testArtifacts packageTests
+}
