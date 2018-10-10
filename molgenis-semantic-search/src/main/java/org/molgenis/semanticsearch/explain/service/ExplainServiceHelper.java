@@ -1,5 +1,7 @@
 package org.molgenis.semanticsearch.explain.service;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -8,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +58,7 @@ public class ExplainServiceHelper {
     String description = explanation.getDescription();
     if (description.startsWith(Options.SUM_OF.toString())
         || description.startsWith(Options.PRODUCT_OF.toString())) {
-      if (Lists.newArrayList(explanation.getDetails()).stream().allMatch(this::reachLastLevel)) {
+      if (newArrayList(explanation.getDetails()).stream().allMatch(this::reachLastLevel)) {
         words.add(extractMatchedWords(explanation.getDetails()));
       } else {
         for (Explanation subExplanation : explanation.getDetails()) {
@@ -63,15 +66,18 @@ public class ExplainServiceHelper {
         }
       }
     } else if (description.startsWith(Options.MAX_OF.toString())) {
-      Explanation maxExplanation =
-          Lists.newArrayList(explanation.getDetails())
+      Optional<Explanation> optionalMaxExplanation =
+          newArrayList(explanation.getDetails())
               .stream()
               .max(
                   (explanation1, explanation2) ->
-                      Float.compare(explanation1.getValue(), explanation2.getValue()))
-              .get();
+                      Float.compare(explanation1.getValue(), explanation2.getValue()));
+      if (optionalMaxExplanation.isPresent()) {
+        words.addAll(findMatchedWords(optionalMaxExplanation.get()));
+      } else {
+        throw new IllegalStateException("explanation.getDetails() shouldn't return an empty array");
+      }
 
-      words.addAll(findMatchedWords(maxExplanation));
     } else if (description.startsWith(Options.WEIGHT.toString())) {
       words.add(getMatchedWord(description));
     }
@@ -80,7 +86,7 @@ public class ExplainServiceHelper {
 
   public String extractMatchedWords(Explanation[] explanations) {
     List<String> collect =
-        Lists.newArrayList(explanations)
+        newArrayList(explanations)
             .stream()
             .map(explanation -> getMatchedWord(explanation.getDescription()))
             .collect(Collectors.toList());
