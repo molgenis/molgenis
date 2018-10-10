@@ -315,9 +315,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
                     filterOntologyTerm(
                         splitIntoTerms(Stemmer.stemAndJoin(searchTerms)), ontologyTerm))
             .map(
-                ontolgoyTerm ->
+                ontologyTerm ->
                     Hit.create(
-                        ontolgoyTerm, bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
+                        ontologyTerm, bestMatchingSynonym(ontologyTerm, searchTerms).getScore()))
             .sorted(Ordering.natural().reverse())
             .collect(toList());
 
