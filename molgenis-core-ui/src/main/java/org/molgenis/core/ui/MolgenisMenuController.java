@@ -158,7 +158,7 @@ public class MolgenisMenuController {
       strBuilder.append("/");
     }
     if (pathRemainder != null && !pathRemainder.isEmpty()) {
-      strBuilder.append(pathRemainder);
+      strBuilder.append("/").append(pathRemainder);
     }
     if (queryString != null && !queryString.isEmpty()) {
       strBuilder.append('?').append(queryString);
