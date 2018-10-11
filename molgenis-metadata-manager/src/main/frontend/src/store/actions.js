@@ -15,7 +15,7 @@ import {
   UPDATE_EDITOR_ENTITY_TYPE
 } from './mutations'
 
-import type {EditorAttribute, EditorEntityType, State} from '../flow.types'
+import type { EditorAttribute, EditorEntityType, State } from '../flow.types'
 
 export const GET_PACKAGES: string = '__GET_PACKAGES__'
 export const GET_ENTITY_TYPES: string = '__GET_ENTITY_TYPES__'
@@ -94,7 +94,7 @@ const withSpinner = (commit, promise) => {
   }).then(() => commit(SET_LOADING, false), 1000)
 }
 
-function getEditorEntityType(commit: Function, entityTypeId: string) {
+function getEditorEntityType (commit: Function, entityTypeId: string) {
   withSpinner(commit,
     api.get('/plugin/metadata-manager/entityType/' + entityTypeId).then(
       response => {
@@ -107,7 +107,7 @@ export default {
   /**
    * Retrieve all Packages and filter on non-system Packages
    */
-  [GET_PACKAGES]({commit}: { commit: Function }) {
+  [GET_PACKAGES] ({commit}: { commit: Function }) {
     withSpinner(commit,
       api.get('/plugin/metadata-manager/editorPackages').then(response => {
         commit(SET_PACKAGES, response)
@@ -116,7 +116,7 @@ export default {
   /**
    * Retrieve all EntityTypes and filter on non-system EntityTypes
    */
-  [GET_ENTITY_TYPES]({commit}: { commit: Function }) {
+  [GET_ENTITY_TYPES] ({commit}: { commit: Function }) {
     withSpinner(commit,
       api.get('/api/v2/sys_md_EntityType?num=10000').then(response => {
         commit(SET_ENTITY_TYPES, response.items)
@@ -125,7 +125,7 @@ export default {
   /**
    * Retrieve all Attribute types
    */
-  [GET_ATTRIBUTE_TYPES]({commit}: { commit: Function }) {
+  [GET_ATTRIBUTE_TYPES] ({commit}: { commit: Function }) {
     withSpinner(commit,
       api.get('/api/v2/sys_md_Attribute/meta/type').then(response => {
         commit(SET_ATTRIBUTE_TYPES, response.enumOptions)
@@ -134,7 +134,7 @@ export default {
   /**
    * Resets the current EditorEntityType
    */
-  [RESET_EDITOR_ENTITY_TYPE]({commit, state}: { commit: Function, state: State }) {
+  [RESET_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
     getEditorEntityType(commit, state.selectedEntityTypeId)
   },
   /**
@@ -142,7 +142,7 @@ export default {
    *
    * @param entityTypeId The selected EntityType identifier
    */
-  [GET_EDITOR_ENTITY_TYPE]({commit}: { commit: Function },
+  [GET_EDITOR_ENTITY_TYPE] ({commit}: { commit: Function },
     entityTypeId: string) {
     getEditorEntityType(commit, entityTypeId)
   },
@@ -151,7 +151,7 @@ export default {
    * Response returns a blank EditorEntityType
    * EditorEntityType is added to the list of entityTypes in the state
    */
-  [CREATE_ENTITY_TYPE]({commit}: { commit: Function }) {
+  [CREATE_ENTITY_TYPE] ({commit}: { commit: Function }) {
     withSpinner(commit,
       api.get('/plugin/metadata-manager/create/entityType').then(response => {
         const newEditorEntityType = toEntityType(response.entityType)
@@ -165,7 +165,7 @@ export default {
    *
    * @param selectedEntityTypeId the ID of the EntityType to be deleted
    */
-  [DELETE_ENTITY_TYPE]({commit, state}: { commit: Function, state: State },
+  [DELETE_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State },
     selectedEntityTypeId: string) {
     withSpinner(commit,
       api.delete_('/api/v1/' + selectedEntityTypeId + '/meta').then(
@@ -186,7 +186,7 @@ export default {
    * Response returns a blank Attribute
    * Attribute is added to the list of attributes in the existing editorEntityType
    */
-  [CREATE_ATTRIBUTE]({commit, state}: { commit: Function, state: State }) {
+  [CREATE_ATTRIBUTE] ({commit, state}: { commit: Function, state: State }) {
     withSpinner(commit,
       api.get('/plugin/metadata-manager/create/attribute').then(response => {
         const attribute = toAttribute(response.attribute)
@@ -201,7 +201,7 @@ export default {
   /**
    * Persist metadata changes to the database
    */
-  [SAVE_EDITOR_ENTITY_TYPE]({commit, state}: { commit: Function, state: State },
+  [SAVE_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State },
     t: Function) {
     const options = {
       body: JSON.stringify(state.editorEntityType)
@@ -211,8 +211,8 @@ export default {
         response => {
           commit(CREATE_ALERT, {
             type: 'success',
-            message: response.statusText + ': ' + t('save-succes-message')
-              + ': ' + state.editorEntityType.label
+            message: response.statusText + ': ' + t('save-succes-message') +
+            ': ' + state.editorEntityType.label
           })
 
           if (state.editorEntityType.isNew) {

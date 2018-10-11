@@ -84,7 +84,7 @@ public class InformationContentService {
                     long wordCount = dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery));
                     Long total = CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
                     BigDecimal idfValue =
-                        new BigDecimal(
+                        BigDecimal.valueOf(
                             total == null ? 0 : (1 + Math.log((double) total / (wordCount + 1))));
                     return idfValue.doubleValue();
                   }

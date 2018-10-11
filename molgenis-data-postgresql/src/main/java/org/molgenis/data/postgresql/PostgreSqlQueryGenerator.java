@@ -100,13 +100,7 @@ class PostgreSqlQueryGenerator {
             .append(getTableName(attr.getRefEntity()))
             .append('(')
             .append(getColumnName(attr.getRefEntity().getIdAttribute()))
-            .append(')');
-
-    // for self-referencing data or inversed attributes defer checking constraints until the end of
-    // the transaction
-    if (attr.getRefEntity().getId().equals(entityType.getId())) {
-      strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
-    }
+            .append(") DEFERRABLE INITIALLY DEFERRED");
 
     return strBuilder.toString();
   }
@@ -364,12 +358,7 @@ class PostgreSqlQueryGenerator {
             .append(getTableName(entityType))
             .append('(')
             .append(getColumnName(idAttr))
-            .append(") ON DELETE CASCADE");
-
-    // for self-referencing data defer checking constraints until the end of the transaction
-    if (attr.getRefEntity().getId().equals(entityType.getId())) {
-      sql.append(" DEFERRABLE INITIALLY DEFERRED");
-    }
+            .append(") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED");
 
     if (isPersistedInPostgreSql(attr.getRefEntity())) {
       sql.append(", FOREIGN KEY (")
@@ -378,12 +367,7 @@ class PostgreSqlQueryGenerator {
           .append(getTableName(attr.getRefEntity()))
           .append('(')
           .append(getColumnName(attr.getRefEntity().getIdAttribute()))
-          .append(")");
-
-      // for self-referencing data defer checking constraints until the end of the transaction
-      if (attr.getRefEntity().getId().equals(entityType.getId())) {
-        sql.append(" DEFERRABLE INITIALLY DEFERRED");
-      }
+          .append(") DEFERRABLE INITIALLY DEFERRED");
     }
 
     AttributeType attrType = attr.getDataType();

@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.molgenis</groupId>
@@ -17,7 +15,6 @@
     <owasp-check-format>HTML</owasp-check-format>
     <dockerfile-maven-version>1.4.0</dockerfile-maven-version>
     <dockerfile.tag>${project.version}</dockerfile.tag>
-    <dockerfile.skip>true</dockerfile.skip>
     <dockerfile.repository>registry.hub.docker.com/molgenis/molgenis-app</dockerfile.repository>
   </properties>
 
@@ -35,17 +32,6 @@
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
         <version>${dockerfile-maven-version}</version>
-        <executions>
-          <execution>
-            <id>default-docker</id>
-            <phase>package</phase>
-            <goals>
-              <goal>build</goal>
-              <goal>tag</goal>
-              <goal>push</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <repository>${dockerfile.repository}</repository>
           <tag>${dockerfile.tag}</tag>

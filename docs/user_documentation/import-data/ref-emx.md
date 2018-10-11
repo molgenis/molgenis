@@ -232,6 +232,30 @@ is used to create computed attributes.
 | attr1   | newEntity |    Attr 1    | string   | FALSE	      |             |TRUE		    | FALSE	  | TRUE           |            |
 | attr2   | newEntity |    Attr 2    | string   | TRUE 	      |             |TRUE		    | FALSE	  | TRUE           |            |
 
+##### Template
+
+In addition to basic 'computed strings' and 'computed' objects a template can be used as expression. The template expression format is:
+{"template":"..."} with the value a [Mustache](http://mustache.github.io/) template. Tags must refer to attribute identifiers 
+(e.g. {{myStringAttribute}}). For attributes referencing another entity type the attribute in the referencing entity type needs to be 
+specified as well (e.g. {{myXrefAttribute.id}}).
+  
+
+*Example:*
+
+| name	         | entity	      | dataType | refEntity	 | expression                                               |
+|----------------|--------------|----------|-------------|----------------------------------------------------------|
+| id	           | MyEntityType |	string	 |			       |                                                          |
+| xref0	         | MyEntityType |	xref	   | MyReference |                                                          |	
+| xref1	         | MyEntityType |	xref	   | MyReference |                                                          |
+| computedXref	 | MyEntityType |	string	 |             | {"template":"lorum {{xref0.id}} ipsum {{xref1.label}}"}  |
+| mref0	         | MyEntityType |	mref	   | MyReference |                                                          |
+| mref1	         | MyEntityType |	mref	   | MyReference |                                                          |
+| computedMref	 | MyEntityType |	string   |						 | {"template":"my {{mref0.id}} text {{mref1.label}}"}      |
+| string0	       | MyEntityType |	string	 |						 |                                                          |
+| string1	       | MyEntityType |	string	 |						 |                                                          |
+| computedString | MyEntityType |	string	 |						 | {"template":"{{string0}} and {{string1}}"}               |
+| id	           | MyReference  |	string	 |						 |                                                          |
+| label	         | MyReference  |	string	 |						 |                                                          |
 
 ## Entities options
 ### Required columns

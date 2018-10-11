@@ -1,5 +1,6 @@
 package org.molgenis.semanticmapper.repository.impl;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -62,8 +64,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
   @Override
   public List<AttributeMapping> getAttributeMappings(
       List<Entity> attributeMappingEntities,
-      EntityType sourceEntityType,
-      EntityType targetEntityType) {
+      @Nullable EntityType sourceEntityType,
+      @Nullable EntityType targetEntityType) {
     return Lists.transform(
         attributeMappingEntities,
         attributeMappingEntity ->
@@ -90,13 +92,19 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
   }
 
   private AttributeMapping toAttributeMapping(
-      Entity attributeMappingEntity, EntityType sourceEntityType, EntityType targetEntityType) {
+      Entity attributeMappingEntity,
+      @Nullable EntityType sourceEntityType,
+      @Nullable EntityType targetEntityType) {
     String identifier = attributeMappingEntity.getString(IDENTIFIER);
     String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
-    Attribute targetAttribute = targetEntityType.getAttribute(targetAttributeName);
+    Attribute targetAttribute =
+        targetEntityType != null ? targetEntityType.getAttribute(targetAttributeName) : null;
     String algorithm = attributeMappingEntity.getString(ALGORITHM);
     String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
-    List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm, sourceEntityType);
+    List<Attribute> sourceAttributes =
+        sourceEntityType != null
+            ? retrieveAttributesFromAlgorithm(algorithm, sourceEntityType)
+            : emptyList();
 
     return new AttributeMapping(
         identifier,

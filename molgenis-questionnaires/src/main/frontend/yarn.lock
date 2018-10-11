@@ -6414,12 +6414,12 @@ querystringify@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-1.0.0.tgz#6286242112c5b712fa654e526652bf6a13ff05cb"
 
-quibble@^0.5.1:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/quibble/-/quibble-0.5.3.tgz#3dfd53206fc6873f61c96f3bece63b69747b4d0c"
+quibble@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/quibble/-/quibble-0.5.5.tgz#669fb731520a923e0a98f8076b7eb55e409f73f9"
   dependencies:
     lodash "^4.17.2"
-    resolve "^1.5.0"
+    resolve "^1.7.1"
 
 quote-stream@^1.0.1, quote-stream@~1.0.2:
   version "1.0.2"
@@ -6801,6 +6801,12 @@ resolve@^1.1.5:
 resolve@^1.1.6, resolve@^1.1.7, resolve@^1.3.3, resolve@^1.4.0, resolve@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.5.0.tgz#1f09acce796c9a762579f31b2c1cc4c3cddf9f36"
+  dependencies:
+    path-parse "^1.0.5"
+
+resolve@^1.7.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.8.1.tgz#82f1ec19a423ac1fbd080b0bab06ba36e84a7a26"
   dependencies:
     path-parse "^1.0.5"
 
@@ -7588,14 +7594,15 @@ test-exclude@^4.1.1:
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
 
-testdouble@^3.5.2:
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.5.2.tgz#7ac91d08be05bac3b2acba57c430f6c62d0ad8af"
+testdouble@^3.8.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/testdouble/-/testdouble-3.8.1.tgz#8c74b6807f82fb07c2387a0640b4ae594b09b964"
   dependencies:
     es6-map "^0.1.5"
     lodash "^4.17.4"
-    quibble "^0.5.1"
+    quibble "^0.5.5"
     stringify-object-es5 "^2.5.0"
+    theredoc "^1.0.0"
 
 text-encoding@^0.6.4:
   version "0.6.4"
@@ -7604,6 +7611,10 @@ text-encoding@^0.6.4:
 text-table@^0.2.0, text-table@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
+
+theredoc@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/theredoc/-/theredoc-1.0.0.tgz#bcace376af6feb1873efbdd0f91ed026570ff062"
 
 throttleit@^1.0.0:
   version "1.0.0"

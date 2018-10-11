@@ -45,6 +45,8 @@ public class OntologyTermMetaData extends SystemEntityType {
         requireNonNull(ontologyTermDynamicAnnotationMetaData);
     this.ontologyTermNodePathMetaData = requireNonNull(ontologyTermNodePathMetaData);
     this.ontologyMetaData = requireNonNull(ontologyMetaData);
+
+    ontologyMetaData.setOntologyTermMetaData(this);
   }
 
   @Override
@@ -58,15 +60,18 @@ public class OntologyTermMetaData extends SystemEntityType {
     addAttribute(ONTOLOGY_TERM_SYNONYM)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermSynonymMetaData);
+        .setRefEntity(ontologyTermSynonymMetaData)
+        .setCascadeDelete(true);
     addAttribute(ONTOLOGY_TERM_DYNAMIC_ANNOTATION)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermDynamicAnnotationMetaData);
+        .setRefEntity(ontologyTermDynamicAnnotationMetaData)
+        .setCascadeDelete(true);
     addAttribute(ONTOLOGY_TERM_NODE_PATH)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermNodePathMetaData);
+        .setRefEntity(ontologyTermNodePathMetaData)
+        .setCascadeDelete(true);
     addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false).setRefEntity(ontologyMetaData);
   }
 }

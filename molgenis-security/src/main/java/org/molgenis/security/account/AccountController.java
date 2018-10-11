@@ -55,6 +55,7 @@ public class AccountController {
   @SuppressWarnings("squid:S2068") // this is not a hardcoded password
   private static final String CHANGE_PASSWORD_RELATIVE_URI = "/password/change";
 
+  @SuppressWarnings("squid:S2068") // this is not a hardcoded password
   public static final String CHANGE_PASSWORD_URI = URI + CHANGE_PASSWORD_RELATIVE_URI;
 
   static final String REGISTRATION_SUCCESS_MESSAGE_USER =
