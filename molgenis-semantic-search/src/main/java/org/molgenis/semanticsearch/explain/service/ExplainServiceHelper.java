@@ -72,7 +72,6 @@ public class ExplainServiceHelper {
                       Float.compare(explanation1.getValue(), explanation2.getValue()))
               .get();
 
-
       words.addAll(findMatchedWords(maxExplanation));
     } else if (description.startsWith(Options.WEIGHT.toString())) {
       words.add(getMatchedWord(description));
