@@ -1,12 +1,12 @@
 <template>
   <span>
-    <b-btn variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-cut')" @click="selectClipboardItems('cut')">
+    <b-btn variant="secondary" :disabled="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-cut')" @click="selectClipboardItems('cut')">
       <font-awesome-icon icon="cut" size="lg" :class="nrSelectedItems == 0 ? 'fa-disabled' : ''"/>
     </b-btn>
-    <b-btn variant="secondary" :disable="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-copy')" @click="selectClipboardItems('copy')">
+    <b-btn variant="secondary" :disabled="nrSelectedItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-copy')" @click="selectClipboardItems('copy')">
       <font-awesome-icon icon="clone" size="lg" :class="nrSelectedItems == 0 ? 'fa-disabled' : ''"/>
     </b-btn>
-    <b-btn variant="secondary" :class="query ? 'invisible' : ''" :disable="nrClipboardItems > 0 ? false : true" v-b-tooltip.hover :title="$t('action-paste')" @click="pasteClipboardItems">
+    <b-btn variant="secondary" :disabled="query || nrClipboardItems === 0 ? true : false" v-b-tooltip.hover :title="$t('action-paste')" @click="pasteClipboardItems">
       <font-awesome-icon icon="paste" size="lg" :class="nrClipboardItems > 0 ? '' : 'fa-disabled'"/>
     </b-btn>
   </span>

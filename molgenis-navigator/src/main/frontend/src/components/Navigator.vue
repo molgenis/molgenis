@@ -72,6 +72,10 @@
     margin-bottom: 2rem;
   }
 
+  .btn.disabled {
+    cursor: not-allowed !important;
+  }
+
   .fa-disabled {
     opacity: 0.6;
   }

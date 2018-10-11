@@ -4,7 +4,7 @@
       <b-input-group>
         <b-form-input v-model="query" type="text" :placeholder="$t('search-input-placeholder')"></b-form-input>
         <b-input-group-append>
-          <b-btn variant="secondary" disabled><font-awesome-icon icon="search"/></b-btn>
+          <b-btn variant="secondary"><font-awesome-icon icon="search"/></b-btn>
         </b-input-group-append>
       </b-input-group>
     </div>

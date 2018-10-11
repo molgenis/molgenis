@@ -31,7 +31,7 @@
 
 <script>
   import {
-    UPDATE_PACKAGE
+    UPDATE_ITEM
   } from '../store/actions'
   import { mapState } from 'vuex'
 
@@ -47,15 +47,15 @@
       }
     },
     computed: {
-      ...mapState(['packages', 'selectedPackageIds']),
-      selectedPackage () {
-        var selectedPackageId = this.selectedPackageIds[0]
-        return this.packages.find(aPackage => aPackage.id === selectedPackageId)
+      ...mapState(['items', 'selectedItems']),
+      selectedItem () {
+        var selectedItemId = this.selectedItems[0].id
+        return this.items.find(item => item.id === selectedItemId)
       }
     },
     methods: {
       resetForm () {
-        this.form = Object.assign({}, {label: this.selectedPackage.label, description: this.selectedPackage.description})
+        this.form = {label: this.selectedItem.label, description: this.selectedItem.description}
         this.validated = false
         this.$refs.updatePackageLabelInput.$el.focus()
       },
@@ -68,8 +68,9 @@
         }
       },
       handleSubmit () {
-        var aPackage = Object.assign({}, this.form, {id: this.selectedPackage.id, parent: this.selectedPackage.parent.id})
-        this.$store.dispatch(UPDATE_PACKAGE, aPackage)
+        var updatedItem = Object.assign({}, this.selectedItem,
+          {label: this.form.label, description: this.form.description})
+        this.$store.dispatch(UPDATE_ITEM, updatedItem)
         this.$refs.packageUpdateModal.hide()
       }
     }

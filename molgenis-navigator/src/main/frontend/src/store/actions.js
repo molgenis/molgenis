@@ -22,7 +22,7 @@ export const SELECT_ALL_ITEMS = '__SELECT_ALL_ITEMS__'
 export const DESELECT_ALL_ITEMS = '__DESELECT_ALL_ITEMS__'
 export const DELETE_SELECTED_ITEMS = '__DELETE_SELECTED_ITEMS__'
 export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
-export const UPDATE_PACKAGE = '__UPDATE_PACKAGE__'
+export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
 
 const SYS_PACKAGE_ID = 'sys'
@@ -206,6 +206,7 @@ function getPackagePathRec (aPackage: Package, path: Array<Package>) {
 }
 
 function fetchPackagePath (packageId: ?string) {
+  // TODO deal with deep packages (show ... in breadcrumb?)
   if (packageId) {
     const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
     return api.get(uri).then(response => getPackagePath(response))
@@ -286,17 +287,19 @@ export default {
       commit(SET_ERROR, error)
     })
   },
-  [UPDATE_PACKAGE] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
-    aPackage: Object) {
-    const uri = REST_API_V2 + '/sys_md_Package'
-    const options = {
-      body: JSON.stringify({entities: [aPackage]})
+  [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }, item: Item) {
+    if (item.type === 'package') {
+      // TODO get package, change package, update package
+      const uri = REST_API_V2 + '/sys_md_Package'
+      const options = {
+        body: JSON.stringify({entities: [item]})
+      }
+      api.put(uri, options).then(() => {
+        dispatch(FETCH_ITEMS)
+      }, error => {
+        commit(SET_ERROR, error)
+      })
     }
-    api.put(uri, options).then(() => {
-      dispatch(FETCH_ITEMS)
-    }, error => {
-      commit(SET_ERROR, error)
-    })
   },
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     targetPackageId: string) {
