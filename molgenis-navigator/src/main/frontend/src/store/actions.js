@@ -94,8 +94,8 @@ function filterPackages (packages: Array<Package>) {
   }
 
   return packages
-  .filter(_package => _package.id !== SYS_PACKAGE_ID)
-  .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
+    .filter(_package => _package.id !== SYS_PACKAGE_ID)
+    .filter(_package => !_package.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
 /**

@@ -5,12 +5,21 @@
         <li class="breadcrumb-item">
           <router-link to="/"><font-awesome-icon icon="home"/></router-link>
         </li>
-        <li v-if="!query" class="breadcrumb-item" v-for="(package, index) in path">
-          <a v-if="index == path.length - 1">{{package.label}}</a>
-          <router-link v-else :to="{params: {package: package.id}}">{{package.label}}</router-link>
-        </li>
-        <li v-show="query" class="breadcrumb-item">
-          <span>{{ 'search-query-label' | i18n }}: <b>{{query}}</b></span>
+        <span v-if="!query">
+          <li
+            v-for="(item, index) in path"
+            :key="item.id"
+            class="breadcrumb-item">
+            <a v-if="index == path.length - 1">{{ item.label }}</a>
+            <router-link
+              v-else
+              :to="{params: {'item': item.id}}">{{ item.label }}</router-link>
+          </li>
+        </span>
+        <li
+          v-show="query"
+          class="breadcrumb-item">
+          <span>{{ 'search-query-label' | i18n }}: <b>{{ query }}</b></span>
         </li>
       </ol>
     </div>
@@ -18,15 +27,15 @@
 </template>
 
 <script>
-  import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
-  export default {
-    name: 'NavigatorBreadcrumb',
-    computed: {
-      ...mapGetters(['query']),
-      ...mapState(['path'])
-    }
+export default {
+  name: 'NavigatorBreadcrumb',
+  computed: {
+    ...mapGetters(['query']),
+    ...mapState(['path'])
   }
+}
 </script>
 
 <style scoped>

@@ -11,7 +11,7 @@ import { faFolderOpen } from '@fortawesome/free-regular-svg-icons'
 import { faClone, faCut, faEdit, faDownload, faHome, faList, faPaste, faPlus, faSearch, faTimes, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-import i18n from '@molgenis/molgenis-i18n-js/dist/molgenis-i18n.esm'
+import i18n from '@molgenis/molgenis-i18n-js'
 import { INITIAL_STATE } from './store/state'
 // Keeps the router and the store in sync @https://github.com/vuejs/vuex-router-sync
 sync(store, router)
@@ -32,8 +32,8 @@ Vue.use(i18n, {
       el: '#app',
       store,
       router,
-      template: '<App />',
-      components: { App }
+      components: { App },
+      template: '<App />'
     })
   }
 })

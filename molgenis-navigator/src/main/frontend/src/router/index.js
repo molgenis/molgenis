@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Navigator from 'components/Navigator'
+import Navigator from '../components/Navigator'
 import { INITIAL_STATE } from '../store/state'
 
 Vue.use(Router)
