@@ -593,8 +593,6 @@
           <version>${release-maven-plugin.version}</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
-            <pushChanges>false</pushChanges>
-            <localCheckout>true</localCheckout>
             <scmCommentPrefix>[ci skip] [maven-release-plugin]${line.separator}</scmCommentPrefix>
           </configuration>
         </plugin>
