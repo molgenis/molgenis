@@ -111,7 +111,7 @@ public class QueryGenerator {
             boolQuery.mustNot(queryPartBuilder);
             break;
           default:
-            throw new MolgenisQueryException("Unknown occurence operator [" + occur + "]");
+            throw new UnexpectedEnumException(occur);
         }
       }
       queryBuilder = boolQuery;
