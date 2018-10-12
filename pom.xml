@@ -25,7 +25,7 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:git:https://github.com/molgenis/molgenis.git</connection>
+    <connection>scm:git:https://${env.GITHUB_USER}:${env.GITHUB_TOKEN}@github.com/molgenis/molgenis.git</connection>
     <url>https://github.com/molgenis/molgenis</url>
     <tag>HEAD</tag>
   </scm>
