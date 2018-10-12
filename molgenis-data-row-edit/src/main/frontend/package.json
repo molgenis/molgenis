@@ -13,7 +13,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "@molgenis/molgenis-api-client": "^2.1.3",
+    "@molgenis/molgenis-api-client": "^3.1.0",
     "@molgenis/molgenis-i18n-js": "^0.1.1",
     "@molgenis/molgenis-ui-form": "^1.1.0",
     "font-awesome": "^4.7.0",
