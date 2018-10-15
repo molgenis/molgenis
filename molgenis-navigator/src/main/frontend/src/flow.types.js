@@ -1,3 +1,4 @@
+// @flow
 export type Parent = {
   id: string,
 }

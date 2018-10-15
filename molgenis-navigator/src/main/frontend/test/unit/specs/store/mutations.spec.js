@@ -1,4 +1,4 @@
-import mutations from 'src/store/mutations'
+import mutations from '@/store/mutations'
 
 describe('mutations', () => {
   describe('Testing mutation SET_PACKAGES', () => {

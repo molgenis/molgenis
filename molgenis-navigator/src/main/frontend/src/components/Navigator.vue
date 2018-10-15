@@ -27,7 +27,6 @@ export default {
   },
   watch: {
     '$route' (to, from) {
-      console.log(from.query, to.query)
       if (to.query && (to.query.q !== from.query.q)) {
         if (to.query.q) {
           _.debounce(this.fetchItemsByQuery, 100)()

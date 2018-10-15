@@ -287,14 +287,38 @@ export default {
       commit(SET_ERROR, error)
     })
   },
-  [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }, item: Item) {
-    if (item.type === 'package') {
-      // TODO get package, change package, update package
-      const uri = REST_API_V2 + '/sys_md_Package'
-      const options = {
-        body: JSON.stringify({entities: [item]})
+  [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    updatedItem: Item) {
+    updatedItem.type = 2
+    if (updatedItem.type === 'package') {
+      const item = state.items.find(item => item.id === updatedItem.id)
+
+      let promises = []
+      if (item.label !== updatedItem.label) {
+        const uri = REST_API_V2 + '/sys_md_Package/label'
+        const options = {
+          body: JSON.stringify({
+            entities: [{
+              id: item.id,
+              label: updatedItem.label
+            }]
+          })
+        }
+        promises.push(api.put(uri, options))
       }
-      api.put(uri, options).then(() => {
+      if (item.description !== updatedItem.description) {
+        const uri = REST_API_V2 + '/sys_md_Package/description'
+        const options = {
+          body: JSON.stringify({
+            entities: [{
+              id: item.id,
+              label: updatedItem.description
+            }]
+          })
+        }
+        promises.push(api.put(uri, options))
+      }
+      Promise.all(promises).then(() => {
         dispatch(FETCH_ITEMS)
       }, error => {
         commit(SET_ERROR, error)

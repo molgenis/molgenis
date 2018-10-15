@@ -1,9 +1,8 @@
 import api from '@molgenis/molgenis-api-client'
 import td from 'testdouble'
-import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE } from 'src/store/actions'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from 'src/store/mutations'
+import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE } from '@/store/actions'
+import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY, SET_SELECTED_ENTITY_TYPES, SET_SELECTED_PACKAGES } from '@/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
-import { SET_SELECTED_ENTITY_TYPES, SET_SELECTED_PACKAGES } from '../../../../src/store/mutations'
 
 describe('actions', () => {
   afterEach(() => { td.reset() })
