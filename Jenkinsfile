@@ -93,7 +93,7 @@ pipeline {
                             sh "helm init --client-only"
                             sh "helm repo add molgenis ${HELM_REPO}"
                             sh "helm repo update"
-                            sh "helm upgrade molgenis-dev molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                            sh "helm upgrade master molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
                         }
                     }
                 }
@@ -148,7 +148,7 @@ pipeline {
                             sh "helm init --client-only"
                             sh "helm repo add molgenis ${HELM_REPO}"
                             sh "helm repo update"
-                            sh "helm upgrade molgenis-test molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                            sh "helm upgrade latest molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
                         }
                     }
                 }
