@@ -1,10 +1,8 @@
 package org.molgenis.data.cache.utils;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.empty;
 
 import com.google.common.cache.Cache;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -13,22 +11,22 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Caches {@link org.molgenis.data.Entity}s from different repositories in dehydrated form in a
+ * Caches {@link CacheHit}s with {@link Entity}s from different repositories in dehydrated form in a
  * single combined Guava {@link Cache}.
  */
 public class CombinedEntityCache {
   private final EntityHydration entityHydration;
-  private final Cache<EntityKey, Optional<Map<String, Object>>> cache;
+  private final Cache<EntityKey, CacheHit<Map<String, Object>>> cache;
 
   /**
    * Creates a new {@link CombinedEntityCache}
    *
    * @param entityHydration {@link EntityHydration} used to hydrate and dehydrate the entities and
    *     generate cache keys
-   * @param cache the {@link Cache} to store the entities in
+   * @param cache the {@link Cache} to store the {@link CacheHit}s in
    */
   public CombinedEntityCache(
-      EntityHydration entityHydration, Cache<EntityKey, Optional<Map<String, Object>>> cache) {
+      EntityHydration entityHydration, Cache<EntityKey, CacheHit<Map<String, Object>>> cache) {
     this.entityHydration = requireNonNull(entityHydration);
     this.cache = requireNonNull(cache);
   }
@@ -39,7 +37,7 @@ public class CombinedEntityCache {
    * @param entityKey the {@link EntityKey} of the deleted entity instance
    */
   public void putDeletion(EntityKey entityKey) {
-    cache.put(entityKey, empty());
+    cache.put(entityKey, CacheHit.empty());
   }
 
   /**
@@ -61,19 +59,13 @@ public class CombinedEntityCache {
    *
    * @param entityType EntityType of the entity to retrieve
    * @param id id value of the entity to retrieve
-   * @return Optional {@link Entity} with the result from the cache, or null if no record of the
-   *     entity is present in the cache
+   * @return Optional {@link CacheHit<Entity>} with the result from the cache, empty if no record of
+   *     the entity is present in the cache
    */
-  @SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
-  public Optional<Entity> getIfPresent(EntityType entityType, Object id) {
-    Optional<Map<String, Object>> optionalDehydratedEntity =
-        cache.getIfPresent(EntityKey.create(entityType, id));
-    if (optionalDehydratedEntity == null) {
-      // no information present in cache
-      return null;
-    }
-    return optionalDehydratedEntity.map(
-        dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityType));
+  public Optional<CacheHit<Entity>> getIfPresent(EntityType entityType, Object id) {
+    EntityKey key = EntityKey.create(entityType, id);
+    return Optional.ofNullable(cache.getIfPresent(key))
+        .map(cacheHit -> hydrate(cacheHit, entityType));
   }
 
   /**
@@ -85,10 +77,19 @@ public class CombinedEntityCache {
     EntityType entityType = entity.getEntityType();
     cache.put(
         EntityKey.create(entityType, entity.getIdValue()),
-        Optional.of(entityHydration.dehydrate(entity)));
+        CacheHit.of(entityHydration.dehydrate(entity)));
   }
 
   public void evict(Stream<EntityKey> entityKeys) {
     entityKeys.forEach(cache::invalidate);
+  }
+
+  private CacheHit<Entity> hydrate(
+      CacheHit<Map<String, Object>> cacheHitAsMap, EntityType entityType) {
+    if (cacheHitAsMap.isEmpty()) {
+      return CacheHit.empty();
+    } else {
+      return CacheHit.of(entityHydration.hydrate(cacheHitAsMap.getValue(), entityType));
+    }
   }
 }
