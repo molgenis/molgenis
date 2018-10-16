@@ -98,8 +98,12 @@ public class QueryGenerator {
         QueryBuilder queryPartBuilder = createQueryClause(queryRule, entityType);
         if (queryPartBuilder == null) continue; // skip SHOULD and DIS_MAX query rules
 
+        //noinspection ConstantConditions
+        if (occur == null) {
+          throw new IllegalStateException("occur shouldn't be null");
+        }
+
         // add query part to query
-        //noinspection EnumSwitchStatementWhichMissesCases
         switch (occur) {
           case AND:
             boolQuery.must(queryPartBuilder);
