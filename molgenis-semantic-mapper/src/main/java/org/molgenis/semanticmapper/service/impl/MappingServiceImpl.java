@@ -73,8 +73,8 @@ public class MappingServiceImpl implements MappingService {
 
   @Override
   @Transactional
-  public MappingProject addMappingProject(String projectName, String target) {
-    MappingProject mappingProject = new MappingProject(projectName);
+  public MappingProject addMappingProject(String projectName, String target, int depth) {
+    MappingProject mappingProject = new MappingProject(projectName, depth);
     mappingProject.addTarget(dataService.getEntityType(target));
     mappingProjectRepository.add(mappingProject);
     return mappingProject;
@@ -167,7 +167,7 @@ public class MappingServiceImpl implements MappingService {
     EntityType targetMetadata =
         createTargetMetadata(mappingTarget, entityTypeId, packageId, label, addSourceAttribute);
     Repository<Entity> targetRepo = getTargetRepository(entityTypeId, targetMetadata);
-    return applyMappingsInternal(mappingTarget, targetRepo, progress);
+    return applyMappingsInternal(mappingTarget, targetRepo, progress, mappingProject.getDepth());
   }
 
   /** Package-private for testability */
@@ -230,13 +230,13 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private long applyMappingsInternal(
-      MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress) {
+      MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress, int depth) {
     progress.status("Applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
-    long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+    long result = applyMappingsToRepositories(mappingTarget, targetRepo, progress, depth);
     if (hasSelfReferences(targetRepo.getEntityType())) {
       progress.status(
           "Self reference found, applying the mapping for a second time to set references");
-      applyMappingsToRepositories(mappingTarget, targetRepo, progress);
+      applyMappingsToRepositories(mappingTarget, targetRepo, progress, depth);
     }
     progress.status(
         "Done applying mappings to repository [" + targetRepo.getEntityType().getId() + "]");
@@ -324,17 +324,17 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private long applyMappingsToRepositories(
-      MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress) {
+      MappingTarget mappingTarget, Repository<Entity> targetRepo, Progress progress, int depth) {
     return mappingTarget
         .getEntityMappings()
         .stream()
-        .mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress))
+        .mapToLong(sourceMapping -> applyMappingToRepo(sourceMapping, targetRepo, progress, depth))
         .sum();
   }
 
   /** Package-private for testability */
   long applyMappingToRepo(
-      EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress) {
+      EntityMapping sourceMapping, Repository<Entity> targetRepo, Progress progress, int depth) {
     progress.status(format("Mapping source [%s]...", sourceMapping.getLabel()));
     AtomicLong counter = new AtomicLong();
 
@@ -343,7 +343,7 @@ public class MappingServiceImpl implements MappingService {
         .getRepository(sourceMapping.getName())
         .forEachBatched(
             entities ->
-                processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities),
+                processBatch(sourceMapping, targetRepo, progress, counter, canAdd, entities, depth),
             MAPPING_BATCH_SIZE);
 
     progress.status(format("Mapped %s [%s] entities.", counter, sourceMapping.getLabel()));
@@ -356,8 +356,10 @@ public class MappingServiceImpl implements MappingService {
       Progress progress,
       AtomicLong counter,
       boolean canAdd,
-      List<Entity> entities) {
-    List<Entity> mappedEntities = mapEntities(sourceMapping, targetRepo.getEntityType(), entities);
+      List<Entity> entities,
+      int depth) {
+    List<Entity> mappedEntities =
+        mapEntities(sourceMapping, targetRepo.getEntityType(), entities, depth);
     if (canAdd) {
       targetRepo.add(mappedEntities.stream());
     } else {
@@ -368,16 +370,18 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<Entity> mapEntities(
-      EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities) {
+      EntityMapping sourceMapping, EntityType targetMetaData, List<Entity> entities, int depth) {
     return entities
         .stream()
-        .map(sourceEntity -> applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData))
+        .map(
+            sourceEntity ->
+                applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData, depth))
         .collect(toList());
   }
 
   /** Package-private for testablility */
   Entity applyMappingToEntity(
-      EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData) {
+      EntityMapping sourceMapping, Entity sourceEntity, EntityType targetMetaData, int depth) {
     Entity target = entityManager.create(targetMetaData, POPULATE);
 
     if (targetMetaData.getAttribute(SOURCE) != null) {
@@ -389,7 +393,11 @@ public class MappingServiceImpl implements MappingService {
         .forEach(
             attributeMapping ->
                 applyMappingToAttribute(
-                    attributeMapping, sourceEntity, target, sourceMapping.getSourceEntityType()));
+                    attributeMapping,
+                    sourceEntity,
+                    target,
+                    sourceMapping.getSourceEntityType(),
+                    depth));
     return target;
   }
 
@@ -397,9 +405,10 @@ public class MappingServiceImpl implements MappingService {
       AttributeMapping attributeMapping,
       Entity sourceEntity,
       Entity target,
-      EntityType entityType) {
+      EntityType entityType,
+      int depth) {
     String targetAttributeName = attributeMapping.getTargetAttribute().getName();
-    Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType);
+    Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityType, depth);
     target.set(targetAttributeName, typedValue);
   }
 

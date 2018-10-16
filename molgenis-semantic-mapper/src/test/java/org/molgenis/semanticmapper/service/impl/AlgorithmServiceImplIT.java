@@ -220,7 +220,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     targetAttribute.setDataType(targetAttributeType);
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm(algorithm);
-    Object result = algorithmService.apply(attributeMapping, source, entityType);
+    Object result = algorithmService.apply(attributeMapping, source, entityType, 3);
     assertEquals(result, expected, message);
   }
 
@@ -239,7 +239,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm(
         "Math.floor((new Date(2015, 2, 12) - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
-    Object result = algorithmService.apply(attributeMapping, source, entityType);
+    Object result = algorithmService.apply(attributeMapping, source, entityType, 3);
     assertEquals(result, 41);
   }
 
@@ -277,12 +277,12 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     when(entityManager.getReference(entityTypeXref, 1)).thenReturn(xref1a);
 
-    Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource);
+    Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource, 3);
     assertEquals(result.get("field1"), xref2a.get("field2"));
   }
 
   @Test
-  public void testDotAnnotationWithXref() throws ParseException {
+  public void testAttrXref() {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -302,14 +302,14 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     Attribute targetAttribute = attrMetaFactory.create().setName("target_label");
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
-    attributeMapping.setAlgorithm("$('source_xref.label').value()");
+    attributeMapping.setAlgorithm("$('source_xref').attr('label').value()");
 
-    Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType);
+    Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType, 3);
     assertEquals(result, "label 1");
   }
 
   @Test
-  public void testDotAnnotationWithMref() throws ParseException {
+  public void testAttrMref() {
     EntityType referenceEntityType = entityTypeFactory.create("reference");
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
     referenceEntityType.addAttribute(attrMetaFactory.create().setName("label"));
@@ -334,9 +334,9 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     Attribute targetAttribute = attrMetaFactory.create().setName("target_label");
     AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
     attributeMapping.setAlgorithm(
-        "var result = [];$('source_mref').map(function(mref){result.push(mref.val.label)});result");
+        "$('source_mref').map(function(mref){ return mref.attr('label').value()}).value()");
 
-    Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType);
+    Object result = algorithmService.apply(attributeMapping, sourceEntity, sourceEntityType, 3);
     assertEquals(result, "[label 1, label 2]");
   }
 
@@ -391,7 +391,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     Entity source = new DynamicEntity(entityTypeSource);
     source.set(sourceEntityAttrName, asList(refEntity0, refEntity1));
 
-    Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
+    Object result = algorithmService.apply(attributeMapping, source, entityTypeSource, 3);
     assertEquals(result, asList(refEntity0, refEntity1));
   }
 
@@ -433,7 +433,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     Entity source = new DynamicEntity(entityTypeSource);
     source.set(sourceEntityAttrName, emptyList());
 
-    Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
+    Object result = algorithmService.apply(attributeMapping, source, entityTypeSource, 3);
     assertEquals(result, emptyList());
   }
 
@@ -449,7 +449,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("height");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project");
+    MappingProject project = new MappingProject("project", 3);
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -492,7 +492,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
     sourceAttribute.setDescription("weight");
     sourceEntityType.addAttribute(sourceAttribute);
 
-    MappingProject project = new MappingProject("project");
+    MappingProject project = new MappingProject("project", 3);
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
@@ -523,7 +523,7 @@ public class AlgorithmServiceImplIT extends AbstractMolgenisSpringTest {
 
     sourceEntityType.addAttributes(asList(sourceAttribute1, sourceAttribute2));
 
-    MappingProject project = new MappingProject("project");
+    MappingProject project = new MappingProject("project", 3);
     project.addTarget(targetEntityType);
 
     EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
