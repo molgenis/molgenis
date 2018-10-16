@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.IDENTIFIER;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
@@ -73,7 +74,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
     EntityType target2 = entityTypeFactory.create("target2");
     target2.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 
-    mappingProject = new MappingProject("My first mapping project");
+    mappingProject = new MappingProject("My first mapping project", 3);
     mappingTarget1 = mappingProject.addTarget(target1);
     mappingTarget2 = mappingProject.addTarget(target2);
 
@@ -89,6 +90,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
     mappingProjectEntity.set(IDENTIFIER, "mappingProjectID");
     mappingProjectEntity.set(MAPPING_TARGETS, mappingTargetEntities);
     mappingProjectEntity.set(NAME, "My first mapping project");
+    mappingProjectEntity.set(DEPTH, 3);
   }
 
   @Test
@@ -108,7 +110,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 
   @Test
   public void testAddWithIdentifier() {
-    MappingProject mappingProject = new MappingProject("My first mapping project");
+    MappingProject mappingProject = new MappingProject("My first mapping project", 3);
     mappingProject.setIdentifier("mappingProjectID");
     try {
       mappingProjectRepositoryImpl.add(mappingProject);

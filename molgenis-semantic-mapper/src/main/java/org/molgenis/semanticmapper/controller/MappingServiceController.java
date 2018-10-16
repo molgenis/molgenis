@@ -171,8 +171,9 @@ public class MappingServiceController extends PluginController {
   @PostMapping("/addMappingProject")
   public String addMappingProject(
       @RequestParam("mapping-project-name") String name,
-      @RequestParam("target-entity") String targetEntity) {
-    MappingProject newMappingProject = mappingService.addMappingProject(name, targetEntity);
+      @RequestParam("target-entity") String targetEntity,
+      @RequestParam("depth") int depth) {
+    MappingProject newMappingProject = mappingService.addMappingProject(name, targetEntity, depth);
     return "redirect:"
         + getMappingServiceMenuUrl()
         + "/mappingproject/"
@@ -268,6 +269,7 @@ public class MappingServiceController extends PluginController {
     String algorithm = mappingServiceRequest.getAlgorithm();
     Long offset = mappingServiceRequest.getOffset();
     Long num = mappingServiceRequest.getNum();
+    int depth = mappingServiceRequest.getDepth();
 
     Query<Entity> query = new QueryImpl<>().offset(offset.intValue()).pageSize(num.intValue());
     String sourceEntityName = mappingServiceRequest.getSourceEntityName();
@@ -278,7 +280,7 @@ public class MappingServiceController extends PluginController {
 
     Map<String, String> errorMessages = new LinkedHashMap<>();
     for (AlgorithmEvaluation evaluation :
-        algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities)) {
+        algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities, depth)) {
       if (evaluation.hasError()) {
         errorMessages.put(
             evaluation.getEntity().getIdValue().toString(), evaluation.getErrorMessage());
@@ -448,6 +450,15 @@ public class MappingServiceController extends PluginController {
   @PostMapping("/mappingproject/clone")
   public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId) {
     mappingService.cloneMappingProject(mappingProjectId);
+    return "redirect:" + getMappingServiceMenuUrl();
+  }
+
+  @PostMapping("/mappingproject/setDepth")
+  public String cloneMappingProject(
+      @RequestParam("mappingProjectId") String mappingProjectId, @RequestParam("depth") int depth) {
+    MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
+    mappingProject.setDepth(depth);
+    mappingService.updateMappingProject(mappingProject);
     return "redirect:" + getMappingServiceMenuUrl();
   }
 
@@ -749,6 +760,7 @@ public class MappingServiceController extends PluginController {
     }
 
     model.addAttribute("mappingProjectId", mappingProjectId);
+    model.addAttribute("depth", project.getDepth());
     model.addAttribute("target", target);
     model.addAttribute("source", source);
     model.addAttribute(
@@ -763,7 +775,10 @@ public class MappingServiceController extends PluginController {
                   try {
                     return AlgorithmResult.createSuccess(
                         algorithmService.apply(
-                            algorithmTest, sourceEntity, sourceEntity.getEntityType()),
+                            algorithmTest,
+                            sourceEntity,
+                            sourceEntity.getEntityType(),
+                            project.getDepth()),
                         sourceEntity);
                   } catch (Exception e) {
                     return AlgorithmResult.createFailure(e, sourceEntity);
@@ -976,7 +991,10 @@ public class MappingServiceController extends PluginController {
 
     Iterable<AlgorithmEvaluation> algorithmEvaluations =
         algorithmService.applyAlgorithm(
-            targetAttribute, mappingServiceRequest.getAlgorithm(), sourceRepo);
+            targetAttribute,
+            mappingServiceRequest.getAlgorithm(),
+            sourceRepo,
+            mappingServiceRequest.getDepth());
 
     List<Object> calculatedValues =
         newArrayList(Iterables.transform(algorithmEvaluations, AlgorithmEvaluation::getValue));
