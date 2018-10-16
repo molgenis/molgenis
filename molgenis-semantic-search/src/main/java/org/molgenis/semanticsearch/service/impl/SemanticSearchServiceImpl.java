@@ -380,14 +380,18 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
    * @param searchTerms the search terms
    * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
    */
-  public Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms) {
+  Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms) {
+    // ontologyTerm.getSynonyms() will never be empty because it contains itself as a synonym
     Optional<Hit<String>> bestSynonym =
         ontologyTerm
             .getSynonyms()
             .stream()
             .map(synonym -> Hit.create(synonym, distanceFrom(synonym, searchTerms)))
             .max(Comparator.naturalOrder());
-    return bestSynonym.get();
+
+    return bestSynonym.orElseThrow(
+        () ->
+            new IllegalStateException("ontologyTerm.getSynonyms() shouldn't return an empty list"));
   }
 
   float distanceFrom(String synonym, Set<String> searchTerms) {

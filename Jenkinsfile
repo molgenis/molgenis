@@ -93,7 +93,7 @@ pipeline {
                             sh "helm init --client-only"
                             sh "helm repo add molgenis ${HELM_REPO}"
                             sh "helm repo update"
-                            sh "helm upgrade molgenis-dev molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                            sh "helm upgrade master molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
                         }
                     }
                 }
@@ -130,13 +130,13 @@ pipeline {
                             input(message: 'Prepare to release?')
                         }
                         container('maven') {
-                            sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
+                            sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true\""
                             script {
-                                env.TAG = sh(script: "grep project.rel release.properties | cut -d'=' -f2", returnStdout: true)
+                                env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
                             }
-                            dir('molgenis-app'){
-                                sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
+                            dir('molgenis-app') {
+                                sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY} -Ddockerfile.warfile.version=${TAG}"
                             }
                         }
                     }
@@ -148,7 +148,7 @@ pipeline {
                             sh "helm init --client-only"
                             sh "helm repo add molgenis ${HELM_REPO}"
                             sh "helm repo update"
-                            sh "helm upgrade molgenis-test molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                            sh "helm upgrade latest molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
                         }
                     }
                 }

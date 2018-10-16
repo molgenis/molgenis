@@ -1,6 +1,7 @@
 package org.molgenis.data.security.aggregation;
 
 import java.util.List;
+import java.util.Objects;
 import org.molgenis.data.aggregation.AggregateResult;
 
 public class AnonymizedAggregateResult extends AggregateResult {
@@ -20,20 +21,22 @@ public class AnonymizedAggregateResult extends AggregateResult {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + getAnonymizationThreshold();
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AnonymizedAggregateResult)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    AnonymizedAggregateResult that = (AnonymizedAggregateResult) o;
+    return getAnonymizationThreshold() == that.getAnonymizationThreshold();
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (!super.equals(obj)) return false;
-    if (getClass() != obj.getClass()) return false;
-    AnonymizedAggregateResult other = (AnonymizedAggregateResult) obj;
-    if (getAnonymizationThreshold() != other.getAnonymizationThreshold()) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), getAnonymizationThreshold());
   }
 }

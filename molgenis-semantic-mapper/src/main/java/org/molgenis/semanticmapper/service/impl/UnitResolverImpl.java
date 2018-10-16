@@ -91,12 +91,7 @@ public class UnitResolverImpl implements UnitResolver {
         List<OntologyTerm> ontologyTerms =
             ontologyService.findExactOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
         if (ontologyTerms != null && !ontologyTerms.isEmpty()) {
-          if (ontologyTerms.size() == 1) {
-            unitOntologyTerm = ontologyTerms.get(0);
-          } else {
-            // multiple unit ontology terms detected, pick first
-            unitOntologyTerm = ontologyTerms.get(0);
-          }
+          unitOntologyTerm = ontologyTerms.get(0);
         } else {
           unitOntologyTerm = null;
         }

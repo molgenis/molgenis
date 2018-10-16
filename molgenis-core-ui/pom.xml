@@ -51,16 +51,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>update package.json version</id>
-            <goals>
-              <goal>gulp</goal>
-            </goals>
-            <configuration>
-              <skip>${skip.js}</skip>
-              <arguments>update-version</arguments>
-            </configuration>
-          </execution>
-          <execution>
             <id>npm test</id>
             <goals>
               <goal>npm</goal>

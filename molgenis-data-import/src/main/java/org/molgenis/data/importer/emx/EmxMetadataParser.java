@@ -1112,7 +1112,9 @@ public class EmxMetadataParser implements MetadataParser {
       if (attribute.getDataType().equals(FILE)) {
         // If attribute is of type file, set refEntity to file meta and continue to the next
         // attribute
-        requireNonNull(dataService, format("Can't set %s if dataService is null", FILE_META));
+        if (dataService == null) {
+          throw new NullPointerException(format("Can't set %s if dataService is null", FILE_META));
+        }
         attribute.setRefEntity(dataService.getEntityType(FILE_META));
         continue;
       }

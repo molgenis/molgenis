@@ -2,7 +2,6 @@ package org.molgenis.data.postgresql;
 
 import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -883,7 +882,9 @@ class PostgreSqlQueryGenerator {
           result.append(" OR ");
           break;
         case LIKE:
-          requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, LIKE));
+          if (attr == null) {
+            throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, LIKE));
+          }
           String columnName;
           if (isPersistedInOtherTable(attr)) {
             columnName = getFilterColumnName(attr, mrefFilterIndex.get());
@@ -902,7 +903,9 @@ class PostgreSqlQueryGenerator {
           break;
         case IN:
           {
-            requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
+            if (attr == null) {
+              throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, IN));
+            }
             Object inValue = r.getValue();
             if (inValue == null) {
               throw new MolgenisDataException("Missing value for IN query");
@@ -948,7 +951,9 @@ class PostgreSqlQueryGenerator {
           result.append(" NOT ");
           break;
         case RANGE:
-          requireNonNull(attr, format(UNSPECIFIED_ATTRIBUTE_MSG, RANGE));
+          if (attr == null) {
+            throw new NullPointerException(format(UNSPECIFIED_ATTRIBUTE_MSG, RANGE));
+          }
           Object range = r.getValue();
           if (range == null) {
             throw new MolgenisDataException("Missing value for RANGE query");
@@ -1024,11 +1029,12 @@ class PostgreSqlQueryGenerator {
         case GREATER_EQUAL:
         case LESS:
         case LESS_EQUAL:
-          requireNonNull(
-              attr,
-              format(
-                  UNSPECIFIED_ATTRIBUTE_MSG,
-                  format("%s, %s, %s or %s", GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)));
+          if (attr == null) {
+            throw new NullPointerException(
+                format(
+                    UNSPECIFIED_ATTRIBUTE_MSG,
+                    format("%s, %s, %s or %s", GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)));
+          }
           if (isPersistedInOtherTable(attr)) {
             predicate.append(getFilterColumnName(attr, mrefFilterIndex.get()));
           } else {

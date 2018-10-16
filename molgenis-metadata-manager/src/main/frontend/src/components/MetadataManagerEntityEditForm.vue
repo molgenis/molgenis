@@ -170,9 +170,6 @@
   import SaveButton from './generic-components/SaveButton'
 
   export default {
-    created: function () {
-      console.log('this.$store', this.$store)
-    },
     name: 'metadata-manager-entity-edit-form',
     data: function () {
       return {showLabelLanguageInputs: false, showDescriptionLanguageInputs: false}
