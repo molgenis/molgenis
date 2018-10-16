@@ -1,6 +1,5 @@
 package org.molgenis.data.cache.utils;
 
-import static java.util.Optional.empty;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
@@ -19,7 +18,7 @@ import org.testng.annotations.Test;
 public class CombinedEntityCacheTest extends AbstractMockitoTest {
   private CombinedEntityCache entityCache;
   @Mock private EntityHydration entityHydration;
-  @Mock private Cache<EntityKey, Optional<Map<String, Object>>> cache;
+  @Mock private Cache<EntityKey, CacheHit<Map<String, Object>>> cache;
   @Mock EntityType entityType;
   @Mock Entity entity;
   @Mock Map<String, Object> dehydratedEntity;
@@ -33,20 +32,22 @@ public class CombinedEntityCacheTest extends AbstractMockitoTest {
   @Test
   public void getIfPresentIntegerIdEntityNotPresentInCache() {
     when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(null);
-    assertEquals(entityCache.getIfPresent(entityType, 123), null);
+    assertEquals(entityCache.getIfPresent(entityType, 123), Optional.empty());
   }
 
   @Test
   public void getIfPresentIntegerIdDeletionLoggedInCache() {
-    when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(empty());
-    assertEquals(entityCache.getIfPresent(entityType, 123), empty());
+    when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(CacheHit.empty());
+    assertEquals(entityCache.getIfPresent(entityType, 123), Optional.of(CacheHit.empty()));
   }
 
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
   @Test
   public void getIfPresentIntegerIdEntityPresentInCache() {
     when(cache.getIfPresent(EntityKey.create("TestEntity", 123)))
-        .thenReturn(Optional.of(dehydratedEntity));
+        .thenReturn(CacheHit.of(dehydratedEntity));
     when(entityHydration.hydrate(dehydratedEntity, entityType)).thenReturn(entity);
-    assertSame(entityCache.getIfPresent(entityType, 123).get(), entity);
+    assertSame(
+        entityCache.getIfPresent(entityType, 123).get().getValue(), CacheHit.of(entity).getValue());
   }
 }

@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
@@ -67,9 +67,10 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
   @Override
   public Entity findOneById(Object id) {
     if (cacheable) {
-      Optional<Entity> entity = l1Cache.get(getEntityType().getId(), id, getEntityType());
-      if (entity != null) {
-        return entity.orElse(null);
+      Optional<CacheHit<Entity>> cacheHit =
+          l1Cache.get(getEntityType().getId(), id, getEntityType());
+      if (cacheHit.isPresent()) {
+        return cacheHit.get().getValue();
       }
     }
     return delegate().findOneById(id);
@@ -100,7 +101,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
     List<Object> missingIds =
         batch
             .stream()
-            .filter(id -> l1Cache.get(entityId, id, entityType) == null)
+            .filter(id -> !l1Cache.get(entityId, id, entityType).isPresent())
             .collect(toList());
 
     Map<Object, Entity> missingEntities =
@@ -109,14 +110,12 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
     return batch
         .stream()
         .map(
-            id -> {
-              Optional<Entity> result = l1Cache.get(entityId, id, getEntityType());
-              if (result == null) {
-                return missingEntities.get(id);
-              }
-              return result.orElse(null);
-            })
-        .collect(Collectors.toList());
+            id ->
+                l1Cache
+                    .get(entityId, id, getEntityType())
+                    .map(CacheHit::getValue)
+                    .orElse(missingEntities.get(id)))
+        .collect(toList());
   }
 
   @Override

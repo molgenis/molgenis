@@ -24,6 +24,7 @@ public class MenuItem {
   @SerializedName("items")
   private List<MenuItem> items;
 
+  @SuppressWarnings("squid:S2637") // see GitHub issue #7859
   public MenuItem() {}
 
   public MenuItem(MenuItemType type, String id, String label) {
