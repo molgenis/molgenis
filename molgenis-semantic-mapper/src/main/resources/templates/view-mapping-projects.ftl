@@ -33,6 +33,7 @@
             <tr>
                 <th></th>
                 <th>Mapping name</th>
+                <th>Max depth</th>
                 <th>Target entities</th>
                 <th>Mapped sources</th>
             </tr>
@@ -54,8 +55,26 @@
                             </form>
                         </td>
                         <td>
-                            <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a></td>
-                        <td>
+                          <a href="${context_url}/mappingproject/${project.identifier}">${project.name?html}</a>
+                        </td>
+                        <td class="text-center">
+                          <#if project.depth gt 1 >
+                          <form method="post" action="${context_url}/mappingproject/setDepth" class="pull-left">
+                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                            <input type="hidden" name="depth" value="${project.depth - 1}"/>
+                            <button type="submit" class="btn btn-default btn-xs plus-btn"><span
+                                class="glyphicon glyphicon-minus"></span></button>
+                          </form>
+                          </#if>
+                          ${project.depth}
+                          <form method="post" action="${context_url}/mappingproject/setDepth" class="pull-right">
+                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                            <input type="hidden" name="depth" value="${project.depth + 1}"/>
+                            <button type="submit" class="btn btn-default btn-xs minus-btn"><span
+                                class="glyphicon glyphicon-plus"></span></button>
+                          </form>
+                        </td>
+                      <td>
                           <#if project.mappingTargets?size != 0>
                             <#list project.mappingTargets as target>
                               <#if target??>${target.name?html}<#else><span class="bg-danger text-white">Target undefined or unknown</span></#if><#if target_has_next>, </#if>
@@ -101,7 +120,16 @@
                                required="required">
                     </div>
 
-                    <hr></hr>
+                    <div class="form-group">
+                        <label>Max Depth</label>
+                        <input name="depth" type="number" class="form-control"
+                               placeholder="Maximum mapping depth for references"
+                               required="required"
+                               value="3" min="1">
+                      <span class="help-block">Maximum depth for evaluation of nested reference attributes.</span>
+                    </div>
+
+                    <hr/>
 
                     <div class="form-group">
                         <label>Select the Target entity</label>

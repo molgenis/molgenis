@@ -156,7 +156,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
     lifeLines = entityTypeFactory.create("LifeLines");
 
-    mappingProject = new MappingProject("hop hop hop");
+    mappingProject = new MappingProject("hop hop hop", 3);
     mappingProject.setIdentifier("asdf");
     MappingTarget mappingTarget = mappingProject.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -201,7 +201,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithm", "$('length').value()")
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
-    MappingProject expected = new MappingProject("hop hop hop");
+    MappingProject expected = new MappingProject("hop hop hop", 3);
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -233,7 +233,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
-    MappingProject expected = new MappingProject("hop hop hop");
+    MappingProject expected = new MappingProject("hop hop hop", 3);
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
@@ -264,7 +264,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
                 .param("algorithmState", "CURATED"))
         .andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
-    MappingProject expected = new MappingProject("hop hop hop");
+    MappingProject expected = new MappingProject("hop hop hop", 3);
     expected.setIdentifier("asdf");
     MappingTarget mappingTarget = expected.addTarget(hop);
     mappingTarget.addSource(lifeLines);
