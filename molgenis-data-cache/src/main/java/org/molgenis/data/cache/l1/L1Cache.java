@@ -31,7 +31,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
   private final ThreadLocal<CombinedEntityCache> caches;
   private final EntityHydration entityHydration;
 
-  public L1Cache(TransactionManager transactionManager, EntityHydration entityHydration) {
+  L1Cache(TransactionManager transactionManager, EntityHydration entityHydration) {
     caches = new ThreadLocal<>();
     this.entityHydration = requireNonNull(entityHydration);
     requireNonNull(transactionManager).addTransactionListener(this);
@@ -58,7 +58,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
     }
   }
 
-  public void putDeletion(EntityKey entityKey) {
+  void putDeletion(EntityKey entityKey) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       entityCache.putDeletion(entityKey);
@@ -66,7 +66,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
   }
 
   // TODO: Call this also when repository metadata changes!
-  public void evictAll(EntityType entityType) {
+  void evictAll(EntityType entityType) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getId());
@@ -74,7 +74,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
     }
   }
 
-  public void evict(Stream<EntityKey> entityKeys) {
+  void evict(Stream<EntityKey> entityKeys) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       LOG.trace("Removing entity keys from L1 cache.");

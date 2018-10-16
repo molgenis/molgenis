@@ -44,7 +44,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
   private transient DataService dataService;
   private final transient UserPermissionEvaluator userPermissionEvaluator;
 
-  public OptionsWizardPage(
+  OptionsWizardPage(
       FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
       ImportServiceFactory importServiceFactory,
       DataService dataService,
@@ -109,7 +109,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     }
 
     try {
-      return validateInput(importWizard.getFile(), importWizard, result);
+      return validateInput(importWizard.getFile(), importWizard);
     } catch (Exception e) {
       ImportWizardUtil.handleException(e, importWizard, result, LOG, dataImportOption);
     }
@@ -117,7 +117,7 @@ public class OptionsWizardPage extends AbstractWizardPage {
     return null;
   }
 
-  private String validateInput(File file, ImportWizard wizard, BindingResult result) {
+  private String validateInput(File file, ImportWizard wizard) {
 
     // decide what importer to use...
     RepositoryCollection source =
