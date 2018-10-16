@@ -98,7 +98,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     when(jsMagmaScriptEvaluator.eval(algorithm, entity, 3)).thenThrow(new NullPointerException());
 
     Iterable<AlgorithmEvaluation> result =
-        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
+        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity), 3);
     AlgorithmEvaluation eval = result.iterator().next();
 
     assertEquals(
@@ -115,7 +115,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     when(jsMagmaScriptEvaluator.eval(algorithm, entity, 3))
         .thenReturn(new ScriptException("algorithm is not defined"));
     Iterable<AlgorithmEvaluation> result =
-        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity));
+        algorithmServiceImpl.applyAlgorithm(attribute, algorithm, Lists.newArrayList(entity), 3);
     AlgorithmEvaluation eval = result.iterator().next();
     assertEquals(eval.getErrorMessage(), "algorithm is not defined");
   }
@@ -131,7 +131,7 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Entity sourceEntity = mock(Entity.class);
     when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3))
         .thenReturn(new ScriptException("algorithm is not defined"));
-    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
+    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3);
   }
 
   private void testApplyConvertException(String algorithmResult, AttributeType attributeType) {
@@ -145,6 +145,6 @@ public class AlgorithmServiceImplTest extends AbstractMockitoTest {
     Entity sourceEntity = mock(Entity.class);
     when(jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, 3)).thenReturn(algorithmResult);
 
-    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null);
+    algorithmServiceImpl.apply(attributeMapping, sourceEntity, null, 3);
   }
 }

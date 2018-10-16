@@ -19,6 +19,7 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
+        <input id="depth" type="hidden" name="depth" value="${mappingProject.depth}"/>
         <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.id?html}"/>
         <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.id?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
