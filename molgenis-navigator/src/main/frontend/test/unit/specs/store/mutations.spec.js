@@ -46,20 +46,18 @@ describe('mutations', () => {
       expect(state.jobs).to.deep.equal(jobs)
     })
   })
-  describe('SET_PATH', () => {
-    it('should set the path in the state', () => {
+  describe('SET_PACKAGE', () => {
+    it('should set the package', () => {
       const state = {
-        path: []
+        package: null
       }
 
-      const path = [
-        {id: '0', label: 'root'},
-        {id: '1', label: 'child'},
-        {id: '2', label: 'grandchild'}
+      const _package = [
+        {id: '0', label: 'grandchild', parent: {id: '1', label: 'child'}}
       ]
 
-      mutations.__SET_PATH__(state, path)
-      expect(state.path).to.deep.equal(path)
+      mutations.__SET_PACKAGE__(state, _package)
+      expect(state.path).to.deep.equal(_package)
     })
   })
   describe('SET_ITEMS', () => {

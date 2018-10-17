@@ -1,5 +1,5 @@
 // @flow
-import type { Item, EntityType, Package, PathComponent, State } from '../flow.types'
+import type { ApiEntityType, ApiPackage, Item, State } from '../flow.types'
 import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
@@ -14,12 +14,13 @@ import { createJobFromApiJobDownload } from '../utils/JobUtils'
 import {
   ADD_ALERTS,
   SET_JOBS,
-  SET_PATH,
+  SET_PACKAGE,
   SET_ITEMS,
   SET_SELECTED_ITEMS,
   RESET_CLIPBOARD
 } from './mutations'
 import { createAlertError } from '../models/Alert'
+import { createPackageFromApiPackage } from '../utils/PackageUtils'
 
 export const FETCH_ITEMS = '__FETCH_ITEMS__'
 export const FETCH_ITEMS_BY_QUERY = '__FETCH_ITEMS_BY_QUERY__'
@@ -95,9 +96,9 @@ function validateQuery (query: string) {
 /**
  * Filter out system package unless user is superUser
  * @param packages
- * @returns {Array.<Package>}
+ * @returns {Array.<ApiPackage>}
  */
-function filterPackages (packages: Array<Package>) {
+function filterPackages (packages: Array<ApiPackage>) {
   if (INITIAL_STATE.isSuperUser) {
     return packages
   }
@@ -110,9 +111,9 @@ function filterPackages (packages: Array<Package>) {
 /**
  * Filter out all system entity types unless user is superUser
  * @param entityTypes
- * @returns {Array.<EntityType>}
+ * @returns {Array.<ApiEntityType>}
  */
-function filterEntityTypes (entityTypes: Array<EntityType>) {
+function filterEntityTypes (entityTypes: Array<ApiEntityType>) {
   if (INITIAL_STATE.isSuperUser) {
     return entityTypes
   }
@@ -183,24 +184,11 @@ function fetchEntityTypes (uri: string) {
   return api.get(uri).then(response => filterEntityTypes(response.items).map(createItemFromApiEntityType))
 }
 
-function getPackagePath (aPackage: Package) {
-  let path = []
-  getPackagePathRec(aPackage, path)
-  return path.reverse()
-}
-
-function getPackagePathRec (aPackage: Package, path: Array<PathComponent>) {
-  path.push({id: aPackage.id, label: aPackage.label})
-  if (aPackage.parent) {
-    getPackagePathRec(aPackage.parent, path)
-  }
-}
-
-function fetchPackagePath (packageId: ?string) {
+function fetchPackageWithAncestors (packageId: ?string) {
   // TODO deal with deep packages (show ... in breadcrumb?)
   if (packageId) {
     const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
-    return api.get(uri).then(response => getPackagePath(response))
+    return api.get(uri).then(response => createPackageFromApiPackage(response))
   } else {
     return new Promise((resolve, reject) => { resolve([]) })
   }
@@ -258,11 +246,11 @@ export default {
     })
   },
   [FETCH_ITEMS_BY_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, packageId: ?string) {
-    const pathFetch = fetchPackagePath(packageId)
-    const packageFetch = fetchPackagesByParentPackage(packageId)
-    const entityTypeFetch = fetchEntityTypesByParentPackage(packageId)
-    Promise.all([pathFetch, packageFetch, entityTypeFetch]).then(responses => {
-      commit(SET_PATH, responses[0])
+    const packageFetch = fetchPackageWithAncestors(packageId)
+    const packagesFetch = fetchPackagesByParentPackage(packageId)
+    const entityTypesFetch = fetchEntityTypesByParentPackage(packageId)
+    Promise.all([packageFetch, packagesFetch, entityTypesFetch]).then(responses => {
+      commit(SET_PACKAGE, responses[0])
       commit(SET_ITEMS, responses[1].concat(responses[2]))
     }).catch(error => {
       commit(ADD_ALERTS, createAlertsFromApiError(error))

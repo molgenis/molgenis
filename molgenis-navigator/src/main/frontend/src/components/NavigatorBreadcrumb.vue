@@ -8,13 +8,13 @@
           <router-link to="/"><font-awesome-icon icon="home"/></router-link>
         </li>
         <li
-          v-for="(item, index) in path"
-          :key="item.id"
+          v-for="(pathComponent, index) in packagePath"
+          :key="pathComponent.id"
           class="breadcrumb-item">
-          <a v-if="index == path.length - 1">{{ item.label }}</a>
+          <a v-if="index == packagePath.length - 1">{{ pathComponent.label }}</a>
           <router-link
             v-else
-            :to="{params: {'item': item.id}}">{{ item.label }}</router-link>
+            :to="{params: {'package': pathComponent.id}}">{{ pathComponent.label }}</router-link>
         </li>
       </ol>
       <ol
@@ -34,13 +34,12 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'NavigatorBreadcrumb',
   computed: {
-    ...mapGetters(['query']),
-    ...mapState(['path'])
+    ...mapGetters(['packagePath', 'query'])
   }
 }
 </script>

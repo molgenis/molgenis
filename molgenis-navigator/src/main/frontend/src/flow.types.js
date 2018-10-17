@@ -20,21 +20,8 @@ export type Job = {
 export type Package = {
   id: string,
   label: string,
-  description: ?string,
-  parent: ?Package
-}
-
-export type EntityType = {
-  id: string,
-  type: string,
-  label: string,
-  description: ?string,
-  abstract: boolean
-}
-
-export type PathComponent = {
-  id: string,
-  label: string
+  parent: ?Package,
+  readonly: boolean
 }
 
 export type ItemType = 'package' | 'entityType'
@@ -58,8 +45,23 @@ export type State = {
   alerts: Array<Alert>,
   jobs: Array<Job>,
   query: ?string,
-  path: Array<PathComponent>,
+  package: ?Package,
   items: Array<Item>,
   selectedItems: Array<Item>,
   clipboard: ?Clipboard
+}
+
+export type ApiPackage = {
+  id: string,
+  label: string,
+  description: ?string,
+  parent: ?ApiPackage
+}
+
+export type ApiEntityType = {
+  id: string,
+  type: string,
+  label: string,
+  description: ?string,
+  abstract: boolean
 }
