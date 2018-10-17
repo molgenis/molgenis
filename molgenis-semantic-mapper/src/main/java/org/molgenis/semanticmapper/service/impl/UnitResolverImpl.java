@@ -1,9 +1,9 @@
 package org.molgenis.semanticmapper.service.impl;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Sets;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,9 +87,9 @@ public class UnitResolverImpl implements UnitResolver {
     Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
     if (unitOntology != null) {
       if (!tokens.isEmpty()) {
-        List<String> ontologyIds = Arrays.asList(unitOntology.getId());
+        List<String> ontologyIds = singletonList(unitOntology.getId());
         List<OntologyTerm> ontologyTerms =
-            ontologyService.findExcatOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
+            ontologyService.findExactOntologyTerms(ontologyIds, tokens, Integer.MAX_VALUE);
         if (ontologyTerms != null && !ontologyTerms.isEmpty()) {
           unitOntologyTerm = ontologyTerms.get(0);
         } else {

@@ -7,7 +7,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 public class AnonymizedAggregateResult extends AggregateResult {
   private final int anonymizationThreshold;
 
-  public AnonymizedAggregateResult(
+  AnonymizedAggregateResult(
       List<List<Long>> matrix,
       List<Object> xLabels,
       List<Object> yLabels,

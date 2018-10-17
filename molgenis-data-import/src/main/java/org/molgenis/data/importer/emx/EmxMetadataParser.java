@@ -58,7 +58,7 @@ import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.importer.EntitiesValidationReport;
-import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.MetadataParser;
 import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
@@ -85,7 +85,7 @@ import org.molgenis.i18n.LanguageService;
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
  * {@link IntermediateParseResults}.
  */
-public class EmxMetaDataParser implements MetaDataParser {
+public class EmxMetadataParser implements MetadataParser {
   // Table names in the emx file
   static final String EMX_PACKAGES = "packages";
   static final String EMX_ENTITIES = "entities";
@@ -220,7 +220,7 @@ public class EmxMetaDataParser implements MetaDataParser {
   private final TagValidator tagValidator;
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-  public EmxMetaDataParser(
+  public EmxMetadataParser(
       PackageFactory packageFactory,
       AttributeFactory attrMetaFactory,
       EntityTypeFactory entityTypeFactory,
@@ -238,7 +238,7 @@ public class EmxMetaDataParser implements MetaDataParser {
     this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
   }
 
-  public EmxMetaDataParser(
+  public EmxMetadataParser(
       DataService dataService,
       PackageFactory packageFactory,
       AttributeFactory attrMetaFactory,

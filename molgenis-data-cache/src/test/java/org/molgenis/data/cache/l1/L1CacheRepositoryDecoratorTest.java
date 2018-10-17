@@ -1,8 +1,6 @@
 package org.molgenis.data.cache.l1;
 
 import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -21,6 +19,7 @@ import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +33,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
+import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -221,7 +221,8 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testFindOneByIdReturnsEntity() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(of(author));
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+        .thenReturn(Optional.of(CacheHit.of(author)));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertEquals(actualEntity, author);
 
@@ -229,8 +230,9 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  public void testFindOneByIdReturnsEmpty() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(empty());
+  public void testFindOneByIdReturnsEmptyCacheHit() {
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+        .thenReturn(Optional.of(CacheHit.empty()));
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertNull(actualEntity);
 
@@ -239,7 +241,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testFindOneByIdReturnsNull() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(null);
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
     Entity actualEntity = l1CacheRepositoryDecorator.findOneById(authorID);
     assertNull(actualEntity);
 
@@ -248,8 +250,8 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testFindAllByStreamOfIdsEntityNotPresentInCache() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(null);
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(null);
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(Optional.empty());
+    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
     when(authorRepository.findAll(entityIdsCaptor.capture()))
         .thenReturn(Stream.of(author, author2));
 
@@ -265,8 +267,9 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testFindAllByStreamOfIdsOneCachedOneMissing() {
-    when(l1Cache.get(authorEntityName, authorID, authorMetaData)).thenReturn(of(author));
-    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(null);
+    when(l1Cache.get(authorEntityName, authorID, authorMetaData))
+        .thenReturn(Optional.of(CacheHit.of(author)));
+    when(l1Cache.get(authorEntityName, authorID2, authorMetaData)).thenReturn(Optional.empty());
 
     when(authorRepository.findAll(entityIdsCaptor.capture())).thenReturn(Stream.of(author2));
 

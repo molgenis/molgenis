@@ -6,12 +6,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
 import com.google.common.cache.Cache;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.cache.utils.CacheHit;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityType;
@@ -31,7 +31,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
   private final ThreadLocal<CombinedEntityCache> caches;
   private final EntityHydration entityHydration;
 
-  public L1Cache(TransactionManager transactionManager, EntityHydration entityHydration) {
+  L1Cache(TransactionManager transactionManager, EntityHydration entityHydration) {
     caches = new ThreadLocal<>();
     this.entityHydration = requireNonNull(entityHydration);
     requireNonNull(transactionManager).addTransactionListener(this);
@@ -44,7 +44,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
   }
 
   private CombinedEntityCache createCache() {
-    Cache<EntityKey, Optional<Map<String, Object>>> cache =
+    Cache<EntityKey, CacheHit<Map<String, Object>>> cache =
         CaffeinatedGuava.build(Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).recordStats());
     return new CombinedEntityCache(entityHydration, cache);
   }
@@ -58,7 +58,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
     }
   }
 
-  public void putDeletion(EntityKey entityKey) {
+  void putDeletion(EntityKey entityKey) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       entityCache.putDeletion(entityKey);
@@ -66,7 +66,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
   }
 
   // TODO: Call this also when repository metadata changes!
-  public void evictAll(EntityType entityType) {
+  void evictAll(EntityType entityType) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       LOG.trace("Removing all entities from L1 cache that belong to {}", entityType.getId());
@@ -74,7 +74,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
     }
   }
 
-  public void evict(Stream<EntityKey> entityKeys) {
+  void evict(Stream<EntityKey> entityKeys) {
     CombinedEntityCache entityCache = caches.get();
     if (entityCache != null) {
       LOG.trace("Removing entity keys from L1 cache.");
@@ -87,17 +87,17 @@ public class L1Cache extends DefaultMolgenisTransactionListener {
    *
    * @param entityTypeId name of the entity to retrieve
    * @param id id value of the entity to retrieve
-   * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored
-   *     in the cache or null if no information available about this entity in the cache
+   * @return an {@link Optional<CacheHit>} of which the CacheHit contains an {@link Entity} or is
+   *     empty if deletion of this entity is stored in the cache, or Optional.empty() if there's no
+   *     information available about this entity in the cache
    */
-  @SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
-  public Optional<Entity> get(String entityTypeId, Object id, EntityType entityType) {
+  public Optional<CacheHit<Entity>> get(String entityTypeId, Object id, EntityType entityType) {
     CombinedEntityCache cache = caches.get();
     if (cache == null) {
-      return null;
+      return Optional.empty();
     }
-    Optional<Entity> result = cache.getIfPresent(entityType, id);
-    if (result != null) {
+    Optional<CacheHit<Entity>> result = cache.getIfPresent(entityType, id);
+    if (result.isPresent()) {
       LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityTypeId);
     } else {
       LOG.trace("No entity with id [{}] present in L1 cache that belongs to {}", id, entityTypeId);

@@ -102,7 +102,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     List<QueryRule> finalQueryRules =
         Lists.newArrayList(new QueryRule(AttributeMetadata.ID, Operator.IN, attributeIdentifiers));
 
-    if (disMaxQueryRule.getNestedRules().size() > 0) {
+    if (!disMaxQueryRule.getNestedRules().isEmpty()) {
       finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
     }
 
@@ -163,11 +163,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
     if (!queryTerms.isEmpty()
         && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token))) return true;
 
-    if (!ontologyTermQueries.isEmpty()
-        && ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)))
-      return true;
-
-    return false;
+    return (!ontologyTermQueries.isEmpty()
+        && ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)));
   }
 
   boolean isGoodMatch(Map<String, Double> matchedTags, String label) {
@@ -217,7 +214,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
               .map(QueryParser::escape)
               .collect(Collectors.toSet());
       ontologyTerms =
-          ontologyService.findExcatOntologyTerms(
+          ontologyService.findExactOntologyTerms(
               ontologyService.getAllOntologiesIds(), escapedSearchTerms, MAX_NUM_TAGS);
     } else if (null == ontologyTerms || ontologyTerms.isEmpty()) {
       List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
@@ -315,9 +312,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
                     filterOntologyTerm(
                         splitIntoTerms(Stemmer.stemAndJoin(searchTerms)), ontologyTerm))
             .map(
-                ontolgoyTerm ->
+                ontologyTerm ->
                     Hit.create(
-                        ontolgoyTerm, bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
+                        ontologyTerm, bestMatchingSynonym(ontologyTerm, searchTerms).getScore()))
             .sorted(Ordering.natural().reverse())
             .collect(toList());
 

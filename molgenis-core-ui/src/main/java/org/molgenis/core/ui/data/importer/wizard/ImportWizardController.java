@@ -138,7 +138,7 @@ public class ImportWizardController extends AbstractWizardController {
   }
 
   /**
-   * Imports entities present in the submitted file
+   * Imports entities present in a file from a URL
    *
    * @param url URL from which a file is downloaded
    */
@@ -152,7 +152,7 @@ public class ImportWizardController extends AbstractWizardController {
       @RequestParam(value = "metadataAction", required = false) String metadataAction,
       @RequestParam(value = "action", required = false) String action,
       @RequestParam(value = "notify", required = false) Boolean notify)
-      throws IOException, URISyntaxException {
+      throws URISyntaxException {
     ImportRun importRun;
     try {
       File tmpFile = fileLocationToStoredRenamedFile(url, entityTypeId);

@@ -26,7 +26,7 @@ public interface OntologyService {
    * @param pageSize number of results to return.
    * @return List of {@link OntologyTerm}s that match the search term.
    */
-  List<OntologyTerm> findExcatOntologyTerms(
+  List<OntologyTerm> findExactOntologyTerms(
       List<String> ontologyIds, Set<String> terms, int pageSize);
 
   /**

@@ -8,7 +8,7 @@ import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.importer.DataPersister;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.MetaDataParser;
+import org.molgenis.data.importer.MetadataParser;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -89,8 +89,8 @@ public class ImporterConfiguration {
   }
 
   @Bean
-  public MetaDataParser emxMetaDataParser() {
-    return new EmxMetaDataParser(
+  public MetadataParser emxMetaDataParser() {
+    return new EmxMetadataParser(
         dataService,
         packageFactory,
         attrMetaFactory,
