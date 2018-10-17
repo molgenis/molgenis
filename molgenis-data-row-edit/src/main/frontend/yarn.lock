@@ -88,9 +88,9 @@
     to-fast-properties "^2.0.0"
 
 "@molgenis/molgenis-api-client@^2.1.2":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.2.0.tgz#4d5c2e76738175a9e90ae2fa429a9910ff414b3e"
-  integrity sha512-eQ3H9ovx2H1Lng/37JO9JFP02dThulGLxpce3pQnV3NQTb6wBagywrw2KOWvLLL7yZiiIaiKheeaKUCF225Rkw==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-api-client/-/molgenis-api-client-2.3.0.tgz#7bb085006508ad908d8dcc755d7a01703721b2df"
+  integrity sha512-lsbBM/lGpexdF02jQTFNv4MZb0ytFq+l5irSEUK0Dsr60hw/sLxwCcyzyNAZNtFuyqu0JLcqXdn8BDyyKrAdLA==
   dependencies:
     babel-runtime "^6.11.6"
     form-data "^2.3.1"
@@ -116,10 +116,10 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-1.1.0.tgz#48648a949fce0cbbf7d6280004aea7e30920f618"
-  integrity sha512-cG+jwcN5bId40wKSX+/2D6yKsFebLrU+RaM7vAeoKcI+PTqLlKxm/CK1yh3QBRQ+UzP97UJH/TMCvUuLQ2rSZA==
+"@molgenis/molgenis-ui-form@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-1.2.0.tgz#098191bceb8753ea847d480ea3d32a90a925b447"
+  integrity sha512-kWHozri01zd14dZw0J+B7H2TG+bUVd+ReCWav04ApYAM+7aXWZk7PIbfbCWmaLxKcvsKGFEdiYPXKUKF320rnw==
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
     "@molgenis/rsql" "^0.1.1"
@@ -1982,6 +1982,13 @@ combined-stream@1.0.6, combined-stream@^1.0.5, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
+combined-stream@^1.0.6:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.7.tgz#2d1d24317afb8abe95d6d2c0b07b57813539d828"
+  integrity sha512-brWl9y6vOB1xYPZcpZde3N9zDByXTosAeMDo4p1wzo6UMOX4vumB+TP1RZ76sfE6Md68Q0NJSrE/gbezd4Ul+w==
+  dependencies:
+    delayed-stream "~1.0.0"
+
 commander@2.15.x, commander@^2.13.0, commander@~2.15.0:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
@@ -3747,13 +3754,13 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-form-data@^2.3.1, form-data@~2.3.1:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.3.2.tgz#4970498be604c20c005d4f5c23aecd21d6b49099"
-  integrity sha1-SXBJi+YEwgwAXU9cI67NIda0kJk=
+form-data@^2.3.1:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.3.3.tgz#dcce52c05f644f298c6a7ab936bd724ceffbf3a6"
+  integrity sha512-1lLKB2Mu3aGP1Q/2eCOx0fNbRMe7XdwktwOruhfqqd0rIJWwN4Dh+E3hrPSlDCXnSR7UtZ1N38rVXm+6+MEhJQ==
   dependencies:
     asynckit "^0.4.0"
-    combined-stream "1.0.6"
+    combined-stream "^1.0.6"
     mime-types "^2.1.12"
 
 form-data@~2.1.1:
@@ -3763,6 +3770,15 @@ form-data@~2.1.1:
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.5"
+    mime-types "^2.1.12"
+
+form-data@~2.3.1:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.3.2.tgz#4970498be604c20c005d4f5c23aecd21d6b49099"
+  integrity sha1-SXBJi+YEwgwAXU9cI67NIda0kJk=
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "1.0.6"
     mime-types "^2.1.12"
 
 forwarded@~0.1.2:
@@ -9003,7 +9019,7 @@ vue-router@^3.0.1:
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.1.tgz#d9b05ad9c7420ba0f626d6500d693e60092cc1e9"
   integrity sha512-vLLoY452L+JBpALMP5UHum9+7nzR9PeIBCghU9ZtJ1eWm6ieUI8Zb/DI3MYxH32bxkjzYV1LRjNv4qr8d+uX/w==
 
-vue-select@ConnorStroomberg/vue-select.git#release/patch-for-update-issue:
+"vue-select@github:ConnorStroomberg/vue-select#release/patch-for-update-issue":
   version "2.4.0"
   resolved "https://codeload.github.com/ConnorStroomberg/vue-select/tar.gz/3bee82380e07634b4d5d7d1c2450d7101581a9b0"
 
