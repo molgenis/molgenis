@@ -54,28 +54,9 @@
             size="lg"
             class="fa-disabled"/>
         </b-btn>
+
         <NavigatorActionsClipboard class="button-last"/>
-        <b-btn
-          v-b-tooltip.hover
-          :title="$t('action-upload')"
-          variant="secondary"
-          to="/menu/importdata/importwizard">
-          <font-awesome-icon
-            icon="upload"
-            size="lg"/>
-        </b-btn>
-        <b-btn
-          v-b-tooltip.hover
-          :title="$t('action-download')"
-          :disabled="nrSelectedItems > 0 ? false : true"
-          variant="secondary"
-          class="button-last"
-          @click="downloadSelectedItems">
-          <font-awesome-icon
-            :class="nrSelectedItems > 0 ? '' : 'fa-disabled'"
-            icon="download"
-            size="lg"/>
-        </b-btn>
+        <NavigatorActionsTransfer class="button-last"/>
       </div>
       <div class="col-2">
         <div class="float-right">
@@ -101,14 +82,16 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex'
+import NavigatorActionsTransfer from './NavigatorActionsTransfer'
+import NavigatorActionsClipboard from './NavigatorActionsClipboard'
 import NavigatorModalPackageCreate from './NavigatorModalPackageCreate'
 import NavigatorModalPackageUpdate from './NavigatorModalPackageUpdate'
 import NavigatorModalItemDelete from './NavigatorModalItemDelete'
-import NavigatorActionsClipboard from './NavigatorActionsClipboard'
 
 export default {
   name: 'NavigatorActions',
   components: {
+    NavigatorActionsTransfer,
     NavigatorActionsClipboard,
     NavigatorModalPackageCreate,
     NavigatorModalPackageUpdate,
@@ -124,21 +107,6 @@ export default {
     ...mapState(['selectedItems', 'clipboard']),
     getSelectedItemType () {
       return this.selectedItems[0].type
-    },
-    nrMovableItems () {
-      var nrMovableItems = 0
-      if (this.clipboard.mode === 'cut' && this.clipboard.packageIds) {
-        nrMovableItems += this.clipboard.packageIds.length
-      }
-      if (this.clipboard.mode === 'cut' && this.clipboard.entityTypeIds) {
-        nrMovableItems += this.clipboard.entityTypeIds.length
-      }
-      return nrMovableItems
-    }
-  },
-  methods: {
-    downloadSelectedItems: function () {
-      alert('TODO download selection as EMX')
     }
   }
 }

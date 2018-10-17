@@ -1,16 +1,30 @@
 // @flow
-export type Parent = {
+
+export type AlertType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR'
+
+export type Alert = {
+  type: AlertType,
+  message: string,
+  code: ?string
+}
+
+export type JobType = 'copy' | 'download'
+export type JobStatus = 'pending' | 'finished' // TODO finish
+
+export type Job = {
+  type: JobType,
   id: string,
+  status: JobStatus
 }
 
 export type Package = {
   id: string,
   label: string,
   description: ?string,
-  parent: ?Parent
+  parent: ?Package
 }
 
-export type Entity = {
+export type EntityType = {
   id: string,
   type: string,
   label: string,
@@ -18,10 +32,19 @@ export type Entity = {
   abstract: boolean
 }
 
-export type Item = {
-  type: string,
+export type PathComponent = {
   id: string,
   label: string
+}
+
+export type ItemType = 'package' | 'entityType'
+
+export type Item = {
+  type: ItemType,
+  id: string,
+  label: string,
+  description: ?string,
+  readonly: boolean
 }
 
 export type Clipboard = {
@@ -30,11 +53,13 @@ export type Clipboard = {
 }
 
 export type State = {
-  error: ?string,
+  route: Object,
   token: ?string,
+  alerts: Array<Alert>,
+  jobs: Array<Job>,
   query: ?string,
-  path: Array<Package>,
+  path: Array<PathComponent>,
   items: Array<Item>,
   selectedItems: Array<Item>,
-  clipboard: Array<Item>
+  clipboard: ?Clipboard
 }

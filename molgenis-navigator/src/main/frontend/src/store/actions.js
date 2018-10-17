@@ -1,17 +1,25 @@
 // @flow
-import type { Item, Entity, Package, State } from '../flow.types'
+import type { Item, EntityType, Package, PathComponent, State } from '../flow.types'
 import { INITIAL_STATE } from './state'
 // $FlowFixMe
 import api from '@molgenis/molgenis-api-client'
 // $FlowFixMe
 import { encodeRsqlValue, transformToRSQL } from '@molgenis/rsql'
+import { createAlertsFromApiError } from '../utils/AlertUtils'
 import {
-  SET_ERROR,
+  createItemFromApiEntityType,
+  createItemFromApiPackage
+} from '../utils/ItemUtils'
+import { createJobFromApiJobDownload } from '../utils/JobUtils'
+import {
+  ADD_ALERTS,
+  SET_JOBS,
   SET_PATH,
   SET_ITEMS,
   SET_SELECTED_ITEMS,
   RESET_CLIPBOARD
 } from './mutations'
+import { createAlertError } from '../models/Alert'
 
 export const FETCH_ITEMS = '__FETCH_ITEMS__'
 export const FETCH_ITEMS_BY_QUERY = '__FETCH_ITEMS_BY_QUERY__'
@@ -24,6 +32,7 @@ export const DELETE_SELECTED_ITEMS = '__DELETE_SELECTED_ITEMS__'
 export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
 export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
+export const SCHEDULE_DOWNLOAD_SELECTED_ITEMS = '__SCHEDULE_DOWNLOAD_SELECTED_ITEMS__'
 
 const SYS_PACKAGE_ID = 'sys'
 const REST_API_V2 = '/api/v2'
@@ -99,16 +108,16 @@ function filterPackages (packages: Array<Package>) {
 }
 
 /**
- * Filter out all system entities unless user is superUser
- * @param entities
- * @returns {Array.<Entity>}
+ * Filter out all system entity types unless user is superUser
+ * @param entityTypes
+ * @returns {Array.<EntityType>}
  */
-function filterEntityTypes (entities: Array<Entity>) {
+function filterEntityTypes (entityTypes: Array<EntityType>) {
   if (INITIAL_STATE.isSuperUser) {
-    return entities
+    return entityTypes
   }
 
-  return entities.filter(entity => !entity.id.startsWith(SYS_PACKAGE_ID + '_'))
+  return entityTypes.filter(entityType => !entityType.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
 function fetchPackagesByParentPackage (packageId: ?string) {
@@ -156,17 +165,8 @@ function getPackageUriByQuery (query: ?string) {
   return packageUri
 }
 
-function createPackageItem (aPackage: Package) {
-  return {
-    type: 'package',
-    id: aPackage.id,
-    label: aPackage.label,
-    description: aPackage.description
-  }
-}
-
 function fetchPackages (uri: string) {
-  return api.get(uri).then(response => filterPackages(response.items).map(createPackageItem))
+  return api.get(uri).then(response => filterPackages(response.items).map(createItemFromApiPackage))
 }
 
 function fetchEntityTypesByParentPackage (packageId: ?string) {
@@ -179,17 +179,8 @@ function fetchEntityTypesByQuery (query: ?string) {
   return fetchEntityTypes(uri)
 }
 
-function createEntityTypeItem (aPackage: Package) {
-  return {
-    type: 'entityType',
-    id: aPackage.id,
-    label: aPackage.label,
-    description: aPackage.description
-  }
-}
-
 function fetchEntityTypes (uri: string) {
-  return api.get(uri).then(response => filterEntityTypes(response.items).map(createEntityTypeItem))
+  return api.get(uri).then(response => filterEntityTypes(response.items).map(createItemFromApiEntityType))
 }
 
 function getPackagePath (aPackage: Package) {
@@ -198,7 +189,7 @@ function getPackagePath (aPackage: Package) {
   return path.reverse()
 }
 
-function getPackagePathRec (aPackage: Package, path: Array<Package>) {
+function getPackagePathRec (aPackage: Package, path: Array<PathComponent>) {
   path.push({id: aPackage.id, label: aPackage.label})
   if (aPackage.parent) {
     getPackagePathRec(aPackage.parent, path)
@@ -215,6 +206,33 @@ function fetchPackagePath (packageId: ?string) {
   }
 }
 
+function fetchJob (job) {
+  const entityType = job.type === 'download' ? 'sys_job_ScriptJobExecution' : 'blaat'
+  return api.get(REST_API_V2 + '/' + entityType + '/' + job.id)
+}
+
+const pollJob = (commit, state, job) => {
+  fetchJob(job).then(response => {
+    let updatedJob = createJobFromApiJobDownload(response)
+    const index = state.jobs.findIndex(job => job.type === updatedJob.type && job.id === updatedJob.id)
+    let updatedJobs = state.jobs.slice()
+    updatedJobs[index] = updatedJob
+    commit(SET_JOBS, updatedJobs)
+
+    switch (updatedJob.status) {
+      case 'pending':
+      case 'running':
+        setTimeout(() => pollJob(commit, state, job), 500)
+        break
+      case 'success':
+      case 'failed':
+      case 'canceled':
+        console.log('job finished with status ' + updatedJob.status)
+        break
+    }
+  })
+}
+
 export default {
   [FETCH_ITEMS] ({state, dispatch}: { state: State, dispatch: Function }) {
     if (state.query) {
@@ -223,13 +241,12 @@ export default {
       dispatch(FETCH_ITEMS_BY_PACKAGE, state.route.params.package)
     }
   },
-  [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: ?string) {
-    if (query) {
-      try {
-        validateQuery(query)
-      } catch (error) {
-        commit(SET_ERROR, error.message)
-      }
+  [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: string) {
+    try {
+      validateQuery(query)
+    } catch (error) {
+      commit(ADD_ALERTS, [createAlertError(error.message)])
+      return
     }
 
     const packageFetch = fetchPackagesByQuery(query)
@@ -237,10 +254,10 @@ export default {
     Promise.all([packageFetch, entityTypeFetch]).then(responses => {
       commit(SET_ITEMS, responses[0].concat(responses[1]))
     }).catch(error => {
-      commit(SET_ERROR, error)
+      commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
-  [FETCH_ITEMS_BY_PACKAGE] ({commit}: { commit: Function }, packageId: ?string) {
+  [FETCH_ITEMS_BY_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, packageId: ?string) {
     const pathFetch = fetchPackagePath(packageId)
     const packageFetch = fetchPackagesByParentPackage(packageId)
     const entityTypeFetch = fetchEntityTypesByParentPackage(packageId)
@@ -248,7 +265,7 @@ export default {
       commit(SET_PATH, responses[0])
       commit(SET_ITEMS, responses[1].concat(responses[2]))
     }).catch(error => {
-      commit(SET_ERROR, error)
+      commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
   [SELECT_ALL_ITEMS] ({commit, state}: { commit: Function, state: State }) {
@@ -272,7 +289,7 @@ export default {
     }).then(() => {
       dispatch(FETCH_ITEMS)
     }, error => {
-      commit(SET_ERROR, error)
+      commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
   [CREATE_PACKAGE] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
@@ -284,53 +301,55 @@ export default {
     api.post(uri, options).then(() => {
       dispatch(FETCH_ITEMS)
     }, error => {
-      commit(SET_ERROR, error)
+      commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
   [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     updatedItem: Item) {
-    updatedItem.type = 2
     if (updatedItem.type === 'package') {
-      const item = state.items.find(item => item.id === updatedItem.id)
-
-      let promises = []
-      if (item.label !== updatedItem.label) {
-        const uri = REST_API_V2 + '/sys_md_Package/label'
-        const options = {
-          body: JSON.stringify({
-            entities: [{
-              id: item.id,
-              label: updatedItem.label
-            }]
-          })
+      const item = state.items.find(
+        item => item.type === 'package' && item.id === updatedItem.id)
+      if (item) {
+        let promises = []
+        if (item.label !== updatedItem.label) {
+          const uri = REST_API_V2 + '/sys_md_Package/label'
+          const options = {
+            body: JSON.stringify({
+              entities: [{
+                id: item.id,
+                label: updatedItem.label
+              }]
+            })
+          }
+          promises.push(api.put(uri, options))
         }
-        promises.push(api.put(uri, options))
-      }
-      if (item.description !== updatedItem.description) {
-        const uri = REST_API_V2 + '/sys_md_Package/description'
-        const options = {
-          body: JSON.stringify({
-            entities: [{
-              id: item.id,
-              label: updatedItem.description
-            }]
-          })
+        if (item.description !== updatedItem.description) {
+          const uri = REST_API_V2 + '/sys_md_Package/description'
+          const options = {
+            body: JSON.stringify({
+              entities: [{
+                id: item.id,
+                description: updatedItem.description
+              }]
+            })
+          }
+          promises.push(api.put(uri, options))
         }
-        promises.push(api.put(uri, options))
+        Promise.all(promises).then(() => {
+          dispatch(FETCH_ITEMS)
+        }, error => {
+          commit(ADD_ALERTS, createAlertsFromApiError(error))
+        })
       }
-      Promise.all(promises).then(() => {
-        dispatch(FETCH_ITEMS)
-      }, error => {
-        commit(SET_ERROR, error)
-      })
     }
   },
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     targetPackageId: string) {
-    if (state.clipboard.items) {
+    if (state.clipboard && state.clipboard.items.length > 0) {
+      const clipboardItems = state.clipboard.items
       let promises = []
 
-      const packages = state.clipboard.items.filter(
+      const packages = clipboardItems.filter(
         item => item.type === 'package')
       if (packages.length > 0) {
         const uri = REST_API_V2 + '/sys_md_Package/parent'
@@ -346,7 +365,7 @@ export default {
         promises.push(api.put(uri, options))
       }
 
-      const entityTypes = state.clipboard.items.filter(
+      const entityTypes = clipboardItems.filter(
         item => item.type === 'entityType')
       if (entityTypes.length > 0) {
         const uri = REST_API_V2 + '/sys_md_EntityType/package'
@@ -366,8 +385,16 @@ export default {
         commit(RESET_CLIPBOARD)
         dispatch(FETCH_ITEMS)
       }).catch(error => {
-        commit(SET_ERROR, error)
+        commit(ADD_ALERTS, createAlertsFromApiError(error))
       })
     }
+  },
+  [SCHEDULE_DOWNLOAD_SELECTED_ITEMS] ({commit, state}: { commit: Function, state: State }) {
+    const dummyJob = {type: 'download', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}
+    pollJob(commit, state, dummyJob)
+    commit(SET_SELECTED_ITEMS, [])
+    // 1. Call download endpoint which will return job location
+    // 2. Poll job location until end state is reached, show progress alert ...
+    // 3. If success: download file
   }
 }

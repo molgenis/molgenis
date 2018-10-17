@@ -116,7 +116,7 @@ export default {
       return this.items.length === this.selectedItems.length
     },
     isClipboardItem: function (item) {
-      return this.clipboard.items && this.clipboard.items.some(
+      return this.clipboard && this.clipboard.items && this.clipboard.items.some(
         clipboardItem => clipboardItem.type === item.type && clipboardItem.id === item.id)
     },
     cellClass: function (value, key, item) {

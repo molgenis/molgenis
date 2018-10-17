@@ -1,7 +1,7 @@
 // @flow
 <template>
   <div class="container">
-    <Alert/>
+    <Alerts/>
     <NavigatorSearch class="navigator-search"/>
     <NavigatorBreadcrumb />
     <NavigatorActions class="navigator-actions"/>
@@ -13,7 +13,7 @@
 import _ from 'lodash'
 import { mapGetters } from 'vuex'
 import { FETCH_ITEMS_BY_PACKAGE, FETCH_ITEMS_BY_QUERY } from '../store/actions'
-import Alert from './Alert'
+import Alerts from './Alerts'
 import NavigatorSearch from './NavigatorSearch'
 import NavigatorBreadcrumb from './NavigatorBreadcrumb'
 import NavigatorActions from './NavigatorActions'
@@ -21,7 +21,7 @@ import NavigatorTable from './NavigatorTable'
 
 export default {
   name: 'Navigator',
-  components: {Alert, NavigatorSearch, NavigatorBreadcrumb, NavigatorActions, NavigatorTable},
+  components: {Alerts, NavigatorSearch, NavigatorBreadcrumb, NavigatorActions, NavigatorTable},
   computed: {
     ...mapGetters(['query', 'packageId'])
   },
