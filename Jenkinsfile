@@ -168,11 +168,12 @@ pipeline {
                         }
                         container('maven') {
                             sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true\""
-                            dir('target/checkout/molgenis-app') {
-                                sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG}"
-                                sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-stable"
-                                sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=stable"
-                            }
+                            // Can not use DSL here because of bug in Jenkins
+                            // The build wants to create a tmp directory in the target/checkout/molgenis-app
+                            // This is not permitted
+                            sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG}"
+                            sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-stable"
+                            sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=stable"
                         }
                     }
                 }
