@@ -16,7 +16,7 @@ export default new Router({
       component: Navigator
     },
     {
-      path: '/:package',
+      path: '/:folderId',
       component: Navigator
     }
   ]

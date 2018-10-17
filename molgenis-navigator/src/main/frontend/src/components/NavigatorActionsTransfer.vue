@@ -3,21 +3,22 @@
     <b-btn
       v-b-tooltip.hover
       :title="$t('action-upload')"
+      :disabled="!canUpload"
       variant="secondary"
       to="/menu/importdata/importwizard">
       <font-awesome-icon
+        :class="{'fa-disabled' : !canUpload}"
         icon="upload"
         size="lg"/>
     </b-btn>
     <b-btn
       v-b-tooltip.hover
       :title="$t('action-download')"
-      :disabled="nrSelectedItems > 0 ? false : true"
+      :disabled="!canDownload"
       variant="secondary"
-      class="button-last"
       @click="downloadSelectedItems">
       <font-awesome-icon
-        :class="nrSelectedItems > 0 ? '' : 'fa-disabled'"
+        :class="{'fa-disabled' : !canDownload}"
         icon="download"
         size="lg"/>
     </b-btn>
@@ -31,7 +32,13 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'NavigatorActionsTransfer',
   computed: {
-    ...mapGetters(['nrSelectedItems'])
+    ...mapGetters(['nrSelectedItems', 'query']),
+    canDownload () {
+      return this.nrSelectedItems > 0
+    },
+    canUpload () {
+      return !this.query
+    }
   },
   methods: {
     downloadSelectedItems: function () {

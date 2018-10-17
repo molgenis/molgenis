@@ -8,7 +8,7 @@ const state: State = {
   alerts: [],
   token: null,
   query: null,
-  package: null,
+  folder: null,
   items: [],
   selectedItems: [],
   clipboard: null,

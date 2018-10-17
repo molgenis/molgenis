@@ -23,7 +23,7 @@ export default {
   name: 'Navigator',
   components: {Alerts, NavigatorSearch, NavigatorBreadcrumb, NavigatorActions, NavigatorTable},
   computed: {
-    ...mapGetters(['query', 'packageId'])
+    ...mapGetters(['query', 'folderId'])
   },
   watch: {
     '$route' (to, from) {
@@ -33,7 +33,7 @@ export default {
         } else {
           this.fetchItemsByPackage()
         }
-      } else if (to.params.package !== from.params.package) {
+      } else if (to.params.folderId !== from.params.folderId) {
         this.fetchItemsByPackage()
       }
     }
@@ -50,7 +50,7 @@ export default {
       this.$store.dispatch(FETCH_ITEMS_BY_QUERY, this.query)
     },
     fetchItemsByPackage: function () {
-      this.$store.dispatch(FETCH_ITEMS_BY_PACKAGE, this.packageId)
+      this.$store.dispatch(FETCH_ITEMS_BY_PACKAGE, this.folderId)
     }
   }
 }

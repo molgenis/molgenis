@@ -2,12 +2,12 @@
   <span>
     <b-dd
       v-b-tooltip.hover
-      :disabled="query ? true : false"
+      :disabled="!canCreate"
       :title="$t('action-create')"
       variant="primary">
       <template slot="button-content">
         <font-awesome-icon
-          :class="query ? 'fa-disabled' : ''"
+          :class="{'fa-disabled' : !canCreate}"
           icon="plus"
           size="lg"/>
       </template>
@@ -22,21 +22,25 @@
       v-b-tooltip.hover
       v-b-modal.packageUpdateModal
       v-if="nrSelectedItems === 1 && getSelectedItemType === 'package'"
+      :disabled="!canEdit"
       :title="$t('action-edit')"
       variant="secondary"
       class="button-last">
       <font-awesome-icon
+        :class="{'fa-disabled' : !canEdit}"
         icon="edit"
         size="lg"/>
     </b-btn>
     <b-btn
       v-b-tooltip.hover
       v-else-if="nrSelectedItems === 1 && getSelectedItemType === 'entityType'"
-      :to="'/menu/dataintegration/metadata-manager/' + selectedEntityTypeIds[0]"
+      :to="'/menu/dataintegration/metadata-manager/' + selectedItems[0].id"
+      :disabled="!canEdit"
       :title="$t('action-edit')"
       variant="secondary"
       class="button-last">
       <font-awesome-icon
+        :class="{'fa-disabled' : !canEdit}"
         icon="edit"
         size="lg"/>
     </b-btn>
@@ -48,23 +52,30 @@
       variant="secondary"
       class="button-last">
       <font-awesome-icon
+        :class="{'fa-disabled' : !canEdit}"
         icon="edit"
-        size="lg"
-        class="fa-disabled"/>
+        size="lg"/>
     </b-btn>
   </span>
 </template>
 
 <script>
 import { SCHEDULE_DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
-  name: 'NavigatorActionsTransfer',
+  name: 'NavigatorActionsCreateEdit',
   computed: {
     ...mapGetters(['nrSelectedItems', 'query']),
+    ...mapState(['folder', 'selectedItems']),
     getSelectedItemType () {
       return this.selectedItems[0].type
+    },
+    canCreate () {
+      return !(this.query || (this.folder && this.folder.readonly))
+    },
+    canEdit () {
+      return !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedItems === 1
     }
   },
   methods: {

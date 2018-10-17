@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import {
   CREATE_PACKAGE
 } from '../store/actions'
@@ -50,6 +51,9 @@ export default {
       },
       validated: false
     }
+  },
+  computed: {
+    ...mapGetters(['folderId'])
   },
   methods: {
     resetForm () {
@@ -69,7 +73,7 @@ export default {
       }
     },
     handleSubmit () {
-      var aPackage = Object.assign({}, this.form, {parent: this.$route.params.package})
+      var aPackage = Object.assign({}, this.form, {parent: this.folderId})
       this.$store.dispatch(CREATE_PACKAGE, aPackage)
       this.$refs.packageCreateModal.hide()
     }

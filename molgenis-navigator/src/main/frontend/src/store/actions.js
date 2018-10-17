@@ -13,14 +13,14 @@ import {
 import { createJobFromApiJobDownload } from '../utils/JobUtils'
 import {
   ADD_ALERTS,
-  SET_JOBS,
-  SET_PACKAGE,
+  RESET_CLIPBOARD,
+  SET_FOLDER,
   SET_ITEMS,
-  SET_SELECTED_ITEMS,
-  RESET_CLIPBOARD
+  SET_JOBS,
+  SET_SELECTED_ITEMS
 } from './mutations'
 import { createAlertError } from '../models/Alert'
-import { createPackageFromApiPackage } from '../utils/PackageUtils'
+import { createFolderFromApiPackage } from '../utils/FolderUtils'
 
 export const FETCH_ITEMS = '__FETCH_ITEMS__'
 export const FETCH_ITEMS_BY_QUERY = '__FETCH_ITEMS_BY_QUERY__'
@@ -33,6 +33,7 @@ export const DELETE_SELECTED_ITEMS = '__DELETE_SELECTED_ITEMS__'
 export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
 export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
+export const COPY_CLIPBOARD_ITEMS = '__COPY_CLIPBOARD_ITEMS__'
 export const SCHEDULE_DOWNLOAD_SELECTED_ITEMS = '__SCHEDULE_DOWNLOAD_SELECTED_ITEMS__'
 
 const SYS_PACKAGE_ID = 'sys'
@@ -188,7 +189,7 @@ function fetchPackageWithAncestors (packageId: ?string) {
   // TODO deal with deep packages (show ... in breadcrumb?)
   if (packageId) {
     const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
-    return api.get(uri).then(response => createPackageFromApiPackage(response))
+    return api.get(uri).then(response => createFolderFromApiPackage(response))
   } else {
     return new Promise((resolve, reject) => { resolve([]) })
   }
@@ -226,7 +227,7 @@ export default {
     if (state.query) {
       dispatch(FETCH_ITEMS_BY_QUERY, state.query)
     } else {
-      dispatch(FETCH_ITEMS_BY_PACKAGE, state.route.params.package)
+      dispatch(FETCH_ITEMS_BY_PACKAGE, state.route.params.folderId)
     }
   },
   [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: string) {
@@ -250,7 +251,7 @@ export default {
     const packagesFetch = fetchPackagesByParentPackage(packageId)
     const entityTypesFetch = fetchEntityTypesByParentPackage(packageId)
     Promise.all([packageFetch, packagesFetch, entityTypesFetch]).then(responses => {
-      commit(SET_PACKAGE, responses[0])
+      commit(SET_FOLDER, responses[0])
       commit(SET_ITEMS, responses[1].concat(responses[2]))
     }).catch(error => {
       commit(ADD_ALERTS, createAlertsFromApiError(error))
@@ -375,6 +376,15 @@ export default {
       }).catch(error => {
         commit(ADD_ALERTS, createAlertsFromApiError(error))
       })
+    }
+  },
+  [COPY_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    targetPackageId: string) {
+    try {
+      commit(RESET_CLIPBOARD) // TODO only reset on copy success
+      throw new Error('TODO copy clipboard items')
+    } catch (error) {
+      commit(ADD_ALERTS, [createAlertError(error.message)])
     }
   },
   [SCHEDULE_DOWNLOAD_SELECTED_ITEMS] ({commit, state}: { commit: Function, state: State }) {

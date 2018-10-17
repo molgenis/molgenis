@@ -3,10 +3,10 @@
     v-b-tooltip.hover
     v-b-modal.itemDeleteModal
     :title="$t('action-delete')"
-    :disabled="nrSelectedItems > 0 ? false : true"
+    :disabled="!canDelete"
     variant="danger">
     <font-awesome-icon
-      :class="nrSelectedItems > 0 ? '' : 'fa-disabled'"
+      :class="{'fa-disabled': !canDelete}"
       icon="trash"
       size="lg"/>
   </b-btn>
@@ -14,14 +14,18 @@
 
 <script>
 import { SCHEDULE_DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'NavigatorActionsTransfer',
   computed: {
     ...mapGetters(['nrSelectedItems']),
+    ...mapState(['folder']),
     getSelectedItemType () {
       return this.selectedItems[0].type
+    },
+    canDelete () {
+      return this.nrSelectedItems > 0 && !(this.folder && this.folder.readonly)
     }
   },
   methods: {

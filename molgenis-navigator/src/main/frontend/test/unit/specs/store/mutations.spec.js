@@ -46,18 +46,18 @@ describe('mutations', () => {
       expect(state.jobs).to.deep.equal(jobs)
     })
   })
-  describe('SET_PACKAGE', () => {
-    it('should set the package', () => {
+  describe('SET_FOLDER', () => {
+    it('should set the folder', () => {
       const state = {
-        package: null
+        folder: null
       }
 
-      const _package = [
+      const folder = [
         {id: '0', label: 'grandchild', parent: {id: '1', label: 'child'}}
       ]
 
-      mutations.__SET_PACKAGE__(state, _package)
-      expect(state.path).to.deep.equal(_package)
+      mutations.__SET_FOLDER__(state, folder)
+      expect(state.folder).to.deep.equal(folder)
     })
   })
   describe('SET_ITEMS', () => {
@@ -93,7 +93,7 @@ describe('mutations', () => {
     })
   })
   describe('SET_CLIPBOARD', () => {
-    it('should set the clipboard in the state', () => {
+    it('should set the clipboard in the state and clear the selected items', () => {
       const state = {
         clipboard: null
       }
@@ -107,6 +107,7 @@ describe('mutations', () => {
       }
 
       mutations.__SET_CLIPBOARD__(state, clipboard)
+      expect(state.selectedItems).to.deep.equal([])
       expect(state.clipboard).to.deep.equal(clipboard)
     })
   })

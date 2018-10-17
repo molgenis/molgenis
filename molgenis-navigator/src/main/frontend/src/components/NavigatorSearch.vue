@@ -25,7 +25,7 @@ export default {
       set: function (query) {
         this.$router.push({
           path: '/',
-          params: {...this.$route.params, package: undefined},
+          params: {...this.$route.params, folder: undefined},
           query: query ? {...this.$route.query, q: query} : undefined
         })
       }

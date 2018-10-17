@@ -17,10 +17,10 @@ export type Job = {
   status: JobStatus
 }
 
-export type Package = {
+export type Folder = {
   id: string,
   label: string,
-  parent: ?Package,
+  parent: ?Folder,
   readonly: boolean
 }
 
@@ -45,7 +45,7 @@ export type State = {
   alerts: Array<Alert>,
   jobs: Array<Job>,
   query: ?string,
-  package: ?Package,
+  folder: ?Folder,
   items: Array<Item>,
   selectedItems: Array<Item>,
   clipboard: ?Clipboard

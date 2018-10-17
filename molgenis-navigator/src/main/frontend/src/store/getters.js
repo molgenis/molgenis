@@ -1,20 +1,20 @@
 // @flow
-import type {Package, State} from '../flow.types'
+import type {Folder, State} from '../flow.types'
 
 const getters = {
   query: (state: State): ?string => state.route.query.q,
-  packageId: (state: State): ?string => state.route.params.package,
-  packagePath: (state: State): Array<Package> => {
-    let packagePath = []
-    if (state.package) {
-      let _package = state.package
-      while (_package) {
-        packagePath.push(_package)
-        _package = _package.parent
+  folderId: (state: State): ?string => state.route.params.folderId,
+  folderPath: (state: State): Array<Folder> => {
+    let folderPath = []
+    if (state.folder) {
+      let folder = state.folder
+      while (folder) {
+        folderPath.push({id: folder.id, label: folder.label})
+        folder = folder.parent
       }
-      packagePath.reverse()
+      folderPath.reverse()
     }
-    return packagePath
+    return folderPath
   },
   nrSelectedItems: (state: State): number => state.selectedItems.length,
   nrClipboardItems: (state: State): number => state.clipboard ? state.clipboard.items.length : 0
