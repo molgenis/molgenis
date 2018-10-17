@@ -12,7 +12,7 @@
 <script>
 import _ from 'lodash'
 import { mapGetters } from 'vuex'
-import { FETCH_ITEMS_BY_PACKAGE, FETCH_ITEMS_BY_QUERY } from '../store/actions'
+import { FETCH_ITEMS_BY_FOLDER, FETCH_ITEMS_BY_QUERY } from '../store/actions'
 import Alerts from './Alerts'
 import NavigatorSearch from './NavigatorSearch'
 import NavigatorBreadcrumb from './NavigatorBreadcrumb'
@@ -50,7 +50,7 @@ export default {
       this.$store.dispatch(FETCH_ITEMS_BY_QUERY, this.query)
     },
     fetchItemsByPackage: function () {
-      this.$store.dispatch(FETCH_ITEMS_BY_PACKAGE, this.folderId)
+      this.$store.dispatch(FETCH_ITEMS_BY_FOLDER, this.folderId)
     }
   }
 }

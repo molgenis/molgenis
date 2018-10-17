@@ -24,13 +24,13 @@ import { createFolderFromApiPackage } from '../utils/FolderUtils'
 
 export const FETCH_ITEMS = '__FETCH_ITEMS__'
 export const FETCH_ITEMS_BY_QUERY = '__FETCH_ITEMS_BY_QUERY__'
-export const FETCH_ITEMS_BY_PACKAGE = '__FETCH_ITEMS_BY_PACKAGE__'
+export const FETCH_ITEMS_BY_FOLDER = '__FETCH_ITEMS_BY_FOLDER__'
 export const SELECT_ITEM = '__SELECT_ITEM__'
 export const DESELECT_ITEM = '__DESELECT_ITEM__'
 export const SELECT_ALL_ITEMS = '__SELECT_ALL_ITEMS__'
 export const DESELECT_ALL_ITEMS = '__DESELECT_ALL_ITEMS__'
 export const DELETE_SELECTED_ITEMS = '__DELETE_SELECTED_ITEMS__'
-export const CREATE_PACKAGE = '__CREATE_PACKAGE__'
+export const CREATE_ITEM = '__CREATE_ITEM__'
 export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
 export const COPY_CLIPBOARD_ITEMS = '__COPY_CLIPBOARD_ITEMS__'
@@ -49,7 +49,7 @@ function getEntityTypeUriByParentPackage (packageId: ?string) {
     rsql = '%22%22'
   }
 
-  return ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000&q=isAbstract==false;package==' + rsql
+  return ENTITY_TYPE_ENDPOINT + '?attrs=id,label,description&sort=label&num=1000&q=isAbstract==false;package==' + rsql
 }
 
 /**
@@ -57,7 +57,7 @@ function getEntityTypeUriByParentPackage (packageId: ?string) {
  * The query retrieves the first 1000 EntityTypes
  */
 function getEntityTypeUriByQuery (query: ?string) {
-  const baseEntityTypeUri = ENTITY_TYPE_ENDPOINT + '?sort=label&num=1000'
+  const baseEntityTypeUri = ENTITY_TYPE_ENDPOINT + '?attrs=id,label,description&sort=label&num=1000'
 
   let entityTypeUri
   if (query) {
@@ -135,7 +135,7 @@ function getPackageUriByParentPackage (packageId: ?string) {
     rsql = '%22%22'
   }
 
-  return PACKAGE_ENDPOINT + '?sort=label&num=1000&q=parent==' + rsql
+  return PACKAGE_ENDPOINT + '?attrs=id,label,description&sort=label&num=1000&q=parent==' + rsql
 }
 
 function fetchPackagesByQuery (query: ?string) {
@@ -159,7 +159,7 @@ function getPackageUriByQuery (query: ?string) {
         {selector: 'description', comparison: '=q=', arguments: query}
       ]
     })
-    packageUri = PACKAGE_ENDPOINT + '?sort=label&num=1000' + '&q=' + encodeRsqlValue(rsql)
+    packageUri = PACKAGE_ENDPOINT + '?attrs=id,label,description&sort=label&num=1000' + '&q=' + encodeRsqlValue(rsql)
   } else {
     packageUri = getPackageUriByParentPackage(null)
   }
@@ -227,7 +227,7 @@ export default {
     if (state.query) {
       dispatch(FETCH_ITEMS_BY_QUERY, state.query)
     } else {
-      dispatch(FETCH_ITEMS_BY_PACKAGE, state.route.params.folderId)
+      dispatch(FETCH_ITEMS_BY_FOLDER, state.route.params.folderId)
     }
   },
   [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: string) {
@@ -246,10 +246,10 @@ export default {
       commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
-  [FETCH_ITEMS_BY_PACKAGE] ({commit, dispatch}: { commit: Function, dispatch: Function }, packageId: ?string) {
-    const packageFetch = fetchPackageWithAncestors(packageId)
-    const packagesFetch = fetchPackagesByParentPackage(packageId)
-    const entityTypesFetch = fetchEntityTypesByParentPackage(packageId)
+  [FETCH_ITEMS_BY_FOLDER] ({commit, dispatch}: { commit: Function, dispatch: Function }, folderId: ?string) {
+    const packageFetch = fetchPackageWithAncestors(folderId)
+    const packagesFetch = fetchPackagesByParentPackage(folderId)
+    const entityTypesFetch = fetchEntityTypesByParentPackage(folderId)
     Promise.all([packageFetch, packagesFetch, entityTypesFetch]).then(responses => {
       commit(SET_FOLDER, responses[0])
       commit(SET_ITEMS, responses[1].concat(responses[2]))
@@ -281,17 +281,19 @@ export default {
       commit(ADD_ALERTS, createAlertsFromApiError(error))
     })
   },
-  [CREATE_PACKAGE] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
-    aPackage: Object) {
-    const uri = REST_API_V2 + '/sys_md_Package'
-    const options = {
-      body: JSON.stringify({entities: [aPackage]})
+  [CREATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    item: Item) {
+    if (item.type === 'package') {
+      const uri = REST_API_V2 + '/sys_md_Package'
+      const options = {
+        body: JSON.stringify({entities: [item]})
+      }
+      api.post(uri, options).then(() => {
+        dispatch(FETCH_ITEMS)
+      }, error => {
+        commit(ADD_ALERTS, createAlertsFromApiError(error))
+      })
     }
-    api.post(uri, options).then(() => {
-      dispatch(FETCH_ITEMS)
-    }, error => {
-      commit(ADD_ALERTS, createAlertsFromApiError(error))
-    })
   },
   [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     updatedItem: Item) {

@@ -38,7 +38,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import {
-  CREATE_PACKAGE
+  CREATE_ITEM
 } from '../store/actions'
 
 export default {
@@ -73,8 +73,8 @@ export default {
       }
     },
     handleSubmit () {
-      var aPackage = Object.assign({}, this.form, {parent: this.folderId})
-      this.$store.dispatch(CREATE_PACKAGE, aPackage)
+      var folder = Object.assign({}, this.form, {type: 'package', parent: this.folderId, readonly: false})
+      this.$store.dispatch(CREATE_ITEM, folder)
       this.$refs.packageCreateModal.hide()
     }
   }
