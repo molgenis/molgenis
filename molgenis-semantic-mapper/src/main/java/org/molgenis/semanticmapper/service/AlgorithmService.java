@@ -16,7 +16,7 @@ public interface AlgorithmService {
    * @return algorithm evaluation for each source entity
    */
   Iterable<AlgorithmEvaluation> applyAlgorithm(
-      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities);
+      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth);
 
   /**
    * Applies an {@link AttributeMapping} to a source {@link Entity}
@@ -25,7 +25,11 @@ public interface AlgorithmService {
    * @param sourceEntity {@link Entity} to apply the mapping to
    * @return Object containing the mapped value
    */
-  Object apply(AttributeMapping attributeMapping, Entity sourceEntity, EntityType sourceEntityType);
+  Object apply(
+      AttributeMapping attributeMapping,
+      Entity sourceEntity,
+      EntityType sourceEntityType,
+      int depth);
 
   /**
    * Retrieves the names of the source attributes in an algorithm

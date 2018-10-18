@@ -12,22 +12,26 @@ import org.molgenis.semanticmapper.service.MappingService;
 public class MappingProject {
   private String identifier;
   private String name;
+  private int depth;
   private Map<String, MappingTarget> mappingTargets;
 
   /** Creates a new empty mapping project. Used by the {@link MappingService}. */
-  public MappingProject(String name) {
+  public MappingProject(String name, int depth) {
     this.identifier = null;
     this.name = name;
     this.mappingTargets = new LinkedHashMap<>();
+    this.depth = depth;
   }
 
   /**
    * Creates a new instance of {@link MappingProject}. Used by the {@link MappingProjectRepository}
    * when recreating a MappingProject from the {@link Repository}.
    */
-  public MappingProject(String identifier, String name, List<MappingTarget> mappingTargets) {
+  public MappingProject(
+      String identifier, String name, int depth, List<MappingTarget> mappingTargets) {
     this.identifier = identifier;
     this.name = name;
+    this.depth = depth;
     this.mappingTargets = new LinkedHashMap<>();
     for (MappingTarget mappingTarget : mappingTargets) {
       if (mappingTarget != null) {
@@ -47,6 +51,14 @@ public class MappingProject {
 
   public void setIdentifier(String identifier) {
     this.identifier = identifier;
+  }
+
+  public int getDepth() {
+    return depth;
+  }
+
+  public void setDepth(int depth) {
+    this.depth = depth;
   }
 
   public String getName() {

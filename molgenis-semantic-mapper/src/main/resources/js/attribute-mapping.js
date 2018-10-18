@@ -71,7 +71,8 @@
                     targetEntityName: $('#target').val(),
                     sourceEntityName: $('#source').val(),
                     targetAttributeName: $('#targetAttribute').val(),
-                    algorithm: algorithm
+                    algorithm: algorithm,
+                    depth: parseInt($('#depth').val(), 10)
                 };
 
                 var items = [];
@@ -168,6 +169,7 @@
                 source: $('#source').val(),
                 targetAttribute: $('#targetAttribute').val(),
                 sourceAttribute: getSourceAttrs(algorithm)[0],
+                depth: parseInt($('#depth').val(), 10),
                 algorithm: algorithm
             });
         }
