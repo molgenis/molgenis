@@ -113,7 +113,7 @@ export default {
       }
     },
     isAllSelected: function (item) {
-      return this.items.length === this.selectedItems.length
+      return this.items.length > 0 && this.items.length === this.selectedItems.length
     },
     isClipboardItem: function (item) {
       return this.clipboard && this.clipboard.items && this.clipboard.items.some(

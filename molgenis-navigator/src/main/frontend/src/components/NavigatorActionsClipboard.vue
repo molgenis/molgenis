@@ -65,11 +65,8 @@ export default {
       this.$store.commit(SET_CLIPBOARD, clipboard)
     },
     pasteClipboardItems: function () {
-      if (this.clipboard.mode === 'cut') {
-        this.$store.dispatch(MOVE_CLIPBOARD_ITEMS, this.folderId)
-      } else {
-        this.$store.dispatch(COPY_CLIPBOARD_ITEMS, this.folderId)
-      }
+      const action = this.clipboard.mode === 'cut' ? MOVE_CLIPBOARD_ITEMS : COPY_CLIPBOARD_ITEMS
+      this.$store.dispatch(action, this.folder)
     }
   }
 }

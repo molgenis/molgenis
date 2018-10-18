@@ -25,7 +25,7 @@ public class NavigatorController extends VuePluginController {
 
   private final NavigatorService navigatorService;
 
-  public NavigatorController(
+  NavigatorController(
       MenuReaderService menuReaderService,
       AppSettings appSettings,
       UserAccountService userAccountService,
