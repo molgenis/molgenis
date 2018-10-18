@@ -121,7 +121,9 @@ describe('Data row repository', () => {
 
       const formData = {
         e: blob,
-        f: 'foobar'
+        f: 'foobar',
+        g: null,
+        h: undefined
       }
 
       const formFields = [
@@ -131,6 +133,14 @@ describe('Data row repository', () => {
         },
         {
           id: 'f',
+          type: 'string'
+        },
+        {
+          id: 'g',
+          type: 'string'
+        },
+        {
+          id: 'h',
           type: 'string'
         }
       ]
