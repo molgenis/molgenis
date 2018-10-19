@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataConverter;
@@ -87,6 +88,7 @@ import org.molgenis.i18n.LanguageService;
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
  * {@link IntermediateParseResults}.
  */
+@Generated(value = "human-developer")
 public class EmxMetadataParser implements MetadataParser {
   // Table names in the emx file
   static final String EMX_PACKAGES = "packages";
