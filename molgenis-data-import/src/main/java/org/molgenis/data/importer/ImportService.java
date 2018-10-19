@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import io.micrometer.core.annotation.Timed;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.springframework.core.Ordered;
 
 public interface ImportService extends Ordered {
+  @Timed(
+      value = "service.import",
+      description = "Timing information for the import service.",
+      histogram = true)
   EntityImportReport doImport(
       RepositoryCollection source,
       MetadataAction metadataAction,

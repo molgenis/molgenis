@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
+import io.micrometer.core.annotation.Timed;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
@@ -99,6 +100,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping(BASE_URI)
+@Timed(value = "rest.v2", description = "Timing information for the REST API v2.", histogram = true)
 public class RestControllerV2 {
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 

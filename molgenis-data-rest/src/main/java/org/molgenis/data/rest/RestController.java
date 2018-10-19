@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import cz.jirutka.rsql.parser.RSQLParserException;
+import io.micrometer.core.annotation.Timed;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -123,6 +124,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
  */
 @org.springframework.web.bind.annotation.RestController
 @RequestMapping(BASE_URI)
+@Timed(value = "rest.v1", description = "Timing information for the REST API v1.", histogram = true)
 public class RestController {
   private static final Logger LOG = LoggerFactory.getLogger(RestController.class);
 

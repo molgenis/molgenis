@@ -58,6 +58,11 @@
       <artifactId>molgenis-genomebrowser</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-metrics</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- third party dependencies -->
     <!-- test dependencies -->
     <dependency>

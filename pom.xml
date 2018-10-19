@@ -140,6 +140,7 @@
     <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.12</checkstyle.version>
+    <micrometer.version>1.0.6</micrometer.version>
     <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
   </properties>
 
@@ -995,6 +996,16 @@
         <version>${zt-zip.version}</version>
       </dependency>
       <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-spring-legacy</artifactId>
+        <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.github.jknack</groupId>
         <artifactId>handlebars</artifactId>
         <version>${handlebars.version}</version>
@@ -1082,5 +1093,6 @@
     <module>molgenis-web</module>
     <module>molgenis-i18n</module>
     <module>molgenis-beacon</module>
+    <module>molgenis-metrics</module>
   </modules>
 </project>

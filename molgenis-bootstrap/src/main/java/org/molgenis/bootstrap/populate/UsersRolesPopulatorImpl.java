@@ -6,6 +6,7 @@ import static org.molgenis.data.security.auth.GroupService.AUTHORITY_MANAGER;
 import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.metrics.MetricsController.ROLE_METRICS;
 import static org.molgenis.security.core.SidUtils.getRoleName;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
@@ -114,6 +115,11 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
         "Role containing permissions needed to manage groups. This role is included in all group manager roles.");
     manager.setIncludes(ImmutableList.of(editor));
 
+    Role metrics = roleFactory.create();
+    metrics.setName(getRoleName(ROLE_METRICS));
+    metrics.setLabel("View metrics");
+    metrics.setDescription("Role granting the permission to view metrics.");
+
     Role aclTakeOwnership = roleFactory.create();
     aclTakeOwnership.setName(getRoleName(ROLE_ACL_TAKE_OWNERSHIP));
     aclTakeOwnership.setLabel("Take resource ownership");
@@ -134,7 +140,8 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     su.setName(getRoleName(AUTHORITY_SU));
     su.setLabel("Superuser");
     su.setDescription("Role granted to superusers.");
-    su.setIncludes(ImmutableList.of(aclTakeOwnership, aclModifyAuditing, aclGeneralChanges));
+    su.setIncludes(
+        ImmutableList.of(aclTakeOwnership, aclModifyAuditing, aclGeneralChanges, metrics));
 
     // persist entities
     dataService.add(USER, Stream.of(userAdmin, anonymousUser));
@@ -145,6 +152,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
             aclTakeOwnership,
             aclModifyAuditing,
             aclGeneralChanges,
+            metrics,
             viewer,
             editor,
             manager,

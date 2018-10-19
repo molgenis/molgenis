@@ -95,7 +95,8 @@ in org.molgenis.data and subpackages from included modules
   "org.molgenis.settings",
   "org.molgenis.data.util",
   "org.molgenis.data.decorator",
-  "org.molgenis.data.event"
+  "org.molgenis.data.event",
+  "org.molgenis.metrics"
 })
 @Import({
   SecurityCoreITConfig.class,

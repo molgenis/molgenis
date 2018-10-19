@@ -1,5 +1,6 @@
 package org.molgenis.semanticmapper.service;
 
+import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.stream.Stream;
 import org.molgenis.data.meta.model.EntityType;
@@ -52,6 +53,10 @@ public interface MappingService {
    * @param progress progress of the mapping
    * @return the total amount of entities mapped
    */
+  @Timed(
+      value = "service.mapper",
+      description = "Timing information for the mapping service",
+      histogram = true)
   long applyMappings(
       String mappingProjectId,
       String entityTypeId,

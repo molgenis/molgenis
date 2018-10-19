@@ -16,6 +16,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,6 +65,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
   @Mock private TransactionInformation transactionInformation;
   @Captor private ArgumentCaptor<Stream<Object>> idStreamCaptor;
 
+  private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
   private List<Entity> testEntities;
   private EntityType emd;
 
@@ -92,7 +95,8 @@ public class L2CacheTest extends AbstractMolgenisSpringTest {
     when(repository.getEntityType()).thenReturn(emd);
     when(repository.getName()).thenReturn(emd.getId());
 
-    l2Cache = new L2Cache(transactionManager, entityHydration, transactionInformation);
+    l2Cache =
+        new L2Cache(transactionManager, entityHydration, transactionInformation, meterRegistry);
   }
 
   @Test
