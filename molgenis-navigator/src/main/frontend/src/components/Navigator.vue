@@ -2,6 +2,7 @@
 <template>
   <div class="container">
     <Alerts/>
+    <Jobs/>
     <NavigatorSearch class="navigator-search"/>
     <NavigatorBreadcrumb />
     <NavigatorActions class="navigator-actions"/>
@@ -14,6 +15,7 @@ import _ from 'lodash'
 import { mapGetters } from 'vuex'
 import { FETCH_ITEMS_BY_FOLDER, FETCH_ITEMS_BY_QUERY } from '../store/actions'
 import Alerts from './Alerts'
+import Jobs from './Jobs'
 import NavigatorSearch from './NavigatorSearch'
 import NavigatorBreadcrumb from './NavigatorBreadcrumb'
 import NavigatorActions from './NavigatorActions'
@@ -21,7 +23,7 @@ import NavigatorTable from './NavigatorTable'
 
 export default {
   name: 'Navigator',
-  components: {Alerts, NavigatorSearch, NavigatorBreadcrumb, NavigatorActions, NavigatorTable},
+  components: {Alerts, Jobs, NavigatorSearch, NavigatorBreadcrumb, NavigatorActions, NavigatorTable},
   computed: {
     ...mapGetters(['query', 'folderId'])
   },

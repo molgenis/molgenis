@@ -6,7 +6,7 @@ function toJobStatus (apiJobStatus: string): JobStatus {
   let jobStatus
   switch (apiJobStatus) {
     case 'PENDING':
-      jobStatus = 'pending'
+      jobStatus = 'running'
       break
     case 'RUNNING':
       jobStatus = 'running'
@@ -18,7 +18,7 @@ function toJobStatus (apiJobStatus: string): JobStatus {
       jobStatus = 'failed'
       break
     case 'CANCELED':
-      jobStatus = 'canceled'
+      jobStatus = 'failed'
       break
     default:
       throw new Error('unexpected job status ' + apiJobStatus)
@@ -26,8 +26,12 @@ function toJobStatus (apiJobStatus: string): JobStatus {
   return jobStatus
 }
 
-export function createCopyJobFromApiCopy (apiJobCopy: Object): Job {
-  return createJobCopy(apiJobCopy.jobId, toJobStatus(apiJobCopy.jobStatus))
+export function createCopyJobFromApiCopy (apiCopy: Object): Job {
+  return createJobCopy(apiCopy.jobId, toJobStatus(apiCopy.jobStatus))
+}
+
+export function createJobFromApiJobCopy (apiJobCopy: Object): Job {
+  return createJobCopy(apiJobCopy.identifier, toJobStatus(apiJobCopy.status))
 }
 
 export function createJobFromApiJobDownload (apiJobDownload: Object): Job {

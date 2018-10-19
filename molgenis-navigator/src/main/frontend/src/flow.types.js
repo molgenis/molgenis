@@ -9,7 +9,7 @@ export type Alert = {
 }
 
 export type JobType = 'copy' | 'download'
-export type JobStatus = 'pending' | 'finished' // TODO finish
+export type JobStatus = 'running' | 'success' | 'failed'
 
 export type Job = {
   type: JobType,

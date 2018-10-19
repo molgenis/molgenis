@@ -11,7 +11,7 @@ import {
   toApiItem
 } from './ItemUtils'
 import { createFolderFromApiPackage } from './FolderUtils'
-import { createCopyJobFromApiCopy, createJobFromApiJobDownload } from './JobUtils'
+import { createCopyJobFromApiCopy, createJobFromApiJobCopy, createJobFromApiJobDownload } from './JobUtils'
 import { createAlertsFromApiError } from './AlertUtils'
 import { createAlertError } from '../models/Alert'
 
@@ -168,9 +168,13 @@ export function fetchPackageWithAncestors (packageId: ?string) {
 }
 
 export function fetchJob (job: Job) {
+  // TODO fix
   console.log(job)
-  const entityType = job.type === 'copy' ? 'sys_job_OneClickImportJobExecution' : 'blaat' // TODO fix
-  return api.get(REST_API_V2 + '/' + entityType + '/' + job.id).then(response => createJobFromApiJobDownload(response))
+  if (job.type === 'copy') {
+    return api.get(REST_API_V2 + '/sys_job_OneClickImportJobExecution/' + job.id).then(response => createJobFromApiJobCopy(response))
+  } else {
+    return api.get(REST_API_V2 + '/blaat/' + job.id).then(response => createJobFromApiJobDownload(response))
+  }
 }
 
 export function getFolder (folderId: ?string): Promise<Folder> {
@@ -196,7 +200,7 @@ function validateQuery (query: string) {
   }
 }
 
-export function getItemsByQuery (query: string) {
+export function getItemsByQuery (query: string): Promise<Item> {
   try {
     validateQuery(query)
   } catch (error) {

@@ -37,21 +37,20 @@ export const POLL_JOB = '__POLL_JOB__'
 export const SCHEDULE_DOWNLOAD_SELECTED_ITEMS = '__SCHEDULE_DOWNLOAD_SELECTED_ITEMS__'
 
 function pollJob (commit: Function, job: Job) {
-  fetchJob(job.id).then(updatedJob => {
+  fetchJob(job).then(updatedJob => {
     if (job.status !== updatedJob.status) {
       commit(UPDATE_JOB, updatedJob)
-
-      switch (updatedJob.status) {
-        case 'pending':
-        case 'running':
-          setTimeout(() => pollJob(commit, updatedJob), 500)
-          break
-        case 'success':
-        case 'failed':
-        case 'canceled':
-          console.log('job finished with status ' + updatedJob.status)
-          break
-      }
+    }
+    switch (updatedJob.status) {
+      case 'pending':
+      case 'running':
+        setTimeout(() => pollJob(commit, updatedJob), 500)
+        break
+      case 'success':
+      case 'failed':
+      case 'canceled':
+        console.log('job finished with status ' + updatedJob.status)
+        break
     }
   })
 }
@@ -147,7 +146,7 @@ export default {
     pollJob(commit, job)
   },
   [SCHEDULE_DOWNLOAD_SELECTED_ITEMS] ({commit, state}: { commit: Function, state: State }) {
-    const dummyJob = {type: 'download', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}
+    const dummyJob = {type: 'copy', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}
     pollJob(commit, state, dummyJob)
     commit(SET_SELECTED_ITEMS, [])
     // 1. Call download endpoint which will return job location

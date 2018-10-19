@@ -12,7 +12,7 @@ const state: State = {
   items: [],
   selectedItems: [],
   clipboard: null,
-  jobs: [{type: 'download', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}] // TODO remove
+  jobs: []
 }
 
 export default state
