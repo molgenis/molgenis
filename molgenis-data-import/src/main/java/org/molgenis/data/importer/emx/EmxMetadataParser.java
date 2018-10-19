@@ -315,7 +315,7 @@ public class EmxMetadataParser implements MetadataParser {
     }
   }
 
-"  @Override
+  @Override
   public EntitiesValidationReport validate(RepositoryCollection source) {
     MyEntitiesValidationReport report = new MyEntitiesValidationReport();
     Map<String, EntityType> metaDataMap = getEntityTypeMap(dataService, source);
