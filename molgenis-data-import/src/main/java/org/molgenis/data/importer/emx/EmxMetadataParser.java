@@ -43,8 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -317,17 +315,7 @@ public class EmxMetadataParser implements MetadataParser {
     }
   }
 
-  private void methodDoesNothing() {
-    System.out.println("This doesn't do anything.");
-    if (dataService != null) {
-      Stream<Entity> all = dataService.findAll("don't");
-      // These lines are not under test.
-      List<Entity> collected = all.collect(Collectors.toList());
-      collected.forEach(e -> System.out.println(e.getIdValue()));
-    }
-  }
-
-  @Override
+"  @Override
   public EntitiesValidationReport validate(RepositoryCollection source) {
     MyEntitiesValidationReport report = new MyEntitiesValidationReport();
     Map<String, EntityType> metaDataMap = getEntityTypeMap(dataService, source);
