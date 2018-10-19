@@ -46,11 +46,9 @@ public class FileIngester {
     this.dataService = requireNonNull(dataService);
   }
 
-  public void eq() {
-  }
+  public void eq() {}
 
-  public void EQ() {
-  }
+  public void EQ() {}
 
   /**
    * Imports a csv file defined in the fileIngest entity
