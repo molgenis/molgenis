@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataConverter;
@@ -310,6 +312,16 @@ public class EmxMetadataParser implements MetadataParser {
       } else {
         throw new UnsupportedOperationException();
       }
+    }
+  }
+
+  private void methodDoesNothing() {
+    System.out.println("This doesn't do anything.");
+    if (dataService != null) {
+      Stream<Entity> all = dataService.findAll("don't");
+      // These lines are not under test.
+      List<Entity> collected = all.collect(Collectors.toList());
+      collected.forEach(e -> System.out.println(e.getIdValue()));
     }
   }
 
