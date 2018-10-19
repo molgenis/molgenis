@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.2.2</version>
+    <version>7.2.2-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-data-migrate</artifactId>
 
