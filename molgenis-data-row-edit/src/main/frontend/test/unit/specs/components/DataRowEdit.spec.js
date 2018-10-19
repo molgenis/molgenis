@@ -54,15 +54,17 @@ describe('DataRowEdit component', () => {
   describe('methods', () => {
     let wrapper
     let mappedCreateData = {
-      formFields: ['a'],
+      formFields: [{id: 'a', type: 'text'}],
       formData: {a: 'b'},
       formLabel: 'form label'
     }
     let mappedUpdateData = {
-      formFields: ['a'],
+      formFields: [{id: 'a', type: 'text'}, {id: 'b', type: 'field-group'}],
       formData: {a: 'b'},
       formLabel: 'form label'
     }
+
+    let save // repository.save action mock
 
     beforeEach(function () {
       td.reset()
@@ -74,15 +76,25 @@ describe('DataRowEdit component', () => {
       td.replace(repository, 'fetch', fetch)
 
       // mock save
-      const save = td.function('repository.save')
-      td.when(save({id: 'update', a: 'a'}, ['field'], tableId, rowId)).thenResolve()
-      td.when(save({id: 'create', b: 'b'}, ['field'], tableId, null)).thenResolve()
+      save = td.function('repository.save')
+      td.when(save({id: 'update', a: 'a'}, [{id: 'a'}], tableId, rowId)).thenResolve()
+      td.when(save({id: 'create', b: 'b'}, [{id: 'a'}], tableId, null)).thenResolve()
       td.replace(repository, 'save', save)
 
       wrapper = shallow(DataRowEdit, {
         propsData: {
           dataTableId: tableId,
           dataRowId: rowId
+        }
+      })
+
+      // mock formState for submit testing
+      wrapper.setData({
+        formState: {
+          $valid: true,
+          a: {
+            $touched: false
+          }
         }
       })
     })
@@ -97,15 +109,32 @@ describe('DataRowEdit component', () => {
 
     it('onSubmit should post the form data formData', (done) => {
       wrapper.setData({formData: {id: 'update', a: 'a'}})
-      wrapper.setData({formFields: ['field']})
+      wrapper.setData({formFields: [{id: 'a'}]})
       wrapper.vm.onSubmit()
+      td.verify(save(), {times: 1, ignoreExtraArgs: true})
+      done()
+    })
+
+    it('onSubmit block the post when the form is invalid', (done) => {
+      wrapper.setData({formData: {id: 'update', a: 'a'}})
+      wrapper.setData({formFields: [{id: 'a'}]})
+      wrapper.setData({
+        formState: {
+          $valid: false,
+          a: {
+            $touched: false
+          }
+        }
+      })
+      wrapper.vm.onSubmit()
+      td.verify(save(), {times: 0, ignoreExtraArgs: true})
       done()
     })
 
     it('onSubmit when no rowId is set should trigger the create call', (done) => {
       wrapper.setData({dataRowId: null})
       wrapper.setData({formData: {id: 'create', b: 'b'}})
-      wrapper.setData({formFields: ['field']})
+      wrapper.setData({formFields: [{id: 'a'}]})
       wrapper.vm.onSubmit()
       done()
     })

@@ -40,7 +40,7 @@
             class="btn btn-primary"
             type="submit"
             @click.prevent="onSubmit"
-            :disabled="formState.$pristine || formState.$invalid">
+            :disabled="formState.$invalid && formState.$touched">
             {{ 'data-row-edit-save-button-label' | i18n }}
           </button>
 
@@ -52,6 +52,10 @@
             disabled="disabled">
             {{ 'data-row-edit-save-busy-state-label' | i18n }} <i class="fa fa-spinner fa-spin "></i>
           </button>
+
+          <span v-if="!isSaving && formState.$invalid && formState.$touched" class="alert text-danger">
+              {{ 'data-row-edit-invalid-fields-msg' | i18n }}
+          </span>
         </div>
       </div>
 
@@ -97,10 +101,19 @@
         this.formData = updatedFormData
       },
       onSubmit () {
-        this.isSaving = true
-        repository
-          .save(this.formData, this.formFields, this.dataTableId, this.dataRowId)
-          .then(this.goBackToPluginCaller, this.handleError)
+        const formState = this.formState
+        this.formFields
+          .filter(field => field.type !== 'field-group') // field-groups have no validation to show
+          .forEach((field) => {
+            const fieldState = formState[field.id]
+            fieldState.$touched = true // trigger field to show validation result to user
+          })
+        if (this.formState.$valid) {
+          this.isSaving = true
+          repository
+            .save(this.formData, this.formFields, this.dataTableId, this.dataRowId)
+            .then(this.goBackToPluginCaller, this.handleError)
+        }
       },
       goBackToPluginCaller () {
         window.history.go(-1)
