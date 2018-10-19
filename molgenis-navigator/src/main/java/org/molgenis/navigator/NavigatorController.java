@@ -7,14 +7,17 @@ import static org.springframework.http.HttpStatus.OK;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
@@ -38,6 +41,24 @@ public class NavigatorController extends VuePluginController {
   public String init(Model model) {
     super.init(model, ID);
     return "view-navigator";
+  }
+
+  @PostMapping("/copy")
+  @ResponseBody
+  public CopyResourcesResponse copyResources(
+      @RequestBody @Valid CopyResourcesRequest copyResourcesRequest) {
+    JobExecution jobExecution =
+        navigatorService.copyResources(
+            copyResourcesRequest.getResources(), copyResourcesRequest.getTargetFolderId());
+    return CopyResourcesResponse.create(
+        jobExecution.getIdentifier(), jobExecution.getStatus().toString());
+  }
+
+  @PostMapping("/move")
+  @ResponseStatus(OK)
+  public void moveResources(@RequestBody @Valid MoveResourcesRequest moveResourcesRequest) {
+    navigatorService.moveResources(
+        moveResourcesRequest.getResources(), moveResourcesRequest.getTargetFolderId());
   }
 
   @DeleteMapping("/delete")

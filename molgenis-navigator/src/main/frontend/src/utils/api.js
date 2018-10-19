@@ -7,10 +7,11 @@ import type { ApiEntityType, ApiPackage, Folder, Item, Job } from '../flow.types
 import { INITIAL_STATE } from '../store/state'
 import {
   createItemFromApiEntityType,
-  createItemFromApiPackage
+  createItemFromApiPackage,
+  toApiItem
 } from './ItemUtils'
 import { createFolderFromApiPackage } from './FolderUtils'
-import { createJobFromApiJobDownload } from './JobUtils'
+import { createCopyJobFromApiCopy, createJobFromApiJobDownload } from './JobUtils'
 import { createAlertsFromApiError } from './AlertUtils'
 import { createAlertError } from '../models/Alert'
 
@@ -167,7 +168,8 @@ export function fetchPackageWithAncestors (packageId: ?string) {
 }
 
 export function fetchJob (job: Job) {
-  const entityType = job.type === 'download' ? 'sys_job_ScriptJobExecution' : 'blaat'
+  console.log(job)
+  const entityType = job.type === 'copy' ? 'sys_job_OneClickImportJobExecution' : 'blaat' // TODO fix
   return api.get(REST_API_V2 + '/' + entityType + '/' + job.id).then(response => createJobFromApiJobDownload(response))
 }
 
@@ -260,48 +262,20 @@ export function deleteItems (items: Array<Item>) {
   }).catch(handleApiErrorResponse)
 }
 
-export function copyItems (items: Array<Item>, folder: Folder) {
-  let error = new Error('TODO')
-  error.alerts = [{type: 'ERROR', message: 'TODO copy clipboard items'}]
-  throw error
+export function copyItems (items: Array<Item>, folder: Folder): Promise<string> {
+  return api.post('/plugin/navigator/copy', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem),
+      targetFolderId: folder.id
+    })
+  }).then(createCopyJobFromApiCopy).catch(handleApiErrorResponse)
 }
 
 export function moveItems (items: Array<Item>, folder: Folder) {
-  // TODO create and use controller endpoint
-  let targetPackageId = folder.id
-
-  let promises = []
-
-  const packages = items.filter(
-    item => item.type === 'package')
-  if (packages.length > 0) {
-    const uri = REST_API_V2 + '/sys_md_Package/parent'
-    const options = {
-      body: JSON.stringify({
-        entities: packages.map(
-          item => ({
-            id: item.id,
-            parent: targetPackageId !== undefined ? targetPackageId : null
-          }))
-      })
-    }
-    promises.push(api.put(uri, options))
-  }
-
-  const entityTypes = items.filter(
-    item => item.type === 'entityType')
-  if (entityTypes.length > 0) {
-    const uri = REST_API_V2 + '/sys_md_EntityType/package'
-    const options = {
-      body: JSON.stringify({
-        entities: entityTypes.map(
-          item => ({
-            id: item.id,
-            package: targetPackageId !== undefined ? targetPackageId : null
-          }))
-      })
-    }
-    promises.push(api.put(uri, options))
-  }
-  return Promise.all(promises).catch(handleApiErrorResponse)
+  return api.post('/plugin/navigator/move', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem),
+      targetFolderId: folder.id
+    })
+  }).catch(handleApiErrorResponse)
 }

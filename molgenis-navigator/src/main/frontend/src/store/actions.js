@@ -16,7 +16,8 @@ import {
   RESET_CLIPBOARD,
   SET_FOLDER,
   SET_ITEMS,
-  SET_JOBS,
+  ADD_JOB,
+  UPDATE_JOB,
   SET_SELECTED_ITEMS
 } from './mutations'
 
@@ -32,25 +33,25 @@ export const CREATE_ITEM = '__CREATE_ITEM__'
 export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
 export const COPY_CLIPBOARD_ITEMS = '__COPY_CLIPBOARD_ITEMS__'
+export const POLL_JOB = '__POLL_JOB__'
 export const SCHEDULE_DOWNLOAD_SELECTED_ITEMS = '__SCHEDULE_DOWNLOAD_SELECTED_ITEMS__'
 
-function pollJob (commit: Function, state: State, jobId: string) {
-  fetchJob(jobId).then(updatedJob => {
-    const index = state.jobs.findIndex(job => job.type === updatedJob.type && job.id === updatedJob.id)
-    let updatedJobs = state.jobs.slice()
-    updatedJobs[index] = updatedJob
-    commit(SET_JOBS, updatedJobs)
+function pollJob (commit: Function, job: Job) {
+  fetchJob(job.id).then(updatedJob => {
+    if (job.status !== updatedJob.status) {
+      commit(UPDATE_JOB, updatedJob)
 
-    switch (updatedJob.status) {
-      case 'pending':
-      case 'running':
-        setTimeout(() => pollJob(commit, state, jobId), 500)
-        break
-      case 'success':
-      case 'failed':
-      case 'canceled':
-        console.log('job finished with status ' + updatedJob.status)
-        break
+      switch (updatedJob.status) {
+        case 'pending':
+        case 'running':
+          setTimeout(() => pollJob(commit, updatedJob), 500)
+          break
+        case 'success':
+        case 'failed':
+        case 'canceled':
+          console.log('job finished with status ' + updatedJob.status)
+          break
+      }
     }
   })
 }
@@ -121,7 +122,7 @@ export default {
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     folder: Folder) {
     if (state.clipboard && state.clipboard.items.length > 0) {
-      moveItems(state.clipboard.items, folder).then(responses => {
+      moveItems(state.clipboard.items, folder).then(() => {
         commit(RESET_CLIPBOARD)
         dispatch(FETCH_ITEMS)
       }).catch(error => {
@@ -132,13 +133,18 @@ export default {
   [COPY_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     folder: Folder) {
     if (state.clipboard && state.clipboard.items.length > 0) {
-      copyItems(state.clipboard.items, folder).then(responses => {
+      copyItems(state.clipboard.items, folder).then(job => {
         commit(RESET_CLIPBOARD)
-        dispatch(FETCH_ITEMS)
+        commit(ADD_JOB, job)
+        dispatch(POLL_JOB, job)
       }).catch(error => {
         commit(ADD_ALERTS, error.alerts)
       })
     }
+  },
+  [POLL_JOB] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
+    job: Job) {
+    pollJob(commit, job)
   },
   [SCHEDULE_DOWNLOAD_SELECTED_ITEMS] ({commit, state}: { commit: Function, state: State }) {
     const dummyJob = {type: 'download', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}

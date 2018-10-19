@@ -69,6 +69,11 @@
       <artifactId>molgenis-core-ui</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency><!-- TODO dummy, must be removed -->
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-one-click-importer</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-test</artifactId>

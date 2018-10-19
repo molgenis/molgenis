@@ -1,5 +1,5 @@
 // @flow
-import type { ApiEntityType, Item, ApiPackage } from '../flow.types'
+import type { ApiEntityType, Item, ItemType, ApiPackage } from '../flow.types'
 import { createItemEntityType, createItemPackage } from '../models/Item'
 
 const SYS_PACKAGE_ID = 'sys'
@@ -15,6 +15,25 @@ function isSystemEntityType (apiEntityType: ApiEntityType): boolean {
 
 export function isSystemPackage (apiPackage: ApiPackage): boolean {
   return isSystemId(apiPackage.id)
+}
+
+function toApiItemType (itemType: ItemType) {
+  let apiItemType
+  switch (itemType) {
+    case 'package':
+      apiItemType = 'PACKAGE'
+      break
+    case 'entityType':
+      apiItemType = 'ENTITY_TYPE'
+      break
+    default:
+      throw new Error('unexpected item type ' + itemType)
+  }
+  return apiItemType
+}
+
+export function toApiItem (item: Item) {
+  return {id: item.id, type: toApiItemType(item.type)}
 }
 
 export function createItemFromApiEntityType (apiEntityType: ApiEntityType): Item {

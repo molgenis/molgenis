@@ -35,12 +35,12 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    navigatorServiceImpl = new NavigatorServiceImpl(dataService);
+    navigatorServiceImpl = new NavigatorServiceImpl(dataService, null, null);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testNavigatorServiceImpl() {
-    new NavigatorServiceImpl(null);
+    new NavigatorServiceImpl(null, null, null);
   }
 
   @Test

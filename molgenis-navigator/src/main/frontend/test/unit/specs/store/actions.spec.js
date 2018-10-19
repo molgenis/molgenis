@@ -288,4 +288,107 @@ describe('actions', () => {
       utils.testAction(actions.__UPDATE_ITEM__, options, done)
     })
   })
+  describe('MOVE_CLIPBOARD_ITEMS', () => {
+    it('should move clipboard items to given target folder', done => {
+      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+
+      const moveItems = td.function('api.moveItems')
+      td.when(moveItems(items, folder)).thenResolve(Promise.resolve())
+      td.replace(api, 'moveItems', moveItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedActions: [
+          {type: '__FETCH_ITEMS__'}
+        ],
+        expectedMutations: [
+          {type: '__RESET_CLIPBOARD__'}
+        ]
+      }
+      utils.testAction(actions.__MOVE_CLIPBOARD_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+
+      const moveItems = td.function('api.moveItems')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(moveItems(items, folder)).thenResolve(Promise.reject(error))
+      td.replace(api, 'moveItems', moveItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__MOVE_CLIPBOARD_ITEMS__, options, done)
+    })
+  })
+  describe('COPY_CLIPBOARD_ITEMS', () => {
+    it('should copy clipboard items to given target folder', done => {
+      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+      const job = {type: 'copy', id: 'id', status: 'running'}
+      const copyItems = td.function('api.copyItems')
+      td.when(copyItems(items, folder)).thenResolve(Promise.resolve(job))
+      td.replace(api, 'copyItems', copyItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'copy',
+            items: items
+          }
+        },
+        expectedActions: [
+          {type: '__POLL_JOB__', payload: job}
+        ],
+        expectedMutations: [
+          {type: '__RESET_CLIPBOARD__'},
+          {type: '__ADD_JOB__', payload: job}
+        ]
+      }
+      utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+
+      const copyItems = td.function('api.copyItems')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(copyItems(items, folder)).thenResolve(Promise.reject(error))
+      td.replace(api, 'copyItems', copyItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
+    })
+  })
 })

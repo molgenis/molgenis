@@ -3,20 +3,16 @@
     v-if="alerts.length > 0"
     class="row">
     <div class="col">
-      <div
+      <b-alert
         v-for="(alert, index) in alerts"
         :key="index"
-        :class="{'alert':true, 'alert-danger': alert.type === 'ERROR', 'alert-warning': alert.type === 'WARNING', 'alert-info': alert.type === 'INFO'}"
-        role="alert">
-        <button
-          type="button"
-          class="close"
-          @click="removeAlert(index)">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        :variant="getVariant(alert)"
+        show
+        dismissible
+        @dismissed="removeAlert(index)">
         <span>{{ alert.message }}</span>
         <span v-if="alert.code"> ({{ alert.code }})</span>
-      </div>
+      </b-alert>
     </div>
   </div>
 </template>
@@ -31,6 +27,26 @@ export default {
     ...mapState(['alerts'])
   },
   methods: {
+    getVariant: function (alert) {
+      let variant
+      switch (alert.type) {
+        case 'INFO':
+          variant = 'info'
+          break
+        case 'SUCCESS':
+          variant = 'success'
+          break
+        case 'WARNING':
+          variant = 'warning'
+          break
+        case 'ERROR':
+          variant = 'danger'
+          break
+        default:
+          throw new Error('unexpected alert type ' + alert.type)
+      }
+      return variant
+    },
     removeAlert: function (index) {
       this.$store.commit(REMOVE_ALERT, index)
     }

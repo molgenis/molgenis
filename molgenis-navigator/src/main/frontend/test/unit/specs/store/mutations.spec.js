@@ -31,19 +31,17 @@ describe('mutations', () => {
       expect(state.alerts).to.eql(expectedAlerts)
     })
   })
-  describe('SET_JOBS', () => {
-    it('should set the jobs in the state', () => {
+  describe('ADD_JOB', () => {
+    it('should add job to jobs in the state', () => {
+      const job0 = {type: 'download', id: '0', status: 'running'}
+      const job1 = {type: 'copy', id: '1', status: 'finished'}
+
       const state = {
-        jobs: []
+        jobs: [job0]
       }
 
-      const jobs = [
-        {type: 'download', id: '0', status: 'running'},
-        {type: 'copy', id: '1', status: 'finished'}
-      ]
-
-      mutations.__SET_JOBS__(state, jobs)
-      expect(state.jobs).to.deep.equal(jobs)
+      mutations.__ADD_JOB__(state, job1)
+      expect(state.jobs).to.deep.equal([job0, job1])
     })
   })
   describe('SET_FOLDER', () => {

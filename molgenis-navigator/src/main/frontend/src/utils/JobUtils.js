@@ -1,6 +1,6 @@
 // @flow
 import type { Job, JobStatus } from '../flow.types'
-import { createJobDownload } from '../models/Job'
+import { createJobCopy, createJobDownload } from '../models/Job'
 
 function toJobStatus (apiJobStatus: string): JobStatus {
   let jobStatus
@@ -24,6 +24,10 @@ function toJobStatus (apiJobStatus: string): JobStatus {
       throw new Error('unexpected job status ' + apiJobStatus)
   }
   return jobStatus
+}
+
+export function createCopyJobFromApiCopy (apiJobCopy: Object): Job {
+  return createJobCopy(apiJobCopy.jobId, toJobStatus(apiJobCopy.jobStatus))
 }
 
 export function createJobFromApiJobDownload (apiJobDownload: Object): Job {
