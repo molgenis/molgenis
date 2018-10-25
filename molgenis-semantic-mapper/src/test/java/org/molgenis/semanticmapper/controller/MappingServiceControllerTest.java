@@ -12,7 +12,6 @@ import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.semantic.Relation.isAssociatedWith;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.semanticmapper.controller.MappingServiceController.URI;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -518,9 +517,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     OntologyTerm ontologyTermAge = OntologyTerm.create("iri1", "label1");
     OntologyTerm ontologyTermDateOfBirth = OntologyTerm.create("iri2", "label2");
     when(ontologyTagService.getTagsForAttribute(hop, ageAttr))
-        .thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermAge));
+        .thenReturn(ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, ontologyTermAge));
     when(ontologyTagService.getTagsForAttribute(hop, dobAttr))
-        .thenReturn(ImmutableMultimap.of(isAssociatedWith, ontologyTermDateOfBirth));
+        .thenReturn(ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, ontologyTermDateOfBirth));
 
     when(dataService.getMeta()).thenReturn(metaDataService);
     when(metaDataService.getPackages()).thenReturn(asList(system, base));

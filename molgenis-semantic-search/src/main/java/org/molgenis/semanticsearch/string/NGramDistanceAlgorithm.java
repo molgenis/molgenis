@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Chao Pang
  */
 public class NGramDistanceAlgorithm {
+
   private static int N_GRAMS = 2;
   public static final Set<String> STOPWORDSLIST;
 
@@ -219,19 +220,15 @@ public class NGramDistanceAlgorithm {
   private NGramDistanceAlgorithm() {}
 
   public static double stringMatching(String queryOne, String queryTwo) {
-    double similarityScore =
-        calculateScore(
-            createNGrams(queryOne.toLowerCase().trim(), true),
-            createNGrams(queryTwo.toLowerCase().trim(), true));
-    return similarityScore;
+    return calculateScore(
+        createNGrams(queryOne.toLowerCase().trim(), true),
+        createNGrams(queryTwo.toLowerCase().trim(), true));
   }
 
   public static double stringMatching(String queryOne, String queryTwo, boolean removeStopWords) {
-    double similarityScore =
-        calculateScore(
-            createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
-            createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
-    return similarityScore;
+    return calculateScore(
+        createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
+        createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
   }
 
   /**
@@ -242,7 +239,9 @@ public class NGramDistanceAlgorithm {
   public static Map<String, Integer> createNGrams(String inputQuery, boolean removeStopWords) {
     List<String> wordsInString =
         Lists.newArrayList(Stemmer.replaceIllegalCharacter(inputQuery).split(" "));
-    if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
+    if (removeStopWords) {
+      wordsInString.removeAll(STOPWORDSLIST);
+    }
     List<String> stemmedWordsInString =
         wordsInString.stream().map(Stemmer::stem).collect(Collectors.toList());
     Map<String, Integer> tokens = new HashMap<>();
@@ -277,7 +276,9 @@ public class NGramDistanceAlgorithm {
   /** Calculate the ngram distance */
   private static double calculateScore(
       Map<String, Integer> inputStringTokens, Map<String, Integer> ontologyTermTokens) {
-    if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
+    if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) {
+      return (double) 0;
+    }
     int totalToken = getTotalNumTokens(inputStringTokens) + getTotalNumTokens(ontologyTermTokens);
     int numMatchedToken = 0;
 

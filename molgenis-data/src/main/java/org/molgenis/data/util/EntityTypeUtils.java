@@ -12,6 +12,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class EntityTypeUtils {
+
   private EntityTypeUtils() {}
 
   /**
@@ -289,8 +290,7 @@ public class EntityTypeUtils {
    */
   public static String buildFullName(Package aPackage, String simpleName) {
     if (aPackage != null) {
-      String sb = aPackage.getId() + PACKAGE_SEPARATOR + simpleName;
-      return sb;
+      return aPackage.getId() + PACKAGE_SEPARATOR + simpleName;
     } else {
       return simpleName;
     }

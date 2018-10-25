@@ -70,7 +70,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
 
     LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
     Multimap<Relation, LabeledResource> tags =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag1);
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag1);
     when(tagService.getTagsForAttribute(entityType, attr1)).thenReturn(tags);
 
     Model result =
@@ -98,7 +98,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
 
     LabeledResource tag2 = new LabeledResource("http://IRI2.nl", "tag2Label");
     Multimap<Relation, LabeledResource> tags2 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag2);
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag2);
     when(tagService.getTagsForAttribute(entityType, attr2)).thenReturn(tags2);
 
     Model result =
@@ -131,7 +131,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
 
     LabeledResource tag3 = new LabeledResource("http://IRI3.nl", "labelTag3");
     Multimap<Relation, LabeledResource> tags3 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag3);
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag3);
     when(tagService.getTagsForAttribute(entityType, attr3)).thenReturn(tags3);
 
     Model result =
@@ -160,7 +160,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.MREF);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "labelTag3");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -191,7 +192,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.BOOL);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -224,7 +226,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.DATE);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -257,7 +260,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.DATE_TIME);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -290,7 +294,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.DECIMAL);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -323,7 +328,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.LONG);
 
     LabeledResource tag = new LabeledResource("http://IRI.nl", "tag label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -355,7 +361,8 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     when(attribute.getDataType()).thenReturn(AttributeType.STRING);
 
     LabeledResource tag = new LabeledResource("http://www.w3.org/ns/dcat#keyword", "keywords");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(Relation.isAssociatedWith, tag);
+    Multimap<Relation, LabeledResource> tags =
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag);
     when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
 
     Model result =
@@ -397,7 +404,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
 
     LabeledResource tag2 = new LabeledResource("http://IRI1.nl", "tag1 label");
     Multimap<Relation, LabeledResource> tags2 =
-        ImmutableMultimap.of(Relation.isAssociatedWith, tag2);
+        ImmutableMultimap.of(Relation.IS_ASSOCIATED_WITH, tag2);
     doReturn(tags2).when(tagService).getTagsForAttribute(entityType, attribute2);
 
     Model result =
@@ -418,7 +425,7 @@ public class EntityModelWriterTest extends AbstractMockitoTest {
     LabeledResource codeSystem = new LabeledResource("ex:object");
 
     SemanticTag<EntityType, LabeledResource, LabeledResource> tag =
-        new SemanticTag<>("tagId", entityType, Relation.isAssociatedWith, object, codeSystem);
+        new SemanticTag<>("tagId", entityType, Relation.IS_ASSOCIATED_WITH, object, codeSystem);
 
     when(tagService.getTagsForEntity(entityType)).thenReturn(singletonList(tag));
 

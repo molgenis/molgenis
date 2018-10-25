@@ -7,6 +7,7 @@ import org.molgenis.web.rsql.AggregateQueryRsql;
 import org.molgenis.web.rsql.QueryRsql;
 
 class EntityCollectionRequestV2 {
+
   public static final int MAX_ROWS = 10000;
   public static final int DEFAULT_ROW_COUNT = 100;
   private QueryRsql q;
@@ -71,20 +72,18 @@ class EntityCollectionRequestV2 {
 
   @Override
   public String toString() {
-    String builder =
-        "EntityCollectionRequestV2 [q="
-            + q
-            + ", aggs="
-            + aggs
-            + ", sort="
-            + sort
-            + ", attrs="
-            + attrs
-            + ", start="
-            + start
-            + ", num="
-            + num
-            + "]";
-    return builder;
+    return "EntityCollectionRequestV2 [q="
+        + q
+        + ", aggs="
+        + aggs
+        + ", sort="
+        + sort
+        + ", attrs="
+        + attrs
+        + ", start="
+        + start
+        + ", num="
+        + num
+        + "]";
   }
 }

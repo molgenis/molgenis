@@ -99,6 +99,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(URI)
 public class MappingServiceController extends PluginController {
+
   private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
   public static final String ID = "mappingservice";
@@ -292,6 +293,7 @@ public class MappingServiceController extends PluginController {
   }
 
   private static class AttributeMappingValidationReport {
+
     private final Long total;
     private final Long nrSuccess;
     private final Long nrErrors;
@@ -535,11 +537,8 @@ public class MappingServiceController extends PluginController {
             .map(sourceEntityType::getAttribute)
             .collect(toList());
 
-    String generateAlgorithm =
-        algorithmService.generateAlgorithm(
-            targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
-
-    return generateAlgorithm;
+    return algorithmService.generateAlgorithm(
+        targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
   }
 
   /**
