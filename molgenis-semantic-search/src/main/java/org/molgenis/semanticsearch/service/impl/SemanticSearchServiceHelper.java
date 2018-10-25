@@ -33,6 +33,7 @@ import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.semanticsearch.string.Stemmer;
 
 public class SemanticSearchServiceHelper {
+
   private final TermFrequencyService termFrequencyService;
 
   private final DataService dataService;
@@ -223,9 +224,10 @@ public class SemanticSearchServiceHelper {
             ENTITY_TYPE_META_DATA,
             new QueryImpl<>().eq(EntityTypeMetadata.ID, sourceEntityType.getId()));
 
-    if (entityTypeEntity == null)
+    if (entityTypeEntity == null) {
       throw new MolgenisDataAccessException(
           "Could not find EntityTypeEntity by the name of " + sourceEntityType.getId());
+    }
 
     List<String> attributeIdentifiers = new ArrayList<>();
 
@@ -252,10 +254,7 @@ public class SemanticSearchServiceHelper {
   public List<OntologyTerm> findTags(String description, List<String> ontologyIds) {
     Set<String> searchTerms = removeStopWords(description);
 
-    List<OntologyTerm> matchingOntologyTerms =
-        ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
-
-    return matchingOntologyTerms;
+    return ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
   }
 
   public String processQueryString(String queryString) {
@@ -275,14 +274,12 @@ public class SemanticSearchServiceHelper {
     return QueryParser.escape(string).replace(ESCAPED_CARET_CHARACTER, CARET_CHARACTER);
   }
 
+  /** @return Set<String> searchTerms without stopwords */
   public Set<String> removeStopWords(String description) {
-    Set<String> searchTerms =
-        stream(description.split(ILLEGAL_CHARS_REGEX))
-            .map(String::toLowerCase)
-            .filter(
-                w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
-            .collect(Collectors.toSet());
-    return searchTerms;
+    return stream(description.split(ILLEGAL_CHARS_REGEX))
+        .map(String::toLowerCase)
+        .filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
+        .collect(Collectors.toSet());
   }
 
   private Double getBestInverseDocumentFrequency(List<String> terms) {

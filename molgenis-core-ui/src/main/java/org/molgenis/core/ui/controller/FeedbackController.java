@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(FeedbackController.URI)
 public class FeedbackController extends AbstractStaticContentController {
+
   private static final Logger LOG = LoggerFactory.getLogger(FeedbackController.class);
 
   public static final String ID = "feedback";
@@ -151,6 +152,7 @@ public class FeedbackController extends AbstractStaticContentController {
 
   /** Bean for the feedback form data. */
   public static class FeedbackForm {
+
     private String name;
     private String email;
     private String subject;
@@ -240,9 +242,13 @@ public class FeedbackController extends AbstractStaticContentController {
 
     @Override
     public String toString() {
-      String builder =
-          "[From: " + getFrom() + "\nSubject: " + getSubject() + "\nBody: " + getFeedback() + ']';
-      return builder;
+      return "[From: "
+          + getFrom()
+          + "\nSubject: "
+          + getSubject()
+          + "\nBody: "
+          + getFeedback()
+          + ']';
     }
   }
 }

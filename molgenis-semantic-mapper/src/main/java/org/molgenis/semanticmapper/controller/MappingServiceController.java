@@ -99,6 +99,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(URI)
 public class MappingServiceController extends PluginController {
+
   private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
   public static final String ID = "mappingservice";
@@ -292,6 +293,7 @@ public class MappingServiceController extends PluginController {
   }
 
   private static class AttributeMappingValidationReport {
+
     private final Long total;
     private final Long nrSuccess;
     private final Long nrErrors;
@@ -458,6 +460,8 @@ public class MappingServiceController extends PluginController {
    * the searchTerms and the OntologyTermTags exist, it will use the information from the
    * targetAttribute in the SemanticSearchService
    *
+   * <p>
+   *
    * <p>If string terms are sent to the SemanticSearchService, they will be first of all converted
    * to the ontologyTerms using findTag method
    */
@@ -535,11 +539,8 @@ public class MappingServiceController extends PluginController {
             .map(sourceEntityType::getAttribute)
             .collect(toList());
 
-    String generateAlgorithm =
-        algorithmService.generateAlgorithm(
-            targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
-
-    return generateAlgorithm;
+    return algorithmService.generateAlgorithm(
+        targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
   }
 
   /**
@@ -986,6 +987,8 @@ public class MappingServiceController extends PluginController {
 
   /**
    * Generate algorithms based on semantic matches between attribute tags and descriptions
+   *
+   * <p>
    *
    * <p>package-private for testablity
    */
