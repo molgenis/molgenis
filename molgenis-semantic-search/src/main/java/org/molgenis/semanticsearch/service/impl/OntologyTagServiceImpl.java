@@ -208,7 +208,7 @@ public class OntologyTagServiceImpl implements OntologyTagService {
           addAttributeTag(
               entity,
               tag.getKey().getName(),
-              Relation.isAssociatedWith.getIRI(),
+              Relation.IS_ASSOCIATED_WITH.getIRI(),
               Collections.singletonList(ontologyTerm.getIRI()));
       result.put(tag.getKey().getName(), ontologyTag);
     }

@@ -20,7 +20,7 @@ public class TagValidatorTest {
   @Test
   public void validateValid() throws Exception {
     Tag tag = mock(Tag.class);
-    when(tag.getRelationIri()).thenReturn(Relation.isRealizationOf.getIRI());
+    when(tag.getRelationIri()).thenReturn(Relation.IS_RELATION_OF.getIRI());
     tagValidator.validate(tag);
   }
 

@@ -77,7 +77,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest {
             tagRepository.getTagEntity(
                 "http://edamontology.org/data_3031",
                 "Core data",
-                Relation.instanceOf,
+                Relation.INSTANCE_OF,
                 "http://edamontology.org"),
             tag));
 
@@ -109,7 +109,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest {
             tagRepository.getTagEntity(
                 "http://edamontology.org/data_3031",
                 "Core data",
-                Relation.instanceOf,
+                Relation.INSTANCE_OF,
                 "http://edamontology.org"),
             tag));
   }

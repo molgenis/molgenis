@@ -91,7 +91,7 @@ public class EntityModelWriter {
       for (LabeledResource tag :
           tagService
               .getTagsForAttribute(entityType, objectAttribute)
-              .get(Relation.isAssociatedWith)) {
+              .get(Relation.IS_ASSOCIATED_WITH)) {
         IRI predicate = valueFactory.createIRI(tag.getIri());
         addRelationForAttribute(model, subject, predicate, objectEntity, objectAttribute);
       }
@@ -101,7 +101,7 @@ public class EntityModelWriter {
   void addStatementsForEntityTags(Model model, Resource subject, EntityType entityType) {
     for (SemanticTag<EntityType, LabeledResource, LabeledResource> tag :
         tagService.getTagsForEntity(entityType)) {
-      if (tag.getRelation() == Relation.isAssociatedWith) {
+      if (tag.getRelation() == Relation.IS_ASSOCIATED_WITH) {
         LabeledResource object = tag.getObject();
         model.add(subject, rdfTypePredicate, valueFactory.createIRI(object.getIri()));
       }

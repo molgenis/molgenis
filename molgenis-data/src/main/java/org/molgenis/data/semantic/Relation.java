@@ -1,18 +1,18 @@
 package org.molgenis.data.semantic;
 
 public enum Relation {
-  instanceOf("http://molgenis.org/biobankconnect/instanceOf"),
-  link("http://molgenis.org/biobankconnect/link"),
-  homepage("http://xmlns.com/foaf/0.1/homepage"),
-  isDefinedBy("http://www.w3.org/2000/01/rdf-schema#isDefinedBy"),
-  seeAlso("http://www.w3.org/2000/01/rdf-schema#seeAlso"),
-  hasLowerValue("http://molgenis.org/uml/hasLowerValue"),
-  hasUpperValue("http://molgenis.org/uml/hasUpperValue"),
-  isRealizationOf("http://molgenis.org/uml/isRealizationOf"),
-  isGeneralizationOf("http://molgenis.org/uml/isGeneralizationOf"),
-  hasSourceId("http://molgenis.org/uml/hasSourceId"),
-  hasSourceName("http://molgenis.org/uml/hasSourceName"),
-  isAssociatedWith("http://molgenis.org#isAssociatedWith");
+  INSTANCE_OF("http://molgenis.org/biobankconnect/instanceOf"),
+  LINK("http://molgenis.org/biobankconnect/link"),
+  HOMEPAGE("http://xmlns.com/foaf/0.1/homepage"),
+  IS_DEFINED_BY("http://www.w3.org/2000/01/rdf-schema#isDefinedBy"),
+  SEE_ALSO("http://www.w3.org/2000/01/rdf-schema#seeAlso"),
+  HAS_LOWER_VALUE("http://molgenis.org/uml/hasLowerValue"),
+  HAS_UPPER_VALUE("http://molgenis.org/uml/hasUpperValue"),
+  IS_RELATION_OF("http://molgenis.org/uml/isRealizationOf"),
+  IS_GENERALIZATION_OF("http://molgenis.org/uml/isGeneralizationOf"),
+  HAS_RESOURCE_ID("http://molgenis.org/uml/hasSourceId"),
+  HAS_SOURCE_NAME("http://molgenis.org/uml/hasSourceName"),
+  IS_ASSOCIATED_WITH("http://molgenis.org#isAssociatedWith");
 
   private String iri;
 

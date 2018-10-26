@@ -129,9 +129,9 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest 
         OntologyTerm.create(
             "http://onto/height", "Height", "Description is not used", singletonList("sature"));
 
-    tags.put(Relation.isAssociatedWith, ontologyTerm1);
-    tags.put(Relation.isRealizationOf, ontologyTerm2);
-    tags.put(Relation.isDefinedBy, ontologyTerm3);
+    tags.put(Relation.IS_ASSOCIATED_WITH, ontologyTerm1);
+    tags.put(Relation.IS_RELATION_OF, ontologyTerm2);
+    tags.put(Relation.IS_DEFINED_BY, ontologyTerm3);
 
     // Case 1
     QueryRule actualTargetAttributeQueryTerms_1 =

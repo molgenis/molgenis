@@ -77,7 +77,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
 
   private Tag geneAnnotationTagEntity;
 
-  private final Relation instanceOf = Relation.valueOf("instanceOf");
+  private final Relation instanceOf = Relation.INSTANCE_OF;
 
   private static final Ontology EDAM_ONTOLOGY =
       Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
@@ -174,11 +174,11 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     when(edamOntology.getIRI()).thenReturn("http://edamontology.org");
 
     SemanticTag<Object, OntologyTerm, Ontology> tag =
-        new SemanticTag<>("1233", null, Relation.instanceOf, coreData, edamOntology);
+        new SemanticTag<>("1233", null, Relation.INSTANCE_OF, coreData, edamOntology);
     when(tagRepository.getTagEntity(
             "http://edamontology.org/data_3031",
             "Core data",
-            Relation.instanceOf,
+            Relation.INSTANCE_OF,
             "http://edamontology.org"))
         .thenReturn(expected);
 
