@@ -69,6 +69,8 @@ const actions = {
           handleError(commit, error)
           reject(error)
         })
+      } else {
+        resolve()
       }
 
       commit('SET_LOADING', false)
