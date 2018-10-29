@@ -1,6 +1,6 @@
 import getters from 'src/store/getters'
 
-describe('getters', () => {
+describe.only('getters', () => {
   const state = {
     chapters: [
       {
@@ -21,7 +21,11 @@ describe('getters', () => {
             type: 'number',
             visible: (data) => true,
             required: () => true,
-            validate: () => true
+            validate: () => true,
+            range: {
+              min: 3,
+              max: 6
+            }
           },
           {
             id: 'chapter-1-field-3',
@@ -123,7 +127,7 @@ describe('getters', () => {
     ],
     formData: {
       'chapter-1-field-1': 'value',
-      'chapter-1-field-2': 'value',
+      'chapter-1-field-2': 5,
       'chapter-1-field-3': undefined,
       'chapter-2-field-1': undefined,
       'chapter-3-field-2': undefined,
