@@ -283,6 +283,22 @@ describe('actions', () => {
       testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
     })
 
+    it('should do nothing, only resolve the promise when questionnaire has already been retrieved', done => {
+      const questionnaireId = 'test_quest'
+
+      const state = {
+        username: 'testuser'
+      }
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
+    })
+
     it('should commit any errors to the store', done => {
       const questionnaireId = 'other_test_quest'
       const error = 'error'
