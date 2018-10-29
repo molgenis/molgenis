@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@SuppressWarnings({"squid:S1854", "squid:S1481"}) // TODO REMOVE ME
 public class CopyServiceImpl implements CopyService {
 
   private final MetaDataService metaDataService;

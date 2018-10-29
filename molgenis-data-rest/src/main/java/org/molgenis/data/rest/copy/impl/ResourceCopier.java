@@ -10,16 +10,18 @@ import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.file.model.FileMeta;
+import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -210,6 +212,7 @@ public class ResourceCopier {
   /** Checks that the target location isn't contained in the packages that will be copied. */
   private void validateNotContainsItself(Package pack) {
     if (pack.equals(targetLocation)) {
+      // TODO add exception
       throw new IllegalArgumentException("Temp!");
     }
     pack.getChildren().forEach(this::validateNotContainsItself);
@@ -221,101 +224,77 @@ public class ResourceCopier {
         .orElseThrow(() -> new UnknownEntityException(packageMetadata, id));
   }
 
-  // TODO document (and extend from AbstractEntityDecorator?)
-  private class PretendingEntity implements Entity {
-
-    private Entity decoratedEntity;
+  /**
+   * When copying rows from one repository to another, the metadata of these entities will not fit
+   * the copied repository and its references because the metadatas will have different IDs. The
+   * PretendingEntity acts like it's the newly copied entity by returning the metadata of the copied
+   * repository instead of the original.
+   */
+  private class PretendingEntity extends AbstractEntityDecorator {
 
     PretendingEntity(Entity entity) {
-      this.decoratedEntity = requireNonNull(entity);
+      super(entity);
     }
 
+    @Override
     public EntityType getEntityType() {
-      if (decoratedEntity.getEntityType() != null) {
-        String id = decoratedEntity.getEntityType().getId();
+      if (delegate().getEntityType() != null) {
+        String id = delegate().getEntityType().getId();
         if (entityTypeMap.containsKey(id)) {
           return entityTypeMap.get(id);
         } else {
-          return decoratedEntity.getEntityType();
+          return delegate().getEntityType();
         }
       } else {
         return null;
       }
     }
 
-    public Iterable<String> getAttributeNames() {
-      return decoratedEntity.getAttributeNames();
-    }
-
-    public Object getIdValue() {
-      return decoratedEntity.getIdValue();
-    }
-
-    public void setIdValue(Object id) {
-      decoratedEntity.setIdValue(id);
-    }
-
-    public Object getLabelValue() {
-      return decoratedEntity.getLabelValue();
-    }
-
-    public Object get(String attributeName) {
-      return decoratedEntity.get(attributeName);
-    }
-
-    public String getString(String attributeName) {
-      return decoratedEntity.getString(attributeName);
-    }
-
-    public Integer getInt(String attributeName) {
-      return decoratedEntity.getInt(attributeName);
-    }
-
-    public Long getLong(String attributeName) {
-      return decoratedEntity.getLong(attributeName);
-    }
-
-    public Boolean getBoolean(String attributeName) {
-      return decoratedEntity.getBoolean(attributeName);
-    }
-
-    public Double getDouble(String attributeName) {
-      return decoratedEntity.getDouble(attributeName);
-    }
-
-    public Instant getInstant(String attributeName) {
-      return decoratedEntity.getInstant(attributeName);
-    }
-
-    public LocalDate getLocalDate(String attributeName) {
-      return decoratedEntity.getLocalDate(attributeName);
-    }
-
+    @Override
     public Entity getEntity(String attributeName) {
-      Entity entity = decoratedEntity.getEntity(attributeName);
+      Entity entity = delegate().getEntity(attributeName);
       return entity != null ? new PretendingEntity(entity) : null;
     }
 
+    /**
+     * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
+     * typed FileMeta Entity is requested.
+     */
+    @Override
     public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {
-      return decoratedEntity.getEntity(attributeName, clazz);
+      Entity entity = delegate().getEntity(attributeName);
+      if (clazz.equals(FileMeta.class)) {
+        //noinspection unchecked
+        return entity != null ? (E) new FileMeta(new PretendingEntity(entity)) : null;
+      } else {
+        throw new UnsupportedOperationException("Can't return typed pretending entities");
+      }
     }
 
+    @Override
     public Iterable<Entity> getEntities(String attributeName) {
-      return stream(decoratedEntity.getEntities(attributeName))
+      return stream(delegate().getEntities(attributeName))
           .map(PretendingEntity::new)
           .collect(toList());
     }
 
+    /**
+     * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
+     * typed FileMeta Entity is requested.
+     */
+    @Override
     public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) {
-      return decoratedEntity.getEntities(attributeName, clazz);
-    }
-
-    public void set(String attributeName, Object value) {
-      decoratedEntity.set(attributeName, value);
-    }
-
-    public void set(Entity values) {
-      decoratedEntity.set(values);
+      Iterable<E> entities = delegate().getEntities(attributeName, clazz);
+      if (clazz.equals(FileMeta.class)) {
+        //noinspection unchecked
+        return stream(entities)
+            .filter(Objects::nonNull)
+            .map(PretendingEntity::new)
+            .map(e -> (E) new FileMeta(e))
+            .collect(toList());
+      } else {
+        throw new UnsupportedOperationException("Can't return typed pretending entities");
+      }
     }
   }
 }
