@@ -41,7 +41,7 @@ public class ResourceCopier {
 
   private final List<Package> packages;
   private final List<EntityType> entityTypes;
-  @Nullable private final Package targetLocation;
+  @Nullable private final Package targetPackage;
 
   private final DataService dataService;
   private final MetaDataService metaDataService;
@@ -58,7 +58,7 @@ public class ResourceCopier {
 
   ResourceCopier(
       ResourceCollection resourceCollection,
-      @Nullable Package targetLocation,
+      @Nullable Package targetPackage,
       DataService dataService,
       IdGenerator idGenerator,
       PackageMetadata packageMetadata,
@@ -67,7 +67,7 @@ public class ResourceCopier {
     requireNonNull(resourceCollection);
     this.packages = resourceCollection.getPackages();
     this.entityTypes = resourceCollection.getEntityTypes();
-    this.targetLocation = targetLocation;
+    this.targetPackage = targetPackage;
 
     this.dataService = requireNonNull(dataService);
     this.idGenerator = requireNonNull(idGenerator);
@@ -89,7 +89,6 @@ public class ResourceCopier {
 
   private void copyEntityTypes() {
     entityTypes.forEach(this::assignUniqueLabel);
-    entityTypes.forEach(entityType -> entityType.setPackage(targetLocation));
 
     List<EntityType> allEntityTypes = newArrayList();
     allEntityTypes.addAll(entityTypes);
@@ -108,22 +107,22 @@ public class ResourceCopier {
     updateReferences(copy);
 
     metaDataService.addEntityType(copy);
-    if (!copy.isAbstract()) {
+    copyData(original, copy);
+  }
 
+  private void copyData(EntityType original, EntityType copy) {
+    if (!copy.isAbstract()) {
       Stream<Entity> entities = dataService.findAll(original.getId());
       entities = entities.map(PretendingEntity::new);
       dataService.add(copy.getId(), entities);
     }
-
-    metaDataService.updateEntityType(copy);
   }
 
   private void updatePackage(EntityType entityType) {
     if (entityType.getPackage() != null) {
-      String packageId = entityType.getPackage().getId();
-      if (packageMap.containsKey(packageId)) {
-        entityType.setPackage(packageMap.get(packageId));
-      }
+      // if the EntityType isn't in a copied package, we know it should land in the target package
+      entityType.setPackage(
+          packageMap.getOrDefault(entityType.getPackage().getId(), targetPackage));
     }
   }
 
@@ -154,7 +153,7 @@ public class ResourceCopier {
   private void copyPackage(Package pack) {
     validateNotContainsItself(pack);
     assignUniqueLabel(pack);
-    copyPackageRecursive(pack, targetLocation);
+    copyPackageRecursive(pack, targetPackage);
   }
 
   private void copyPackageRecursive(Package pack, Package parent) {
@@ -183,8 +182,8 @@ public class ResourceCopier {
    */
   private void assignUniqueLabel(Package pack) {
     Set<String> existingLabels = emptySet();
-    if (targetLocation != null) {
-      existingLabels = stream(targetLocation.getChildren()).map(Package::getLabel).collect(toSet());
+    if (targetPackage != null) {
+      existingLabels = stream(targetPackage.getChildren()).map(Package::getLabel).collect(toSet());
     }
     pack.setLabel(generateUniqueLabel(existingLabels, pack.getLabel()));
   }
@@ -195,9 +194,9 @@ public class ResourceCopier {
    */
   private void assignUniqueLabel(EntityType entityType) {
     Set<String> existingLabels = emptySet();
-    if (targetLocation != null) {
+    if (targetPackage != null) {
       existingLabels =
-          stream(targetLocation.getEntityTypes()).map(EntityType::getLabel).collect(toSet());
+          stream(targetPackage.getEntityTypes()).map(EntityType::getLabel).collect(toSet());
     }
     entityType.setLabel(generateUniqueLabel(existingLabels, entityType.getLabel()));
   }
@@ -212,7 +211,7 @@ public class ResourceCopier {
 
   /** Checks that the target location isn't contained in the packages that will be copied. */
   private void validateNotContainsItself(Package pack) {
-    if (pack.equals(targetLocation)) {
+    if (pack.equals(targetPackage)) {
       throw new RecursiveCopyException();
     }
     pack.getChildren().forEach(this::validateNotContainsItself);

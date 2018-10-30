@@ -2,6 +2,7 @@ package org.molgenis.navigator.copy.service;
 
 import static java.util.Objects.requireNonNull;
 
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -33,10 +34,11 @@ public class ResourceCopierFactory {
     this.attributeFactory = requireNonNull(attributeFactory);
   }
 
-  public ResourceCopier newInstance(ResourceCollection resourceCollection, Package targetLocation) {
+  ResourceCopier newInstance(
+      ResourceCollection resourceCollection, @Nullable Package targetPackage) {
     return new ResourceCopier(
         resourceCollection,
-        targetLocation,
+        targetPackage,
         dataService,
         idGenerator,
         packageMetadata,

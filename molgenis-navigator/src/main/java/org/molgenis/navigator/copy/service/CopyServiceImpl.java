@@ -11,6 +11,7 @@ import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings("unused")
 @Component
 public class CopyServiceImpl implements CopyService {
 
@@ -27,9 +28,11 @@ public class CopyServiceImpl implements CopyService {
   @Transactional
   public String copy(List<Resource> resources, String targetPackageId, Progress progress) {
     ResourceCollection resourceCollection = resourceCollector.get(resources);
-    Package targetLocation = resourceCollector.getPackage(targetPackageId);
 
-    resourceCopierFactory.newInstance(resourceCollection, targetLocation).copy();
+    Package targetPackage =
+        targetPackageId != null ? resourceCollector.getPackage(targetPackageId) : null;
+
+    resourceCopierFactory.newInstance(resourceCollection, targetPackage).copy();
     return "true";
   }
 }
