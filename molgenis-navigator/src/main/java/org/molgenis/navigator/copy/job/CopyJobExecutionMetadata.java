@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.job;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.STRING;

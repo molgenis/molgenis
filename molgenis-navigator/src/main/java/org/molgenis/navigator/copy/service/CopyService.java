@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.service;
 
 import java.util.List;
 import org.molgenis.data.resource.Resource;

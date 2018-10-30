@@ -1,8 +1,8 @@
-package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.job;
 
-import static org.molgenis.data.rest.copy.CopyJobExecutionMetadata.COPY_JOB_TYPE;
-import static org.molgenis.data.rest.copy.CopyJobExecutionMetadata.RESOURCES;
-import static org.molgenis.data.rest.copy.CopyJobExecutionMetadata.TARGET_PACKAGE;
+import static org.molgenis.navigator.copy.job.CopyJobExecutionMetadata.COPY_JOB_TYPE;
+import static org.molgenis.navigator.copy.job.CopyJobExecutionMetadata.RESOURCES;
+import static org.molgenis.navigator.copy.job.CopyJobExecutionMetadata.TARGET_PACKAGE;
 
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;

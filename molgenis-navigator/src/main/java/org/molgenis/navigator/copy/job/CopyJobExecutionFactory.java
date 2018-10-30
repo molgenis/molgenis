@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.job;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;

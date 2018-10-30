@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy.impl;
+package org.molgenis.navigator.copy.service;
 
 import static java.util.Objects.requireNonNull;
 

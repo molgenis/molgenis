@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.job;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -9,6 +9,7 @@ import java.util.List;
 import org.molgenis.data.resource.Resource;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
+import org.molgenis.navigator.copy.service.CopyService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.copy.impl;
+package org.molgenis.navigator.copy.service;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -40,8 +40,7 @@ public class ResourceCopier {
 
   private final List<Package> packages;
   private final List<EntityType> entityTypes;
-  @Nullable
-  private final Package targetLocation;
+  @Nullable private final Package targetLocation;
 
   private final DataService dataService;
   private final MetaDataService metaDataService;
@@ -50,9 +49,7 @@ public class ResourceCopier {
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
   private final AttributeFactory attributeFactory;
 
-  /**
-   * List of EntityTypes contained in Package(s) that are being copied.
-   */
+  /** List of EntityTypes contained in Package(s) that are being copied. */
   private final List<EntityType> entityTypesInPackages;
 
   private final Map<String, Package> packageMap;
