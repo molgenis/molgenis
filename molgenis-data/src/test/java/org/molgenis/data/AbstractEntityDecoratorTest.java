@@ -14,8 +14,7 @@ public class AbstractEntityDecoratorTest extends AbstractMockitoTest {
 
   private TestEntity testEntity;
 
-  @Mock
-  private Entity delegateEntity;
+  @Mock private Entity delegateEntity;
 
   @BeforeMethod
   public void beforeMethod() {

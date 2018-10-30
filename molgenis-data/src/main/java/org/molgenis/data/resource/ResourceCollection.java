@@ -7,9 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.util.AutoGson;
 
-/**
- * Collection of typed resources.
- */
+/** Collection of typed resources. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ResourceCollection.class)
 @SuppressWarnings(

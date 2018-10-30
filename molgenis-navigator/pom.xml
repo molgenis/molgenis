@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
@@ -69,9 +71,17 @@
       <artifactId>molgenis-core-ui</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-test</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-i18n</artifactId>
+      <type>test-jar</type>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

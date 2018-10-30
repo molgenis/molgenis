@@ -4,9 +4,7 @@ import com.google.auto.value.AutoValue;
 import javax.validation.constraints.NotNull;
 import org.molgenis.util.AutoGson;
 
-/**
- * Wrapper class for resources. Stores the ID and the type.
- */
+/** Wrapper class for resources. Stores the ID and the type. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_Resource.class)
 @SuppressWarnings(

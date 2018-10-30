@@ -32,6 +32,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.navigator.copy.exception.RecursiveCopyException;
 
 // TODO document
 public class ResourceCopier {
@@ -212,8 +213,7 @@ public class ResourceCopier {
   /** Checks that the target location isn't contained in the packages that will be copied. */
   private void validateNotContainsItself(Package pack) {
     if (pack.equals(targetLocation)) {
-      // TODO add exception
-      throw new IllegalArgumentException("Temp!");
+      throw new RecursiveCopyException();
     }
     pack.getChildren().forEach(this::validateNotContainsItself);
   }
