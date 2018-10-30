@@ -31,7 +31,7 @@ public class CopyJobConfig {
       public Job<String> createJob(CopyJobExecution jobExecution) {
         final List<Resource> resources = toResources(jobExecution.getResources());
         final String targetPackageId = jobExecution.getTargetPackage();
-        return progress -> copyService.copy(resources.stream(), targetPackageId, progress);
+        return progress -> copyService.copy(resources, targetPackageId, progress);
       }
     };
   }

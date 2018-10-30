@@ -2,14 +2,13 @@ package org.molgenis.data.rest.copy.impl;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.resource.ResourceCollection;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,11 +33,9 @@ public class ResourceCopierFactory {
     this.attributeFactory = requireNonNull(attributeFactory);
   }
 
-  public ResourceCopier newInstance(
-      List<Package> packages, List<EntityType> entityTypes, Package targetLocation) {
+  public ResourceCopier newInstance(ResourceCollection resourceCollection, Package targetLocation) {
     return new ResourceCopier(
-        packages,
-        entityTypes,
+        resourceCollection,
         targetLocation,
         dataService,
         idGenerator,

@@ -24,11 +24,13 @@ import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
+import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.util.EntityTypeUtils;
 
 // TODO document
@@ -57,16 +59,16 @@ public class ResourceCopier {
   private final Map<String, EntityType> entityTypeMap;
 
   ResourceCopier(
-      List<Package> packages,
-      List<EntityType> entityTypes,
+      ResourceCollection resourceCollection,
       @Nullable Package targetLocation,
       DataService dataService,
       IdGenerator idGenerator,
       PackageMetadata packageMetadata,
       EntityTypeDependencyResolver entityTypeDependencyResolver,
       AttributeFactory attributeFactory) {
-    this.packages = requireNonNull(packages);
-    this.entityTypes = requireNonNull(entityTypes);
+    requireNonNull(resourceCollection);
+    this.packages = resourceCollection.getPackages();
+    this.entityTypes = resourceCollection.getEntityTypes();
     this.targetLocation = targetLocation;
 
     this.dataService = requireNonNull(dataService);
@@ -139,15 +141,16 @@ public class ResourceCopier {
   private void updateReferences(EntityType entityType) {
     stream(entityType.getAtomicAttributes())
         .filter(EntityTypeUtils::isReferenceType)
-        .forEach(
-            attribute -> {
-              if (attribute.getRefEntity() != null) {
-                String refId = attribute.getRefEntity().getId();
-                if (entityTypeMap.containsKey(refId)) {
-                  attribute.setRefEntity(entityTypeMap.get(refId));
-                }
-              }
-            });
+        .forEach(this::updateReference);
+  }
+
+  private void updateReference(Attribute attribute) {
+    if (attribute.getRefEntity() != null) {
+      String refId = attribute.getRefEntity().getId();
+      if (entityTypeMap.containsKey(refId)) {
+        attribute.setRefEntity(entityTypeMap.get(refId));
+      }
+    }
   }
 
   private void copyPackage(Package pack) {
