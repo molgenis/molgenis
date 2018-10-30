@@ -36,7 +36,7 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
     const valid = child.validate(formData)
 
     if (filledInValue) {
-      const inRange = child.range ? value => child.range.min && value <= child.range.max : true
+      const inRange = child.range ? value >= child.range.min && value <= child.range.max : true
       return valid && inRange
     } else {
       return valid && !required
