@@ -13,7 +13,7 @@ import {
 } from './ItemUtils'
 import { createFolderFromApiPackage } from './FolderUtils'
 import { createJobFromApiJobCopy, createJobFromApiJobDownload } from './JobUtils'
-import { createAlertsFromApiError } from './AlertUtils'
+import { AlertError, createAlertErrorFromApiError } from './AlertUtils'
 import { createAlertError } from '../models/Alert'
 
 const SYS_PACKAGE_ID = 'sys'
@@ -31,31 +31,25 @@ export function fetchJob (job: Job) {
   }
 }
 
-export function getFolder (folderId: ?string): Promise<Folder> {
+export function getFolder (folderId: ?string): Promise<?Folder> {
   return fetchPackageWithAncestors(folderId)
 }
 
-export function getItemsByFolderId (folderId: string) {
+export function getItemsByFolderId (folderId: ?string) {
   const packagesFetch = fetchPackagesByParentPackage(folderId)
   const entityTypesFetch = fetchEntityTypesByParentPackage(folderId)
   return Promise.all([packagesFetch, entityTypesFetch]).then(responses => responses[0].concat(responses[1]))
 }
 
 export function getItemsByQuery (query: string): Promise<Item> {
-  try {
-    validateQuery(query)
-  } catch (error) {
-    let translatedError = new Error('Query ' + query + ' is invalid')
-    translatedError.alerts = [createAlertError(error.message)]
-    throw translatedError
-  }
-
+  validateQuery(query)
   const packageFetch = fetchPackagesByQuery(query)
   const entityTypeFetch = fetchEntityTypesByQuery(query)
   return Promise.all([packageFetch, entityTypeFetch]).then(responses => responses[0].concat(responses[1]))
 }
 
 export function createItem (item: Item, folder: Folder) {
+  let promise
   if (item.type === 'package') {
     const packageEntity = createRestApiPackageFromItem(item)
     packageEntity.parent = folder.id
@@ -64,8 +58,11 @@ export function createItem (item: Item, folder: Folder) {
     const options = {
       body: JSON.stringify({entities: [packageEntity]})
     }
-    return api.post(uri, options).catch(handleApiErrorResponse)
+    promise = api.post(uri, options).catch(handleApiErrorResponse)
+  } else {
+    promise = Promise.resolve()
   }
+  return promise
 }
 
 export function updateItem (item: Item, updatedItem: Item) {
@@ -79,7 +76,7 @@ export function updateItem (item: Item, updatedItem: Item) {
 export function downloadItems (items: Array<Item>): Promise<Job> {
   return api.post('/plugin/navigator/download', {
     body: JSON.stringify({
-      resources: items.map(toApiItem)
+      resources: items.map(item => toApiItem(item))
     })
   }).catch(handleApiErrorResponse).then(createJobFromApiJobDownload)
 }
@@ -87,7 +84,7 @@ export function downloadItems (items: Array<Item>): Promise<Job> {
 export function deleteItems (items: Array<Item>): Promise<string> {
   return api.delete_('/plugin/navigator/delete', {
     body: JSON.stringify({
-      resources: items.map(toApiItem)
+      resources: items.map(item => toApiItem(item))
     })
   }).catch(handleApiErrorResponse)
 }
@@ -95,7 +92,7 @@ export function deleteItems (items: Array<Item>): Promise<string> {
 export function copyItems (items: Array<Item>, folder: Folder): Promise<Job> {
   return api.post('/plugin/navigator/copy', {
     body: JSON.stringify({
-      resources: items.map(toApiItem),
+      resources: items.map(item => toApiItem(item)),
       targetFolderId: folder.id
     })
   }).catch(handleApiErrorResponse).then(createJobFromApiJobCopy)
@@ -104,7 +101,7 @@ export function copyItems (items: Array<Item>, folder: Folder): Promise<Job> {
 export function moveItems (items: Array<Item>, folder: Folder): Promise<string> {
   return api.post('/plugin/navigator/move', {
     body: JSON.stringify({
-      resources: items.map(toApiItem),
+      resources: items.map(item => toApiItem(item)),
       targetFolderId: folder.id
     })
   }).catch(handleApiErrorResponse)
@@ -224,7 +221,7 @@ function getPackageUriByQuery (query: ?string) {
 }
 
 function handleApiErrorResponse (response: Object) {
-  throw createAlertsFromApiError(response)
+  throw createAlertErrorFromApiError(response)
 }
 
 function fetchPackages (uri: string) {
@@ -245,13 +242,13 @@ function fetchEntityTypes (uri: string) {
   return api.get(uri).then(response => filterEntityTypes(response.items).map(createItemFromApiEntityType)).catch(handleApiErrorResponse)
 }
 
-function fetchPackageWithAncestors (packageId: ?string) {
+function fetchPackageWithAncestors (packageId: ?string): Promise<?Folder> {
   // TODO deal with deep packages (show ... in breadcrumb?)
   if (packageId) {
     const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
     return api.get(uri).then(response => createFolderFromApiPackage(response))
   } else {
-    return new Promise((resolve, reject) => { resolve([]) })
+    return Promise.resolve(null)
   }
 }
 
@@ -263,7 +260,10 @@ function fetchPackageWithAncestors (packageId: ?string) {
  */
 function validateQuery (query: string) {
   if (query.indexOf('"') > -1) {
-    throw new Error(
-      'Double quotes not are allowed in queries, please use single quotes.') // TODO i18n
+    throw new AlertError([{
+      type: 'ERROR',
+      code: null,
+      message: 'Double quotes not are allowed in queries, please use single quotes.'
+    }]) // TODO i18n
   }
 }

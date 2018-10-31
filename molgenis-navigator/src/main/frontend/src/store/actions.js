@@ -104,20 +104,30 @@ export default {
   },
   [CREATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     item: Item) {
-    createItem(item, state.folder).then(() => {
-      dispatch(FETCH_ITEMS)
-    }).catch(error => {
-      commit(ADD_ALERTS, error.alerts)
-    })
+    if (state.folder) {
+      createItem(item, state.folder).then(() => {
+        dispatch(FETCH_ITEMS)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    } else {
+      throw new Error('CREATE_ITEM requires state.folder to be set')
+    }
   },
   [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     updatedItem: Item) {
-    const item = state.items.find(item => item.type === updatedItem.type && item.id === updatedItem.id)
-    updateItem(item, updatedItem).then(() => {
-      dispatch(FETCH_ITEMS)
-    }).catch(error => {
-      commit(ADD_ALERTS, error.alerts)
-    })
+    const item = state.items.find(
+      item => item.type === updatedItem.type && item.id === updatedItem.id)
+    if (item !== undefined) {
+      updateItem(item, updatedItem).then(() => {
+        dispatch(FETCH_ITEMS)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    } else {
+      throw new Error(
+        'UPDATE_ITEM requires updated item to refer to existing item')
+    }
   },
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     folder: Folder) {

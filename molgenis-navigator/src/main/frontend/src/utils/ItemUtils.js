@@ -1,5 +1,12 @@
 // @flow
-import type { ApiEntityType, Item, ItemType, ApiPackage } from '../flow.types'
+import type {
+  ApiEntityType,
+  Item,
+  ItemType,
+  ApiPackage,
+  RestApiPackage,
+  ApiItem
+} from '../flow.types'
 import { createItemEntityType, createItemPackage } from '../models/Item'
 
 const SYS_PACKAGE_ID = 'sys'
@@ -32,11 +39,12 @@ function toApiItemType (itemType: ItemType) {
   return apiItemType
 }
 
-export function toApiItem (item: Item, allProperties: boolean = false) {
-  let apiItem = {id: item.id, type: toApiItemType(item.type)}
-  if (allProperties) {
-    apiItem.label = item.label
-    apiItem.description = item.description
+export function toApiItem (item: Item, allProperties: boolean = false): ApiItem {
+  let apiItem = {
+    id: item.id,
+    type: toApiItemType(item.type),
+    label: allProperties ? item.label : undefined,
+    description: allProperties ? item.description : undefined
   }
   return apiItem
 }
@@ -52,5 +60,5 @@ export function createItemFromApiPackage (apiPackage: ApiPackage): Item {
 }
 
 export function createRestApiPackageFromItem (item: Item): RestApiPackage {
-  return {id: item.id, label: item.label, description: item.description}
+  return {id: item.id, label: item.label, description: item.description, parent: undefined}
 }

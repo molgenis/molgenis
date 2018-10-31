@@ -76,7 +76,7 @@ export type RestApiPackage = {
   id: string,
   label: string,
   description: ?string,
-  parent: string
+  parent: ?string
 }
 
 export type ApiEntityType = {
