@@ -99,11 +99,18 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
 
   @Test
   public void testDelete() throws Exception {
-    String json = "{\"entityTypeIds\":[\"e0\",\"e1\"], \"packageIds\":[\"p0\",\"p1\"]}";
+    String json =
+        "{\"resources\": [{\"type\": \"PACKAGE\", \"id\": \"p0\"},{\"type\": \"PACKAGE\", \"id\": \"p1\"},{\"type\": \"ENTITY_TYPE\", \"id\": \"e0\"},{\"type\": \"ENTITY_TYPE\", \"id\": \"e1\"}]}";
     mockMvc
         .perform(
             delete(NavigatorController.URI + "/delete").content(json).contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
-    verify(navigatorService).deleteItems(asList("p0", "p1"), asList("e0", "e1"));
+    verify(navigatorService)
+        .deleteResources(
+            asList(
+                Resource.create(Type.PACKAGE, "p0", null, null),
+                Resource.create(Type.PACKAGE, "p1", null, null),
+                Resource.create(Type.ENTITY_TYPE, "e0", null, null),
+                Resource.create(Type.ENTITY_TYPE, "e1", null, null)));
   }
 }

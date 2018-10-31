@@ -24,6 +24,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.JobExecutor;
+import org.molgenis.navigator.Resource.Type;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +46,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteItemsPackagesAndEntityTypes() {
+  public void testDeleteResourcesPackagesAndEntityTypes() {
     EntityType entityTypeA0 = when(mock(EntityType.class).getId()).thenReturn("eA0").getMock();
     EntityType entityTypeA1 = when(mock(EntityType.class).getId()).thenReturn("eA1").getMock();
     EntityType entityTypeB0 = when(mock(EntityType.class).getId()).thenReturn("eB0").getMock();
@@ -65,7 +66,12 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
         .when(dataService)
         .findAll(eq(PACKAGE), any(Stream.class), eq(Package.class));
 
-    navigatorServiceImpl.deleteItems(asList("pA", "pB"), asList("e0", "e1"));
+    navigatorServiceImpl.deleteResources(
+        asList(
+            Resource.create(Type.PACKAGE, "pA", null, null),
+            Resource.create(Type.PACKAGE, "pB", null, null),
+            Resource.create(Type.ENTITY_TYPE, "e0", null, null),
+            Resource.create(Type.ENTITY_TYPE, "e1", null, null)));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityTypeIdCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -84,7 +90,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteItemsPackages() {
+  public void testDeleteResourcesPackages() {
     EntityType entityTypeA0 = when(mock(EntityType.class).getId()).thenReturn("eA0").getMock();
     EntityType entityTypeA1 = when(mock(EntityType.class).getId()).thenReturn("eA1").getMock();
 
@@ -95,7 +101,8 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
         .when(dataService)
         .findAll(eq(PACKAGE), any(Stream.class), eq(Package.class));
 
-    navigatorServiceImpl.deleteItems(singletonList("pA"), emptyList());
+    navigatorServiceImpl.deleteResources(
+        singletonList(Resource.create(Type.PACKAGE, "pA", null, null)));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityTypeIdCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -112,8 +119,11 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteItemsEntityTypes() {
-    navigatorServiceImpl.deleteItems(emptyList(), asList("e0", "e1"));
+  public void testDeleteResourcesEntityTypes() {
+    navigatorServiceImpl.deleteResources(
+        asList(
+            Resource.create(Type.ENTITY_TYPE, "e0", null, null),
+            Resource.create(Type.ENTITY_TYPE, "e1", null, null)));
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<Object>> entityTypeIdCaptor = ArgumentCaptor.forClass(Stream.class);
@@ -124,8 +134,8 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testDeleteItemsNothing() {
-    navigatorServiceImpl.deleteItems(emptyList(), emptyList());
+  public void testDeleteResourcesNothing() {
+    navigatorServiceImpl.deleteResources(emptyList());
     verifyZeroInteractions(dataService);
   }
 }

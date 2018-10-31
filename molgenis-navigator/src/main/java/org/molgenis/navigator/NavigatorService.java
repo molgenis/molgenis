@@ -9,7 +9,7 @@ public interface NavigatorService {
   // TODO return CopyJobExecution once available
   JobExecution copyResources(List<Resource> resources, String targetFolderId);
 
-  void deleteItems(List<String> packageIds, List<String> entityTypeIds);
+  void deleteResources(List<Resource> resources);
 
   void updateResource(Resource resource);
 }

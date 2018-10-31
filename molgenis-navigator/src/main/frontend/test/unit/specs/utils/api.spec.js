@@ -165,7 +165,7 @@ describe('api', () => {
     const updatedItem = {
       type: 'package',
       id: 'package0',
-      label: 'updated package #0',app
+      label: 'updated package #0',
       readonly: false
     }
     const body = {

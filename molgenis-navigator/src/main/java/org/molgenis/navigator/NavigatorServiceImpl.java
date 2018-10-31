@@ -80,10 +80,23 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   @Transactional
   @Override
-  public void deleteItems(List<String> packageIds, List<String> entityTypeIds) {
-    if (packageIds.isEmpty() && entityTypeIds.isEmpty()) {
+  public void deleteResources(List<Resource> resources) {
+    if (resources.isEmpty()) {
       return;
     }
+
+    List<String> packageIds =
+        resources
+            .stream()
+            .filter(resource -> resource.getType() == Type.PACKAGE)
+            .map(Resource::getId)
+            .collect(toList());
+    List<String> entityTypeIds =
+        resources
+            .stream()
+            .filter(resource -> resource.getType() == Type.ENTITY_TYPE)
+            .map(Resource::getId)
+            .collect(toList());
 
     if (packageIds.isEmpty()) {
       deleteEntityTypes(entityTypeIds);
