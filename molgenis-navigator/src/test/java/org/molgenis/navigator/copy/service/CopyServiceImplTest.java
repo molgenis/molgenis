@@ -1,4 +1,4 @@
-// package org.molgenis.data.rest.copy;
+package org.molgenis.navigator.copy.service;// package org.molgenis.data.rest.copy;
 //
 // import static java.util.Arrays.asList;
 // import static java.util.Collections.singletonList;

@@ -1,4 +1,4 @@
-// package org.molgenis.data.rest.copy.impl;
+//package org.molgenis.navigator.copy.service;
 //
 // import static java.util.Arrays.asList;
 // import static java.util.Collections.singletonList;
@@ -16,7 +16,6 @@
 // import org.molgenis.data.meta.model.Package;
 // import org.molgenis.data.meta.model.PackageMetadata;
 // import org.molgenis.data.populate.IdGenerator;
-// import org.molgenis.data.rest.copy.service.CopyServiceImpl;
 // import org.molgenis.test.AbstractMockitoTest;
 // import org.testng.annotations.BeforeMethod;
 // import org.testng.annotations.Test;
