@@ -26,14 +26,10 @@ function toJobStatus (apiJobStatus: string): JobStatus {
   return jobStatus
 }
 
-export function createCopyJobFromApiCopy (apiCopy: Object): Job {
-  return createJobCopy(apiCopy.jobId, toJobStatus(apiCopy.jobStatus))
-}
-
 export function createJobFromApiJobCopy (apiJobCopy: Object): Job {
-  return createJobCopy(apiJobCopy.identifier, toJobStatus(apiJobCopy.status))
+  return createJobCopy(apiJobCopy.jobId, toJobStatus(apiJobCopy.jobStatus))
 }
 
 export function createJobFromApiJobDownload (apiJobDownload: Object): Job {
-  return createJobDownload(apiJobDownload.identifier, toJobStatus(apiJobDownload.status))
+  return createJobDownload(apiJobDownload.jobId, toJobStatus(apiJobDownload.jobStatus))
 }

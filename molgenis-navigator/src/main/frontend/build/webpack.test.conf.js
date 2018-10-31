@@ -9,7 +9,12 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const webpackConfig = merge(baseWebpackConfig, {
   // use inline sourcemap for karma-sourcemap-loader
   module: {
-    rules: utils.styleLoaders()
+    rules: utils.styleLoaders().concat([
+      {
+        test: require.resolve('chai-as-promised'),
+        use: 'babel-loader'
+      }
+    ])
   },
   devtool: '#inline-source-map',
   resolveLoader: {

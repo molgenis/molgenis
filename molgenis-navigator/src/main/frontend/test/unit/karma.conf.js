@@ -12,11 +12,12 @@ module.exports = function karmaConfig (config) {
     //    http://karma-runner.github.io/0.13/config/browsers.html
     // 2. add it to the `browsers` array below.
     browsers: ['PhantomJS'],
-    frameworks: ['mocha', 'sinon-chai'],
+    frameworks: ['mocha', 'chai-as-promised', 'chai'],
     reporters: ['spec', 'coverage'],
     files: ['../../node_modules/babel-polyfill/dist/polyfill.js', './index.js'],
     preprocessors: {
-      './index.js': ['webpack', 'sourcemap']
+      './index.js': ['webpack', 'sourcemap'],
+      [require.resolve('chai-as-promised')]: ['webpack']
     },
     webpack: webpackConfig,
     webpackMiddleware: {

@@ -10,4 +10,6 @@ public interface NavigatorService {
   JobExecution copyResources(List<Resource> resources, String targetFolderId);
 
   void deleteItems(List<String> packageIds, List<String> entityTypeIds);
+
+  void updateResource(Resource resource);
 }

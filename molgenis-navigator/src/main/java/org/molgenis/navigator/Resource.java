@@ -1,6 +1,7 @@
 package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -15,7 +16,14 @@ public abstract class Resource {
 
   public abstract String getId();
 
-  public static Resource create(Type type, String id) {
-    return new AutoValue_Resource(type, id);
+  @Nullable
+  public abstract String getLabel();
+
+  @Nullable
+  public abstract String getDescription();
+
+  public static Resource create(
+      Type type, String id, @Nullable String label, @Nullable String description) {
+    return new AutoValue_Resource(type, id, label, description);
   }
 }

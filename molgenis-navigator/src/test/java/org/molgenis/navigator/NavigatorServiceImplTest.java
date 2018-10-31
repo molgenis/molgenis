@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,17 +31,17 @@ import org.testng.annotations.Test;
 public class NavigatorServiceImplTest extends AbstractMockitoTest {
 
   @Mock private DataService dataService;
-
+  @Mock private JobExecutor jobExecutor;
   private NavigatorServiceImpl navigatorServiceImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    navigatorServiceImpl = new NavigatorServiceImpl(dataService, null, null);
+    navigatorServiceImpl = new NavigatorServiceImpl(dataService, jobExecutor);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testNavigatorServiceImpl() {
-    new NavigatorServiceImpl(null, null, null);
+    new NavigatorServiceImpl(null, null);
   }
 
   @Test

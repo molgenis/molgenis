@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
+import org.molgenis.navigator.Resource.Type;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -81,6 +83,18 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
         .andExpect(model().attribute("lng", "fr"))
         .andExpect(model().attribute("fallbackLng", "de"))
         .andExpect(model().attribute("isSuperUser", false));
+  }
+
+  @Test
+  public void testUpdateResource() throws Exception {
+    String json =
+        "{\"resource\":{\"id\":\"p0\",\"type\":\"PACKAGE\",\"label\":\"label\",\"description\":\"description\"}}";
+    mockMvc
+        .perform(
+            put(NavigatorController.URI + "/update").content(json).contentType(APPLICATION_JSON))
+        .andExpect(status().isOk());
+    verify(navigatorService)
+        .updateResource(Resource.create(Type.PACKAGE, "p0", "label", "description"));
   }
 
   @Test

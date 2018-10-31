@@ -215,14 +215,18 @@ describe('actions', () => {
     })
   })
   describe('CREATE_ITEM', () => {
-    it('should create the given item and refresh items in the state', done => {
-      const item = {type: 'package', id: 'id', label: 'label', readonly: false}
+    const item = {type: 'package', id: 'id', label: 'label', readonly: false}
+    const folder = {id: 'id', label: 'label', readonly: false}
+    const createItem = td.function('api.createItem')
 
-      const createItem = td.function('api.createItem')
-      td.when(createItem(item)).thenResolve(Promise.resolve())
+    it('should create the given item and refresh items in the state', done => {
+      td.when(createItem(item, folder)).thenResolve(Promise.resolve())
       td.replace(api, 'createItem', createItem)
 
       const options = {
+        state: {
+          folder: folder
+        },
         payload: item,
         expectedActions: [
           {
@@ -233,15 +237,15 @@ describe('actions', () => {
       utils.testAction(actions.__CREATE_ITEM__, options, done)
     })
     it('should set alerts in the state in case of errors', done => {
-      const item = {type: 'package', id: 'id', label: 'label', readonly: false}
-
-      const createItem = td.function('api.createItem')
       const error = new Error()
       error.alerts = [{type: 'ERROR', message: 'message'}]
-      td.when(createItem(item)).thenResolve(Promise.reject(error))
+      td.when(createItem(item, folder)).thenResolve(Promise.reject(error))
       td.replace(api, 'createItem', createItem)
 
       const options = {
+        state: {
+          folder: folder
+        },
         payload: item
       }
       utils.testAction(actions.__CREATE_ITEM__, options, done)
@@ -340,9 +344,10 @@ describe('actions', () => {
     })
   })
   describe('COPY_CLIPBOARD_ITEMS', () => {
+    const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+    const folder = {id: 'id', label: 'label', readonly: false}
+
     it('should copy clipboard items to given target folder', done => {
-      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
-      const folder = {id: 'id', label: 'label', readonly: false}
       const job = {type: 'copy', id: 'id', status: 'running'}
       const copyItems = td.function('api.copyItems')
       td.when(copyItems(items, folder)).thenResolve(Promise.resolve(job))
@@ -367,9 +372,6 @@ describe('actions', () => {
       utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
     })
     it('should set alerts in the state in case of errors', done => {
-      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
-      const folder = {id: 'id', label: 'label', readonly: false}
-
       const copyItems = td.function('api.copyItems')
       const error = new Error()
       error.alerts = [{type: 'ERROR', message: 'message'}]
@@ -389,6 +391,48 @@ describe('actions', () => {
         ]
       }
       utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
+    })
+  })
+  describe('DOWNLOAD_SELECTED_ITEMS', () => {
+    const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
+    const downloadItems = td.function('api.downloadItems')
+
+    it('should download selected items', done => {
+      const job = {type: 'download', id: 'id', status: 'running'}
+
+      td.when(downloadItems(items)).thenResolve(Promise.resolve(job))
+      td.replace(api, 'downloadItems', downloadItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedActions: [
+          {type: '__POLL_JOB__', payload: job}
+        ],
+        expectedMutations: [
+          {type: '__SET_SELECTED_ITEMS__', payload: []},
+          {type: '__ADD_JOB__', payload: job}
+        ]
+      }
+      utils.testAction(actions.__DOWNLOAD_SELECTED_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+
+      td.when(downloadItems(items)).thenResolve(Promise.reject(error))
+      td.replace(api, 'downloadItems', downloadItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__DOWNLOAD_SELECTED_ITEMS__, options, done)
     })
   })
 })

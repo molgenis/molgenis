@@ -1,5 +1,5 @@
 // @flow
-import type { Folder, Item, State } from '../flow.types'
+import type { Folder, Item, Job, State } from '../flow.types'
 import {
   fetchJob,
   getFolder,
@@ -9,7 +9,8 @@ import {
   copyItems,
   deleteItems,
   moveItems,
-  updateItem
+  updateItem,
+  downloadItems
 } from '../utils/api.js'
 import {
   ADD_ALERTS,
@@ -34,7 +35,7 @@ export const UPDATE_ITEM = '__UPDATE_ITEM__'
 export const MOVE_CLIPBOARD_ITEMS = '__MOVE_CLIPBOARD_ITEMS__'
 export const COPY_CLIPBOARD_ITEMS = '__COPY_CLIPBOARD_ITEMS__'
 export const POLL_JOB = '__POLL_JOB__'
-export const SCHEDULE_DOWNLOAD_SELECTED_ITEMS = '__SCHEDULE_DOWNLOAD_SELECTED_ITEMS__'
+export const DOWNLOAD_SELECTED_ITEMS = '__DOWNLOAD_SELECTED_ITEMS__'
 
 function pollJob (commit: Function, job: Job) {
   fetchJob(job).then(updatedJob => {
@@ -101,9 +102,9 @@ export default {
       })
     }
   },
-  [CREATE_ITEM] ({commit, dispatch}: { commit: Function, dispatch: Function },
+  [CREATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     item: Item) {
-    createItem(item).then(() => {
+    createItem(item, state.folder).then(() => {
       dispatch(FETCH_ITEMS)
     }).catch(error => {
       commit(ADD_ALERTS, error.alerts)
@@ -145,12 +146,15 @@ export default {
     job: Job) {
     pollJob(commit, job)
   },
-  [SCHEDULE_DOWNLOAD_SELECTED_ITEMS] ({commit, state}: { commit: Function, state: State }) {
-    const dummyJob = {type: 'copy', id: 'aaaacztxsh4nqabegilmlgaaae', status: 'pending'}
-    pollJob(commit, state, dummyJob)
-    commit(SET_SELECTED_ITEMS, [])
-    // 1. Call download endpoint which will return job location
-    // 2. Poll job location until end state is reached, show progress alert ...
-    // 3. If success: download file
+  [DOWNLOAD_SELECTED_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
+    if (state.selectedItems.length > 0) {
+      downloadItems(state.selectedItems).then(job => {
+        commit(SET_SELECTED_ITEMS, [])
+        commit(ADD_JOB, job)
+        dispatch(POLL_JOB, job)
+      }).catch(error => {
+        commit(ADD_ALERTS, error.alerts)
+      })
+    }
   }
 }

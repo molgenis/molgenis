@@ -44,6 +44,20 @@ describe('mutations', () => {
       expect(state.jobs).to.deep.equal([job0, job1])
     })
   })
+  describe('UPDATE_JOB', () => {
+    it('should update existing job in the state', () => {
+      const job0 = {type: 'download', id: '0', status: 'running'}
+      const job1 = {type: 'copy', id: '0', status: 'running'}
+
+      const state = {
+        jobs: [job0, job1]
+      }
+
+      const updatedJob1 = {type: 'copy', id: '0', status: 'success'}
+      mutations.__UPDATE_JOB__(state, updatedJob1)
+      expect(state.jobs).to.deep.equal([job0, updatedJob1])
+    })
+  })
   describe('SET_FOLDER', () => {
     it('should set the folder', () => {
       const state = {

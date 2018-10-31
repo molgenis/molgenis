@@ -8,8 +8,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.graph.Traverser;
 import java.util.List;
@@ -23,8 +23,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.Resource.Type;
-import org.molgenis.oneclickimporter.job.OneClickImportJobExecution;
-import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class NavigatorServiceImpl implements NavigatorService {
 
   private final DataService dataService;
-  private final OneClickImportJobExecutionFactory
-      oneClickImportJobExecutionFactory; // TODO dummy, must be removed
   private final JobExecutor jobExecutor;
 
-  NavigatorServiceImpl(
-      DataService dataService,
-      OneClickImportJobExecutionFactory oneClickImportJobExecutionFactory,
-      JobExecutor jobExecutor) {
+  NavigatorServiceImpl(DataService dataService, JobExecutor jobExecutor) {
     this.dataService = requireNonNull(dataService);
-    this.oneClickImportJobExecutionFactory = oneClickImportJobExecutionFactory;
     this.jobExecutor = jobExecutor;
   }
 
@@ -78,11 +70,12 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   @Override
   public JobExecution copyResources(List<Resource> resources, String targetFolderId) {
-    OneClickImportJobExecution jobExecution = oneClickImportJobExecutionFactory.create();
-    jobExecution.setUser(getCurrentUsername());
-    jobExecution.setFile("dummy.csv");
-    jobExecutor.submit(jobExecution);
-    return jobExecution;
+    throw new UnsupportedOperationException("TODO implement");
+    //    OneClickImportJobExecution jobExecution = oneClickImportJobExecutionFactory.create();
+    //    jobExecution.setUser(getCurrentUsername());
+    //    jobExecution.setFile("dummy.csv");
+    //    jobExecutor.submit(jobExecution);
+    //    return jobExecution;
   }
 
   @Transactional
@@ -98,6 +91,51 @@ public class NavigatorServiceImpl implements NavigatorService {
       List<Package> deletablePackages = getDeletablePackages(packageIds);
       deleteEntityTypes(deletablePackages, entityTypeIds);
       deletePackages(deletablePackages);
+    }
+  }
+
+  @Transactional
+  @Override
+  public void updateResource(Resource resource) {
+    Type resourceType = resource.getType();
+    switch (resourceType) {
+      case PACKAGE:
+        updatePackage(resource);
+        break;
+      case ENTITY_TYPE:
+        updateEntityType(resource);
+        break;
+      default:
+        throw new UnexpectedEnumException(resourceType);
+    }
+  }
+
+  private void updatePackage(Resource resource) {
+    Package aPackage = dataService.findOneById(PACKAGE, resource.getId(), Package.class);
+    if (aPackage == null) {
+      throw new UnknownEntityException(PACKAGE, resource.getId());
+    }
+
+    if (!Objects.equal(aPackage.getLabel(), resource.getLabel())
+        || !Objects.equal(aPackage.getDescription(), resource.getDescription())) {
+      aPackage.setLabel(resource.getLabel());
+      aPackage.setDescription(resource.getDescription());
+      dataService.update(PACKAGE, aPackage);
+    }
+  }
+
+  private void updateEntityType(Resource resource) {
+    EntityType entityType =
+        dataService.findOneById(ENTITY_TYPE_META_DATA, resource.getId(), EntityType.class);
+    if (entityType == null) {
+      throw new UnknownEntityException(ENTITY_TYPE_META_DATA, resource.getId());
+    }
+
+    if (!Objects.equal(entityType.getLabel(), resource.getLabel())
+        || !Objects.equal(entityType.getDescription(), resource.getDescription())) {
+      entityType.setLabel(resource.getLabel());
+      entityType.setDescription(resource.getDescription());
+      dataService.update(ENTITY_TYPE_META_DATA, entityType);
     }
   }
 

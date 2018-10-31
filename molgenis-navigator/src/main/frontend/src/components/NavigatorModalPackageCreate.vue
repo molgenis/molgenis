@@ -73,7 +73,7 @@ export default {
       }
     },
     handleSubmit () {
-      var folder = Object.assign({}, this.form, {type: 'package', parent: this.folderId, readonly: false})
+      var folder = Object.assign({}, this.form, {type: 'package', readonly: false})
       this.$store.dispatch(CREATE_ITEM, folder)
       this.$refs.packageCreateModal.hide()
     }

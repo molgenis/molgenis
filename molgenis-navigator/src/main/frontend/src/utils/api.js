@@ -8,10 +8,11 @@ import { INITIAL_STATE } from '../store/state'
 import {
   createItemFromApiEntityType,
   createItemFromApiPackage,
+  createRestApiPackageFromItem,
   toApiItem
 } from './ItemUtils'
 import { createFolderFromApiPackage } from './FolderUtils'
-import { createCopyJobFromApiCopy, createJobFromApiJobCopy, createJobFromApiJobDownload } from './JobUtils'
+import { createJobFromApiJobCopy, createJobFromApiJobDownload } from './JobUtils'
 import { createAlertsFromApiError } from './AlertUtils'
 import { createAlertError } from '../models/Alert'
 
@@ -19,6 +20,95 @@ const SYS_PACKAGE_ID = 'sys'
 const REST_API_V2 = '/api/v2'
 const PACKAGE_ENDPOINT = REST_API_V2 + '/sys_md_Package'
 const ENTITY_TYPE_ENDPOINT = REST_API_V2 + '/sys_md_EntityType'
+
+export function fetchJob (job: Job) {
+  // TODO fix
+  console.log(job)
+  if (job.type === 'copy') {
+    return api.get(REST_API_V2 + '/sys_job_OneClickImportJobExecution/' + job.id).then(response => createJobFromApiJobCopy(response))
+  } else {
+    return api.get(REST_API_V2 + '/blaat/' + job.id).then(response => createJobFromApiJobDownload(response))
+  }
+}
+
+export function getFolder (folderId: ?string): Promise<Folder> {
+  return fetchPackageWithAncestors(folderId)
+}
+
+export function getItemsByFolderId (folderId: string) {
+  const packagesFetch = fetchPackagesByParentPackage(folderId)
+  const entityTypesFetch = fetchEntityTypesByParentPackage(folderId)
+  return Promise.all([packagesFetch, entityTypesFetch]).then(responses => responses[0].concat(responses[1]))
+}
+
+export function getItemsByQuery (query: string): Promise<Item> {
+  try {
+    validateQuery(query)
+  } catch (error) {
+    let translatedError = new Error('Query ' + query + ' is invalid')
+    translatedError.alerts = [createAlertError(error.message)]
+    throw translatedError
+  }
+
+  const packageFetch = fetchPackagesByQuery(query)
+  const entityTypeFetch = fetchEntityTypesByQuery(query)
+  return Promise.all([packageFetch, entityTypeFetch]).then(responses => responses[0].concat(responses[1]))
+}
+
+export function createItem (item: Item, folder: Folder) {
+  if (item.type === 'package') {
+    const packageEntity = createRestApiPackageFromItem(item)
+    packageEntity.parent = folder.id
+
+    const uri = REST_API_V2 + '/sys_md_Package'
+    const options = {
+      body: JSON.stringify({entities: [packageEntity]})
+    }
+    return api.post(uri, options).catch(handleApiErrorResponse)
+  }
+}
+
+export function updateItem (item: Item, updatedItem: Item) {
+  return api.put('/plugin/navigator/update', {
+    body: JSON.stringify({
+      resource: toApiItem(updatedItem, true)
+    })
+  }).catch(handleApiErrorResponse)
+}
+
+export function downloadItems (items: Array<Item>): Promise<Job> {
+  return api.post('/plugin/navigator/download', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem)
+    })
+  }).catch(handleApiErrorResponse).then(createJobFromApiJobDownload)
+}
+
+export function deleteItems (items: Array<Item>): Promise<string> {
+  return api.delete_('/plugin/navigator/delete', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem)
+    })
+  }).catch(handleApiErrorResponse)
+}
+
+export function copyItems (items: Array<Item>, folder: Folder): Promise<Job> {
+  return api.post('/plugin/navigator/copy', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem),
+      targetFolderId: folder.id
+    })
+  }).catch(handleApiErrorResponse).then(createJobFromApiJobCopy)
+}
+
+export function moveItems (items: Array<Item>, folder: Folder): Promise<string> {
+  return api.post('/plugin/navigator/move', {
+    body: JSON.stringify({
+      resources: items.map(toApiItem),
+      targetFolderId: folder.id
+    })
+  }).catch(handleApiErrorResponse)
+}
 
 function getEntityTypeUriByParentPackage (packageId: ?string) {
   let rsql
@@ -88,7 +178,7 @@ function filterEntityTypes (entityTypes: Array<ApiEntityType>) {
   return entityTypes.filter(entityType => !entityType.id.startsWith(SYS_PACKAGE_ID + '_'))
 }
 
-export function fetchPackagesByParentPackage (packageId: ?string) {
+function fetchPackagesByParentPackage (packageId: ?string) {
   const uri = getPackageUriByParentPackage(packageId)
   return fetchPackages(uri)
 }
@@ -104,7 +194,7 @@ function getPackageUriByParentPackage (packageId: ?string) {
   return PACKAGE_ENDPOINT + '?attrs=id,label,description&sort=label&num=1000&q=parent==' + rsql
 }
 
-export function fetchPackagesByQuery (query: ?string) {
+function fetchPackagesByQuery (query: ?string) {
   const uri = getPackageUriByQuery(query)
   return fetchPackages(uri)
 }
@@ -134,21 +224,19 @@ function getPackageUriByQuery (query: ?string) {
 }
 
 function handleApiErrorResponse (response: Object) {
-  let error = new Error('API error')
-  error.alerts = createAlertsFromApiError(response)
-  throw error
+  throw createAlertsFromApiError(response)
 }
 
 function fetchPackages (uri: string) {
   return api.get(uri).then(response => filterPackages(response.items).map(createItemFromApiPackage)).catch(handleApiErrorResponse)
 }
 
-export function fetchEntityTypesByParentPackage (packageId: ?string) {
+function fetchEntityTypesByParentPackage (packageId: ?string) {
   const uri = getEntityTypeUriByParentPackage(packageId)
   return fetchEntityTypes(uri)
 }
 
-export function fetchEntityTypesByQuery (query: ?string) {
+function fetchEntityTypesByQuery (query: ?string) {
   const uri = getEntityTypeUriByQuery(query)
   return fetchEntityTypes(uri)
 }
@@ -157,7 +245,7 @@ function fetchEntityTypes (uri: string) {
   return api.get(uri).then(response => filterEntityTypes(response.items).map(createItemFromApiEntityType)).catch(handleApiErrorResponse)
 }
 
-export function fetchPackageWithAncestors (packageId: ?string) {
+function fetchPackageWithAncestors (packageId: ?string) {
   // TODO deal with deep packages (show ... in breadcrumb?)
   if (packageId) {
     const uri = PACKAGE_ENDPOINT + '/' + packageId + '?attrs=id,label,description,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label,parent(id,label)))))'
@@ -165,26 +253,6 @@ export function fetchPackageWithAncestors (packageId: ?string) {
   } else {
     return new Promise((resolve, reject) => { resolve([]) })
   }
-}
-
-export function fetchJob (job: Job) {
-  // TODO fix
-  console.log(job)
-  if (job.type === 'copy') {
-    return api.get(REST_API_V2 + '/sys_job_OneClickImportJobExecution/' + job.id).then(response => createJobFromApiJobCopy(response))
-  } else {
-    return api.get(REST_API_V2 + '/blaat/' + job.id).then(response => createJobFromApiJobDownload(response))
-  }
-}
-
-export function getFolder (folderId: ?string): Promise<Folder> {
-  return fetchPackageWithAncestors(folderId)
-}
-
-export function getItemsByFolderId (folderId: string) {
-  const packagesFetch = fetchPackagesByParentPackage(folderId)
-  const entityTypesFetch = fetchEntityTypesByParentPackage(folderId)
-  return Promise.all([packagesFetch, entityTypesFetch]).then(responses => responses[0].concat(responses[1]))
 }
 
 /**
@@ -198,88 +266,4 @@ function validateQuery (query: string) {
     throw new Error(
       'Double quotes not are allowed in queries, please use single quotes.') // TODO i18n
   }
-}
-
-export function getItemsByQuery (query: string): Promise<Item> {
-  try {
-    validateQuery(query)
-  } catch (error) {
-    let translatedError = new Error('Query ' + query + ' is invalid')
-    translatedError.alerts = [createAlertError(error.message)]
-    throw translatedError
-  }
-
-  const packageFetch = fetchPackagesByQuery(query)
-  const entityTypeFetch = fetchEntityTypesByQuery(query)
-  return Promise.all([packageFetch, entityTypeFetch]).then(responses => responses[0].concat(responses[1]))
-}
-
-export function createItem (item: Item) {
-  if (item.type === 'package') {
-    const uri = REST_API_V2 + '/sys_md_Package'
-    const options = {
-      body: JSON.stringify({entities: [item]})
-    }
-    return api.post(uri, options).catch(handleApiErrorResponse)
-  }
-}
-
-export function updateItem (item: Item, updatedItem: Item) {
-  let promises = []
-  if (updatedItem.type === 'package') {
-    if (item) {
-      if (item.label !== updatedItem.label) {
-        const uri = REST_API_V2 + '/sys_md_Package/label'
-        const options = {
-          body: JSON.stringify({
-            entities: [{
-              id: item.id,
-              label: updatedItem.label
-            }]
-          })
-        }
-        promises.push(api.put(uri, options))
-      }
-      if (item.description !== updatedItem.description) {
-        const uri = REST_API_V2 + '/sys_md_Package/description'
-        const options = {
-          body: JSON.stringify({
-            entities: [{
-              id: item.id,
-              description: updatedItem.description
-            }]
-          })
-        }
-        promises.push(api.put(uri, options))
-      }
-    }
-  }
-  return Promise.all(promises).catch(handleApiErrorResponse)
-}
-
-export function deleteItems (items: Array<Item>) {
-  return api.delete_('/plugin/navigator/delete', {
-    body: JSON.stringify({
-      packageIds: items.filter(item => item.type === 'package').map(item => item.id),
-      entityTypeIds: items.filter(item => item.type === 'entityType').map(item => item.id)
-    })
-  }).catch(handleApiErrorResponse)
-}
-
-export function copyItems (items: Array<Item>, folder: Folder): Promise<string> {
-  return api.post('/plugin/navigator/copy', {
-    body: JSON.stringify({
-      resources: items.map(toApiItem),
-      targetFolderId: folder.id
-    })
-  }).then(createCopyJobFromApiCopy).catch(handleApiErrorResponse)
-}
-
-export function moveItems (items: Array<Item>, folder: Folder) {
-  return api.post('/plugin/navigator/move', {
-    body: JSON.stringify({
-      resources: items.map(toApiItem),
-      targetFolderId: folder.id
-    })
-  }).catch(handleApiErrorResponse)
 }

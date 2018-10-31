@@ -32,8 +32,13 @@ function toApiItemType (itemType: ItemType) {
   return apiItemType
 }
 
-export function toApiItem (item: Item) {
-  return {id: item.id, type: toApiItemType(item.type)}
+export function toApiItem (item: Item, allProperties: boolean = false) {
+  let apiItem = {id: item.id, type: toApiItemType(item.type)}
+  if (allProperties) {
+    apiItem.label = item.label
+    apiItem.description = item.description
+  }
+  return apiItem
 }
 
 export function createItemFromApiEntityType (apiEntityType: ApiEntityType): Item {
@@ -44,4 +49,8 @@ export function createItemFromApiEntityType (apiEntityType: ApiEntityType): Item
 export function createItemFromApiPackage (apiPackage: ApiPackage): Item {
   return createItemPackage(apiPackage.id, apiPackage.label,
     apiPackage.description, isSystemPackage(apiPackage))
+}
+
+export function createRestApiPackageFromItem (item: Item): RestApiPackage {
+  return {id: item.id, label: item.label, description: item.description}
 }

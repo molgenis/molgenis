@@ -1,10 +1,10 @@
 // @flow
-import type {Folder, State} from '../flow.types'
+import type {PathComponent, State} from '../flow.types'
 
 const getters = {
   query: (state: State): ?string => state.route.query.q,
   folderId: (state: State): ?string => state.route.params.folderId,
-  folderPath: (state: State): Array<Folder> => {
+  folderPath: (state: State): Array<PathComponent> => {
     let folderPath = []
     if (state.folder) {
       let folder = state.folder

@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { SCHEDULE_DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
+import { DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
 import { mapGetters, mapState } from 'vuex'
 
 export default {
@@ -80,7 +80,7 @@ export default {
   },
   methods: {
     downloadSelectedItems: function () {
-      this.$store.dispatch(SCHEDULE_DOWNLOAD_SELECTED_ITEMS)
+      this.$store.dispatch(DOWNLOAD_SELECTED_ITEMS)
     }
   }
 }
