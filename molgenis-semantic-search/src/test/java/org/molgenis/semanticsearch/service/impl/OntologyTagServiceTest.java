@@ -128,7 +128,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest {
     Attribute attribute = attrFactory.create().setName("Chr");
     attribute.setTags(asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 
-    Relation instanceOf = Relation.valueOf("instanceOf");
+    Relation instanceOf = Relation.INSTANCE_OF;
 
     Ontology edamOntology =
         Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
