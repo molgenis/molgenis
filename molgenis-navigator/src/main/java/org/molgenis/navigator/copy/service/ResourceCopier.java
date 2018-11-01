@@ -3,11 +3,12 @@ package org.molgenis.navigator.copy.service;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
-import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
@@ -35,6 +37,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
 
 // TODO document
+@SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S3958"}) // TODO REMOVE ME
 public class ResourceCopier {
 
   private static final String POSTFIX = " (Copy)";
@@ -53,8 +56,9 @@ public class ResourceCopier {
   /** List of EntityTypes contained in Package(s) that are being copied. */
   private final List<EntityType> entityTypesInPackages;
 
-  private final Map<String, Package> packageMap;
-  private final Map<String, EntityType> entityTypeMap;
+  private final Map<String, Package> copiedPackageMap;
+  private final Map<String, EntityType> copiedEntityTypeMap;
+  private final Map<String, String> copiedIdsMap;
 
   ResourceCopier(
       ResourceCollection resourceCollection,
@@ -78,8 +82,9 @@ public class ResourceCopier {
     this.metaDataService = this.dataService.getMeta();
 
     this.entityTypesInPackages = newArrayList();
-    this.packageMap = newHashMap();
-    this.entityTypeMap = newHashMap();
+    this.copiedPackageMap = newHashMap();
+    this.copiedEntityTypeMap = newHashMap();
+    this.copiedIdsMap = newHashMap();
   }
 
   public void copy() {
@@ -90,29 +95,46 @@ public class ResourceCopier {
   private void copyEntityTypes() {
     entityTypes.forEach(this::assignUniqueLabel);
 
-    List<EntityType> allEntityTypes = newArrayList();
-    allEntityTypes.addAll(entityTypes);
-    allEntityTypes.addAll(entityTypesInPackages);
+    List<EntityType> copiedEntityTypes =
+        concat(entityTypes.stream(), entityTypesInPackages.stream())
+            .map(this::copyEntityType)
+            .collect(toList());
 
-    List<EntityType> resolvedEntityTypes = entityTypeDependencyResolver.resolve(allEntityTypes);
-    resolvedEntityTypes.forEach(this::copyEntityType);
+    entityTypeDependencyResolver
+        .resolve(copiedEntityTypes)
+        .stream()
+        .map(this::update)
+        .forEach(this::persist);
   }
 
-  private void copyEntityType(EntityType original) {
+  private EntityType copyEntityType(EntityType original) {
     EntityType copy = EntityType.newInstance(original, DEEP_COPY_ATTRS, attributeFactory);
 
-    assignNewId(copy);
+    String newId = idGenerator.generateId();
+    copy.setId(newId);
+
+    copiedEntityTypeMap.put(original.getId(), copy);
+    copiedIdsMap.put(newId, original.getId());
+
+    return copy;
+  }
+
+  private void persist(EntityType copy) {
+    metaDataService.addEntityType(copy);
+
+    copyEntities(copiedIdsMap.get(copy.getId()), copy);
+  }
+
+  private EntityType update(EntityType copy) {
     updatePackage(copy);
     updateExtends(copy);
     updateReferences(copy);
-
-    metaDataService.addEntityType(copy);
-    copyData(original, copy);
+    return copy;
   }
 
-  private void copyData(EntityType original, EntityType copy) {
+  private void copyEntities(String originalEntityTypeId, EntityType copy) {
     if (!copy.isAbstract()) {
-      Stream<Entity> entities = dataService.findAll(original.getId());
+      Stream<Entity> entities = dataService.findAll(originalEntityTypeId);
       entities = entities.map(PretendingEntity::new);
       dataService.add(copy.getId(), entities);
     }
@@ -122,15 +144,15 @@ public class ResourceCopier {
     if (entityType.getPackage() != null) {
       // if the EntityType isn't in a copied package, we know it should land in the target package
       entityType.setPackage(
-          packageMap.getOrDefault(entityType.getPackage().getId(), targetPackage));
+          copiedPackageMap.getOrDefault(entityType.getPackage().getId(), targetPackage));
     }
   }
 
   private void updateExtends(EntityType entityType) {
     if (entityType.getExtends() != null) {
       String extendsId = entityType.getExtends().getId();
-      if (entityTypeMap.containsKey(extendsId)) {
-        entityType.setExtends(entityTypeMap.get(extendsId));
+      if (copiedEntityTypeMap.containsKey(extendsId)) {
+        entityType.setExtends(copiedEntityTypeMap.get(extendsId));
       }
     }
   }
@@ -144,8 +166,8 @@ public class ResourceCopier {
   private void updateReference(Attribute attribute) {
     if (attribute.getRefEntity() != null) {
       String refId = attribute.getRefEntity().getId();
-      if (entityTypeMap.containsKey(refId)) {
-        attribute.setRefEntity(entityTypeMap.get(refId));
+      if (copiedEntityTypeMap.containsKey(refId)) {
+        attribute.setRefEntity(copiedEntityTypeMap.get(refId));
       }
     }
   }
@@ -164,15 +186,9 @@ public class ResourceCopier {
     pack.getChildren().forEach(child -> copyPackageRecursive(getPackage(child.getId()), pack));
   }
 
-  private void assignNewId(EntityType entityType) {
-    String newId = idGenerator.generateId();
-    entityTypeMap.put(entityType.getId(), entityType);
-    entityType.setId(newId);
-  }
-
   private void assignNewId(Package pack) {
     String newId = idGenerator.generateId();
-    packageMap.put(pack.getId(), pack);
+    copiedPackageMap.put(pack.getId(), pack);
     pack.setId(newId);
   }
 
@@ -181,9 +197,17 @@ public class ResourceCopier {
    * postfix until the label is unique.
    */
   private void assignUniqueLabel(Package pack) {
-    Set<String> existingLabels = emptySet();
+    Set<String> existingLabels;
     if (targetPackage != null) {
       existingLabels = stream(targetPackage.getChildren()).map(Package::getLabel).collect(toSet());
+    } else {
+      existingLabels =
+          dataService
+              .query(PACKAGE, Package.class)
+              .eq(PackageMetadata.PARENT, null)
+              .findAll()
+              .map(Package::getLabel)
+              .collect(toSet());
     }
     pack.setLabel(generateUniqueLabel(existingLabels, pack.getLabel()));
   }
@@ -193,10 +217,18 @@ public class ResourceCopier {
    * a postfix until the label is unique.
    */
   private void assignUniqueLabel(EntityType entityType) {
-    Set<String> existingLabels = emptySet();
+    Set<String> existingLabels;
     if (targetPackage != null) {
       existingLabels =
           stream(targetPackage.getEntityTypes()).map(EntityType::getLabel).collect(toSet());
+    } else {
+      existingLabels =
+          dataService
+              .query(ENTITY_TYPE_META_DATA, EntityType.class)
+              .eq(EntityTypeMetadata.PACKAGE, null)
+              .findAll()
+              .map(EntityType::getLabel)
+              .collect(toSet());
     }
     entityType.setLabel(generateUniqueLabel(existingLabels, entityType.getLabel()));
   }
@@ -239,8 +271,8 @@ public class ResourceCopier {
     public EntityType getEntityType() {
       if (delegate().getEntityType() != null) {
         String id = delegate().getEntityType().getId();
-        if (entityTypeMap.containsKey(id)) {
-          return entityTypeMap.get(id);
+        if (copiedEntityTypeMap.containsKey(id)) {
+          return copiedEntityTypeMap.get(id);
         } else {
           return delegate().getEntityType();
         }
