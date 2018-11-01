@@ -10,7 +10,8 @@
 </template>
 
 <style>
-  .questionnaire-chapter .pl-2 > fieldset > small {
+  .questionnaire-chapter .pl-2 > fieldset > small,
+  .questionnaire-chapter .pl-4 > fieldset > legend {
     font-size: 100%;
   }
 
@@ -18,8 +19,9 @@
     padding-top: 1rem;
   }
 
+  .questionnaire-chapter [class^="pl-"] > fieldset .form-group > label,
   .questionnaire-chapter .pl-4 > fieldset > legend {
-    font-size: 100%;
+    font-weight: 700;
   }
 </style>
 
