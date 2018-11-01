@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PythonScriptExecutor {
+
   private static final Logger LOG = LoggerFactory.getLogger(PythonScriptExecutor.class);
+  public static final char DOUBLEQUOTE = '"';
 
   private final String pythonScriptExecutable;
 
@@ -53,7 +55,7 @@ public class PythonScriptExecutor {
       // Create r process
       LOG.info("Running python script [{}]", tempScriptFilePath);
       Process process =
-          Runtime.getRuntime().exec(pythonScriptExecutable + " " + tempScriptFilePath);
+          Runtime.getRuntime().exec(getCommand(pythonScriptExecutable, tempScriptFilePath));
 
       // Capture the error output
       final StringBuilder sb = new StringBuilder();
@@ -93,5 +95,9 @@ public class PythonScriptExecutor {
         }
       }
     }
+  }
+
+  protected static String getCommand(String pythonScriptExecutable, String tempScriptFilePath) {
+    return pythonScriptExecutable + " " + DOUBLEQUOTE + tempScriptFilePath + DOUBLEQUOTE;
   }
 }
