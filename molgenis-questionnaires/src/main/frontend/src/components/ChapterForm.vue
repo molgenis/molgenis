@@ -10,12 +10,12 @@
 </template>
 
 <style>
-  .questionnaire-chapter .pl-2 > fieldset > small,
-  .questionnaire-chapter .pl-4 > fieldset > legend {
+  .questionnaire-chapter fieldset fieldset fieldset > small,
+  .questionnaire-chapter fieldset fieldset fieldset > legend {
     font-size: 100%;
   }
 
-  .questionnaire-chapter [class^="pl-"] > fieldset > legend {
+  .questionnaire-chapter fieldset fieldset fieldset > legend {
     padding-top: 1rem;
   }
 </style>
