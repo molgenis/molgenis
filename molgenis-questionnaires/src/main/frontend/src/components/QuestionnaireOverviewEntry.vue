@@ -4,7 +4,8 @@
 
       <template v-if="attribute.fieldType === 'COMPOUND'">
         <div v-if="hasAChildWithData(attribute)">
-          <h4>{{ attribute.label }}</h4>
+          <h4 v-if="level < 5">{{attribute.label }}</h4>
+          <b v-else>{{ attribute.label }}</b>
           <hr>
         </div>
 
@@ -67,7 +68,8 @@
             case 'CATEGORICAL_MREF':
               return value.map(v => v[attribute.refEntity.labelAttribute]).join(', ')
             case 'BOOL':
-              return value ? this.$t('questionnaire_boolean_true') : this.$t('questionnaire_boolean_false')
+              return value ? this.$t('questionnaire_boolean_true') : this.$t(
+                'questionnaire_boolean_false')
             case 'ENUM':
               return value.join(', ')
             case 'XREF':
