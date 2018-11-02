@@ -11,6 +11,10 @@ jaxb {
     }
 }
 
+tasks.withType(JavaCompile) {
+    dependsOn 'yarnBuild'
+}
+
 description = 'core-ui'
 dependencies {
     compile project(':molgenis-core')

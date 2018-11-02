@@ -3,25 +3,25 @@ var webpack = require('webpack');
 
 var configuration = {
     resolve: {
-        root: [path.resolve('./src/main/javascript'), path.resolve('./node_modules')],
+        root: [path.resolve('./src'), path.resolve('./node_modules')],
         alias: {
             'react-components': 'modules/react-components',
             'rest-client': 'modules/rest-client',
             'i18n': 'modules/i18n',
-            'jquery-ui': 'plugins/jquery-ui-1.9.2.custom.min',
-            'jq-edit-rangeslider': 'plugins/jQEditRangeSlider-min',
-            'select2': 'plugins/select2-patched',
+            'jquery-ui': '../../resources/js/jquery-ui-1.9.2.custom.min',
+            'jq-edit-rangeslider': '../../resources/js/jQEditRangeSlider-min',
+            'select2': '../../resources/js/select2-patched',
             'utils' : 'modules/utils'
         }
     },
     context: __dirname,
     entry: {
-        'global-ui': ['./src/main/javascript/molgenis-global-ui-webpack'],
-        'global': ['./src/main/javascript/molgenis-global-webpack'],
-        'vendor-bundle': ['./src/main/javascript/molgenis-vendor-webpack']
+        'global-ui': ['molgenis-global-ui-webpack'],
+        'global': ['molgenis-global-webpack'],
+        'vendor-bundle': ['molgenis-vendor-webpack']
     },
     output: {
-        path: './target/classes/js/dist/',
+        path : '../../../build/dist/js/dist/',
         filename: 'molgenis-[name].js',
         publicPath: '/js/dist/'
     },    
@@ -34,7 +34,7 @@ var configuration = {
         new webpack.PrefetchPlugin('react-components'),
         new webpack.PrefetchPlugin('moment'),
         new webpack.PrefetchPlugin('promise'),
-        new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
+        new webpack.PrefetchPlugin('./src/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.DefinePlugin({
@@ -57,7 +57,7 @@ var configuration = {
         loaders: [{
             test: /\.jsx?$/,
             loader: 'babel',
-            exclude: [/node_modules/, /src[/\\]main[/\\]javascript[/\\]plugins/]
+            exclude: [/node_modules/, /src[/\\]main[/\\]resources[/\\]js/]
         }, {
             test: /\.css$/,
             loader: 'style-loader!css-loader'
