@@ -21,6 +21,28 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
+    test {
+        // enable TestNG support (default is JUnit)
+        useTestNG()
+
+        exclude 'org/molgenis/**/**IT**'
+
+        // show standard out and standard error of the test JVM(s) on the console
+        testLogging {
+            showExceptions false
+            showCauses false
+            showStackTraces false
+            showStandardStreams false
+        }
+
+        // set heap size for the test JVM(s)
+        minHeapSize = "128m"
+        maxHeapSize = "512m"
+
+        // Fail the 'test' task on the first test failure
+        failFast = true
+    }
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -101,8 +123,6 @@ subprojects {
             }
         }
     }
-
-
 
     dependencies {
         compile group: 'com.google.code.findbugs', name: 'jsr305'
