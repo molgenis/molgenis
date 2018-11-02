@@ -1,5 +1,6 @@
 plugins {
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+    id 'com.moowork.node' version '1.2.0'
 }
 
 allprojects {
@@ -13,9 +14,23 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.moowork.node'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+
+    node {
+        version = '8.12.0'
+        npmVersion = '2.1.5'
+        yarnVersion = '1.7.0'
+        download = true
+    }
+
+    jar {
+        from('build/dist') {
+            include '**'
+        }
+    }
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -27,20 +42,42 @@ subprojects {
 
         exclude 'org/molgenis/**/**IT**'
 
-        // show standard out and standard error of the test JVM(s) on the console
-        testLogging {
-            showExceptions false
-            showCauses false
-            showStackTraces false
-            showStandardStreams false
-        }
-
         // set heap size for the test JVM(s)
         minHeapSize = "128m"
         maxHeapSize = "512m"
 
         // Fail the 'test' task on the first test failure
         failFast = true
+    }
+
+    task yarnInstall(type: YarnTask) {
+        // Checks if package.json has been modified for efficiency purposes
+        // The reference directory is node_modules
+        inputs.file("${project.projectDir}/src/main/frontend/package.json")
+        outputs.dir("${project.projectDir}/src/main/frontend/node_modules")
+
+        // Determines working directory of subproject
+        workingDir = file("${project.projectDir}/src/main/frontend")
+
+        // Arguments for yarn to run (in this case "install")
+        args = ['install', '--frozen-lockfile', '--mutex', 'network']
+    }
+
+    task yarnTest(type: YarnTask) {
+        dependsOn yarnInstall
+        workingDir = file("${project.projectDir}/src/main/frontend")
+
+        args = ['test']
+    }
+
+    task yarnBuild(type: YarnTask) {
+        dependsOn yarnInstall
+
+        inputs.files(fileTree("${project.projectDir}/src/main/frontend"))
+        outputs.dir("${project.buildDir}/dist")
+
+        workingDir = file("${project.projectDir}/src/main/frontend")
+        args = ['build']
     }
 
     repositories {

@@ -1,4 +1,9 @@
 description = 'questionnaires'
+
+tasks.withType(JavaCompile) {
+    dependsOn 'yarnBuild'
+}
+
 dependencies {
     compile project(':molgenis-core-ui')
     compile project(':molgenis-data')

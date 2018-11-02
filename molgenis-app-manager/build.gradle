@@ -1,4 +1,9 @@
 description = 'app-manager'
+
+tasks.withType(JavaCompile) {
+    dependsOn 'yarnBuild'
+}
+
 dependencies {
     compile project(':molgenis-core')
     compile project(':molgenis-core-ui')

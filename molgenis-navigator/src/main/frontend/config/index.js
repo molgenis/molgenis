@@ -3,8 +3,8 @@ var path = require('path')
 module.exports = {
   build: {
     env: require('./prod.env'),
-    index: path.resolve(__dirname, '../../../../target/classes/index.html'),
-    assetsRoot: path.resolve(__dirname, '../../../../target/classes'),
+    index: path.resolve(__dirname, '../../../../build/dist/index.html'),
+    assetsRoot: path.resolve(__dirname, '../../../../build/dist'),
     assetsSubDirectory: '',
     assetsPublicPath: '/',
     productionSourceMap: true,

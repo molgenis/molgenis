@@ -1,5 +1,9 @@
-
 description = 'security-ui'
+
+tasks.withType(JavaCompile) {
+  dependsOn 'yarnBuild'
+}
+
 dependencies {
   compile project(':molgenis-web')
   compile project(':molgenis-core-ui')

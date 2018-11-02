@@ -1,5 +1,9 @@
-
 description = 'one-click-importer'
+
+tasks.withType(JavaCompile) {
+  dependsOn 'yarnBuild'
+}
+
 dependencies {
   compile project(':molgenis-data')
   compile project(':molgenis-web')

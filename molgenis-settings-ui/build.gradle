@@ -1,5 +1,9 @@
-
 description = 'settings-ui'
+
+tasks.withType(JavaCompile) {
+  dependsOn 'yarnBuild'
+}
+
 dependencies {
   compile project(':molgenis-web')
   compile project(':molgenis-i18n')

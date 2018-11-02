@@ -1,5 +1,9 @@
-
 description = 'navigator'
+
+tasks.withType(JavaCompile) {
+  dependsOn 'yarnBuild'
+}
+
 dependencies {
   compile project(':molgenis-core-ui')
   testCompile project(':molgenis-test')
