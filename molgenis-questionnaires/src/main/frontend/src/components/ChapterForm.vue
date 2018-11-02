@@ -18,11 +18,6 @@
   .questionnaire-chapter [class^="pl-"] > fieldset > legend {
     padding-top: 1rem;
   }
-
-  .questionnaire-chapter [class^="pl-"] > fieldset .form-group > label,
-  .questionnaire-chapter .pl-4 > fieldset > legend {
-    font-weight: 700;
-  }
 </style>
 
 <script>
