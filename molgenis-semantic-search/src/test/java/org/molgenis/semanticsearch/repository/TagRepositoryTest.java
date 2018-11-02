@@ -62,7 +62,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest {
     tag.setObjectIri("http://edamontology.org/data_3031");
     tag.setLabel("Core data");
     tag.setRelationIri("http://molgenis.org/biobankconnect/instanceOf");
-    tag.setRelationLabel("instanceOf");
+    tag.setRelationLabel("INSTANCE_OF");
     tag.setCodeSystem("http://edamontology.org");
 
     @SuppressWarnings("unchecked")
