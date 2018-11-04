@@ -50,34 +50,21 @@ subprojects {
         failFast = true
     }
 
-    task yarnInstall(type: YarnTask) {
-        // Checks if package.json has been modified for efficiency purposes
-        // The reference directory is node_modules
-        inputs.file("${project.projectDir}/src/main/frontend/package.json")
-        outputs.dir("${project.projectDir}/src/main/frontend/node_modules")
-
-        // Determines working directory of subproject
-        workingDir = file("${project.projectDir}/src/main/frontend")
-
-        // Arguments for yarn to run (in this case "install")
-        args = ['install', '--frozen-lockfile', '--mutex', 'network']
-    }
-
     task yarnTest(type: YarnTask) {
-        dependsOn yarnInstall
+        dependsOn ':yarn_install'
         workingDir = file("${project.projectDir}/src/main/frontend")
 
         args = ['test']
     }
 
     task yarnBuild(type: YarnTask) {
-        dependsOn yarnInstall
+        dependsOn ':yarn_install'
 
         inputs.files(fileTree("${project.projectDir}/src/main/frontend"))
         outputs.dir("${project.buildDir}/dist")
 
         workingDir = file("${project.projectDir}/src/main/frontend")
-        args = ['build', '--mutex', 'network']
+        args = ['build']
     }
 
     repositories {
@@ -176,12 +163,7 @@ subprojects {
     dependencies {
         compile group: 'com.google.code.findbugs', name: 'jsr305'
         compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
-        compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
-        compile(group: 'com.google.guava', name: 'guava') {
-            exclude(module: 'error_prone_annotations')
-            exclude(module: 'j2objc-annotations')
-            exclude(module: 'animal-sniffer-annotations')
-            exclude(module: 'checker-compat-qual')
-        }
+        compile group: 'org.slf4j', name: 'log4j-over-slf4j'
+        compile group: 'com.google.guava', name: 'guava'
     }
 }
