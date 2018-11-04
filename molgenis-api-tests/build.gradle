@@ -1,17 +1,16 @@
-
 description = 'api-tests'
 dependencies {
-  testCompile project(':molgenis-app')
+    testCompile project(':molgenis-app')
     testCompile group: 'org.glassfish', name: 'javax.el'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all'
-  testCompile project(':molgenis-data')
-  testCompile project(':molgenis-data-rest')
-  testCompile project(':molgenis-one-click-importer')
-  testCompile project(':molgenis-beacon')
-  testCompile project(':molgenis-security')
+    testCompile project(':molgenis-data')
+    testCompile project(':molgenis-data-rest')
+    testCompile project(':molgenis-one-click-importer')
+    testCompile project(':molgenis-beacon')
+    testCompile project(':molgenis-security')
     testCompile group: 'org.skyscreamer', name: 'jsonassert'
-  testCompile project(':molgenis-test')
-  testCompile project(':molgenis-data-elasticsearch')
+    testCompile project(':molgenis-test')
+    testCompile project(':molgenis-data-elasticsearch')
     testCompile group: 'io.rest-assured', name: 'rest-assured'
     testCompile group: 'com.jayway.jsonpath', name: 'json-path'
     testCompile group: 'org.awaitility', name: 'awaitility'

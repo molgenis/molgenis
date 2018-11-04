@@ -8,8 +8,8 @@ dependencies {
     compile project(':molgenis-core-ui')
     compile project(':molgenis-data')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path'
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }

@@ -2,7 +2,7 @@ description = 'data-file'
 dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-data-security')
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'commons-io', name: 'commons-io'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')

@@ -4,13 +4,13 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-data-import')
     compile project(':molgenis-data-file')
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api', version: '3.4.10'
-    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding', version: '3.4.10'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-api'
+    compile group: 'net.sourceforge.owlapi', name: 'owlapi-apibinding'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
 }
 
 task packageTests(type: Jar) {

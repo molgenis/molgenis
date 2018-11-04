@@ -8,10 +8,8 @@ dependencies {
     compile project(':molgenis-data-csv')
     compile project(':molgenis-test')
     compile project(':molgenis-security-core')
-    compile(group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.86') {
-        exclude(module: 'commons-logging')
-    }
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compile(group: 'com.amazonaws', name: 'aws-java-sdk-s3')
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
     testCompile project (path: ":molgenis-data", configuration: 'testArtifacts')
     testCompile project (path: ":molgenis-jobs", configuration: 'testArtifacts')
     testCompile project(path: ':molgenis-data-file', configuration: 'testArtifacts')

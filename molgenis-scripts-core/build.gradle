@@ -1,9 +1,9 @@
 description = 'scripts-core'
 dependencies {
     compile project(':molgenis-data')
-    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
-    testCompile group: 'org.testng', name: 'testng', version: '6.8'
-    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.7.22'
+    compile group: 'org.freemarker', name: 'freemarker'
+    testCompile group: 'org.testng', name: 'testng'
+    testCompile group: 'org.mockito', name: 'mockito-core'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
 }
 test.useTestNG()

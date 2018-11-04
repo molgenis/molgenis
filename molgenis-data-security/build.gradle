@@ -3,11 +3,11 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-security-core')
     compile project(':molgenis-settings')
-    compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-acl', version: '5.0.8.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-core'
+    compile group: 'org.springframework.security', name: 'spring-security-acl'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
     testCompile project(path: ':molgenis-security-core', configuration: 'testArtifacts')
 }

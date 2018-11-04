@@ -6,18 +6,18 @@ dependencies {
     compile project(':molgenis-data-file')
     compile project(':molgenis-data-i18n')
     compile project(':molgenis-security')
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.0.9.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.0.8.RELEASE'
-    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.12.Final'
-    compile group: 'org.glassfish', name: 'javax.el', version: '3.0.0'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
-    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    compile group: 'org.springframework', name: 'spring-webmvc'
+    compile group: 'org.springframework.security', name: 'spring-security-web'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator'
+    compile group: 'org.glassfish', name: 'javax.el'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-core'
+    testCompile group: 'org.skyscreamer', name: 'jsonassert'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path'
     testCompile project(':molgenis-test')
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
 }

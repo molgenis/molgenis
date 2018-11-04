@@ -1,8 +1,7 @@
-
 description = 'js'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-scripts-core')
-    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version:'2.6.2'
-  testCompile project(':molgenis-test')
+    compile project(':molgenis-data')
+    compile project(':molgenis-scripts-core')
+    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine'
+    testCompile project(':molgenis-test')
 }

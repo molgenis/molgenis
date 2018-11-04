@@ -1,8 +1,7 @@
-
 description = 'python'
 dependencies {
-  compile project(':molgenis-security')
-  compile project(':molgenis-scripts-core')
-  testCompile project(':molgenis-test')
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile project(':molgenis-security')
+    compile project(':molgenis-scripts-core')
+    testCompile project(':molgenis-test')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }

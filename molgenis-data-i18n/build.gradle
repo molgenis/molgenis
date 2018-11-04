@@ -3,7 +3,7 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-i18n')
     compile project(':molgenis-data-security')
-    compile group: 'org.springframework', name: 'spring-tx', version: '5.0.9.RELEASE'
+    compile group: 'org.springframework', name: 'spring-tx'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
 }

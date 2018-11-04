@@ -32,28 +32,26 @@ dependencies {
     compile project(':molgenis-security')
     compile project(':molgenis-jobs')
     compile project(':molgenis-web')
-    compile(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6') {
-        exclude(module: 'commons-logging')
-    }
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.0.9.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.0.8.RELEASE'
-    compile group: 'no.api.freemarker', name: 'freemarker-java8', version: '1.1.2'
-    compile group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
-    compile group: 'eu.bitwalker', name: 'UserAgentUtils', version: '1.17'
-    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: '2.0.2'
-    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.12.Final'
-    compile group: 'org.glassfish', name: 'javax.el', version: '3.0.0'
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    compile group: 'io.swagger', name: 'swagger-annotations', version: '1.5.16'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient'
+    compile group: 'org.springframework', name: 'spring-webmvc'
+    compile group: 'org.springframework.security', name: 'spring-security-web'
+    compile group: 'no.api.freemarker', name: 'freemarker-java8'
+    compile group: 'org.webjars', name: 'webjars-locator-core'
+    compile group: 'eu.bitwalker', name: 'UserAgentUtils'
+    compile group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator'
+    compile group: 'org.glassfish', name: 'javax.el'
+    compile group: 'commons-io', name: 'commons-io'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
+    compile group: 'io.swagger', name: 'swagger-annotations'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all'
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
-    testCompile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.3.3'
+    testCompile group: 'commons-fileupload', name: 'commons-fileupload'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-data-import')
     testCompile project(path: ':molgenis-data-security', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }

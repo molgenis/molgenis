@@ -77,7 +77,7 @@ subprojects {
         outputs.dir("${project.buildDir}/dist")
 
         workingDir = file("${project.projectDir}/src/main/frontend")
-        args = ['build']
+        args = ['build', '--mutex', 'network']
     }
 
     repositories {
@@ -158,6 +158,18 @@ subprojects {
             dependency('org.skyscreamer:jsonassert:1.5.0') {
                 exclude 'com.vaadin.external.google:android-json'
             }
+            dependency 'com.eaio.uuid:uuid:3.2'
+            dependency 'com.mchange:c3p0:0.9.5.2'
+            dependency 'net.sf.opencsv:opencsv:2.3'
+            dependency('com.github.jmchilton.blend4j:blend4j:0.1.0') {
+                exclude 'stax:stax-api'
+            }
+            dependency 'net.sourceforge.owlapi:owlapi-api:3.4.10'
+            dependency 'net.sourceforge.owlapi:owlapi-apibinding:3.4.10'
+            dependency 'com.fatboyindustrial.gson-javatime-serialisers:gson-javatime-serialisers:1.1.1'
+            dependency 'org.jscience:jscience:4.3.1'
+            dependency 'org.webjars:swagger-ui:3.2.2'
+
         }
     }
 

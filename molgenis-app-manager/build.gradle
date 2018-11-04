@@ -10,10 +10,10 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-security-core')
     testCompile project(':molgenis-test')
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path'
     testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }

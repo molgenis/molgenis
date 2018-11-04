@@ -3,9 +3,9 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-data-file')
     compile project(':molgenis-util')
-    compile group: 'net.sf.opencsv', name: 'opencsv', version: '2.3'
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'net.sf.opencsv', name: 'opencsv'
+    compile group: 'commons-io', name: 'commons-io'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
 }

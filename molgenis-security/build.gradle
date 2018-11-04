@@ -6,22 +6,22 @@ dependencies {
     compile project(':molgenis-data-plugin')
     compile project(':molgenis-data-security')
     compile project(':molgenis-web')
-    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.6.2'
-    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
-    compile group: 'cn.apiclub.tool', name: 'simplecaptcha', version: '1.2.2'
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '5.0.9.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-acl', version: '5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: '5.0.8.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-oauth2-client', version: '5.0.8.RELEASE'
-    compile group: 'org.jboss.aerogear', name: 'aerogear-otp-java', version: '1.0.0'
-    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.0.12.Final'
-    compile group: 'org.glassfish', name: 'javax.el', version: '3.0.0'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    compile group: 'com.github.ben-manes.caffeine', name: 'caffeine'
+    compile group: 'org.freemarker', name: 'freemarker'
+    compile group: 'cn.apiclub.tool', name: 'simplecaptcha'
+    compile group: 'org.springframework', name: 'spring-webmvc'
+    compile group: 'org.springframework.security', name: 'spring-security-web'
+    compile group: 'org.springframework.security', name: 'spring-security-config'
+    compile group: 'org.springframework.security', name: 'spring-security-acl'
+    compile group: 'org.springframework.security', name: 'spring-security-oauth2-jose'
+    compile group: 'org.springframework.security', name: 'spring-security-oauth2-client'
+    compile group: 'org.jboss.aerogear', name: 'aerogear-otp-java'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator'
+    compile group: 'org.glassfish', name: 'javax.el'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
     testCompile project(':molgenis-test')
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
-    testCompile project(path: ':molgenis-i18n', configuration: 'testArtifacts')
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path'
+    testCompile project (path: ':molgenis-i18n', configuration: 'testArtifacts')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }

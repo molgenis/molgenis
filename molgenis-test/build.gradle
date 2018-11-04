@@ -1,12 +1,10 @@
-
 description = 'test'
 dependencies {
-    compile group: 'org.testng', name: 'testng', version:'6.8'
-    compile group: 'org.mockito', name: 'mockito-core', version:'2.7.22'
-    compile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
-    compile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    compile group: 'org.springframework', name: 'spring-test', version:'5.0.9.RELEASE'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version:'2.9.6'
-    compile group: 'org.springframework', name: 'spring-context', version:'5.0.9.RELEASE'
+    compile group: 'org.testng', name: 'testng'
+    compile group: 'org.mockito', name: 'mockito-core'
+    compile group: 'org.hamcrest', name: 'hamcrest-all'
+    compile group: 'javax.servlet', name: 'javax.servlet-api'
+    compile group: 'org.springframework', name: 'spring-test'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    compile group: 'org.springframework', name: 'spring-context'
 }
-test.useTestNG()

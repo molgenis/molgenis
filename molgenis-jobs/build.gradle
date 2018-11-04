@@ -3,17 +3,14 @@ dependencies {
     compile project(':molgenis-data')
     compile project(':molgenis-security')
     compile project(':molgenis-util')
-    compile(group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.0') {
-        exclude(module: 'c3p0')
-        exclude(module: 'HikariCP-java6')
-    }
-    compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.0.8.RELEASE'
-    compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile(group: 'org.quartz-scheduler', name: 'quartz')
+    compile group: 'org.springframework.security', name: 'spring-security-core'
+    compile group: 'joda-time', name: 'joda-time'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
     compile project(':molgenis-data-validation')
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
 }
 
 task packageTests(type: Jar) {

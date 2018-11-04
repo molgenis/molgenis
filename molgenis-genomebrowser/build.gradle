@@ -1,11 +1,8 @@
-
 description = 'genomebrowser'
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-data-rest')
-    compile(group: 'org.everit.json', name: 'org.everit.json.schema', version:'1.5.1') {
-exclude(module: 'commons-logging')
-    }
-    compile group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
-  testCompile project(':molgenis-test')
+    compile project(':molgenis-data')
+    compile project(':molgenis-data-rest')
+    compile group: 'org.everit.json', name: 'org.everit.json.schema'
+    compile group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
+    testCompile project(':molgenis-test')
 }

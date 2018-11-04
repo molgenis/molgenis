@@ -14,11 +14,11 @@ dependencies {
     compile project(':molgenis-data-vcf')
     compile project(':molgenis-ontology')
     compile project(':molgenis-ontology-core')
-    compile group: 'org.springframework', name: 'spring-context-support', version: '5.0.9.RELEASE'
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.springframework', name: 'spring-context-support'
+    compile group: 'commons-io', name: 'commons-io'
     compile project(':molgenis-semantic-search')
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-test')
     testCompile project(path: ':molgenis-ontology-core', configuration: 'testArtifacts')

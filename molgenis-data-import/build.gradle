@@ -5,14 +5,14 @@ dependencies {
     compile project(':molgenis-data-i18n')
     compile project(':molgenis-data-validation')
     compile project(':molgenis-data-security')
-    compile group: 'org.springframework', name: 'spring-context-support', version: '5.0.9.RELEASE'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile group: 'org.springframework', name: 'spring-context-support'
+    compile group: 'org.apache.commons', name: 'commons-lang3'
     testCompile project(path: ':molgenis-data', configuration: 'testArtifacts')
     testCompile project(':molgenis-data-security')
     testCompile project(':molgenis-test')
-    testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.8.RELEASE'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version: '1.4.1'
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    testCompile group: 'org.springframework.security', name: 'spring-security-test'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
 }
 
 task packageTests(type: Jar) {

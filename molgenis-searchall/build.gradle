@@ -1,19 +1,19 @@
 description = 'searchall'
 
 tasks.withType(JavaCompile) {
-  dependsOn 'yarnBuild'
+    dependsOn 'yarnBuild'
 }
 
 dependencies {
-  compile project(':molgenis-core')
-  compile project(':molgenis-core-ui')
-  compile project(':molgenis-data')
-  compile project(':molgenis-data-rest')
-  compile project(':molgenis-data-file')
-  compile project(':molgenis-security')
-    compile group: 'org.springframework', name: 'spring-webmvc', version:'5.0.9.RELEASE'
-    compile group: 'org.springframework.security', name: 'spring-security-web', version:'5.0.8.RELEASE'
-  testCompile project(':molgenis-test')
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+    compile project(':molgenis-core')
+    compile project(':molgenis-core-ui')
+    compile project(':molgenis-data')
+    compile project(':molgenis-data-rest')
+    compile project(':molgenis-data-file')
+    compile project(':molgenis-security')
+    compile group: 'org.springframework', name: 'spring-webmvc'
+    compile group: 'org.springframework.security', name: 'spring-security-web'
+    testCompile project(':molgenis-test')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api'
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
 }

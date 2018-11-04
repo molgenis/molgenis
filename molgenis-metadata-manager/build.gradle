@@ -1,12 +1,12 @@
 description = 'metadata-manager'
 
 tasks.withType(JavaCompile) {
-  dependsOn 'yarnBuild'
+    dependsOn 'yarnBuild'
 }
 
 dependencies {
-  compile project(':molgenis-data')
-  compile project(':molgenis-core-ui')
-  testCompile project(':molgenis-test')
-    compileOnly group: 'com.google.auto.value', name: 'auto-value', version:'1.4.1'
+    compile project(':molgenis-data')
+    compile project(':molgenis-core-ui')
+    testCompile project(':molgenis-test')
+    compileOnly group: 'com.google.auto.value', name: 'auto-value'
 }

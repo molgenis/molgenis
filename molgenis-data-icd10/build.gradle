@@ -1,14 +1,13 @@
-
 description = 'data-icd10'
 dependencies {
-  compile project(':molgenis-data')
-    compile group: 'org.springframework', name: 'spring-context-support', version:'5.0.9.RELEASE'
-  testCompile project(':molgenis-test')
-    compileOnly group: 'com.google.code.findbugs', name: 'findbugs-annotations', version:'3.0.1'
+    compile project(':molgenis-data')
+    compile group: 'org.springframework', name: 'spring-context-support'
+    testCompile project(':molgenis-test')
+    compileOnly group: 'com.google.code.findbugs', name: 'findbugs-annotations'
 }
 
 task packageTests(type: Jar) {
-  from sourceSets.test.output
-  classifier = 'tests'
+    from sourceSets.test.output
+    classifier = 'tests'
 }
 artifacts.archives packageTests
