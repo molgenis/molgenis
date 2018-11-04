@@ -67,7 +67,7 @@
 
 <script>
   import { FormComponent, EntityToFormMapper } from '@molgenis/molgenis-ui-form'
-  import '../../node_modules/@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
+  import '@molgenis/molgenis-ui-form/dist/static/css/molgenis-ui-form.css'
   import api from '@molgenis/molgenis-api-client'
 
   export default {

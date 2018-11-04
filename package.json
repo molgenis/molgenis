@@ -1,0 +1,9 @@
+{
+  "name": "root",
+  "private": true,
+  "devDependencies": {
+    "lerna": "^3.4.3"
+  },
+  "workspaces": ["*/src/main/frontend"],
+  "nohoist": ["**/postcss-loader"]
+}
