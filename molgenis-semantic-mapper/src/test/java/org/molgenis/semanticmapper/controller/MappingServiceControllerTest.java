@@ -480,9 +480,12 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testCreateIntegratedEntity() throws Exception {
+    when(mappingJobExecution.getEntityType()).thenReturn(mappingJobExecutionMetadata);
+    when(mappingJobExecution.getIdValue()).thenReturn("mappingJobExecution");
+    when(mappingJobExecutionMetadata.getId()).thenReturn("mappingJobExecutionMetadata");
     when(mappingJobExecutionFactory.create()).thenReturn(mappingJobExecution);
-    when(userAccountService.getCurrentUser()).thenReturn(user);
-    when(jobsController.createJobExecutionViewHref(mappingJobExecution, 1000))
+    when(jobsController.createJobExecutionViewHref(
+            "/api/v2/mappingJobExecutionMetadata/mappingJobExecution", 1000))
         .thenReturn("/jobs/viewJob/?jobHref=jobHref&refreshTimeoutMillis=1000");
 
     mockMvc
@@ -504,6 +507,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     verify(mappingJobExecution).setAddSourceAttribute(null);
     verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
     verify(mappingJobExecution).setPackageId("base");
+    verify(mappingJobExecution).getIdValue();
+    verify(mappingJobExecution).getEntityType();
     Mockito.verifyNoMoreInteractions(mappingJobExecution);
   }
 

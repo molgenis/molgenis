@@ -49,13 +49,10 @@ public class JobsControllerTest extends AbstractMockitoTest {
 
   @Test
   public void testCreateJobExecutionViewHref() {
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
     when(menuReaderService.getMenu()).thenReturn(menu);
     when(menu.findMenuItemPath(JobsController.ID)).thenReturn("/jobs");
-    when(jobExecutionEntityType.getId()).thenReturn("sys_MappingJobExecution");
-    when(jobExecution.getIdValue()).thenReturn("abcde");
     assertEquals(
-        jobsController.createJobExecutionViewHref(jobExecution, 2345),
+        jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345),
         "/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345");
   }
 

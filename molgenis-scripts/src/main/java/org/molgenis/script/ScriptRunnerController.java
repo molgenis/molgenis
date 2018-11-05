@@ -2,6 +2,9 @@ package org.molgenis.script;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.rest.util.Href.concatEntityHref;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+import static org.springframework.http.ResponseEntity.ok;
 
 import com.google.gson.Gson;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import org.molgenis.jobs.JobExecutor;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.script.core.UnknownScriptException;
 import org.molgenis.security.user.UserAccountService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,13 +72,20 @@ public class ScriptRunnerController {
       @RequestParam Map<String, Object> parameters,
       HttpServletResponse response)
       throws IOException {
+    String scriptJobExecutionHref = submitScript(scriptName, parameters).getBody();
+
+    response.sendRedirect(jobsController.createJobExecutionViewHref(scriptJobExecutionHref, 1000));
+  }
+
+  @RequestMapping(value = "/scripts/{name}/submit", produces = TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> submitScript(
+      @PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters) {
     ScriptJobExecution scriptJobExecution = scriptJobExecutionFactory.create();
     scriptJobExecution.setName(scriptName);
     scriptJobExecution.setParameters(gson.toJson(parameters));
 
     jobExecutor.submit(scriptJobExecution);
-
-    response.sendRedirect(jobsController.createJobExecutionViewHref(scriptJobExecution, 1000));
+    return ok(concatEntityHref(scriptJobExecution));
   }
 
   /**
