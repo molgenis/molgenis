@@ -1,125 +1,142 @@
-import mutations from 'src/store/mutations'
+import mutations from '@/store/mutations'
 
 describe('mutations', () => {
-  describe('Testing mutation SET_PACKAGES', () => {
-    it('should set the list of packages in the state', () => {
+  describe('ADD_ALERTS', () => {
+    it('should set add the alerts to existing alerts in the state', () => {
       const state = {
-        packages: []
+        alerts: [{type: 'error', message: 'error message', code: 'error code'}]
       }
 
-      const packages = [
-        {id: 'p1'},
-        {id: 'p2'},
-        {id: 'p3'}
+      const alerts = [
+        [{type: 'info', message: 'info message'}]
       ]
 
-      mutations.__SET_PACKAGES__(state, packages)
-      expect(state.packages).to.deep.equal(packages)
-      expect(state.selectedPackageIds).to.deep.equal([])
+      mutations.__ADD_ALERTS__(state, alerts)
+      expect(state.alerts[1]).to.eql(alerts[0])
     })
   })
-
-  describe('Testing mutation SET_PATH', () => {
-    it('should set the path in the state', () => {
+  describe('REMOVE_ALERT', () => {
+    it('should remove an alert by index in the state', () => {
       const state = {
-        path: []
-      }
-
-      const path = [
-        {id: 'p1'},
-        {id: 'p2'},
-        {id: 'p3'}
-      ]
-
-      mutations.__SET_PATH__(state, path)
-      expect(state.path).to.deep.equal(path)
-    })
-  })
-
-  describe('Testing mutation RESET_PATH', () => {
-    it('should reset the path array', () => {
-      const state = {
-        path: [
-          {
-            id: 'p1'
-          },
-          {
-            id: 'p2'
-          }
+        alerts: [
+          {type: 'error', message: 'error message', code: 'error code'},
+          {type: 'info', message: 'info message'}
         ]
       }
 
-      mutations.__RESET_PATH__(state)
-      expect(state.path).to.deep.equal([])
+      const expectedAlerts = [
+        {type: 'info', message: 'info message'}
+      ]
+      mutations.__REMOVE_ALERT__(state, 0)
+      expect(state.alerts).to.eql(expectedAlerts)
     })
   })
+  describe('ADD_JOB', () => {
+    it('should add job to jobs in the state', () => {
+      const job0 = {type: 'download', id: '0', status: 'running'}
+      const job1 = {type: 'copy', id: '1', status: 'finished'}
 
-  describe('Testing mutation SET_ENTITIES', () => {
-    it('should set the entities in the state ', () => {
       const state = {
-        entities: []
+        jobs: [job0]
       }
 
-      const entities = [
-        {id: 'e1'},
-        {id: 'e2'}
+      mutations.__ADD_JOB__(state, job1)
+      expect(state.jobs).to.deep.equal([job0, job1])
+    })
+  })
+  describe('UPDATE_JOB', () => {
+    it('should update existing job in the state', () => {
+      const job0 = {type: 'download', id: '0', status: 'running'}
+      const job1 = {type: 'copy', id: '0', status: 'running'}
+
+      const state = {
+        jobs: [job0, job1]
+      }
+
+      const updatedJob1 = {type: 'copy', id: '0', status: 'success'}
+      mutations.__UPDATE_JOB__(state, updatedJob1)
+      expect(state.jobs).to.deep.equal([job0, updatedJob1])
+    })
+  })
+  describe('SET_FOLDER', () => {
+    it('should set the folder', () => {
+      const state = {
+        folder: null
+      }
+
+      const folder = [
+        {id: '0', label: 'grandchild', parent: {id: '1', label: 'child'}}
       ]
 
-      mutations.__SET_ENTITIES__(state, entities)
-      expect(state.entities).to.deep.equal(entities)
-      expect(state.selectedEntityTypeIds).to.deep.equal([])
+      mutations.__SET_FOLDER__(state, folder)
+      expect(state.folder).to.deep.equal(folder)
     })
   })
-
-  describe('Testing mutation SET_QUERY', () => {
-    it('should set the query in the state', () => {
+  describe('SET_ITEMS', () => {
+    it('should set the items in the state and clear the selected items', () => {
       const state = {
-        query: null
+        items: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}],
+        selectedItems: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}]
       }
 
-      const query = 'query'
+      const items = [
+        {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
+        {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
+      ]
 
-      mutations.__SET_QUERY__(state, query)
-      expect(state.query).to.equal(query)
+      mutations.__SET_ITEMS__(state, items)
+      expect(state.items).to.deep.equal(items)
+      expect(state.selectedItems).to.deep.equal([])
     })
   })
-
-  describe('Testing mutation SET_ERROR', () => {
-    it('should set the error in the state', () => {
+  describe('SET_SELECTED_ITEMS', () => {
+    it('should set the selected items in the state', () => {
       const state = {
-        error: null
+        selectedItems: []
       }
 
-      const error = 'error'
+      const selectedItems = [
+        {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
+        {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
+      ]
 
-      mutations.__SET_ERROR__(state, error)
-      expect(state.error).to.equal(error)
+      mutations.__SET_SELECTED_ITEMS__(state, selectedItems)
+      expect(state.selectedItems).to.deep.equal(selectedItems)
     })
   })
-
-  describe('Testing mutation SET_SELECTED_PACKAGES', () => {
-    it('should set the selected packages in the state', () => {
+  describe('SET_CLIPBOARD', () => {
+    it('should set the clipboard in the state and clear the selected items', () => {
       const state = {
-        selectedPackageIds: null
+        clipboard: null
       }
 
-      const packageIds = ['packageId0', 'packageId1']
+      const clipboard = {
+        mode: 'cut',
+        items: [
+          {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
+          {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
+        ]
+      }
 
-      mutations.__SET_SELECTED_PACKAGES__(state, packageIds)
-      expect(state.selectedPackageIds).to.equal(packageIds)
+      mutations.__SET_CLIPBOARD__(state, clipboard)
+      expect(state.selectedItems).to.deep.equal([])
+      expect(state.clipboard).to.deep.equal(clipboard)
     })
   })
-
-  describe('Testing mutation SET_SELECTED_ENTITY_TYPES', () => {
-    it('should set the selected entity types in the state', () => {
+  describe('RESET_CLIPBOARD', () => {
+    it('should set the clipboard to null in the state', () => {
       const state = {
-        selectedEntityTypeIds: null
+        clipboard: {
+          mode: 'cut',
+          items: [
+            {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
+            {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
+          ]
+        }
       }
 
-      const entityTypeIds = ['entityTypeId0', 'entityTypeId1']
-
-      mutations.__SET_SELECTED_ENTITY_TYPES__(state, entityTypeIds)
-      expect(state.selectedEntityTypeIds).to.equal(entityTypeIds)
+      mutations.__RESET_CLIPBOARD__(state)
+      expect(state.clipboard).to.deep.equal(null)
     })
   })
 })

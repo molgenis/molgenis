@@ -1,40 +1,52 @@
 // @flow
-import type { Entity, Package, State } from '../flow.types'
+import type { Alert, Clipboard, Folder, Item, Job, State } from '../flow.types'
 
-export const SET_PACKAGES = '__SET_PACKAGES__'
-export const SET_ENTITIES = '__SET_ENTITIES__'
-export const SET_PATH = '__SET_PATH__'
-export const RESET_PATH = '__RESET_PATH__'
-export const SET_QUERY = '__SET_QUERY__'
-export const SET_ERROR = '__SET_ERROR__'
-export const SET_SELECTED_PACKAGES = '__SET_SELECTED_PACKAGES__'
-export const SET_SELECTED_ENTITY_TYPES = '__SET_SELECTED_ENTITY_TYPES__'
+export const ADD_ALERTS = '__ADD_ALERTS__'
+export const REMOVE_ALERT = '__REMOVE_ALERT__'
+export const ADD_JOB = '__ADD_JOB__'
+export const UPDATE_JOB = '__UPDATE_JOB__'
+export const SET_FOLDER = '__SET_FOLDER__'
+export const SET_ITEMS = '__SET_ITEMS__'
+export const SET_SELECTED_ITEMS = '__SET_SELECTED_ITEMS__'
+export const SET_SHOW_HIDDEN_ITEMS = '__SET_SHOW_HIDDEN_ITEMS__'
+export const SET_CLIPBOARD = '__SET_CLIPBOARD__'
+export const RESET_CLIPBOARD = '__RESET_CLIPBOARD__'
 
 export default {
-  [SET_PACKAGES] (state: State, packages: Array<Package>) {
-    state.selectedPackageIds = []
-    state.packages = packages
+  [ADD_ALERTS] (state: State, alerts: Array<Alert>) {
+    state.alerts = state.alerts.concat(alerts)
   },
-  [SET_PATH] (state: State, packages: Array<Package>) {
-    state.path = packages
+  [REMOVE_ALERT] (state: State, index: number) {
+    let alerts = state.alerts.slice()
+    alerts.splice(index, 1)
+    state.alerts = alerts
   },
-  [RESET_PATH] (state: State) {
-    state.path.splice(0, state.path.length)
+  [ADD_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.concat([job])
   },
-  [SET_ENTITIES] (state: State, entities: Array<Entity>) {
-    state.selectedEntityTypeIds = []
-    state.entities = entities
+  [UPDATE_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.map(
+      existingJob => existingJob.type === job.type && existingJob.id === job.id
+        ? job : existingJob)
   },
-  [SET_QUERY] (state: State, query: string) {
-    state.query = query
+  [SET_FOLDER] (state: State, folder: Folder) {
+    state.folder = folder
   },
-  [SET_ERROR] (state: State, error: any) {
-    state.error = error
+  [SET_ITEMS] (state: State, items: Array<Item>) {
+    state.selectedItems = []
+    state.items = items
   },
-  [SET_SELECTED_PACKAGES] (state: State, packageIds: Array<string>) {
-    state.selectedPackageIds = packageIds
+  [SET_SELECTED_ITEMS] (state: State, items: Array<Item>) {
+    state.selectedItems = items
   },
-  [SET_SELECTED_ENTITY_TYPES] (state: State, entityTypeIds: Array<string>) {
-    state.selectedEntityTypeIds = entityTypeIds
+  [SET_SHOW_HIDDEN_ITEMS] (state: State, showHiddenItems: boolean) {
+    state.showHiddenItems = showHiddenItems
+  },
+  [SET_CLIPBOARD] (state: State, clipboard: Clipboard) {
+    state.selectedItems = []
+    state.clipboard = clipboard
+  },
+  [RESET_CLIPBOARD] (state: State) {
+    state.clipboard = null
   }
 }

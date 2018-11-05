@@ -1,777 +1,433 @@
-import api from '@molgenis/molgenis-api-client'
+import actions from '@/store/actions'
+import * as api from '@/utils/api'
 import td from 'testdouble'
-import actions, { GET_ENTITIES_IN_PACKAGE, GET_STATE_FOR_PACKAGE, QUERY_ENTITIES, RESET_STATE } from 'src/store/actions'
-import { RESET_PATH, SET_ENTITIES, SET_ERROR, SET_PACKAGES, SET_PATH, SET_QUERY } from 'src/store/mutations'
 import utils from '@molgenis/molgenis-vue-test-utils'
-import { SET_SELECTED_ENTITY_TYPES, SET_SELECTED_PACKAGES } from '../../../../src/store/mutations'
 
 describe('actions', () => {
-  afterEach(() => { td.reset() })
+  beforeEach(() => td.reset())
 
-  describe('QUERY_PACKAGES', function () {
-    it('should fetch the packages, filter out the system packages and call the SET_PACKAGES mutation', done => {
-      const package1 = {id: 'pack1', label: 'packLabel1'}
-      const sysPackage = {id: 'sys', label: 'sys package'}
-      const sysChildPackage = {id: 'sys_child', label: 'sys child package'}
-      const package2 = {id: 'pack2', label: 'packLabel2'}
-      const response = {
-        items: [package1, sysPackage, sysChildPackage, package2]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=test,label=q=test,description=q=test')).thenResolve(response)
-      td.replace(api, 'get', get)
-
+  describe('FETCH_ITEMS', () => {
+    it('should dispatch FETCH_ITEMS_BY_QUERY action for the current query', done => {
       const options = {
-        payload: 'test',
-        expectedMutations: [
-          {type: SET_PACKAGES, payload: [package1, package2]}
-        ]
-      }
-
-      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
-    })
-
-    it('should fetch packages with a query and call the SET_PACKAGES mutation', done => {
-      const package1 = {id: 'pack1', label: 'packLabel1'}
-      const sysPackage = {id: 'sys', label: 'sys package'}
-      const sysChildPackage = {id: 'sys_child', label: 'sys child package'}
-      const response = {
-        items: [package1, sysPackage, sysChildPackage]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=test,label=q=test,description=q=test')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: 'test',
-        expectedMutations: [
-          {type: SET_PACKAGES, payload: [package1]}
-        ]
-      }
-
-      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
-    })
-
-    it('should fail creating the URI and call the SET_ERROR mutation', done => {
-      const error = 'Double quotes not are allowed in queries, please use single quotes.'
-      const options = {
-        payload: '"wrong query"',
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
-    })
-
-    it('should fail the get and call the SET_ERROR mutation', done => {
-      const error = 'failed to get'
-      const query = 'foobar'
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&q=id=q=foobar,label=q=foobar,description=q=foobar')).thenReject(error)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: query,
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__QUERY_PACKAGES__, options, done)
-    })
-  })
-
-  describe('QUERY_ENTITIES', () => {
-    it('should fetch entities, map the result to entity types, filter out system entities and call the SET_ENTITIES mutation', done => {
-      const response = {
-        items: [
-          {
-            'id': '1',
-            'label': 'test',
-            'description': 'test'
-          },
-          {
-            'id': 'sys_entity',
-            'label': 'system entity',
-            'description': 'test2'
-          }
-        ]
-      }
-
-      const expectedEntities = [
-        {
-          'id': '1',
-          'type': 'entity',
-          'label': 'test',
-          'description': 'test'
-        }
-      ]
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=test,description=q=test);isAbstract==false')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: 'test',
-        expectedMutations: [
-          {type: SET_ENTITIES, payload: expectedEntities}
-        ]
-      }
-      utils.testAction(actions.__QUERY_ENTITIES__, options, done)
-    })
-
-    it('should fail the get and call the SET_ERROR mutation', done => {
-      const error = 'failed to get'
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&q=(label=q=test,description=q=test);isAbstract==false')).thenReject(error)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: 'test',
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__QUERY_ENTITIES__, options, done)
-    })
-  })
-
-  describe('GET_ENTITIES_IN_PACKAGE', () => {
-    it('should retrieve all entities from a specific package', done => {
-      const entity1 = {
-        'id': '1',
-        'type': 'entity',
-        'label': 'test',
-        'description': 'test'
-      }
-
-      const entity2 = {
-        'id': '2',
-        'type': 'entity',
-        'label': 'test',
-        'description': 'test'
-      }
-
-      const response = {
-        items: [
-          entity1,
-          entity2
-        ]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==1')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: '1',
-        expectedMutations: [
-          {type: SET_ENTITIES, payload: response.items}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
-    })
-
-    it('should fail the get and call the SET_ERROR mutation', done => {
-      const error = 'failed to get'
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==1')).thenReject(error)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: '1',
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITIES_IN_PACKAGE__, options, done)
-    })
-  })
-
-  describe('RESET_STATE', () => {
-    it('should fetch all packages and entities and call RESET_PATH', done => {
-      const packageResponse = {
-        items: [
-          {
-            id: '1',
-            name: 'package1'
-          },
-          {
-            id: '2',
-            name: 'package2'
-          }
-        ]
-      }
-
-      const entityResponse = {
-        items: [
-          {
-            id: '1',
-            label: 'entity1'
-          }
-        ]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==%22%22')).thenResolve(packageResponse)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==%22%22')).thenResolve(entityResponse)
-      td.replace(api, 'get', get)
-
-      const packages = [
-        {
-          id: '1',
-          name: 'package1'
+        state: {
+          query: 'MyQuery'
         },
-        {
-          id: '2',
-          name: 'package2'
-        }
-      ]
-
-      const options = {
-        expectedMutations: [
-          {type: RESET_PATH},
-          {type: SET_PACKAGES, payload: packages}
-        ]
-      }
-
-      utils.testAction(actions.__RESET_STATE__, options, done)
-    })
-
-    it('should fail the get and call the SET_ERROR mutation', done => {
-      const error = 'failed to get'
-
-      const entityResponse = {
-        items: []
-      }
-
-      const entities = []
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000&&q=parent==%22%22')).thenReject(error)
-      td.when(get('/api/v2/sys_md_EntityType?sort=label&num=1000&&q=isAbstract==false;package==%22%22')).thenResolve(entityResponse)
-      td.replace(api, 'get', get)
-
-      const options = {
-        expectedMutations: [
-          {type: RESET_PATH},
-          {type: SET_ERROR, payload: error},
-          {type: SET_ENTITIES, payload: entities}
-        ]
-      }
-
-      utils.testAction(actions.__RESET_STATE__, options, done)
-    })
-  })
-
-  describe('GET_STATE_FOR_PACKAGE', () => {
-    it('should reset state if no package is selected', done => {
-      const response = {
-        items: [
-          {
-            id: '1',
-            name: 'package1'
-          },
-          {
-            id: '2',
-            name: 'package2'
-          }
-        ]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
         expectedActions: [
-          {type: RESET_STATE}
+          {type: '__FETCH_ITEMS_BY_QUERY__', payload: 'MyQuery'}
         ]
       }
-
-      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
+      utils.testAction(actions.__FETCH_ITEMS__, options, done)
     })
-
-    it('should throw an error if the selected package was not found', done => {
-      const response = {
-        items: [
-          {
-            id: '1',
-            name: 'package1'
-          },
-          {
-            id: '2',
-            name: 'package2'
-          }
-        ]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: '3',
-        expectedMutations: [
-          {type: SET_ERROR, payload: 'couldn\'t find package.'}
-        ],
-        expectedActions: [
-          {type: RESET_STATE}
-        ]
-      }
-
-      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
-    })
-
-    it('should create a path based on the selected package', done => {
-      const response = {
-        items: [
-          {
-            id: '1',
-            name: 'package1'
-          },
-          {
-            id: '2',
-            name: 'package2',
-            parent: {
-              id: '1',
-              name: 'package1'
-            }
-          },
-          {
-            id: '3',
-            name: 'package3'
-          },
-          {
-            id: '4',
-            name: 'package4',
-            parent: {
-              id: '2',
-              name: 'package2'
-            }
-          },
-          {
-            id: '5',
-            name: 'package5',
-            parent: {
-              id: '2',
-              name: 'package2'
-            }
-          }
-        ]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const payload = [
-        {
-          id: '4',
-          name: 'package4',
-          parent: {
-            id: '2',
-            name: 'package2'
-          }
-        },
-        {
-          id: '5',
-          name: 'package5',
-          parent: {
-            id: '2',
-            name: 'package2'
-          }
-        }
-      ]
-
-      const path = [
-        {
-          id: '1',
-          name: 'package1'
-        },
-        {
-          id: '2',
-          name: 'package2',
-          parent: {
-            id: '1',
-            name: 'package1'
-          }
-        }
-      ]
-
-      const options = {
-        payload: '2',
-        expectedMutations: [
-          {type: SET_PACKAGES, payload: payload},
-          {type: SET_PATH, payload: path}
-        ],
-        expectedActions: [
-          {type: GET_ENTITIES_IN_PACKAGE, payload: '2'}
-        ]
-      }
-
-      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
-    })
-
-    it('should fail the get and call the SET_ERROR mutation', done => {
-      const error = 'failed to get'
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_Package?sort=label&num=1000')).thenReject(error)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: '1',
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__GET_STATE_FOR_PACKAGE__, options, done)
-    })
-  })
-
-  describe('GET_ENTITY_PACKAGES', () => {
-    it('should find the package id given a entityId', done => {
-      const entityId = 'my-entity-id'
-      const packageId = 'my-package-id'
-      const entity = {
-        'id': entityId,
-        'label': 'my entity in a package',
-        'package': {
-          id: packageId
-        }
-      }
-
-      const response = {
-        items: [entity]
-      }
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: entityId,
-        expectedActions: [
-          {type: GET_STATE_FOR_PACKAGE, payload: packageId}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
-    })
-
-    it('should reset the state if no package could be found', done => {
-      const entityId = 'my-entity-id'
-      const response = {items: []}
-      const get = td.function('api.get')
-
-      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: entityId,
-        expectedActions: [
-          {type: RESET_STATE}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
-    })
-
-    it('should fallback to searching if the lookup entity is not in a package', done => {
-      const entityId = 'my-entity-id'
-      const entity = {
-        'id': entityId,
-        'label': 'my entity in a package'
-      }
-
-      const response = {
-        items: [entity]
-      }
-
-      const get = td.function('api.get')
-
-      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenResolve(response)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: entityId,
-        expectedMutations: [
-          {type: SET_QUERY, payload: entity.label}
-        ],
-        expectedActions: [
-          {type: QUERY_ENTITIES, payload: entity.label}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
-    })
-
-    it('should call the SET_ERROR mutation in case the rest request fails', done => {
-      const entityId = 'my-entity-id'
-      const error = 'failed to get'
-
-      const get = td.function('api.get')
-      td.when(get('/api/v2/sys_md_EntityType?num=1000&&q=isAbstract==false;id==' + entityId)).thenReject(error)
-      td.replace(api, 'get', get)
-
-      const options = {
-        payload: entityId,
-        expectedMutations: [
-          {type: SET_ERROR, payload: error}
-        ]
-      }
-
-      utils.testAction(actions.__GET_ENTITY_PACKAGES__, options, done)
-    })
-  })
-
-  describe('SELECT_ALL_PACKAGES_AND_ENTITY_TYPES', () => {
-    it('should select all packages and entity types', done => {
-      const packageId = 'my-package-id'
-      const entityTypeId = 'my-entity-type-id'
-
+    it('should dispatch FETCH_ITEMS_BY_FOLDER action for the current folder', done => {
       const options = {
         state: {
-          packages: [{
-            id: packageId
-          }],
-          entities: [{
-            id: entityTypeId
-          }]
-        },
-        expectedMutations: [
-          {type: SET_SELECTED_PACKAGES, payload: [packageId]},
-          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId]}
-        ]
-      }
-
-      utils.testAction(actions.__SELECT_ALL_PACKAGES_AND_ENTITY_TYPES__, options, done)
-    })
-  })
-
-  describe('SELECT_ENTITY_TYPE', () => {
-    it('should select the given entity type', done => {
-      const entityTypeId0 = 'entity-type-id-0'
-      const entityTypeId1 = 'entity-type-id-1'
-
-      const options = {
-        state: {
-          selectedEntityTypeIds: [entityTypeId0]
-        },
-        payload: entityTypeId1,
-        expectedMutations: [
-          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId0, entityTypeId1]}
-        ]
-      }
-
-      utils.testAction(actions.__SELECT_ENTITY_TYPE__, options, done)
-    })
-  })
-
-  describe('SELECT_PACKAGE', () => {
-    it('should select the given package', done => {
-      const packageId0 = 'package-id-0'
-      const packageId1 = 'package-id-1'
-
-      const options = {
-        state: {
-          selectedPackageIds: [packageId0]
-        },
-        payload: packageId1,
-        expectedMutations: [
-          {type: SET_SELECTED_PACKAGES, payload: [packageId0, packageId1]}
-        ]
-      }
-
-      utils.testAction(actions.__SELECT_PACKAGE__, options, done)
-    })
-  })
-
-  describe('DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES', () => {
-    it('should deselect all packages and entity types', done => {
-      const packageId = 'my-package-id'
-      const entityTypeId = 'my-entity-type-id'
-
-      const options = {
-        state: {
-          selectedPackageIds: [packageId],
-          selectedEntityTypeIds: [entityTypeId]
-        },
-        expectedMutations: [
-          {type: SET_SELECTED_PACKAGES, payload: []},
-          {type: SET_SELECTED_ENTITY_TYPES, payload: []}
-        ]
-      }
-
-      utils.testAction(actions.__DESELECT_ALL_PACKAGES_AND_ENTITY_TYPES__, options, done)
-    })
-  })
-
-  describe('DESELECT_ENTITY_TYPE', () => {
-    it('should deselect the given entity type', done => {
-      const entityTypeId0 = 'entity-type-id-0'
-      const entityTypeId1 = 'entity-type-id-1'
-
-      const options = {
-        state: {
-          selectedEntityTypeIds: [entityTypeId0, entityTypeId1]
-        },
-        payload: entityTypeId0,
-        expectedMutations: [
-          {type: SET_SELECTED_ENTITY_TYPES, payload: [entityTypeId1]}
-        ]
-      }
-
-      utils.testAction(actions.__DESELECT_ENTITY_TYPE__, options, done)
-    })
-  })
-
-  describe('DESELECT_PACKAGE', () => {
-    it('should deselect the given package', done => {
-      const packageId0 = 'package-id-0'
-      const packageId1 = 'package-id-1'
-
-      const options = {
-        state: {
-          selectedPackageIds: [packageId0, packageId1]
-        },
-        payload: packageId0,
-        expectedMutations: [
-          {type: SET_SELECTED_PACKAGES, payload: [packageId1]}
-        ]
-      }
-
-      utils.testAction(actions.__DESELECT_PACKAGE__, options, done)
-    })
-  })
-
-  describe('DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES', () => {
-    it('should delete the selected packages and entity types', done => {
-      const packageIdRoot = 'package-id-root'
-      const packageId0 = 'package-id-0'
-      const packageId1 = 'package-id-1'
-      const entityTypeId0 = 'entity-type-id-0'
-      const entityTypeId1 = 'entity-type-id-1'
-
-      const response = {
-        statusText: 'OK!'
-      }
-      const deleteBody = {packageIds: [packageId0, packageId1], entityTypeIds: [entityTypeId0, entityTypeId1]}
-      const delete_ = td.function('api.delete_')
-      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
-      td.replace(api, 'delete_', delete_)
-
-      const options = {
-        state: {
-          selectedPackageIds: [packageId0, packageId1],
-          selectedEntityTypeIds: [entityTypeId0, entityTypeId1],
           route: {
             params: {
-              package: packageIdRoot
+              folderId: 'folderId'
             }
           }
         },
         expectedActions: [
-          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
+          {type: '__FETCH_ITEMS_BY_FOLDER__', payload: 'folderId'}
         ]
       }
-
-      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
+      utils.testAction(actions.__FETCH_ITEMS__, options, done)
     })
+  })
+  describe('FETCH_ITEMS_BY_QUERY', () => {
+    it('should set items in the state for the given query', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
 
-    it('should delete the selected packages', done => {
-      const packageIdRoot = 'package-id-root'
-      const packageId0 = 'package-id-0'
-      const packageId1 = 'package-id-1'
+      const getItemsByQuery = td.function('api.getItemsByQuery')
+      td.when(getItemsByQuery('myQuery')).thenResolve(Promise.resolve(items))
+      td.replace(api, 'getItemsByQuery', getItemsByQuery)
 
-      const response = {
-        statusText: 'OK!'
+      const options = {
+        payload: 'myQuery',
+        expectedMutations: [
+          {type: '__SET_ITEMS__', payload: items}
+        ]
       }
-      const deleteBody = {packageIds: [packageId0, packageId1], entityTypeIds: []}
-      const delete_ = td.function('api.delete_')
-      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
-      td.replace(api, 'delete_', delete_)
+      utils.testAction(actions.__FETCH_ITEMS_BY_QUERY__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const getItemsByQuery = td.function('api.getItemsByQuery')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(getItemsByQuery('myQuery')).thenResolve(Promise.reject(new Error()))
+      td.replace(api, 'getItemsByQuery', getItemsByQuery)
+
+      const options = {
+        payload: 'myQuery',
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__FETCH_ITEMS_BY_QUERY__, options, done)
+    })
+  })
+  describe('FETCH_ITEMS_BY_FOLDER', () => {
+    it('should set folder and folder items in the state for the given folder id', done => {
+      const folderState = {
+        folder: {id: 'id', label: 'label', readonly: false},
+        resources: [{
+          type: 'PACKAGE',
+          id: 'id',
+          label: 'label',
+          readonly: false
+        }]
+      }
+
+      const getItemsByFolderId = td.function('api.getItemsByFolderId')
+      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.resolve(folderState))
+      td.replace(api, 'getItemsByFolderId', getItemsByFolderId)
+
+      const options = {
+        payload: 'folderId',
+        expectedMutations: [
+          {type: '__SET_FOLDER__', payload: folderState.folder},
+          {type: '__SET_ITEMS__', payload: folderState.resources}
+        ]
+      }
+      utils.testAction(actions.__FETCH_ITEMS_BY_FOLDER__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const getItemsByFolderId = td.function('api.getItemsByFolderId')
+      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.reject(new Error()))
+      td.replace(api, 'getItemsByFolderId', getItemsByFolderId)
+
+      const options = {
+        payload: 'folderId',
+        expectedMutations: [
+          {type: '__ADD_ALERTS__'}
+        ]
+      }
+      utils.testAction(actions.__FETCH_ITEMS_BY_FOLDER__, options, done)
+    })
+  })
+  describe('SELECT_ALL_ITEMS', () => {
+    it('should update selected items in the state to be items', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
 
       const options = {
         state: {
-          selectedPackageIds: [packageId0, packageId1],
-          selectedEntityTypeIds: [],
-          route: {
-            params: {
-              package: packageIdRoot
-            }
-          }
-        },
-        expectedActions: [
-          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
-        ]
-      }
-
-      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
-    })
-
-    it('should delete the selected entity types', done => {
-      const packageIdRoot = 'package-id-root'
-      const entityTypeId0 = 'entity-type-id-0'
-      const entityTypeId1 = 'entity-type-id-1'
-
-      const response = {
-        statusText: 'OK!'
-      }
-      const deleteBody = {packageIds: [], entityTypeIds: [entityTypeId0, entityTypeId1]}
-      const delete_ = td.function('api.delete_')
-      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenResolve(response)
-      td.replace(api, 'delete_', delete_)
-
-      const options = {
-        state: {
-          selectedPackageIds: [],
-          selectedEntityTypeIds: [entityTypeId0, entityTypeId1],
-          route: {
-            params: {
-              package: packageIdRoot
-            }
-          }
-        },
-        expectedActions: [
-          {type: GET_STATE_FOR_PACKAGE, payload: packageIdRoot}
-        ]
-      }
-
-      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
-    })
-
-    it('should call the SET_ERROR mutation in case the delete request fails', done => {
-      const entityTypeId0 = 'entity-type-id-0'
-
-      const error = 'failed to delete'
-      const deleteBody = {packageIds: [], entityTypeIds: [entityTypeId0]}
-      const delete_ = td.function('api.delete_')
-      td.when(delete_('/plugin/navigator/delete', {body: JSON.stringify(deleteBody)})).thenReject(error)
-      td.replace(api, 'delete_', delete_)
-
-      const options = {
-        state: {
-          selectedPackageIds: [],
-          selectedEntityTypeIds: [entityTypeId0]
+          items: items
         },
         expectedMutations: [
-          {type: SET_ERROR, payload: error}
+          {type: '__SET_SELECTED_ITEMS__', payload: items}
         ]
       }
+      utils.testAction(actions.__SELECT_ALL_ITEMS__, options, done)
+    })
+  })
+  describe('DESELECT_ALL_ITEMS', () => {
+    it('should update selected items in the state to be empty', done => {
+      const options = {
+        state: {
+          selectedItems: [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+        },
+        expectedMutations: [
+          {type: '__SET_SELECTED_ITEMS__', payload: []}
+        ]
+      }
+      utils.testAction(actions.__DESELECT_ALL_ITEMS__, options, done)
+    })
+  })
+  describe('SELECT_ITEM', () => {
+    it('should add given item to the selected items in the state', done => {
+      const item0 = {type: 'PACKAGE', id: 'id0', label: 'label0', readonly: false}
+      const item1 = {type: 'PACKAGE', id: 'id1', label: 'label1', readonly: false}
+      const options = {
+        state: {
+          selectedItems: [item0]
+        },
+        payload: item1,
+        expectedMutations: [
+          {
+            type: '__SET_SELECTED_ITEMS__',
+            payload: [item0, item1]
+          }
+        ]
+      }
+      utils.testAction(actions.__SELECT_ITEM__, options, done)
+    })
+  })
+  describe('DESELECT_ITEM', () => {
+    it('should remove given item from the selected items in the state', done => {
+      const item0 = {type: 'PACKAGE', id: '0', label: 'label0', readonly: false}
+      const item1 = {type: 'ENTITY_TYPE', id: '0', label: 'label0', readonly: false}
+      const options = {
+        state: {
+          selectedItems: [item0, item1]
+        },
+        payload: item0,
+        expectedMutations: [
+          {
+            type: '__SET_SELECTED_ITEMS__',
+            payload: [item1]
+          }
+        ]
+      }
+      utils.testAction(actions.__DESELECT_ITEM__, options, done)
+    })
+  })
+  describe('DELETE_SELECTED_ITEMS', () => {
+    it('should delete the selected items', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
 
-      utils.testAction(actions.__DELETE_SELECTED_PACKAGES_AND_ENTITY_TYPES__, options, done)
+      const deleteItems = td.function('api.deleteItems')
+      td.when(deleteItems(items)).thenResolve(Promise.resolve())
+      td.replace(api, 'deleteItems', deleteItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedActions: [
+          {type: '__FETCH_ITEMS__'}
+        ]
+      }
+      utils.testAction(actions.__DELETE_SELECTED_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+
+      const deleteItems = td.function('api.deleteItems')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(deleteItems(items)).thenResolve(Promise.reject(error))
+      td.replace(api, 'deleteItems', deleteItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__DELETE_SELECTED_ITEMS__, options, done)
+    })
+  })
+  describe('CREATE_ITEM', () => {
+    const item = {type: 'PACKAGE', id: 'id', label: 'label', readonly: false}
+    const folder = {id: 'id', label: 'label', readonly: false}
+    const createItem = td.function('api.createItem')
+
+    it('should create the given item and refresh items in the state', done => {
+      td.when(createItem(item, folder)).thenResolve(Promise.resolve())
+      td.replace(api, 'createItem', createItem)
+
+      const options = {
+        state: {
+          folder: folder
+        },
+        payload: item,
+        expectedActions: [
+          {
+            type: '__FETCH_ITEMS__'
+          }
+        ]
+      }
+      utils.testAction(actions.__CREATE_ITEM__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(createItem(item, folder)).thenResolve(Promise.reject(error))
+      td.replace(api, 'createItem', createItem)
+
+      const options = {
+        state: {
+          folder: folder
+        },
+        payload: item
+      }
+      utils.testAction(actions.__CREATE_ITEM__, options, done)
+    })
+  })
+  describe('UPDATE_ITEM', () => {
+    it('should update the given item and refresh items in the state', done => {
+      const item = {type: 'PACKAGE', id: 'id', label: 'label', readonly: false}
+      const updatedItem = {type: 'PACKAGE', id: 'id', label: 'labelNew', readonly: false}
+
+      const updateItem = td.function('api.updateItem')
+      td.when(updateItem(item, updatedItem)).thenResolve(Promise.resolve())
+      td.replace(api, 'updateItem', updateItem)
+
+      const options = {
+        state: {
+          items: [item]
+        },
+        payload: updatedItem,
+        expectedActions: [
+          {
+            type: '__FETCH_ITEMS__'
+          }
+        ]
+      }
+      utils.testAction(actions.__UPDATE_ITEM__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const item = {type: 'PACKAGE', id: 'id', label: 'label', readonly: false}
+      const updatedItem = {type: 'PACKAGE', id: 'id', label: 'labelNew', readonly: false}
+
+      const updateItem = td.function('api.createItem')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(updateItem(item, updatedItem)).thenResolve(Promise.reject(error))
+      td.replace(api, 'updateItem', updateItem)
+
+      const options = {
+        state: {
+          items: [item]
+        },
+        payload: updatedItem
+      }
+      utils.testAction(actions.__UPDATE_ITEM__, options, done)
+    })
+  })
+  describe('MOVE_CLIPBOARD_ITEMS', () => {
+    it('should move clipboard items to given target folder', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+
+      const moveItems = td.function('api.moveItems')
+      td.when(moveItems(items, folder)).thenResolve(Promise.resolve())
+      td.replace(api, 'moveItems', moveItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedActions: [
+          {type: '__FETCH_ITEMS__'}
+        ],
+        expectedMutations: [
+          {type: '__RESET_CLIPBOARD__'}
+        ]
+      }
+      utils.testAction(actions.__MOVE_CLIPBOARD_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+      const folder = {id: 'id', label: 'label', readonly: false}
+
+      const moveItems = td.function('api.moveItems')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(moveItems(items, folder)).thenResolve(Promise.reject(error))
+      td.replace(api, 'moveItems', moveItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__MOVE_CLIPBOARD_ITEMS__, options, done)
+    })
+  })
+  describe('COPY_CLIPBOARD_ITEMS', () => {
+    const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+    const folder = {id: 'id', label: 'label', readonly: false}
+
+    it('should copy clipboard items to given target folder', done => {
+      const job = {type: 'copy', id: 'id', status: 'running'}
+      const copyItems = td.function('api.copyItems')
+      td.when(copyItems(items, folder)).thenResolve(Promise.resolve(job))
+      td.replace(api, 'copyItems', copyItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'copy',
+            items: items
+          }
+        },
+        expectedActions: [
+          {type: '__POLL_JOB__', payload: job}
+        ],
+        expectedMutations: [
+          {type: '__RESET_CLIPBOARD__'},
+          {type: '__ADD_JOB__', payload: job}
+        ]
+      }
+      utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const copyItems = td.function('api.copyItems')
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+      td.when(copyItems(items, folder)).thenResolve(Promise.reject(error))
+      td.replace(api, 'copyItems', copyItems)
+
+      const options = {
+        payload: folder,
+        state: {
+          clipboard: {
+            mode: 'cut',
+            items: items
+          }
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
+    })
+  })
+  describe('DOWNLOAD_SELECTED_ITEMS', () => {
+    const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+    const downloadItems = td.function('api.downloadItems')
+
+    it('should download selected items', done => {
+      const job = {type: 'download', id: 'id', status: 'running'}
+
+      td.when(downloadItems(items)).thenResolve(Promise.resolve(job))
+      td.replace(api, 'downloadItems', downloadItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedActions: [
+          {type: '__POLL_JOB__', payload: job}
+        ],
+        expectedMutations: [
+          {type: '__SET_SELECTED_ITEMS__', payload: []},
+          {type: '__ADD_JOB__', payload: job}
+        ]
+      }
+      utils.testAction(actions.__DOWNLOAD_SELECTED_ITEMS__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+
+      td.when(downloadItems(items)).thenResolve(Promise.reject(error))
+      td.replace(api, 'downloadItems', downloadItems)
+
+      const options = {
+        state: {
+          selectedItems: items
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+      utils.testAction(actions.__DOWNLOAD_SELECTED_ITEMS__, options, done)
     })
   })
 })
