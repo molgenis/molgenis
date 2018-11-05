@@ -11,7 +11,9 @@ describe('Alerts.vue', () => {
     it('should remove the error alert', () => {
       const state = {
         alerts: [{type: 'ERROR', message: 'error message', code: 'error code'},
-          {type: 'INFO', message: 'info message'}]
+          {type: 'INFO', message: 'info message'},
+          {type: 'SUCCESS', message: 'success message', code: 'error code'},
+          {type: 'WARNING', message: 'warning message', code: 'error code'}]
       }
       const removeAlert = td.function('__REMOVE_ALERT__')
       let store = new Vuex.Store({

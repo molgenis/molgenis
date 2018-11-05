@@ -2,7 +2,6 @@
 import type { Folder, Item, Job, State } from '../flow.types'
 import {
   fetchJob,
-  getFolder,
   getItemsByFolderId,
   getItemsByQuery,
   createItem,
@@ -64,19 +63,19 @@ export default {
       dispatch(FETCH_ITEMS_BY_FOLDER, state.route.params.folderId)
     }
   },
+  // TODO rename to FETCH_STATE_BY_QUERY
   [FETCH_ITEMS_BY_QUERY] ({commit}: { commit: Function }, query: string) {
-    getItemsByQuery(query).then(items => {
-      commit(SET_ITEMS, items)
+    getItemsByQuery(query).then(data => {
+      commit(SET_ITEMS, data.resources)
     }).catch(error => {
       commit(ADD_ALERTS, error.alerts)
     })
   },
+  // TODO rename to FETCH_STATE_BY_FOLDER
   [FETCH_ITEMS_BY_FOLDER] ({commit, dispatch}: { commit: Function, dispatch: Function }, folderId: ?string) {
-    const folderFetch = getFolder(folderId)
-    const itemsFetch = getItemsByFolderId(folderId)
-    Promise.all([folderFetch, itemsFetch]).then(responses => {
-      commit(SET_FOLDER, responses[0])
-      commit(SET_ITEMS, responses[1])
+    getItemsByFolderId(folderId).then(data => {
+      commit(SET_FOLDER, data.folder)
+      commit(SET_ITEMS, data.resources)
     }).catch(error => {
       commit(ADD_ALERTS, error.alerts)
     })
@@ -104,15 +103,11 @@ export default {
   },
   [CREATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     item: Item) {
-    if (state.folder) {
-      createItem(item, state.folder).then(() => {
-        dispatch(FETCH_ITEMS)
-      }).catch(error => {
-        commit(ADD_ALERTS, error.alerts)
-      })
-    } else {
-      throw new Error('CREATE_ITEM requires state.folder to be set')
-    }
+    createItem(item, state.folder).then(() => {
+      dispatch(FETCH_ITEMS)
+    }).catch(error => {
+      commit(ADD_ALERTS, error.alerts)
+    })
   },
   [UPDATE_ITEM] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     updatedItem: Item) {

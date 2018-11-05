@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.navigator.NavigatorController.URI;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.List;
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -42,6 +45,22 @@ public class NavigatorController extends VuePluginController {
   public String init(Model model) {
     super.init(model, ID);
     return "view-navigator";
+  }
+
+  @GetMapping("/get")
+  @ResponseBody
+  public GetResourcesResponse getResources(
+      @RequestParam(value = "folderId", required = false) @Nullable String folderId) {
+    Folder folder = navigatorService.getFolder(folderId);
+    List<Resource> resources = navigatorService.getResources(folderId);
+    return GetResourcesResponse.create(folder, resources);
+  }
+
+  @GetMapping("/search")
+  @ResponseBody
+  public SearchResourcesResponse searchResources(@RequestParam(value = "query") String query) {
+    List<Resource> resources = navigatorService.findResources(query);
+    return SearchResourcesResponse.create(resources);
   }
 
   @PutMapping("/update")

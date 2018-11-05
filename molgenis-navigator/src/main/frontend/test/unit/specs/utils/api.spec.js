@@ -1,7 +1,7 @@
 import molgenisApiClient from '@molgenis/molgenis-api-client'
 import * as api from '@/utils/api'
-import AlertError from '@/utils/AlertUtils'
 import td from 'testdouble'
+import { AlertError } from '@/utils/AlertError'
 
 describe('api', () => {
   const expect = require('chai').use(require('chai-as-promised')).expect
@@ -15,6 +15,65 @@ describe('api', () => {
   }]
   const folderId = 'folderId'
   const folder = {id: folderId, label: 'label', readonly: false}
+
+  describe('getItemsByFolderId', (done) => {
+    it('should call the get endpoint with folderId parameter and return folder state', () => {
+      const response = {
+        folder: {id: 'id', label: 'label', readonly: 'false'},
+        resources: [{type: 'PACKAGE', id: 'p0', label: 'package #0', readonly: 'false'}]
+      }
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/plugin/navigator/get?folderId=f0')).thenResolve(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.getItemsByFolderId('f0')).to.eventually.equal(response).then(done, done)
+    })
+
+    it('should call the get endpoint without folderId parameter and return folder state', () => {
+      const response = {
+        folder: {id: 'id', label: 'label', readonly: 'false'},
+        resources: [{type: 'PACKAGE', id: 'p0', label: 'package #0', readonly: 'false'}]
+      }
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/plugin/navigator/get')).thenResolve(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.getItemsByFolderId()).to.eventually.equal(response).then(done, done)
+    })
+
+    it('should return alerts in case of errors', (done) => {
+      const response = {errors: [{message: 'error'}]}
+
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/plugin/navigator/get?folderId=unknownFolder')).thenReject(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.getItemsByFolderId('unknownFolder')).to.eventually.be.rejectedWith(Error).then(() => done())
+    })
+  })
+
+  describe('getItemsByQuery', (done) => {
+    it('should call the search endpoint and return folder state', () => {
+      const response = {
+        resources: [{type: 'PACKAGE', id: 'p0', label: 'package #0', readonly: 'false'}]
+      }
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/plugin/navigator/search?query=text')).thenResolve(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.getItemsByQuery('text')).to.eventually.equal(response).then(done, done)
+    })
+
+    it('should return alerts in case of errors', (done) => {
+      const response = {errors: [{message: 'error'}]}
+
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/plugin/navigator/search?query=text')).thenReject(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.getItemsByQuery('text')).to.eventually.be.rejectedWith(Error).then(() => done())
+    })
+  })
 
   describe('moveItems', (done) => {
     const body = {
@@ -40,7 +99,7 @@ describe('api', () => {
       td.when(post('/plugin/navigator/move', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.moveItems(items, folder)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.moveItems(items, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
@@ -72,7 +131,7 @@ describe('api', () => {
       td.when(post('/plugin/navigator/copy', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.copyItems(items, folder)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.copyItems(items, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
@@ -99,7 +158,7 @@ describe('api', () => {
       td.when(delete_('/plugin/navigator/delete', body)).thenReject(response)
       td.replace(molgenisApiClient, 'delete_', delete_)
 
-      expect(api.deleteItems(items)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.deleteItems(items)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
@@ -130,7 +189,7 @@ describe('api', () => {
       td.when(post('/plugin/navigator/download', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.downloadItems(items)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.downloadItems(items)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
@@ -157,7 +216,7 @@ describe('api', () => {
       td.when(post('/api/v2/sys_md_Package', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.createItem(items[0], folder)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.createItem(items[0], folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
@@ -188,7 +247,7 @@ describe('api', () => {
       td.when(put('/plugin/navigator/update', body)).thenReject(response)
       td.replace(molgenisApiClient, 'put', put)
 
-      expect(api.deleteItems(items, updatedItem)).to.eventually.be.rejectedWith(AlertError).then(() => done())
+      expect(api.deleteItems(items, updatedItem)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 })

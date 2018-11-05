@@ -24,6 +24,11 @@ export type Folder = {
   readonly: boolean
 }
 
+export type FolderState = {
+  folder: ?Folder,
+  resources: Array<Item>
+}
+
 export type PathComponent = {
   id: string,
   label: string
@@ -54,34 +59,4 @@ export type State = {
   items: Array<Item>,
   selectedItems: Array<Item>,
   clipboard: ?Clipboard
-}
-
-export type ApiItemType = 'PACKAGE' | 'ENTITY_TYPE'
-
-export type ApiItem = {
-  type: ApiItemType,
-  id: string,
-  label: ?string,
-  description: ?string,
-}
-
-export type ApiPackage = {
-  id: string,
-  label: string,
-  description: ?string,
-  parent: ?ApiPackage
-}
-
-export type RestApiPackage = {
-  id: string,
-  label: string,
-  description: ?string,
-  parent: ?string
-}
-
-export type ApiEntityType = {
-  id: string,
-  label: string,
-  description: ?string,
-  abstract: boolean
 }

@@ -68,43 +68,38 @@ describe('actions', () => {
   })
   describe('FETCH_ITEMS_BY_FOLDER', () => {
     it('should set folder and folder items in the state for the given folder id', done => {
-      const folder = {id: 'id', label: 'label', readonly: false}
-      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
-
-      const getFolder = td.function('api.getFolder')
-      td.when(getFolder('folderId')).thenResolve(Promise.resolve(folder))
-      td.replace(api, 'getFolder', getFolder)
+      const folderState = {
+        folder: {id: 'id', label: 'label', readonly: false},
+        resources: [{
+          type: 'package',
+          id: 'id',
+          label: 'label',
+          readonly: false
+        }]
+      }
 
       const getItemsByFolderId = td.function('api.getItemsByFolderId')
-      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.resolve(items))
+      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.resolve(folderState))
       td.replace(api, 'getItemsByFolderId', getItemsByFolderId)
 
       const options = {
         payload: 'folderId',
         expectedMutations: [
-          {type: '__SET_FOLDER__', payload: folder},
-          {type: '__SET_ITEMS__', payload: items}
+          {type: '__SET_FOLDER__', payload: folderState.folder},
+          {type: '__SET_ITEMS__', payload: folderState.resources}
         ]
       }
       utils.testAction(actions.__FETCH_ITEMS_BY_FOLDER__, options, done)
     })
     it('should set alerts in the state in case of errors', done => {
-      const items = [{type: 'package', id: 'id', label: 'label', readonly: false}]
-
-      const getFolder = td.function('api.getFolder')
-      const error = new Error()
-      error.alerts = [{type: 'ERROR', message: 'message'}]
-      td.when(getFolder('folderId')).thenResolve(Promise.reject(error))
-      td.replace(api, 'getFolder', getFolder)
-
       const getItemsByFolderId = td.function('api.getItemsByFolderId')
-      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.resolve(items))
+      td.when(getItemsByFolderId('folderId')).thenResolve(Promise.reject(new Error()))
       td.replace(api, 'getItemsByFolderId', getItemsByFolderId)
 
       const options = {
         payload: 'folderId',
         expectedMutations: [
-          {type: '__ADD_ALERTS__', payload: error.alerts}
+          {type: '__ADD_ALERTS__'}
         ]
       }
       utils.testAction(actions.__FETCH_ITEMS_BY_FOLDER__, options, done)
