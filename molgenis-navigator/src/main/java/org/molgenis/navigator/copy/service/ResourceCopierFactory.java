@@ -43,7 +43,6 @@ public class ResourceCopierFactory {
         progress,
         dataService,
         idGenerator,
-        packageMetadata,
         entityTypeDependencyResolver,
         attributeFactory);
   }

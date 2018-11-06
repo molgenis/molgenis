@@ -55,7 +55,6 @@ public class ResourceCopier {
   private final DataService dataService;
   private final MetaDataService metaDataService;
   private final IdGenerator idGenerator;
-  private final PackageMetadata packageMetadata;
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
   private final AttributeFactory attributeFactory;
 
@@ -68,24 +67,24 @@ public class ResourceCopier {
   /** Map of the newly generated EntityType IDs and the original IDs. */
   private final Map<String, String> copiedIdsMap;
 
+  private final Map<String, String> referenceDefaultValues;
+
   ResourceCopier(
       ResourceCollection resourceCollection,
       @Nullable Package targetPackage,
       Progress progress,
       DataService dataService,
       IdGenerator idGenerator,
-      PackageMetadata packageMetadata,
       EntityTypeDependencyResolver entityTypeDependencyResolver,
       AttributeFactory attributeFactory) {
-    this.progress = requireNonNull(progress);
     requireNonNull(resourceCollection);
     this.packages = resourceCollection.getPackages();
     this.entityTypes = resourceCollection.getEntityTypes();
     this.targetPackage = targetPackage;
+    this.progress = requireNonNull(progress);
 
     this.dataService = requireNonNull(dataService);
     this.idGenerator = requireNonNull(idGenerator);
-    this.packageMetadata = requireNonNull(packageMetadata);
     this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
     this.attributeFactory = requireNonNull(attributeFactory);
 
@@ -95,6 +94,7 @@ public class ResourceCopier {
     this.copiedPackageMap = newHashMap();
     this.copiedEntityTypeMap = newHashMap();
     this.copiedIdsMap = newHashMap();
+    this.referenceDefaultValues = newHashMap();
   }
 
   public void copy() {
@@ -120,14 +120,42 @@ public class ResourceCopier {
     List<EntityType> copiedEntityTypes =
         concat(entityTypes.stream(), entityTypesInPackages.stream())
             .map(this::copyEntityType)
+            .map(this::cutDefaultValues)
             .collect(toList());
 
     entityTypeDependencyResolver
         .resolve(copiedEntityTypes)
         .stream()
-        .map(this::update)
-        .map(this::persist)
+        .map(this::updateRelations)
+        .map(this::addEntityType)
+        .collect(toList())
+        .stream()
+        .map(this::copyEntities)
+        .map(this::pasteDefaultValues)
         .forEach(e -> progress.increment(1));
+  }
+
+  private EntityType cutDefaultValues(EntityType copy) {
+    stream(copy.getAtomicAttributes())
+        .filter(EntityTypeUtils::isReferenceType)
+        .forEach(
+            attr -> {
+              referenceDefaultValues.put(attr.getIdentifier(), attr.getDefaultValue());
+              attr.setDefaultValue(null);
+            });
+    return copy;
+  }
+
+  private EntityType pasteDefaultValues(EntityType copy) {
+    stream(copy.getAtomicAttributes())
+        .filter(EntityTypeUtils::isReferenceType)
+        .forEach(
+            attr ->
+                attr.setDefaultValue(
+                    referenceDefaultValues.getOrDefault(attr.getIdentifier(), null)));
+
+    metaDataService.updateEntityType(copy);
+    return copy;
   }
 
   private EntityType copyEntityType(EntityType original) {
@@ -142,26 +170,26 @@ public class ResourceCopier {
     return copy;
   }
 
-  private EntityType persist(EntityType copy) {
+  private EntityType addEntityType(EntityType copy) {
     metaDataService.addEntityType(copy);
-
-    copyEntities(copiedIdsMap.get(copy.getId()), copy);
     return copy;
   }
 
-  private EntityType update(EntityType copy) {
+  private EntityType updateRelations(EntityType copy) {
     updatePackage(copy);
     updateExtends(copy);
     updateReferences(copy);
     return copy;
   }
 
-  private void copyEntities(String originalEntityTypeId, EntityType copy) {
+  private EntityType copyEntities(EntityType copy) {
+    String originalEntityTypeId = copiedIdsMap.get(copy.getId());
     if (!copy.isAbstract()) {
       Stream<Entity> entities = dataService.findAll(originalEntityTypeId);
       entities = entities.map(PretendingEntity::new);
       dataService.add(copy.getId(), entities);
     }
+    return copy;
   }
 
   private void updatePackage(EntityType entityType) {
@@ -277,7 +305,7 @@ public class ResourceCopier {
   private Package getPackage(String id) {
     return metaDataService
         .getPackage(id)
-        .orElseThrow(() -> new UnknownEntityException(packageMetadata, id));
+        .orElseThrow(() -> new UnknownEntityException(PackageMetadata.PACKAGE, id));
   }
 
   private int calculateMaxProgress() {
