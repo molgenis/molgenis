@@ -10,6 +10,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.resource.ResourceCollection;
+import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,10 +36,11 @@ public class ResourceCopierFactory {
   }
 
   ResourceCopier newInstance(
-      ResourceCollection resourceCollection, @Nullable Package targetPackage) {
+      ResourceCollection resourceCollection, @Nullable Package targetPackage, Progress progress) {
     return new ResourceCopier(
         resourceCollection,
         targetPackage,
+        progress,
         dataService,
         idGenerator,
         packageMetadata,

@@ -32,7 +32,7 @@ public class CopyServiceImpl implements CopyService {
     Package targetPackage =
         targetPackageId != null ? resourceCollector.getPackage(targetPackageId) : null;
 
-    resourceCopierFactory.newInstance(resourceCollection, targetPackage).copy();
+    resourceCopierFactory.newInstance(resourceCollection, targetPackage, progress).copy();
     return "true";
   }
 }

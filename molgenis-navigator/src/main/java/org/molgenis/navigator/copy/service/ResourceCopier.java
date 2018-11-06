@@ -1,5 +1,6 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Streams.stream;
@@ -11,11 +12,14 @@ import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COP
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
+import com.google.common.collect.TreeTraverser;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.DataService;
@@ -34,6 +38,7 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
 
 // TODO document
@@ -45,6 +50,7 @@ public class ResourceCopier {
   private final List<Package> packages;
   private final List<EntityType> entityTypes;
   @Nullable private final Package targetPackage;
+  private final Progress progress;
 
   private final DataService dataService;
   private final MetaDataService metaDataService;
@@ -58,16 +64,20 @@ public class ResourceCopier {
 
   private final Map<String, Package> copiedPackageMap;
   private final Map<String, EntityType> copiedEntityTypeMap;
+
+  /** Map of the newly generated EntityType IDs and the original IDs. */
   private final Map<String, String> copiedIdsMap;
 
   ResourceCopier(
       ResourceCollection resourceCollection,
       @Nullable Package targetPackage,
+      Progress progress,
       DataService dataService,
       IdGenerator idGenerator,
       PackageMetadata packageMetadata,
       EntityTypeDependencyResolver entityTypeDependencyResolver,
       AttributeFactory attributeFactory) {
+    this.progress = requireNonNull(progress);
     requireNonNull(resourceCollection);
     this.packages = resourceCollection.getPackages();
     this.entityTypes = resourceCollection.getEntityTypes();
@@ -88,8 +98,20 @@ public class ResourceCopier {
   }
 
   public void copy() {
-    packages.forEach(this::copyPackage);
-    copyEntityTypes();
+    progress.setProgressMax(calculateMaxProgress());
+    progress.progress(0, "Starting to copy.");
+
+    if (!packages.isEmpty()) {
+      progress.status("Copying packages.");
+      packages.forEach(this::copyPackage);
+    }
+
+    if (!entityTypes.isEmpty() || !entityTypesInPackages.isEmpty()) {
+      progress.status("Copying entity types.");
+      copyEntityTypes();
+    }
+
+    progress.status("Finished copying.");
   }
 
   private void copyEntityTypes() {
@@ -104,7 +126,8 @@ public class ResourceCopier {
         .resolve(copiedEntityTypes)
         .stream()
         .map(this::update)
-        .forEach(this::persist);
+        .map(this::persist)
+        .forEach(e -> progress.increment(1));
   }
 
   private EntityType copyEntityType(EntityType original) {
@@ -119,10 +142,11 @@ public class ResourceCopier {
     return copy;
   }
 
-  private void persist(EntityType copy) {
+  private EntityType persist(EntityType copy) {
     metaDataService.addEntityType(copy);
 
     copyEntities(copiedIdsMap.get(copy.getId()), copy);
+    return copy;
   }
 
   private EntityType update(EntityType copy) {
@@ -176,6 +200,7 @@ public class ResourceCopier {
     validateNotContainsItself(pack);
     assignUniqueLabel(pack);
     copyPackageRecursive(pack, targetPackage);
+    progress.increment(1);
   }
 
   private void copyPackageRecursive(Package pack, Package parent) {
@@ -253,6 +278,31 @@ public class ResourceCopier {
     return metaDataService
         .getPackage(id)
         .orElseThrow(() -> new UnknownEntityException(packageMetadata, id));
+  }
+
+  private int calculateMaxProgress() {
+    AtomicInteger maxProgress = new AtomicInteger();
+    maxProgress.addAndGet(entityTypes.size());
+    maxProgress.addAndGet(packages.size());
+
+    packages.forEach(
+        packToCopy ->
+            new PackageTreeTraverser()
+                .postOrderTraversal(packToCopy)
+                .forEach(
+                    pack -> {
+                      maxProgress.addAndGet(size(pack.getChildren()));
+                      maxProgress.addAndGet(size(pack.getEntityTypes()));
+                    }));
+
+    return maxProgress.get();
+  }
+
+  private static class PackageTreeTraverser extends TreeTraverser<Package> {
+    @Override
+    public Iterable<Package> children(@Nonnull Package packageEntity) {
+      return packageEntity.getChildren();
+    }
   }
 
   /**
