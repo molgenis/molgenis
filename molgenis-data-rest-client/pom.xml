@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.2.7-SNAPSHOT</version>
+    <version>7.2.7</version>
   </parent>
   <artifactId>molgenis-data-rest-client</artifactId>
   <packaging>jar</packaging>
