@@ -88,17 +88,26 @@
     i18next-xhr-backend "^1.4.1"
     moment "^2.18.1"
 
-"@molgenis/molgenis-ui-form@^0.11.4":
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-0.11.4.tgz#5900078ca93ce4527251683e533c26841a75896d"
+"@molgenis/molgenis-ui-form@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-form/-/molgenis-ui-form-1.2.0.tgz#098191bceb8753ea847d480ea3d32a90a925b447"
+  integrity sha512-kWHozri01zd14dZw0J+B7H2TG+bUVd+ReCWav04ApYAM+7aXWZk7PIbfbCWmaLxKcvsKGFEdiYPXKUKF320rnw==
   dependencies:
     "@molgenis/molgenis-api-client" "^2.1.2"
+    "@molgenis/rsql" "^0.1.1"
     debounce "^1.1.0"
     moment "^2.20.1"
     vue-code "^1.2.3"
-    vue-flatpickr-component "^7.0.4"
-    vue-form "^4.8.1"
+    vue-flatpickr-component "^8.0.0"
+    vue-form "^4.10.1"
     vue-select ConnorStroomberg/vue-select.git#release/patch-for-update-issue
+
+"@molgenis/rsql@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@molgenis/rsql/-/rsql-0.1.1.tgz#de234a5f8de71ab1405cce48bb5c5c76c4525ca4"
+  integrity sha512-2OtVDzXSTws76RR9zUpYRDPw6SLuG7KfeaFpTwrayPhGlXfJE2D/gDR1TktCuaNWFbq90oLb3RTlxAoB5NgmAg==
+  dependencies:
+    mdurl "^1.0.1"
 
 "@sinonjs/formatio@^2.0.0":
   version "2.0.0"
@@ -1703,8 +1712,9 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
 codemirror@5.x:
-  version "5.39.0"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.39.0.tgz#4654f7d2f7e525e04a62e72d9482348ccb37dce5"
+  version "5.41.0"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.41.0.tgz#57e245be197643c39440d2840236d3edc4bb1162"
+  integrity sha512-mkCwbneCx2WHg1MNCYrI+8Zuq0KMMaZ5yTFpQlAZazy3yxME8bHcuSc9WUFzgPZ114WqWu1FIHlx8CavLzBDIg==
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -2173,8 +2183,9 @@ de-indent@^1.0.2:
   resolved "https://registry.yarnpkg.com/de-indent/-/de-indent-1.0.2.tgz#b2038e846dc33baa5796128d0804b455b8c1e21d"
 
 debounce@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.1.0.tgz#6a1a4ee2a9dc4b7c24bb012558dbcdb05b37f408"
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.0.tgz#44a540abc0ea9943018dc0eaa95cce87f65cd131"
+  integrity sha512-mYtLl1xfZLi1m4RtQYlZgJUNQjl4ZxVnHzIR8nLLgi4q1YT8o/WM+MK/f8yfcc9s5Ir5zRaPZyZU6xs1Syoocg==
 
 debug@2, debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
@@ -3077,9 +3088,14 @@ extend-shallow@^3.0.0, extend-shallow@^3.0.2:
     assign-symbols "^1.0.0"
     is-extendable "^1.0.1"
 
-extend@3, extend@3.0.1, extend@^3.0.0, extend@~3.0.0, extend@~3.0.1:
+extend@3, extend@^3.0.0, extend@~3.0.0, extend@~3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
+
+extend@3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz#f8b1136b4071fbd8eb140aff858b1019ec2915fa"
+  integrity sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==
 
 external-editor@^2.0.4:
   version "2.1.0"
@@ -3294,9 +3310,10 @@ flatpickr@^2.3.0-3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-2.6.3.tgz#457357532deb135f3da64b425bf4435737961564"
 
-flatpickr@^4.4.6:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.5.1.tgz#f65eaf54c07538f87d6f68a67b03cf816d7fb82f"
+flatpickr@^4.5.1:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.5.2.tgz#47c8ad472a096e5fb7e74b809b0703535383f20d"
+  integrity sha512-jDy4QYGpmiy7+Qk8QvKJ4spjDdxcx9cxMydmq1x427HkKWBw0qizLYeYM2F6tMcvvqGjU5VpJS55j4LnsaBblA==
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -5014,6 +5031,11 @@ md5.js@^1.3.4:
   dependencies:
     hash-base "^3.0.0"
     inherits "^2.0.1"
+
+mdurl@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
+  integrity sha1-/oWy7HWlkDfyrf7BAP1sYBdhFS4=
 
 media-typer@0.3.0:
   version "0.3.0"
@@ -6906,6 +6928,7 @@ schema-utils@^0.4.0, schema-utils@^0.4.5:
 scope-eval@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/scope-eval/-/scope-eval-1.0.0.tgz#e182db1a1ef26f3e79d4bf48423b25e22839f0ff"
+  integrity sha1-4YLbGh7ybz551L9IQjsl4ig58P8=
 
 select-hose@^2.0.0:
   version "2.0.0"
@@ -8013,6 +8036,7 @@ void-elements@^2.0.0:
 vue-code@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/vue-code/-/vue-code-1.2.3.tgz#c87ca19fb0255c5167c784b3e78c8958306d8a60"
+  integrity sha512-IWVQk/wCcOzy43a3CZ1Ps0KMvP8mFlTIIpEgsTC7bSiqGd2uQr0vptLTvkBA44EfbijQKPuwFvmswxhXl578RA==
   dependencies:
     codemirror "5.x"
 
@@ -8027,11 +8051,12 @@ vue-eslint-parser@^2.0.3:
     esquery "^1.0.0"
     lodash "^4.17.4"
 
-vue-flatpickr-component@^7.0.4:
-  version "7.0.4"
-  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-7.0.4.tgz#29909596555f5160792a917f469f9e809e5e6c26"
+vue-flatpickr-component@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/vue-flatpickr-component/-/vue-flatpickr-component-8.0.0.tgz#d5ce18981ad1c6fdf32106ae441f5160978e46b3"
+  integrity sha512-PQ8D2sa25a05J4EyCK/iZIUM85zp8Ahlg+7S8XknwFqYcuayeo3r9bqVppT36QEO07Cyne4XPnjIMGHIh0hZ7Q==
   dependencies:
-    flatpickr "^4.4.6"
+    flatpickr "^4.5.1"
 
 vue-flatpickr@^2.3.0:
   version "2.3.0"
@@ -8039,11 +8064,12 @@ vue-flatpickr@^2.3.0:
   dependencies:
     flatpickr "^2.3.0-3"
 
-vue-form@^4.8.1:
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/vue-form/-/vue-form-4.9.0.tgz#cfb0f75f6c1b387a6b830084fb12ec9cbde8d260"
+vue-form@^4.10.1:
+  version "4.10.1"
+  resolved "https://registry.yarnpkg.com/vue-form/-/vue-form-4.10.1.tgz#062a9655d7004361f3122341509e3105f8a7f0e8"
+  integrity sha512-/dMvwuSp5Ht7qS5MWKV3NCH5Dy8KBU1m/9th0zBRYByRo6AKHvrheEBFfB1ibamP6eSHdErYI3fIruAY+obw+w==
   dependencies:
-    extend "3.0.1"
+    extend "3.0.2"
     scope-eval "1.0.0"
 
 vue-hot-reload-api@^2.2.0:
@@ -8072,7 +8098,7 @@ vue-router@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.1.tgz#d9b05ad9c7420ba0f626d6500d693e60092cc1e9"
 
-vue-select@ConnorStroomberg/vue-select.git#release/patch-for-update-issue:
+"vue-select@github:ConnorStroomberg/vue-select#release/patch-for-update-issue":
   version "2.4.0"
   resolved "https://codeload.github.com/ConnorStroomberg/vue-select/tar.gz/3bee82380e07634b4d5d7d1c2450d7101581a9b0"
 
