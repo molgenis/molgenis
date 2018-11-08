@@ -31,6 +31,7 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.JobExecutor;
+import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
 import org.molgenis.navigator.download.job.DownloadJobExecution;
 import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -47,17 +48,19 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   @Mock private DataService dataService;
   @Mock private JobExecutor jobExecutor;
   @Mock private DownloadJobExecutionFactory downloadJobExecutionFactory;
+  @Mock private CopyJobExecutionFactory copyJobExecutionFactory;
   private NavigatorServiceImpl navigatorServiceImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     navigatorServiceImpl =
-        new NavigatorServiceImpl(dataService, jobExecutor, downloadJobExecutionFactory);
+        new NavigatorServiceImpl(
+            dataService, jobExecutor, downloadJobExecutionFactory, copyJobExecutionFactory);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testNavigatorServiceImpl() {
-    new NavigatorServiceImpl(null, null, null);
+    new NavigatorServiceImpl(null, null, null, null);
   }
 
   @Test

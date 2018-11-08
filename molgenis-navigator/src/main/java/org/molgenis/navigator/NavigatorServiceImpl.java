@@ -29,6 +29,8 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.util.MetaUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.navigator.copy.job.CopyJobExecution;
+import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
 import org.molgenis.navigator.download.job.DownloadJobExecution;
 import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
 import org.molgenis.util.UnexpectedEnumException;
@@ -46,10 +48,12 @@ public class NavigatorServiceImpl implements NavigatorService {
   NavigatorServiceImpl(
       DataService dataService,
       JobExecutor jobExecutor,
-      DownloadJobExecutionFactory downloadJobExecutionFactory) {
+      DownloadJobExecutionFactory downloadJobExecutionFactory,
+      CopyJobExecutionFactory copyJobExecutionFactory) {
     this.dataService = requireNonNull(dataService);
     this.jobExecutor = requireNonNull(jobExecutor);
     this.downloadJobExecutionFactory = requireNonNull(downloadJobExecutionFactory);
+    this.copyJobExecutionFactory = requireNonNull(copyJobExecutionFactory);
   }
 
   @Transactional(readOnly = true)
@@ -136,7 +140,6 @@ public class NavigatorServiceImpl implements NavigatorService {
 
     Package aPackage = getPackage(targetFolderId);
 
-    // TODO enable once CopyJobExecution available
     CopyJobExecution jobExecution = copyJobExecutionFactory.create();
     jobExecution.setResources(new Gson().toJson(resources));
     jobExecution.setTargetPackage(aPackage != null ? aPackage.getId() : null);

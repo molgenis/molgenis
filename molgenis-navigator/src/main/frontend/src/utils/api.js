@@ -86,11 +86,11 @@ export function deleteItems (items: Array<Item>): Promise<string> {
   }).catch(throwAlertError)
 }
 
-export function copyItems (items: Array<Item>, folder: Folder): Promise<Job> {
+export function copyItems (items: Array<Item>, folder: ?Folder): Promise<Job> {
   return api.post(NAVIGATOR_URI + '/copy', {
     body: JSON.stringify({
       resources: items.map(item => toApiItemIdentifier(item)),
-      targetFolderId: folder.id
+      targetFolderId: folder ? folder.id : null
     })
   }).catch(throwAlertError).then(toCopyJob)
 }
