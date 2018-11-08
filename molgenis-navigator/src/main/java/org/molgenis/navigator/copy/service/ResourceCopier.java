@@ -59,15 +59,16 @@ public class ResourceCopier {
   private final AttributeFactory attributeFactory;
 
   /** List of EntityTypes contained in Package(s) that are being copied. */
-  private final List<EntityType> entityTypesInPackages;
+  private final List<EntityType> entityTypesInPackages = newArrayList();
 
-  private final Map<String, Package> copiedPackageMap;
-  private final Map<String, EntityType> copiedEntityTypeMap;
+  private final Map<String, Package> copiedPackageMap = newHashMap();
+
+  private final Map<String, EntityType> copiedEntityTypeMap = newHashMap();
 
   /** Map of the newly generated EntityType IDs and the original IDs. */
-  private final Map<String, String> copiedIdsMap;
+  private final Map<String, String> copiedIdsMap = newHashMap();
 
-  private final Map<String, String> referenceDefaultValues;
+  private final Map<String, String> referenceDefaultValues = newHashMap();
 
   ResourceCopier(
       ResourceCollection resourceCollection,
@@ -89,12 +90,6 @@ public class ResourceCopier {
     this.attributeFactory = requireNonNull(attributeFactory);
 
     this.metaDataService = this.dataService.getMeta();
-
-    this.entityTypesInPackages = newArrayList();
-    this.copiedPackageMap = newHashMap();
-    this.copiedEntityTypeMap = newHashMap();
-    this.copiedIdsMap = newHashMap();
-    this.referenceDefaultValues = newHashMap();
   }
 
   public void copy() {
@@ -120,14 +115,15 @@ public class ResourceCopier {
     List<EntityType> copiedEntityTypes =
         concat(entityTypes.stream(), entityTypesInPackages.stream())
             .map(this::copyEntityType)
-            .map(this::cutDefaultValues)
             .collect(toList());
+
+    copiedEntityTypes.forEach(this::updateRelations);
 
     entityTypeDependencyResolver
         .resolve(copiedEntityTypes)
         .stream()
-        .map(this::updateRelations)
-        .map(this::addEntityType)
+        .map(this::cutDefaultValues)
+        .map(this::persistEntityType)
         .collect(toList())
         .stream()
         .map(this::copyEntities)
@@ -170,16 +166,15 @@ public class ResourceCopier {
     return copy;
   }
 
-  private EntityType addEntityType(EntityType copy) {
+  private EntityType persistEntityType(EntityType copy) {
     metaDataService.addEntityType(copy);
     return copy;
   }
 
-  private EntityType updateRelations(EntityType copy) {
+  private void updateRelations(EntityType copy) {
     updatePackage(copy);
     updateExtends(copy);
     updateReferences(copy);
-    return copy;
   }
 
   private EntityType copyEntities(EntityType copy) {
