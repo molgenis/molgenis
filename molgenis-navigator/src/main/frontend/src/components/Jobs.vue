@@ -2,14 +2,19 @@
   <div
     v-if="jobs.length > 0"
     class="row">
-    <div class="col"><!-- TODO dismissable when variant is success/failed -->
+    <div class="col">
       <b-alert
         v-for="(job, index) in jobs"
         :key="index"
         :variant="getVariant(job)"
+        :dismissible="job.status !== 'running'"
         show
         @dismissed="removeAlert(index)">
-        <span>copying ...</span>
+        <span v-if="job.status === 'running'">Preparing download ...</span>
+        <span v-else >Download ready, click
+          <a
+            :href="job.resultUrl"
+            download>here</a> to download your file</span>
       </b-alert>
     </div>
   </div>
@@ -38,7 +43,7 @@ export default {
           variant = 'danger'
           break
         default:
-          throw new Error('unexpected job type ' + job.type)
+          throw new Error('unexpected job status ' + job.status)
       }
       return variant
     },

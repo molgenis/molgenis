@@ -10,23 +10,26 @@ import type {
 } from '../flow.types'
 import {
   createJobFromApiJobCopy,
-  createJobFromApiJobDownload
+  createJobFromApiJobDownload,
+  toJobStatus
 } from './JobUtils'
 import { AlertError } from './AlertError'
 
 const NAVIGATOR_URI = '/plugin/navigator'
 const REST_API_V2 = '/api/v2'
 
-export function fetchJob (job: Job) {
-  // TODO fix
-  console.log(job)
-  if (job.type === 'copy') {
-    return api.get(
-      REST_API_V2 + '/sys_job_OneClickImportJobExecution/' + job.id).then(
-      response => createJobFromApiJobCopy(response))
-  } else {
-    return api.get(REST_API_V2 + '/blaat/' + job.id).then(
-      response => createJobFromApiJobDownload(response))
+export function fetchJob (job: Job): Promise<Job> {
+  switch (job.type) {
+    case 'copy':
+      return api.get(
+        REST_API_V2 + '/sys_job_CopyJobExecution/' + job.id).catch(
+        throwAlertError).then(createJobFromApiJobCopy)
+    case 'download':
+      return api.get(
+        REST_API_V2 + '/sys_job_DownloadJobExecution/' + job.id).catch(
+        throwAlertError).then(createJobFromApiJobDownload)
+    default:
+      throw new Error('unknown job type \'' + job.type + '\'')
   }
 }
 
@@ -72,7 +75,7 @@ export function downloadItems (items: Array<Item>): Promise<Job> {
     body: JSON.stringify({
       resources: items.map(item => toApiItemIdentifier(item))
     })
-  }).catch(throwAlertError).then(createJobFromApiJobDownload)
+  }).catch(throwAlertError).then(toDownloadJob)
 }
 
 export function deleteItems (items: Array<Item>): Promise<string> {
@@ -89,7 +92,7 @@ export function copyItems (items: Array<Item>, folder: Folder): Promise<Job> {
       resources: items.map(item => toApiItemIdentifier(item)),
       targetFolderId: folder.id
     })
-  }).catch(throwAlertError).then(createJobFromApiJobCopy)
+  }).catch(throwAlertError).then(toCopyJob)
 }
 
 export function moveItems (items: Array<Item>,
@@ -105,6 +108,14 @@ export function moveItems (items: Array<Item>,
 // map API types to navigator types
 function toFolderState (response: Object): FolderState {
   return response
+}
+
+function toDownloadJob (response: Object): Job {
+  return {type: 'download', id: response.jobId, status: toJobStatus(response.jobStatus)}
+}
+
+function toCopyJob (response: Object): Job {
+  return {type: 'copy', id: response.jobId, status: toJobStatus(response.jobStatus)}
 }
 
 function throwAlertError (response: Object): Alert {

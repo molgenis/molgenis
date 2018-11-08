@@ -31,25 +31,33 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.navigator.download.job.DownloadJobExecution;
+import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
+import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class NavigatorServiceImplTest extends AbstractMockitoTest {
-
+@ContextConfiguration(classes = {NavigatorServiceImplTest.Config.class})
+@TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
+public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContextTests {
   @Mock private DataService dataService;
-
   @Mock private JobExecutor jobExecutor;
+  @Mock private DownloadJobExecutionFactory downloadJobExecutionFactory;
   private NavigatorServiceImpl navigatorServiceImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    navigatorServiceImpl = new NavigatorServiceImpl(dataService, jobExecutor);
+    navigatorServiceImpl =
+        new NavigatorServiceImpl(dataService, jobExecutor, downloadJobExecutionFactory);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testNavigatorServiceImpl() {
-    new NavigatorServiceImpl(null, null);
+    new NavigatorServiceImpl(null, null, null);
   }
 
   @Test
@@ -209,6 +217,12 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
+  public void testMoveResourcesNoResources() {
+    navigatorServiceImpl.moveResources(emptyList(), "targetFolderId");
+    verifyZeroInteractions(dataService);
+  }
+
+  @Test
   public void testMoveResourcesSourcePackageIsTargetPackage() {
     String targetFolderId = "targetFolderId";
     List<ResourceIdentifier> resources =
@@ -256,9 +270,35 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
     throw new RuntimeException("TODO implement");
   }
 
+  @WithMockUser
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void testCopyResourcesNoResources() {
+    navigatorServiceImpl.copyResources(emptyList(), "targetFolderId");
+  }
+
+  @WithMockUser
   @Test
   public void testDownloadResources() {
-    throw new RuntimeException("TODO implement");
+    DownloadJobExecution downloadJobExecution = mock(DownloadJobExecution.class);
+    when(downloadJobExecutionFactory.create()).thenReturn(downloadJobExecution);
+
+    List<ResourceIdentifier> resources =
+        asList(
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
+
+    assertEquals(navigatorServiceImpl.downloadResources(resources), downloadJobExecution);
+    verify(downloadJobExecution)
+        .setResources(
+            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
+    verify(downloadJobExecution).setUser("user");
+    verify(jobExecutor).submit(downloadJobExecution);
+  }
+
+  @WithMockUser
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void testDownloadResourcesNoResources() {
+    navigatorServiceImpl.downloadResources(emptyList());
   }
 
   @Test
@@ -516,4 +556,6 @@ public class NavigatorServiceImplTest extends AbstractMockitoTest {
     navigatorServiceImpl.deleteResources(emptyList());
     verifyZeroInteractions(dataService);
   }
+
+  static class Config {}
 }

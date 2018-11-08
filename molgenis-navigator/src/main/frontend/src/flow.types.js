@@ -14,7 +14,8 @@ export type JobStatus = 'running' | 'success' | 'failed'
 export type Job = {
   type: JobType,
   id: string,
-  status: JobStatus
+  status: JobStatus,
+  resultUrl: ?string
 }
 
 export type Folder = {

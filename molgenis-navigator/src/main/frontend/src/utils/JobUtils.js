@@ -2,7 +2,7 @@
 import type { Job, JobStatus } from '../flow.types'
 import { createJobCopy, createJobDownload } from '../models/Job'
 
-function toJobStatus (apiJobStatus: string): JobStatus {
+export function toJobStatus (apiJobStatus: string): JobStatus {
   let jobStatus
   switch (apiJobStatus) {
     case 'PENDING':
@@ -27,9 +27,9 @@ function toJobStatus (apiJobStatus: string): JobStatus {
 }
 
 export function createJobFromApiJobCopy (apiJobCopy: Object): Job {
-  return createJobCopy(apiJobCopy.jobId, toJobStatus(apiJobCopy.jobStatus))
+  return createJobCopy(apiJobCopy.identifier, toJobStatus(apiJobCopy.status))
 }
 
 export function createJobFromApiJobDownload (apiJobDownload: Object): Job {
-  return createJobDownload(apiJobDownload.jobId, toJobStatus(apiJobDownload.jobStatus))
+  return createJobDownload(apiJobDownload.identifier, toJobStatus(apiJobDownload.status), apiJobDownload.resultUrl)
 }

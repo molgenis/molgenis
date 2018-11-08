@@ -8,11 +8,13 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
+import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -27,6 +29,8 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.util.MetaUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.navigator.download.job.DownloadJobExecution;
+import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,24 +40,22 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   private final DataService dataService;
   private final JobExecutor jobExecutor;
+  private final DownloadJobExecutionFactory downloadJobExecutionFactory;
+  private final CopyJobExecutionFactory copyJobExecutionFactory;
 
-  NavigatorServiceImpl(DataService dataService, JobExecutor jobExecutor) {
+  NavigatorServiceImpl(
+      DataService dataService,
+      JobExecutor jobExecutor,
+      DownloadJobExecutionFactory downloadJobExecutionFactory) {
     this.dataService = requireNonNull(dataService);
-    this.jobExecutor = jobExecutor;
+    this.jobExecutor = requireNonNull(jobExecutor);
+    this.downloadJobExecutionFactory = requireNonNull(downloadJobExecutionFactory);
   }
 
   @Transactional(readOnly = true)
   @Override
   public @Nullable Folder getFolder(@Nullable String folderId) {
-    if (folderId == null) {
-      return null;
-    }
-
-    Package aPackage = dataService.findOneById(PACKAGE, folderId, Package.class);
-    if (aPackage == null) {
-      throw new UnknownEntityException(PACKAGE, folderId);
-    }
-
+    Package aPackage = getPackage(folderId);
     return toFolder(aPackage);
   }
 
@@ -101,15 +103,11 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Transactional
   @Override
   public void moveResources(List<ResourceIdentifier> resources, @Nullable String targetFolderId) {
-    Package targetPackage;
-    if (targetFolderId != null) {
-      targetPackage = dataService.findOneById(PACKAGE, targetFolderId, Package.class);
-      if (targetPackage == null) {
-        throw new UnknownEntityException(PACKAGE, targetFolderId);
-      }
-    } else {
-      targetPackage = null;
+    if (resources.isEmpty()) {
+      return;
     }
+
+    Package targetPackage = getPackage(targetFolderId);
 
     Map<ResourceType, List<ResourceIdentifier>> resourceMap =
         resources.stream().collect(groupingBy(ResourceIdentifier::getType));
@@ -132,12 +130,32 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Override
   public JobExecution copyResources(
       List<ResourceIdentifier> resources, @Nullable String targetFolderId) {
-    throw new UnsupportedOperationException("TODO implement");
+    if (resources.isEmpty()) {
+      throw new IllegalArgumentException("resources can't be empty");
+    }
+
+    Package aPackage = getPackage(targetFolderId);
+
+    // TODO enable once CopyJobExecution available
+    CopyJobExecution jobExecution = copyJobExecutionFactory.create();
+    jobExecution.setResources(new Gson().toJson(resources));
+    jobExecution.setTargetPackage(aPackage != null ? aPackage.getId() : null);
+    jobExecution.setUser(getCurrentUsername());
+    jobExecutor.submit(jobExecution);
+    return jobExecution;
   }
 
   @Override
   public JobExecution downloadResources(List<ResourceIdentifier> resources) {
-    throw new UnsupportedOperationException("TODO implement");
+    if (resources.isEmpty()) {
+      throw new IllegalArgumentException("resources can't be empty");
+    }
+
+    DownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
+    jobExecution.setResources(new Gson().toJson(resources));
+    jobExecution.setUser(getCurrentUsername());
+    jobExecutor.submit(jobExecution);
+    return jobExecution;
   }
 
   @Transactional
@@ -187,9 +205,9 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private void updatePackage(Resource resource) {
-    Package aPackage = dataService.findOneById(PACKAGE, resource.getId(), Package.class);
+    Package aPackage = getPackage(resource.getId());
     if (aPackage == null) {
-      throw new UnknownEntityException(PACKAGE, resource.getId());
+      throw new NullPointerException("package can't be null");
     }
 
     if (!Objects.equal(aPackage.getLabel(), resource.getLabel())
@@ -329,8 +347,32 @@ public class NavigatorServiceImpl implements NavigatorService {
         .build();
   }
 
-  private Folder toFolder(Package aPackage) {
+  /**
+   * @param aPackage <tt>null</tt> implies the root package
+   * @return folder or <tt>null</tt> for the root folder
+   */
+  private @Nullable Folder toFolder(@Nullable Package aPackage) {
+    if (aPackage == null) {
+      return null;
+    }
+
     Folder parentFolder = aPackage.getParent() != null ? toFolder(aPackage.getParent()) : null;
     return Folder.create(aPackage.getId(), aPackage.getLabel(), parentFolder);
+  }
+
+  /**
+   * @param folderId <tt>null</tt> implies the root folder
+   * @return package or <tt>null</tt> for the root package
+   */
+  private @Nullable Package getPackage(@Nullable String folderId) {
+    if (folderId == null) {
+      return null;
+    }
+
+    Package aPackage = dataService.findOneById(PACKAGE, folderId, Package.class);
+    if (aPackage == null) {
+      throw new UnknownEntityException(PACKAGE, folderId);
+    }
+    return aPackage;
   }
 }

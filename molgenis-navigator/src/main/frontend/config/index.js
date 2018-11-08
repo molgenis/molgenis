@@ -22,6 +22,9 @@ module.exports = {
       },
       '/plugin': {
         target: 'http://localhost:8080'
+      },
+      '/files': {
+        target: 'http://localhost:8080'
       }
     },
 

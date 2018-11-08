@@ -2,6 +2,7 @@ package org.molgenis.navigator;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.jobs.model.JobExecution;
 
 public interface NavigatorService {
@@ -20,10 +21,12 @@ public interface NavigatorService {
   /** @param targetFolderId <tt>null</tt> implies the root folder */
   void moveResources(List<ResourceIdentifier> resources, @Nullable String targetFolderId);
 
-  /** @param targetFolderId <tt>null</tt> implies the root folder */
-  JobExecution copyResources(List<ResourceIdentifier> resources, @Nullable String targetFolderId);
+  /**
+   * @param targetFolderId <tt>null</tt> implies the root folder
+   */
+  JobExecution copyResources(@NotEmpty List<ResourceIdentifier> resources, @Nullable String targetFolderId);
 
-  JobExecution downloadResources(List<ResourceIdentifier> resources);
+  JobExecution downloadResources(@NotEmpty List<ResourceIdentifier> resources);
 
   void deleteResources(List<ResourceIdentifier> resources);
 

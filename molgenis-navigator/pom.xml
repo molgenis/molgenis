@@ -69,11 +69,24 @@
       <artifactId>molgenis-core-ui</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-test</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-data</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

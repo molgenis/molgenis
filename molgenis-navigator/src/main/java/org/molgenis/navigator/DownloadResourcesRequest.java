@@ -2,6 +2,7 @@ package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -9,6 +10,7 @@ import org.molgenis.util.AutoGson;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class DownloadResourcesRequest {
+  @NotEmpty
   public abstract List<ResourceIdentifier> getResources();
 
   public static DownloadResourcesRequest create(List<ResourceIdentifier> newResources) {

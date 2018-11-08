@@ -38,6 +38,7 @@ export const DOWNLOAD_SELECTED_ITEMS = '__DOWNLOAD_SELECTED_ITEMS__'
 
 function pollJob (commit: Function, job: Job) {
   fetchJob(job).then(updatedJob => {
+    // TODO progress change
     if (job.status !== updatedJob.status) {
       commit(UPDATE_JOB, updatedJob)
     }
