@@ -208,9 +208,9 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private void updatePackage(Resource resource) {
-    Package aPackage = getPackage(resource.getId());
+    Package aPackage = dataService.findOneById(PACKAGE, resource.getId(), Package.class);
     if (aPackage == null) {
-      throw new NullPointerException("package can't be null");
+      throw new UnknownEntityException(PACKAGE, resource.getId());
     }
 
     if (!Objects.equal(aPackage.getLabel(), resource.getLabel())

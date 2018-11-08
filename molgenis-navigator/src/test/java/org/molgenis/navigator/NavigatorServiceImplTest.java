@@ -26,11 +26,13 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.JobExecutor;
+import org.molgenis.navigator.copy.job.CopyJobExecution;
 import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
 import org.molgenis.navigator.download.job.DownloadJobExecution;
 import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
@@ -264,19 +266,96 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   }
 
   @Test
-  public void testCopyResources() {
-    throw new RuntimeException("TODO implement");
+  public void testMoveResourcesSourcePackageIsTargetPackageIsRootPackage() {
+    List<ResourceIdentifier> resources =
+        asList(
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
+
+    Package package0 = mock(Package.class);
+    Stream<Package> packages = Stream.of(package0);
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Object>> packageIdsCaptor = ArgumentCaptor.forClass(Stream.class);
+    doReturn(packages)
+        .when(dataService)
+        .findAll(eq(PackageMetadata.PACKAGE), packageIdsCaptor.capture(), eq(Package.class));
+
+    EntityType entityType0 = mock(EntityType.class);
+    Stream<EntityType> entityTypes = Stream.of(entityType0);
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<Stream<Object>> entityTypeIdsCaptor = ArgumentCaptor.forClass(Stream.class);
+    doReturn(entityTypes)
+        .when(dataService)
+        .findAll(
+            eq(EntityTypeMetadata.ENTITY_TYPE_META_DATA),
+            entityTypeIdsCaptor.capture(),
+            eq(EntityType.class));
+
+    navigatorServiceImpl.moveResources(resources, null);
+
+    verifyNoMoreInteractions(dataService);
   }
 
+  @WithMockUser
+  @Test
+  public void testCopyResources() {
+    CopyJobExecution copyJobExecution = mock(CopyJobExecution.class);
+    when(copyJobExecutionFactory.create()).thenReturn(copyJobExecution);
+
+    String targetFolderId = "targetFolderId";
+    List<ResourceIdentifier> resources =
+        asList(
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
+
+    Package targetPackage = when(mock(Package.class).getId()).thenReturn(targetFolderId).getMock();
+    when(dataService.findOneById(PackageMetadata.PACKAGE, targetFolderId, Package.class))
+        .thenReturn(targetPackage);
+
+    assertEquals(navigatorServiceImpl.copyResources(resources, targetFolderId), copyJobExecution);
+    verify(copyJobExecution)
+        .setResources(
+            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
+    verify(copyJobExecution).setUser("user");
+    verify(copyJobExecution).setTargetPackage(targetFolderId);
+    verify(jobExecutor).submit(copyJobExecution);
+  }
+
+  @WithMockUser
   @Test
   public void testCopyResourcesRootPackage() {
-    throw new RuntimeException("TODO implement");
+    CopyJobExecution copyJobExecution = mock(CopyJobExecution.class);
+    when(copyJobExecutionFactory.create()).thenReturn(copyJobExecution);
+
+    List<ResourceIdentifier> resources =
+        asList(
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
+
+    assertEquals(navigatorServiceImpl.copyResources(resources, null), copyJobExecution);
+    verify(copyJobExecution)
+        .setResources(
+            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
+    verify(copyJobExecution).setUser("user");
+    verify(copyJobExecution).setTargetPackage(null);
+    verify(jobExecutor).submit(copyJobExecution);
   }
 
   @WithMockUser
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testCopyResourcesNoResources() {
     navigatorServiceImpl.copyResources(emptyList(), "targetFolderId");
+  }
+
+  @WithMockUser
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testCopyResourcesUnknownTargetFolder() {
+    List<ResourceIdentifier> resources =
+        asList(
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
+
+    navigatorServiceImpl.copyResources(resources, "unknownTargetFolderId");
   }
 
   @WithMockUser

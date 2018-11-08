@@ -50,6 +50,12 @@ function pollJob (commit: Function, job: Job) {
       case 'success':
       case 'failed':
       case 'canceled':
+        // TODO discuss with TdB: what to do when job is done?
+        // 1) user is currently in target folder of job
+        //    --> dispatch FETCH_ITEMS_BY_FOLDER
+        //        BUG: current selection is removed
+        // 2) user is somewhere else (search context or normal context with other folder)
+        //    --> do nothing
         console.log('job finished with status ' + updatedJob.status)
         break
     }
@@ -75,6 +81,9 @@ export default {
   // TODO rename to FETCH_STATE_BY_FOLDER
   [FETCH_ITEMS_BY_FOLDER] ({commit, dispatch}: { commit: Function, dispatch: Function }, folderId: ?string) {
     getItemsByFolderId(folderId).then(data => {
+      // if folder changed, then remove selection
+      // if folder same, then update selection
+
       commit(SET_FOLDER, data.folder)
       commit(SET_ITEMS, data.resources)
     }).catch(error => {
