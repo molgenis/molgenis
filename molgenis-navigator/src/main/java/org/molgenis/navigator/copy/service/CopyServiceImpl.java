@@ -9,6 +9,7 @@ import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.resource.ResourceCollector;
 import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("unused")
@@ -25,7 +26,7 @@ public class CopyServiceImpl implements CopyService {
   }
 
   @Override
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public String copy(List<Resource> resources, String targetPackageId, Progress progress) {
     ResourceCollection resourceCollection = resourceCollector.get(resources);
 
