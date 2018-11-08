@@ -2,6 +2,7 @@ package org.molgenis.navigator.copy.job;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
@@ -40,7 +41,7 @@ public class CopyJobExecutionMetadata extends SystemEntityType {
     setLabel("Copy Job Execution");
 
     addAttribute(RESOURCES)
-        .setDataType(STRING)
+        .setDataType(TEXT)
         .setLabel("Resources")
         .setDescription("JSON containing the resources to copy.");
     addAttribute(TARGET_PACKAGE)
