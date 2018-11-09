@@ -1,38 +1,47 @@
 <template>
   <span>
-    <b-btn
-      v-b-tooltip.hover
+    <div
+      v-b-tooltip.d500
       :title="$t('action-cut')"
-      :disabled="!canCut"
-      variant="secondary"
-      @click="selectClipboardItems('cut')">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canCut}"
-        icon="cut"
-        size="lg"/>
-    </b-btn>
-    <b-btn
-      v-b-tooltip.hover
+      class="btn-tooltip-wrapper">
+      <b-btn
+        :disabled="!canCut"
+        variant="secondary"
+        @click="selectClipboardItems('cut')">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canCut}"
+          icon="cut"
+          size="lg"/>
+      </b-btn>
+    </div>
+    <div
+      v-b-tooltip.d500
       :title="$t('action-copy')"
-      :disabled="!canCopy"
-      variant="secondary"
-      @click="selectClipboardItems('copy')">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canCopy}"
-        icon="clone"
-        size="lg"/>
-    </b-btn>
-    <b-btn
-      v-b-tooltip.hover
+      class="btn-tooltip-wrapper">
+      <b-btn
+        :disabled="!canCopy"
+        variant="secondary"
+        @click="selectClipboardItems('copy')">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canCopy}"
+          icon="clone"
+          size="lg"/>
+      </b-btn>
+    </div>
+    <div
+      v-b-tooltip.d500
       :title="$t('action-paste')"
-      :disabled="!canPaste"
-      variant="secondary"
-      @click="pasteClipboardItems">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canPaste}"
-        icon="paste"
-        size="lg"/>
-    </b-btn>
+      class="btn-tooltip-wrapper">
+      <b-btn
+        :disabled="!canPaste"
+        variant="secondary"
+        @click="pasteClipboardItems">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canPaste}"
+          icon="paste"
+          size="lg"/>
+      </b-btn>
+    </div>
   </span>
 </template>
 
@@ -58,6 +67,7 @@ export default {
   },
   methods: {
     selectClipboardItems: function (mode) {
+      this.$emit('bv::disable::tooltip')
       const clipboard = {
         mode: mode,
         items: this.selectedItems.slice()

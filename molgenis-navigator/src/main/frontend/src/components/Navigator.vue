@@ -77,6 +77,11 @@ export default {
     cursor: not-allowed !important;
   }
 
+  .btn-tooltip-wrapper {
+    display: inline;
+    padding: 0.375rem 0rem;
+  }
+
   .fa-disabled {
     opacity: 0.6;
   }

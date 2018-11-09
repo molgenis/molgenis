@@ -1,27 +1,33 @@
 <template>
   <span>
-    <b-btn
-      v-b-tooltip.hover
+    <div
+      v-b-tooltip.d500
       :title="$t('action-upload')"
-      :disabled="!canUpload"
-      variant="secondary"
-      to="/menu/importdata/importwizard">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canUpload}"
-        icon="upload"
-        size="lg"/>
-    </b-btn>
-    <b-btn
-      v-b-tooltip.hover
+      class="btn-tooltip-wrapper">
+      <b-btn
+        :disabled="!canUpload"
+        variant="secondary"
+        to="/menu/importdata/importwizard">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canUpload}"
+          icon="upload"
+          size="lg"/>
+      </b-btn>
+    </div>
+    <div
+      v-b-tooltip.d500
       :title="$t('action-download')"
-      :disabled="!canDownload"
-      variant="secondary"
-      @click="downloadSelectedItems">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canDownload}"
-        icon="download"
-        size="lg"/>
-    </b-btn>
+      class="btn-tooltip-wrapper">
+      <b-btn
+        :disabled="!canDownload"
+        variant="secondary"
+        @click="downloadSelectedItems">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canDownload}"
+          icon="download"
+          size="lg"/>
+      </b-btn>
+    </div>
   </span>
 </template>
 

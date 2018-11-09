@@ -1,15 +1,18 @@
 <template>
-  <b-btn
-    v-b-tooltip.hover
-    v-b-modal.itemDeleteModal
+  <div
+    v-b-tooltip.d500
     :title="$t('action-delete')"
-    :disabled="!canDelete"
-    variant="danger">
-    <font-awesome-icon
-      :class="{'fa-disabled': !canDelete}"
-      icon="trash"
-      size="lg"/>
-  </b-btn>
+    class="btn-tooltip-wrapper">
+    <b-btn
+      v-b-modal.itemDeleteModal
+      :disabled="!canDelete"
+      variant="danger">
+      <font-awesome-icon
+        :class="{'fa-disabled': !canDelete}"
+        icon="trash"
+        size="lg"/>
+    </b-btn>
+  </div>
 </template>
 
 <script>

@@ -1,61 +1,63 @@
 <template>
   <span>
-    <b-dd
-      v-b-tooltip.hover
-      :disabled="!canCreate"
+    <div
+      v-b-tooltip.d500
       :title="$t('action-create')"
-      variant="primary">
-      <template slot="button-content">
+      class="btn-tooltip-wrapper">
+      <b-dd
+        :disabled="!canCreate"
+        variant="primary">
+        <template slot="button-content">
+          <font-awesome-icon
+            :class="{'fa-disabled' : !canCreate}"
+            icon="plus"
+            size="lg"/>
+        </template>
+        <b-dd-item v-b-modal.packageCreateModal>
+          <font-awesome-icon :icon="['far', 'folder-open']"/> {{ 'action-create-package' | i18n }}
+        </b-dd-item>
+        <b-dd-item to="/menu/dataintegration/metadata-manager">
+          <font-awesome-icon icon="list"/> {{ 'action-create-entity-type' | i18n }}
+        </b-dd-item>
+      </b-dd>
+    </div>
+    <div
+      v-b-tooltip.d500
+      :title="$t('action-edit')"
+      class="btn-tooltip-wrapper">
+      <b-btn
+        v-b-modal.packageUpdateModal
+        v-if="nrSelectedItems === 1 && getSelectedItemType === 'PACKAGE'"
+        :disabled="!canEdit"
+        variant="secondary"
+        class="button-last">
         <font-awesome-icon
-          :class="{'fa-disabled' : !canCreate}"
-          icon="plus"
+          :class="{'fa-disabled' : !canEdit}"
+          icon="edit"
           size="lg"/>
-      </template>
-      <b-dd-item v-b-modal.packageCreateModal>
-        <font-awesome-icon :icon="['far', 'folder-open']"/> {{ 'action-create-package' | i18n }}
-      </b-dd-item>
-      <b-dd-item to="/menu/dataintegration/metadata-manager">
-        <font-awesome-icon icon="list"/> {{ 'action-create-entity-type' | i18n }}
-      </b-dd-item>
-    </b-dd>
-    <b-btn
-      v-b-tooltip.hover
-      v-b-modal.packageUpdateModal
-      v-if="nrSelectedItems === 1 && getSelectedItemType === 'PACKAGE'"
-      :disabled="!canEdit"
-      :title="$t('action-edit')"
-      variant="secondary"
-      class="button-last">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canEdit}"
-        icon="edit"
-        size="lg"/>
-    </b-btn>
-    <b-btn
-      v-b-tooltip.hover
-      v-else-if="nrSelectedItems === 1 && (getSelectedItemType === 'ENTITY_TYPE' || getSelectedItemType === 'ENTITY_TYPE_ABSTRACT')"
-      :to="'/menu/dataintegration/metadata-manager/' + selectedItems[0].id"
-      :disabled="!canEdit"
-      :title="$t('action-edit')"
-      variant="secondary"
-      class="button-last">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canEdit}"
-        icon="edit"
-        size="lg"/>
-    </b-btn>
-    <b-btn
-      v-b-tooltip.hover
-      v-else
-      :title="$t('action-edit')"
-      :disabled="true"
-      variant="secondary"
-      class="button-last">
-      <font-awesome-icon
-        :class="{'fa-disabled' : !canEdit}"
-        icon="edit"
-        size="lg"/>
-    </b-btn>
+      </b-btn>
+      <b-btn
+        v-else-if="nrSelectedItems === 1 && (getSelectedItemType === 'ENTITY_TYPE' || getSelectedItemType === 'ENTITY_TYPE_ABSTRACT')"
+        :to="'/menu/dataintegration/metadata-manager/' + selectedItems[0].id"
+        :disabled="!canEdit"
+        variant="secondary"
+        class="button-last">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canEdit}"
+          icon="edit"
+          size="lg"/>
+      </b-btn>
+      <b-btn
+        v-else
+        :disabled="true"
+        variant="secondary"
+        class="button-last">
+        <font-awesome-icon
+          :class="{'fa-disabled' : !canEdit}"
+          icon="edit"
+          size="lg"/>
+      </b-btn>
+    </div>
   </span>
 </template>
 
