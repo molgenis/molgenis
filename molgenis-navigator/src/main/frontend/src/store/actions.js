@@ -142,7 +142,7 @@ export default {
     }
   },
   [MOVE_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
-    folder: Folder) {
+    folder: ?Folder) {
     if (state.clipboard && state.clipboard.items.length > 0) {
       moveItems(state.clipboard.items, folder).then(() => {
         commit(RESET_CLIPBOARD)
@@ -153,7 +153,7 @@ export default {
     }
   },
   [COPY_CLIPBOARD_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
-    folder: Folder) {
+    folder: ?Folder) {
     if (state.clipboard && state.clipboard.items.length > 0) {
       copyItems(state.clipboard.items, folder).then(job => {
         commit(RESET_CLIPBOARD)

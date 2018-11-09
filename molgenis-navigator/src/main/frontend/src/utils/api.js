@@ -81,11 +81,11 @@ export function copyItems (items: Array<Item>, folder: ?Folder): Promise<Job> {
 }
 
 export function moveItems (items: Array<Item>,
-  folder: Folder): Promise<string> {
+  folder: ?Folder): Promise<string> {
   return api.post(NAVIGATOR_URI + '/move', {
     body: JSON.stringify({
       resources: items.map(item => toApiItemIdentifier(item)),
-      targetFolderId: folder.id
+      targetFolderId: folder ? folder.id : null
     })
   }).catch(throwAlertError)
 }
