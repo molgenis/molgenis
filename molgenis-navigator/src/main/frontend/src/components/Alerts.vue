@@ -3,16 +3,18 @@
     v-if="alerts.length > 0"
     class="row">
     <div class="col">
-      <b-alert
+      <div
         v-for="(alert, index) in alerts"
-        :key="index"
-        :variant="getVariant(alert)"
-        show
-        dismissible
-        @dismissed="removeAlert(index)">
-        <span>{{ alert.message }}</span>
-        <span v-if="alert.code"> ({{ alert.code }})</span>
-      </b-alert>
+        :key="index">
+        <b-alert
+          :variant="getVariant(alert)"
+          show
+          dismissible
+          @dismissed="removeAlert(index)">
+          <span>{{ alert.message }}</span>
+          <span v-if="alert.code"> ({{ alert.code }})</span>
+        </b-alert>
+      </div>
     </div>
   </div>
 </template>

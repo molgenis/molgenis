@@ -36,29 +36,36 @@ export const COPY_CLIPBOARD_ITEMS = '__COPY_CLIPBOARD_ITEMS__'
 export const POLL_JOB = '__POLL_JOB__'
 export const DOWNLOAD_SELECTED_ITEMS = '__DOWNLOAD_SELECTED_ITEMS__'
 
-function pollJob (commit: Function, job: Job) {
+function finishJob (commit: Function, dispatch: Function, state: State,
+  job: Job) {
+  switch (job.type) {
+    case 'copy':
+      if (job.status === 'success') {
+        dispatch(FETCH_ITEMS)
+      }
+      break
+    case 'download':
+      break
+    default:
+      throw new Error('unexpected job type \'' + job.type + '\'')
+  }
+}
+
+function pollJob (commit: Function, dispatch: Function, state: State,
+  job: Job) {
   fetchJob(job).then(updatedJob => {
-    // TODO progress change
-    if (job.status !== updatedJob.status) {
-      commit(UPDATE_JOB, updatedJob)
-    }
+    commit(UPDATE_JOB, updatedJob)
     switch (updatedJob.status) {
-      case 'pending':
       case 'running':
-        setTimeout(() => pollJob(commit, updatedJob), 500)
+        setTimeout(() => pollJob(commit, dispatch, state, updatedJob), 500)
         break
       case 'success':
       case 'failed':
-      case 'canceled':
-        // TODO discuss with TdB: what to do when job is done?
-        // 1) user is currently in target folder of job
-        //    --> dispatch FETCH_ITEMS_BY_FOLDER
-        //        BUG: current selection is removed
-        // 2) user is somewhere else (search context or normal context with other folder)
-        //    --> do nothing
-        console.log('job finished with status ' + updatedJob.status)
+        finishJob(commit, dispatch, state, updatedJob)
         break
     }
+  }).catch(error => {
+    commit(ADD_ALERTS, error.alerts)
   })
 }
 
@@ -159,7 +166,7 @@ export default {
   },
   [POLL_JOB] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function },
     job: Job) {
-    pollJob(commit, job)
+    pollJob(commit, dispatch, state, job)
   },
   [DOWNLOAD_SELECTED_ITEMS] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
     if (state.selectedItems.length > 0) {

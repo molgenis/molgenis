@@ -388,6 +388,102 @@ describe('actions', () => {
       utils.testAction(actions.__COPY_CLIPBOARD_ITEMS__, options, done)
     })
   })
+  describe('POLL_JOB', () => {
+    it('should update the job on progress change', done => {
+      const job = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'running',
+        progress: 3,
+        progressMax: 100
+      }
+      const updatedJob = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'running',
+        progress: 30,
+        progressMax: 100
+      }
+
+      const fetchJob = td.function('api.fetchJob')
+      td.when(fetchJob(job)).thenResolve(Promise.resolve(updatedJob))
+      td.replace(api, 'fetchJob', fetchJob)
+
+      const options = {
+        payload: job,
+        state: {
+          jobs: [job]
+        },
+        expectedMutations: [
+          {type: '__UPDATE_JOB__', payload: updatedJob}
+        ]
+      }
+      utils.testAction(actions.__POLL_JOB__, options, done)
+    })
+    it('should fetch items on copy job success', done => {
+      const job = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'running',
+        progress: 3,
+        progressMax: 100
+      }
+      const updatedJob = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'success',
+        progress: 100,
+        progressMax: 100,
+        resultUrl: '/files/myfile.zip'
+      }
+
+      const fetchJob = td.function('api.fetchJob')
+      td.when(fetchJob(job)).thenResolve(Promise.resolve(updatedJob))
+      td.replace(api, 'fetchJob', fetchJob)
+
+      const options = {
+        payload: job,
+        state: {
+          jobs: [job]
+        },
+        expectedMutations: [
+          {type: '__UPDATE_JOB__', payload: updatedJob}
+        ],
+        expectedActions: [
+          {type: '__FETCH_ITEMS__'}
+        ]
+      }
+      utils.testAction(actions.__POLL_JOB__, options, done)
+    })
+    it('should set alerts in the state in case of errors', done => {
+      const error = new Error()
+      error.alerts = [{type: 'ERROR', message: 'message'}]
+
+      const job = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'running',
+        progress: 3,
+        progressMax: 100
+      }
+
+      const fetchJob = td.function('api.fetchJob')
+      td.when(fetchJob(job)).thenResolve(Promise.reject(error))
+      td.replace(api, 'fetchJob', fetchJob)
+
+      const options = {
+        payload: job,
+        state: {
+          jobs: [job]
+        },
+        expectedMutations: [
+          {type: '__ADD_ALERTS__', payload: error.alerts}
+        ]
+      }
+
+      utils.testAction(actions.__POLL_JOB__, options, done)
+    })
+  })
   describe('DOWNLOAD_SELECTED_ITEMS', () => {
     const items = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
     const downloadItems = td.function('api.downloadItems')

@@ -15,6 +15,87 @@ describe('api', () => {
   const folderId = 'folderId'
   const folder = {id: folderId, label: 'label', readonly: false}
 
+  describe('fetchJob', (done) => {
+    it('should call the job endpoint for a copy job and return current job', () => {
+      const job = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'running',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
+
+      const response = {
+        type: 'Copy',
+        identifier: 'jobId',
+        status: 'SUCCESS'
+      }
+
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/api/v2/sys_job_CopyJobExecution/jobId')).thenResolve(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      const updatedJob = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'success',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
+      expect(api.fetchJob(job)).to.eventually.eql(updatedJob).then(done, done)
+    })
+    it('should call the job endpoint for a download job and return current job', () => {
+      const job = {
+        type: 'download',
+        id: 'jobId',
+        status: 'running',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
+
+      const response = {
+        type: 'DownloadJob',
+        identifier: 'jobId',
+        status: 'FAILED'
+      }
+
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/api/v2/sys_job_DownloadJobExecution/jobId')).thenResolve(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      const updatedJob = {
+        type: 'download',
+        id: 'jobId',
+        status: 'failed',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
+      expect(api.fetchJob(job)).to.eventually.eql(updatedJob).then(done, done)
+    })
+    it('should return alerts in case of errors', (done) => {
+      const job = {
+        type: 'download',
+        id: 'jobId',
+        status: 'running',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
+
+      const response = {errors: [{message: 'error'}]}
+
+      const get = td.function('molgenisApiClient.get')
+      td.when(get('/api/v2/sys_job_DownloadJobExecution/jobId')).thenReject(response)
+      td.replace(molgenisApiClient, 'get', get)
+
+      expect(api.fetchJob(job)).to.eventually.be.rejectedWith(Error).then(() => done())
+    })
+  })
+
   describe('getItemsByFolderId', (done) => {
     it('should call the get endpoint with folderId parameter and return folder state', () => {
       const response = {
@@ -112,15 +193,23 @@ describe('api', () => {
 
     it('should call copy endpoint and return job on success', () => {
       const response = {
-        jobId: 'jobId',
-        jobStatus: 'SUCCESS'
+        type: 'Copy',
+        identifier: 'jobId',
+        status: 'SUCCESS'
       }
 
       const post = td.function('molgenisApiClient.post')
       td.when(post('/plugin/navigator/copy', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      const expectedjob = {type: 'copy', id: 'jobId', status: 'success'}
+      const expectedjob = {
+        type: 'copy',
+        id: 'jobId',
+        status: 'success',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
       expect(api.copyItems(items, folder)).to.eventually.eql(expectedjob).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
@@ -170,15 +259,23 @@ describe('api', () => {
 
     it('should call download endpoint and return job on success', () => {
       const response = {
-        jobId: 'jobId',
-        jobStatus: 'SUCCESS'
+        type: 'DownloadJob',
+        identifier: 'jobId',
+        status: 'SUCCESS'
       }
 
       const post = td.function('molgenisApiClient.post')
       td.when(post('/plugin/navigator/download', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      const expectedjob = {type: 'download', id: 'jobId', status: 'success'}
+      const expectedjob = {
+        type: 'download',
+        id: 'jobId',
+        status: 'success',
+        progress: undefined,
+        progressMax: undefined,
+        resultUrl: undefined
+      }
       expect(api.downloadItems(items)).to.eventually.eql(expectedjob).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {

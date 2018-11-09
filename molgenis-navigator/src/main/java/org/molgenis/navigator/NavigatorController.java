@@ -71,20 +71,16 @@ public class NavigatorController extends VuePluginController {
 
   @PostMapping("/copy")
   @ResponseBody
-  public JobResponse copyResources(@RequestBody @Valid CopyResourcesRequest copyResourcesRequest) {
-    JobExecution jobExecution =
-        navigatorService.copyResources(
-            copyResourcesRequest.getResources(), copyResourcesRequest.getTargetFolderId());
-    return toJobResponse(jobExecution);
+  public JobExecution copyResources(@RequestBody @Valid CopyResourcesRequest copyResourcesRequest) {
+    return navigatorService.copyResources(
+        copyResourcesRequest.getResources(), copyResourcesRequest.getTargetFolderId());
   }
 
   @PostMapping("/download")
   @ResponseBody
-  public JobResponse downloadResources(
+  public JobExecution downloadResources(
       @RequestBody @Valid DownloadResourcesRequest downloadResourcesRequest) {
-    JobExecution jobExecution =
-        navigatorService.downloadResources(downloadResourcesRequest.getResources());
-    return toJobResponse(jobExecution);
+    return navigatorService.downloadResources(downloadResourcesRequest.getResources());
   }
 
   @PostMapping("/move")
@@ -98,12 +94,5 @@ public class NavigatorController extends VuePluginController {
   @ResponseStatus(OK)
   public void deleteResources(@RequestBody @Valid DeleteResourcesRequest deleteItemsRequest) {
     navigatorService.deleteResources(deleteItemsRequest.getResources());
-  }
-
-  private JobResponse toJobResponse(JobExecution jobExecution) {
-    return JobResponse.builder()
-        .setJobId(jobExecution.getIdentifier())
-        .setJobStatus(jobExecution.getStatus().toString())
-        .build();
   }
 }

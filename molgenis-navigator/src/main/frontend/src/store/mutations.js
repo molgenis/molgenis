@@ -5,6 +5,7 @@ export const ADD_ALERTS = '__ADD_ALERTS__'
 export const REMOVE_ALERT = '__REMOVE_ALERT__'
 export const ADD_JOB = '__ADD_JOB__'
 export const UPDATE_JOB = '__UPDATE_JOB__'
+export const REMOVE_JOB = '__REMOVE_JOB__'
 export const SET_FOLDER = '__SET_FOLDER__'
 export const SET_ITEMS = '__SET_ITEMS__'
 export const SET_SELECTED_ITEMS = '__SET_SELECTED_ITEMS__'
@@ -28,6 +29,9 @@ export default {
     state.jobs = state.jobs.map(
       existingJob => existingJob.type === job.type && existingJob.id === job.id
         ? job : existingJob)
+  },
+  [REMOVE_JOB] (state: State, job: Job) {
+    state.jobs = state.jobs.filter(existingJob => !(existingJob.type === job.type && existingJob.id === job.id))
   },
   [SET_FOLDER] (state: State, folder: Folder) {
     state.folder = folder

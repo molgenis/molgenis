@@ -58,6 +58,19 @@ describe('mutations', () => {
       expect(state.jobs).to.deep.equal([job0, updatedJob1])
     })
   })
+  describe('REMOVE_JOB', () => {
+    it('should remove existing job in the state', () => {
+      const job0 = {type: 'download', id: '0', status: 'running'}
+      const job1 = {type: 'copy', id: '0', status: 'running'}
+
+      const state = {
+        jobs: [job0, job1]
+      }
+
+      mutations.__REMOVE_JOB__(state, job1)
+      expect(state.jobs).to.deep.equal([job0])
+    })
+  })
   describe('SET_FOLDER', () => {
     it('should set the folder', () => {
       const state = {
@@ -102,6 +115,15 @@ describe('mutations', () => {
 
       mutations.__SET_SELECTED_ITEMS__(state, selectedItems)
       expect(state.selectedItems).to.deep.equal(selectedItems)
+    })
+  })
+  describe('SET_SHOW_HIDDEN_ITEMS', () => {
+    it('should enable show hidden items', () => {
+      const state = {
+        showHiddenItems: false
+      }
+      mutations.__SET_SHOW_HIDDEN_ITEMS__(state, true)
+      expect(state.showHiddenItems).to.equal(true)
     })
   })
   describe('SET_CLIPBOARD', () => {

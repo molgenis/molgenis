@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;

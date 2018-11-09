@@ -15,6 +15,8 @@ export type Job = {
   type: JobType,
   id: string,
   status: JobStatus,
+  progress: ?number,
+  progressMax: ?number,
   resultUrl: ?string
 }
 

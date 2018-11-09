@@ -4,6 +4,7 @@
     :fields="fields"
     :filter="filter"
     :empty-text="$t('table-no-results')"
+    sort-by="label"
     class="text-left"
     show-empty>
     <template

@@ -6,31 +6,16 @@ import type {
   Folder,
   FolderState,
   Item,
-  Job
+  Job, JobStatus, JobType
 } from '../flow.types'
-import {
-  createJobFromApiJobCopy,
-  createJobFromApiJobDownload,
-  toJobStatus
-} from './JobUtils'
 import { AlertError } from './AlertError'
 
 const NAVIGATOR_URI = '/plugin/navigator'
 const REST_API_V2 = '/api/v2'
 
 export function fetchJob (job: Job): Promise<Job> {
-  switch (job.type) {
-    case 'copy':
-      return api.get(
-        REST_API_V2 + '/sys_job_CopyJobExecution/' + job.id).catch(
-        throwAlertError).then(createJobFromApiJobCopy)
-    case 'download':
-      return api.get(
-        REST_API_V2 + '/sys_job_DownloadJobExecution/' + job.id).catch(
-        throwAlertError).then(createJobFromApiJobDownload)
-    default:
-      throw new Error('unknown job type \'' + job.type + '\'')
-  }
+  const uri = REST_API_V2 + '/' + toApiJobEntityType(job) + '/' + job.id
+  return api.get(uri).catch(throwAlertError).then(toJob)
 }
 
 export function getItemsByFolderId (folderId: ?string): Promise<FolderState> {
@@ -75,7 +60,7 @@ export function downloadItems (items: Array<Item>): Promise<Job> {
     body: JSON.stringify({
       resources: items.map(item => toApiItemIdentifier(item))
     })
-  }).catch(throwAlertError).then(toDownloadJob)
+  }).catch(throwAlertError).then(toJob)
 }
 
 export function deleteItems (items: Array<Item>): Promise<string> {
@@ -92,7 +77,7 @@ export function copyItems (items: Array<Item>, folder: ?Folder): Promise<Job> {
       resources: items.map(item => toApiItemIdentifier(item)),
       targetFolderId: folder ? folder.id : null
     })
-  }).catch(throwAlertError).then(toCopyJob)
+  }).catch(throwAlertError).then(toJob)
 }
 
 export function moveItems (items: Array<Item>,
@@ -110,12 +95,50 @@ function toFolderState (response: Object): FolderState {
   return response
 }
 
-function toDownloadJob (response: Object): Job {
-  return {type: 'download', id: response.jobId, status: toJobStatus(response.jobStatus)}
+function toJob (response: Object): Job {
+  return {
+    type: toJobType(response),
+    id: response.identifier,
+    status: toJobStatus(response),
+    progress: response.progressInt,
+    progressMax: response.progressMax,
+    resultUrl: response.resultUrl
+  }
 }
 
-function toCopyJob (response: Object): Job {
-  return {type: 'copy', id: response.jobId, status: toJobStatus(response.jobStatus)}
+function toJobType (response: Object): JobType {
+  let type
+  switch (response.type) {
+    case 'Copy':
+      type = 'copy'
+      break
+    case 'DownloadJob':
+      type = 'download'
+      break
+    default:
+      throw new Error('Unknown job type \'' + response._meta.name + '\'')
+  }
+  return type
+}
+
+function toJobStatus (response: Object): JobStatus {
+  let jobStatus
+  switch (response.status) {
+    case 'PENDING':
+    case 'RUNNING':
+      jobStatus = 'running'
+      break
+    case 'SUCCESS':
+      jobStatus = 'success'
+      break
+    case 'FAILED':
+    case 'CANCELED':
+      jobStatus = 'failed'
+      break
+    default:
+      throw new Error('unexpected job status \'' + response.status + '\'')
+  }
+  return jobStatus
 }
 
 function throwAlertError (response: Object): Alert {
@@ -125,22 +148,37 @@ function throwAlertError (response: Object): Alert {
 }
 
 // map navigator types to API types
-function toApiItem (item: Item) {
+function toApiItem (item: Item): Object {
   return item
 }
 
-function toApiItemIdentifier (item: Item) {
+function toApiItemIdentifier (item: Item): Object {
   return {
     id: item.id,
     type: item.type
   }
 }
 
-export function toApiPackage (item: Item) {
+function toApiPackage (item: Item): Object {
   return {
     id: item.id,
     label: item.label,
     description: item.description,
     parent: undefined
   }
+}
+
+function toApiJobEntityType (job: Job): string {
+  let apiType
+  switch (job.type) {
+    case 'copy':
+      apiType = 'sys_job_CopyJobExecution'
+      break
+    case 'download':
+      apiType = 'sys_job_DownloadJobExecution'
+      break
+    default:
+      throw new Error('unexpected job type \'' + job.type + '\'')
+  }
+  return apiType
 }
