@@ -7,7 +7,7 @@ import router from './router'
 import BootstrapVue from 'bootstrap-vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faFolderOpen, faHourglass } from '@fortawesome/free-regular-svg-icons'
+import { faCheckCircle, faFolderOpen, faHourglass, faTimesCircle } from '@fortawesome/free-regular-svg-icons'
 import { faClone, faCut, faEdit, faDownload, faHome, faList, faPaste, faPlus, faSearch, faTimes, faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -21,7 +21,7 @@ const {lng, fallbackLng, isSuperUser} = window.__INITIAL_STATE__
 // Keeps the router and the store in sync @https://github.com/vuejs/vuex-router-sync
 sync(store, router)
 
-library.add(faClone, faCut, faEdit, faDownload, faFolderOpen, faHome, faHourglass, faList, faPaste, faPlus, faSearch, faTimes, faTrash, faUpload)
+library.add(faCheckCircle, faClone, faCut, faEdit, faDownload, faFolderOpen, faHome, faHourglass, faList, faPaste, faPlus, faSearch, faTimes, faTimesCircle, faTrash, faUpload)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

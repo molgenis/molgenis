@@ -18,6 +18,7 @@ export type Job = {
   status: JobStatus,
   progress: ?number,
   progressMax: ?number,
+  progressMessage: ?string,
   resultUrl: ?string
 }
 

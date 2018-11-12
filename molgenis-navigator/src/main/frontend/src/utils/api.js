@@ -102,6 +102,7 @@ function toJob (response: Object): Job {
     status: toJobStatus(response),
     progress: response.progressInt,
     progressMax: response.progressMax,
+    progressMessage: response.progressMessage,
     resultUrl: response.resultUrl
   }
 }

@@ -6,6 +6,10 @@ const localVue = createLocalVue()
 localVue.use(Vuex)
 
 describe('NavigatorTable.vue', () => {
+  window.__INITIAL_STATE__ = {
+    pluginUrls: {}
+  }
+
   describe('table', () => {
     it('should exist', () => {
       const state = {

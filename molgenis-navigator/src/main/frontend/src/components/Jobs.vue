@@ -12,42 +12,30 @@
             :dismissible="job.status !== 'RUNNING'"
             show
             @dismissed.prevent="removeJob(job)">
-            <div v-if="job.type === 'COPY'">
-              <span v-if="job.status === 'RUNNING'">
-                <font-awesome-icon :icon="['far', 'hourglass']"/> {{ 'progress-copy-running' | i18n }}
-                <span v-if="job.progress">
-                  &nbsp;{{ job.progress }}/{{ job.progressMax }}
-                </span>
-                &nbsp;...
+            <span v-if="job.status === 'RUNNING'">
+              <font-awesome-icon :icon="['far', 'hourglass']"/>
+              <span class="alert-message">{{ job.progressMessage }}</span>
+              <span v-if="job.progress">{{ job.progress }}/{{ job.progressMax }}</span>
+              <span>...</span>
+            </span>
+            <span v-else-if="job.status === 'SUCCESS'">
+              <font-awesome-icon :icon="['far', 'check-circle']"/>
+              <span class="alert-message">{{ job.progressMessage }}
               </span>
-              <span v-else-if="job.status === 'SUCCESS'">
-                {{ 'progress-copy-success' | i18n }}
-              </span>
-              <span v-else-if="job.status === 'FAILED'">
-                {{ 'progress-copy-failed' | i18n }}
-              </span>
-            </div>
-            <div v-else-if="job.type === 'DOWNLOAD'">
-              <span v-if="job.status === 'RUNNING'">
-                <font-awesome-icon :icon="['far', 'hourglass']"/> {{ 'progress-download-running' | i18n }}
-                <span v-if="job.progress">
-                  &nbsp;{{ job.progress }}/{{ job.progressMax }}
-                </span>
-                &nbsp;...
-              </span>
-              <span v-else-if="job.status === 'SUCCESS'">
-                {{ 'progress-download-success' | i18n }}<br>
-                {{ 'progress-download-success-action-pre' | i18n }}
+              <span v-if="job.type === 'DOWNLOAD'">
+                <span>{{ 'progress-download-success-action-pre' | i18n }}</span>
                 <a
                   :href="job.resultUrl"
                   download
-                  class="alert-link">{{ 'progress-download-success-action' | i18n }}</a>
-                {{ 'progress-download-success-action-post' | i18n }}
+                  class="alert-link">{{ progress-download-success-action | i18n }}</a>
+                <span>{{ 'progress-download-success-action-post' | i18n }}</span>
               </span>
-              <span v-else-if="job.status === 'FAILED'">
-                {{ 'progress-download-failed' | i18n }}
-              </span>
-            </div>
+            </span>
+            <span v-else-if="job.status === 'FAILED'">
+              <font-awesome-icon :icon="['far', 'times-circle']"/>
+              <span class="alert-message">{{ job.progressMessage }}</span>
+              <span v-if="job.progress">{{ job.progress }}/{{ job.progressMax }}</span>
+            </span>
           </b-alert>
         </div>
       </div>
@@ -88,3 +76,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .alert-message {
+    margin-left: .75rem
+  }
+</style>
