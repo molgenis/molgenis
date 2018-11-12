@@ -23,7 +23,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class DownloadJobTest extends AbstractMolgenisSpringTest {
+public class DownloadServiceTest extends AbstractMolgenisSpringTest {
 
   @Mock EmxExportService downloadService;
 
@@ -44,19 +44,12 @@ public class DownloadJobTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testDownload() {
-    doReturn("start")
-        .when(messageSource)
-        .getMessage(
-            "progress-download-running",
-            new Object[] {},
-            "Starting downloading.",
-            LocaleContextHolder.getLocale());
     doReturn("done")
         .when(messageSource)
         .getMessage(
             "progress-download-success",
             new Object[] {},
-            "Finished downloading.",
+            "Finished preparing download.",
             LocaleContextHolder.getLocale());
 
     FileMeta fileMeta = mock(FileMeta.class);
@@ -68,7 +61,6 @@ public class DownloadJobTest extends AbstractMolgenisSpringTest {
         new DownloadService(downloadService, fileStore, fileMetaFactory, dataService);
     String json = "[{'id':'it','type':'PACKAGE'},{'id':'test_entity','type':'ENTITY_TYPE'}]";
     downloadJob.download(json, "test", progress);
-    verify(progress).progress(0, "start");
     verify(downloadService)
         .download(newArrayList("test_entity"), newArrayList("it"), file, Optional.of(progress));
     verify(progress).increment(1);

@@ -29,6 +29,7 @@ public class DownloadConfig {
         String fileType = XLSX.toString().toLowerCase();
         final String filename = getDownloadFilename(fileType);
         downloadJobExecution.setResultUrl("/files/" + filename);
+        downloadJobExecution.setProgressInt(0);
         downloadJobExecution.setProgressMessage(
             getMessage("progress-download-running", "Starting preparing download."));
 
