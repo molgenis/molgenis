@@ -47,7 +47,8 @@ public class DownloadService {
     resources = ResourcesUtil.getResourcesFromJson(resourceJson);
     resources.forEach(
         resource -> {
-          if (resource.getType().equals(Type.ENTITY_TYPE)) {
+          if (resource.getType().equals(Type.ENTITY_TYPE)
+              || resource.getType().equals(Type.ENTITY_TYPE_ABSTRACT)) {
             entityTypes.add(resource.getId());
           } else if (resource.getType().equals(Type.PACKAGE)) {
             packages.add(resource.getId());
