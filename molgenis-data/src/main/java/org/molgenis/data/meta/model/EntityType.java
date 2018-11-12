@@ -3,6 +3,7 @@ package org.molgenis.data.meta.model;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
@@ -24,7 +25,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
-import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -114,23 +114,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
     // Own attributes (deep copy or shallow copy)
     if (attrCopyMode == DEEP_COPY_ATTRS) {
-      // step #1: deep copy attributes
-      Map<String, Attribute> ownAttrMap =
-          stream(entityType.getOwnAllAttributes().spliterator(), false)
-              .map(attr -> Attribute.newInstance(attr, attrCopyMode, attrFactory))
-              .map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
-              .collect(toLinkedMap(Attribute::getName, Function.identity()));
-
-      // step #2: update attribute.parent relations
-      ownAttrMap.forEach(
-          (attrName, ownAttr) -> {
-            Attribute ownAttrParent = ownAttr.getParent();
-            if (ownAttrParent != null) {
-              ownAttr.setParent(ownAttrMap.get(ownAttrParent.getName()));
-            }
-          });
-
-      entityTypeCopy.setOwnAllAttributes(ownAttrMap.values());
+      deepCopyAttributes(entityType, entityTypeCopy, attrFactory);
     } else {
       entityTypeCopy.setOwnAllAttributes(newArrayList(entityType.getOwnAllAttributes()));
     }
@@ -141,6 +125,44 @@ public class EntityType extends StaticEntity implements Labeled {
     entityTypeCopy.setBackend(entityType.getBackend());
 
     return entityTypeCopy;
+  }
+
+  /**
+   * Deep copy all attributes of an EntityType to its copy. Returns a LinkedMap of the old attribute
+   * IDs to the newly copied Attributes.
+   *
+   * @param entityType original entity meta data
+   * @param entityTypeCopy copy of entity meta data
+   * @param attrFactory attribute factory used to create new attributes in deep-copy mode
+   * @return map of old attributes IDs to copied attributes
+   */
+  public static Map<String, Attribute> deepCopyAttributes(
+      EntityType entityType, EntityType entityTypeCopy, AttributeFactory attrFactory) {
+    Map<String, Attribute> copiedAttributes = newLinkedHashMap();
+
+    // step #1: deep copy attributes
+    Map<String, Attribute> ownAttrMap =
+        stream(entityType.getOwnAllAttributes().spliterator(), false)
+            .map(
+                attr -> {
+                  Attribute attrCopy = Attribute.newInstance(attr, DEEP_COPY_ATTRS, attrFactory);
+                  copiedAttributes.put(attr.getIdentifier(), attrCopy);
+                  return attrCopy;
+                })
+            .map(attrCopy -> attrCopy.setEntity(entityTypeCopy))
+            .collect(toLinkedMap(Attribute::getName, Function.identity()));
+
+    // step #2: update attribute.parent relations
+    ownAttrMap.forEach(
+        (attrName, ownAttr) -> {
+          Attribute ownAttrParent = ownAttr.getParent();
+          if (ownAttrParent != null) {
+            ownAttr.setParent(ownAttrMap.get(ownAttrParent.getName()));
+          }
+        });
+
+    entityTypeCopy.setOwnAllAttributes(ownAttrMap.values());
+    return copiedAttributes;
   }
 
   @Override
@@ -703,7 +725,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
   private Map<String, Attribute> getCachedOwnAttrs() {
     if (cachedOwnAttrs == null) {
-      cachedOwnAttrs = Maps.newLinkedHashMap();
+      cachedOwnAttrs = newLinkedHashMap();
       getEntities(ATTRIBUTES, Attribute.class)
           .forEach(attr -> cachedOwnAttrs.put(attr.getName(), attr));
     }
