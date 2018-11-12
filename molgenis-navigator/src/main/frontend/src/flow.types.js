@@ -8,8 +8,9 @@ export type Alert = {
   code: ?string
 }
 
-export type JobType = 'copy' | 'download'
-export type JobStatus = 'running' | 'success' | 'failed'
+export type JobType = 'COPY' | 'DOWNLOAD'
+
+export type JobStatus = 'RUNNING' | 'SUCCESS' | 'FAILED'
 
 export type Job = {
   type: JobType,
@@ -29,7 +30,7 @@ export type Folder = {
 
 export type FolderState = {
   folder: ?Folder,
-  resources: Array<Item>
+  resources: Array<Resource>
 }
 
 export type PathComponent = {
@@ -37,10 +38,10 @@ export type PathComponent = {
   label: string
 }
 
-export type ItemType = 'PACKAGE' | 'ENTITY_TYPE' | 'ENTITY_TYPE_ABSTRACT'
+export type ResourceType = 'PACKAGE' | 'ENTITY_TYPE' | 'ENTITY_TYPE_ABSTRACT'
 
-export type Item = {
-  type: ItemType,
+export type Resource = {
+  type: ResourceType,
   id: string,
   label: string,
   description: ?string,
@@ -49,8 +50,8 @@ export type Item = {
 }
 
 export type Clipboard = {
-  mode: "cut" | "copy",
-  items: Array<Item>
+  mode: 'CUT' | 'COPY',
+  resources: Array<Resource>
 }
 
 export type State = {
@@ -60,8 +61,8 @@ export type State = {
   jobs: Array<Job>,
   query: ?string,
   folder: ?Folder,
-  items: Array<Item>,
-  selectedItems: Array<Item>,
-  showHiddenItems: boolean,
+  resources: Array<Resource>,
+  selectedResources: Array<Resource>,
+  showHiddenResources: boolean,
   clipboard: ?Clipboard
 }

@@ -21,7 +21,7 @@
       <b-btn
         :disabled="!canDownload"
         variant="secondary"
-        @click="downloadSelectedItems">
+        @click="downloadSelectedResources">
         <font-awesome-icon
           :class="{'fa-disabled' : !canDownload}"
           icon="download"
@@ -32,23 +32,23 @@
 </template>
 
 <script>
-import { DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
+import { DOWNLOAD_SELECTED_RESOURCES } from '../store/actions'
 import { mapGetters } from 'vuex'
 
 export default {
   name: 'NavigatorActionsTransfer',
   computed: {
-    ...mapGetters(['nrSelectedItems', 'query']),
+    ...mapGetters(['nrSelectedResources', 'query']),
     canDownload () {
-      return this.nrSelectedItems > 0
+      return this.nrSelectedResources > 0
     },
     canUpload () {
       return !this.query
     }
   },
   methods: {
-    downloadSelectedItems: function () {
-      this.$store.dispatch(DOWNLOAD_SELECTED_ITEMS)
+    downloadSelectedResources: function () {
+      this.$store.dispatch(DOWNLOAD_SELECTED_RESOURCES)
     }
   }
 }

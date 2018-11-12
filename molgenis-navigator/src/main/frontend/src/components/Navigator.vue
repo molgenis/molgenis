@@ -13,7 +13,7 @@
 <script>
 import _ from 'lodash'
 import { mapGetters } from 'vuex'
-import { FETCH_ITEMS_BY_FOLDER, FETCH_ITEMS_BY_QUERY } from '../store/actions'
+import { FETCH_RESOURCES_BY_FOLDER, FETCH_RESOURCES_BY_QUERY } from '../store/actions'
 import Alerts from './Alerts'
 import Jobs from './Jobs'
 import NavigatorSearch from './NavigatorSearch'
@@ -31,28 +31,28 @@ export default {
     '$route' (to, from) {
       if (to.query && (to.query.q !== from.query.q)) {
         if (to.query.q) {
-          _.debounce(this.fetchItemsByQuery, 100)()
+          _.debounce(this.fetchResourcesByQuery, 100)()
         } else {
-          this.fetchItemsByPackage()
+          this.fetchResourcesByPackage()
         }
       } else if (to.params.folderId !== from.params.folderId) {
-        this.fetchItemsByPackage()
+        this.fetchResourcesByPackage()
       }
     }
   },
   mounted: function () {
     if (this.query) {
-      this.fetchItemsByQuery()
+      this.fetchResourcesByQuery()
     } else {
-      this.fetchItemsByPackage()
+      this.fetchResourcesByPackage()
     }
   },
   methods: {
-    fetchItemsByQuery: function () {
-      this.$store.dispatch(FETCH_ITEMS_BY_QUERY, this.query)
+    fetchResourcesByQuery: function () {
+      this.$store.dispatch(FETCH_RESOURCES_BY_QUERY, this.query)
     },
-    fetchItemsByPackage: function () {
-      this.$store.dispatch(FETCH_ITEMS_BY_FOLDER, this.folderId)
+    fetchResourcesByPackage: function () {
+      this.$store.dispatch(FETCH_RESOURCES_BY_FOLDER, this.folderId)
     }
   }
 }
@@ -62,6 +62,13 @@ export default {
   @media (min-width: 1200px) {
     .container {
       width: 1199px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .job-alerts {
+      left: 75%;
+      right: 1rem;
     }
   }
 

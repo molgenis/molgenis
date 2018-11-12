@@ -27,7 +27,7 @@
       class="btn-tooltip-wrapper">
       <b-btn
         v-b-modal.packageUpdateModal
-        v-if="nrSelectedItems === 1 && getSelectedItemType === 'PACKAGE'"
+        v-if="nrSelectedResources === 1 && getSelectedResourceType === 'PACKAGE'"
         :disabled="!canEdit"
         variant="secondary"
         class="button-last">
@@ -37,8 +37,8 @@
           size="lg"/>
       </b-btn>
       <b-btn
-        v-else-if="nrSelectedItems === 1 && (getSelectedItemType === 'ENTITY_TYPE' || getSelectedItemType === 'ENTITY_TYPE_ABSTRACT')"
-        :to="'/menu/dataintegration/metadata-manager/' + selectedItems[0].id"
+        v-else-if="nrSelectedResources === 1 && (getSelectedResourceType === 'ENTITY_TYPE' || getSelectedResourceType === 'ENTITY_TYPE_ABSTRACT')"
+        :to="'/menu/dataintegration/metadata-manager/' + selectedResources[0].id"
         :disabled="!canEdit"
         variant="secondary"
         class="button-last">
@@ -62,27 +62,27 @@
 </template>
 
 <script>
-import { DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
+import { DOWNLOAD_SELECTED_RESOURCES } from '../store/actions'
 import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'NavigatorActionsCreateEdit',
   computed: {
-    ...mapGetters(['nrSelectedItems', 'query']),
-    ...mapState(['folder', 'selectedItems']),
-    getSelectedItemType () {
-      return this.selectedItems[0].type
+    ...mapGetters(['nrSelectedResources', 'query']),
+    ...mapState(['folder', 'selectedResources']),
+    getSelectedResourceType () {
+      return this.selectedResources[0].type
     },
     canCreate () {
       return !(this.query || (this.folder && this.folder.readonly))
     },
     canEdit () {
-      return !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedItems === 1
+      return !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedResources === 1
     }
   },
   methods: {
-    downloadSelectedItems: function () {
-      this.$store.dispatch(DOWNLOAD_SELECTED_ITEMS)
+    downloadSelectedResources: function () {
+      this.$store.dispatch(DOWNLOAD_SELECTED_RESOURCES)
     }
   }
 }

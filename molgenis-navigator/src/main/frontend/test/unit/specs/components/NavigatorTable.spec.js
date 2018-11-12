@@ -9,8 +9,8 @@ describe('NavigatorTable.vue', () => {
   describe('table', () => {
     it('should exist', () => {
       const state = {
-        items: [{type: 'PACKAGE', id: 'p0', label: 'package #0'}, {type: 'ENTITY_TYPE', id: 'e0', label: 'entity type #0'}],
-        selectedItems: []
+        resources: [{type: 'PACKAGE', id: 'p0', label: 'package #0'}, {type: 'ENTITY_TYPE', id: 'e0', label: 'entity type #0'}],
+        selectedResources: []
       }
 
       let store = new Vuex.Store({

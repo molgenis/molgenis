@@ -4,7 +4,7 @@
     :title="$t('action-delete')"
     class="btn-tooltip-wrapper">
     <b-btn
-      v-b-modal.itemDeleteModal
+      v-b-modal.resourceDeleteModal
       :disabled="!canDelete"
       variant="danger">
       <font-awesome-icon
@@ -16,24 +16,24 @@
 </template>
 
 <script>
-import { DOWNLOAD_SELECTED_ITEMS } from '../store/actions'
+import { DOWNLOAD_SELECTED_RESOURCES } from '../store/actions'
 import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'NavigatorActionsTransfer',
   computed: {
-    ...mapGetters(['nrSelectedItems']),
+    ...mapGetters(['nrSelectedResources']),
     ...mapState(['folder']),
-    getSelectedItemType () {
-      return this.selectedItems[0].type
+    getSelectedResourceType () {
+      return this.selectedResources[0].type
     },
     canDelete () {
-      return this.nrSelectedItems > 0 && !(this.folder && this.folder.readonly)
+      return this.nrSelectedResources > 0 && !(this.folder && this.folder.readonly)
     }
   },
   methods: {
-    downloadSelectedItems: function () {
-      this.$store.dispatch(DOWNLOAD_SELECTED_ITEMS)
+    downloadSelectedResources: function () {
+      this.$store.dispatch(DOWNLOAD_SELECTED_RESOURCES)
     }
   }
 }

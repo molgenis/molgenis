@@ -1,24 +1,24 @@
 <template>
   <b-modal
-    id="itemDeleteModal"
+    id="resourceDeleteModal"
     :title="$t('delete-confirmation-title')"
     :ok-title="$t('delete-confirmation-ok-text')"
     :cancel-title="$t('delete-confirmation-cancel-text')"
     ok-variant="danger"
     cancel-variant="secondary"
-    @ok="deleteSelectedItems">
+    @ok="deleteSelectedResources">
     {{ 'delete-confirmation-text' | i18n }}
   </b-modal>
 </template>
 
 <script>
-import { DELETE_SELECTED_ITEMS } from '../store/actions'
+import { DELETE_SELECTED_RESOURCES } from '../store/actions'
 
 export default {
   name: 'NavigatorDeleteModal',
   methods: {
-    deleteSelectedItems: function () {
-      this.$store.dispatch(DELETE_SELECTED_ITEMS)
+    deleteSelectedResources: function () {
+      this.$store.dispatch(DELETE_SELECTED_RESOURCES)
     }
   }
 }

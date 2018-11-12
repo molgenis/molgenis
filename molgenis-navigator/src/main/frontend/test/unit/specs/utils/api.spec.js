@@ -6,7 +6,7 @@ describe('api', () => {
   const expect = require('chai').use(require('chai-as-promised')).expect
   afterEach(() => td.reset())
 
-  const items = [{
+  const resources = [{
     type: 'PACKAGE',
     id: 'package0',
     label: 'package #0',
@@ -18,9 +18,9 @@ describe('api', () => {
   describe('fetchJob', (done) => {
     it('should call the job endpoint for a copy job and return current job', () => {
       const job = {
-        type: 'copy',
+        type: 'COPY',
         id: 'jobId',
-        status: 'running',
+        status: 'RUNNING',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
@@ -37,9 +37,9 @@ describe('api', () => {
       td.replace(molgenisApiClient, 'get', get)
 
       const updatedJob = {
-        type: 'copy',
+        type: 'COPY',
         id: 'jobId',
-        status: 'success',
+        status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
@@ -48,9 +48,9 @@ describe('api', () => {
     })
     it('should call the job endpoint for a download job and return current job', () => {
       const job = {
-        type: 'download',
+        type: 'DOWNLOAD',
         id: 'jobId',
-        status: 'running',
+        status: 'RUNNING',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
@@ -67,9 +67,9 @@ describe('api', () => {
       td.replace(molgenisApiClient, 'get', get)
 
       const updatedJob = {
-        type: 'download',
+        type: 'DOWNLOAD',
         id: 'jobId',
-        status: 'failed',
+        status: 'FAILED',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
@@ -78,9 +78,9 @@ describe('api', () => {
     })
     it('should return alerts in case of errors', (done) => {
       const job = {
-        type: 'download',
+        type: 'DOWNLOAD',
         id: 'jobId',
-        status: 'running',
+        status: 'RUNNING',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
@@ -96,7 +96,7 @@ describe('api', () => {
     })
   })
 
-  describe('getItemsByFolderId', (done) => {
+  describe('getResourcesByFolderId', (done) => {
     it('should call the get endpoint with folderId parameter and return folder state', () => {
       const response = {
         folder: {id: 'id', label: 'label', readonly: 'false'},
@@ -106,7 +106,7 @@ describe('api', () => {
       td.when(get('/plugin/navigator/get?folderId=f0')).thenResolve(response)
       td.replace(molgenisApiClient, 'get', get)
 
-      expect(api.getItemsByFolderId('f0')).to.eventually.equal(response).then(done, done)
+      expect(api.getResourcesByFolderId('f0')).to.eventually.equal(response).then(done, done)
     })
 
     it('should call the get endpoint without folderId parameter and return folder state', () => {
@@ -118,7 +118,7 @@ describe('api', () => {
       td.when(get('/plugin/navigator/get')).thenResolve(response)
       td.replace(molgenisApiClient, 'get', get)
 
-      expect(api.getItemsByFolderId()).to.eventually.equal(response).then(done, done)
+      expect(api.getResourcesByFolderId()).to.eventually.equal(response).then(done, done)
     })
 
     it('should return alerts in case of errors', (done) => {
@@ -128,11 +128,11 @@ describe('api', () => {
       td.when(get('/plugin/navigator/get?folderId=unknownFolder')).thenReject(response)
       td.replace(molgenisApiClient, 'get', get)
 
-      expect(api.getItemsByFolderId('unknownFolder')).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.getResourcesByFolderId('unknownFolder')).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('getItemsByQuery', (done) => {
+  describe('getResourcesByQuery', (done) => {
     it('should call the search endpoint and return folder state', () => {
       const response = {
         resources: [{type: 'PACKAGE', id: 'p0', label: 'package #0', readonly: 'false'}]
@@ -141,7 +141,7 @@ describe('api', () => {
       td.when(get('/plugin/navigator/search?query=text')).thenResolve(response)
       td.replace(molgenisApiClient, 'get', get)
 
-      expect(api.getItemsByQuery('text')).to.eventually.equal(response).then(done, done)
+      expect(api.getResourcesByQuery('text')).to.eventually.equal(response).then(done, done)
     })
 
     it('should return alerts in case of errors', (done) => {
@@ -151,11 +151,11 @@ describe('api', () => {
       td.when(get('/plugin/navigator/search?query=text')).thenReject(response)
       td.replace(molgenisApiClient, 'get', get)
 
-      expect(api.getItemsByQuery('text')).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.getResourcesByQuery('text')).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('moveItems', (done) => {
+  describe('moveResources', (done) => {
     const body = {
       body: JSON.stringify({
         resources: [{id: 'package0', type: 'PACKAGE'}],
@@ -170,7 +170,7 @@ describe('api', () => {
       td.when(post('/plugin/navigator/move', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.moveItems(items, folder)).to.eventually.equal(response).then(done, done)
+      expect(api.moveResources(resources, folder)).to.eventually.equal(response).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
       const response = {errors: [{message: 'error'}]}
@@ -179,11 +179,11 @@ describe('api', () => {
       td.when(post('/plugin/navigator/move', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.moveItems(items, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.moveResources(resources, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('copyItems', (done) => {
+  describe('copyResources', (done) => {
     const body = {
       body: JSON.stringify({
         resources: [{id: 'package0', type: 'PACKAGE'}],
@@ -203,14 +203,14 @@ describe('api', () => {
       td.replace(molgenisApiClient, 'post', post)
 
       const expectedjob = {
-        type: 'copy',
+        type: 'COPY',
         id: 'jobId',
-        status: 'success',
+        status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
       }
-      expect(api.copyItems(items, folder)).to.eventually.eql(expectedjob).then(done, done)
+      expect(api.copyResources(resources, folder)).to.eventually.eql(expectedjob).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
       const response = {errors: [{message: 'error'}]}
@@ -219,11 +219,11 @@ describe('api', () => {
       td.when(post('/plugin/navigator/copy', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.copyItems(items, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.copyResources(resources, folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('deleteItems', (done) => {
+  describe('deleteResources', (done) => {
     const body = {
       body: JSON.stringify({
         resources: [{id: 'package0', type: 'PACKAGE'}]
@@ -237,7 +237,7 @@ describe('api', () => {
       td.when(delete_('/plugin/navigator/delete', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'delete_', delete_)
 
-      expect(api.deleteItems(items)).to.eventually.equal(response).then(done, done)
+      expect(api.deleteResources(resources)).to.eventually.equal(response).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
       const response = {errors: [{message: 'error'}]}
@@ -246,11 +246,11 @@ describe('api', () => {
       td.when(delete_('/plugin/navigator/delete', body)).thenReject(response)
       td.replace(molgenisApiClient, 'delete_', delete_)
 
-      expect(api.deleteItems(items)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.deleteResources(resources)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('downloadItems', (done) => {
+  describe('downloadResources', (done) => {
     const body = {
       body: JSON.stringify({
         resources: [{id: 'package0', type: 'PACKAGE'}]
@@ -269,14 +269,14 @@ describe('api', () => {
       td.replace(molgenisApiClient, 'post', post)
 
       const expectedjob = {
-        type: 'download',
+        type: 'DOWNLOAD',
         id: 'jobId',
-        status: 'success',
+        status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
         resultUrl: undefined
       }
-      expect(api.downloadItems(items)).to.eventually.eql(expectedjob).then(done, done)
+      expect(api.downloadResources(resources)).to.eventually.eql(expectedjob).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
       const response = {errors: [{message: 'error'}]}
@@ -285,11 +285,11 @@ describe('api', () => {
       td.when(post('/plugin/navigator/download', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.downloadItems(items)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.downloadResources(resources)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('createItem', (done) => {
+  describe('createResource', (done) => {
     const body = {
       body: JSON.stringify({
         entities: [{id: 'package0', label: 'package #0', parent: folderId}]
@@ -297,13 +297,13 @@ describe('api', () => {
     }
     const post = td.function('molgenisApiClient.post')
 
-    it('should create a new item and do nothing on success', () => {
+    it('should create a new resource and do nothing on success', () => {
       const response = 'OK'
 
       td.when(post('/api/v2/sys_md_Package', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.createItem(items[0], folder)).to.eventually.equal(response).then(done, done)
+      expect(api.createResource(resources[0], folder)).to.eventually.equal(response).then(done, done)
     })
 
     it('should return alerts in case of errors', (done) => {
@@ -312,12 +312,12 @@ describe('api', () => {
       td.when(post('/api/v2/sys_md_Package', body)).thenReject(response)
       td.replace(molgenisApiClient, 'post', post)
 
-      expect(api.createItem(items[0], folder)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.createResource(resources[0], folder)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 
-  describe('updateItem', (done) => {
-    const updatedItem = {
+  describe('updateResource', (done) => {
+    const updatedResource = {
       type: 'PACKAGE',
       id: 'package0',
       label: 'updated package #0',
@@ -335,7 +335,7 @@ describe('api', () => {
       td.when(put('/plugin/navigator/update', body)).thenResolve(response)
       td.replace(molgenisApiClient, 'put', put)
 
-      expect(api.updateItem(items[0], updatedItem)).to.eventually.equal(response).then(done, done)
+      expect(api.updateResource(resources[0], updatedResource)).to.eventually.equal(response).then(done, done)
     })
     it('should return alerts in case of errors', (done) => {
       const response = {errors: [{message: 'error'}]}
@@ -343,7 +343,7 @@ describe('api', () => {
       td.when(put('/plugin/navigator/update', body)).thenReject(response)
       td.replace(molgenisApiClient, 'put', put)
 
-      expect(api.deleteItems(items, updatedItem)).to.eventually.be.rejectedWith(Error).then(() => done())
+      expect(api.deleteResources(resources, updatedResource)).to.eventually.be.rejectedWith(Error).then(() => done())
     })
   })
 })

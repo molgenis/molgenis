@@ -11,7 +11,7 @@ describe('getters', () => {
         }
       }
 
-      expect(getters.query(state)).to.deep.equal('text')
+      expect(getters.query(state)).to.eql('text')
     })
     it('should return undefined if route query param q is undefined', () => {
       const state = {
@@ -21,7 +21,7 @@ describe('getters', () => {
         }
       }
 
-      expect(getters.query(state)).to.deep.equal(undefined)
+      expect(getters.query(state)).to.eql(undefined)
     })
   })
   describe('folderId', () => {
@@ -34,7 +34,7 @@ describe('getters', () => {
         }
       }
 
-      expect(getters.folderId(state)).to.deep.equal('folderId')
+      expect(getters.folderId(state)).to.eql('folderId')
     })
     it('should return undefined if route param folderId is undefined', () => {
       const state = {
@@ -44,7 +44,7 @@ describe('getters', () => {
         }
       }
 
-      expect(getters.folderId(state)).to.deep.equal(undefined)
+      expect(getters.folderId(state)).to.eql(undefined)
     })
   })
   describe('folderPath', () => {
@@ -82,33 +82,33 @@ describe('getters', () => {
       const state = {
         folder: null
       }
-      expect(getters.folderPath(state)).to.deep.equal([])
+      expect(getters.folderPath(state)).to.eql([])
     })
   })
-  describe('nrSelectedItems', () => {
-    it('should return the number of selected items', () => {
+  describe('nrSelectedResources', () => {
+    it('should return the number of selected resources', () => {
       const state = {
-        selectedItems: [{id: '0', label: 'label0'}, {id: '1', label: 'label1'}]
+        selectedResources: [{id: '0', label: 'label0'}, {id: '1', label: 'label1'}]
       }
 
-      expect(getters.nrSelectedItems(state)).to.deep.equal(2)
+      expect(getters.nrSelectedResources(state)).to.eql(2)
     })
   })
-  describe('nrClipboardItems', () => {
-    it('should return the number of clipboard items', () => {
+  describe('nrClipboardResources', () => {
+    it('should return the number of clipboard resourcse', () => {
       const state = {
         clipboard: {
-          mode: 'cut',
-          items: [{id: '0', label: 'label0'}, {id: '1', label: 'label1'}]
+          mode: 'CUT',
+          resources: [{id: '0', label: 'label0'}, {id: '1', label: 'label1'}]
         }
       }
-      expect(getters.nrClipboardItems(state)).to.deep.equal(2)
+      expect(getters.nrClipboardResources(state)).to.eql(2)
     })
     it('should return zero when clipboard is absent', () => {
       const state = {
         clipboard: null
       }
-      expect(getters.nrClipboardItems(state)).to.deep.equal(0)
+      expect(getters.nrClipboardResources(state)).to.eql(0)
     })
   })
 })

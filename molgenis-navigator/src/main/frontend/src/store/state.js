@@ -9,8 +9,8 @@ const state: State = {
   token: null,
   query: null,
   folder: null,
-  items: [],
-  selectedItems: [],
+  resources: [],
+  selectedResources: [],
   clipboard: null,
   jobs: []
 }

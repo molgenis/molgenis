@@ -7,7 +7,7 @@
       <b-btn
         :disabled="!canCut"
         variant="secondary"
-        @click="selectClipboardItems('cut')">
+        @click="selectClipboardResources('CUT')">
         <font-awesome-icon
           :class="{'fa-disabled' : !canCut}"
           icon="cut"
@@ -21,7 +21,7 @@
       <b-btn
         :disabled="!canCopy"
         variant="secondary"
-        @click="selectClipboardItems('copy')">
+        @click="selectClipboardResources('COPY')">
         <font-awesome-icon
           :class="{'fa-disabled' : !canCopy}"
           icon="clone"
@@ -35,7 +35,7 @@
       <b-btn
         :disabled="!canPaste"
         variant="secondary"
-        @click="pasteClipboardItems">
+        @click="pasteClipboardResources">
         <font-awesome-icon
           :class="{'fa-disabled' : !canPaste}"
           icon="paste"
@@ -47,35 +47,35 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex'
-import { COPY_CLIPBOARD_ITEMS, MOVE_CLIPBOARD_ITEMS } from '../store/actions'
+import { COPY_CLIPBOARD_RESOURCES, MOVE_CLIPBOARD_RESOURCES } from '../store/actions'
 import { SET_CLIPBOARD } from '../store/mutations'
 
 export default {
   name: 'NavigatorActionsClipboard',
   computed: {
-    ...mapGetters(['nrSelectedItems', 'folderId', 'query', 'nrClipboardItems']),
-    ...mapState(['clipboard', 'folder', 'selectedItems']),
+    ...mapGetters(['nrSelectedResources', 'folderId', 'query', 'nrClipboardResources']),
+    ...mapState(['clipboard', 'folder', 'selectedResources']),
     canCut () {
-      return this.nrSelectedItems > 0 && !(this.folder && this.folder.readonly)
+      return this.nrSelectedResources > 0 && !(this.folder && this.folder.readonly)
     },
     canCopy () {
-      return this.nrSelectedItems > 0
+      return this.nrSelectedResources > 0
     },
     canPaste () {
-      return !this.query && this.nrClipboardItems > 0 && !(this.folder && this.folder.readonly)
+      return !this.query && this.nrClipboardResources > 0 && !(this.folder && this.folder.readonly)
     }
   },
   methods: {
-    selectClipboardItems: function (mode) {
+    selectClipboardResources: function (mode) {
       this.$emit('bv::disable::tooltip')
       const clipboard = {
         mode: mode,
-        items: this.selectedItems.slice()
+        resources: this.selectedResources.slice()
       }
       this.$store.commit(SET_CLIPBOARD, clipboard)
     },
-    pasteClipboardItems: function () {
-      const action = this.clipboard.mode === 'cut' ? MOVE_CLIPBOARD_ITEMS : COPY_CLIPBOARD_ITEMS
+    pasteClipboardResources: function () {
+      const action = this.clipboard.mode === 'CUT' ? MOVE_CLIPBOARD_RESOURCES : COPY_CLIPBOARD_RESOURCES
       this.$store.dispatch(action, this.folder)
     }
   }

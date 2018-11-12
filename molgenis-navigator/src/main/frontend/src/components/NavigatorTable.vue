@@ -1,55 +1,56 @@
 <template>
-  <b-table
-    :items="tableItems"
-    :fields="fields"
-    :filter="filter"
-    :empty-text="$t('table-no-results')"
-    sort-by="label"
-    class="text-left"
-    show-empty>
-    <template
-      slot="HEAD_selected"
-      slot-scope="data">
-      <b-form-checkbox
-        :class="tableItems.length == 0 ? 'invisible' : ''"
-        :checked="isAllSelected()"
-        @click.native.stop
-        @change="toggleAllSelected"/>
-    </template>
-    <template
-      slot="selected"
-      slot-scope="row">
-      <b-form-checkbox
-        :checked="isSelected(row.item)"
-        @click.native.stop
-        @change="toggleSelected(row.item, $event)"/>
-    </template>
-    <template
-      slot="label"
-      slot-scope="label">
-      <span v-if="label.item.type === 'ENTITY_TYPE'">
-        <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
+  <div class="table-container">
+    <b-table
+      :items="tableResources"
+      :fields="fields"
+      :filter="filter"
+      :empty-text="$t('table-no-results')"
+      class="text-left"
+      show-empty>
+      <template
+        slot="HEAD_selected"
+        slot-scope="data">
+        <b-form-checkbox
+          :class="tableResources.length == 0 ? 'invisible' : ''"
+          :checked="isAllSelected()"
+          @click.native.stop
+          @change="toggleAllSelected"/>
+      </template>
+      <template
+        slot="selected"
+        slot-scope="row">
+        <b-form-checkbox
+          :checked="isSelected(row.item)"
+          @click.native.stop
+          @change="toggleSelected(row.item, $event)"/>
+      </template>
+      <template
+        slot="label"
+        slot-scope="label">
+        <span v-if="label.item.type === 'ENTITY_TYPE'">
+          <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
+            <font-awesome-icon icon="list"/> {{ label.item.label }}
+          </a>
+        </span>
+        <span v-else-if="label.item.type === 'ENTITY_TYPE_ABSTRACT'">
           <font-awesome-icon icon="list"/> {{ label.item.label }}
-        </a>
-      </span>
-      <span v-else-if="label.item.type === 'ENTITY_TYPE_ABSTRACT'">
-        <font-awesome-icon icon="list"/> {{ label.item.label }}
-      </span>
-      <span v-else>
-        <router-link :to="label.item.id">
-          <font-awesome-icon :icon="['far', 'folder-open']"/> {{ label.item.label }}
-        </router-link>
-      </span>
-    </template>
-  </b-table>
+        </span>
+        <span v-else>
+          <router-link :to="label.item.id">
+            <font-awesome-icon :icon="['far', 'folder-open']"/> {{ label.item.label }}
+          </router-link>
+        </span>
+      </template>
+    </b-table>
+  </div>
 </template>
 
 <script>
 import {
-  SELECT_ALL_ITEMS,
-  DESELECT_ALL_ITEMS,
-  DESELECT_ITEM,
-  SELECT_ITEM
+  SELECT_ALL_RESOURCES,
+  DESELECT_ALL_RESOURCES,
+  DESELECT_RESOURCE,
+  SELECT_RESOURCE
 } from '../store/actions'
 import { mapState } from 'vuex'
 
@@ -80,15 +81,24 @@ export default {
     }
   },
   computed: {
-    ...mapState(['items', 'selectedItems', 'showHiddenItems', 'clipboard']),
-    tableItems () {
-      return this.items.filter(item => this.showHiddenItems || !item.hidden).map(item => Object.assign({}, item))
+    ...mapState(['resources', 'selectedResources', 'showHiddenResources', 'clipboard']),
+    tableResources () {
+      return this.resources.filter(resource => this.showHiddenResources || !resource.hidden).map(
+        resource => Object.assign({}, resource)).sort((a, b) => {
+        if (a.type === 'PACKAGE' && b.type !== 'PACKAGE') {
+          return -1
+        } else if (b.type === 'PACKAGE' && a.type !== 'PACKAGE') {
+          return 1
+        } else {
+          return a.label.localeCompare(b.label)
+        }
+      })
     },
-    nrItems () {
-      return this.items.filter(item => this.showHiddenItems || !item.hidden).length
+    nrResources () {
+      return this.resources.filter(resource => this.showHiddenResources || !resource.hidden).length
     },
-    nrSelectedItems () {
-      return Object.keys(this.selectedItems).length
+    nrSelectedResources () {
+      return Object.keys(this.selectedResources).length
     }
   },
   watch: {
@@ -97,40 +107,46 @@ export default {
     }
   },
   methods: {
-    toggleSelected: function (item, checked) {
+    toggleSelected: function (resource, checked) {
       if (checked) {
-        this.$store.dispatch(SELECT_ITEM, item)
-        this.allSelected = this.nrItems === this.nrSelectedItems
+        this.$store.dispatch(SELECT_RESOURCE, resource)
+        this.allSelected = this.nrResources === this.nrSelectedResources
       } else {
-        this.$store.dispatch(DESELECT_ITEM, item)
+        this.$store.dispatch(DESELECT_RESOURCE, resource)
         this.allSelected = false
       }
     },
-    isSelected: function (item) {
-      return this.selectedItems.some(selectedItem => selectedItem.type === item.type && selectedItem.id === item.id)
+    isSelected: function (resource) {
+      return this.selectedResources.some(selectedResource => selectedResource.type === resource.type && selectedResource.id === resource.id)
     },
     toggleAllSelected: function (checked) {
       if (checked) {
-        this.$store.dispatch(SELECT_ALL_ITEMS)
+        this.$store.dispatch(SELECT_ALL_RESOURCES)
       } else {
-        this.$store.dispatch(DESELECT_ALL_ITEMS)
+        this.$store.dispatch(DESELECT_ALL_RESOURCES)
       }
     },
-    isAllSelected: function (item) {
-      return this.nrItems > 0 && this.nrItems === this.nrSelectedItems
+    isAllSelected: function (resource) {
+      return this.nrResources > 0 && this.nrResources === this.nrSelectedResources
     },
-    isClipboardItem: function (item) {
-      return this.clipboard && this.clipboard.items && this.clipboard.items.some(
-        clipboardItem => clipboardItem.type === item.type && clipboardItem.id === item.id)
+    isClipboardResource: function (resource) {
+      return this.clipboard && this.clipboard.resources && this.clipboard.resources.some(
+        clipboardResource => clipboardResource.type === resource.type && clipboardResource.id === resource.id)
     },
-    cellClass: function (value, key, item) {
-      return this.isClipboardItem(item) ? 'bg-warning' : ''
+    cellClass: function (value, key, resource) {
+      return this.isClipboardResource(resource) ? 'bg-warning' : ''
     }
   }
 }
 </script>
 
 <style>
+  .table-container {
+    width: 100%;
+    height: 75vh;
+    overflow-y: auto;
+  }
+
   .invisible {
     visibility: hidden;
   }
@@ -138,9 +154,5 @@ export default {
   .compact {
     width: 1px;
     white-space: nowrap;
-  }
-
-  .clipped {
-    background-color: pink;
   }
 </style>

@@ -37,7 +37,7 @@
 
 <script>
 import {
-  UPDATE_ITEM
+  UPDATE_RESOURCE
 } from '../store/actions'
 import { mapState } from 'vuex'
 
@@ -53,15 +53,15 @@ export default {
     }
   },
   computed: {
-    ...mapState(['items', 'selectedItems']),
-    selectedItem () {
-      var selectedItemId = this.selectedItems[0].id
-      return this.items.find(item => item.id === selectedItemId)
+    ...mapState(['resources', 'selectedResources']),
+    selectedResource () {
+      var selectedResourceId = this.selectedResources[0].id
+      return this.resources.find(resource => resource.id === selectedResourceId)
     }
   },
   methods: {
     resetForm () {
-      this.form = {label: this.selectedItem.label, description: this.selectedItem.description}
+      this.form = {label: this.selectedResource.label, description: this.selectedResource.description}
       this.validated = false
       this.$refs.updatePackageLabelInput.$el.focus()
     },
@@ -74,9 +74,9 @@ export default {
       }
     },
     handleSubmit () {
-      var updatedItem = Object.assign({}, this.selectedItem,
+      var updatedResource = Object.assign({}, this.selectedResource,
         {label: this.form.label, description: this.form.description})
-      this.$store.dispatch(UPDATE_ITEM, updatedItem)
+      this.$store.dispatch(UPDATE_RESOURCE, updatedResource)
       this.$refs.packageUpdateModal.hide()
     }
   }

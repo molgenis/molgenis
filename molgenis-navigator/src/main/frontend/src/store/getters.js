@@ -16,7 +16,7 @@ const getters = {
     }
     return folderPath
   },
-  nrSelectedItems: (state: State): number => state.selectedItems.length,
-  nrClipboardItems: (state: State): number => state.clipboard ? state.clipboard.items.length : 0
+  nrSelectedResources: (state: State): number => state.selectedResources.length,
+  nrClipboardResources: (state: State): number => state.clipboard ? state.clipboard.resources.length : 0
 }
 export default getters

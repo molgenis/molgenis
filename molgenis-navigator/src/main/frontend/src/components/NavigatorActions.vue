@@ -12,7 +12,7 @@
     </div>
     <NavigatorModalPackageCreate/>
     <NavigatorModalPackageUpdate/>
-    <NavigatorModalItemDelete/>
+    <NavigatorModalResourceDelete/>
   </div>
 </template>
 
@@ -23,7 +23,7 @@ import NavigatorActionsClipboard from './NavigatorActionsClipboard'
 import NavigatorActionsDelete from './NavigatorActionsDelete'
 import NavigatorModalPackageCreate from './NavigatorModalPackageCreate'
 import NavigatorModalPackageUpdate from './NavigatorModalPackageUpdate'
-import NavigatorModalItemDelete from './NavigatorModalItemDelete'
+import NavigatorModalResourceDelete from './NavigatorModalResourceDelete'
 
 export default {
   name: 'NavigatorActions',
@@ -34,7 +34,7 @@ export default {
     NavigatorActionsDelete,
     NavigatorModalPackageCreate,
     NavigatorModalPackageUpdate,
-    NavigatorModalItemDelete
+    NavigatorModalResourceDelete
   }
 }
 </script>

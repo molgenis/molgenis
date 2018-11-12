@@ -5,7 +5,7 @@ import type {
   Alert,
   Folder,
   FolderState,
-  Item,
+  Resource,
   Job, JobStatus, JobType
 } from '../flow.types'
 import { AlertError } from './AlertError'
@@ -18,22 +18,22 @@ export function fetchJob (job: Job): Promise<Job> {
   return api.get(uri).catch(throwAlertError).then(toJob)
 }
 
-export function getItemsByFolderId (folderId: ?string): Promise<FolderState> {
+export function getResourcesByFolderId (folderId: ?string): Promise<FolderState> {
   const uri = folderId ? NAVIGATOR_URI + '/get?folderId=' + encodeURIComponent(
     folderId) : NAVIGATOR_URI + '/get'
   return api.get(uri).catch(throwAlertError).then(toFolderState)
 }
 
-export function getItemsByQuery (query: string): Promise<FolderState> {
+export function getResourcesByQuery (query: string): Promise<FolderState> {
   const uri = NAVIGATOR_URI + '/search?query=' + encodeURIComponent(query)
   return api.get(uri).catch(throwAlertError).then(toFolderState)
 }
 
 // TODO cleanup
-export function createItem (item: Item, folder: ?Folder) {
+export function createResource (resource: Resource, folder: ?Folder) {
   let promise
-  if (item.type === 'PACKAGE') {
-    const packageEntity = toApiPackage(item)
+  if (resource.type === 'PACKAGE') {
+    const packageEntity = toApiPackage(resource)
     packageEntity.parent = folder ? folder.id : null
 
     const uri = REST_API_V2 + '/sys_md_Package'
@@ -47,44 +47,44 @@ export function createItem (item: Item, folder: ?Folder) {
   return promise
 }
 
-export function updateItem (item: Item, updatedItem: Item) {
+export function updateResource (resource: Resource, updatedResource: Resource) {
   return api.put(NAVIGATOR_URI + '/update', {
     body: JSON.stringify({
-      resource: toApiItem(updatedItem)
+      resource: toApiResource(updatedResource)
     })
   }).catch(throwAlertError)
 }
 
-export function downloadItems (items: Array<Item>): Promise<Job> {
+export function downloadResources (resources: Array<Resource>): Promise<Job> {
   return api.post(NAVIGATOR_URI + '/download', {
     body: JSON.stringify({
-      resources: items.map(item => toApiItemIdentifier(item))
+      resources: resources.map(resource => toApiResourceIdentifier(resource))
     })
   }).catch(throwAlertError).then(toJob)
 }
 
-export function deleteItems (items: Array<Item>): Promise<string> {
+export function deleteResources (resources: Array<Resource>): Promise<string> {
   return api.delete_(NAVIGATOR_URI + '/delete', {
     body: JSON.stringify({
-      resources: items.map(item => toApiItemIdentifier(item))
+      resources: resources.map(resource => toApiResourceIdentifier(resource))
     })
   }).catch(throwAlertError)
 }
 
-export function copyItems (items: Array<Item>, folder: ?Folder): Promise<Job> {
+export function copyResources (resources: Array<Resource>, folder: ?Folder): Promise<Job> {
   return api.post(NAVIGATOR_URI + '/copy', {
     body: JSON.stringify({
-      resources: items.map(item => toApiItemIdentifier(item)),
+      resources: resources.map(resource => toApiResourceIdentifier(resource)),
       targetFolderId: folder ? folder.id : null
     })
   }).catch(throwAlertError).then(toJob)
 }
 
-export function moveItems (items: Array<Item>,
+export function moveResources (resources: Array<Resource>,
   folder: ?Folder): Promise<string> {
   return api.post(NAVIGATOR_URI + '/move', {
     body: JSON.stringify({
-      resources: items.map(item => toApiItemIdentifier(item)),
+      resources: resources.map(resource => toApiResourceIdentifier(resource)),
       targetFolderId: folder ? folder.id : null
     })
   }).catch(throwAlertError)
@@ -110,10 +110,10 @@ function toJobType (response: Object): JobType {
   let type
   switch (response.type) {
     case 'Copy':
-      type = 'copy'
+      type = 'COPY'
       break
     case 'DownloadJob':
-      type = 'download'
+      type = 'DOWNLOAD'
       break
     default:
       throw new Error('Unknown job type \'' + response._meta.name + '\'')
@@ -126,14 +126,14 @@ function toJobStatus (response: Object): JobStatus {
   switch (response.status) {
     case 'PENDING':
     case 'RUNNING':
-      jobStatus = 'running'
+      jobStatus = 'RUNNING'
       break
     case 'SUCCESS':
-      jobStatus = 'success'
+      jobStatus = 'SUCCESS'
       break
     case 'FAILED':
     case 'CANCELED':
-      jobStatus = 'failed'
+      jobStatus = 'FAILED'
       break
     default:
       throw new Error('unexpected job status \'' + response.status + '\'')
@@ -148,22 +148,22 @@ function throwAlertError (response: Object): Alert {
 }
 
 // map navigator types to API types
-function toApiItem (item: Item): Object {
-  return item
+function toApiResource (resource: Resource): Object {
+  return resource
 }
 
-function toApiItemIdentifier (item: Item): Object {
+function toApiResourceIdentifier (resource: Resource): Object {
   return {
-    id: item.id,
-    type: item.type
+    id: resource.id,
+    type: resource.type
   }
 }
 
-function toApiPackage (item: Item): Object {
+function toApiPackage (resource: Resource): Object {
   return {
-    id: item.id,
-    label: item.label,
-    description: item.description,
+    id: resource.id,
+    label: resource.label,
+    description: resource.description,
     parent: undefined
   }
 }
@@ -171,10 +171,10 @@ function toApiPackage (item: Item): Object {
 function toApiJobEntityType (job: Job): string {
   let apiType
   switch (job.type) {
-    case 'copy':
+    case 'COPY':
       apiType = 'sys_job_CopyJobExecution'
       break
-    case 'download':
+    case 'DOWNLOAD':
       apiType = 'sys_job_DownloadJobExecution'
       break
     default:

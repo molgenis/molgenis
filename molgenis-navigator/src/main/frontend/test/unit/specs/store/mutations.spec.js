@@ -33,42 +33,42 @@ describe('mutations', () => {
   })
   describe('ADD_JOB', () => {
     it('should add job to jobs in the state', () => {
-      const job0 = {type: 'download', id: '0', status: 'running'}
-      const job1 = {type: 'copy', id: '1', status: 'finished'}
+      const job0 = {type: 'DOWNLOAD', id: '0', status: 'RUNNING'}
+      const job1 = {type: 'COPY', id: '1', status: 'finished'}
 
       const state = {
         jobs: [job0]
       }
 
       mutations.__ADD_JOB__(state, job1)
-      expect(state.jobs).to.deep.equal([job0, job1])
+      expect(state.jobs).to.eql([job0, job1])
     })
   })
   describe('UPDATE_JOB', () => {
     it('should update existing job in the state', () => {
-      const job0 = {type: 'download', id: '0', status: 'running'}
-      const job1 = {type: 'copy', id: '0', status: 'running'}
+      const job0 = {type: 'DOWNLOAD', id: '0', status: 'RUNNING'}
+      const job1 = {type: 'COPY', id: '0', status: 'RUNNING'}
 
       const state = {
         jobs: [job0, job1]
       }
 
-      const updatedJob1 = {type: 'copy', id: '0', status: 'success'}
+      const updatedJob1 = {type: 'COPY', id: '0', status: 'SUCCESS'}
       mutations.__UPDATE_JOB__(state, updatedJob1)
-      expect(state.jobs).to.deep.equal([job0, updatedJob1])
+      expect(state.jobs).to.eql([job0, updatedJob1])
     })
   })
   describe('REMOVE_JOB', () => {
     it('should remove existing job in the state', () => {
-      const job0 = {type: 'download', id: '0', status: 'running'}
-      const job1 = {type: 'copy', id: '0', status: 'running'}
+      const job0 = {type: 'DOWNLOAD', id: '0', status: 'RUNNING'}
+      const job1 = {type: 'COPY', id: '0', status: 'RUNNING'}
 
       const state = {
         jobs: [job0, job1]
       }
 
       mutations.__REMOVE_JOB__(state, job1)
-      expect(state.jobs).to.deep.equal([job0])
+      expect(state.jobs).to.eql([job0])
     })
   })
   describe('SET_FOLDER', () => {
@@ -82,75 +82,75 @@ describe('mutations', () => {
       ]
 
       mutations.__SET_FOLDER__(state, folder)
-      expect(state.folder).to.deep.equal(folder)
+      expect(state.folder).to.eql(folder)
     })
   })
-  describe('SET_ITEMS', () => {
-    it('should set the items in the state and clear the selected items', () => {
+  describe('SET_RESOURCES', () => {
+    it('should set the resources in the state and clear the selected resources', () => {
       const state = {
-        items: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}],
-        selectedItems: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}]
+        resources: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}],
+        selectedResources: [{type: 'PACKAGE', 'id': '0', 'label': 'label0'}]
       }
 
-      const items = [
+      const resources = [
         {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
         {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
       ]
 
-      mutations.__SET_ITEMS__(state, items)
-      expect(state.items).to.deep.equal(items)
-      expect(state.selectedItems).to.deep.equal([])
+      mutations.__SET_RESOURCES__(state, resources)
+      expect(state.resources).to.eql(resources)
+      expect(state.selectedResources).to.eql([])
     })
   })
-  describe('SET_SELECTED_ITEMS', () => {
-    it('should set the selected items in the state', () => {
+  describe('SET_SELECTED_RESOURCES', () => {
+    it('should set the selected resources in the state', () => {
       const state = {
-        selectedItems: []
+        selectedResources: []
       }
 
-      const selectedItems = [
+      const selectedResources = [
         {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
         {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
       ]
 
-      mutations.__SET_SELECTED_ITEMS__(state, selectedItems)
-      expect(state.selectedItems).to.deep.equal(selectedItems)
+      mutations.__SET_SELECTED_RESOURCES__(state, selectedResources)
+      expect(state.selectedResources).to.eql(selectedResources)
     })
   })
-  describe('SET_SHOW_HIDDEN_ITEMS', () => {
-    it('should enable show hidden items', () => {
+  describe('SET_SHOW_HIDDEN_RESOURCES', () => {
+    it('should enable show hidden resources', () => {
       const state = {
-        showHiddenItems: false
+        showHiddenResources: false
       }
-      mutations.__SET_SHOW_HIDDEN_ITEMS__(state, true)
-      expect(state.showHiddenItems).to.equal(true)
+      mutations.__SET_SHOW_HIDDEN_RESOURCES__(state, true)
+      expect(state.showHiddenResources).to.equal(true)
     })
   })
   describe('SET_CLIPBOARD', () => {
-    it('should set the clipboard in the state and clear the selected items', () => {
+    it('should set the clipboard in the state and clear the selected resources', () => {
       const state = {
         clipboard: null
       }
 
       const clipboard = {
-        mode: 'cut',
-        items: [
+        mode: 'CUT',
+        resources: [
           {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
           {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
         ]
       }
 
       mutations.__SET_CLIPBOARD__(state, clipboard)
-      expect(state.selectedItems).to.deep.equal([])
-      expect(state.clipboard).to.deep.equal(clipboard)
+      expect(state.selectedResources).to.eql([])
+      expect(state.clipboard).to.eql(clipboard)
     })
   })
   describe('RESET_CLIPBOARD', () => {
     it('should set the clipboard to null in the state', () => {
       const state = {
         clipboard: {
-          mode: 'cut',
-          items: [
+          mode: 'CUT',
+          resources: [
             {type: 'PACKAGE', 'id': '1', 'label': 'label1'},
             {type: 'ENTITY_TYPE', 'id': '2', 'label': 'label2'}
           ]
@@ -158,7 +158,7 @@ describe('mutations', () => {
       }
 
       mutations.__RESET_CLIPBOARD__(state)
-      expect(state.clipboard).to.deep.equal(null)
+      expect(state.clipboard).to.eql(null)
     })
   })
 })

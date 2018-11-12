@@ -1,5 +1,5 @@
 // @flow
-import type { Alert, Clipboard, Folder, Item, Job, State } from '../flow.types'
+import type { Alert, Clipboard, Folder, Resource, Job, State } from '../flow.types'
 
 export const ADD_ALERTS = '__ADD_ALERTS__'
 export const REMOVE_ALERT = '__REMOVE_ALERT__'
@@ -7,9 +7,9 @@ export const ADD_JOB = '__ADD_JOB__'
 export const UPDATE_JOB = '__UPDATE_JOB__'
 export const REMOVE_JOB = '__REMOVE_JOB__'
 export const SET_FOLDER = '__SET_FOLDER__'
-export const SET_ITEMS = '__SET_ITEMS__'
-export const SET_SELECTED_ITEMS = '__SET_SELECTED_ITEMS__'
-export const SET_SHOW_HIDDEN_ITEMS = '__SET_SHOW_HIDDEN_ITEMS__'
+export const SET_RESOURCES = '__SET_RESOURCES__'
+export const SET_SELECTED_RESOURCES = '__SET_SELECTED_RESOURCES__'
+export const SET_SHOW_HIDDEN_RESOURCES = '__SET_SHOW_HIDDEN_RESOURCES__'
 export const SET_CLIPBOARD = '__SET_CLIPBOARD__'
 export const RESET_CLIPBOARD = '__RESET_CLIPBOARD__'
 
@@ -36,18 +36,18 @@ export default {
   [SET_FOLDER] (state: State, folder: Folder) {
     state.folder = folder
   },
-  [SET_ITEMS] (state: State, items: Array<Item>) {
-    state.selectedItems = []
-    state.items = items
+  [SET_RESOURCES] (state: State, resources: Array<Resource>) {
+    state.selectedResources = []
+    state.resources = resources
   },
-  [SET_SELECTED_ITEMS] (state: State, items: Array<Item>) {
-    state.selectedItems = items
+  [SET_SELECTED_RESOURCES] (state: State, resources: Array<Resource>) {
+    state.selectedResources = resources
   },
-  [SET_SHOW_HIDDEN_ITEMS] (state: State, showHiddenItems: boolean) {
-    state.showHiddenItems = showHiddenItems
+  [SET_SHOW_HIDDEN_RESOURCES] (state: State, showHiddenResources: boolean) {
+    state.showHiddenResources = showHiddenResources
   },
   [SET_CLIPBOARD] (state: State, clipboard: Clipboard) {
-    state.selectedItems = []
+    state.selectedResources = []
     state.clipboard = clipboard
   },
   [RESET_CLIPBOARD] (state: State) {
