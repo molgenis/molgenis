@@ -16,7 +16,9 @@
         <b-dd-item v-b-modal.packageCreateModal>
           <font-awesome-icon :icon="['far', 'folder-open']"/> {{ 'action-create-package' | i18n }}
         </b-dd-item>
-        <b-dd-item to="/menu/dataintegration/metadata-manager">
+        <b-dd-item
+          v-if="metadataManagerUrl"
+          :href="metadataManagerUrl">
           <font-awesome-icon icon="list"/> {{ 'action-create-entity-type' | i18n }}
         </b-dd-item>
       </b-dd>
@@ -37,8 +39,8 @@
           size="lg"/>
       </b-btn>
       <b-btn
-        v-else-if="nrSelectedResources === 1 && (getSelectedResourceType === 'ENTITY_TYPE' || getSelectedResourceType === 'ENTITY_TYPE_ABSTRACT')"
-        :to="'/menu/dataintegration/metadata-manager/' + selectedResources[0].id"
+        v-else-if="metadataManagerUrl && nrSelectedResources === 1 && (getSelectedResourceType === 'ENTITY_TYPE' || getSelectedResourceType === 'ENTITY_TYPE_ABSTRACT')"
+        :href="metadataManagerUrl + '/' + selectedResources[0].id"
         :disabled="!canEdit"
         variant="secondary"
         class="button-last">
@@ -67,6 +69,11 @@ import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'NavigatorActionsCreateEdit',
+  data () {
+    return {
+      metadataManagerUrl: window.__INITIAL_STATE__.pluginUrls['metadata-manager']
+    }
+  },
   computed: {
     ...mapGetters(['nrSelectedResources', 'query']),
     ...mapState(['folder', 'selectedResources']),
@@ -77,7 +84,18 @@ export default {
       return !(this.query || (this.folder && this.folder.readonly))
     },
     canEdit () {
-      return !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedResources === 1
+      let canEdit = !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedResources === 1
+      if (canEdit) {
+        switch (this.getSelectedResourceType) {
+          case 'PACKAGE':
+            break
+          case 'ENTITY_TYPE':
+          case 'ENTITY_TYPE_ABSTRACT':
+            canEdit &= this.metadataManagerUrl !== undefined
+            break
+        }
+      }
+      return canEdit
     }
   },
   methods: {

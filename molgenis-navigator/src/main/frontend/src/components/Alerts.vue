@@ -10,7 +10,7 @@
           :variant="getVariant(alert)"
           show
           dismissible
-          @dismissed="removeAlert(index)">
+          @dismissed.prevent="removeAlert(index)">
           <span>{{ alert.message }}</span>
           <span v-if="alert.code"> ({{ alert.code }})</span>
         </b-alert>

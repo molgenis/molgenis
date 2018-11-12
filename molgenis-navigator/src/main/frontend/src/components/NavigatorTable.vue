@@ -27,12 +27,12 @@
       <template
         slot="label"
         slot-scope="label">
-        <span v-if="label.item.type === 'ENTITY_TYPE'">
-          <a :href="'/menu/main/dataexplorer?entity=' + label.item.id + '&hideselect=true'">
+        <span v-if="label.item.type === 'ENTITY_TYPE' && dataExplorerUrl">
+          <a :href="dataExplorerUrl + '?entity=' + label.item.id + '&hideselect=true'">
             <font-awesome-icon icon="list"/> {{ label.item.label }}
           </a>
         </span>
-        <span v-else-if="label.item.type === 'ENTITY_TYPE_ABSTRACT'">
+        <span v-else-if="label.item.type === 'ENTITY_TYPE' || label.item.type === 'ENTITY_TYPE_ABSTRACT'">
           <font-awesome-icon icon="list"/> {{ label.item.label }}
         </span>
         <span v-else>
@@ -77,7 +77,8 @@ export default {
         }
       },
       filter: null,
-      allSelected: false
+      allSelected: false,
+      dataExplorerUrl: window.__INITIAL_STATE__.pluginUrls['dataexplorer']
     }
   },
   computed: {

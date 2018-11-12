@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-content-center">
-    <div class="col-6">
+    <div class="col-md-6">
       <b-input-group>
         <b-form-input
           v-model="query"

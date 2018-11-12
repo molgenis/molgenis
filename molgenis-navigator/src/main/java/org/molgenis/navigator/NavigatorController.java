@@ -1,5 +1,6 @@
 package org.molgenis.navigator;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.navigator.NavigatorController.URI;
 import static org.springframework.http.HttpStatus.OK;
@@ -8,6 +9,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
+import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.security.user.UserAccountService;
@@ -44,6 +46,13 @@ public class NavigatorController extends VuePluginController {
   @GetMapping("/**")
   public String init(Model model) {
     super.init(model, ID);
+
+    Menu menu = menuReaderService.getMenu();
+    asList("dataexplorer", "metadata-manager", "importwizard")
+        .forEach(
+            pluginId ->
+                model.addAttribute(pluginId.replace('-', '_'), menu.findMenuItemPath(pluginId)));
+
     return "view-navigator";
   }
 

@@ -5,13 +5,13 @@
       class="row">
       <div class="col">
         <div
-          v-for="(job, index) in jobs"
-          :key="index">
+          v-for="job in jobs"
+          :key="job.id">
           <b-alert
             :variant="getVariant(job)"
             :dismissible="job.status !== 'RUNNING'"
             show
-            @dismissed="removeJob(job)">
+            @dismissed.prevent="removeJob(job)">
             <div v-if="job.type === 'COPY'">
               <span v-if="job.status === 'RUNNING'">
                 <font-awesome-icon :icon="['far', 'hourglass']"/> {{ 'progress-copy-running' | i18n }}
@@ -40,7 +40,8 @@
                 {{ 'progress-download-success-action-pre' | i18n }}
                 <a
                   :href="job.resultUrl"
-                  download>{{ 'progress-download-success-action' | i18n }}</a>
+                  download
+                  class="alert-link">{{ 'progress-download-success-action' | i18n }}</a>
                 {{ 'progress-download-success-action-post' | i18n }}
               </span>
               <span v-else-if="job.status === 'FAILED'">

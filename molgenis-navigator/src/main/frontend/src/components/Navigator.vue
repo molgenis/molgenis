@@ -65,10 +65,14 @@ export default {
     }
   }
 
+  .job-alerts {
+    left: 1rem;
+    right: 1rem;
+  }
+
   @media (min-width: 1200px) {
     .job-alerts {
       left: 75%;
-      right: 1rem;
     }
   }
 

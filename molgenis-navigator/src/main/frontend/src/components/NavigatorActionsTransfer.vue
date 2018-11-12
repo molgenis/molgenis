@@ -6,8 +6,8 @@
       class="btn-tooltip-wrapper">
       <b-btn
         :disabled="!canUpload"
-        variant="secondary"
-        to="/menu/importdata/importwizard">
+        :href="importWizardUrl + (folder ? '?selectedPackage=' + folder.id : '')"
+        variant="secondary">
         <font-awesome-icon
           :class="{'fa-disabled' : !canUpload}"
           icon="upload"
@@ -33,17 +33,23 @@
 
 <script>
 import { DOWNLOAD_SELECTED_RESOURCES } from '../store/actions'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default {
   name: 'NavigatorActionsTransfer',
+  data () {
+    return {
+      importWizardUrl: window.__INITIAL_STATE__.pluginUrls['importwizard']
+    }
+  },
   computed: {
+    ...mapState(['folder']),
     ...mapGetters(['nrSelectedResources', 'query']),
     canDownload () {
       return this.nrSelectedResources > 0
     },
     canUpload () {
-      return !this.query
+      return this.importWizardUrl && !this.query
     }
   },
   methods: {
