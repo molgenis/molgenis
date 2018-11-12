@@ -173,7 +173,7 @@ export default {
       downloadResources(state.selectedResources).then(job => {
         commit(SET_SELECTED_RESOURCES, [])
         commit(ADD_JOB, job)
-        dispatch(POLL_JOB, job)
+        setTimeout(() => dispatch(POLL_JOB, job), 500)
       }).catch(error => {
         commit(ADD_ALERTS, error.alerts)
       })
