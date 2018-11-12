@@ -47,8 +47,9 @@ public class ExcelWriter implements AutoCloseable {
         .forEach(
             record -> {
               String stringValue = record.toString().trim();
+              int index = counter.getAndIncrement();
               if (record != null && !stringValue.isEmpty()) {
-                final Cell cell = row.createCell(counter.getAndIncrement());
+                final Cell cell = row.createCell(index);
                 cell.setCellValue(stringValue);
               }
             });
