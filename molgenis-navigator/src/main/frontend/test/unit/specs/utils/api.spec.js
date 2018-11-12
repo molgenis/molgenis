@@ -23,6 +23,7 @@ describe('api', () => {
         status: 'RUNNING',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
 
@@ -42,6 +43,7 @@ describe('api', () => {
         status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
       expect(api.fetchJob(job)).to.eventually.eql(updatedJob).then(done, done)
@@ -53,6 +55,7 @@ describe('api', () => {
         status: 'RUNNING',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
 
@@ -72,6 +75,7 @@ describe('api', () => {
         status: 'FAILED',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
       expect(api.fetchJob(job)).to.eventually.eql(updatedJob).then(done, done)
@@ -208,6 +212,7 @@ describe('api', () => {
         status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
       expect(api.copyResources(resources, folder)).to.eventually.eql(expectedjob).then(done, done)
@@ -274,6 +279,7 @@ describe('api', () => {
         status: 'SUCCESS',
         progress: undefined,
         progressMax: undefined,
+        progressMessage: undefined,
         resultUrl: undefined
       }
       expect(api.downloadResources(resources)).to.eventually.eql(expectedjob).then(done, done)
