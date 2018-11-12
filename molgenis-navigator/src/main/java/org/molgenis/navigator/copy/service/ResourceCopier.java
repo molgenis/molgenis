@@ -8,9 +8,13 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
-import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.navigator.copy.service.RelationTransformer.transformExtends;
+import static org.molgenis.navigator.copy.service.RelationTransformer.transformMappedBys;
+import static org.molgenis.navigator.copy.service.RelationTransformer.transformPackage;
+import static org.molgenis.navigator.copy.service.RelationTransformer.transformRefEntities;
 
 import com.google.common.collect.TreeTraverser;
 import java.util.List;
@@ -58,16 +62,11 @@ public class ResourceCopier {
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
   private final AttributeFactory attributeFactory;
 
-  /** List of EntityTypes contained in Package(s) that are being copied. */
   private final List<EntityType> entityTypesInPackages = newArrayList();
-
   private final Map<String, Package> copiedPackageMap = newHashMap();
-
   private final Map<String, EntityType> copiedEntityTypeMap = newHashMap();
-
-  /** Map of the newly generated EntityType IDs and the original IDs. */
+  private final Map<String, Attribute> copiedAttributesMap = newHashMap();
   private final Map<String, String> copiedIdsMap = newHashMap();
-
   private final Map<String, String> referenceDefaultValues = newHashMap();
 
   ResourceCopier(
@@ -117,7 +116,7 @@ public class ResourceCopier {
             .map(this::copyEntityType)
             .collect(toList());
 
-    copiedEntityTypes.forEach(this::updateRelations);
+    copiedEntityTypes.forEach(this::transformRelations);
 
     entityTypeDependencyResolver
         .resolve(copiedEntityTypes)
@@ -129,6 +128,13 @@ public class ResourceCopier {
         .map(this::copyEntities)
         .map(this::pasteDefaultValues)
         .forEach(e -> progress.increment(1));
+  }
+
+  private void transformRelations(EntityType entityType) {
+    transformPackage(entityType, copiedPackageMap);
+    transformExtends(entityType, copiedEntityTypeMap);
+    transformRefEntities(entityType, copiedEntityTypeMap);
+    transformMappedBys(entityType, copiedAttributesMap);
   }
 
   private EntityType cutDefaultValues(EntityType copy) {
@@ -155,13 +161,16 @@ public class ResourceCopier {
   }
 
   private EntityType copyEntityType(EntityType original) {
-    EntityType copy = EntityType.newInstance(original, DEEP_COPY_ATTRS, attributeFactory);
+    EntityType copy = EntityType.newInstance(original, SHALLOW_COPY_ATTRS, attributeFactory);
+    Map<String, Attribute> copiedAttributes =
+        EntityType.deepCopyAttributes(original, copy, attributeFactory);
 
     String newId = idGenerator.generateId();
     copy.setId(newId);
 
     copiedEntityTypeMap.put(original.getId(), copy);
     copiedIdsMap.put(newId, original.getId());
+    copiedAttributesMap.putAll(copiedAttributes);
 
     return copy;
   }
@@ -169,12 +178,6 @@ public class ResourceCopier {
   private EntityType persistEntityType(EntityType copy) {
     metaDataService.addEntityType(copy);
     return copy;
-  }
-
-  private void updateRelations(EntityType copy) {
-    updatePackage(copy);
-    updateExtends(copy);
-    updateReferences(copy);
   }
 
   private EntityType copyEntities(EntityType copy) {
@@ -185,38 +188,6 @@ public class ResourceCopier {
       dataService.add(copy.getId(), entities);
     }
     return copy;
-  }
-
-  private void updatePackage(EntityType entityType) {
-    if (entityType.getPackage() != null) {
-      // if the EntityType isn't in a copied package, we know it should land in the target package
-      entityType.setPackage(
-          copiedPackageMap.getOrDefault(entityType.getPackage().getId(), targetPackage));
-    }
-  }
-
-  private void updateExtends(EntityType entityType) {
-    if (entityType.getExtends() != null) {
-      String extendsId = entityType.getExtends().getId();
-      if (copiedEntityTypeMap.containsKey(extendsId)) {
-        entityType.setExtends(copiedEntityTypeMap.get(extendsId));
-      }
-    }
-  }
-
-  private void updateReferences(EntityType entityType) {
-    stream(entityType.getAtomicAttributes())
-        .filter(EntityTypeUtils::isReferenceType)
-        .forEach(this::updateReference);
-  }
-
-  private void updateReference(Attribute attribute) {
-    if (attribute.getRefEntity() != null) {
-      String refId = attribute.getRefEntity().getId();
-      if (copiedEntityTypeMap.containsKey(refId)) {
-        attribute.setRefEntity(copiedEntityTypeMap.get(refId));
-      }
-    }
   }
 
   private void copyPackage(Package pack) {
