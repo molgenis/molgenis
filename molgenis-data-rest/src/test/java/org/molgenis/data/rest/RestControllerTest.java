@@ -777,6 +777,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
   }
 
   @Test
+  public void updateAttributeWithEmptyValue() throws Exception {
+    mockMvc
+        .perform(
+            post(HREF_ENTITY_ID + "/name").param("_method", "PUT").contentType(APPLICATION_JSON))
+        .andExpect(status().isOk());
+    verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));
+  }
+
+  @Test
   public void updateAttribute_unknownEntity() throws Exception {
     mockMvc
         .perform(
