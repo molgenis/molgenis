@@ -16,7 +16,6 @@
               <font-awesome-icon :icon="['far', 'hourglass']"/>
               <span class="alert-message">{{ job.progressMessage }}</span>
               <span v-if="job.progress">{{ job.progress }}/{{ job.progressMax }}</span>
-              <span>...</span>
             </span>
             <span v-else-if="job.status === 'SUCCESS'">
               <font-awesome-icon :icon="['far', 'check-circle']"/>

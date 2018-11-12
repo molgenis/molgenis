@@ -1,22 +1,20 @@
 package org.molgenis.navigator;
 
-import static com.google.common.collect.Streams.concat;
-import static com.google.common.collect.Streams.stream;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.navigator.ResourceType.ENTITY_TYPE;
+import static org.molgenis.navigator.ResourceType.ENTITY_TYPE_ABSTRACT;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
-import com.google.common.graph.Traverser;
 import com.google.gson.Gson;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
@@ -68,7 +66,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   public List<Resource> getResources(@Nullable String folderId) {
     try (Stream<Resource> packageResources =
         dataService
-            .query(PACKAGE, Package.class)
+            .query(PackageMetadata.PACKAGE, Package.class)
             .eq(PackageMetadata.PARENT, folderId)
             .findAll()
             .map(this::toResource)) {
@@ -87,7 +85,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   public List<Resource> findResources(String query) {
     Stream<Resource> packageResources =
         dataService
-            .query(PACKAGE, Package.class)
+            .query(PackageMetadata.PACKAGE, Package.class)
             .search(PackageMetadata.LABEL, query)
             .or()
             .search(PackageMetadata.DESCRIPTION, query)
@@ -168,26 +166,72 @@ public class NavigatorServiceImpl implements NavigatorService {
       return;
     }
 
-    List<String> packageIds =
-        resources
-            .stream()
-            .filter(resource -> resource.getType() == ResourceType.PACKAGE)
-            .map(ResourceIdentifier::getId)
-            .collect(toList());
-    List<String> entityTypeIds =
-        resources
-            .stream()
-            .filter(resource -> resource.getType() == ResourceType.ENTITY_TYPE)
-            .map(ResourceIdentifier::getId)
+    Set<Object> packageIds = new LinkedHashSet<>();
+    Set<Object> entityTypeIds = new LinkedHashSet<>();
+    resources.forEach(
+        resource -> {
+          switch (resource.getType()) {
+            case PACKAGE:
+              packageIds.add(resource.getId());
+              break;
+            case ENTITY_TYPE:
+            case ENTITY_TYPE_ABSTRACT:
+              entityTypeIds.add(resource.getId());
+              break;
+            default:
+              throw new UnexpectedEnumException(resource.getType());
+          }
+        });
+
+    if (!entityTypeIds.isEmpty()) {
+      deleteEntityTypes(entityTypeIds);
+    }
+    if (!packageIds.isEmpty()) {
+      deletePackages(packageIds);
+    }
+  }
+
+  private void deleteEntityTypes(@NotEmpty Set<Object> entityTypeIds) {
+    List<EntityType> entityTypes =
+        dataService
+            .findAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream(), EntityType.class)
             .collect(toList());
 
-    if (packageIds.isEmpty()) {
-      deleteEntityTypes(entityTypeIds);
-    } else {
-      List<Package> deletablePackages = getDeletablePackages(packageIds);
-      deleteEntityTypes(deletablePackages, entityTypeIds);
-      deletePackages(deletablePackages);
+    if (!entityTypes.isEmpty()) {
+      dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
     }
+  }
+
+  private void deletePackages(Set<Object> packageIds) {
+    List<Package> packages =
+        dataService
+            .findAll(PackageMetadata.PACKAGE, packageIds.stream(), Package.class)
+            .collect(toList());
+
+    if (!packages.isEmpty()) {
+      List<Package> deletablePackages = getDeletablePackages(packages, packageIds);
+      if (!deletablePackages.isEmpty()) {
+        dataService.delete(PackageMetadata.PACKAGE, deletablePackages.stream());
+      }
+    }
+  }
+
+  private List<Package> getDeletablePackages(List<Package> packages, Set<Object> packageIds) {
+    return packages
+        .stream()
+        .filter(aPackage -> isDeletablePackage(aPackage, packageIds))
+        .collect(toList());
+  }
+
+  private boolean isDeletablePackage(Package aPackage, Set<Object> packageIds) {
+    Package parentPackage = aPackage.getParent();
+    while (parentPackage != null) {
+      if (packageIds.contains(parentPackage.getId())) {
+        return false;
+      }
+      parentPackage = parentPackage.getParent();
+    }
+    return true;
   }
 
   @Transactional
@@ -208,16 +252,17 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private void updatePackage(Resource resource) {
-    Package aPackage = dataService.findOneById(PACKAGE, resource.getId(), Package.class);
+    Package aPackage =
+        dataService.findOneById(PackageMetadata.PACKAGE, resource.getId(), Package.class);
     if (aPackage == null) {
-      throw new UnknownEntityException(PACKAGE, resource.getId());
+      throw new UnknownEntityException(PackageMetadata.PACKAGE, resource.getId());
     }
 
     if (!Objects.equal(aPackage.getLabel(), resource.getLabel())
         || !Objects.equal(aPackage.getDescription(), resource.getDescription())) {
       aPackage.setLabel(resource.getLabel());
       aPackage.setDescription(resource.getDescription());
-      dataService.update(PACKAGE, aPackage);
+      dataService.update(PackageMetadata.PACKAGE, aPackage);
     }
   }
 
@@ -236,63 +281,19 @@ public class NavigatorServiceImpl implements NavigatorService {
     }
   }
 
-  private void deleteEntityTypes(@NotEmpty List<String> entityTypeIds) {
-    deleteEntityTypes(emptyList(), entityTypeIds);
-  }
-
-  @SuppressWarnings("unchecked")
-  private void deleteEntityTypes(List<Package> packages, List<String> entityTypeIds) {
-    List<Object> allEntityTypeIds;
-    if (packages.isEmpty()) {
-      allEntityTypeIds = (List<Object>) (List) entityTypeIds;
-    } else {
-      Stream<Object> allPackageEntityTypeIds =
-          packages
-              .stream()
-              .flatMap(aPackage -> stream(aPackage.getEntityTypes()))
-              .map(EntityType::getId);
-      if (entityTypeIds.isEmpty()) {
-        allEntityTypeIds = allPackageEntityTypeIds.collect(toList());
-      } else {
-        allEntityTypeIds =
-            concat(entityTypeIds.stream(), allPackageEntityTypeIds).collect(toList());
-      }
-    }
-    if (!allEntityTypeIds.isEmpty()) {
-      dataService.deleteAll(ENTITY_TYPE_META_DATA, allEntityTypeIds.stream());
-    }
-  }
-
-  private void deletePackages(@NotEmpty List<Package> packages) {
-    // the package entity types have been deleted, so delete by id instead of entity
-    dataService.deleteAll(PACKAGE, packages.stream().map(Package::getId));
-  }
-
-  private List<Package> getDeletablePackages(List<String> packageIds) {
-    @SuppressWarnings("unchecked")
-    List<Object> untypedPackageIds = (List) packageIds;
-    List<Package> packages =
-        !packageIds.isEmpty()
-            ? dataService
-                .findAll(PACKAGE, untypedPackageIds.stream(), Package.class)
-                .collect(toList())
-            : emptyList();
-
-    Iterable<Package> packageIterable =
-        Traverser.forTree(Package::getChildren).breadthFirst(packages);
-    return Lists.newArrayList(packageIterable);
-  }
-
   private void movePackages(
       List<ResourceIdentifier> typeResources, @Nullable Package targetPackage) {
     List<Package> packages =
         dataService
-            .findAll(PACKAGE, typeResources.stream().map(ResourceIdentifier::getId), Package.class)
+            .findAll(
+                PackageMetadata.PACKAGE,
+                typeResources.stream().map(ResourceIdentifier::getId),
+                Package.class)
             .filter(aPackage -> isDifferentPackage(aPackage.getParent(), targetPackage))
             .collect(toList());
     if (!packages.isEmpty()) {
       packages.forEach(aPackage -> aPackage.setParent(targetPackage));
-      dataService.update(PACKAGE, packages.stream());
+      dataService.update(PackageMetadata.PACKAGE, packages.stream());
     }
   }
 
@@ -337,8 +338,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private Resource toResource(EntityType entityType) {
-    ResourceType type =
-        entityType.isAbstract() ? ResourceType.ENTITY_TYPE_ABSTRACT : ResourceType.ENTITY_TYPE;
+    ResourceType type = entityType.isAbstract() ? ENTITY_TYPE_ABSTRACT : ENTITY_TYPE;
     boolean isSystemEntityType = MetaUtils.isSystemPackage(entityType.getPackage());
     return Resource.builder()
         .setType(type)
@@ -372,9 +372,9 @@ public class NavigatorServiceImpl implements NavigatorService {
       return null;
     }
 
-    Package aPackage = dataService.findOneById(PACKAGE, folderId, Package.class);
+    Package aPackage = dataService.findOneById(PackageMetadata.PACKAGE, folderId, Package.class);
     if (aPackage == null) {
-      throw new UnknownEntityException(PACKAGE, folderId);
+      throw new UnknownEntityException(PackageMetadata.PACKAGE, folderId);
     }
     return aPackage;
   }
