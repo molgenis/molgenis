@@ -54,14 +54,13 @@ public class DownloadService {
             packages.add(resource.getId());
           }
         });
-    progress.progress(0, getMessage("navigator_download_start_message", "Starting downloading."));
 
     File emxFile = fileStore.getFile(filename);
     FileMeta fileMeta = createFileMeta(emxFile);
     dataService.add(FileMetaMetaData.FILE_META, fileMeta);
     emxExportService.download(entityTypes, packages, emxFile, Optional.of(progress));
     progress.increment(1);
-    progress.status(getMessage("navigator_download_finished_message", "Finished downloading."));
+    progress.status(getMessage("progress-download-success", "Finished preparing download."));
     return fileMeta;
   }
 

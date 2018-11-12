@@ -47,14 +47,14 @@ public class DownloadJobTest extends AbstractMolgenisSpringTest {
     doReturn("start")
         .when(messageSource)
         .getMessage(
-            "navigator_download_start_message",
+            "progress-download-running",
             new Object[] {},
             "Starting downloading.",
             LocaleContextHolder.getLocale());
     doReturn("done")
         .when(messageSource)
         .getMessage(
-            "navigator_download_finished_message",
+            "progress-download-success",
             new Object[] {},
             "Finished downloading.",
             LocaleContextHolder.getLocale());
