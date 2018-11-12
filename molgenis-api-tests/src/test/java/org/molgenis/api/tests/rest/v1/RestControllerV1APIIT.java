@@ -614,7 +614,7 @@ public class RestControllerV1APIIT {
         .log()
         .all()
         .statusCode(OKE)
-        .body("label", nullValue());
+        .body("xstringnillable", nullValue());
   }
 
   @Test
