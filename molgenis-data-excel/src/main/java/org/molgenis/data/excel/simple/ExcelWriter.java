@@ -46,11 +46,13 @@ public class ExcelWriter implements AutoCloseable {
         .stream()
         .forEach(
             record -> {
-              String stringValue = record.toString().trim();
               int index = counter.getAndIncrement();
-              if (record != null && !stringValue.isEmpty()) {
-                final Cell cell = row.createCell(index);
-                cell.setCellValue(stringValue);
+              if (record != null) {
+                String stringValue = record.toString().trim();
+                if (!stringValue.isEmpty()) {
+                  final Cell cell = row.createCell(index);
+                  cell.setCellValue(stringValue);
+                }
               }
             });
   }
@@ -63,7 +65,7 @@ public class ExcelWriter implements AutoCloseable {
     this.writeRows(rows.stream(), sheetName);
   }
 
-  public void writeRows(Stream<List<Object>> rows, String sheetName) throws IOException {
+  public void writeRows(Stream<List<Object>> rows, String sheetName) {
     Sheet sheet = workbook.getSheet(sheetName);
     rows.forEach(
         row -> {
