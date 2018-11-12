@@ -10,7 +10,6 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
 
-import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -34,6 +33,9 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.jobs.Progress;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,34 +43,52 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmxExportServiceImpl implements EmxExportService {
 
   private final DataService dataService;
-  private static final int BATCH_SIZE = 10000;
 
   public EmxExportServiceImpl(DataService dataService) {
     this.dataService = requireNonNull(dataService);
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public void download(List<String> entityTypeIds, List<String> packageIds, File downloadFile) {
+    download(entityTypeIds, packageIds, downloadFile, Optional.empty());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public void download(
+      List<String> entityTypeIds,
+      List<String> packageIds,
+      File downloadFile,
+      Optional<Progress> progress) {
     if (!(entityTypeIds.isEmpty() && packageIds.isEmpty())) {
 
       try (ExcelWriter writer = ExcelWriterFactory.create(downloadFile)) {
-        downloadEmx(entityTypeIds, packageIds, writer);
+        downloadEmx(entityTypeIds, packageIds, writer, progress);
       } catch (IOException e) {
-        throw new EmxExportException();
+        throw new EmxExportException(e);
       }
     } else {
       throw new EmptyDownloadRequestException();
     }
   }
 
-  private void downloadEmx(List<String> entityTypeIds, List<String> packageIds, ExcelWriter writer)
+  private void downloadEmx(
+      List<String> entityTypeIds,
+      List<String> packageIds,
+      ExcelWriter writer,
+      Optional<Progress> progress)
       throws IOException {
     Set<Package> packages = new LinkedHashSet<>();
     Set<EntityType> entityTypes = new LinkedHashSet<>();
     resolveMetadata(entityTypeIds, packageIds, packages, entityTypes);
-    writeEntityTypeSheets(writer, entityTypes);
-    writePackageSheets(writer, packages);
+
+    if (progress.isPresent()) {
+      // Progress per entity plus package sheet + finished message
+      progress.get().setProgressMax(entityTypes.size() + 2);
+    }
+    writePackageSheets(packages, writer, progress);
+    writeEntityTypeSheets(entityTypes, writer, progress);
   }
 
   protected void resolveMetadata(
@@ -80,17 +100,24 @@ public class EmxExportServiceImpl implements EmxExportService {
     resolveEntityTypeIds(entityTypeIds, entityTypes);
   }
 
-  private void writePackageSheets(ExcelWriter writer, Set<Package> packages) throws IOException {
-    for (Package pack : packages) {
-      writePackage(pack, writer);
-    }
-  }
-
-  private void writeEntityTypeSheets(ExcelWriter writer, Set<EntityType> entityTypes)
+  private void writeEntityTypeSheets(
+      Set<EntityType> entityTypes, ExcelWriter writer, Optional<Progress> progressOptional)
       throws IOException {
+    writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
+      String progressMessage =
+          MessageSourceHolder.getMessageSource()
+              .getMessage(
+                  "emx_export_progress_message",
+                  new Object[] {entityType.getLabel(LocaleContextHolder.getLocale().getLanguage())},
+                  "Downloading: ",
+                  LocaleContextHolder.getLocale());
+      if (progressOptional.isPresent()) {
+        Progress progress = progressOptional.get();
+        progress.status(progressMessage);
+        progress.increment(1);
+      }
       writeAttributes(entityType.getAllAttributes(), writer);
-      writeEntityType(entityType, writer);
       if (!entityType.isAbstract()) {
         downloadData(entityType, writer);
       }
@@ -125,7 +152,10 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   private void resolvePackage(Package pack, Set<Package> packages, Set<EntityType> entityTypes) {
     packages.add(pack);
-    entityTypes.addAll(Lists.newLinkedList(pack.getEntityTypes()));
+    for (EntityType entityType : pack.getEntityTypes()) {
+      checkIfEmxEntityType(entityType);
+      entityTypes.add(entityType);
+    }
     for (Package child : pack.getChildren()) {
       resolvePackage(child, packages, entityTypes);
     }
@@ -150,31 +180,47 @@ public class EmxExportServiceImpl implements EmxExportService {
       writer.createSheet(entityType.getId(), headers);
     }
     writer.writeRows(
-        dataService.findAll(entityType.getId()).map(DataRowMapper::mapDataRow),
-        entityType.getId(),
-        BATCH_SIZE);
+        dataService.findAll(entityType.getId()).map(DataRowMapper::mapDataRow), entityType.getId());
   }
 
-  private void writeEntityType(EntityType entityType, ExcelWriter writer) throws IOException {
+  private void writeEntityTypes(Iterable<EntityType> entityTypes, ExcelWriter writer)
+      throws IOException {
     if (!writer.hasSheet(EMX_ENTITIES)) {
       writer.createSheet(EMX_ENTITIES, newArrayList(ENTITIES_ATTRS.keySet()));
     }
-    writer.writeRow(EntityTypeMapper.map(entityType), EMX_ENTITIES);
+    writer.writeRows(
+        StreamSupport.stream(entityTypes.spliterator(), false)
+            .map(entityType -> EntityTypeMapper.map(entityType)),
+        EMX_ENTITIES);
   }
 
   private void writeAttributes(Iterable<Attribute> attrs, ExcelWriter writer) throws IOException {
     if (!writer.hasSheet(EMX_ATTRIBUTES)) {
       writer.createSheet(EMX_ATTRIBUTES, newArrayList(ATTRIBUTE_ATTRS.keySet()));
     }
-    for (Attribute attr : attrs) {
-      writer.writeRow(map(attr), EMX_ATTRIBUTES);
-    }
+    writer.writeRows(
+        StreamSupport.stream(attrs.spliterator(), false).map(attr -> map(attr)), EMX_ATTRIBUTES);
   }
 
-  private void writePackage(Package pack, ExcelWriter writer) throws IOException {
+  private void writePackageSheets(
+      Iterable<Package> packages, ExcelWriter writer, Optional<Progress> progressOptional)
+      throws IOException {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }
-    writer.writeRow(PackageMapper.map(pack), EMX_PACKAGES);
+    writer.writeRows(
+        StreamSupport.stream(packages.spliterator(), false).map(pack -> PackageMapper.map(pack)),
+        EMX_PACKAGES);
+    if (progressOptional.isPresent()) {
+      Progress progress = progressOptional.get();
+      progress.status(
+          MessageSourceHolder.getMessageSource()
+              .getMessage(
+                  "emx_export_metadata_message",
+                  new Object[] {},
+                  "Finished downloading package metadata",
+                  LocaleContextHolder.getLocale()));
+      progress.increment(1);
+    }
   }
 }

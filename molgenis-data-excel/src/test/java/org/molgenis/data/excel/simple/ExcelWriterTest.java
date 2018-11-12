@@ -5,7 +5,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ExcelWriterTest extends AbstractMockitoTest {
+public class ExcelWriterTest extends AbstractMolgenisSpringTest {
 
   @Mock Workbook workbook;
 
@@ -42,13 +43,13 @@ public class ExcelWriterTest extends AbstractMockitoTest {
   public void testHasSheetTrue() {
     Sheet sheet = mock(Sheet.class);
     when(workbook.getSheet("test")).thenReturn(sheet);
-    assertEquals(true, excelWriter.hasSheet("test"));
+    assertTrue(excelWriter.hasSheet("test"));
   }
 
   @Test
   public void testHasSheetFalse() {
     when(workbook.getSheet("test")).thenReturn(null);
-    assertEquals(false, excelWriter.hasSheet("test"));
+    assertFalse(excelWriter.hasSheet("test"));
   }
 
   @Test
@@ -115,7 +116,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(workbook.getSheet("test")).thenReturn(sheet);
 
     excelWriter.writeRows(
-        Stream.of(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test", 1);
+        Stream.of(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
     verify(cell1).setCellValue("value2");
@@ -156,9 +157,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(workbook.getSheet("test")).thenReturn(sheet);
 
     excelWriter.writeRows(
-        newArrayList(newArrayList("value1", "value2"), newArrayList("value3", "value4")),
-        "test",
-        1);
+        newArrayList(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
     verify(cell1).setCellValue("value2");

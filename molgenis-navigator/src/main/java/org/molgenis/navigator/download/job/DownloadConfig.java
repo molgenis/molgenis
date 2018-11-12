@@ -1,5 +1,6 @@
 package org.molgenis.navigator.download.job;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.importer.emx.EmxFileExtensions.XLSX;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public class DownloadConfig {
   private final DownloadService downloadService;
 
   public DownloadConfig(DownloadService downloadService) {
-    this.downloadService = downloadService;
+    this.downloadService = requireNonNull(downloadService);
   }
 
   @Bean
@@ -34,7 +35,7 @@ public class DownloadConfig {
 
   private String getDownloadFilename(String extension) {
     String timestamp =
-        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss"));
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss.SSS"));
     return String.format("%s.%s", timestamp, extension);
   }
 }

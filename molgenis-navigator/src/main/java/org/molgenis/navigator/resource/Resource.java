@@ -9,7 +9,8 @@ import org.molgenis.util.AutoGson;
 public abstract class Resource {
   public enum Type {
     PACKAGE,
-    ENTITY_TYPE
+    ENTITY_TYPE,
+    ENTITY_TYPE_ABSTRACT
   }
 
   public abstract Type getType();

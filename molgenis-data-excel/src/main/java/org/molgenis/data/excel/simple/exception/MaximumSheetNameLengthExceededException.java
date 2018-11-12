@@ -1,5 +1,6 @@
 package org.molgenis.data.excel.simple.exception;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.i18n.CodedRuntimeException;
@@ -11,6 +12,11 @@ public class MaximumSheetNameLengthExceededException extends CodedRuntimeExcepti
   public MaximumSheetNameLengthExceededException(String sheetName) {
     super(ERROR_CODE);
     this.sheetName = requireNonNull(sheetName);
+  }
+
+  @Override
+  public String getMessage() {
+    return format("sheetName:%s", sheetName);
   }
 
   @Override

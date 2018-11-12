@@ -1,6 +1,7 @@
 package org.molgenis.navigator.download.job;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 import org.molgenis.data.meta.SystemEntityType;
@@ -31,6 +32,7 @@ public class DownloadJobExecutionMetaData extends SystemEntityType {
     setPackage(jobPackage);
     addAttribute(RESOURCES)
         .setLabel(RESOURCES)
+        .setDataType(TEXT)
         .setDescription("List of resources to be downloaded.")
         .setNillable(true);
   }

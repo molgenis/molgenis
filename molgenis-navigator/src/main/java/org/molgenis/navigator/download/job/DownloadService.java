@@ -5,19 +5,20 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.file.FileDownloadController.URI;
 
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.resource.Resource;
 import org.molgenis.navigator.resource.Resource.Type;
 import org.molgenis.navigator.resource.ResourcesUtil;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,28 +41,33 @@ public class DownloadService {
   }
 
   public FileMeta download(String resourceJson, String filename, Progress progress) {
-    progress.setProgressMax(1);
-    progress.progress(0, "Starting download...");
-
-    File emxFile = fileStore.getFile(filename);
-    FileMeta fileMeta = createFileMeta(emxFile);
-    dataService.add(FileMetaMetaData.FILE_META, fileMeta);
     List<Resource> resources;
     List<String> entityTypes = newArrayList();
     List<String> packages = newArrayList();
     resources = ResourcesUtil.getResourcesFromJson(resourceJson);
     resources.forEach(
         resource -> {
-          if (resource.getType().equals(Type.ENTITY_TYPE)) {
+          if (resource.getType().equals(Type.ENTITY_TYPE)
+              || resource.getType().equals(Type.ENTITY_TYPE_ABSTRACT)) {
             entityTypes.add(resource.getId());
           } else if (resource.getType().equals(Type.PACKAGE)) {
             packages.add(resource.getId());
           }
         });
+    progress.progress(0, getMessage("navigator_download_start_message", "Starting downloading."));
 
-    emxExportService.download(entityTypes, packages, emxFile);
-    progress.progress(1, "Download finished");
+    File emxFile = fileStore.getFile(filename);
+    FileMeta fileMeta = createFileMeta(emxFile);
+    dataService.add(FileMetaMetaData.FILE_META, fileMeta);
+    emxExportService.download(entityTypes, packages, emxFile, Optional.of(progress));
+    progress.increment(1);
+    progress.status(getMessage("navigator_download_finished_message", "Finished downloading."));
     return fileMeta;
+  }
+
+  private String getMessage(String key, String defaultMessage) {
+    return MessageSourceHolder.getMessageSource()
+        .getMessage(key, new Object[] {}, defaultMessage, LocaleContextHolder.getLocale());
   }
 
   private FileMeta createFileMeta(File file) {
@@ -71,11 +77,5 @@ public class DownloadService {
     fileMeta.setFilename(file.getName());
     fileMeta.setUrl(URI + "/" + file.getName());
     return fileMeta;
-  }
-
-  public String getDownloadFilename(String extension) {
-    String timestamp =
-        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss"));
-    return String.format("%s.%s", timestamp, extension);
   }
 }

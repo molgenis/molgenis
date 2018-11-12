@@ -1,5 +1,7 @@
 package org.molgenis.data.export.exception;
 
+import static org.mockito.Mockito.mock;
+
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -14,7 +16,8 @@ public class EmxExportExceptionTest extends ExceptionMessageTest {
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
-    ExceptionMessageTest.assertExceptionMessageEquals(new EmxExportException(), lang, message);
+    Exception e = mock(Exception.class);
+    ExceptionMessageTest.assertExceptionMessageEquals(new EmxExportException(e), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
