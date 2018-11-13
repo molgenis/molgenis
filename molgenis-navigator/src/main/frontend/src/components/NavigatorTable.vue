@@ -1,4 +1,4 @@
-<template>
+f<template>
   <div class="table-container">
     <b-table
       :items="tableResources"
@@ -14,7 +14,10 @@
           :class="tableResources.length == 0 ? 'invisible' : ''"
           :checked="isAllSelected()"
           @click.native.stop
-          @change="toggleAllSelected"/>
+          @change="toggleAllSelected">
+          <!-- workaround for https://github.com/twbs/bootstrap/issues/26221 -->
+          <span class="text-hide">placeholder</span>
+        </b-form-checkbox>
       </template>
       <template
         slot="selected"
@@ -22,7 +25,10 @@
         <b-form-checkbox
           :checked="isSelected(row.item)"
           @click.native.stop
-          @change="toggleSelected(row.item, $event)"/>
+          @change="toggleSelected(row.item, $event)">
+          <!-- workaround for https://github.com/twbs/bootstrap/issues/26221 -->
+          <span class="text-hide">placeholder</span>
+        </b-form-checkbox>
       </template>
       <template
         slot="label"
@@ -60,7 +66,7 @@ export default {
     return {
       fields: {
         selected: {
-          'class': 'compact',
+          'class': 'compact align-middle',
           tdClass: this.cellClass
         },
         label: {
