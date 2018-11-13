@@ -12,6 +12,7 @@ import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.navigator.model.Resource;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,4 @@
-package org.molgenis.navigator;
+package org.molgenis.navigator.model;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.Nullable;

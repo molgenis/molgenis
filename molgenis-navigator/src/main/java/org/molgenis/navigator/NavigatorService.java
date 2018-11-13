@@ -4,6 +4,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotEmpty;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.navigator.model.Resource;
+import org.molgenis.navigator.model.ResourceIdentifier;
 
 public interface NavigatorService {
   /**

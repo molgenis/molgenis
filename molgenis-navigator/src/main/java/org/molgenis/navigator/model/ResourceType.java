@@ -1,4 +1,4 @@
-package org.molgenis.navigator;
+package org.molgenis.navigator.model;
 
 public enum ResourceType {
   PACKAGE,

@@ -1,6 +1,7 @@
 package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.navigator.model.Resource;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
