@@ -6,7 +6,6 @@ import static org.testng.Assert.*;
 import java.util.List;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.navigator.model.ResourceType;
-import org.molgenis.navigator.model.ResourcesUtil;
 import org.testng.annotations.Test;
 
 public class ResourcesUtilTest {
