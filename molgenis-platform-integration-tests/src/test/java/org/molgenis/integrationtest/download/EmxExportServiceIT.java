@@ -68,8 +68,9 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     dataService.add(
         entityType2.getId(), entityTestHarness.createTestRefEntities(entityType2, 2).stream());
     File actual = File.createTempFile("test", ".xlsx");
-    emxDownloadService.download(
-        newArrayList(entityType1.getId()), newArrayList(it.getId()), actual);
+    // when using the "in memory" it package, created above, the "getChildern" returns null.
+    Package actualIt = dataService.getMeta().getPackage("it").get();
+    emxDownloadService.download(newArrayList(entityType1), newArrayList(actualIt), actual);
     Workbook workbook = new XSSFWorkbook(new FileInputStream(actual));
     Workbook expected =
         new XSSFWorkbook(

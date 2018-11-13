@@ -19,8 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
-import org.molgenis.data.UnknownEntityTypeException;
-import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.excel.simple.ExcelWriter;
 import org.molgenis.data.excel.simple.ExcelWriterFactory;
 import org.molgenis.data.export.exception.EmptyDownloadRequestException;
@@ -50,21 +48,21 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   @Override
   @Transactional(readOnly = true)
-  public void download(List<String> entityTypeIds, List<String> packageIds, File downloadFile) {
-    download(entityTypeIds, packageIds, downloadFile, Optional.empty());
+  public void download(List<EntityType> entityTypes, List<Package> packages, File downloadFile) {
+    download(entityTypes, packages, downloadFile, Optional.empty());
   }
 
   @Override
   @Transactional(readOnly = true)
   public void download(
-      List<String> entityTypeIds,
-      List<String> packageIds,
+      List<EntityType> entityTypes,
+      List<Package> packages,
       File downloadFile,
       Optional<Progress> progress) {
-    if (!(entityTypeIds.isEmpty() && packageIds.isEmpty())) {
+    if (!(entityTypes.isEmpty() && packages.isEmpty())) {
 
       try (ExcelWriter writer = ExcelWriterFactory.create(downloadFile)) {
-        downloadEmx(entityTypeIds, packageIds, writer, progress);
+        downloadEmx(entityTypes, packages, writer, progress);
       } catch (IOException e) {
         throw new EmxExportException(e);
       }
@@ -74,30 +72,30 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void downloadEmx(
-      List<String> entityTypeIds,
-      List<String> packageIds,
+      List<EntityType> entityTypes,
+      List<Package> packages,
       ExcelWriter writer,
       Optional<Progress> progress)
       throws IOException {
-    Set<Package> packages = new LinkedHashSet<>();
-    Set<EntityType> entityTypes = new LinkedHashSet<>();
-    resolveMetadata(entityTypeIds, packageIds, packages, entityTypes);
+    Set<Package> packageSet = new LinkedHashSet<>();
+    Set<EntityType> entityTypeSet = new LinkedHashSet<>();
+    resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
 
     if (progress.isPresent()) {
       // Progress per entity plus package sheet + finished message
       progress.get().setProgressMax(entityTypes.size() + 2);
     }
-    writePackageSheets(packages, writer, progress);
-    writeEntityTypeSheets(entityTypes, writer, progress);
+    writePackageSheets(packageSet, writer, progress);
+    writeEntityTypeSheets(entityTypeSet, writer, progress);
   }
 
   protected void resolveMetadata(
-      List<String> entityTypeIds,
-      List<String> packageIds,
-      Set<Package> packages,
-      Set<EntityType> entityTypes) {
-    resolvePackageIds(packageIds, packages, entityTypes);
-    resolveEntityTypeIds(entityTypeIds, entityTypes);
+      List<EntityType> entityTypes,
+      List<Package> packages,
+      Set<Package> packageSet,
+      Set<EntityType> entityTypeSet) {
+    resolvePackages(packages, packageSet, entityTypeSet);
+    resolveEntityTypes(entityTypes, entityTypeSet);
   }
 
   private void writeEntityTypeSheets(
@@ -124,29 +122,17 @@ public class EmxExportServiceImpl implements EmxExportService {
     }
   }
 
-  private void resolvePackageIds(
-      List<String> packageIds, Set<Package> packages, Set<EntityType> entityTypes) {
-    for (String id : packageIds) {
-      Optional<Package> optional = dataService.getMeta().getPackage(id);
-      if (optional.isPresent()) {
-        Package pack = optional.get();
-        resolvePackage(pack, packages, entityTypes);
-      } else {
-        throw new UnknownPackageException(id);
-      }
+  private void resolvePackages(
+      List<Package> packages, Set<Package> packageSet, Set<EntityType> entityTypes) {
+    for (Package pack : packages) {
+      resolvePackage(pack, packageSet, entityTypes);
     }
   }
 
-  private void resolveEntityTypeIds(List<String> entityTypeIds, Set<EntityType> entityTypes) {
-    for (String entityTypeName : entityTypeIds) {
-      Optional<EntityType> entityTypeOptional = dataService.getMeta().getEntityType(entityTypeName);
-      if (entityTypeOptional.isPresent()) {
-        EntityType entityType = entityTypeOptional.get();
-        checkIfEmxEntityType(entityType);
-        entityTypes.add(entityType);
-      } else {
-        throw new UnknownEntityTypeException(entityTypeName);
-      }
+  private void resolveEntityTypes(List<EntityType> entityTypes, Set<EntityType> entityTypeSet) {
+    for (EntityType entityType : entityTypes) {
+      checkIfEmxEntityType(entityType);
+      entityTypeSet.add(entityType);
     }
   }
 

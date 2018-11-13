@@ -16,8 +16,14 @@ import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.model.ResourceIdentifier;
+import org.molgenis.navigator.model.ResourceType;
+import org.molgenis.navigator.model.util.ResourceCollection;
+import org.molgenis.navigator.model.util.ResourceCollector;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -34,6 +40,8 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
   @Mock FileMetaFactory fileMetaFactory;
 
   @Mock DataService dataService;
+
+  @Mock ResourceCollector resourceCollector;
 
   @Mock MessageSource messageSource;
 
@@ -57,12 +65,23 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     File file = mock(File.class);
     when(file.getName()).thenReturn("test");
     when(fileStore.getFile(anyString())).thenReturn(file);
+
+    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, "it");
+    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "test_entity");
+    ResourceCollection collection = mock(ResourceCollection.class);
+    when(resourceCollector.get(newArrayList(id1, id2))).thenReturn(collection);
+    EntityType entityType1 = mock(EntityType.class);
+    Package package1 = mock(Package.class);
+    when(collection.getEntityTypes()).thenReturn(newArrayList(entityType1));
+    when(collection.getPackages()).thenReturn(newArrayList(package1));
+
     DownloadService downloadJob =
-        new DownloadService(downloadService, fileStore, fileMetaFactory, dataService);
+        new DownloadService(
+            downloadService, fileStore, fileMetaFactory, dataService, resourceCollector);
     String json = "[{'id':'it','type':'PACKAGE'},{'id':'test_entity','type':'ENTITY_TYPE'}]";
     downloadJob.download(json, "test", progress);
     verify(downloadService)
-        .download(newArrayList("test_entity"), newArrayList("it"), file, Optional.of(progress));
+        .download(newArrayList(entityType1), newArrayList(package1), file, Optional.of(progress));
     verify(progress).increment(1);
     verify(progress).status("done");
   }

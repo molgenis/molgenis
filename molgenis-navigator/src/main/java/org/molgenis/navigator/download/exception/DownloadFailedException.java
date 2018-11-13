@@ -12,6 +12,11 @@ public class DownloadFailedException extends CodedRuntimeException {
   }
 
   @Override
+  public String getMessage() {
+    return String.format("cause:%s", cause.getMessage());
+  }
+
+  @Override
   protected Object[] getLocalizedMessageArguments() {
     return new Object[] {cause.getLocalizedMessage()};
   }

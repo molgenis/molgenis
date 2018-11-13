@@ -4,11 +4,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
@@ -45,17 +43,10 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     doReturn(newArrayList(entityType2)).when(pack2).getEntityTypes();
     doReturn(newArrayList(entityType1)).when(pack3).getEntityTypes();
 
-    doReturn(Optional.of(pack1)).when(metaDataService).getPackage("p1");
-    doReturn(Optional.of(pack2)).when(metaDataService).getPackage("p2");
-    doReturn(Optional.of(entityType1)).when(metaDataService).getEntityType("e1");
-    doReturn(Optional.of(entityType3)).when(metaDataService).getEntityType("e3");
-
-    when(dataService.getMeta()).thenReturn(metaDataService);
-
     Set<Package> packages = new HashSet<>();
     Set<EntityType> entityTypes = new HashSet<>();
     service.resolveMetadata(
-        newArrayList("e1", "e3"), newArrayList("p1", "p2"), packages, entityTypes);
+        newArrayList(entityType1, entityType3), newArrayList(pack1, pack2), packages, entityTypes);
 
     Set<Package> expectedPackages = new HashSet<>();
     expectedPackages.addAll(newArrayList(pack1, pack2, pack3));
