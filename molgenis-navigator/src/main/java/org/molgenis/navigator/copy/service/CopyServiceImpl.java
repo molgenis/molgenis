@@ -3,14 +3,13 @@ package org.molgenis.navigator.copy.service;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.Progress;
-import org.molgenis.navigator.Resource;
-import org.molgenis.navigator.ResourceCollection;
-import org.molgenis.navigator.ResourceCollector;
+import org.molgenis.navigator.model.ResourceIdentifier;
+import org.molgenis.navigator.model.util.ResourceCollection;
+import org.molgenis.navigator.model.util.ResourceCollector;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,8 @@ public class CopyServiceImpl implements CopyService {
 
   @Override
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public String copy(List<Resource> resources, String targetPackageId, Progress progress) {
+  public String copy(
+      List<ResourceIdentifier> resources, String targetPackageId, Progress progress) {
     ResourceCollection resourceCollection = resourceCollector.get(resources);
 
     Package targetPackage = getPackage(targetPackageId);
@@ -47,7 +47,7 @@ public class CopyServiceImpl implements CopyService {
     return targetPackageId != null
         ? metaDataService
             .getPackage(targetPackageId)
-            .orElseThrow(() -> new UnknownEntityException(PackageMetadata.PACKAGE, targetPackageId))
+            .orElseThrow(() -> new UnknownPackageException(targetPackageId))
         : null;
   }
 }

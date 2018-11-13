@@ -42,8 +42,8 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.jobs.Progress;
-import org.molgenis.navigator.ResourceCollection;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
+import org.molgenis.navigator.model.util.ResourceCollection;
 
 // TODO document
 @SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S3958"}) // TODO REMOVE ME
