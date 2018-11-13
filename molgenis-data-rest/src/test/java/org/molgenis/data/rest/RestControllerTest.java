@@ -773,8 +773,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
                 .content("\"Klaas\"")
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
-    verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME),
-        ArgumentMatchers.<Entity>argThat(x -> "Klaas".equals(x.getString("name"))));
+    verify(dataService)
+        .update(
+            ArgumentMatchers.eq(ENTITY_NAME),
+            ArgumentMatchers.<Entity>argThat(x -> "Klaas".equals(x.getString("name"))));
   }
 
   @Test
@@ -786,8 +788,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
                 .content("null")
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
-    verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME),
-        ArgumentMatchers.<Entity>argThat(x -> x.getString("name") == null));
+    verify(dataService)
+        .update(
+            ArgumentMatchers.eq(ENTITY_NAME),
+            ArgumentMatchers.<Entity>argThat(x -> x.getString("name") == null));
   }
 
   @Test
