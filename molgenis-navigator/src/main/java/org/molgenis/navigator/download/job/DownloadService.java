@@ -17,9 +17,9 @@ import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.download.exception.DownloadFailedException;
-import org.molgenis.navigator.resource.Resource;
-import org.molgenis.navigator.resource.Resource.Type;
-import org.molgenis.navigator.resource.ResourcesUtil;
+import org.molgenis.navigator.model.Resource;
+import org.molgenis.navigator.model.ResourceType;
+import org.molgenis.navigator.model.ResourcesUtil;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -51,10 +51,10 @@ public class DownloadService {
       resources = ResourcesUtil.getResourcesFromJson(resourceJson);
       resources.forEach(
           resource -> {
-            if (resource.getType().equals(Type.ENTITY_TYPE)
-                || resource.getType().equals(Type.ENTITY_TYPE_ABSTRACT)) {
+            if (resource.getType().equals(ResourceType.ENTITY_TYPE)
+                || resource.getType().equals(ResourceType.ENTITY_TYPE_ABSTRACT)) {
               entityTypes.add(resource.getId());
-            } else if (resource.getType().equals(Type.PACKAGE)) {
+            } else if (resource.getType().equals(ResourceType.PACKAGE)) {
               packages.add(resource.getId());
             }
           });
