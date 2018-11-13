@@ -13,8 +13,10 @@ import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.download.exception.DownloadFailedException;
 import org.molgenis.navigator.resource.Resource;
 import org.molgenis.navigator.resource.Resource.Type;
 import org.molgenis.navigator.resource.ResourcesUtil;
@@ -41,26 +43,31 @@ public class DownloadService {
   }
 
   public FileMeta download(String resourceJson, String filename, Progress progress) {
+    FileMeta fileMeta;
     List<Resource> resources;
     List<String> entityTypes = newArrayList();
     List<String> packages = newArrayList();
-    resources = ResourcesUtil.getResourcesFromJson(resourceJson);
-    resources.forEach(
-        resource -> {
-          if (resource.getType().equals(Type.ENTITY_TYPE)
-              || resource.getType().equals(Type.ENTITY_TYPE_ABSTRACT)) {
-            entityTypes.add(resource.getId());
-          } else if (resource.getType().equals(Type.PACKAGE)) {
-            packages.add(resource.getId());
-          }
-        });
+    try {
+      resources = ResourcesUtil.getResourcesFromJson(resourceJson);
+      resources.forEach(
+          resource -> {
+            if (resource.getType().equals(Type.ENTITY_TYPE)
+                || resource.getType().equals(Type.ENTITY_TYPE_ABSTRACT)) {
+              entityTypes.add(resource.getId());
+            } else if (resource.getType().equals(Type.PACKAGE)) {
+              packages.add(resource.getId());
+            }
+          });
 
-    File emxFile = fileStore.getFile(filename);
-    FileMeta fileMeta = createFileMeta(emxFile);
-    dataService.add(FileMetaMetaData.FILE_META, fileMeta);
-    emxExportService.download(entityTypes, packages, emxFile, Optional.of(progress));
-    progress.increment(1);
-    progress.status(getMessage("progress-download-success", "Finished preparing download."));
+      File emxFile = fileStore.getFile(filename);
+      fileMeta = createFileMeta(emxFile);
+      dataService.add(FileMetaMetaData.FILE_META, fileMeta);
+      emxExportService.download(entityTypes, packages, emxFile, Optional.of(progress));
+      progress.increment(1);
+      progress.status(getMessage("progress-download-success", "Finished preparing download."));
+    } catch (CodedRuntimeException exception) {
+      throw new DownloadFailedException(exception);
+    }
     return fileMeta;
   }
 
