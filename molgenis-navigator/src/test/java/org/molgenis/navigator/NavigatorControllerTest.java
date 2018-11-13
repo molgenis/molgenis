@@ -21,9 +21,9 @@ import java.util.Locale;
 import org.mockito.Mock;
 import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.model.JobExecution;
-import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -137,18 +137,17 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
     List<ResourceIdentifier> resources = getMockResourceIdentifiers();
 
     JobExecution jobExecution = mock(JobExecution.class);
-    when(jobExecution.getIdentifier()).thenReturn("myJobExecutionId");
-    when(jobExecution.getStatus()).thenReturn(Status.RUNNING);
+    EntityType entityType = mock(EntityType.class);
+    when(jobExecution.getEntityType()).thenReturn(entityType);
+
     when(navigatorService.copyResources(resources, targetFolderId)).thenReturn(jobExecution);
 
     String json =
         "{\"resources\":[{\"type\":\"PACKAGE\",\"id\":\"myPackageId\",\"label\":\"label\",\"description\":\"description\"}],\"targetFolderId\":\"myFolderId\"}";
-    String expectedContent = "{\"jobId\":\"myJobExecutionId\",\"jobStatus\":\"RUNNING\"}";
     mockMvc
         .perform(
             post(NavigatorController.URI + "/copy").content(json).contentType(APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(expectedContent));
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -156,18 +155,17 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
     List<ResourceIdentifier> resources = getMockResourceIdentifiers();
 
     JobExecution jobExecution = mock(JobExecution.class);
-    when(jobExecution.getIdentifier()).thenReturn("myJobExecutionId");
-    when(jobExecution.getStatus()).thenReturn(Status.RUNNING);
+    EntityType entityType = mock(EntityType.class);
+    when(jobExecution.getEntityType()).thenReturn(entityType);
+
     when(navigatorService.downloadResources(resources)).thenReturn(jobExecution);
 
     String json =
         "{\"resources\":[{\"type\":\"PACKAGE\",\"id\":\"myPackageId\",\"label\":\"label\",\"description\":\"description\"}],\"targetFolderId\":\"myFolderId\"}";
-    String expectedContent = "{\"jobId\":\"myJobExecutionId\",\"jobStatus\":\"RUNNING\"}";
     mockMvc
         .perform(
             post(NavigatorController.URI + "/download").content(json).contentType(APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(expectedContent));
+        .andExpect(status().isOk());
   }
 
   @Test
