@@ -40,9 +40,9 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.ResourceCollection;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
 
 // TODO document
@@ -336,10 +336,10 @@ public class ResourceCopier {
      * typed FileMeta Entity is requested.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {
       Entity entity = delegate().getEntity(attributeName);
       if (clazz.equals(FileMeta.class)) {
-        //noinspection unchecked
         return entity != null ? (E) new FileMeta(new PretendingEntity(entity)) : null;
       } else {
         throw new UnsupportedOperationException("Can't return typed pretending entities");
@@ -358,10 +358,10 @@ public class ResourceCopier {
      * typed FileMeta Entity is requested.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) {
       Iterable<E> entities = delegate().getEntities(attributeName, clazz);
       if (clazz.equals(FileMeta.class)) {
-        //noinspection unchecked
         return stream(entities)
             .filter(Objects::nonNull)
             .map(PretendingEntity::new)

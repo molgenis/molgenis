@@ -1,4 +1,4 @@
-package org.molgenis.data.resource;
+package org.molgenis.navigator;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -21,17 +21,15 @@ import org.springframework.stereotype.Component;
 public class ResourceCollector {
 
   private final MetaDataService metaDataService;
-  private final PackageMetadata packageMetadata;
 
-  public ResourceCollector(MetaDataService metaDataService, PackageMetadata packageMetadata) {
+  public ResourceCollector(MetaDataService metaDataService) {
     this.metaDataService = requireNonNull(metaDataService);
-    this.packageMetadata = packageMetadata;
   }
 
-  public Package getPackage(String id) {
+  private Package getPackage(String id) {
     return metaDataService
         .getPackage(id)
-        .orElseThrow(() -> new UnknownEntityException(packageMetadata, id));
+        .orElseThrow(() -> new UnknownEntityException(PackageMetadata.PACKAGE, id));
   }
 
   private EntityType getEntityType(String id) {
@@ -49,6 +47,7 @@ public class ResourceCollector {
               packages.add(getPackage(resource.getId()));
               break;
             case ENTITY_TYPE:
+            case ENTITY_TYPE_ABSTRACT:
               entityTypes.add(getEntityType(resource.getId()));
               break;
             default:

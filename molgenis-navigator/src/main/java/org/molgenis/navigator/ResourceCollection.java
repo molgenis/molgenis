@@ -1,4 +1,4 @@
-package org.molgenis.data.resource;
+package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;

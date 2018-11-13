@@ -6,9 +6,10 @@ import static java.util.Objects.requireNonNull;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import java.util.List;
-import org.molgenis.data.resource.Resource;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
+import org.molgenis.navigator.Resource;
+import org.molgenis.navigator.ResourceType;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -44,8 +45,10 @@ public class CopyJobConfig {
     List<LinkedTreeMap<String, String>> jsonList = gson.fromJson(resourceJson, List.class);
     for (LinkedTreeMap<String, String> jsonResource : jsonList) {
       resources.add(
-          Resource.of(
-              Resource.ResourceType.valueOf(jsonResource.get("type")), jsonResource.get("id")));
+          Resource.builder()
+              .setType(ResourceType.valueOf(jsonResource.get("type")))
+              .setId(jsonResource.get("id"))
+              .build());
     }
     return resources;
   }

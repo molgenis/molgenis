@@ -16,7 +16,7 @@ public class RecursiveCopyException extends CodedRuntimeException {
 
   @Override
   public String getMessage() {
-    return "";
+    return "The target package is a subpackage of the package being copied";
   }
 
   @Override

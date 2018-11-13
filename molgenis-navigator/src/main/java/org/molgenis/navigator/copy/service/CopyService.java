@@ -1,8 +1,8 @@
 package org.molgenis.navigator.copy.service;
 
 import java.util.List;
-import org.molgenis.data.resource.Resource;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.Resource;
 
 public interface CopyService {
 
