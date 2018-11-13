@@ -6,7 +6,9 @@ import java.util.List;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.copy.exception.CopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.util.ResourceCollection;
 import org.molgenis.navigator.model.util.ResourceCollector;
@@ -39,7 +41,12 @@ public class CopyServiceImpl implements CopyService {
 
     Package targetPackage = getPackage(targetPackageId);
 
-    resourceCopierFactory.newInstance(resourceCollection, targetPackage, progress).copy();
+    try {
+      resourceCopierFactory.newInstance(resourceCollection, targetPackage, progress).copy();
+    } catch (CodedRuntimeException exception) {
+      throw new CopyFailedException(exception);
+    }
+
     return "true";
   }
 
