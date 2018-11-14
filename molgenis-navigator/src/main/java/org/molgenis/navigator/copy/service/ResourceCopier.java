@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -53,6 +52,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 public class ResourceCopier {
 
   private static final String POSTFIX = " (Copy)";
+  private static final int BATCH_SIZE = 1000;
 
   private final List<Package> packages;
   private final List<EntityType> entityTypes;
@@ -192,9 +192,11 @@ public class ResourceCopier {
   private EntityType copyEntities(EntityType copy) {
     String originalEntityTypeId = copiedIdsMap.get(copy.getId());
     if (!copy.isAbstract()) {
-      Stream<Entity> entities = dataService.findAll(originalEntityTypeId);
-      entities = entities.map(PretendingEntity::new);
-      dataService.add(copy.getId(), entities);
+      dataService
+          .getRepository(originalEntityTypeId)
+          .forEachBatched(
+              batch -> dataService.add(copy.getId(), batch.stream().map(PretendingEntity::new)),
+              BATCH_SIZE);
     }
     return copy;
   }
@@ -203,7 +205,6 @@ public class ResourceCopier {
     validateNotContainsItself(pack);
     assignUniqueLabel(pack);
     copyPackageRecursive(pack, targetPackage);
-    progress.increment(1);
   }
 
   private void copyPackageRecursive(Package pack, Package parent) {
@@ -211,6 +212,7 @@ public class ResourceCopier {
     assignNewId(pack);
     pack.setParent(parent);
     dataService.add(PACKAGE, pack);
+    progress.increment(1);
     pack.getChildren().forEach(child -> copyPackageRecursive(getPackage(child.getId()), pack));
   }
 
