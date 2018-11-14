@@ -117,15 +117,11 @@ const actions = {
 
     const updatedAttribute = Object.keys(formData).find(key => formData[key] !== state.formData[key]) || ''
     commit('SET_FORM_DATA', formData)
-    // Set state to open allow required fields to be empty on auto-save
-    commit('UPDATE_FORM_STATUS', 'OPEN')
 
     Vue.nextTick(() => {
       const fieldState = formState[updatedAttribute]
       const updatedValue = formData[updatedAttribute]
-      if (fieldState && fieldState.$valid) {
-        // Set state to submitted to have the form validate required fields
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
+      if (fieldState && Object.keys(fieldState.$error).every((errorKey) => errorKey === 'required')) {
         const options = {
           body: JSON.stringify(updatedValue),
           method: 'PUT'
@@ -139,8 +135,6 @@ const actions = {
         }).then(() => {
           commit('DECREMENT_SAVING_QUEUE')
         })
-      } else {
-        commit('UPDATE_FORM_STATUS', 'SUBMITTED')
       }
     })
   },
