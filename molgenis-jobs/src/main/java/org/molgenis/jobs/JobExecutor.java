@@ -21,7 +21,6 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /** Executes {@link ScheduledJob}s. */
@@ -37,7 +36,7 @@ public class JobExecutor {
   private final MailSender mailSender;
   private final ExecutorService executorService;
   private final JobFactoryRegistry jobFactoryRegistry;
-  private final JobExecutorTokenService jobExecutorTokenService;
+  private final JobExecutionContextFactory jobExecutionContextFactory;
   private final Gson gson;
 
   public JobExecutor(
@@ -47,14 +46,14 @@ public class JobExecutor {
       MailSender mailSender,
       ExecutorService executorService,
       JobFactoryRegistry jobFactoryRegistry,
-      JobExecutorTokenService jobExecutorTokenService) {
+      JobExecutionContextFactory jobExecutionContextFactory) {
     this.dataService = requireNonNull(dataService);
     this.entityManager = requireNonNull(entityManager);
     this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
     this.mailSender = requireNonNull(mailSender);
     this.executorService = requireNonNull(executorService);
     this.jobFactoryRegistry = jobFactoryRegistry;
-    this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
+    this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
     this.gson = new Gson();
   }
 
@@ -130,10 +129,11 @@ public class JobExecutor {
     }
   }
 
-  private void runJob(JobExecution jobExecution, Job<?> molgenisJob) {
-    Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
+  private void runJob(JobExecution jobExecution, Job<?> job) {
+    JobExecutionContext jobExecutionContext =
+        jobExecutionContextFactory.createJobExecutionContext(jobExecution);
     Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
-    jobExecutionTemplate.call(molgenisJob, progress, authentication);
+    jobExecutionTemplate.call(job, progress, jobExecutionContext);
   }
 
   private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs) {

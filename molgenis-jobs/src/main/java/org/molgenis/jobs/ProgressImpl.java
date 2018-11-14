@@ -42,7 +42,7 @@ public class ProgressImpl implements Progress {
 
   @Override
   public void start() {
-    JobExecutionContext.set(jobExecution);
+    JobExecutionHolder.set(jobExecution);
     JOB_EXECUTION_LOG.info("Execution started.");
     jobExecution.setStartDate(Instant.now());
     jobExecution.setStatus(RUNNING);
@@ -90,12 +90,12 @@ public class ProgressImpl implements Progress {
         jobExecution.getType() + " job succeeded.",
         jobExecution.getLog());
     update();
-    JobExecutionContext.unset();
+    JobExecutionHolder.unset();
   }
 
   @Override
   public void failed(Exception ex) {
-    JOB_EXECUTION_LOG.error("Failed. " + ex.getMessage(), ex);
+    JOB_EXECUTION_LOG.error("Failed. " + ex.getLocalizedMessage(), ex);
     jobExecution.setEndDate(Instant.now());
     jobExecution.setStatus(FAILED);
     jobExecution.setProgressMessage(ex.getMessage());
@@ -104,7 +104,7 @@ public class ProgressImpl implements Progress {
         jobExecution.getType() + " job failed.",
         jobExecution.getLog());
     update();
-    JobExecutionContext.unset();
+    JobExecutionHolder.unset();
   }
 
   private void sendEmail(String[] to, String subject, String text) {
@@ -133,7 +133,7 @@ public class ProgressImpl implements Progress {
         jobExecution.getType() + " job failed.",
         jobExecution.getLog());
     update();
-    JobExecutionContext.unset();
+    JobExecutionHolder.unset();
   }
 
   @Override
