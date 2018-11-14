@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -40,10 +41,12 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
-import org.molgenis.data.resource.ResourceCollection;
 import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
+import org.molgenis.navigator.model.util.ResourceCollection;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 // TODO document
 @SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S3958"}) // TODO REMOVE ME
@@ -93,19 +96,25 @@ public class ResourceCopier {
 
   public void copy() {
     progress.setProgressMax(calculateMaxProgress());
-    progress.progress(0, "Starting to copy.");
+    progress.progress(0, getMessage("progress-copy-started"));
 
     if (!packages.isEmpty()) {
-      progress.status("Copying packages.");
+      progress.status(getMessage("progress-copy-packages"));
       packages.forEach(this::copyPackage);
     }
 
     if (!entityTypes.isEmpty() || !entityTypesInPackages.isEmpty()) {
-      progress.status("Copying entity types.");
+      progress.status(getMessage("progress-copy-entity-types"));
       copyEntityTypes();
     }
 
-    progress.status("Finished copying.");
+    progress.status(getMessage("progress-copy-success"));
+  }
+
+  @NotNull
+  private String getMessage(String key) {
+    return MessageSourceHolder.getMessageSource()
+        .getMessage(key, new Object[0], LocaleContextHolder.getLocale());
   }
 
   private void copyEntityTypes() {
@@ -336,10 +345,10 @@ public class ResourceCopier {
      * typed FileMeta Entity is requested.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {
       Entity entity = delegate().getEntity(attributeName);
       if (clazz.equals(FileMeta.class)) {
-        //noinspection unchecked
         return entity != null ? (E) new FileMeta(new PretendingEntity(entity)) : null;
       } else {
         throw new UnsupportedOperationException("Can't return typed pretending entities");
@@ -358,10 +367,10 @@ public class ResourceCopier {
      * typed FileMeta Entity is requested.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) {
       Iterable<E> entities = delegate().getEntities(attributeName, clazz);
       if (clazz.equals(FileMeta.class)) {
-        //noinspection unchecked
         return stream(entities)
             .filter(Objects::nonNull)
             .map(PretendingEntity::new)

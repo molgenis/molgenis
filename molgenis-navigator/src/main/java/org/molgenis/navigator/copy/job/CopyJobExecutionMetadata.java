@@ -22,7 +22,7 @@ public class CopyJobExecutionMetadata extends SystemEntityType {
   public static final String RESOURCES = "resources";
   public static final String TARGET_PACKAGE = "targetPackage";
 
-  public static final String COPY_JOB_TYPE = "Copy";
+  public static final String COPY_JOB_TYPE = "ResourceCopyJob";
 
   private final JobPackage jobPackage;
   private final JobExecutionMetaData jobExecutionMetaData;
