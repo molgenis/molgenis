@@ -110,10 +110,10 @@ function toJob (response: Object): Job {
 function toJobType (response: Object): JobType {
   let type
   switch (response.type) {
-    case 'Copy':
+    case 'ResourceCopyJob':
       type = 'COPY'
       break
-    case 'DownloadJob':
+    case 'ResourceDownloadJob':
       type = 'DOWNLOAD'
       break
     default:

@@ -11,30 +11,25 @@
             :variant="getVariant(job)"
             :dismissible="job.status !== 'RUNNING'"
             show
-            @dismissed.prevent="removeJob(job)">
-            <span v-if="job.status === 'RUNNING'">
-              <font-awesome-icon :icon="['far', 'hourglass']"/>
-              <span class="alert-message">{{ job.progressMessage }}</span>
-              <span v-if="job.progress">{{ job.progress }}/{{ job.progressMax }}</span>
-            </span>
-            <span v-else-if="job.status === 'SUCCESS'">
-              <font-awesome-icon :icon="['far', 'check-circle']"/>
-              <span class="alert-message">{{ job.progressMessage }}
-              </span>
-              <span v-if="job.type === 'DOWNLOAD'">
-                <span>{{ 'progress-download-success-action-pre' | i18n }}</span>
-                <a
-                  :href="job.resultUrl"
-                  download
-                  class="alert-link">{{ progress-download-success-action | i18n }}</a>
-                <span>{{ 'progress-download-success-action-post' | i18n }}</span>
-              </span>
-            </span>
-            <span v-else-if="job.status === 'FAILED'">
-              <font-awesome-icon :icon="['far', 'times-circle']"/>
-              <span class="alert-message">{{ job.progressMessage }}</span>
-              <span v-if="job.progress">{{ job.progress }}/{{ job.progressMax }}</span>
-            </span>
+            @dismissed="removeJob(job)">
+            <div class="row">
+              <div class="col-1">
+                <font-awesome-icon :icon="['far', getIcon(job)]"/>
+              </div>
+              <div class="col-11">
+                <span v-if="job.progressMessage">{{ job.progressMessage }}</span>
+                <span v-if="showProgress(job)">{{ job.progress }}/{{ job.progressMax }}</span>
+                <span v-if="job.type === 'DOWNLOAD' && job.status === 'SUCCESS'">
+                  <br>
+                  <span>{{ 'progress-download-success-action-pre' | i18n }}</span>
+                  <a
+                    :href="job.resultUrl"
+                    download
+                    class="alert-link">{{ 'progress-download-success-action' | i18n }}</a>
+                  <span>{{ 'progress-download-success-action-post' | i18n }}</span>
+                </span>
+              </div>
+            </div>
           </b-alert>
         </div>
       </div>
@@ -69,15 +64,29 @@ export default {
       }
       return variant
     },
+    getIcon: function (job) {
+      let icon
+      switch (job.status) {
+        case 'RUNNING':
+          icon = 'hourglass'
+          break
+        case 'SUCCESS':
+          icon = 'check-circle'
+          break
+        case 'FAILED':
+          icon = 'times-circle'
+          break
+        default:
+          throw new Error('unexpected job status ' + job.status)
+      }
+      return icon
+    },
     removeJob: function (job) {
       this.$store.commit(REMOVE_JOB, job)
+    },
+    showProgress: function (job) {
+      return job.status === 'RUNNING' && job.progress && job.progressMax
     }
   }
 }
 </script>
-
-<style scoped>
-  .alert-message {
-    margin-left: .75rem
-  }
-</style>
