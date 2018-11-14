@@ -40,6 +40,7 @@ import org.molgenis.security.twofactor.service.TwoFactorAuthenticationService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.security.user.UserDetailsService;
+import org.molgenis.web.i18n.HttpLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -77,6 +78,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.servlet.LocaleResolver;
 
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
@@ -418,5 +420,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Bean
   public OidcUserMapper oidcUserMapper() {
     return new OidcUserMapperImpl(dataService, oidcUserMappingFactory, userFactory);
+  }
+
+  @Autowired private HttpLocaleResolver httpLocaleResolver;
+
+  @Bean
+  public LocaleResolver localeResolver() {
+    return httpLocaleResolver;
   }
 }
