@@ -83,6 +83,7 @@ in org.molgenis.data and subpackages from included modules
   "org.molgenis.data.cache",
   "org.molgenis.data.i18n",
   "org.molgenis.i18n",
+  "org.molgenis.web.i18n",
   "org.molgenis.data.postgresql",
   "org.molgenis.data.file.model",
   "org.molgenis.data.security.owned",
