@@ -596,7 +596,7 @@ public class RestController {
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName,
       @PathVariable("id") String untypedId,
-      @RequestBody Object paramValue) {
+      @RequestBody(required = false) Object paramValue) {
     updateAttribute(entityTypeId, attributeName, untypedId, paramValue);
   }
 
@@ -608,7 +608,7 @@ public class RestController {
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName,
       @PathVariable("id") String untypedId,
-      @RequestBody Object paramValue) {
+      @RequestBody(required = false) Object paramValue) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
     if (entityType == null) {
       throw new UnknownEntityTypeException(entityTypeId);
