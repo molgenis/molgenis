@@ -1,8 +1,10 @@
 package org.molgenis.jobs;
 
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,29 +33,37 @@ class JobExecutionTemplate {
       Progress progress,
       Authentication authentication,
       TransactionOperations transactionOperations) {
-    return runWithAuthentication(
-        authentication, () -> tryCallInTransaction(job, progress, transactionOperations));
+    // FIXME determine locale using job username
+    JobExecutionContext jobExecutionContext =
+        JobExecutionContext.builder()
+            .setAuthentication(authentication)
+            .setLocale(LocaleContextHolder.getLocale())
+            .build();
+    return runWithContext(
+        jobExecutionContext, () -> tryCallInTransaction(job, progress, transactionOperations));
   }
 
   /**
    * Executes a job in the calling thread.
    *
+   * @param <T> Job result type
    * @param job the {@link Job} to execute
    * @param progress {@link Progress} to report progress to
-   * @param authentication {@link Authentication} to run the job with
-   * @param <T> Job result type
+   * @param jobExecutionContext {@link Authentication} to run the job with
    * @return the result of the job execution
    * @throws JobExecutionException if job execution throws an exception
    */
-  <T> T call(Job<T> job, Progress progress, Authentication authentication) {
-    return runWithAuthentication(authentication, () -> tryCall(job, progress));
+  <T> T call(Job<T> job, Progress progress, JobExecutionContext jobExecutionContext) {
+    return runWithContext(jobExecutionContext, () -> tryCall(job, progress));
   }
 
-  private <T> T runWithAuthentication(Authentication authentication, Callable<T> callable) {
+  private <T> T runWithContext(JobExecutionContext jobExecutionContext, Callable<T> callable) {
     final SecurityContext originalContext = SecurityContextHolder.getContext();
+    final Locale originalLocale = LocaleContextHolder.getLocale();
     try {
       SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      SecurityContextHolder.getContext().setAuthentication(jobExecutionContext.getAuthentication());
+      LocaleContextHolder.setLocale(jobExecutionContext.getLocale());
       return callable.call();
     } catch (RuntimeException rte) {
       throw rte;
@@ -61,6 +71,7 @@ class JobExecutionTemplate {
       throw new IllegalStateException("Lambda should only throw runtime exception", e);
     } finally {
       SecurityContextHolder.setContext(originalContext);
+      LocaleContextHolder.setLocale(originalLocale);
     }
   }
 

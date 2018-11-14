@@ -3,6 +3,7 @@ package org.molgenis.security.core.utils;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 import java.util.Collection;
+import javax.annotation.Nullable;
 import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,7 +23,7 @@ public class SecurityUtils {
 
   private SecurityUtils() {}
 
-  public static String getCurrentUsername() {
+  public static @Nullable String getCurrentUsername() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null) {
       return null;

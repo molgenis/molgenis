@@ -3,7 +3,7 @@ package org.molgenis.jobs.model;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
-import org.molgenis.jobs.JobExecutionContext;
+import org.molgenis.jobs.JobExecutionHolder;
 
 /** Appender that appends to the log attribute of a {@link JobExecution} entity. */
 public class JobExecutionLogAppender extends AppenderBase<ILoggingEvent> {
@@ -25,7 +25,7 @@ public class JobExecutionLogAppender extends AppenderBase<ILoggingEvent> {
   @Override
   protected void append(ILoggingEvent eventObject) {
     String formattedMessage = layout.doLayout(eventObject);
-    JobExecution jobExecution = JobExecutionContext.get();
+    JobExecution jobExecution = JobExecutionHolder.get();
     jobExecution.appendLog(formattedMessage);
   }
 }
