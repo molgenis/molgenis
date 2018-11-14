@@ -17,7 +17,7 @@ public class DownloadJobExecutionMetaData extends SystemEntityType {
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
-  public static final String DOWNLOAD_JOB_TYPE = "DownloadJob";
+  public static final String DOWNLOAD_JOB_TYPE = "ResourceDownloadJob";
 
   DownloadJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {
     super(SIMPLE_NAME, PACKAGE_JOB);
