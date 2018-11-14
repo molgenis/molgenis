@@ -150,7 +150,7 @@ export default {
 <style>
   .table-container {
     width: 100%;
-    height: 75vh;
+    height: 70vh; /* no page scrollbar when using default header and footer */
     overflow-y: auto;
   }
 

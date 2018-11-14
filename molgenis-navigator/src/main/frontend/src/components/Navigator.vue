@@ -68,6 +68,7 @@ export default {
   .job-alerts {
     left: 1rem;
     right: 1rem;
+    bottom: 60px; /* default footer height */
   }
 
   @media (min-width: 1200px) {

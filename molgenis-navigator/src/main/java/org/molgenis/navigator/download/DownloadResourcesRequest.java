@@ -2,7 +2,7 @@ package org.molgenis.navigator.download;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
-import org.molgenis.navigator.resource.Resource;
+import org.molgenis.navigator.model.Resource;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
