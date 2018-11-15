@@ -1,4 +1,4 @@
-package org.molgenis.navigator.model.util;
+package org.molgenis.navigator.util;
 
 import static com.google.common.collect.Lists.newArrayList;
 
