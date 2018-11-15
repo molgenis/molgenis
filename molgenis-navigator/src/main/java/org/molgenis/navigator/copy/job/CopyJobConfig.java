@@ -7,7 +7,7 @@ import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.model.util.ResourceIdentifierUtil;
+import org.molgenis.navigator.util.ResourceIdentifierUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

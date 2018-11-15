@@ -44,7 +44,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
-import org.molgenis.navigator.model.util.ResourceCollection;
+import org.molgenis.navigator.util.ResourceCollection;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 // TODO document

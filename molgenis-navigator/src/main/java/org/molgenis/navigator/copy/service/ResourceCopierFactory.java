@@ -9,7 +9,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.jobs.Progress;
-import org.molgenis.navigator.model.util.ResourceCollection;
+import org.molgenis.navigator.util.ResourceCollection;
 import org.springframework.stereotype.Component;
 
 @Component
