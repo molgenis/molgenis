@@ -1,7 +1,7 @@
-package org.molgenis.navigator.model.util;
+package org.molgenis.navigator.util;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 import org.molgenis.navigator.model.ResourceIdentifier;

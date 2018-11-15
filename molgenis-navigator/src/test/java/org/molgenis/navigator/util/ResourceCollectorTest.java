@@ -1,4 +1,4 @@
-package org.molgenis.navigator.model.util;
+package org.molgenis.navigator.util;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
