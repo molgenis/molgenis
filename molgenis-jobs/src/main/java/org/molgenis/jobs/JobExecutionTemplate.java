@@ -8,40 +8,10 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.support.TransactionOperations;
 
 /** Template to execute jobs. */
 class JobExecutionTemplate {
   private static final Logger LOG = LoggerFactory.getLogger(JobExecutionTemplate.class);
-
-  /**
-   * Executes a job in the calling thread within a transaction.
-   *
-   * @param job the {@link Job} to execute.
-   * @param progress {@link Progress} to report progress to
-   * @param authentication {@link Authentication} to run the job with
-   * @param transactionOperations TransactionOperations to use for a transactional call
-   * @param <T> Job result type
-   * @return the result of the job execution
-   * @throws JobExecutionException if job execution throws an exception
-   * @deprecated Create a service bean with a @Transactional annotation instead
-   */
-  @Deprecated
-  <T> T call(
-      Job<T> job,
-      Progress progress,
-      Authentication authentication,
-      TransactionOperations transactionOperations) {
-    // FIXME determine locale using job username
-    JobExecutionContext jobExecutionContext =
-        JobExecutionContext.builder()
-            .setAuthentication(authentication)
-            .setLocale(LocaleContextHolder.getLocale())
-            .build();
-    return runWithContext(
-        jobExecutionContext, () -> tryCallInTransaction(job, progress, transactionOperations));
-  }
 
   /**
    * Executes a job in the calling thread.
@@ -72,17 +42,6 @@ class JobExecutionTemplate {
     } finally {
       SecurityContextHolder.setContext(originalContext);
       LocaleContextHolder.setLocale(originalLocale);
-    }
-  }
-
-  private <T> T tryCallInTransaction(
-      Job<T> job, Progress progress, TransactionOperations transactionOperations) {
-    try {
-      return transactionOperations.execute(status -> tryCall(job, progress));
-    } catch (TransactionException te) {
-      LOG.error("Transaction error while running job", te);
-      progress.failed(te);
-      throw te;
     }
   }
 
