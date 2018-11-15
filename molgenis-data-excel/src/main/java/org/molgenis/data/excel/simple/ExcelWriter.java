@@ -2,7 +2,6 @@ package org.molgenis.data.excel.simple;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,15 +72,14 @@ public class ExcelWriter implements AutoCloseable {
         row -> {
           internalWriteRow(row, sheet, sheet.getLastRowNum() + 1);
         });
-
   }
 
   public void close() throws IOException {
-    try{
+    try {
       workbook.write(Files.newOutputStream(target));
-    }catch (IOException e){
+    } catch (IOException e) {
       throw e;
-    }finally{
+    } finally {
       workbook.close();
     }
   }

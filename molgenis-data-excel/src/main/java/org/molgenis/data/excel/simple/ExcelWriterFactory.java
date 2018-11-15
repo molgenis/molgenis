@@ -1,6 +1,5 @@
 package org.molgenis.data.excel.simple;
 
-import java.io.File;
 import java.nio.file.Path;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
