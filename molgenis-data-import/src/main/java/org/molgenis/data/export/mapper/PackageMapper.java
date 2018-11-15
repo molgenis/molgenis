@@ -1,6 +1,7 @@
 package org.molgenis.data.export.mapper;
 
 import static com.google.common.collect.Maps.newLinkedHashMap;
+import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_DESCRIPTION;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_LABEL;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_NAME;
@@ -8,6 +9,7 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_PAREN
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_TAGS;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,12 +39,9 @@ public class PackageMapper {
     for (Entry<String, String> entry : PACKAGE_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_PACKAGE_TAGS:
-          row.add(
-              StringUtils.join(
-                  StreamSupport.stream(pack.getTags().spliterator(), false)
+          row.add( Streams.stream(pack.getTags())
                       .map(Tag::getId)
-                      .collect(Collectors.toList()),
-                  ","));
+                      .collect( joining( "," )));
           break;
         case EMX_PACKAGE_PARENT:
           Package parent = pack.getParent();

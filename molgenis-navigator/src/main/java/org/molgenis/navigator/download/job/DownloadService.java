@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DownloadService {
-
   private final EmxExportService emxExportService;
   private final FileStore fileStore;
   private final FileMetaFactory fileMetaFactory;
@@ -51,11 +50,11 @@ public class DownloadService {
       File emxFile = fileStore.getFile(filename);
       fileMeta = createFileMeta(emxFile);
       dataService.add(FileMetaMetaData.FILE_META, fileMeta);
-      emxExportService.download(
+      emxExportService.export(
           resourceCollection.getEntityTypes(),
           resourceCollection.getPackages(),
-          emxFile,
-          Optional.of(progress));
+          emxFile.toPath(),
+          progress);
       progress.increment(1);
       progress.status(getMessage("progress-download-success", "Finished preparing download."));
     } catch (CodedRuntimeException exception) {
