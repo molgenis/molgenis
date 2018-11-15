@@ -3,6 +3,7 @@ package org.molgenis.jobs;
 import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.Callable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -25,6 +26,12 @@ public abstract class NontransactionalJob<T> implements Callable<T>, Job<T> {
 
   @Override
   public T call() {
-    return jobExecutionTemplate.call(this, progress, authentication);
+    // FIXME determine locale using job username
+    JobExecutionContext jobExecutionContext =
+        JobExecutionContext.builder()
+            .setAuthentication(authentication)
+            .setLocale(LocaleContextHolder.getLocale())
+            .build();
+    return jobExecutionTemplate.call(this, progress, jobExecutionContext);
   }
 }

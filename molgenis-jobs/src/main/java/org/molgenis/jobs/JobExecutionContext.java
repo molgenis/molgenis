@@ -1,22 +1,32 @@
 package org.molgenis.jobs;
 
-import org.molgenis.jobs.model.JobExecution;
+import com.google.auto.value.AutoValue;
+import java.util.Locale;
+import org.springframework.security.core.Authentication;
 
-/** Keeps track of the currently executing {@link JobExecution}. */
-public class JobExecutionContext {
-  private JobExecutionContext() {}
+@AutoValue
+@SuppressWarnings(
+    "squid:S1610") // Abstract classes without fields should be converted to interfaces
+abstract class JobExecutionContext {
+  abstract Authentication getAuthentication();
 
-  public static final ThreadLocal<JobExecution> jobContextHolder = new ThreadLocal<>();
+  abstract Locale getLocale();
 
-  public static void set(JobExecution jobExecution) {
-    jobContextHolder.set(jobExecution);
+  static JobExecutionContext create(Authentication newAuthentication, Locale newLocale) {
+    return builder().setAuthentication(newAuthentication).setLocale(newLocale).build();
   }
 
-  public static void unset() {
-    jobContextHolder.remove();
+  static Builder builder() {
+    return new AutoValue_JobExecutionContext.Builder();
   }
 
-  public static JobExecution get() {
-    return jobContextHolder.get();
+  @AutoValue.Builder
+  abstract static class Builder {
+
+    abstract Builder setAuthentication(Authentication newAuthentication);
+
+    abstract Builder setLocale(Locale newLocale);
+
+    abstract JobExecutionContext build();
   }
 }
