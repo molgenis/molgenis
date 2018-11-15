@@ -5,7 +5,7 @@ import static org.molgenis.data.security.PackagePermission.ADD_PACKAGE;
 import static org.molgenis.data.security.PackagePermission.VIEW;
 
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.util.MetaUtils;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 
 public class PackagePermissionUtils {
@@ -28,7 +28,7 @@ public class PackagePermissionUtils {
       UserPermissionEvaluator userPermissionEvaluator,
       PackagePermission packagePermission) {
     PackageIdentity packageIdentity = new PackageIdentity(aPackage);
-    return !MetaUtils.isSystemPackage(aPackage)
+    return !PackageUtils.isSystemPackage(aPackage)
         && (userPermissionEvaluator.hasPermission(packageIdentity, ADD_ENTITY_TYPE)
             || userPermissionEvaluator.hasPermission(packageIdentity, packagePermission));
   }

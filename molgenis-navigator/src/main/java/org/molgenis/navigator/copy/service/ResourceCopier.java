@@ -16,19 +16,17 @@ import static org.molgenis.navigator.copy.service.RelationTransformer.transformM
 import static org.molgenis.navigator.copy.service.RelationTransformer.transformPackage;
 import static org.molgenis.navigator.copy.service.RelationTransformer.transformRefEntities;
 
-import com.google.common.collect.TreeTraverser;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
@@ -41,6 +39,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.util.EntityTypeUtils;
+import org.molgenis.data.util.PackageUtils;
+import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
@@ -271,18 +271,14 @@ public class ResourceCopier {
     return newLabel.toString();
   }
 
-  /** Checks that the target location isn't contained in the packages that will be copied. */
   private void validateNotContainsItself(Package pack) {
-    if (pack.equals(targetPackage)) {
+    if (PackageUtils.contains(pack, targetPackage)) {
       throw new RecursiveCopyException();
     }
-    pack.getChildren().forEach(this::validateNotContainsItself);
   }
 
   private Package getPackage(String id) {
-    return metaDataService
-        .getPackage(id)
-        .orElseThrow(() -> new UnknownEntityException(PackageMetadata.PACKAGE, id));
+    return metaDataService.getPackage(id).orElseThrow(() -> new UnknownPackageException(id));
   }
 
   private int calculateMaxProgress() {
@@ -301,13 +297,6 @@ public class ResourceCopier {
                     }));
 
     return maxProgress.get();
-  }
-
-  private static class PackageTreeTraverser extends TreeTraverser<Package> {
-    @Override
-    public Iterable<Package> children(@Nonnull Package packageEntity) {
-      return packageEntity.getChildren();
-    }
   }
 
   /**

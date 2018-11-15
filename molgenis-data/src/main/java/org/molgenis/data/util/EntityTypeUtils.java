@@ -2,7 +2,7 @@ package org.molgenis.data.util;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.util.MetaUtils.isSystemPackage;
+import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;

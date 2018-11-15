@@ -8,37 +8,27 @@
 // import static org.mockito.Mockito.verify;
 // import static org.mockito.Mockito.when;
 //
+// import java.util.List;
 // import org.mockito.Mock;
 // import org.mockito.invocation.InvocationOnMock;
 // import org.mockito.stubbing.Answer;
 // import org.molgenis.data.DataService;
-// import org.molgenis.data.meta.MetaDataService;
+// import org.molgenis.data.meta.EntityTypeDependencyResolver;
+// import org.molgenis.data.meta.model.AttributeFactory;
+// import org.molgenis.data.meta.model.EntityType;
 // import org.molgenis.data.meta.model.Package;
-// import org.molgenis.data.meta.model.PackageMetadata;
 // import org.molgenis.data.populate.IdGenerator;
+// import org.molgenis.jobs.Progress;
+// import org.molgenis.navigator.util.ResourceCollection;
 // import org.molgenis.test.AbstractMockitoTest;
-// import org.testng.annotations.BeforeMethod;
 // import org.testng.annotations.Test;
 //
 // public class ResourceCopierTest extends AbstractMockitoTest {
 //
-//  @Mock MetaDataService metaDataService;
-//  @Mock PackageMetadata packageMetadata;
 //  @Mock IdGenerator idGenerator;
 //  @Mock DataService dataService;
-//
-//  private CopyServiceImpl copyService;
-//
-//  @BeforeMethod
-//  public void beforeMethod() {
-//    copyService =
-//        new ResourceCopier(
-//            metaDataService,
-//            packageMetadata,
-//            idGenerator,
-//            dataService,
-//            mock(ResourceCopierFactory.class));
-//  }
+//  @Mock EntityTypeDependencyResolver entityTypeDependencyResolver;
+//  @Mock AttributeFactory attributeFactory;
 //
 //  @Test
 //  public void testValidateNotContainsItself() {
@@ -47,6 +37,8 @@
 //    Package packageAb = mock(Package.class);
 //    when(packageA.getChildren()).thenReturn(asList(packageAa, packageAb));
 //    Package targetPackage = mock(Package.class);
+//
+//    ResourceCopier copier = createCopier()
 //
 //    copyService.validateNotContainsItself(packageA, targetPackage);
 //  }
@@ -156,5 +148,23 @@
 //                return "id" + count;
 //              }
 //            });
+//  }
+//
+//  private ResourceCopier createCopier(
+//      List<Package> packages,
+//      List<EntityType> entityTypes,
+//      Package targetPackage,
+//      Progress progress) {
+//    ResourceCollection resourceCollection = mock(ResourceCollection.class);
+//    when(resourceCollection.getEntityTypes()).thenReturn(entityTypes);
+//    when(resourceCollection.getPackages()).thenReturn(packages);
+//    return new ResourceCopier(
+//        resourceCollection,
+//        targetPackage,
+//        progress,
+//        dataService,
+//        idGenerator,
+//        entityTypeDependencyResolver,
+//        attributeFactory);
 //  }
 // }

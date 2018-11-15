@@ -47,6 +47,7 @@ public class CopyServiceImpl implements CopyService {
       throw new CopyFailedException(exception);
     }
 
+    // TODO return something sensible
     return "true";
   }
 
