@@ -24,11 +24,11 @@ public class InvalidEmxIdentifierExceptionTest extends ExceptionMessageTest {
     return new Object[][] {
       new Object[] {
         "en",
-        "Entitytype 'autoid' cannot be downloaded, the name does not start with the packagename."
+        "Entity type 'autoid' cannot be downloaded, the identifier does not start with the package name."
       },
       {
         "nl",
-        "Entiteitsoort 'autoid' kan niet worden gedownload, de naam start niet met de packagenaam."
+        "Entiteitsoort 'autoid' kan niet worden gedownload, de identifier start niet met de mapnaam."
       }
     };
   }
