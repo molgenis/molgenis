@@ -1,6 +1,7 @@
 package org.molgenis.data.export.mapper;
 
 import static com.google.common.collect.Maps.newLinkedHashMap;
+import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.AUTO;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_AGGREGATEABLE;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_DATA_TYPE;
@@ -28,6 +29,9 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VI
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +44,7 @@ import org.molgenis.data.meta.model.Tag;
 
 public class AttributeMapper {
 
-  public static final Map<String, String> ATTRIBUTE_ATTRS = newLinkedHashMap();
+  public static final Map<String, String> ATTRIBUTE_ATTRS = new LinkedHashMap<>();
 
   static {
     ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME);
@@ -72,7 +76,7 @@ public class AttributeMapper {
   private AttributeMapper() {}
 
   public static List<Object> map(Attribute attr) {
-    List<Object> row = Lists.newArrayList();
+    List<Object> row = new ArrayList<>();
     for (Entry<String, String> entry : ATTRIBUTE_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_ATTRIBUTES_ID_ATTRIBUTE:
@@ -129,11 +133,9 @@ public class AttributeMapper {
   }
 
   private static Object getTagsValue(Attribute attr) {
-    return StringUtils.join(
-        StreamSupport.stream(attr.getTags().spliterator(), false)
+    return Streams.stream(attr.getTags())
             .map(Tag::getId)
-            .collect(Collectors.toList()),
-        ",");
+            .collect( joining( "," ));
   }
 
   private static Object getVisibleValue(Attribute attr) {
