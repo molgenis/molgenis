@@ -27,11 +27,11 @@ public class MaximumSheetNameLengthExceededExceptionTest extends ExceptionMessag
     return new Object[][] {
       new Object[] {
         "en",
-        "The entitytype name 'Thisisasheennamethatexceedsthelimit' is too long to be used as a sheetname in xslx."
+        "The entity type name 'Thisisasheennamethatexceedsthelimit' is too long to be used as a sheet name in XLSX."
       },
       {
         "nl",
-        "De entiteitsoort naam  'Thisisasheennamethatexceedsthelimit' is te lang om als tabblad naam in xslx gebruikt te worden."
+        "De entiteitsoort naam  'Thisisasheennamethatexceedsthelimit' is te lang om als tabblad naam in XLSX gebruikt te worden."
       }
     };
   }
