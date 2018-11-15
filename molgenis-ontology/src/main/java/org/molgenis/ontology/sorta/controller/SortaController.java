@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -67,13 +66,12 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobExecutionFactory;
-import org.molgenis.ontology.sorta.job.SortaJobFactory;
-import org.molgenis.ontology.sorta.job.SortaJobImpl;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
@@ -118,8 +116,6 @@ public class SortaController extends PluginController {
   private final SortaService sortaService;
   private final DataService dataService;
   private final UserAccountService userAccountService;
-  private final SortaJobFactory sortaMatchJobFactory;
-  private final ExecutorService taskExecutor;
   private final FileStore fileStore;
   private final UserPermissionEvaluator permissionService;
   private final MenuReaderService menuReaderService;
@@ -131,12 +127,11 @@ public class SortaController extends PluginController {
   private final SortaJobExecutionFactory sortaJobExecutionFactory;
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attrMetaFactory;
+  private final JobExecutor jobExecutor;
 
   public SortaController(
       OntologyService ontologyService,
       SortaService sortaService,
-      SortaJobFactory sortaMatchJobFactory,
-      ExecutorService taskExecutor,
       UserAccountService userAccountService,
       FileStore fileStore,
       UserPermissionEvaluator permissionService,
@@ -149,12 +144,11 @@ public class SortaController extends PluginController {
       OntologyTermMetaData ontologyTermMetaData,
       SortaJobExecutionFactory sortaJobExecutionFactory,
       EntityTypeFactory entityTypeFactory,
-      AttributeFactory attrMetaFactory) {
+      AttributeFactory attrMetaFactory,
+      JobExecutor jobExecutor) {
     super(URI);
     this.ontologyService = requireNonNull(ontologyService);
     this.sortaService = requireNonNull(sortaService);
-    this.sortaMatchJobFactory = requireNonNull(sortaMatchJobFactory);
-    this.taskExecutor = requireNonNull(taskExecutor);
     this.userAccountService = requireNonNull(userAccountService);
     this.fileStore = requireNonNull(fileStore);
     this.permissionService = requireNonNull(permissionService);
@@ -168,6 +162,7 @@ public class SortaController extends PluginController {
     this.sortaJobExecutionFactory = requireNonNull(sortaJobExecutionFactory);
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attrMetaFactory = requireNonNull(attrMetaFactory);
+    this.jobExecutor = jobExecutor;
   }
 
   @GetMapping
@@ -539,9 +534,8 @@ public class SortaController extends PluginController {
       return matchTask(model);
     }
 
-    SortaJobExecution jobExecution = createJobExecution(inputRepository, jobName, ontologyIri);
-    SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(jobExecution);
-    taskExecutor.submit(sortaMatchJob);
+    SortaJobExecution sortaJobExecution = createJobExecution(inputRepository, jobName, ontologyIri);
+    jobExecutor.submit(sortaJobExecution);
 
     return "redirect:" + getSortaServiceMenuUrl();
   }
@@ -585,7 +579,6 @@ public class SortaController extends PluginController {
         () -> {
           createInputRepository(inputData);
           createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityType());
-          dataService.add(SORTA_JOB_EXECUTION, sortaJobExecution);
         });
 
     EntityType resultEntityType = entityTypeFactory.create(resultEntityName);
