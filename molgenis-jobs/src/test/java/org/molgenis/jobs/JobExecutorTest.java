@@ -132,7 +132,8 @@ public class JobExecutorTest extends AbstractMockitoTest {
         .thenReturn(jobExecutionContext);
 
     doThrow(new RuntimeException())
-        .when(jobExecutionTemplate).call(eq(job), any(Progress.class), eq(jobExecutionContext));
+        .when(jobExecutionTemplate)
+        .call(eq(job), any(Progress.class), eq(jobExecutionContext));
     try {
       jobExecutor.executeScheduledJob(scheduledJobId);
     } finally {
