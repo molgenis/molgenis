@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.file.FileDownloadController.URI;
 
 import java.io.File;
-import java.util.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.file.FileStore;

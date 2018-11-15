@@ -73,10 +73,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void exportEmx(
-      List<EntityType> entityTypes,
-      List<Package> packages,
-      ExcelWriter writer,
-      Progress progress)
+      List<EntityType> entityTypes, List<Package> packages, ExcelWriter writer, Progress progress)
       throws IOException {
     Set<Package> packageSet = new LinkedHashSet<>();
     Set<EntityType> entityTypeSet = new LinkedHashSet<>();
@@ -86,7 +83,7 @@ public class EmxExportServiceImpl implements EmxExportService {
       // Progress per entity type plus package sheet + finished message
       progress.setProgressMax(entityTypes.size() + 2);
     }
-    writePackageSheets(packageSet, writer, progress);
+    writePackageSheet(packageSet, writer, progress);
     writeEntityTypeSheets(entityTypeSet, writer, progress);
   }
 
@@ -100,8 +97,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void writeEntityTypeSheets(
-      Set<EntityType> entityTypes, ExcelWriter writer, Progress progress)
-      throws IOException {
+      Set<EntityType> entityTypes, ExcelWriter writer, Progress progress) throws IOException {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
       String progressMessage =
@@ -111,7 +107,7 @@ public class EmxExportServiceImpl implements EmxExportService {
                   new Object[] {entityType.getLabel(LocaleContextHolder.getLocale().getLanguage())},
                   "Downloading: ",
                   LocaleContextHolder.getLocale());
-      if (progress == null) {
+      if (progress != null) {
         progress.status(progressMessage);
         progress.increment(1);
       }
@@ -150,7 +146,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   private void checkIfEmxEntityType(EntityType entityType) {
     String entityTypeId = entityType.getId();
     String packageName = entityType.getPackage() != null ? entityType.getPackage().getId() : null;
-    // Entity name should be fully qualified if it resides in a package
+    // Entity type name should be fully qualified if it resides in a package
     if (!(Strings.isNullOrEmpty(packageName) || entityTypeId.startsWith(packageName))) {
       throw new InvalidEmxIdentifierException(entityTypeId);
     }
@@ -174,28 +170,22 @@ public class EmxExportServiceImpl implements EmxExportService {
     if (!writer.hasSheet(EMX_ENTITIES)) {
       writer.createSheet(EMX_ENTITIES, newArrayList(ENTITIES_ATTRS.keySet()));
     }
-    writer.writeRows(
-        Streams.stream(entityTypes)
-            .map(EntityTypeMapper::map),
-        EMX_ENTITIES);
+    writer.writeRows(Streams.stream(entityTypes).map(EntityTypeMapper::map), EMX_ENTITIES);
   }
 
   private void writeAttributes(Iterable<Attribute> attrs, ExcelWriter writer) throws IOException {
     if (!writer.hasSheet(EMX_ATTRIBUTES)) {
       writer.createSheet(EMX_ATTRIBUTES, newArrayList(ATTRIBUTE_ATTRS.keySet()));
     }
-    writer.writeRows(
-        Streams.stream(attrs).map(AttributeMapper::map), EMX_ATTRIBUTES);
+    writer.writeRows(Streams.stream(attrs).map(AttributeMapper::map), EMX_ATTRIBUTES);
   }
 
-  private void writePackageSheets(
-      Iterable<Package> packages, ExcelWriter writer, Progress progress){
+  private void writePackageSheet(
+      Iterable<Package> packages, ExcelWriter writer, Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }
-    writer.writeRows(
-        Streams.stream(packages).map(PackageMapper::map),
-        EMX_PACKAGES);
+    writer.writeRows(Streams.stream(packages).map(PackageMapper::map), EMX_PACKAGES);
     if (progress != null) {
       progress.status(
           MessageSourceHolder.getMessageSource()

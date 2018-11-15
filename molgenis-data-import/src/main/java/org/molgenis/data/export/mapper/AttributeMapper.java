@@ -1,6 +1,5 @@
 package org.molgenis.data.export.mapper;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.AUTO;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_AGGREGATEABLE;
@@ -28,15 +27,12 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VA
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VISIBLE;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -133,9 +129,7 @@ public class AttributeMapper {
   }
 
   private static Object getTagsValue(Attribute attr) {
-    return Streams.stream(attr.getTags())
-            .map(Tag::getId)
-            .collect( joining( "," ));
+    return Streams.stream(attr.getTags()).map(Tag::getId).collect(joining(","));
   }
 
   private static Object getVisibleValue(Attribute attr) {

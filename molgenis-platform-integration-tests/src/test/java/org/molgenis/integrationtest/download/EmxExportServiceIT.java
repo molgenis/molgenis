@@ -4,7 +4,6 @@ import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;

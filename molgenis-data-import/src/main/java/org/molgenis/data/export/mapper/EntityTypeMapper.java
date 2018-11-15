@@ -1,6 +1,5 @@
 package org.molgenis.data.export.mapper;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_ABSTRACT;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_BACKEND;
@@ -17,9 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -67,9 +63,7 @@ public class EntityTypeMapper {
   }
 
   private static String getTags(EntityType entityType) {
-    return Streams.stream(entityType.getTags())
-            .map(Tag::getId)
-            .collect( joining( "," ));
+    return Streams.stream(entityType.getTags()).map(Tag::getId).collect(joining(","));
   }
 
   private static String getName(EntityType entityType) {

@@ -13,9 +13,6 @@ import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.Tag;
@@ -39,9 +36,7 @@ public class PackageMapper {
     for (Entry<String, String> entry : PACKAGE_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_PACKAGE_TAGS:
-          row.add( Streams.stream(pack.getTags())
-                      .map(Tag::getId)
-                      .collect( joining( "," )));
+          row.add(Streams.stream(pack.getTags()).map(Tag::getId).collect(joining(",")));
           break;
         case EMX_PACKAGE_PARENT:
           Package parent = pack.getParent();

@@ -5,7 +5,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 public class EmptyExportRequestException extends CodedRuntimeException {
   private static final String ERROR_CODE = "EXP02";
 
-  public EmptyExportRequestException () {
+  public EmptyExportRequestException() {
     super(ERROR_CODE);
   }
 

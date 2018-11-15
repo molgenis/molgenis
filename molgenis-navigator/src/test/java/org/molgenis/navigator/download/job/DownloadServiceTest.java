@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -81,7 +80,7 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     String json = "[{'id':'it','type':'PACKAGE'},{'id':'test_entity','type':'ENTITY_TYPE'}]";
     downloadJob.download(json, "test", progress);
     verify(downloadService)
-        .download(newArrayList(entityType1), newArrayList(package1), file, Optional.of(progress));
+        .export(newArrayList(entityType1), newArrayList(package1), file.toPath(), progress);
     verify(progress).increment(1);
     verify(progress).status("done");
   }

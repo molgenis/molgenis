@@ -7,8 +7,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.Progress;
 
 public interface EmxExportService {
-  void export(
-      List<EntityType> entityTypes, List<Package> packages, Path path, Progress progress);
+  void export(List<EntityType> entityTypes, List<Package> packages, Path path, Progress progress);
 
   void export(List<EntityType> entityTypes, List<Package> packages, Path path);
 }

@@ -14,7 +14,7 @@ public class EmptyExportRequestExceptionTest extends ExceptionMessageTest {
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
-    assertExceptionMessageEquals(new EmptyExportRequestException (), lang, message);
+    assertExceptionMessageEquals(new EmptyExportRequestException(), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
@@ -22,7 +22,7 @@ public class EmptyExportRequestExceptionTest extends ExceptionMessageTest {
   public Object[][] languageMessageProvider() {
     return new Object[][] {
       new Object[] {
-        "en", "The download request should contain at least one package or entitytype."
+        "en", "The download request should contain at least one package or entity type."
       },
       {"nl", "Het download verzoek moet minimaal 1 entiteitsoort of package bevatten."}
     };
