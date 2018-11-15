@@ -33,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.Tag;
@@ -120,7 +119,7 @@ public class AttributeMapper {
 
   private static String getEnumOptions(Attribute attr) {
 
-    return attr.getEnumOptions() != null ? StringUtils.join(attr.getEnumOptions(), ",") : "";
+    return attr.getEnumOptions() != null ? String.join(",", attr.getEnumOptions()) : "";
   }
 
   private static String getLookupValue(Attribute attr) {

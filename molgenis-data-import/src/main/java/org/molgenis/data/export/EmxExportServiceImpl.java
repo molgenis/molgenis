@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.excel.simple.ExcelWriter;
 import org.molgenis.data.excel.simple.ExcelWriterFactory;
 import org.molgenis.data.export.exception.EmptyExportRequestException;
@@ -36,11 +37,13 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EmxExportServiceImpl implements EmxExportService {
 
+  private static final int BATCH_SIZE = 1000;
   private final DataService dataService;
 
   public EmxExportServiceImpl(DataService dataService) {
@@ -48,13 +51,13 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public void export(List<EntityType> entityTypes, List<Package> packages, Path downloadFilePath) {
     export(entityTypes, packages, downloadFilePath, null);
   }
 
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public void export(
       List<EntityType> entityTypes,
       List<Package> packages,
@@ -161,8 +164,14 @@ public class EmxExportServiceImpl implements EmxExportService {
     if (!writer.hasSheet(entityType.getId())) {
       writer.createSheet(entityType.getId(), headers);
     }
-    writer.writeRows(
-        dataService.findAll(entityType.getId()).map(DataRowMapper::mapDataRow), entityType.getId());
+
+    dataService
+        .getRepository(entityType.getId())
+        .forEachBatched(entities -> writeRows(entities, entityType, writer), BATCH_SIZE);
+  }
+
+  public void writeRows(List<Entity> entities, EntityType entityType, ExcelWriter writer) {
+    writer.writeRows(entities.stream().map(DataRowMapper::mapDataRow), entityType.getId());
   }
 
   private void writeEntityTypes(Iterable<EntityType> entityTypes, ExcelWriter writer)
