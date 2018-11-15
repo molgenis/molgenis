@@ -1,6 +1,6 @@
 package org.molgenis.data.export.mapper;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
+import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_ABSTRACT;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_BACKEND;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_DESCRIPTION;
@@ -11,19 +11,18 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_PACK
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_TAGS;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 public class EntityTypeMapper {
-  public static final Map<String, String> ENTITIES_ATTRS = newLinkedHashMap();
+  public static final Map<String, String> ENTITIES_ATTRS = new LinkedHashMap<>();
 
   static {
     ENTITIES_ATTRS.put(EMX_ENTITIES_NAME, EntityTypeMetadata.ID);
@@ -64,11 +63,7 @@ public class EntityTypeMapper {
   }
 
   private static String getTags(EntityType entityType) {
-    return StringUtils.join(
-        StreamSupport.stream(entityType.getTags().spliterator(), false)
-            .map(Tag::getId)
-            .collect(Collectors.toList()),
-        ",");
+    return Streams.stream(entityType.getTags()).map(Tag::getId).collect(joining(","));
   }
 
   private static String getName(EntityType entityType) {

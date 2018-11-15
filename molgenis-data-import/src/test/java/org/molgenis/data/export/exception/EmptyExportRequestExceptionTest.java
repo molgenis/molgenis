@@ -5,7 +5,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class EmptyDownloadRequestExceptionTest extends ExceptionMessageTest {
+public class EmptyExportRequestExceptionTest extends ExceptionMessageTest {
   @BeforeMethod
   public void setUp() {
     messageSource.addMolgenisNamespaces("data-import");
@@ -14,7 +14,7 @@ public class EmptyDownloadRequestExceptionTest extends ExceptionMessageTest {
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
-    assertExceptionMessageEquals(new EmptyDownloadRequestException(), lang, message);
+    assertExceptionMessageEquals(new EmptyExportRequestException(), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")

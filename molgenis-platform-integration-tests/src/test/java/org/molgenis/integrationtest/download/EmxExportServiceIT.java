@@ -4,9 +4,10 @@ import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.DataService;
@@ -67,16 +68,18 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     dataService.getMeta().addEntityType(entityType2);
     dataService.add(
         entityType2.getId(), entityTestHarness.createTestRefEntities(entityType2, 2).stream());
-    File actual = File.createTempFile("test", ".xlsx");
+    Path actual = Files.createTempFile("test", ".xlsx");
     // when using the "in memory" it package, created above, the "getChildern" returns null.
     Package actualIt = dataService.getMeta().getPackage("it").get();
-    emxDownloadService.download(newArrayList(entityType1), newArrayList(actualIt), actual);
-    Workbook workbook = new XSSFWorkbook(new FileInputStream(actual));
-    Workbook expected =
-        new XSSFWorkbook(
-            new FileInputStream(
-                ResourceUtils.getFile(
-                    EmxExportServiceIT.class, "/xls/expectedDownloadResult.xlsx")));
-    assertThat(workbook, sameWorkbook(expected));
+    emxDownloadService.export(newArrayList(entityType1), newArrayList(actualIt), actual);
+    try (XSSFWorkbook actualWorkbook = new XSSFWorkbook(Files.newInputStream(actual))) {
+      try (Workbook expected =
+          new XSSFWorkbook(
+              new FileInputStream(
+                  ResourceUtils.getFile(
+                      EmxExportServiceIT.class, "/xls/expectedDownloadResult.xlsx")))) {
+        assertThat(actualWorkbook, sameWorkbook(expected));
+      }
+    }
   }
 }

@@ -36,7 +36,7 @@ public class ExcelWriterTest extends AbstractMolgenisSpringTest {
   @BeforeMethod
   public void setUp() {
     file = new File("path");
-    excelWriter = new ExcelWriter(file, workbook);
+    excelWriter = new ExcelWriter(file.toPath(), workbook);
   }
 
   @Test

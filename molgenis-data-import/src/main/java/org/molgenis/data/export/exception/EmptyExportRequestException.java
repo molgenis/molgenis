@@ -2,10 +2,10 @@ package org.molgenis.data.export.exception;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class EmptyDownloadRequestException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "DL02";
+public class EmptyExportRequestException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "EXP02";
 
-  public EmptyDownloadRequestException() {
+  public EmptyExportRequestException() {
     super(ERROR_CODE);
   }
 

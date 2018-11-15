@@ -5,7 +5,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class InvalidEntityIdentifierExceptionTest extends ExceptionMessageTest {
+public class InvalidEmxIdentifierExceptionTest extends ExceptionMessageTest {
 
   @BeforeMethod
   public void setUp() {
@@ -15,7 +15,7 @@ public class InvalidEntityIdentifierExceptionTest extends ExceptionMessageTest {
   @Test(dataProvider = "languageMessageProvider")
   @Override
   public void testGetLocalizedMessage(String lang, String message) {
-    assertExceptionMessageEquals(new InvalidEntityIdentifierException("autoid"), lang, message);
+    assertExceptionMessageEquals(new InvalidEmxIdentifierException("autoid"), lang, message);
   }
 
   @DataProvider(name = "languageMessageProvider")
