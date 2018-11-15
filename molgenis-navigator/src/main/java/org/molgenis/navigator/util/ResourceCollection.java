@@ -1,4 +1,4 @@
-package org.molgenis.navigator.model.util;
+package org.molgenis.navigator.util;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
