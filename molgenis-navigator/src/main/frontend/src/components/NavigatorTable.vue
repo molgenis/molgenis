@@ -1,4 +1,4 @@
-f<template>
+<template>
   <div class="table-container">
     <b-table
       :items="tableResources"
@@ -35,15 +35,21 @@ f<template>
         slot-scope="label">
         <span v-if="label.item.type === 'ENTITY_TYPE' && dataExplorerUrl">
           <a :href="dataExplorerUrl + '?entity=' + label.item.id + '&hideselect=true'">
-            <font-awesome-icon icon="list"/> {{ label.item.label }}
+            <font-awesome-icon
+              icon="list"
+              fixed-width/> {{ label.item.label }}
           </a>
         </span>
         <span v-else-if="label.item.type === 'ENTITY_TYPE' || label.item.type === 'ENTITY_TYPE_ABSTRACT'">
-          <font-awesome-icon icon="list"/> {{ label.item.label }}
+          <font-awesome-icon
+            icon="list"
+            fixed-width/> {{ label.item.label }}
         </span>
         <span v-else>
           <router-link :to="label.item.id">
-            <font-awesome-icon :icon="['far', 'folder-open']"/> {{ label.item.label }}
+            <font-awesome-icon
+              :icon="['far', 'folder-open']"
+              fixed-width/> {{ label.item.label }}
           </router-link>
         </span>
       </template>
