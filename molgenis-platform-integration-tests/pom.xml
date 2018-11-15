@@ -243,13 +243,11 @@
     <dependency>
     <groupId>com.github.mokka88</groupId>
     <artifactId>simple-excel</artifactId>
-    <version>1.2</version>
     <scope>test</scope>
   </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml-schemas</artifactId>
-      <version>4.0.0</version>
       <scope>test</scope>
     </dependency>
     <!-- test dependencies -->
