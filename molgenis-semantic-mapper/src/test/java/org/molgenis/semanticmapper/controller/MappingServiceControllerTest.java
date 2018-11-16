@@ -85,6 +85,8 @@ import org.testng.annotations.Test;
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
 public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
+  private static final String USERNAME = "MyUsername";
+
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attrMetaFactory;
@@ -142,7 +144,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
 
   @BeforeMethod
   public void beforeTest() {
-    user = mock(User.class);
+    user = when(mock(User.class).getUsername()).thenReturn(USERNAME).getMock();
     TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", null);
     authentication.setAuthenticated(true);
     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -471,7 +473,6 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     verify(mappingJobExecution).setAddSourceAttribute(null);
     verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
     verify(mappingJobExecution).setPackageId("base");
-    verify(mappingJobExecution).setUser(user);
     verify(mappingJobExecution).getEntityType();
     verify(mappingJobExecution).getIdValue();
     Mockito.verifyNoMoreInteractions(mappingJobExecution);
@@ -503,7 +504,6 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
     verify(mappingJobExecution).setAddSourceAttribute(null);
     verify(mappingJobExecution).setTargetEntityTypeId("targetEntityTypeId");
     verify(mappingJobExecution).setPackageId("base");
-    verify(mappingJobExecution).setUser(user);
     Mockito.verifyNoMoreInteractions(mappingJobExecution);
   }
 

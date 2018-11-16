@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Locale;
+import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.test.AbstractMockitoTest;
@@ -27,12 +28,19 @@ public class JobExecutorLocaleServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateLocale() {
+  public void testCreateLocaleUser() {
     String username = "MyUsername";
     JobExecution jobExecution =
-        when(mock(JobExecution.class).getUser()).thenReturn(username).getMock();
+        when(mock(JobExecution.class).getUser()).thenReturn(Optional.of(username)).getMock();
     Locale locale = Locale.getDefault();
     when(userLocaleResolver.resolveLocale(username)).thenReturn(locale);
+    assertEquals(jobExecutorLocaleServiceImpl.createLocale(jobExecution), locale);
+  }
+
+  @Test
+  public void testCreateLocaleSystem() {
+    Locale locale = Locale.getDefault();
+    JobExecution jobExecution = mock(JobExecution.class);
     assertEquals(jobExecutorLocaleServiceImpl.createLocale(jobExecution), locale);
   }
 }

@@ -60,7 +60,6 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest {
   public void helloWorld() throws InterruptedException, TimeoutException, ExecutionException {
     HelloWorldJobExecution jobExecution = factory.create();
     jobExecution.setDelay(1);
-    jobExecution.setUser("user");
     CompletableFuture<Void> job = jobExecutor.submit(jobExecution);
     job.get(2, SECONDS);
     assertTrue(jobExecution.getLog().contains("Hello user!"));

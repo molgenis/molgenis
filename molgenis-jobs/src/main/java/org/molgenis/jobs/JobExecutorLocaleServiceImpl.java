@@ -17,7 +17,9 @@ class JobExecutorLocaleServiceImpl implements JobExecutorLocaleService {
 
   @Override
   public Locale createLocale(JobExecution jobExecution) {
-    String username = jobExecution.getUser();
-    return userLocaleResolver.resolveLocale(username);
+    return jobExecution
+        .getUser()
+        .map(userLocaleResolver::resolveLocale)
+        .orElseGet(Locale::getDefault);
   }
 }
