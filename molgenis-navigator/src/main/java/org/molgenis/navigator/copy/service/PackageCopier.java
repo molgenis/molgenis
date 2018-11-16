@@ -24,7 +24,7 @@ public class PackageCopier {
   private final DataService dataService;
   private final IdGenerator idGenerator;
 
-  public PackageCopier(DataService dataService, IdGenerator idGenerator) {
+  PackageCopier(DataService dataService, IdGenerator idGenerator) {
     this.dataService = requireNonNull(dataService);
     this.idGenerator = requireNonNull(idGenerator);
   }
