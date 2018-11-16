@@ -7,7 +7,7 @@ import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Component;
 
 @Component
-class FallbackLocaleSupplierImpl implements FallbackLocaleSupplier {
+public class FallbackLocaleSupplierImpl implements FallbackLocaleSupplier {
   private final AppSettings appSettings;
 
   FallbackLocaleSupplierImpl(AppSettings appSettings) {

@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 @AutoValue
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
-abstract class JobExecutionContext {
+public abstract class JobExecutionContext {
   abstract Authentication getAuthentication();
 
   abstract Locale getLocale();
@@ -16,17 +16,17 @@ abstract class JobExecutionContext {
     return builder().setAuthentication(newAuthentication).setLocale(newLocale).build();
   }
 
-  static Builder builder() {
+  public static Builder builder() {
     return new AutoValue_JobExecutionContext.Builder();
   }
 
   @AutoValue.Builder
-  abstract static class Builder {
+  public abstract static class Builder {
 
-    abstract Builder setAuthentication(Authentication newAuthentication);
+    public abstract Builder setAuthentication(Authentication newAuthentication);
 
-    abstract Builder setLocale(Locale newLocale);
+    public abstract Builder setLocale(Locale newLocale);
 
-    abstract JobExecutionContext build();
+    public abstract JobExecutionContext build();
   }
 }

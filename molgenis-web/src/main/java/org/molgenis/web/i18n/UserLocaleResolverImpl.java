@@ -9,7 +9,7 @@ import org.molgenis.data.security.user.UserService;
 import org.springframework.stereotype.Component;
 
 @Component
-class UserLocaleResolverImpl implements UserLocaleResolver {
+public class UserLocaleResolverImpl implements UserLocaleResolver {
   private final UserService userService;
   private final FallbackLocaleSupplier fallbackLocaleSupplier;
 

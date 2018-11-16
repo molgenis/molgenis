@@ -3,9 +3,12 @@ package org.molgenis.jobs;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
+import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.test.AbstractMockitoTest;
@@ -32,10 +35,10 @@ public class JobExecutorTokenServiceImplTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateToken() {
+  public void testCreateTokenUser() {
     String username = "user";
     JobExecution jobExecution =
-        when(mock(JobExecution.class).getUser()).thenReturn(username).getMock();
+        when(mock(JobExecution.class).getUser()).thenReturn(Optional.of(username)).getMock();
 
     UserDetails userDetails = mock(UserDetails.class);
     when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
@@ -44,5 +47,12 @@ public class JobExecutorTokenServiceImplTest extends AbstractMockitoTest {
         .thenReturn(runAsUserToken);
 
     assertEquals(jobExecutorTokenServiceImpl.createToken(jobExecution), runAsUserToken);
+  }
+
+  @Test
+  public void testCreateTokenSystem() {
+    JobExecution jobExecution = mock(JobExecution.class);
+    assertTrue(
+        jobExecutorTokenServiceImpl.createToken(jobExecution) instanceof SystemSecurityToken);
   }
 }

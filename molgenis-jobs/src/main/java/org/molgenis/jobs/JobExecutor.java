@@ -12,9 +12,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -31,12 +33,13 @@ public class JobExecutor {
 
   private final DataService dataService;
   private final EntityManager entityManager;
-  private final JobExecutionTemplate jobExecutionTemplate = new JobExecutionTemplate();
   private final JobExecutionUpdater jobExecutionUpdater;
   private final MailSender mailSender;
   private final ExecutorService executorService;
   private final JobFactoryRegistry jobFactoryRegistry;
   private final JobExecutionContextFactory jobExecutionContextFactory;
+
+  private JobExecutionTemplate jobExecutionTemplate;
   private final Gson gson;
 
   public JobExecutor(
@@ -54,6 +57,8 @@ public class JobExecutor {
     this.executorService = requireNonNull(executorService);
     this.jobFactoryRegistry = jobFactoryRegistry;
     this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
+
+    this.jobExecutionTemplate = new JobExecutionTemplate();
     this.gson = new Gson();
   }
 
@@ -66,6 +71,10 @@ public class JobExecutor {
   public void executeScheduledJob(String scheduledJobId) {
     ScheduledJob scheduledJob =
         dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
+    if (scheduledJob == null) {
+      throw new UnknownEntityException(SCHEDULED_JOB, scheduledJobId);
+    }
+
     JobExecution jobExecution = createJobExecution(scheduledJob);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 
@@ -110,8 +119,19 @@ public class JobExecutor {
    */
   public CompletableFuture<Void> submit(
       JobExecution jobExecution, ExecutorService executorService) {
+    overwriteJobExecutionUser(jobExecution);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
     return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
+  }
+
+  private void overwriteJobExecutionUser(JobExecution jobExecution) {
+    String username;
+    if (SecurityUtils.currentUserIsSystem()) {
+      username = null;
+    } else {
+      username = SecurityUtils.getCurrentUsername();
+    }
+    jobExecution.setUser(username);
   }
 
   @SuppressWarnings("unchecked")
@@ -146,5 +166,10 @@ public class JobExecutor {
     MutablePropertyValues pvs = new MutablePropertyValues();
     pvs.addPropertyValues(parameters);
     return pvs;
+  }
+
+  /** testability */
+  void setJobExecutionTemplate(JobExecutionTemplate jobExecutionTemplate) {
+    this.jobExecutionTemplate = requireNonNull(jobExecutionTemplate);
   }
 }
