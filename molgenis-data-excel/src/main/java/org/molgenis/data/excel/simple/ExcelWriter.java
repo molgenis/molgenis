@@ -17,7 +17,7 @@ public class ExcelWriter implements AutoCloseable {
 
   public static final int MAXIMUM_SHEET_LENGTH = 31;
   private final Path target;
-  private Workbook workbook;
+  private final Workbook workbook;
 
   ExcelWriter(Path target, Workbook workbook) {
     this.target = requireNonNull(target);

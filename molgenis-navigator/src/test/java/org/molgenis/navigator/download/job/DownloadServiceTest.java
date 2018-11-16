@@ -8,6 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
@@ -45,7 +48,7 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
   @Mock MessageSource messageSource;
 
   @BeforeMethod
-  public void exceptionMessageTestBeforeMethod() {
+  public void messageTestBeforeMethod() {
     MessageSourceHolder.setMessageSource(messageSource);
   }
 
@@ -77,8 +80,12 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     DownloadService downloadJob =
         new DownloadService(
             downloadService, fileStore, fileMetaFactory, dataService, resourceCollector);
-    String json = "[{'id':'it','type':'PACKAGE'},{'id':'test_entity','type':'ENTITY_TYPE'}]";
-    downloadJob.download(json, "test", progress);
+    List<ResourceIdentifier> resourceIdentifierList = new ArrayList<>();
+    resourceIdentifierList.addAll(
+        Arrays.asList(
+            ResourceIdentifier.create(ResourceType.PACKAGE, "it"),
+            ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "test_entity")));
+    downloadJob.download(resourceIdentifierList, "test", progress);
     verify(downloadService)
         .export(newArrayList(entityType1), newArrayList(package1), file.toPath(), progress);
     verify(progress).increment(1);

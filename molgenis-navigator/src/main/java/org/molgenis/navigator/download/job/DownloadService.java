@@ -4,19 +4,19 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.file.FileDownloadController.URI;
 
 import java.io.File;
+import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.file.model.FileMetaMetaData;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.download.exception.DownloadFailedException;
+import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.util.ResourceCollection;
 import org.molgenis.navigator.model.util.ResourceCollector;
-import org.molgenis.navigator.model.util.ResourceIdentifierUtil;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -41,11 +41,11 @@ public class DownloadService {
     this.resourceCollector = requireNonNull(resourceCollector);
   }
 
-  public FileMeta download(String resourceJson, String filename, Progress progress) {
+  public FileMeta download(
+      List<ResourceIdentifier> resourceIdentifiers, String filename, Progress progress) {
     FileMeta fileMeta;
     try {
-      ResourceCollection resourceCollection =
-          resourceCollector.get(ResourceIdentifierUtil.getResourcesFromJson(resourceJson));
+      ResourceCollection resourceCollection = resourceCollector.get(resourceIdentifiers);
       File emxFile = fileStore.getFile(filename);
       fileMeta = createFileMeta(emxFile);
       dataService.add(FileMetaMetaData.FILE_META, fileMeta);
@@ -56,7 +56,7 @@ public class DownloadService {
           progress);
       progress.increment(1);
       progress.status(getMessage("progress-download-success", "Finished preparing download."));
-    } catch (CodedRuntimeException exception) {
+    } catch (RuntimeException exception) {
       throw new DownloadFailedException(exception);
     }
     return fileMeta;

@@ -5,7 +5,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class ExcelWriterFactory {
 
-  public static final int ROWS_IN_MEMORY = 10000;
+  public static final int ROWS_IN_MEMORY = 1000;
 
   private ExcelWriterFactory() {}
 
