@@ -19,7 +19,7 @@ import org.molgenis.data.meta.model.Tag;
 
 public class PackageMapper {
 
-  public static final Map<String, String> PACKAGE_ATTRS;
+  public static Map<String, String> PACKAGE_ATTRS;
 
   static {
     PACKAGE_ATTRS = new LinkedHashMap();

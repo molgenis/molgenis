@@ -39,7 +39,7 @@ import org.molgenis.data.meta.model.Tag;
 
 public class AttributeMapper {
 
-  public static final Map<String, String> ATTRIBUTE_ATTRS;
+  public static Map<String, String> ATTRIBUTE_ATTRS;
 
   static {
     ATTRIBUTE_ATTRS = new LinkedHashMap<>();

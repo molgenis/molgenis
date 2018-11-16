@@ -22,7 +22,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 public class EntityTypeMapper {
-  public static final Map<String, String> ENTITIES_ATTRS;
+  public static Map<String, String> ENTITIES_ATTRS;
 
   static {
     ENTITIES_ATTRS = new LinkedHashMap<>();
