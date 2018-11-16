@@ -4,7 +4,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.URI;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -79,7 +78,6 @@ public class OneClickImporterController extends VuePluginController {
     }
 
     OneClickImportJobExecution jobExecution = oneClickImportJobExecutionFactory.create();
-    jobExecution.setUser(getCurrentUsername());
     jobExecution.setFile(filename);
     jobExecutor.submit(jobExecution);
 

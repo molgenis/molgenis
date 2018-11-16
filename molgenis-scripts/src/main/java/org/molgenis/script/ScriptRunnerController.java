@@ -71,7 +71,6 @@ public class ScriptRunnerController {
     ScriptJobExecution scriptJobExecution = scriptJobExecutionFactory.create();
     scriptJobExecution.setName(scriptName);
     scriptJobExecution.setParameters(gson.toJson(parameters));
-    scriptJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 
     jobExecutor.submit(scriptJobExecution);
 
