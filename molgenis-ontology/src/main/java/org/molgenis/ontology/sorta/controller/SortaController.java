@@ -22,6 +22,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALID
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -202,7 +203,7 @@ public class SortaController extends PluginController {
       try {
         User currentUser = userAccountService.getCurrentUser();
         if (currentUser.isSuperuser()
-            || sortaJobExecution.getUser().equals(currentUser.getUsername())) {
+            || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
           RunAsSystemAspect.runAsSystem(
               () -> {
                 Double thresholdValue = Double.parseDouble(threshold);
@@ -258,7 +259,7 @@ public class SortaController extends PluginController {
     if (sortaJobExecution != null) {
       User currentUser = userAccountService.getCurrentUser();
       if (currentUser.isSuperuser()
-          || sortaJobExecution.getUser().equals(currentUser.getUsername())) {
+          || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
         RunAsSystemAspect.runAsSystem(
             () -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
         tryDeleteRepository(sortaJobExecution.getResultEntityName());
@@ -568,7 +569,7 @@ public class SortaController extends PluginController {
     SortaJobExecution sortaJobExecution = sortaJobExecutionFactory.create();
     sortaJobExecution.setIdentifier(resultEntityName);
     sortaJobExecution.setName(jobName);
-    sortaJobExecution.setUser(userAccountService.getCurrentUser());
+    User currentUser = userAccountService.getCurrentUser();
     sortaJobExecution.setSourceEntityName(inputData.getName());
     sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + resultEntityName);
     sortaJobExecution.setResultEntityName(resultEntityName);

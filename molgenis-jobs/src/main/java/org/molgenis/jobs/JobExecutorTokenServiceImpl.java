@@ -3,9 +3,9 @@ package org.molgenis.jobs;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.token.RunAsUserTokenFactory;
 import org.molgenis.security.user.UserDetailsService;
-import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,13 @@ public class JobExecutorTokenServiceImpl implements JobExecutorTokenService {
 
   @Override
   public AbstractAuthenticationToken createToken(JobExecution jobExecution) {
-    return createAuthorization(jobExecution.getUser());
+    return jobExecution
+        .getUser()
+        .map(this::createRunAsUsertoken)
+        .orElseGet(SystemSecurityToken::getInstance);
   }
 
-  private RunAsUserToken createAuthorization(String username) {
+  private AbstractAuthenticationToken createRunAsUsertoken(String username) {
     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
     return runAsUserTokenFactory.create(JOB_EXECUTION_TOKEN_KEY, userDetails, null);
   }

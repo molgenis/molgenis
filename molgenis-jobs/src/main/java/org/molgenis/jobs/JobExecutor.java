@@ -16,6 +16,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -118,8 +119,19 @@ public class JobExecutor {
    */
   public CompletableFuture<Void> submit(
       JobExecution jobExecution, ExecutorService executorService) {
+    overwriteJobExecutionUser(jobExecution);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
     return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
+  }
+
+  private void overwriteJobExecutionUser(JobExecution jobExecution) {
+    String username;
+    if (SecurityUtils.currentUserIsSystem()) {
+      username = null;
+    } else {
+      username = SecurityUtils.getCurrentUsername();
+    }
+    jobExecution.setUser(username);
   }
 
   @SuppressWarnings("unchecked")

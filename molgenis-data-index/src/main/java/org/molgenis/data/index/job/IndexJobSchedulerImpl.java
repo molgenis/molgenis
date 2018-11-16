@@ -65,7 +65,6 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
       indexStatus.addActionCounts(numberOfActionsPerEntity);
 
       IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
-      indexJobExecution.setUser("admin");
       indexJobExecution.setIndexActionJobID(transactionId);
       jobExecutor
           .submit(indexJobExecution, executorService)
