@@ -11,6 +11,7 @@ import org.molgenis.navigator.util.ResourceIdentifierUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
 public class CopyJobConfig {
 
@@ -24,7 +25,7 @@ public class CopyJobConfig {
   public JobFactory<CopyJobExecution> copyJobFactory() {
     return new JobFactory<CopyJobExecution>() {
       @Override
-      public Job<String> createJob(CopyJobExecution jobExecution) {
+      public Job<Void> createJob(CopyJobExecution jobExecution) {
         final List<ResourceIdentifier> resources =
             ResourceIdentifierUtil.getResourcesFromJson(jobExecution.getResources());
         final String targetPackageId = jobExecution.getTargetPackage();

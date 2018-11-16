@@ -6,5 +6,5 @@ import org.molgenis.navigator.model.ResourceIdentifier;
 
 public interface CopyService {
 
-  String copy(List<ResourceIdentifier> resources, String newLocationId, Progress progress);
+  Void copy(List<ResourceIdentifier> resources, String newLocationId, Progress progress);
 }

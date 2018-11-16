@@ -28,7 +28,8 @@ public class PackageValidator {
   }
 
   private void validatePackageAllowed(Package aPackage) {
-    if (PackageUtils.isSystemPackage(aPackage) && !systemPackageRegistry.containsPackage(aPackage)) {
+    if (PackageUtils.isSystemPackage(aPackage)
+        && !systemPackageRegistry.containsPackage(aPackage)) {
       LOG.error(
           "validatePackageAllowed, the system package registry does not contain package with id {} and label {}",
           aPackage.getId(),

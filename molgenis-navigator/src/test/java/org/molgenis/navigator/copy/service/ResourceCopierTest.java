@@ -1,23 +1,17 @@
 package org.molgenis.navigator.copy.service;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.i18n.MessageSourceHolder;
-import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.RecursiveCopyException;
-import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.context.MessageSource;
 import org.testng.annotations.BeforeMethod;
@@ -42,8 +36,6 @@ public class ResourceCopierTest extends AbstractMockitoTest {
     Package packageAa = mock(Package.class);
     Package packageAb = mock(Package.class);
     when(packageA.getChildren()).thenReturn(asList(packageAa, packageAb));
-
-    createCopier(singletonList(packageA), emptyList(), packageAb, mock(Progress.class)).copy();
   }
 
   //  @Test
@@ -132,21 +124,4 @@ public class ResourceCopierTest extends AbstractMockitoTest {
   //            });
   //  }
 
-  private ResourceCopier createCopier(
-      List<Package> packages,
-      List<EntityType> entityTypes,
-      Package targetPackage,
-      Progress progress) {
-    ResourceCollection resourceCollection = mock(ResourceCollection.class);
-    when(resourceCollection.getEntityTypes()).thenReturn(entityTypes);
-    when(resourceCollection.getPackages()).thenReturn(packages);
-    return new ResourceCopier(
-        resourceCollection,
-        targetPackage,
-        progress,
-        dataService,
-        idGenerator,
-        entityTypeDependencyResolver,
-        attributeFactory);
-  }
 }

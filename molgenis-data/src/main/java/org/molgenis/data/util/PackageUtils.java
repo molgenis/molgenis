@@ -28,7 +28,7 @@ public class PackageUtils {
         () ->
             aPackage.getId().equals(PACKAGE_SYSTEM)
                 || (aPackage.getRootPackage() != null
-                && aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM)));
+                    && aPackage.getRootPackage().getId().equals(PACKAGE_SYSTEM)));
   }
 
   /**
