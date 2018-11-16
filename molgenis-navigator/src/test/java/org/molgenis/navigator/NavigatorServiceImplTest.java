@@ -318,7 +318,6 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
     verify(copyJobExecution)
         .setResources(
             "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
-    verify(copyJobExecution).setUser("user");
     verify(copyJobExecution).setTargetPackage(targetFolderId);
     verify(jobExecutor).submit(copyJobExecution);
   }
@@ -338,7 +337,6 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
     verify(copyJobExecution)
         .setResources(
             "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
-    verify(copyJobExecution).setUser("user");
     verify(copyJobExecution).setTargetPackage(null);
     verify(jobExecutor).submit(copyJobExecution);
   }
@@ -372,10 +370,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
             ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
     assertEquals(navigatorServiceImpl.downloadResources(resources), downloadJobExecution);
-    verify(downloadJobExecution)
-        .setResources(
-            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
-    verify(downloadJobExecution).setUser("user");
+    verify(downloadJobExecution).setResources(resources);
     verify(jobExecutor).submit(downloadJobExecution);
   }
 

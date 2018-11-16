@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE;
 import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE_ABSTRACT;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Streams;
@@ -144,7 +143,6 @@ public class NavigatorServiceImpl implements NavigatorService {
     CopyJobExecution jobExecution = copyJobExecutionFactory.create();
     jobExecution.setResources(new Gson().toJson(resources));
     jobExecution.setTargetPackage(aPackage != null ? aPackage.getId() : null);
-    jobExecution.setUser(getCurrentUsername());
     jobExecutor.submit(jobExecution);
     return jobExecution;
   }
@@ -156,8 +154,7 @@ public class NavigatorServiceImpl implements NavigatorService {
     }
 
     DownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
-    jobExecution.setResources(new Gson().toJson(resources));
-    jobExecution.setUser(getCurrentUsername());
+    jobExecution.setResources(resources);
     jobExecutor.submit(jobExecution);
     return jobExecution;
   }
