@@ -1,6 +1,5 @@
 package org.molgenis.data.export.mapper;
 
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_DESCRIPTION;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_LABEL;
@@ -10,6 +9,7 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_TAGS;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,9 +19,10 @@ import org.molgenis.data.meta.model.Tag;
 
 public class PackageMapper {
 
-  public static final Map<String, String> PACKAGE_ATTRS = newLinkedHashMap();
+  public static final Map<String, String> PACKAGE_ATTRS;
 
   static {
+    PACKAGE_ATTRS = new LinkedHashMap();
     PACKAGE_ATTRS.put(EMX_PACKAGE_NAME, PackageMetadata.ID);
     PACKAGE_ATTRS.put(EMX_PACKAGE_LABEL, PackageMetadata.LABEL);
     PACKAGE_ATTRS.put(EMX_PACKAGE_DESCRIPTION, PackageMetadata.DESCRIPTION);
