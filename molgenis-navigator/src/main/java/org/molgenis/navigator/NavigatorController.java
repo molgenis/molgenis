@@ -5,7 +5,6 @@ import static org.molgenis.navigator.NavigatorController.URI;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.springframework.http.HttpStatus.OK;
 
-import com.google.gson.Gson;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -64,7 +63,7 @@ public class NavigatorController extends VuePluginController {
   @ResponseStatus(OK)
   public void copy(@RequestBody @Valid CopyResourceRequest request) {
     CopyJobExecution jobExecution = copyJobExecutionFactory.create();
-    jobExecution.setResources(new Gson().toJson(request.getResources()));
+    jobExecution.setResources(request.getResources());
     jobExecution.setTargetPackage(request.getTargetPackage());
     jobExecution.setUser(getCurrentUsername());
     jobExecutor.submit(jobExecution);

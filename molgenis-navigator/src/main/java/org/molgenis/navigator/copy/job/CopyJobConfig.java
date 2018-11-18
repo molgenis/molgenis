@@ -7,7 +7,6 @@ import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.util.ResourceIdentifierUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +25,7 @@ public class CopyJobConfig {
     return new JobFactory<CopyJobExecution>() {
       @Override
       public Job<Void> createJob(CopyJobExecution jobExecution) {
-        final List<ResourceIdentifier> resources =
-            ResourceIdentifierUtil.getResourcesFromJson(jobExecution.getResources());
+        final List<ResourceIdentifier> resources = jobExecution.getResources();
         final String targetPackageId = jobExecution.getTargetPackage();
         return progress -> copyService.copy(resources, targetPackageId, progress);
       }
