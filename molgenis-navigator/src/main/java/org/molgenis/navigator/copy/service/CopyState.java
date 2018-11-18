@@ -13,6 +13,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.Progress;
 
 @AutoValue
+@SuppressWarnings("squid:S1610")
 abstract class CopyState {
 
   @Nullable
@@ -28,7 +29,7 @@ abstract class CopyState {
 
   abstract Map<String, Attribute> copiedAttributes();
 
-  abstract Map<String, String> originalIds();
+  abstract Map<String, String> originalEntityTypeIds();
 
   abstract Map<String, String> referenceDefaultValues();
 

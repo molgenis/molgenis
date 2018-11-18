@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.validation.constraints.NotNull;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.CodedRuntimeException;
@@ -64,18 +65,24 @@ public class CopyServiceImpl implements CopyService {
     progress.setProgressMax(calculateMaxProgress(resourceCollection));
     progress.progress(0, getMessage("progress-copy-started"));
 
-    if (!resourceCollection.getPackages().isEmpty()) {
-      progress.status(getMessage("progress-copy-packages"));
-      packageCopier.copy(resourceCollection.getPackages(), state);
-    }
-
-    if (!resourceCollection.getEntityTypes().isEmpty()
-        || !state.entityTypesInPackages().isEmpty()) {
-      progress.status(getMessage("progress-copy-entity-types"));
-      entityTypeCopier.copy(resourceCollection.getEntityTypes(), state);
-    }
+    copyPackages(resourceCollection.getPackages(), state);
+    copyEntityTypes(resourceCollection.getEntityTypes(), state);
 
     progress.status(getMessage("progress-copy-success"));
+  }
+
+  private void copyPackages(List<Package> packages, CopyState state) {
+    if (!packages.isEmpty()) {
+      state.progress().status(getMessage("progress-copy-packages"));
+      packageCopier.copy(packages, state);
+    }
+  }
+
+  private void copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
+    if (!entityTypes.isEmpty() || !state.entityTypesInPackages().isEmpty()) {
+      state.progress().status(getMessage("progress-copy-entity-types"));
+      entityTypeCopier.copy(entityTypes, state);
+    }
   }
 
   private Package getPackage(String targetPackageId) {

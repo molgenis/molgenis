@@ -22,7 +22,7 @@ public class ResourceCollector {
 
   private final MetaDataService metaDataService;
 
-  public ResourceCollector(MetaDataService metaDataService) {
+  ResourceCollector(MetaDataService metaDataService) {
     this.metaDataService = requireNonNull(metaDataService);
   }
 

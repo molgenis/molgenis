@@ -73,6 +73,43 @@ class EntityTypeCopier {
         .forEach(e -> state.progress().increment(1));
   }
 
+  /**
+   * Checks if there's an EntityType in the target location with the same label. If so, keeps adding
+   * a postfix until the label is unique.
+   */
+  private void assignUniqueLabel(EntityType entityType, CopyState state) {
+    Set<String> existingLabels;
+    if (state.targetPackage() != null) {
+      //noinspection ConstantConditions
+      existingLabels =
+          stream(state.targetPackage().getEntityTypes()).map(EntityType::getLabel).collect(toSet());
+    } else {
+      existingLabels =
+          dataService
+              .query(ENTITY_TYPE_META_DATA, EntityType.class)
+              .eq(EntityTypeMetadata.PACKAGE, null)
+              .findAll()
+              .map(EntityType::getLabel)
+              .collect(toSet());
+    }
+    entityType.setLabel(LabelGenerator.generateUniqueLabel(entityType.getLabel(), existingLabels));
+  }
+
+  private EntityType copyEntityType(EntityType original, CopyState state) {
+    EntityType copy = EntityType.newInstance(original, SHALLOW_COPY_ATTRS, attributeFactory);
+    Map<String, Attribute> copiedAttributes =
+        EntityType.deepCopyAttributes(original, copy, attributeFactory);
+
+    String newId = idGenerator.generateId();
+    copy.setId(newId);
+
+    state.copiedEntityTypes().put(original.getId(), copy);
+    state.originalEntityTypeIds().put(newId, original.getId());
+    state.copiedAttributes().putAll(copiedAttributes);
+
+    return copy;
+  }
+
   private void transformRelations(EntityType entityType, CopyState state) {
     transformPackage(entityType, state.copiedPackages());
     transformExtends(entityType, state.copiedEntityTypes());
@@ -103,28 +140,13 @@ class EntityTypeCopier {
     return copy;
   }
 
-  private EntityType copyEntityType(EntityType original, CopyState state) {
-    EntityType copy = EntityType.newInstance(original, SHALLOW_COPY_ATTRS, attributeFactory);
-    Map<String, Attribute> copiedAttributes =
-        EntityType.deepCopyAttributes(original, copy, attributeFactory);
-
-    String newId = idGenerator.generateId();
-    copy.setId(newId);
-
-    state.copiedEntityTypes().put(original.getId(), copy);
-    state.originalIds().put(newId, original.getId());
-    state.copiedAttributes().putAll(copiedAttributes);
-
-    return copy;
-  }
-
   private EntityType persistEntityType(EntityType copy) {
     dataService.getMeta().addEntityType(copy);
     return copy;
   }
 
   private EntityType copyEntities(EntityType copy, CopyState state) {
-    String originalEntityTypeId = state.originalIds().get(copy.getId());
+    String originalEntityTypeId = state.originalEntityTypeIds().get(copy.getId());
     if (!copy.isAbstract()) {
       dataService
           .getRepository(originalEntityTypeId)
@@ -137,28 +159,6 @@ class EntityTypeCopier {
     dataService.add(
         copy.getId(),
         batch.stream().map(entity -> new PretendingEntity(entity, state.copiedEntityTypes())));
-  }
-
-  /**
-   * Checks if there's an EntityType in the target location with the same label. If so, keeps adding
-   * a postfix until the label is unique.
-   */
-  private void assignUniqueLabel(EntityType entityType, CopyState state) {
-    Set<String> existingLabels;
-    if (state.targetPackage() != null) {
-      //noinspection ConstantConditions
-      existingLabels =
-          stream(state.targetPackage().getEntityTypes()).map(EntityType::getLabel).collect(toSet());
-    } else {
-      existingLabels =
-          dataService
-              .query(ENTITY_TYPE_META_DATA, EntityType.class)
-              .eq(EntityTypeMetadata.PACKAGE, null)
-              .findAll()
-              .map(EntityType::getLabel)
-              .collect(toSet());
-    }
-    entityType.setLabel(LabelGenerator.generateUniqueLabel(entityType.getLabel(), existingLabels));
   }
 
   /**
