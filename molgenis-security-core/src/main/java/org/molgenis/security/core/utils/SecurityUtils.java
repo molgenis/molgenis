@@ -3,6 +3,7 @@ package org.molgenis.security.core.utils;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 
 import java.util.Collection;
+import javax.annotation.Nullable;
 import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
 import org.springframework.security.core.Authentication;

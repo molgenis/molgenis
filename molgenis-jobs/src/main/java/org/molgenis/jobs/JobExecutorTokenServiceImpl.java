@@ -28,15 +28,11 @@ public class JobExecutorTokenServiceImpl implements JobExecutorTokenService {
     return jobExecution
         .getUser()
         .map(this::createRunAsUsertoken)
-        .orElseGet(this::createSystemToken);
+        .orElseGet(SystemSecurityToken::getInstance);
   }
 
   private AbstractAuthenticationToken createRunAsUsertoken(String username) {
     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
     return runAsUserTokenFactory.create(JOB_EXECUTION_TOKEN_KEY, userDetails, null);
-  }
-
-  private AbstractAuthenticationToken createSystemToken() {
-    return new SystemSecurityToken();
   }
 }
