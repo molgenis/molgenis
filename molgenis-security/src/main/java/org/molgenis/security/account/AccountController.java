@@ -18,10 +18,10 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.security.captcha.CaptchaException;
-import org.molgenis.security.captcha.CaptchaRequest;
-import org.molgenis.security.captcha.CaptchaService;
+import org.molgenis.security.captcha.ReCaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -64,22 +64,25 @@ public class AccountController {
       "You have successfully registered, your request has been forwarded to the administrator.";
 
   private final AccountService accountService;
-  private final CaptchaService captchaService;
+  private final ReCaptchaService reCaptchaV3Service;
   private final RedirectStrategy redirectStrategy;
   private final AuthenticationSettings authenticationSettings;
   private final UserFactory userFactory;
+  private final AppSettings appSettings;
 
   public AccountController(
       AccountService accountService,
-      CaptchaService captchaService,
+      ReCaptchaService reCaptchaV3Service,
       RedirectStrategy redirectStrategy,
       AuthenticationSettings authenticationSettings,
-      UserFactory userFactory) {
+      UserFactory userFactory,
+      AppSettings appSettings) {
     this.accountService = requireNonNull(accountService);
-    this.captchaService = requireNonNull(captchaService);
+    this.reCaptchaV3Service = requireNonNull(reCaptchaV3Service);
     this.redirectStrategy = requireNonNull(redirectStrategy);
     this.authenticationSettings = requireNonNull(authenticationSettings);
     this.userFactory = requireNonNull(userFactory);
+    this.appSettings = requireNonNull(appSettings);
   }
 
   @GetMapping("/login")
@@ -92,6 +95,8 @@ public class AccountController {
     ModelAndView model = new ModelAndView("register-modal");
     model.addObject("countries", CountryCodes.get());
     model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
+    model.addObject("isRecaptchaEnabled", appSettings.getRecaptchaIsEnabled());
+    model.addObject("recaptchaPublicKey", appSettings.getRecaptchaPublicKey());
     return model;
   }
 
@@ -129,16 +134,14 @@ public class AccountController {
   @PostMapping(value = "/register", headers = "Content-Type=application/x-www-form-urlencoded")
   @ResponseBody
   public Map<String, String> registerUser(
-      @Valid @ModelAttribute RegisterRequest registerRequest,
-      @Valid @ModelAttribute CaptchaRequest captchaRequest,
-      HttpServletRequest request)
-      throws BindException, CaptchaException, UsernameAlreadyExistsException,
-          EmailAlreadyExistsException, NoPermissionException {
+      @Valid @ModelAttribute RegisterRequest registerRequest, HttpServletRequest request)
+      throws Exception {
     if (authenticationSettings.getSignUp()) {
       if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
         throw new BindException(RegisterRequest.class, "password does not match confirm password");
       }
-      if (!captchaService.validateCaptcha(captchaRequest.getCaptcha())) {
+      if (appSettings.getRecaptchaIsEnabled()
+          && !reCaptchaV3Service.validate(registerRequest.getRecaptcha())) {
         throw new CaptchaException("invalid captcha answer");
       }
       User user = toUser(registerRequest);
@@ -160,7 +163,6 @@ public class AccountController {
           authenticationSettings.getSignUpModeration()
               ? REGISTRATION_SUCCESS_MESSAGE_ADMIN
               : REGISTRATION_SUCCESS_MESSAGE_USER;
-      captchaService.removeCaptcha();
       return Collections.singletonMap("message", successMessage);
     } else {
       throw new NoPermissionException("Self registration is disabled");
