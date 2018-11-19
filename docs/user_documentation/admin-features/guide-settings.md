@@ -15,7 +15,7 @@ There are a three main sections in the application settings.
 
 ### ReCaptcha settings
 ReCaptcha is a service currently only provided by Google. It basically works on determining a BOT-score. The value of this score is based on the request send to the server. The request is validated based on host-key comparison and other variables which are part of the inner workings of reCaptcha.
-To set it up you need to configure an account on [ReCaptcha](https://www.google.com/recaptcha) (Check [Adding a domain at reCaptcha](#markdown-header-adding-domain-at-recaptcha)). Secondly you need to define properties in MOLGENIS (please check: [Configure reCaptcha in MOLGENIS](#markdown-header-configure-recaptcha-in-molgenis)).
+To set it up you need to configure an account on [ReCaptcha](https://www.google.com/recaptcha) (Check [Adding a domain at reCaptcha](#adding-domain-at-recaptcha)). Secondly you need to define properties in MOLGENIS (please check: [Configure reCaptcha in MOLGENIS](#configure-recaptcha-in-molgenis)).
 
 #### Adding domain at reCaptcha
 You have to configure a domain at [ReCaptcha](https://www.google.com/recaptcha). If you follow the this [documentation](https://developers.google.com/recaptcha/docs/v3) you can register your domain to use reCaptcha.
