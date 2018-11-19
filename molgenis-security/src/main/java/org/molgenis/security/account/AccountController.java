@@ -64,7 +64,7 @@ public class AccountController {
       "You have successfully registered, your request has been forwarded to the administrator.";
 
   private final AccountService accountService;
-  private final ReCaptchaService reCaptchaV3Service;
+  private final ReCaptchaService reCaptchaService;
   private final RedirectStrategy redirectStrategy;
   private final AuthenticationSettings authenticationSettings;
   private final UserFactory userFactory;
@@ -78,7 +78,7 @@ public class AccountController {
       UserFactory userFactory,
       AppSettings appSettings) {
     this.accountService = requireNonNull(accountService);
-    this.reCaptchaV3Service = requireNonNull(reCaptchaV3Service);
+    this.reCaptchaService = requireNonNull(reCaptchaV3Service);
     this.redirectStrategy = requireNonNull(redirectStrategy);
     this.authenticationSettings = requireNonNull(authenticationSettings);
     this.userFactory = requireNonNull(userFactory);
@@ -141,7 +141,7 @@ public class AccountController {
         throw new BindException(RegisterRequest.class, "password does not match confirm password");
       }
       if (appSettings.getRecaptchaIsEnabled()
-          && !reCaptchaV3Service.validate(registerRequest.getRecaptcha())) {
+          && !reCaptchaService.validate(registerRequest.getRecaptcha())) {
         throw new CaptchaException("invalid captcha answer");
       }
       User user = toUser(registerRequest);

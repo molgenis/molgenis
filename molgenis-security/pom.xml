@@ -165,9 +165,5 @@
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-    </dependency>
   </dependencies>
 </project>
