@@ -16,6 +16,25 @@ public class SidUtils {
 
   private SidUtils() {}
 
+  /** @return security identity for the current security context, never <tt>null</tt>. */
+  public static Sid createSecurityContextSid() {
+    Sid sid;
+
+    if (SecurityUtils.currentUserIsSystem()) {
+      sid = createSystemSid();
+    } else if (SecurityUtils.currentUserIsAnonymous()) {
+      sid = createAnonymousSid();
+    } else {
+      String username = SecurityUtils.getCurrentUsername();
+      if (username == null) {
+        throw new NullPointerException("SecurityUtils.getCurrentUsername is null");
+      }
+      sid = new PrincipalSid(username);
+    }
+
+    return sid;
+  }
+
   public static Sid createUserSid(String username) {
     if (username.equals(SecurityUtils.ANONYMOUS_USERNAME)) {
       return createAnonymousSid();
@@ -43,7 +62,11 @@ public class SidUtils {
     return authority.substring(ROLE_PREFIX.length());
   }
 
-  private static Sid createAnonymousSid() {
+  private static Sid createSystemSid() {
+    return new GrantedAuthoritySid(SecurityUtils.ROLE_SYSTEM);
+  }
+
+  public static Sid createAnonymousSid() {
     return new GrantedAuthoritySid(SecurityUtils.AUTHORITY_ANONYMOUS);
   }
 }
