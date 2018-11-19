@@ -14,6 +14,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,7 +88,7 @@ public class EmxExportServiceImpl implements EmxExportService {
       // Progress per entity type plus package sheet + finished message
       progress.setProgressMax(entityTypes.size() + 2);
     }
-    writePackageSheet(packageSet, writer, progress);
+    writePackageSheet(packageSet, entityTypeSet, writer, progress);
     writeEntityTypeSheets(entityTypeSet, writer, progress);
   }
 
@@ -190,10 +192,16 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void writePackageSheet(
-      Iterable<Package> packages, ExcelWriter writer, Progress progress) {
+      Set<Package> packages, Set<EntityType> entityTypes, ExcelWriter writer, Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }
+
+    // add the packages that should be writte to the packages sheet, but for which the entityTypes
+    // should not be exported
+    addEntityPackages(entityTypes, packages);
+    addParentPackages(packages);
+
     writer.writeRows(Streams.stream(packages).map(PackageMapper::map), EMX_PACKAGES);
     if (progress != null) {
       progress.status(
@@ -205,5 +213,31 @@ public class EmxExportServiceImpl implements EmxExportService {
                   LocaleContextHolder.getLocale()));
       progress.increment(1);
     }
+  }
+
+  private void addEntityPackages(Set<EntityType> entityTypes, Set<Package> packages) {
+    for (EntityType entityType : entityTypes) {
+      Package pack = entityType.getPackage();
+      if (pack != null) {
+        packages.add(pack);
+      }
+    }
+  }
+
+  private void addParentPackages(Set<Package> packages) {
+    List<Package> parents = new ArrayList<>();
+    for (Package pack : packages) {
+      parents.addAll(getParentPackages(pack));
+    }
+  }
+
+  private Collection<Package> getParentPackages(Package pack) {
+    List<Package> parents = new ArrayList<>();
+    Package parent = pack.getParent();
+    if (parent != null) {
+      parents.add(pack);
+      parents.addAll(getParentPackages(parent));
+    }
+    return parents;
   }
 }
