@@ -7,11 +7,10 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_NAME;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_PARENT;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_TAGS;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -19,14 +18,17 @@ import org.molgenis.data.meta.model.Tag;
 
 public class PackageMapper {
 
-  public static final Map<String, String> PACKAGE_ATTRS = new LinkedHashMap();
+  public static final ImmutableMap<String, String> PACKAGE_ATTRS;
 
   static {
-    PACKAGE_ATTRS.put(EMX_PACKAGE_NAME, PackageMetadata.ID);
-    PACKAGE_ATTRS.put(EMX_PACKAGE_LABEL, PackageMetadata.LABEL);
-    PACKAGE_ATTRS.put(EMX_PACKAGE_DESCRIPTION, PackageMetadata.DESCRIPTION);
-    PACKAGE_ATTRS.put(EMX_PACKAGE_PARENT, PackageMetadata.PARENT);
-    PACKAGE_ATTRS.put(EMX_PACKAGE_TAGS, PackageMetadata.TAGS);
+    PACKAGE_ATTRS =
+        ImmutableMap.<String, String>builder()
+            .put(EMX_PACKAGE_NAME, PackageMetadata.ID)
+            .put(EMX_PACKAGE_LABEL, PackageMetadata.LABEL)
+            .put(EMX_PACKAGE_DESCRIPTION, PackageMetadata.DESCRIPTION)
+            .put(EMX_PACKAGE_PARENT, PackageMetadata.PARENT)
+            .put(EMX_PACKAGE_TAGS, PackageMetadata.TAGS)
+            .build();
   }
 
   private PackageMapper() {}

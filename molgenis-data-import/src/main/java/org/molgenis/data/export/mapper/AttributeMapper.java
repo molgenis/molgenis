@@ -27,11 +27,10 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VA
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ATTRIBUTES_VISIBLE;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetadata;
@@ -39,33 +38,35 @@ import org.molgenis.data.meta.model.Tag;
 
 public class AttributeMapper {
 
-  public static final Map<String, String> ATTRIBUTE_ATTRS = new LinkedHashMap<>();
+  public static final ImmutableMap<String, String> ATTRIBUTE_ATTRS;
 
   static {
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_LABEL, AttributeMetadata.LABEL);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_DESCRIPTION, AttributeMetadata.DESCRIPTION);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_ENTITY, AttributeMetadata.ENTITY);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_DATA_TYPE, AttributeMetadata.TYPE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_REF_ENTITY, AttributeMetadata.REF_ENTITY_TYPE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_NILLABLE, AttributeMetadata.IS_NULLABLE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_UNIQUE, AttributeMetadata.IS_UNIQUE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_VISIBLE, AttributeMetadata.IS_VISIBLE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_ID_ATTRIBUTE, AttributeMetadata.IS_ID_ATTRIBUTE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_LABEL_ATTRIBUTE, AttributeMetadata.IS_LABEL_ATTRIBUTE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_READ_ONLY, AttributeMetadata.IS_READ_ONLY);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_AGGREGATEABLE, AttributeMetadata.IS_AGGREGATABLE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, AttributeMetadata.LOOKUP_ATTRIBUTE_INDEX);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_ENUM_OPTIONS, AttributeMetadata.ENUM_OPTIONS);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_PART_OF_ATTRIBUTE, AttributeMetadata.PARENT);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_RANGE_MAX, AttributeMetadata.RANGE_MAX);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_RANGE_MIN, AttributeMetadata.RANGE_MIN);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_MAPPED_BY, AttributeMetadata.MAPPED_BY);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_EXPRESSION, AttributeMetadata.EXPRESSION);
-    ATTRIBUTE_ATTRS.put(
-        EMX_ATTRIBUTES_VALIDATION_EXPRESSION, AttributeMetadata.VALIDATION_EXPRESSION);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_DEFAULT_VALUE, AttributeMetadata.DEFAULT_VALUE);
-    ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS);
+    ATTRIBUTE_ATTRS =
+        ImmutableMap.<String, String>builder()
+            .put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME)
+            .put(EMX_ATTRIBUTES_LABEL, AttributeMetadata.LABEL)
+            .put(EMX_ATTRIBUTES_DESCRIPTION, AttributeMetadata.DESCRIPTION)
+            .put(EMX_ATTRIBUTES_ENTITY, AttributeMetadata.ENTITY)
+            .put(EMX_ATTRIBUTES_DATA_TYPE, AttributeMetadata.TYPE)
+            .put(EMX_ATTRIBUTES_REF_ENTITY, AttributeMetadata.REF_ENTITY_TYPE)
+            .put(EMX_ATTRIBUTES_NILLABLE, AttributeMetadata.IS_NULLABLE)
+            .put(EMX_ATTRIBUTES_UNIQUE, AttributeMetadata.IS_UNIQUE)
+            .put(EMX_ATTRIBUTES_VISIBLE, AttributeMetadata.IS_VISIBLE)
+            .put(EMX_ATTRIBUTES_ID_ATTRIBUTE, AttributeMetadata.IS_ID_ATTRIBUTE)
+            .put(EMX_ATTRIBUTES_LABEL_ATTRIBUTE, AttributeMetadata.IS_LABEL_ATTRIBUTE)
+            .put(EMX_ATTRIBUTES_READ_ONLY, AttributeMetadata.IS_READ_ONLY)
+            .put(EMX_ATTRIBUTES_AGGREGATEABLE, AttributeMetadata.IS_AGGREGATABLE)
+            .put(EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE, AttributeMetadata.LOOKUP_ATTRIBUTE_INDEX)
+            .put(EMX_ATTRIBUTES_ENUM_OPTIONS, AttributeMetadata.ENUM_OPTIONS)
+            .put(EMX_ATTRIBUTES_PART_OF_ATTRIBUTE, AttributeMetadata.PARENT)
+            .put(EMX_ATTRIBUTES_RANGE_MAX, AttributeMetadata.RANGE_MAX)
+            .put(EMX_ATTRIBUTES_RANGE_MIN, AttributeMetadata.RANGE_MIN)
+            .put(EMX_ATTRIBUTES_MAPPED_BY, AttributeMetadata.MAPPED_BY)
+            .put(EMX_ATTRIBUTES_EXPRESSION, AttributeMetadata.EXPRESSION)
+            .put(EMX_ATTRIBUTES_VALIDATION_EXPRESSION, AttributeMetadata.VALIDATION_EXPRESSION)
+            .put(EMX_ATTRIBUTES_DEFAULT_VALUE, AttributeMetadata.DEFAULT_VALUE)
+            .put(EMX_ATTRIBUTES_TAGS, AttributeMetadata.TAGS)
+            .build();
   }
 
   private AttributeMapper() {}
