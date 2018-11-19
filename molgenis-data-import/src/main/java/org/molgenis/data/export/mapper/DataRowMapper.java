@@ -19,7 +19,9 @@ public class DataRowMapper {
     List<Object> dataRow = new ArrayList<>();
     for (Attribute attribute : entity.getEntityType().getAttributes()) {
       // MAPPED_BY and expressions
-      if (attribute.getDataType() != AttributeType.COMPOUND) {
+      if (attribute.getExpression() != null || attribute.getMappedBy() != null) {
+        dataRow.add(null);
+      } else if (attribute.getDataType() != AttributeType.COMPOUND) {
         if (isSingleReferenceType(attribute)) {
           Entity value = entity.getEntity(attribute.getName());
           dataRow.add(value != null ? value.getIdValue() : null);
