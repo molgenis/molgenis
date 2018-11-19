@@ -22,10 +22,9 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 public class EntityTypeMapper {
-  public static Map<String, String> ENTITIES_ATTRS;
+  public static final Map<String, String> ENTITIES_ATTRS = new LinkedHashMap<>();
 
   static {
-    ENTITIES_ATTRS = new LinkedHashMap<>();
     ENTITIES_ATTRS.put(EMX_ENTITIES_NAME, EntityTypeMetadata.ID);
     ENTITIES_ATTRS.put(EMX_ENTITIES_PACKAGE, EntityTypeMetadata.PACKAGE);
     ENTITIES_ATTRS.put(EMX_ENTITIES_LABEL, EntityTypeMetadata.LABEL);

@@ -39,10 +39,9 @@ import org.molgenis.data.meta.model.Tag;
 
 public class AttributeMapper {
 
-  public static Map<String, String> ATTRIBUTE_ATTRS;
+  public static final Map<String, String> ATTRIBUTE_ATTRS = new LinkedHashMap<>();
 
   static {
-    ATTRIBUTE_ATTRS = new LinkedHashMap<>();
     ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_NAME, AttributeMetadata.NAME);
     ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_LABEL, AttributeMetadata.LABEL);
     ATTRIBUTE_ATTRS.put(EMX_ATTRIBUTES_DESCRIPTION, AttributeMetadata.DESCRIPTION);

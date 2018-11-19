@@ -19,10 +19,9 @@ import org.molgenis.data.meta.model.Tag;
 
 public class PackageMapper {
 
-  public static Map<String, String> PACKAGE_ATTRS;
+  public static final Map<String, String> PACKAGE_ATTRS = new LinkedHashMap();
 
   static {
-    PACKAGE_ATTRS = new LinkedHashMap();
     PACKAGE_ATTRS.put(EMX_PACKAGE_NAME, PackageMetadata.ID);
     PACKAGE_ATTRS.put(EMX_PACKAGE_LABEL, PackageMetadata.LABEL);
     PACKAGE_ATTRS.put(EMX_PACKAGE_DESCRIPTION, PackageMetadata.DESCRIPTION);
