@@ -4,7 +4,7 @@
   <parent>
     <artifactId>molgenis</artifactId>
     <groupId>org.molgenis</groupId>
-    <version>7.2.9</version>
+    <version>7.2.10-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-data-cache</artifactId>
 
