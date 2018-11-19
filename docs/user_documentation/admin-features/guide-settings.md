@@ -27,8 +27,7 @@ You have to configure 6 properties:
 
 - *ReCaptcha secret*: Can be obtained by configuring your domain in [ReCaptcha from Google](https://www.google.com/recaptcha) 
 - *ReCaptcha site*: Can be obtained by configuring your domain in [ReCaptcha from Google](https://www.google.com/recaptcha)
-- *Enable reCaptcha for Feedback plugin*: If set to true then the feedback plugin used reCaptcha for BOT-determination
-- *Enable reCaptcha for Sign-up plugin*: If set to true then the sign-up plugin used reCaptcha for BOT-determination
+- *Enable reCaptcha*: If set to true then the reCaptcha is enabled in MOLGENIS
 - *Verification URI*: Fires a request for verification if the user is a BOT or not
 - *BOT threshold*: A number between 0.0 and 1.0. 1.0 is most likely a human and 0.0 is most likely a BOT. The threshold is compare to the score that reCaptcha calculates. 
 
