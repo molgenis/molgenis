@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.download;
 import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.molgenis.jobs.Progress;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -71,7 +73,9 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     Path actual = Files.createTempFile("test", ".xlsx");
     // when using the "in memory" it package, created above, the "getChildern" returns null.
     Package actualIt = dataService.getMeta().getPackage("it").get();
-    emxDownloadService.export(newArrayList(entityType1), newArrayList(actualIt), actual);
+    // We're testing the export service, not a job, use TestProgress to check if progress is updated
+    Progress progress = new TestProgress();
+    emxDownloadService.export(newArrayList(entityType1), newArrayList(actualIt), actual, progress);
     try (XSSFWorkbook actualWorkbook = new XSSFWorkbook(Files.newInputStream(actual))) {
       try (Workbook expected =
           new XSSFWorkbook(
@@ -81,5 +85,12 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
         assertThat(actualWorkbook, sameWorkbook(expected));
       }
     }
+    assertEquals(
+        progress,
+        new TestProgress(
+            3,
+            3,
+            "Downloading: test1\nDownloading: it_emx_test1\nFinished downloading package metadata",
+            ""));
   }
 }
