@@ -223,6 +223,11 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   }
 
   @Bean
+  public PropertiesMessageSource feedbackMessageSource() {
+    return new PropertiesMessageSource("feedback");
+  }
+
+  @Bean
   public PropertiesMessageSource dataexplorerMessageSource() {
     return new PropertiesMessageSource("dataexplorer");
   }

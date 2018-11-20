@@ -136,4 +136,29 @@ public class TestAppSettings implements AppSettings {
   public String getCustomJavascript() {
     return null;
   }
+
+  @Override
+  public String getRecaptchaPrivateKey() {
+    return null;
+  }
+
+  @Override
+  public String getRecaptchaPublicKey() {
+    return null;
+  }
+
+  @Override
+  public boolean getRecaptchaIsEnabled() {
+    return false;
+  }
+
+  @Override
+  public double getRecaptchaBotThreshold() {
+    return 0.0;
+  }
+
+  @Override
+  public String getRecaptchaVerifyURI() {
+    return null;
+  }
 }

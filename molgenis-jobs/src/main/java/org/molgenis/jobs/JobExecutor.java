@@ -1,6 +1,5 @@
 package org.molgenis.jobs;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
@@ -113,18 +112,7 @@ public class JobExecutor {
   public CompletableFuture<Void> submit(
       JobExecution jobExecution, ExecutorService executorService) {
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
-    return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService)
-        .handle(
-            (voidResult, throwable) -> {
-              if (throwable != null) {
-                LOG.error(
-                    format(
-                        "Job of type '%s' with id '%s' completed with exception",
-                        jobExecution.getType(), jobExecution.getIdentifier()),
-                    throwable);
-              }
-              return voidResult;
-            });
+    return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
   }
 
   @SuppressWarnings("unchecked")
