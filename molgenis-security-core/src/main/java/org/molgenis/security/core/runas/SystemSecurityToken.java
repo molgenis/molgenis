@@ -3,6 +3,7 @@ package org.molgenis.security.core.runas;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_GENERAL_CHANGES;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_MODIFY_AUDITING;
 import static org.molgenis.security.core.utils.SecurityUtils.ROLE_ACL_TAKE_OWNERSHIP;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -11,8 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 /** Authentication token for the SYSTEM user */
 public class SystemSecurityToken extends AbstractAuthenticationToken {
   private static final SystemSecurityToken INSTANCE = new SystemSecurityToken();
-
-  public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
 
   private SystemSecurityToken() {
     super(
@@ -35,6 +34,11 @@ public class SystemSecurityToken extends AbstractAuthenticationToken {
   @Override
   public Object getPrincipal() {
     return SystemPrincipal.getInstance();
+  }
+
+  @Override
+  public boolean isAuthenticated() {
+    return true;
   }
 
   public static class SystemPrincipal {

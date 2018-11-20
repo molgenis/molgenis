@@ -27,7 +27,12 @@ public class SystemSecurityTokenTest {
   }
 
   @Test
-  public void testgetPrincipal() {
+  public void testGetPrincipal() {
     assertTrue(SystemSecurityToken.getInstance().getPrincipal() instanceof SystemPrincipal);
+  }
+
+  @Test
+  public void testIsAuthenticated() {
+    assertTrue(SystemSecurityToken.getInstance().isAuthenticated());
   }
 }
