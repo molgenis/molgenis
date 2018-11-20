@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -169,6 +170,42 @@ public class FeedbackControllerTest extends AbstractMolgenisSpringTest {
                 .param("recaptcha", "validCaptcha"))
         .andExpect(status().is4xxClientError());
     verify(reCaptchaService, times(0)).validate("validCaptcha");
+  }
+
+  @Test
+  public void submitAuthenticationErrorWhileSendingMail() throws Exception {
+    List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
+    when(userService.getSuEmailAddresses()).thenReturn(adminEmails);
+    when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
+    when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
+    SimpleMailMessage expected = new SimpleMailMessage();
+    expected.setTo("molgenis@molgenis.org");
+    expected.setCc("user@domain.com");
+    expected.setReplyTo("user@domain.com");
+    expected.setSubject("[feedback-app123] Feedback form");
+    expected.setText("Feedback from First Last (user@domain.com):\n\n" + "Feedback.\nLine two.");
+    doThrow(new MailAuthenticationException("ERRORRR!")).when(mailSender).send(expected);
+    mockMvcFeedback
+        .perform(
+            MockMvcRequestBuilders.post(FeedbackController.URI)
+                .param("name", "First Last")
+                .param("subject", "Feedback form")
+                .param("email", "user@domain.com")
+                .param("feedback", "Feedback.\nLine two.")
+                .param("recaptcha", "validCaptcha"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("view-feedback"))
+        .andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
+        .andExpect(
+            model()
+                .attribute(
+                    "feedbackForm",
+                    hasProperty(
+                        "errorMessage",
+                        equalTo(
+                            "Unfortunately, we were unable to send the mail containing "
+                                + "your feedback. Please contact the administrator."))));
+    verify(reCaptchaService, times(1)).validate("validCaptcha");
   }
 
   @Test
