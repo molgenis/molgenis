@@ -140,7 +140,6 @@
     <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.12</checkstyle.version>
-    <micrometer.version>1.0.6</micrometer.version>
     <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
   </properties>
 
@@ -994,16 +993,6 @@
         <groupId>org.zeroturnaround</groupId>
         <artifactId>zt-zip</artifactId>
         <version>${zt-zip.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-core</artifactId>
-        <version>${micrometer.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-spring-legacy</artifactId>
-        <version>${micrometer.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.jknack</groupId>

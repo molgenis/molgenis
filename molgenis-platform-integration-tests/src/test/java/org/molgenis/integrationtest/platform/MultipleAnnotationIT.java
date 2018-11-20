@@ -1,9 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,14 +51,14 @@ public class MultipleAnnotationIT extends AbstractTestNGSpringContextTests {
     @Transactional
     @PreAuthorize("ROLE_USER")
     public void runAsSystemMethod() {
-      assertEquals(getCurrentUsername(), "SYSTEM");
+      assertTrue(SecurityUtils.currentUserIsSystem());
     }
 
     @PreAuthorize("ROLE_USER")
     @RunAsSystem
     @Transactional
     public void runAsSystemMethod2() {
-      assertEquals(getCurrentUsername(), "SYSTEM");
+      assertTrue(SecurityUtils.currentUserIsSystem());
     }
   }
 
@@ -80,19 +82,19 @@ public class MultipleAnnotationIT extends AbstractTestNGSpringContextTests {
       return new AbstractPlatformTransactionManager() {
         @Override
         protected Object doGetTransaction() throws TransactionException {
-          assertEquals(getCurrentUsername(), "SYSTEM");
+          assertTrue(SecurityUtils.currentUserIsSystem());
           return new Object();
         }
 
         @Override
         protected void doBegin(Object transaction, TransactionDefinition definition)
             throws TransactionException {
-          assertEquals(getCurrentUsername(), "SYSTEM");
+          assertTrue(SecurityUtils.currentUserIsSystem());
         }
 
         @Override
         protected void doCommit(DefaultTransactionStatus status) throws TransactionException {
-          assertEquals(getCurrentUsername(), "SYSTEM");
+          assertTrue(SecurityUtils.currentUserIsSystem());
         }
 
         @Override

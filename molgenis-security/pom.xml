@@ -80,6 +80,10 @@
     </dependency>
     <!-- third party dependencies -->
     <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
     </dependency>
@@ -91,10 +95,6 @@
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>cn.apiclub.tool</groupId>
-      <artifactId>simplecaptcha</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
