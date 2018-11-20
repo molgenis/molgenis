@@ -2,6 +2,7 @@ package org.molgenis.jobs;
 
 import java.util.Locale;
 import java.util.concurrent.Callable;
+import org.molgenis.i18n.ErrorCoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -53,8 +54,16 @@ class JobExecutionTemplate {
       return result;
     } catch (Exception ex) {
       LOG.warn("Error executing job", ex);
-      progress.failed(ex);
+      progress.failed(createFailureMessage(ex), ex);
       throw new JobExecutionException(ex);
     }
+  }
+
+  private String createFailureMessage(Exception exception) {
+    String message = exception.getLocalizedMessage();
+    if (exception instanceof ErrorCoded) {
+      message += " (" + ((ErrorCoded) exception).getErrorCode() + ')';
+    }
+    return message;
   }
 }
