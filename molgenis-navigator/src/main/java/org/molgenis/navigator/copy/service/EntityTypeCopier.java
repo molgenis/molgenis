@@ -1,10 +1,10 @@
 package org.molgenis.navigator.copy.service;
 
 import static com.google.common.collect.Streams.stream;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
-import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.navigator.copy.service.RelationTransformer.transformExtends;
 import static org.molgenis.navigator.copy.service.RelationTransformer.transformMappedBys;
@@ -21,15 +21,12 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
 
-// TODO document
 @Component
 class EntityTypeCopier {
 
@@ -38,29 +35,36 @@ class EntityTypeCopier {
   private final DataService dataService;
   private final IdGenerator idGenerator;
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
-  private final AttributeFactory attributeFactory;
+  private final EntityTypeMetadataCopier entityTypeMetadataCopier;
 
   EntityTypeCopier(
       DataService dataService,
       IdGenerator idGenerator,
       EntityTypeDependencyResolver entityTypeDependencyResolver,
-      AttributeFactory attributeFactory) {
-    this.dataService = dataService;
-    this.idGenerator = idGenerator;
-    this.entityTypeDependencyResolver = entityTypeDependencyResolver;
-    this.attributeFactory = attributeFactory;
+      EntityTypeMetadataCopier entityTypeMetadataCopier) {
+    this.dataService = requireNonNull(dataService);
+    this.idGenerator = requireNonNull(idGenerator);
+    this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
+    this.entityTypeMetadataCopier = requireNonNull(entityTypeMetadataCopier);
   }
 
   public void copy(List<EntityType> entityTypes, CopyState state) {
     entityTypes.forEach(entityType -> assignUniqueLabel(entityType, state));
+    List<EntityType> copiedEntityTypes = copyEntityTypes(entityTypes, state);
+    persist(copiedEntityTypes, state);
+  }
 
+  private List<EntityType> copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
     List<EntityType> copiedEntityTypes =
         concat(entityTypes.stream(), state.entityTypesInPackages().stream())
             .map(original -> copyEntityType(original, state))
             .collect(toList());
 
     copiedEntityTypes.forEach(entityType -> transformRelations(entityType, state));
+    return copiedEntityTypes;
+  }
 
+  private void persist(List<EntityType> copiedEntityTypes, CopyState state) {
     entityTypeDependencyResolver
         .resolve(copiedEntityTypes)
         .stream()
@@ -96,16 +100,12 @@ class EntityTypeCopier {
   }
 
   private EntityType copyEntityType(EntityType original, CopyState state) {
-    EntityType copy = EntityType.newInstance(original, SHALLOW_COPY_ATTRS, attributeFactory);
-    Map<String, Attribute> copiedAttributes =
-        EntityType.deepCopyAttributes(original, copy, attributeFactory);
-
+    EntityType copy = entityTypeMetadataCopier.copy(original, state);
     String newId = idGenerator.generateId();
     copy.setId(newId);
 
     state.copiedEntityTypes().put(original.getId(), copy);
     state.originalEntityTypeIds().put(newId, original.getId());
-    state.copiedAttributes().putAll(copiedAttributes);
 
     return copy;
   }
