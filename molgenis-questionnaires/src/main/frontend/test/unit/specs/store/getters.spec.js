@@ -143,7 +143,7 @@ describe('getters', () => {
                 validate: () => false
               }
             ]
-          },
+          }
         ]
       },
       {
@@ -168,7 +168,7 @@ describe('getters', () => {
                 }
               }
             ]
-          },
+          }
         ]
       },
       {
@@ -193,7 +193,7 @@ describe('getters', () => {
                 }
               }
             ]
-          },
+          }
         ]
       },
       {
@@ -212,10 +212,10 @@ describe('getters', () => {
                 type: 'checkbox',
                 visible: (data) => true,
                 required: () => true,
-                validate: () => true,
+                validate: () => true
               }
             ]
-          },
+          }
         ]
       }
     ],

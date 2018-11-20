@@ -424,7 +424,7 @@ describe('actions', () => {
   })
 
   describe('AUTO_SAVE_QUESTIONNAIRE', () => {
-    let error= {}
+    let error = {}
 
     const state = {
       questionnaire: {
@@ -490,7 +490,7 @@ describe('actions', () => {
       payload = {formState: state, formData: {field1: 'updated value'}}
 
       const expectedMutations = [
-        {type: 'SET_FORM_DATA', payload: payload.formData},
+        {type: 'SET_FORM_DATA', payload: payload.formData}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
