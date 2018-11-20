@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.model.util.ResourceIdentifierUtil;
+import org.molgenis.navigator.util.ResourceIdentifierUtil;
 
 public class DownloadJobExecution extends JobExecution {
   public DownloadJobExecution(Entity entity) {
