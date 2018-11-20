@@ -25,9 +25,8 @@ import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.ONTOLOGY_
 import static org.molgenis.security.core.PermissionSet.READ;
 import static org.molgenis.security.core.PermissionSet.READMETA;
 import static org.molgenis.security.core.PermissionSet.WRITE;
+import static org.molgenis.security.core.SidUtils.createAnonymousSid;
 import static org.molgenis.security.core.SidUtils.createAuthoritySid;
-import static org.molgenis.security.core.SidUtils.createUserSid;
-import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_USER;
 import static org.molgenis.settings.SettingsPackage.PACKAGE_SETTINGS;
 
@@ -62,7 +61,7 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
       new ImmutableMultimap.Builder<>();
 
   WebAppPermissionRegistry() {
-    Sid anonymousUser = createUserSid(ANONYMOUS_USERNAME);
+    Sid anonymousUser = createAnonymousSid();
     Sid user = createAuthoritySid(AUTHORITY_USER);
     Sid viewer = createAuthoritySid(AUTHORITY_VIEWER);
     Sid editor = createAuthoritySid(AUTHORITY_EDITOR);
