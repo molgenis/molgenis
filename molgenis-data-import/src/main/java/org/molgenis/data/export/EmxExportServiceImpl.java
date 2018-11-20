@@ -54,12 +54,6 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   @Override
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-  public void export(List<EntityType> entityTypes, List<Package> packages, Path downloadFilePath) {
-    export(entityTypes, packages, downloadFilePath, null);
-  }
-
-  @Override
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public void export(
       List<EntityType> entityTypes,
       List<Package> packages,
@@ -80,14 +74,13 @@ public class EmxExportServiceImpl implements EmxExportService {
   private void exportEmx(
       List<EntityType> entityTypes, List<Package> packages, ExcelWriter writer, Progress progress)
       throws IOException {
+    requireNonNull(progress);
     Set<Package> packageSet = new LinkedHashSet<>();
     Set<EntityType> entityTypeSet = new LinkedHashSet<>();
     resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
 
-    if (progress != null) {
-      // Progress per entity type plus package sheet + finished message
-      progress.setProgressMax(entityTypes.size() + 2);
-    }
+    // Progress per entity type plus package sheet + finished message
+    progress.setProgressMax(entityTypes.size() + 2);
     writePackageSheet(packageSet, entityTypeSet, writer, progress);
     writeEntityTypeSheets(entityTypeSet, writer, progress);
   }
@@ -113,7 +106,7 @@ public class EmxExportServiceImpl implements EmxExportService {
                   "Downloading: ",
                   LocaleContextHolder.getLocale());
       if (progress != null) {
-        progress.status(progressMessage);
+        progress.status(progressMessage + entityType.getLabel());
         progress.increment(1);
       }
       writeAttributes(entityType.getAllAttributes(), writer);
@@ -172,12 +165,11 @@ public class EmxExportServiceImpl implements EmxExportService {
         .forEachBatched(entities -> writeRows(entities, entityType, writer), BATCH_SIZE);
   }
 
-  public void writeRows(List<Entity> entities, EntityType entityType, ExcelWriter writer) {
+  private void writeRows(List<Entity> entities, EntityType entityType, ExcelWriter writer) {
     writer.writeRows(entities.stream().map(DataRowMapper::mapDataRow), entityType.getId());
   }
 
-  private void writeEntityTypes(Iterable<EntityType> entityTypes, ExcelWriter writer)
-      throws IOException {
+  private void writeEntityTypes(Iterable<EntityType> entityTypes, ExcelWriter writer) {
     if (!writer.hasSheet(EMX_ENTITIES)) {
       writer.createSheet(EMX_ENTITIES, newArrayList(ENTITIES_ATTRS.keySet()));
     }
@@ -191,28 +183,26 @@ public class EmxExportServiceImpl implements EmxExportService {
     writer.writeRows(Streams.stream(attrs).map(AttributeMapper::map), EMX_ATTRIBUTES);
   }
 
-  private void writePackageSheet(
+  protected void writePackageSheet(
       Set<Package> packages, Set<EntityType> entityTypes, ExcelWriter writer, Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }
 
-    // add the packages that should be writte to the packages sheet, but for which the entityTypes
+    // add the packages that should be write to the packages sheet, but for which the entityTypes
     // should not be exported
     addEntityPackages(entityTypes, packages);
     addParentPackages(packages);
 
-    writer.writeRows(Streams.stream(packages).map(PackageMapper::map), EMX_PACKAGES);
-    if (progress != null) {
-      progress.status(
-          MessageSourceHolder.getMessageSource()
-              .getMessage(
-                  "emx_export_metadata_message",
-                  new Object[] {},
-                  "Finished downloading package metadata",
-                  LocaleContextHolder.getLocale()));
-      progress.increment(1);
-    }
+    writer.writeRows(packages.stream().map(PackageMapper::map), EMX_PACKAGES);
+    progress.status(
+        MessageSourceHolder.getMessageSource()
+            .getMessage(
+                "emx_export_metadata_message",
+                new Object[] {},
+                "Finished downloading package metadata",
+                LocaleContextHolder.getLocale()));
+    progress.increment(1);
   }
 
   private void addEntityPackages(Set<EntityType> entityTypes, Set<Package> packages) {
@@ -229,13 +219,14 @@ public class EmxExportServiceImpl implements EmxExportService {
     for (Package pack : packages) {
       parents.addAll(getParentPackages(pack));
     }
+    packages.addAll(parents);
   }
 
   private Collection<Package> getParentPackages(Package pack) {
     List<Package> parents = new ArrayList<>();
     Package parent = pack.getParent();
     if (parent != null) {
-      parents.add(pack);
+      parents.add(parent);
       parents.addAll(getParentPackages(parent));
     }
     return parents;

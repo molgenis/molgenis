@@ -1,6 +1,7 @@
 package org.molgenis.data.export.mapper;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_ABSTRACT;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_BACKEND;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_DESCRIPTION;
@@ -15,6 +16,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Map.Entry;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
@@ -62,6 +65,13 @@ public class EntityTypeMapper {
       }
     }
     return row;
+  }
+
+  public static List<Object> getHeaders(EntityType entityType) {
+    return Streams.stream(entityType.getAttributes())
+        .filter(attr -> attr.getDataType() != AttributeType.COMPOUND)
+        .map(Attribute::getName)
+        .collect(toList());
   }
 
   private static String getTags(EntityType entityType) {
