@@ -120,6 +120,7 @@ class EntityTypeCopier {
   private EntityType cutDefaultValues(EntityType copy, CopyState state) {
     stream(copy.getAtomicAttributes())
         .filter(EntityTypeUtils::isReferenceType)
+        .filter(attr -> attr.getDefaultValue() != null)
         .forEach(
             attr -> {
               state.referenceDefaultValues().put(attr.getIdentifier(), attr.getDefaultValue());

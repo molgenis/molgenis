@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
+import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictableIdGeneratorMock;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -19,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataService;
@@ -108,7 +108,7 @@ public class PackageCopierTest extends AbstractMockitoTest {
 
   @Test
   public void testCopyPackage() {
-    setupPredictableIdGeneratorMock();
+    setupPredictableIdGeneratorMock(idGenerator);
     EntityType entityType1 = mock(EntityType.class);
     EntityType entityType2 = mock(EntityType.class);
     EntityType entityType3 = mock(EntityType.class);
@@ -166,19 +166,5 @@ public class PackageCopierTest extends AbstractMockitoTest {
                   String id = invocation.getArgument(0);
                   return Optional.of(packages.getOrDefault(id, null));
                 });
-  }
-
-  private void setupPredictableIdGeneratorMock() {
-    when(idGenerator.generateId())
-        .thenAnswer(
-            new Answer() {
-              private int count = 0;
-
-              @Override
-              public Object answer(InvocationOnMock invocation) {
-                count++;
-                return "id" + count;
-              }
-            });
   }
 }
