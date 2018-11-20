@@ -5,6 +5,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.molgenis.api.tests.utils.RestTestUtils.APPLICATION_JSON;
 import static org.molgenis.api.tests.utils.RestTestUtils.CREATED;
 import static org.molgenis.api.tests.utils.RestTestUtils.NO_CONTENT;
@@ -589,6 +590,31 @@ public class RestControllerV1APIIT {
         .log()
         .all()
         .statusCode(OKE);
+  }
+
+  @Test
+  public void testUpdateAttributePutWithEmptyValue() {
+    given()
+        .log()
+        .all()
+        .contentType(APPLICATION_JSON)
+        .header(X_MOLGENIS_TOKEN, testUserToken)
+        .put(API_V1 + "V1_API_TypeTestAPIV1/1/xstringnillable")
+        .then()
+        .log()
+        .all()
+        .statusCode(OKE);
+
+    given()
+        .log()
+        .all()
+        .header(X_MOLGENIS_TOKEN, testUserToken)
+        .get(API_V1 + "V1_API_TypeTestAPIV1/1/xstringnillable")
+        .then()
+        .log()
+        .all()
+        .statusCode(OKE)
+        .body("xstringnillable", nullValue());
   }
 
   @Test
