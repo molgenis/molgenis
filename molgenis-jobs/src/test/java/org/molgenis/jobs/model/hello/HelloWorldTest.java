@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -56,6 +57,7 @@ public class HelloWorldTest extends AbstractMolgenisSpringTest {
     super(Strictness.WARN);
   }
 
+  @WithMockUser
   @Test
   public void helloWorld() throws InterruptedException, TimeoutException, ExecutionException {
     HelloWorldJobExecution jobExecution = factory.create();

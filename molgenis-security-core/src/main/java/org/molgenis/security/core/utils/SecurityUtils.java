@@ -1,10 +1,9 @@
 package org.molgenis.security.core.utils;
 
-import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
-
 import java.util.Collection;
 import javax.annotation.Nullable;
 import org.molgenis.security.core.MappedAuthenticatedPrincipal;
+import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +15,7 @@ public class SecurityUtils {
   public static final String AUTHORITY_SU = "ROLE_SU";
   public static final String AUTHORITY_ANONYMOUS = "ROLE_ANONYMOUS";
   public static final String AUTHORITY_USER = "ROLE_USER";
+  public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
 
   public static final String ROLE_ACL_TAKE_OWNERSHIP = "ROLE_ACL_TAKE_OWNERSHIP";
   public static final String ROLE_ACL_MODIFY_AUDITING = "ROLE_ACL_MODIFY_AUDITING";
@@ -23,6 +23,12 @@ public class SecurityUtils {
 
   private SecurityUtils() {}
 
+  /**
+   * Returns the username of the current authentication.
+   *
+   * @return username or <tt>null</tt> if 1) the current authentication is null or 2) the currently
+   *     authenticated principal is the system.
+   */
   public static @Nullable String getCurrentUsername() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null) {
@@ -31,15 +37,21 @@ public class SecurityUtils {
     return getUsername(authentication);
   }
 
-  public static String getUsername(Authentication authentication) {
+  private static @Nullable String getUsername(Authentication authentication) {
+    String username;
+
     Object principal = authentication.getPrincipal();
-    if (principal instanceof UserDetails) {
-      return ((UserDetails) principal).getUsername();
+    if (principal == null || principal instanceof SystemPrincipal) {
+      username = null;
+    } else if (principal instanceof UserDetails) {
+      username = ((UserDetails) principal).getUsername();
     } else if (principal instanceof MappedAuthenticatedPrincipal) {
-      return ((MappedAuthenticatedPrincipal) principal).getMappedName();
+      username = ((MappedAuthenticatedPrincipal) principal).getMappedName();
+    } else {
+      username = principal.toString();
     }
 
-    return principal.toString();
+    return username;
   }
 
   /** Returns whether the current user has at least one of the given roles */

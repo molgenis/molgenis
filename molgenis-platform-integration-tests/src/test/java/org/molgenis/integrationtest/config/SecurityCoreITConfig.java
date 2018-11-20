@@ -3,7 +3,7 @@ package org.molgenis.integrationtest.config;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 
 import java.util.Collection;
 import org.molgenis.security.token.RunAsUserTokenFactory;

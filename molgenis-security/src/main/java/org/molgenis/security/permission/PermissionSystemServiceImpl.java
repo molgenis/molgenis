@@ -3,7 +3,6 @@ package org.molgenis.security.permission;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Collection;
 import org.molgenis.data.meta.model.EntityType;
@@ -33,7 +32,7 @@ public class PermissionSystemServiceImpl implements PermissionSystemService {
 
   @Override
   public void giveUserWriteMetaPermissions(Collection<EntityType> entityTypes) {
-    Sid sid = SidUtils.createUserSid(getCurrentUsername());
+    Sid sid = SidUtils.createSecurityContextSid();
     runAsSystem(
         () ->
             entityTypes.forEach(

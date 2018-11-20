@@ -2,9 +2,7 @@ package org.molgenis.jobs;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -80,7 +78,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.start();
     progress.status("Working....");
     Exception ex = new IllegalArgumentException("blah");
-    progress.failed(ex);
+    progress.failed("blah", ex);
     System.out.println(jobExecution.getLog());
     assertTrue(jobExecution.getLog().contains("- Execution started." + System.lineSeparator()));
     assertTrue(jobExecution.getLog().contains("- Working...." + System.lineSeparator()));
@@ -119,7 +117,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
 
     String exceptionMessage = "x is not a number";
     Exception ex = new IllegalArgumentException(exceptionMessage);
-    progress.failed(ex);
+    progress.failed(exceptionMessage, ex);
 
     verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), exceptionMessage + " (Mail not sent: fail!)");
@@ -137,23 +135,6 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
 
     verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), "Downloading... (Mail not sent: fail!)");
-  }
-
-  // regression test for https://github.com/molgenis/molgenis/issues/7948
-  @Test
-  public void testFailedLocalizedMessage() {
-    JobExecution jobExecution = mock(JobExecution.class);
-    when(jobExecution.getFailureEmail()).thenReturn(new String[] {});
-    progress = new ProgressImpl(jobExecution, updater, mailSender);
-
-    String localizedMessage = "localized message";
-    Exception exception = mock(Exception.class);
-    when(exception.getLocalizedMessage()).thenReturn(localizedMessage);
-
-    progress.failed(exception);
-
-    verify(jobExecution).setProgressMessage(localizedMessage);
-    verify(updater).update(jobExecution);
   }
 
   @Configuration
