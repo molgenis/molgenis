@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import org.molgenis.core.ui.converter.RdfConverter;
@@ -49,7 +48,6 @@ import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
 import org.molgenis.web.Ui;
 import org.molgenis.web.converter.CsvHttpMessageConverter;
-import org.molgenis.web.i18n.MolgenisLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -68,7 +66,6 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -223,6 +220,11 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   }
 
   @Bean
+  public PropertiesMessageSource feedbackMessageSource() {
+    return new PropertiesMessageSource("feedback");
+  }
+
+  @Bean
   public PropertiesMessageSource dataexplorerMessageSource() {
     return new PropertiesMessageSource("dataexplorer");
   }
@@ -346,10 +348,5 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   public Ui molgenisUi() {
     Ui molgenisUi = new MenuMolgenisUi(menuReaderService());
     return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
-  }
-
-  @Bean
-  public LocaleResolver localeResolver() {
-    return new MolgenisLocaleResolver(dataService, () -> new Locale(appSettings.getLanguageCode()));
   }
 }

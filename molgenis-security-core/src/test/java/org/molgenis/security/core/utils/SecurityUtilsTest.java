@@ -3,15 +3,17 @@ package org.molgenis.security.core.utils;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.ROLE_SYSTEM;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -99,7 +101,7 @@ public class SecurityUtilsTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void currentUserIsSystemTrue() throws Exception {
+  public void currentUserIsSystemTrue() {
     GrantedAuthority authoritySystem =
         when(mock(GrantedAuthority.class).getAuthority()).thenReturn(ROLE_SYSTEM).getMock();
     when((Collection<GrantedAuthority>) authentication.getAuthorities())
@@ -109,15 +111,25 @@ public class SecurityUtilsTest {
   }
 
   @Test
-  public void currentUserIsSystemFalse() throws Exception {
+  public void currentUserIsSystemFalse() {
     when(userDetails.getUsername()).thenReturn("user");
     assertFalse(SecurityUtils.currentUserIsSystem());
     assertFalse(SecurityUtils.currentUserIsSuOrSystem());
   }
 
   @Test
-  public void getCurrentUsername() {
+  public void getCurrentUsernameUserDetails() {
     assertEquals(SecurityUtils.getCurrentUsername(), userDetails.getUsername());
+  }
+
+  @Test
+  public void getCurrentUsernameSystemPrincipal() {
+    try {
+      SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
+      assertNull(SecurityUtils.getCurrentUsername());
+    } finally {
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
   }
 
   @Test

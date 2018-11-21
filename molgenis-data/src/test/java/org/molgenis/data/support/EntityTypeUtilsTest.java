@@ -21,6 +21,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.testng.annotations.DataProvider;
@@ -194,6 +195,21 @@ public class EntityTypeUtilsTest {
                             .field("MyRefRefEntityTypeAttr")
                             .field("MyRefRefEntityTypeRefAttr")));
     assertEquals(EntityTypeUtils.createFetchForReindexing(entityType), expectedFetch);
+  }
+
+  @Test
+  public void testGetEntityTypeFetch() {
+    Fetch fetch = EntityTypeUtils.getEntityTypeFetch();
+
+    assertTrue(fetch.hasField(EntityTypeMetadata.ID));
+    assertTrue(fetch.hasField(EntityTypeMetadata.PACKAGE));
+    assertTrue(fetch.hasField(EntityTypeMetadata.LABEL));
+    assertTrue(fetch.hasField(EntityTypeMetadata.DESCRIPTION));
+    assertTrue(fetch.hasField(EntityTypeMetadata.ATTRIBUTES));
+    assertTrue(fetch.hasField(EntityTypeMetadata.IS_ABSTRACT));
+    assertTrue(fetch.hasField(EntityTypeMetadata.EXTENDS));
+    assertTrue(fetch.hasField(EntityTypeMetadata.TAGS));
+    assertTrue(fetch.hasField(EntityTypeMetadata.BACKEND));
   }
 
   private EntityType createMockEntityType() {

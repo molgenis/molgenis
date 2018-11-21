@@ -11,7 +11,6 @@ import org.molgenis.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -20,26 +19,27 @@ import org.springframework.stereotype.Component;
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater {
   private static final Logger LOG = LoggerFactory.getLogger(JobExecutionUpdater.class);
 
-  private final JobExecutorTokenService jobExecutorTokenService;
+  private final JobExecutionContextFactory jobExecutionContextFactory;
   private final ExecutorService executorService;
   @Autowired private DataService dataService;
 
-  JobExecutionUpdaterImpl(JobExecutorTokenService jobExecutorTokenService) {
-    this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
+  JobExecutionUpdaterImpl(JobExecutionContextFactory jobExecutionContextFactory) {
+    this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
     this.executorService = Executors.newSingleThreadExecutor();
   }
 
   @Override
   public void update(JobExecution jobExecution) {
-    Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
-    executorService.execute(() -> updateInternal(authentication, jobExecution));
+    JobExecutionContext jobExecutionContext =
+        jobExecutionContextFactory.createJobExecutionContext(jobExecution);
+    executorService.execute(() -> updateInternal(jobExecution, jobExecutionContext));
   }
 
-  private void updateInternal(Authentication authentication, JobExecution jobExecution) {
+  private void updateInternal(JobExecution jobExecution, JobExecutionContext jobExecutionContext) {
     SecurityContext originalContext = SecurityContextHolder.getContext();
     try {
       SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-      securityContext.setAuthentication(authentication);
+      securityContext.setAuthentication(jobExecutionContext.getAuthentication());
       SecurityContextHolder.setContext(securityContext);
 
       tryUpdate(jobExecution);

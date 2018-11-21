@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.meta;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -16,6 +17,7 @@ public class MappingProjectMetaData extends SystemEntityType {
 
   public static final String IDENTIFIER = "identifier";
   public static final String NAME = "name";
+  public static final String DEPTH = "depth";
   public static final String MAPPING_TARGETS = "mappingtargets";
 
   private final MapperPackage mapperPackage;
@@ -35,6 +37,7 @@ public class MappingProjectMetaData extends SystemEntityType {
 
     addAttribute(IDENTIFIER, ROLE_ID);
     addAttribute(NAME).setNillable(false);
+    addAttribute(DEPTH).setDataType(INT).setRangeMin(1L);
     addAttribute(MAPPING_TARGETS)
         .setDataType(MREF)
         .setRefEntity(mappingTargetMetaData)
