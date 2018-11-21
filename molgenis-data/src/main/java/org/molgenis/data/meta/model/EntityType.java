@@ -114,6 +114,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
     // Own attributes (deep copy or shallow copy)
     if (attrCopyMode == DEEP_COPY_ATTRS) {
+      // don't mind me, I'm just triggering a build
       // step #1: deep copy attributes
       Map<String, Attribute> ownAttrMap =
           stream(entityType.getOwnAllAttributes().spliterator(), false)
