@@ -53,6 +53,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.security.auth.User;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -655,7 +656,7 @@ public class MappingServiceController extends PluginController {
       String packageId,
       String label) {
     MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
-    mappingJobExecution.setUser(userAccountService.getCurrentUser());
+    User currentUser = userAccountService.getCurrentUser();
     mappingJobExecution.setMappingProjectId(mappingProjectId);
     mappingJobExecution.setTargetEntityTypeId(targetEntityTypeId);
     mappingJobExecution.setAddSourceAttribute(addSourceAttribute);

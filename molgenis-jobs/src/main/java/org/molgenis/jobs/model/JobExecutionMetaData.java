@@ -57,7 +57,7 @@ public class JobExecutionMetaData extends SystemEntityType {
     setAbstract(true);
     setPackage(jobPackage);
     addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
-    addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
+    addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(true);
     addAttribute(STATUS)
         .setDataType(ENUM)
         .setEnumOptions(jobStatusOptions)

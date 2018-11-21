@@ -1,252 +1,244 @@
 package org.molgenis.jobs;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.reset;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.jobs.model.JobExecution.Status.FAILED;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.SCHEDULED_JOB;
+import static org.testng.Assert.assertEquals;
 
-import java.time.Instant;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
-import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.mockito.invocation.InvocationOnMock;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecution;
+import org.molgenis.jobs.model.JobExecution.Status;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.jobs.model.ScheduledJobType;
-import org.quartz.JobExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.mail.MailSender;
-import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {JobExecutorTest.Config.class, JobExecutor.class, JobTestConfig.class})
-public class JobExecutorTest extends AbstractMolgenisSpringTest {
-  @Autowired private Config config;
-
-  @Autowired private DataService dataService;
-
-  @Autowired private JobExecutor jobExecutor;
-
-  @Autowired private JobFactory jobFactory;
-
-  @Autowired private ScheduledJobType scheduledJobType;
-
-  @Autowired private JobFactoryRegistry jobFactoryRegistry;
-
-  @Autowired private ExecutorService executorService;
-
-  @Mock private ScheduledJob scheduledJob;
-
-  @Mock private Job<Void> job;
-
-  @Mock private JobExecutionContext jobExecutionContext;
-
-  @Autowired private EntityManager entityManager;
-
-  @Mock private EntityType jobExecutionType;
-
-  @Mock private TestJobExecution jobExecution;
-
-  @Captor private ArgumentCaptor<Runnable> jobCaptor;
-
-  public JobExecutorTest() {
-    super(Strictness.WARN);
-  }
-
-  @BeforeClass
-  public void beforeClass() {
-    initMocks(this);
-  }
+public class JobExecutorTest extends AbstractMockitoTest {
+  @Mock private DataService dataService;
+  @Mock private EntityManager entityManager;
+  @Mock private JobExecutionUpdater jobExecutionUpdater;
+  @Mock private MailSender mailSender;
+  @Mock private ExecutorService executorService;
+  @Mock private JobFactoryRegistry jobFactoryRegistry;
+  @Mock private JobExecutionContextFactory jobExecutionContextFactory;
+  @Mock private JobExecutionTemplate jobExecutionTemplate;
+  private JobExecutor jobExecutor;
 
   @BeforeMethod
-  public void beforeMethod() {
-    config.resetMocks();
-    reset(jobExecutionContext);
+  public void setUpBeforeMethod() {
+    jobExecutor =
+        new JobExecutor(
+            dataService,
+            entityManager,
+            jobExecutionUpdater,
+            mailSender,
+            executorService,
+            jobFactoryRegistry,
+            jobExecutionContextFactory);
+    jobExecutor.setJobExecutionTemplate(jobExecutionTemplate);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void testJobExecutor() {
+    new JobExecutor(null, null, null, null, null, null, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testExecuteScheduledJob() {
+    String scheduledJobId = "MyScheduledJobId";
+
+    EntityType jobExecutionType = mock(EntityType.class);
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
     when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
-    when(scheduledJobType.getName()).thenReturn("jobName");
-    when(jobExecution.getStartDate()).thenReturn(Instant.now());
-    when(jobExecution.getSuccessEmail()).thenReturn(new String[] {});
-    when(jobExecution.getFailureEmail()).thenReturn(new String[] {});
-    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
-  }
 
-  @SuppressWarnings("unchecked")
-  @Test
-  public void executeScheduledJob() throws Exception {
-    when(dataService.findOneById(SCHEDULED_JOB, "aaaacw67ejuwq7wron3yjriaae", ScheduledJob.class))
-        .thenReturn(scheduledJob);
-    when(entityManager.create(jobExecutionType, EntityManager.CreationMode.POPULATE))
-        .thenReturn(jobExecution);
-
-    when(jobFactory.createJob(jobExecution)).thenReturn(job);
-    when(scheduledJob.getParameters()).thenReturn("{param1:'param1Value', param2:2}");
-    when(scheduledJob.getFailureEmail()).thenReturn("x@y.z");
-    when(scheduledJob.getSuccessEmail()).thenReturn("a@b.c");
-    when(scheduledJob.getUser()).thenReturn("fjant");
+    ScheduledJob scheduledJob = mock(ScheduledJob.class);
     when(scheduledJob.getType()).thenReturn(scheduledJobType);
+    when(dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class))
+        .thenReturn(scheduledJob);
 
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
-    when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
-    when(jobExecution.getUser()).thenReturn("fjant");
+    String jobExecutionEntityTypeId = "MyJobExecutionId";
+    EntityType jobExecutionEntityType = mock(EntityType.class);
+    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
 
-    jobExecutor.executeScheduledJob("aaaacw67ejuwq7wron3yjriaae");
+    JobExecution jobExecution = mock(JobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
+    when(entityManager.create(jobExecutionType, POPULATE)).thenReturn(jobExecution);
 
-    verify(jobExecution).setFailureEmail("x@y.z");
-    verify(jobExecution).setSuccessEmail("a@b.c");
-    verify(jobExecution).setParam1("param1Value");
-    verify(jobExecution).setParam2(2);
+    Job job = mock(Job.class);
 
-    verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
-
-    verify(job).call(any(Progress.class));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void submitJobExecution() throws Exception {
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
-    when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
-    when(jobExecution.getUser()).thenReturn("fjant");
-
+    JobFactory jobFactory = mock(JobFactory.class);
+    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
     when(jobFactory.createJob(jobExecution)).thenReturn(job);
 
-    jobExecutor.submit(jobExecution);
+    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
+    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+        .thenReturn(jobExecutionContext);
 
-    verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
-    verify(executorService).execute(jobCaptor.capture());
+    jobExecutor.executeScheduledJob(scheduledJobId);
 
-    jobCaptor.getValue().run();
-    verify(job).call(any(Progress.class));
+    verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
+    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
+    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expectedExceptions = RuntimeException.class)
+  public void testExecuteScheduledJobRunJobFails() {
+    String scheduledJobId = "MyScheduledJobId";
+
+    EntityType jobExecutionType = mock(EntityType.class);
+    ScheduledJobType scheduledJobType = mock(ScheduledJobType.class);
+    when(scheduledJobType.getJobExecutionType()).thenReturn(jobExecutionType);
+
+    ScheduledJob scheduledJob = mock(ScheduledJob.class);
+    when(scheduledJob.getType()).thenReturn(scheduledJobType);
+    when(dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class))
+        .thenReturn(scheduledJob);
+
+    String jobExecutionEntityTypeId = "MyJobExecutionId";
+    EntityType jobExecutionEntityType = mock(EntityType.class);
+    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
+
+    JobExecution jobExecution = mock(JobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
+    when(entityManager.create(jobExecutionType, POPULATE)).thenReturn(jobExecution);
+
+    Job job = mock(Job.class);
+
+    JobFactory jobFactory = mock(JobFactory.class);
+    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
+    when(jobFactory.createJob(jobExecution)).thenReturn(job);
+
+    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
+    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+        .thenReturn(jobExecutionContext);
+
+    doThrow(new RuntimeException())
+        .when(jobExecutionTemplate)
+        .call(eq(job), any(Progress.class), eq(jobExecutionContext));
+    try {
+      jobExecutor.executeScheduledJob(scheduledJobId);
+    } finally {
+      verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+      verify(jobExecution).setStatus(Status.FAILED);
+      verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
+    }
+  }
+
+  @Test(expectedExceptions = UnknownEntityException.class)
+  public void testExecuteScheduledJobUnknownJob() {
+    String scheduledJobId = "UnknownScheduledJobId";
+    jobExecutor.executeScheduledJob(scheduledJobId);
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void submitJobExecutionJobFactoryThrowsException() {
-    when(jobExecution.getEntityType()).thenReturn(jobExecutionType);
-    when(jobExecutionType.getId()).thenReturn("sys_FileIngestJobExecution");
-    when(jobExecution.getUser()).thenReturn("fjant");
+  public void testSubmit() throws ExecutionException, InterruptedException {
+    String jobExecutionEntityTypeId = "MyJobExecutionId";
+    EntityType jobExecutionEntityType = mock(EntityType.class);
+    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
 
-    when(jobFactory.createJob(jobExecution)).thenThrow(new NullPointerException());
+    JobExecution jobExecution = mock(JobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
+
+    Job job = mock(Job.class);
+
+    JobFactory jobFactory = mock(JobFactory.class);
+    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
+    when(jobFactory.createJob(jobExecution)).thenReturn(job);
+
+    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
+    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+        .thenReturn(jobExecutionContext);
+
+    doAnswer(
+            (InvocationOnMock invocation) -> {
+              ((Runnable) invocation.getArguments()[0]).run();
+              return null;
+            })
+        .when(executorService)
+        .execute(any(Runnable.class));
+    jobExecutor.submit(jobExecution).get();
+
+    verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
+    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
+    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
+  }
+
+  @Test(expectedExceptions = RuntimeException.class)
+  public void testSubmitJobCreationFails() {
+    String jobExecutionEntityTypeId = "MyJobExecutionId";
+    EntityType jobExecutionEntityType = mock(EntityType.class);
+    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
+
+    JobExecution jobExecution = mock(JobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
+
+    doThrow(new RuntimeException()).when(jobFactoryRegistry).getJobFactory(jobExecution);
 
     try {
       jobExecutor.submit(jobExecution);
-    } catch (NullPointerException expected) {
-    }
-
-    verify(dataService).add("sys_FileIngestJobExecution", jobExecution);
-    verify(jobExecution).setStatus(FAILED);
-    verify(dataService).update("sys_FileIngestJobExecution", jobExecution);
-  }
-
-  public static class TestJobExecution extends JobExecution {
-    private String param1;
-    private int param2;
-
-    public TestJobExecution(Entity entity) {
-      super(entity);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void setParam1(String param1) {
-      this.param1 = param1;
-    }
-
-    @SuppressWarnings("unused")
-    public String getParam1() {
-      return param1;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public void setParam2(int param2) {
-      this.param2 = param2;
-    }
-
-    @SuppressWarnings("unused")
-    public int getParam2() {
-      return param2;
+    } finally {
+      verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+      verify(jobExecution).setStatus(Status.FAILED);
+      verify(dataService).update(jobExecutionEntityTypeId, jobExecution);
     }
   }
 
-  @Configuration
-  @Import({JobTestConfig.class})
-  public static class Config {
-    public Config() {
-      initMocks(this);
-    }
+  // same as testSubmit but with other ExecutorService
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSubmitExecutorService() throws ExecutionException, InterruptedException {
+    ExecutorService myExecutorService = mock(ExecutorService.class);
 
-    @Mock private JobFactoryRegistry jobFactoryRegistry;
+    String jobExecutionEntityTypeId = "MyJobExecutionId";
+    EntityType jobExecutionEntityType = mock(EntityType.class);
+    when(jobExecutionEntityType.getId()).thenReturn(jobExecutionEntityTypeId);
 
-    @Mock private JobFactory jobFactory;
+    JobExecution jobExecution = mock(JobExecution.class);
+    when(jobExecution.getEntityType()).thenReturn(jobExecutionEntityType);
 
-    @Mock private ScheduledJobType scheduledJobType;
+    Job job = mock(Job.class);
 
-    @Mock private ExecutorService executorService;
+    JobFactory jobFactory = mock(JobFactory.class);
+    when(jobFactoryRegistry.getJobFactory(jobExecution)).thenReturn(jobFactory);
+    when(jobFactory.createJob(jobExecution)).thenReturn(job);
 
-    @Mock private MailSender mailSender;
+    JobExecutionContext jobExecutionContext = mock(JobExecutionContext.class);
+    when(jobExecutionContextFactory.createJobExecutionContext(jobExecution))
+        .thenReturn(jobExecutionContext);
 
-    @Mock private JobExecutorTokenService jobExecutorTokenService;
+    doAnswer(
+            (InvocationOnMock invocation) -> {
+              ((Runnable) invocation.getArguments()[0]).run();
+              return null;
+            })
+        .when(myExecutorService)
+        .execute(any(Runnable.class));
+    jobExecutor.submit(jobExecution, myExecutorService).get();
 
-    @Mock private EntityManager entityManager;
-
-    public void resetMocks() {
-      reset(
-          jobFactory,
-          scheduledJobType,
-          executorService,
-          mailSender,
-          jobExecutorTokenService,
-          entityManager);
-    }
-
-    @Bean
-    public JobFactoryRegistry jobFactoryRegistry() {
-      return jobFactoryRegistry;
-    }
-
-    @Bean
-    public JobFactory jobFactory() {
-      return jobFactory;
-    }
-
-    @Bean
-    ScheduledJobType jobType() {
-      return scheduledJobType;
-    }
-
-    @Bean
-    ExecutorService executorService() {
-      return executorService;
-    }
-
-    @Bean
-    public MailSender mailSender() {
-      return mailSender;
-    }
-
-    @Bean
-    public JobExecutorTokenService jobExecutorTokenService() {
-      return jobExecutorTokenService;
-    }
-
-    @Bean
-    public EntityManager entityManager() {
-      return entityManager;
-    }
+    verify(dataService).add(jobExecutionEntityTypeId, jobExecution);
+    ArgumentCaptor<Progress> progressCaptor = ArgumentCaptor.forClass(Progress.class);
+    verify(jobExecutionTemplate).call(eq(job), progressCaptor.capture(), eq(jobExecutionContext));
+    assertEquals(progressCaptor.getValue().getJobExecution(), jobExecution);
   }
 }
