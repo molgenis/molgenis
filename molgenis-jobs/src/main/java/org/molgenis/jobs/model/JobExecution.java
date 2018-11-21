@@ -20,11 +20,11 @@ import static org.molgenis.jobs.model.JobExecutionMetaData.TYPE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 
 import java.time.Instant;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.data.support.StaticEntity;
 
 /**
@@ -68,16 +68,12 @@ public class JobExecution extends StaticEntity {
     set(IDENTIFIER, value);
   }
 
-  public String getUser() {
-    return getString(USER);
+  public Optional<String> getUser() {
+    return Optional.ofNullable(getString(USER));
   }
 
-  public void setUser(String username) {
+  public void setUser(@Nullable String username) {
     set(USER, username);
-  }
-
-  public void setUser(User value) {
-    set(USER, value.getUsername());
   }
 
   public Status getStatus() {

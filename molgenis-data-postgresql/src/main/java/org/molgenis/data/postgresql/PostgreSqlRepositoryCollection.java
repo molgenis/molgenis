@@ -43,10 +43,10 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableAttribut
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isTableAttribute;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.BATCH_SIZE;
 import static org.molgenis.data.postgresql.PostgreSqlRepository.createJunctionTableRowData;
+import static org.molgenis.data.util.EntityTypeUtils.getEntityTypeFetch;
 import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
-import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 import static org.springframework.jdbc.support.JdbcUtils.closeConnection;
 

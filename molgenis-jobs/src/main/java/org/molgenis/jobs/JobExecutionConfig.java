@@ -21,7 +21,7 @@ public class JobExecutionConfig {
   private final JobExecutionUpdater jobExecutionUpdater;
   private final MailSender mailSender;
   private final JobFactoryRegistry jobFactoryRegistry;
-  private final JobExecutorTokenService jobExecutorTokenService;
+  private final JobExecutionContextFactory jobExecutionContextFactory;
 
   public JobExecutionConfig(
       DataService dataService,
@@ -29,13 +29,13 @@ public class JobExecutionConfig {
       JobExecutionUpdater jobExecutionUpdater,
       MailSender mailSender,
       JobFactoryRegistry jobFactoryRegistry,
-      JobExecutorTokenService jobExecutorTokenService) {
+      JobExecutionContextFactory jobExecutionContextFactory) {
     this.dataService = requireNonNull(dataService);
     this.entityManager = requireNonNull(entityManager);
     this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
     this.mailSender = requireNonNull(mailSender);
     this.jobFactoryRegistry = requireNonNull(jobFactoryRegistry);
-    this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
+    this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
   }
 
   @Primary // Use this ExecutorService when no specific bean is demanded
@@ -54,6 +54,6 @@ public class JobExecutionConfig {
         mailSender,
         executorService,
         jobFactoryRegistry,
-        jobExecutorTokenService);
+        jobExecutionContextFactory);
   }
 }

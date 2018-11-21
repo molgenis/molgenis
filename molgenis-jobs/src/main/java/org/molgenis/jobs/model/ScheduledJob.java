@@ -71,7 +71,7 @@ public class ScheduledJob extends StaticEntity {
     return getString(USER);
   }
 
-  public void setUser(String username) {
+  public void setUser(@Nullable String username) {
     set(USER, username);
   }
 

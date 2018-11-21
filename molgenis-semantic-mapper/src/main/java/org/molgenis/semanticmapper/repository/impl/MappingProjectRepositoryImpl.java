@@ -1,11 +1,13 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -90,12 +92,13 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository {
   private MappingProject toMappingProject(Entity mappingProjectEntity) {
     String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
     String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
+    int depth = Optional.ofNullable(mappingProjectEntity.getInt(DEPTH)).orElse(3);
     List<Entity> mappingTargetEntities =
         Lists.newArrayList(
             mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
     List<MappingTarget> mappingTargets = mappingTargetRepo.toMappingTargets(mappingTargetEntities);
 
-    return new MappingProject(identifier, name, mappingTargets);
+    return new MappingProject(identifier, name, depth, mappingTargets);
   }
 
   /**
@@ -112,6 +115,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository {
     }
     result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
     result.set(MappingProjectMetaData.NAME, mappingProject.getName());
+    result.set(DEPTH, mappingProject.getDepth());
     List<Entity> mappingTargetEntities =
         mappingTargetRepo.upsert(mappingProject.getMappingTargets());
     result.set(MappingProjectMetaData.MAPPING_TARGETS, mappingTargetEntities);

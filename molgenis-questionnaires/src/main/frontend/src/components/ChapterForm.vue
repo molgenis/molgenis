@@ -9,6 +9,17 @@
   </form-component>
 </template>
 
+<style>
+  .questionnaire-chapter fieldset fieldset fieldset > small,
+  .questionnaire-chapter fieldset fieldset fieldset > legend {
+    font-size: 100%;
+  }
+
+  .questionnaire-chapter fieldset fieldset fieldset > legend {
+    padding-top: 1rem;
+  }
+</style>
+
 <script>
   import { FormComponent } from '@molgenis/molgenis-ui-form'
   import 'flatpickr/dist/flatpickr.css'
