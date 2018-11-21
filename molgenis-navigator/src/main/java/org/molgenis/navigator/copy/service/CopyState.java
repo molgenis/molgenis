@@ -1,9 +1,8 @@
 package org.molgenis.navigator.copy.service;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-
 import com.google.auto.value.AutoValue;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -37,11 +36,11 @@ abstract class CopyState {
     return new AutoValue_CopyState(
         targetPackage,
         progress,
-        newArrayList(),
-        newHashMap(),
-        newHashMap(),
-        newHashMap(),
-        newHashMap(),
-        newHashMap());
+        new ArrayList<>(),
+        new HashMap<>(),
+        new HashMap<>(),
+        new HashMap<>(),
+        new HashMap<>(),
+        new HashMap<>());
   }
 }

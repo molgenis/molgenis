@@ -22,7 +22,6 @@ public class AbstractEntityDecoratorTest extends AbstractMockitoTest {
   }
 
   private class TestEntity extends AbstractEntityDecorator {
-
     TestEntity(Entity entity) {
       super(entity);
     }

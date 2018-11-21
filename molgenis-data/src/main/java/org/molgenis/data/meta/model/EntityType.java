@@ -3,7 +3,6 @@ package org.molgenis.data.meta.model;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
@@ -26,6 +25,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -139,7 +139,7 @@ public class EntityType extends StaticEntity implements Labeled {
    */
   public static Map<String, Attribute> deepCopyAttributes(
       EntityType entityType, EntityType entityTypeCopy, AttributeFactory attrFactory) {
-    Map<String, Attribute> copiedAttributes = newLinkedHashMap();
+    Map<String, Attribute> copiedAttributes = new LinkedHashMap<>();
 
     // step #1: deep copy attributes
     Map<String, Attribute> ownAttrMap =
@@ -726,7 +726,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
   private Map<String, Attribute> getCachedOwnAttrs() {
     if (cachedOwnAttrs == null) {
-      cachedOwnAttrs = newLinkedHashMap();
+      cachedOwnAttrs = new LinkedHashMap<>();
       getEntities(ATTRIBUTES, Attribute.class)
           .forEach(attr -> cachedOwnAttrs.put(attr.getName(), attr));
     }
