@@ -2,13 +2,13 @@ package org.molgenis.jobs;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.jobs.config.JobTestConfig;
 import org.molgenis.jobs.model.JobExecution;
@@ -69,7 +69,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     mail.setTo(new String[] {"a@b.c", "d@e.f"});
     mail.setSubject("Annotator job succeeded.");
     mail.setText(jobExecution.getLog());
-    Mockito.verify(mailSender).send(mail);
+    verify(mailSender).send(mail);
   }
 
   @Test
@@ -78,7 +78,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.start();
     progress.status("Working....");
     Exception ex = new IllegalArgumentException("blah");
-    progress.failed(ex);
+    progress.failed("blah", ex);
     System.out.println(jobExecution.getLog());
     assertTrue(jobExecution.getLog().contains("- Execution started." + System.lineSeparator()));
     assertTrue(jobExecution.getLog().contains("- Working...." + System.lineSeparator()));
@@ -89,7 +89,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     mail.setTo(new String[] {"a@b.c", "d@e.f"});
     mail.setSubject("Annotator job failed.");
     mail.setText(jobExecution.getLog());
-    Mockito.verify(mailSender).send(mail);
+    verify(mailSender).send(mail);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.start();
     progress.success();
 
-    Mockito.verify(mailSender).send(any(SimpleMailMessage.class));
+    verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), "Job finished. (Mail not sent: fail!)");
   }
 
@@ -117,9 +117,9 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
 
     String exceptionMessage = "x is not a number";
     Exception ex = new IllegalArgumentException(exceptionMessage);
-    progress.failed(ex);
+    progress.failed(exceptionMessage, ex);
 
-    Mockito.verify(mailSender).send(any(SimpleMailMessage.class));
+    verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), exceptionMessage + " (Mail not sent: fail!)");
   }
 
@@ -133,7 +133,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest {
     progress.start();
     progress.canceled();
 
-    Mockito.verify(mailSender).send(any(SimpleMailMessage.class));
+    verify(mailSender).send(any(SimpleMailMessage.class));
     assertEquals(jobExecution.getProgressMessage(), "Downloading... (Mail not sent: fail!)");
   }
 

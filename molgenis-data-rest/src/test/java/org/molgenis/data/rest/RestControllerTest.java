@@ -770,8 +770,35 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
         .perform(
             post(HREF_ENTITY_ID + "/name")
                 .param("_method", "PUT")
-                .content("Klaas")
+                .content("\"Klaas\"")
                 .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk());
+    verify(dataService)
+        .update(
+            ArgumentMatchers.eq(ENTITY_NAME),
+            ArgumentMatchers.<Entity>argThat(x -> "Klaas".equals(x.getString("name"))));
+  }
+
+  @Test
+  public void updateAttributeNull() throws Exception {
+    mockMvc
+        .perform(
+            post(HREF_ENTITY_ID + "/name")
+                .param("_method", "PUT")
+                .content("null")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk());
+    verify(dataService)
+        .update(
+            ArgumentMatchers.eq(ENTITY_NAME),
+            ArgumentMatchers.<Entity>argThat(x -> x.getString("name") == null));
+  }
+
+  @Test
+  public void updateAttributeWithEmptyValue() throws Exception {
+    mockMvc
+        .perform(
+            post(HREF_ENTITY_ID + "/name").param("_method", "PUT").contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
     verify(dataService).update(ArgumentMatchers.eq(ENTITY_NAME), any(Entity.class));
   }

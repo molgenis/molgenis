@@ -3,8 +3,8 @@ package org.molgenis.security.acl;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.molgenis.security.core.SidUtils;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.Acl;
@@ -13,8 +13,6 @@ import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -36,8 +34,7 @@ public class TransactionalJdbcMutableAclService extends JdbcMutableAclService {
 
     // Need to retrieve the current principal, in order to know who "owns" this ACL
     // (can be changed later on)
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    PrincipalSid sid = new PrincipalSid(auth);
+    Sid sid = SidUtils.createSecurityContextSid();
 
     try {
       // Create the acl_object_identity row

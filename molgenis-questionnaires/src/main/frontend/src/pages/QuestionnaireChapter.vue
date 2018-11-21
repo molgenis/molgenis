@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid questionnaire-chapter">
     <div class="row my-5">
       <div class="col-12">
 

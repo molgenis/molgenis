@@ -16,7 +16,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.molgenis.data.util.MetaUtils;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.searchall.model.AttributeResult;
 import org.molgenis.searchall.model.EntityTypeResult;
 import org.molgenis.searchall.model.PackageResult;
@@ -45,7 +45,7 @@ public class SearchAllService {
         .setPackages(
             dataService
                 .findAll(PACKAGE, Package.class)
-                .filter(not(MetaUtils::isSystemPackage))
+                .filter(not(PackageUtils::isSystemPackage))
                 .map(PackageResult::create)
                 .filter(packageResult -> packageResult.isLabelOrDescriptionMatch(searchTerm))
                 .collect(toList()))

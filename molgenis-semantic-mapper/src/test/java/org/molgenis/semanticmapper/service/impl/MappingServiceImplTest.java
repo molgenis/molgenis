@@ -6,6 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -13,6 +14,7 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.IDENTIFIER;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
@@ -194,7 +196,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         .thenReturn(mappedEntity);
 
     assertEquals(
-        mappingService.applyMappingToEntity(entityMapping, sourceEntity, targetMetaData),
+        mappingService.applyMappingToEntity(entityMapping, sourceEntity, targetMetaData, 3),
         mappedEntity);
   }
 
@@ -202,11 +204,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   public void testAddMappingProject() {
     String projectName = "test_project";
     MappingProject mappingProject =
-        mappingService.addMappingProject(projectName, hopMetaData.getId());
+        mappingService.addMappingProject(projectName, hopMetaData.getId(), 3);
     Mockito.verify(mappingProjectRepo, Mockito.times(1)).add(mappingProject);
     assertEquals(mappingProject.getName(), projectName);
     List<MappingTarget> mappingTargets = mappingProject.getMappingTargets();
     assertEquals(mappingTargets.size(), 1);
+    assertEquals(mappingProject.getDepth(), 3);
     assertEquals(mappingTargets.get(0).getTarget(), hopMetaData);
   }
 
@@ -215,7 +218,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     String projectName = "test_project";
 
     MappingProject actualAddedMappingProject =
-        mappingService.addMappingProject(projectName, hopMetaData.getId());
+        mappingService.addMappingProject(projectName, hopMetaData.getId(), 3);
 
     String mappingTargetIdentifier =
         actualAddedMappingProject.getMappingTarget(hopMetaData.getId()).getIdentifier();
@@ -224,7 +227,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
 
     String mappingProjectIdentifier = actualAddedMappingProject.getIdentifier();
     MappingProject expectedMappingProject =
-        getManualMappingProject(mappingProjectIdentifier, projectName, expectedMappingTarget);
+        getManualMappingProject(mappingProjectIdentifier, projectName, 3, expectedMappingTarget);
 
     Entity mappingTargetEntity = mock(Entity.class);
     when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER))
@@ -238,6 +241,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
     Entity mappingProjectEntity = mock(Entity.class);
     when(mappingProjectEntity.get(IDENTIFIER)).thenReturn(mappingProjectIdentifier);
     when(mappingProjectEntity.get(NAME)).thenReturn(projectName);
+    when(mappingProjectEntity.get(DEPTH)).thenReturn(3);
     when(mappingProjectEntity.getEntities(MAPPING_TARGETS))
         .thenReturn(singletonList(mappingTargetEntity));
     when(mappingProjectEntity.get(MAPPING_TARGETS))
@@ -283,7 +287,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   @Test(expectedExceptions = IllegalStateException.class)
   public void testAddExistingTarget() {
     MappingProject mappingProject =
-        mappingService.addMappingProject("Test123", hopMetaData.getId());
+        mappingService.addMappingProject("Test123", hopMetaData.getId(), 3);
     mappingProject.addTarget(hopMetaData);
   }
 
@@ -363,8 +367,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
               return null;
             })
         .when(geneRepo)
-        .forEachBatched(
-            ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+        .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
     // make project and apply mappings once
     MappingProject project = createMappingProjectWithMappings();
@@ -438,8 +441,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
               return null;
             })
         .when(geneRepo)
-        .forEachBatched(
-            ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+        .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
     // make project and apply mappings once
     MappingProject project = createMappingProjectWithMappings();
@@ -502,10 +504,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
               return null;
             })
         .when(sourceRepo)
-        .forEachBatched(
-            ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+        .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+    mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress, 3);
 
     Mockito.verify(targetRepo, Mockito.times(3)).add(ArgumentMatchers.any(Stream.class));
     Mockito.verify(progress, Mockito.times(3)).increment(1);
@@ -545,10 +546,9 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
               return null;
             })
         .when(sourceRepo)
-        .forEachBatched(
-            ArgumentMatchers.any(Consumer.class), ArgumentMatchers.eq(MAPPING_BATCH_SIZE));
+        .forEachBatched(ArgumentMatchers.any(Consumer.class), eq(MAPPING_BATCH_SIZE));
 
-    mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress);
+    mappingService.applyMappingToRepo(sourceMapping, targetRepo, progress, 3);
 
     Mockito.verify(targetRepo, Mockito.times(2)).upsertBatch(ArgumentMatchers.any(List.class));
     Mockito.verify(progress, Mockito.times(2)).increment(1);
@@ -771,14 +771,16 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
 
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('id').value()")),
-              ArgumentMatchers.eq(geneEntity),
-              ArgumentMatchers.eq(geneMetaData)))
+              eq(geneEntity),
+              eq(geneMetaData),
+              eq(3)))
           .thenReturn(geneEntity.getString("id"));
 
       when(algorithmService.apply(
               argThat(obj -> obj != null && obj.getAlgorithm().equals("$('length').value()")),
-              ArgumentMatchers.eq(geneEntity),
-              ArgumentMatchers.eq(geneMetaData)))
+              eq(geneEntity),
+              eq(geneMetaData),
+              eq(3)))
           .thenReturn(geneEntity.getDouble("length"));
 
       Entity expectedEntity = new DynamicEntity(targetMeta);
@@ -791,7 +793,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
 
   private MappingProject createMappingProjectWithMappings() {
     MappingProject mappingProject =
-        mappingService.addMappingProject("TestRun", hopMetaData.getId());
+        mappingService.addMappingProject("TestRun", hopMetaData.getId(), 3);
     MappingTarget target = mappingProject.getMappingTarget(hopMetaData.getId());
 
     when(mappingProjectRepo.getMappingProject("TestRun")).thenReturn(mappingProject);
@@ -812,8 +814,8 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
   }
 
   private MappingProject getManualMappingProject(
-      String identifier, String projectName, MappingTarget mappingTarget) {
-    return new MappingProject(identifier, projectName, newArrayList(mappingTarget));
+      String identifier, String projectName, int depth, MappingTarget mappingTarget) {
+    return new MappingProject(identifier, projectName, depth, newArrayList(mappingTarget));
   }
 
   @Configuration

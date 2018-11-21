@@ -4,14 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
-import com.google.common.collect.TreeTraverser;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 
 public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Package> {
   private final DataService dataService;
@@ -68,12 +67,5 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
 
   private Repository<EntityType> getEntityRepository() {
     return dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
-  }
-
-  private static class PackageTreeTraverser extends TreeTraverser<Package> {
-    @Override
-    public Iterable<Package> children(@Nonnull Package packageEntity) {
-      return packageEntity.getChildren();
-    }
   }
 }

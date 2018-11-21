@@ -12,16 +12,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.ScheduledJob;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.mail.MailSender;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /** Executes {@link ScheduledJob}s. */
@@ -32,12 +33,13 @@ public class JobExecutor {
 
   private final DataService dataService;
   private final EntityManager entityManager;
-  private final JobExecutionTemplate jobExecutionTemplate = new JobExecutionTemplate();
   private final JobExecutionUpdater jobExecutionUpdater;
   private final MailSender mailSender;
   private final ExecutorService executorService;
   private final JobFactoryRegistry jobFactoryRegistry;
-  private final JobExecutorTokenService jobExecutorTokenService;
+  private final JobExecutionContextFactory jobExecutionContextFactory;
+
+  private JobExecutionTemplate jobExecutionTemplate;
   private final Gson gson;
 
   public JobExecutor(
@@ -47,14 +49,16 @@ public class JobExecutor {
       MailSender mailSender,
       ExecutorService executorService,
       JobFactoryRegistry jobFactoryRegistry,
-      JobExecutorTokenService jobExecutorTokenService) {
+      JobExecutionContextFactory jobExecutionContextFactory) {
     this.dataService = requireNonNull(dataService);
     this.entityManager = requireNonNull(entityManager);
     this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
     this.mailSender = requireNonNull(mailSender);
     this.executorService = requireNonNull(executorService);
     this.jobFactoryRegistry = jobFactoryRegistry;
-    this.jobExecutorTokenService = requireNonNull(jobExecutorTokenService);
+    this.jobExecutionContextFactory = requireNonNull(jobExecutionContextFactory);
+
+    this.jobExecutionTemplate = new JobExecutionTemplate();
     this.gson = new Gson();
   }
 
@@ -67,6 +71,10 @@ public class JobExecutor {
   public void executeScheduledJob(String scheduledJobId) {
     ScheduledJob scheduledJob =
         dataService.findOneById(SCHEDULED_JOB, scheduledJobId, ScheduledJob.class);
+    if (scheduledJob == null) {
+      throw new UnknownEntityException(SCHEDULED_JOB, scheduledJobId);
+    }
+
     JobExecution jobExecution = createJobExecution(scheduledJob);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
 
@@ -111,8 +119,19 @@ public class JobExecutor {
    */
   public CompletableFuture<Void> submit(
       JobExecution jobExecution, ExecutorService executorService) {
+    overwriteJobExecutionUser(jobExecution);
     Job molgenisJob = saveExecutionAndCreateJob(jobExecution);
     return CompletableFuture.runAsync(() -> runJob(jobExecution, molgenisJob), executorService);
+  }
+
+  private void overwriteJobExecutionUser(JobExecution jobExecution) {
+    String username;
+    if (SecurityUtils.currentUserIsSystem()) {
+      username = null;
+    } else {
+      username = SecurityUtils.getCurrentUsername();
+    }
+    jobExecution.setUser(username);
   }
 
   @SuppressWarnings("unchecked")
@@ -130,10 +149,11 @@ public class JobExecutor {
     }
   }
 
-  private void runJob(JobExecution jobExecution, Job<?> molgenisJob) {
-    Authentication authentication = jobExecutorTokenService.createToken(jobExecution);
+  private void runJob(JobExecution jobExecution, Job<?> job) {
+    JobExecutionContext jobExecutionContext =
+        jobExecutionContextFactory.createJobExecutionContext(jobExecution);
     Progress progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
-    jobExecutionTemplate.call(molgenisJob, progress, authentication);
+    jobExecutionTemplate.call(job, progress, jobExecutionContext);
   }
 
   private void writePropertyValues(JobExecution jobExecution, MutablePropertyValues pvs) {
@@ -146,5 +166,10 @@ public class JobExecutor {
     MutablePropertyValues pvs = new MutablePropertyValues();
     pvs.addPropertyValues(parameters);
     return pvs;
+  }
+
+  /** testability */
+  void setJobExecutionTemplate(JobExecutionTemplate jobExecutionTemplate) {
+    this.jobExecutionTemplate = requireNonNull(jobExecutionTemplate);
   }
 }
