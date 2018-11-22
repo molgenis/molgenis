@@ -1,7 +1,6 @@
 package org.molgenis.navigator.copy.service;
 
 import static com.google.common.collect.Streams.stream;
-import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 
 import java.util.Map;
 import org.molgenis.data.meta.AttributeType;
@@ -101,12 +100,13 @@ class RelationTransformer {
     }
 
     stream(entityType.getAtomicAttributes())
-        .filter(attr -> attr.getDataType() == ONE_TO_MANY)
+        .filter(Attribute::isMappedBy)
         .forEach(attr -> transformMappedBy(attr, newAttributes));
   }
 
   private static void transformMappedBy(Attribute attribute, Map<String, Attribute> newAttributes) {
-    if (attribute.getMappedBy() != null) {
+    if (attribute.isMappedBy()) {
+      @SuppressWarnings("ConstantConditions")
       String mappedByAttrId = attribute.getMappedBy().getIdentifier();
       if (newAttributes.containsKey(mappedByAttrId)) {
         attribute.setMappedBy(newAttributes.get(mappedByAttrId));

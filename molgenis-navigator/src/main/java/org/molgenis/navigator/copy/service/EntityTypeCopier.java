@@ -12,15 +12,11 @@ import static org.molgenis.navigator.copy.service.RelationTransformer.transformP
 import static org.molgenis.navigator.copy.service.RelationTransformer.transformRefEntities;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.IdGenerator;
@@ -65,12 +61,15 @@ class EntityTypeCopier {
   }
 
   private void persist(List<EntityType> copiedEntityTypes, CopyState state) {
-    entityTypeDependencyResolver
-        .resolve(copiedEntityTypes)
-        .stream()
-        .map(copy -> cutDefaultValues(copy, state))
-        .map(this::persistEntityType)
-        .collect(toList())
+    List<EntityType> persistedEntityTypes =
+        entityTypeDependencyResolver
+            .resolve(copiedEntityTypes)
+            .stream()
+            .map(copy -> cutDefaultValues(copy, state))
+            .map(this::persistEntityType)
+            .collect(toList());
+
+    persistedEntityTypes
         .stream()
         .map(copy -> copyEntities(copy, state))
         .map(copy -> pasteDefaultValues(copy, state))
@@ -120,7 +119,7 @@ class EntityTypeCopier {
   private EntityType cutDefaultValues(EntityType copy, CopyState state) {
     stream(copy.getAtomicAttributes())
         .filter(EntityTypeUtils::isReferenceType)
-        .filter(attr -> attr.getDefaultValue() != null)
+        .filter(Attribute::hasDefaultValue)
         .forEach(
             attr -> {
               state.referenceDefaultValues().put(attr.getIdentifier(), attr.getDefaultValue());
@@ -160,86 +159,5 @@ class EntityTypeCopier {
     dataService.add(
         copy.getId(),
         batch.stream().map(entity -> new PretendingEntity(entity, state.copiedEntityTypes())));
-  }
-
-  /**
-   * When copying rows from one repository to another, the metadata of these entities will not fit
-   * the copied repository and its references because the metadatas will have different IDs. The
-   * PretendingEntity acts like it's the newly copied entity by returning the metadata of the copied
-   * repository instead of the original.
-   */
-  private class PretendingEntity extends AbstractEntityDecorator {
-
-    private final Map<String, EntityType> copiedEntityTypes;
-
-    PretendingEntity(Entity entity, Map<String, EntityType> copiedEntityTypes) {
-      super(entity);
-      this.copiedEntityTypes = copiedEntityTypes;
-    }
-
-    @Override
-    public EntityType getEntityType() {
-      if (delegate().getEntityType() != null) {
-        String id = delegate().getEntityType().getId();
-        if (copiedEntityTypes.containsKey(id)) {
-          return copiedEntityTypes.get(id);
-        } else {
-          return delegate().getEntityType();
-        }
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public Entity getEntity(String attributeName) {
-      Entity entity = delegate().getEntity(attributeName);
-      return entity != null ? newPretendingEntity(entity) : null;
-    }
-
-    /**
-     * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
-     * typed FileMeta Entity is requested.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {
-      Entity entity = delegate().getEntity(attributeName);
-      if (clazz.equals(FileMeta.class)) {
-        return entity != null ? (E) new FileMeta(newPretendingEntity(entity)) : null;
-      } else {
-        throw new UnsupportedOperationException("Can't return typed pretending entities");
-      }
-    }
-
-    @Override
-    public Iterable<Entity> getEntities(String attributeName) {
-      return stream(delegate().getEntities(attributeName))
-          .map(this::newPretendingEntity)
-          .collect(toList());
-    }
-
-    /**
-     * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
-     * typed FileMeta Entity is requested.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) {
-      Iterable<E> entities = delegate().getEntities(attributeName, clazz);
-      if (clazz.equals(FileMeta.class)) {
-        return stream(entities)
-            .filter(Objects::nonNull)
-            .map(this::newPretendingEntity)
-            .map(e -> (E) new FileMeta(e))
-            .collect(toList());
-      } else {
-        throw new UnsupportedOperationException("Can't return typed pretending entities");
-      }
-    }
-
-    private PretendingEntity newPretendingEntity(Entity entity) {
-      return new PretendingEntity(entity, copiedEntityTypes);
-    }
   }
 }

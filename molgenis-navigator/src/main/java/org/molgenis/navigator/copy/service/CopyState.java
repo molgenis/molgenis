@@ -1,6 +1,7 @@
 package org.molgenis.navigator.copy.service;
 
-import com.google.auto.value.AutoValue;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,36 +12,56 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.jobs.Progress;
 
-@AutoValue
-@SuppressWarnings("squid:S1610")
-abstract class CopyState {
+class CopyState {
 
-  @Nullable
-  abstract Package targetPackage();
+  @Nullable private final Package targetPackage;
+  private final Progress progress;
+  private final List<EntityType> entityTypesInPackages = new ArrayList<>();
+  private final Map<String, Package> copiedPackages = new HashMap<>();
+  private final Map<String, EntityType> copiedEntityTypes = new HashMap<>();
+  private final Map<String, Attribute> copiedAttributes = new HashMap<>();
+  private final Map<String, String> originalEntityTypeIds = new HashMap<>();
+  private final Map<String, String> referenceDefaultValues = new HashMap<>();
 
-  abstract Progress progress();
-
-  abstract List<EntityType> entityTypesInPackages();
-
-  abstract Map<String, Package> copiedPackages();
-
-  abstract Map<String, EntityType> copiedEntityTypes();
-
-  abstract Map<String, Attribute> copiedAttributes();
-
-  abstract Map<String, String> originalEntityTypeIds();
-
-  abstract Map<String, String> referenceDefaultValues();
+  private CopyState(@Nullable Package targetPackage, Progress progress) {
+    this.targetPackage = targetPackage;
+    this.progress = requireNonNull(progress);
+  }
 
   public static CopyState create(@Nullable Package targetPackage, Progress progress) {
-    return new AutoValue_CopyState(
-        targetPackage,
-        progress,
-        new ArrayList<>(),
-        new HashMap<>(),
-        new HashMap<>(),
-        new HashMap<>(),
-        new HashMap<>(),
-        new HashMap<>());
+    return new CopyState(targetPackage, progress);
+  }
+
+  @Nullable
+  public Package targetPackage() {
+    return targetPackage;
+  }
+
+  public Progress progress() {
+    return progress;
+  }
+
+  public List<EntityType> entityTypesInPackages() {
+    return entityTypesInPackages;
+  }
+
+  public Map<String, Package> copiedPackages() {
+    return copiedPackages;
+  }
+
+  public Map<String, EntityType> copiedEntityTypes() {
+    return copiedEntityTypes;
+  }
+
+  public Map<String, Attribute> copiedAttributes() {
+    return copiedAttributes;
+  }
+
+  public Map<String, String> originalEntityTypeIds() {
+    return originalEntityTypeIds;
+  }
+
+  public Map<String, String> referenceDefaultValues() {
+    return referenceDefaultValues;
   }
 }
