@@ -81,7 +81,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void exportEmx(
-      List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress){
+      List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress) {
     Set<Package> packageSet = new LinkedHashSet<>();
     Set<EntityType> entityTypeSet = new LinkedHashSet<>();
     resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
@@ -102,7 +102,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void writeEntityTypeSheets(
-      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress){
+      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
       String progressMessage = contextMessageSource.getMessage("emx_export_progress_message");
@@ -174,7 +174,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     writer.writeRows(Streams.stream(entityTypes).map(EntityTypeMapper::map), EMX_ENTITIES);
   }
 
-  private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer){
+  private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer) {
     if (!writer.hasSheet(EMX_ATTRIBUTES)) {
       writer.createSheet(EMX_ATTRIBUTES, newArrayList(ATTRIBUTE_ATTRS.keySet()));
     }
