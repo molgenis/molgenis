@@ -37,6 +37,10 @@ public class DataServiceImpl implements DataService {
     return metaDataService.getEntityTypes().map(EntityType::getId);
   }
 
+  public void EQ() {}
+
+  public void eq() {}
+
   @Override
   public boolean hasRepository(String entityTypeId) {
     return metaDataService.hasRepository(entityTypeId);
