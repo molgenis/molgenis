@@ -161,6 +161,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     when(entityTypeCopy.getAtomicAttributes()).thenReturn(singletonList(refAttrCopy));
     when(refAttrCopy.getIdentifier()).thenReturn("refAttr");
     when(refAttrCopy.getDataType()).thenReturn(AttributeType.MREF);
+    when(refAttrCopy.hasDefaultValue()).thenReturn(true);
     when(refAttrCopy.getDefaultValue()).thenReturn("row1,row2,row3");
     Package targetPackage = mock(Package.class);
     Progress progress = mock(Progress.class);

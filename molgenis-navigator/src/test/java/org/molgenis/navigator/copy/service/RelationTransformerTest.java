@@ -144,8 +144,10 @@ public class RelationTransformerTest {
     Attribute refAttr1 = mock(Attribute.class, RETURNS_DEEP_STUBS);
     Attribute refAttr2 = mock(Attribute.class, RETURNS_DEEP_STUBS);
     Attribute normalAttr = mock(Attribute.class);
+    when(refAttr1.isMappedBy()).thenReturn(true);
     when(refAttr1.getMappedBy().getIdentifier()).thenReturn("mappedByAttr1");
     when(refAttr1.getDataType()).thenReturn(ONE_TO_MANY);
+    when(refAttr2.isMappedBy()).thenReturn(true);
     when(refAttr2.getMappedBy().getIdentifier()).thenReturn("mappedByAttr2");
     when(refAttr2.getDataType()).thenReturn(ONE_TO_MANY);
     when(normalAttr.getIdentifier()).thenReturn("normalAttr");
