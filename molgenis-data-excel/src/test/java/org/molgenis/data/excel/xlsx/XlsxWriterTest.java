@@ -1,4 +1,4 @@
-package org.molgenis.data.excel.simple;
+package org.molgenis.data.excel.xlsx;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.doReturn;
@@ -23,7 +23,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ExcelWriterTest extends AbstractMockitoTest {
+public class XlsxWriterTest extends AbstractMockitoTest {
 
   @Mock Workbook workbook;
 
@@ -31,25 +31,25 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
   File file;
 
-  ExcelWriter excelWriter;
+  XlsxWriter xlsxWriter;
 
   @BeforeMethod
   public void setUp() {
     file = new File("path");
-    excelWriter = new ExcelWriter(file.toPath(), workbook);
+    xlsxWriter = new XlsxWriter(file.toPath(), workbook);
   }
 
   @Test
   public void testHasSheetTrue() {
     Sheet sheet = mock(Sheet.class);
     when(workbook.getSheet("test")).thenReturn(sheet);
-    assertTrue(excelWriter.hasSheet("test"));
+    assertTrue(xlsxWriter.hasSheet("test"));
   }
 
   @Test
   public void testHasSheetFalse() {
     when(workbook.getSheet("test")).thenReturn(null);
-    assertFalse(excelWriter.hasSheet("test"));
+    assertFalse(xlsxWriter.hasSheet("test"));
   }
 
   @Test
@@ -63,7 +63,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(workbook.getSheet("test")).thenReturn(null);
     when(workbook.createSheet("test")).thenReturn(sheet);
 
-    excelWriter.createSheet("test", newArrayList("head1", "head2"));
+    xlsxWriter.createSheet("test", newArrayList("head1", "head2"));
     verify(cell0).setCellValue("head1");
     verify(cell1).setCellValue("head2");
   }
@@ -78,7 +78,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(sheet.createRow(1)).thenReturn(row);
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRow(newArrayList("value1", "value2"), "test");
+    xlsxWriter.writeRow(newArrayList("value1", "value2"), "test");
     verify(cell0).setCellValue("value1");
     verify(cell1).setCellValue("value2");
   }
@@ -115,7 +115,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRows(
+    xlsxWriter.writeRows(
         Stream.of(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
@@ -156,7 +156,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRows(
+    xlsxWriter.writeRows(
         newArrayList(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
@@ -167,7 +167,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
   @Test
   public void testClose() throws IOException {
-    excelWriter.close();
+    xlsxWriter.close();
     verify(workbook).close();
   }
 }

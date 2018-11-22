@@ -12,8 +12,8 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_PACK
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_ENTITIES_TAGS;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.molgenis.data.meta.AttributeType;
@@ -43,7 +43,7 @@ public class EntityTypeMapper {
   private EntityTypeMapper() {}
 
   public static List<Object> map(EntityType entityType) {
-    List<Object> row = Lists.newArrayList();
+    List<Object> row = new ArrayList(ENTITIES_ATTRS.size());
     for (Entry<String, String> entry : ENTITIES_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_ENTITIES_TAGS:

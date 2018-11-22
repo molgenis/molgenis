@@ -53,7 +53,10 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
       roles = {ROLE_SU})
   @Test
   public void test() throws IOException {
-    EntityType entityType1 = entityTestHarness.createDynamicRefEntityType("test1");
+    //FIXME: fix
+    EntityType refEntityType1 = entityTestHarness.createDynamicRefEntityType("test1");
+    EntityType entityType1 = entityTestHarness.createDynamicTestEntityType(refEntityType1, "test1");
+
     dataService.getMeta().addEntityType(entityType1);
     dataService.add(
         entityType1.getId(), entityTestHarness.createTestRefEntities(entityType1, 2).stream());

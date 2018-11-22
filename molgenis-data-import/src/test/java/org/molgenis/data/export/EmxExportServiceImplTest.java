@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
-import org.molgenis.data.excel.simple.ExcelWriter;
+import org.molgenis.data.excel.xlsx.XlsxWriter;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
@@ -121,7 +121,7 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
             "Finished downloading package metadata",
             LocaleContextHolder.getLocale());
 
-    ExcelWriter writer = mock(ExcelWriter.class);
+    XlsxWriter writer = mock(XlsxWriter.class);
     Progress progress = mock(Progress.class);
 
     List<Object> expectedRow1 = new ArrayList();

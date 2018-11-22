@@ -19,11 +19,10 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.excel.simple.ExcelWriter;
-import org.molgenis.data.excel.simple.ExcelWriterFactory;
+import org.molgenis.data.excel.xlsx.XlsxWriter;
+import org.molgenis.data.excel.xlsx.XlsxWriterFactory;
 import org.molgenis.data.export.exception.EmptyExportRequestException;
 import org.molgenis.data.export.exception.EmxExportException;
 import org.molgenis.data.export.exception.InvalidEmxIdentifierException;
@@ -58,10 +57,10 @@ public class EmxExportServiceImpl implements EmxExportService {
       List<EntityType> entityTypes,
       List<Package> packages,
       Path downloadFilePath,
-      @Nullable Progress progress) {
+      Progress progress) {
+    requireNonNull(progress);
     if (!(entityTypes.isEmpty() && packages.isEmpty())) {
-
-      try (ExcelWriter writer = ExcelWriterFactory.create(downloadFilePath)) {
+      try (XlsxWriter writer = XlsxWriterFactory.create(downloadFilePath)) {
         exportEmx(entityTypes, packages, writer, progress);
       } catch (IOException e) {
         throw new EmxExportException(e);
@@ -72,9 +71,8 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void exportEmx(
-      List<EntityType> entityTypes, List<Package> packages, ExcelWriter writer, Progress progress)
+      List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress)
       throws IOException {
-    requireNonNull(progress);
     Set<Package> packageSet = new LinkedHashSet<>();
     Set<EntityType> entityTypeSet = new LinkedHashSet<>();
     resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
@@ -95,7 +93,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void writeEntityTypeSheets(
-      Set<EntityType> entityTypes, ExcelWriter writer, Progress progress) throws IOException {
+      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) throws IOException {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
       String progressMessage =
@@ -150,10 +148,9 @@ public class EmxExportServiceImpl implements EmxExportService {
     }
   }
 
-  private void downloadData(EntityType entityType, ExcelWriter writer) {
+  private void downloadData(EntityType entityType, XlsxWriter writer) {
     List<Object> headers =
-        Streams.stream(entityType.getAttributes())
-            .filter(attr -> attr.getDataType() != AttributeType.COMPOUND)
+        Streams.stream(entityType.getAtomicAttributes())
             .map(Attribute::getName)
             .collect(toList());
     if (!writer.hasSheet(entityType.getId())) {
@@ -165,18 +162,18 @@ public class EmxExportServiceImpl implements EmxExportService {
         .forEachBatched(entities -> writeRows(entities, entityType, writer), BATCH_SIZE);
   }
 
-  private void writeRows(List<Entity> entities, EntityType entityType, ExcelWriter writer) {
+  private void writeRows(List<Entity> entities, EntityType entityType, XlsxWriter writer) {
     writer.writeRows(entities.stream().map(DataRowMapper::mapDataRow), entityType.getId());
   }
 
-  private void writeEntityTypes(Iterable<EntityType> entityTypes, ExcelWriter writer) {
+  private void writeEntityTypes(Iterable<EntityType> entityTypes, XlsxWriter writer) {
     if (!writer.hasSheet(EMX_ENTITIES)) {
       writer.createSheet(EMX_ENTITIES, newArrayList(ENTITIES_ATTRS.keySet()));
     }
     writer.writeRows(Streams.stream(entityTypes).map(EntityTypeMapper::map), EMX_ENTITIES);
   }
 
-  private void writeAttributes(Iterable<Attribute> attrs, ExcelWriter writer) throws IOException {
+  private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer) throws IOException {
     if (!writer.hasSheet(EMX_ATTRIBUTES)) {
       writer.createSheet(EMX_ATTRIBUTES, newArrayList(ATTRIBUTE_ATTRS.keySet()));
     }
@@ -184,7 +181,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   protected void writePackageSheet(
-      Set<Package> packages, Set<EntityType> entityTypes, ExcelWriter writer, Progress progress) {
+      Set<Package> packages, Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }

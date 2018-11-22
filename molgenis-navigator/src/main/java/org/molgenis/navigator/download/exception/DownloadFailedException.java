@@ -1,5 +1,7 @@
 package org.molgenis.navigator.download.exception;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.i18n.CodedRuntimeException;
 
 public class DownloadFailedException extends CodedRuntimeException {
@@ -8,12 +10,7 @@ public class DownloadFailedException extends CodedRuntimeException {
 
   public DownloadFailedException(Throwable cause) {
     super(ERROR_CODE, cause);
-    this.cause = cause;
-  }
-
-  @Override
-  public String getMessage() {
-    return String.format("cause:%s", cause.getMessage());
+    this.cause = requireNonNull(cause);
   }
 
   @Override

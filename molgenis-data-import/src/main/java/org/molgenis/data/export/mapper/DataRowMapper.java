@@ -17,11 +17,10 @@ public class DataRowMapper {
 
   public static List<Object> mapDataRow(Entity entity) {
     List<Object> dataRow = new ArrayList<>();
-    for (Attribute attribute : entity.getEntityType().getAttributes()) {
-      // MAPPED_BY and expressions
-      if (attribute.getExpression() != null || attribute.getMappedBy() != null) {
+    for (Attribute attribute : entity.getEntityType().getAtomicAttributes()) {
+      if (attribute.hasExpression() || attribute.isMappedBy()) {
         dataRow.add(null);
-      } else if (attribute.getDataType() != AttributeType.COMPOUND) {
+      } else {
         if (isSingleReferenceType(attribute)) {
           Entity value = entity.getEntity(attribute.getName());
           dataRow.add(value != null ? value.getIdValue() : null);

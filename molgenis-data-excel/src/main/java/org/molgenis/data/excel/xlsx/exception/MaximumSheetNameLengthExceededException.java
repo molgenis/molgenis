@@ -1,4 +1,4 @@
-package org.molgenis.data.excel.simple.exception;
+package org.molgenis.data.excel.xlsx.exception;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;

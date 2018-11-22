@@ -1,6 +1,7 @@
 package org.molgenis.navigator.download.job;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.core.ui.file.FileDownloadController.URI;
 import static org.molgenis.data.importer.emx.EmxFileExtensions.XLSX;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class DownloadConfig {
       public Job createJob(DownloadJobExecution downloadJobExecution) {
         String fileType = XLSX.toString().toLowerCase();
         final String filename = getDownloadFilename(fileType);
-        downloadJobExecution.setResultUrl("/files/" + filename);
+        downloadJobExecution.setResultUrl(URI + filename);
         downloadJobExecution.setProgressInt(0);
         downloadJobExecution.setProgressMessage(
             getMessage("progress-download-running", "Starting preparing download."));

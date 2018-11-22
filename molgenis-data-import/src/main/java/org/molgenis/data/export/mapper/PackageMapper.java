@@ -8,8 +8,8 @@ import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_PAREN
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGE_TAGS;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.molgenis.data.meta.model.Package;
@@ -34,7 +34,7 @@ public class PackageMapper {
   private PackageMapper() {}
 
   public static List<Object> map(Package pack) {
-    List<Object> row = Lists.newArrayList();
+    List<Object> row = new ArrayList<>(PACKAGE_ATTRS.size());
     for (Entry<String, String> entry : PACKAGE_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_PACKAGE_TAGS:

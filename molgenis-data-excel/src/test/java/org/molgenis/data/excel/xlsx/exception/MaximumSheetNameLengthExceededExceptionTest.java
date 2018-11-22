@@ -1,4 +1,4 @@
-package org.molgenis.data.excel.simple.exception;
+package org.molgenis.data.excel.xlsx.exception;
 
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;

@@ -72,7 +72,7 @@ public class AttributeMapper {
   private AttributeMapper() {}
 
   public static List<Object> map(Attribute attr) {
-    List<Object> row = new ArrayList<>();
+    List<Object> row = new ArrayList<>(ATTRIBUTE_ATTRS.size());
     for (Entry<String, String> entry : ATTRIBUTE_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_ATTRIBUTES_ID_ATTRIBUTE:
@@ -82,10 +82,10 @@ public class AttributeMapper {
           row.add(getTagsValue(attr));
           break;
         case EMX_ATTRIBUTES_ENTITY:
-          row.add(attr.getEntity() != null ? attr.getEntity().getId() : "");
+          row.add(attr.getEntity() != null ? attr.getEntity().getId() : null);
           break;
         case EMX_ATTRIBUTES_REF_ENTITY:
-          row.add(attr.getRefEntity() != null ? attr.getRefEntity().getId() : "");
+          row.add(attr.getRefEntity() != null ? attr.getRefEntity().getId() : null);
           break;
         case EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE:
           row.add(getLookupValue(attr));
@@ -107,7 +107,7 @@ public class AttributeMapper {
           break;
         default:
           Object value = attr.get(entry.getValue());
-          row.add(value != null ? value.toString() : "");
+          row.add(value != null ? value.toString() : null);
       }
     }
     return row;
@@ -115,12 +115,12 @@ public class AttributeMapper {
 
   private static String getMappedByValue(Attribute attr) {
     Attribute mappedBy = attr.getMappedBy();
-    return mappedBy != null ? mappedBy.getName() : "";
+    return mappedBy != null ? mappedBy.getName() : null;
   }
 
   private static String getEnumOptions(Attribute attr) {
 
-    return attr.getEnumOptions() != null ? String.join(",", attr.getEnumOptions()) : "";
+    return attr.getEnumOptions() != null ? String.join(",", attr.getEnumOptions()) : null;
   }
 
   private static String getLookupValue(Attribute attr) {
@@ -148,7 +148,7 @@ public class AttributeMapper {
 
   private static String getPartOfValue(Attribute attr) {
     Attribute partOfAttribute = attr.getParent();
-    return partOfAttribute != null ? partOfAttribute.getName() : "";
+    return partOfAttribute != null ? partOfAttribute.getName() : null;
   }
 
   private static Object getIdAttrValue(Attribute attr) {
