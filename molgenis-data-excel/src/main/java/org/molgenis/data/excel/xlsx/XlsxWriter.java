@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -52,19 +53,6 @@ public class XlsxWriter implements AutoCloseable {
     }
   }
 
-  private void internalWriteRow(List<Object> values, Sheet sheet, int rowNr) {
-    final org.apache.poi.ss.usermodel.Row row = sheet.createRow(rowNr);
-    AtomicInteger counter = new AtomicInteger(0);
-    values
-        .stream()
-        .forEach(
-            record -> {
-              int index = counter.getAndIncrement();
-              if (record != null) {
-                createCell(row, index, record);
-              }
-            });
-  }
 
   public void writeRow(List<Object> row, String sheetName) {
     this.writeRows(Stream.of(row), sheetName);
@@ -90,11 +78,25 @@ public class XlsxWriter implements AutoCloseable {
     }
   }
 
-  public void createCell(Row row, int index, Object value) {
-    Cell cell = row.createCell(++index);
+  private void internalWriteRow(List<Object> values, Sheet sheet, int rowNr) {
+    final Row row = sheet.createRow(rowNr);
+    AtomicInteger counter = new AtomicInteger(0);
+    values
+        .stream()
+        .forEach(
+            record -> {
+              int index = counter.getAndIncrement();
+              if (record != null) {
+                Cell cell = row.createCell(index);
+                setCellValue(cell, record);
+              }
+            });
+  }
+
+  private void setCellValue(Cell cell, Object value) {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));
-    } else if (value instanceof Date) {
+    } else if (value instanceof LocalDate) {
       //TODO: system default okay?
       cell.setCellValue(Date.from(toLocalDate(value).atStartOfDay(ZoneId.systemDefault()).toInstant()));
     } else if (value instanceof Instant) {
@@ -105,6 +107,8 @@ public class XlsxWriter implements AutoCloseable {
       cell.setCellValue(toInt(value));
     } else if (value instanceof Long) {
       cell.setCellValue(toLong(value));
+    }else if (value instanceof String) {
+      cell.setCellValue(value.toString());
     } else {
       throw new UnsupportedValueException(value);
     }
