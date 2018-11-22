@@ -30,7 +30,6 @@ import org.molgenis.data.export.mapper.AttributeMapper;
 import org.molgenis.data.export.mapper.DataRowMapper;
 import org.molgenis.data.export.mapper.EntityTypeMapper;
 import org.molgenis.data.export.mapper.PackageMapper;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -62,7 +61,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     if (!(entityTypes.isEmpty() && packages.isEmpty())) {
       try (XlsxWriter writer = XlsxWriterFactory.create(downloadFilePath)) {
         exportEmx(entityTypes, packages, writer, progress);
-      } catch (IOException e) {
+      } catch (IOException | RuntimeException e) {
         throw new EmxExportException(e);
       }
     } else {
