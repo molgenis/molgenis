@@ -21,14 +21,14 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DownloadService {
+public class ResourceDownloadService {
   private final EmxExportService emxExportService;
   private final FileStore fileStore;
   private final FileMetaFactory fileMetaFactory;
   private final DataService dataService;
   private final ResourceCollector resourceCollector;
 
-  public DownloadService(
+  public ResourceDownloadService(
       EmxExportService emxExportService,
       FileStore fileStore,
       FileMetaFactory fileMetaFactory,

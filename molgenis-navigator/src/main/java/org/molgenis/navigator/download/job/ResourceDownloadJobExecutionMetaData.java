@@ -10,8 +10,8 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DownloadJobExecutionMetaData extends SystemEntityType {
-  private static final String SIMPLE_NAME = "DownloadJobExecution";
+public class ResourceDownloadJobExecutionMetaData extends SystemEntityType {
+  private static final String SIMPLE_NAME = "ResourceDownloadJobExecution";
   public static final String RESOURCES = "resources";
 
   private final JobExecutionMetaData jobExecutionMetaData;
@@ -19,7 +19,7 @@ public class DownloadJobExecutionMetaData extends SystemEntityType {
 
   public static final String DOWNLOAD_JOB_TYPE = "ResourceDownloadJob";
 
-  DownloadJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {
+  ResourceDownloadJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {
     super(SIMPLE_NAME, PACKAGE_JOB);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
     this.jobPackage = requireNonNull(jobPackage);

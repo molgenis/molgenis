@@ -9,29 +9,29 @@ import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceIdentifierUtil;
 
-public class DownloadJobExecution extends JobExecution {
-  public DownloadJobExecution(Entity entity) {
+public class ResourceDownloadJobExecution extends JobExecution {
+  public ResourceDownloadJobExecution(Entity entity) {
     super(entity);
-    setType(DownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
+    setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
   }
 
-  public DownloadJobExecution(EntityType entityType) {
+  public ResourceDownloadJobExecution(EntityType entityType) {
     super(entityType);
-    setType(DownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
+    setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
   }
 
-  public DownloadJobExecution(String identifier, EntityType entityType) {
+  public ResourceDownloadJobExecution(String identifier, EntityType entityType) {
     super(identifier, entityType);
-    setType(DownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
+    setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
   }
 
   public void setResources(List<ResourceIdentifier> resourceIdentifiers) {
-    set(DownloadJobExecutionMetaData.RESOURCES, new Gson().toJson(resourceIdentifiers));
+    set(ResourceDownloadJobExecutionMetaData.RESOURCES, new Gson().toJson(resourceIdentifiers));
   }
 
   @Nullable
   public List<ResourceIdentifier> getResources() {
-    String resourceJson = getString(DownloadJobExecutionMetaData.RESOURCES);
+    String resourceJson = getString(ResourceDownloadJobExecutionMetaData.RESOURCES);
     List<ResourceIdentifier> resourceIdentifiers =
         ResourceIdentifierUtil.getResourcesFromJson(resourceJson);
     return resourceIdentifiers;
