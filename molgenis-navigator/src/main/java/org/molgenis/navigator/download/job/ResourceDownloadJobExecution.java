@@ -32,8 +32,6 @@ public class ResourceDownloadJobExecution extends JobExecution {
   @Nullable
   public List<ResourceIdentifier> getResources() {
     String resourceJson = getString(ResourceDownloadJobExecutionMetaData.RESOURCES);
-    List<ResourceIdentifier> resourceIdentifiers =
-        ResourceIdentifierUtil.getResourcesFromJson(resourceJson);
-    return resourceIdentifiers;
+    return ResourceIdentifierUtil.getResourcesFromJson(resourceJson);
   }
 }

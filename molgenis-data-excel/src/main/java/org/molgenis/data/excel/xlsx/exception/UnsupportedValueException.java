@@ -7,7 +7,7 @@ import org.molgenis.i18n.CodedRuntimeException;
 
 public class UnsupportedValueException extends CodedRuntimeException {
   private static final String ERROR_CODE = "XLS02";
-  private final Object value;
+  private final transient Object value;
   private final Class<? extends Object> claZZ;
 
   public UnsupportedValueException(Object value) {

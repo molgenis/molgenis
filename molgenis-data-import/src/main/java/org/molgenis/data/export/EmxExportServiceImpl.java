@@ -46,7 +46,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   private final DataService dataService;
   private final ContextMessageSource contextMessageSource;
 
-  public EmxExportServiceImpl(DataService dataService, ContextMessageSource contextMessageSource) {
+  EmxExportServiceImpl(DataService dataService, ContextMessageSource contextMessageSource) {
     this.dataService = requireNonNull(dataService);
     this.contextMessageSource = requireNonNull(contextMessageSource);
   }
@@ -81,8 +81,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void exportEmx(
-      List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress)
-      throws IOException {
+      List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress){
     Set<Package> packageSet = new LinkedHashSet<>();
     Set<EntityType> entityTypeSet = new LinkedHashSet<>();
     resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
@@ -93,7 +92,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     writeEntityTypeSheets(entityTypeSet, writer, progress);
   }
 
-  protected void resolveMetadata(
+  void resolveMetadata(
       List<EntityType> entityTypes,
       List<Package> packages,
       Set<Package> packageSet,
@@ -103,7 +102,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void writeEntityTypeSheets(
-      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) throws IOException {
+      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress){
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
       String progressMessage = contextMessageSource.getMessage("emx_export_progress_message");
@@ -175,14 +174,14 @@ public class EmxExportServiceImpl implements EmxExportService {
     writer.writeRows(Streams.stream(entityTypes).map(EntityTypeMapper::map), EMX_ENTITIES);
   }
 
-  private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer) throws IOException {
+  private void writeAttributes(Iterable<Attribute> attrs, XlsxWriter writer){
     if (!writer.hasSheet(EMX_ATTRIBUTES)) {
       writer.createSheet(EMX_ATTRIBUTES, newArrayList(ATTRIBUTE_ATTRS.keySet()));
     }
     writer.writeRows(Streams.stream(attrs).map(AttributeMapper::map), EMX_ATTRIBUTES);
   }
 
-  protected void writePackageSheet(
+  void writePackageSheet(
       Set<Package> packages, Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));

@@ -41,8 +41,8 @@ public class XlsxWriter implements AutoCloseable {
   public boolean hasSheet(String name) {
     try {
       return workbook.getSheet(name) != null;
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     }
   }
 
@@ -59,8 +59,8 @@ public class XlsxWriter implements AutoCloseable {
       }
     } catch (MaximumSheetNameLengthExceededException e) {
       throw e;
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     }
   }
 
@@ -72,8 +72,8 @@ public class XlsxWriter implements AutoCloseable {
   public void writeRow(List<Object> row, String sheetName) {
     try {
       this.writeRows(Stream.of(row), sheetName);
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     }
   }
 
@@ -85,8 +85,8 @@ public class XlsxWriter implements AutoCloseable {
   public void writeRows(List<List<Object>> rows, String sheetName) {
     try {
       this.writeRows(rows.stream(), sheetName);
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     }
   }
 
@@ -102,16 +102,16 @@ public class XlsxWriter implements AutoCloseable {
           row -> {
             internalWriteRow(row, sheet, sheet.getLastRowNum() + 1);
           });
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     }
   }
 
   public void close() throws IOException {
     try {
       workbook.write(Files.newOutputStream(target));
-    } catch (Throwable throwable) {
-      throw new XlsxWriterException(throwable);
+    } catch (RuntimeException e) {
+      throw new XlsxWriterException(e);
     } finally {
       workbook.close();
     }
