@@ -18,7 +18,7 @@ import org.molgenis.core.ui.menu.Menu;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
@@ -59,7 +59,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
             appSettings,
             userAccountService,
             navigatorService,
-            mock(CopyJobExecutionFactory.class),
+            mock(ResourceCopyJobExecutionFactory.class),
             mock(JobExecutor.class));
     mockMvc =
         MockMvcBuilders.standaloneSetup(navigatorController)

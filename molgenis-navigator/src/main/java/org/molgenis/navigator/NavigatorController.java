@@ -10,8 +10,8 @@ import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.navigator.copy.CopyResourceRequest;
-import org.molgenis.navigator.copy.job.CopyJobExecution;
-import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecution;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.springframework.stereotype.Controller;
@@ -30,7 +30,7 @@ public class NavigatorController extends VuePluginController {
   public static final String URI = PLUGIN_URI_PREFIX + ID;
 
   private final NavigatorService navigatorService;
-  private final CopyJobExecutionFactory copyJobExecutionFactory;
+  private final ResourceCopyJobExecutionFactory copyJobExecutionFactory;
   private final JobExecutor jobExecutor;
 
   public NavigatorController(
@@ -38,7 +38,7 @@ public class NavigatorController extends VuePluginController {
       AppSettings appSettings,
       UserAccountService userAccountService,
       NavigatorService navigatorService,
-      CopyJobExecutionFactory copyJobExecutionFactory,
+      ResourceCopyJobExecutionFactory copyJobExecutionFactory,
       JobExecutor jobExecutor) {
     super(URI, menuReaderService, appSettings, userAccountService);
     this.navigatorService = requireNonNull(navigatorService);
@@ -62,7 +62,7 @@ public class NavigatorController extends VuePluginController {
   @PostMapping("/copy")
   @ResponseStatus(OK)
   public void copy(@RequestBody @Valid CopyResourceRequest request) {
-    CopyJobExecution jobExecution = copyJobExecutionFactory.create();
+    ResourceCopyJobExecution jobExecution = copyJobExecutionFactory.create();
     jobExecution.setResources(request.getResources());
     jobExecution.setTargetPackage(request.getTargetPackage());
     jobExecution.setUser(getCurrentUsername());

@@ -12,19 +12,19 @@ import org.springframework.stereotype.Component;
 
 @SuppressWarnings("unused")
 @Component
-public class CopyJobConfig {
+public class ResourceCopyJobConfig {
 
   private final CopyService copyService;
 
-  public CopyJobConfig(CopyService copyService) {
+  public ResourceCopyJobConfig(CopyService copyService) {
     this.copyService = requireNonNull(copyService);
   }
 
   @Bean
-  public JobFactory<CopyJobExecution> copyJobFactory() {
-    return new JobFactory<CopyJobExecution>() {
+  public JobFactory<ResourceCopyJobExecution> copyJobFactory() {
+    return new JobFactory<ResourceCopyJobExecution>() {
       @Override
-      public Job<Void> createJob(CopyJobExecution jobExecution) {
+      public Job<Void> createJob(ResourceCopyJobExecution jobExecution) {
         final List<ResourceIdentifier> resources = jobExecution.getResources();
         final String targetPackageId = jobExecution.getTargetPackage();
         return progress -> copyService.copy(resources, targetPackageId, progress);
