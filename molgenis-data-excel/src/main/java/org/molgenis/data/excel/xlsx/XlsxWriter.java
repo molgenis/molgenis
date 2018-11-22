@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.molgenis.data.excel.xlsx.exception.MaximumSheetNameLengthExceededException;
 import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
+import org.molgenis.data.excel.xlsx.exception.XlsxWriterException;
 
 public class XlsxWriter implements AutoCloseable {
 
@@ -38,40 +39,64 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   public boolean hasSheet(String name) {
-    return workbook.getSheet(name) != null;
+    try {
+      return workbook.getSheet(name) != null;
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
+    }
   }
 
   public void createSheet(String name, List<Object> headers) {
-    if (name.length() <= MAXIMUM_SHEET_LENGTH) {
-      Sheet sheet = workbook.getSheet(name);
-      if (sheet == null) {
-        sheet = workbook.createSheet(name);
-        internalWriteRow(headers, sheet, 0);
+    try {
+      if (name.length() <= MAXIMUM_SHEET_LENGTH) {
+        Sheet sheet = workbook.getSheet(name);
+        if (sheet == null) {
+          sheet = workbook.createSheet(name);
+          internalWriteRow(headers, sheet, 0);
+        }
+      } else {
+        throw new MaximumSheetNameLengthExceededException(name);
       }
-    } else {
-      throw new MaximumSheetNameLengthExceededException(name);
+    } catch (MaximumSheetNameLengthExceededException e) {
+      throw e;
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
     }
   }
 
   public void writeRow(List<Object> row, String sheetName) {
-    this.writeRows(Stream.of(row), sheetName);
+    try {
+      this.writeRows(Stream.of(row), sheetName);
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
+    }
   }
 
   public void writeRows(List<List<Object>> rows, String sheetName) {
-    this.writeRows(rows.stream(), sheetName);
+    try {
+      this.writeRows(rows.stream(), sheetName);
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
+    }
   }
 
   public void writeRows(Stream<List<Object>> rows, String sheetName) {
-    Sheet sheet = workbook.getSheet(sheetName);
-    rows.forEach(
-        row -> {
-          internalWriteRow(row, sheet, sheet.getLastRowNum() + 1);
-        });
+    try {
+      Sheet sheet = workbook.getSheet(sheetName);
+      rows.forEach(
+          row -> {
+            internalWriteRow(row, sheet, sheet.getLastRowNum() + 1);
+          });
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
+    }
   }
 
   public void close() throws IOException {
     try {
       workbook.write(Files.newOutputStream(target));
+    } catch (Throwable throwable) {
+      throw new XlsxWriterException(throwable);
     } finally {
       workbook.close();
     }
