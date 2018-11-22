@@ -53,7 +53,6 @@ public class XlsxWriter implements AutoCloseable {
     }
   }
 
-
   public void writeRow(List<Object> row, String sheetName) {
     this.writeRows(Stream.of(row), sheetName);
   }
@@ -93,12 +92,13 @@ public class XlsxWriter implements AutoCloseable {
             });
   }
 
-  private void setCellValue(Cell cell, Object value) {
+  protected void setCellValue(Cell cell, Object value) {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
-      //TODO: system default okay?
-      cell.setCellValue(Date.from(toLocalDate(value).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+      Instant instant = toLocalDate(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
+      Date date = Date.from(instant);
+      cell.setCellValue(date);
     } else if (value instanceof Instant) {
       cell.setCellValue(Date.from(toInstant(value)));
     } else if (value instanceof Double) {
@@ -107,7 +107,7 @@ public class XlsxWriter implements AutoCloseable {
       cell.setCellValue(toInt(value));
     } else if (value instanceof Long) {
       cell.setCellValue(toLong(value));
-    }else if (value instanceof String) {
+    } else if (value instanceof String) {
       cell.setCellValue(value.toString());
     } else {
       throw new UnsupportedValueException(value);

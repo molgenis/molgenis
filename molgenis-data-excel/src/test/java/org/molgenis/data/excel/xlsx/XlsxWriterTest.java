@@ -10,6 +10,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -169,5 +175,69 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   public void testClose() throws IOException {
     xlsxWriter.close();
     verify(workbook).close();
+  }
+
+  @Test
+  public void testSetCellValueInt() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, 1);
+
+    verify(cell).setCellValue(1);
+  }
+
+  @Test
+  public void testSetCellValueString() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, "1");
+
+    verify(cell).setCellValue("1");
+  }
+
+  @Test
+  public void testSetCellValueLong() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, 1L);
+
+    verify(cell).setCellValue(1L);
+  }
+
+  @Test
+  public void testSetCellValueDouble() {
+    Cell cell = mock(Cell.class);
+    double test = 1.123;
+
+    xlsxWriter.setCellValue(cell, test);
+
+    verify(cell).setCellValue(test);
+  }
+
+  @Test
+  public void testSetCellValueLocalDate() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, LocalDate.ofYearDay(2018, 200));
+
+    verify(cell).setCellValue(Date.from(Instant.ofEpochMilli(1531951200000l)));
+  }
+
+  @Test
+  public void testSetCellValueInstant() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
+
+    verify(cell).setCellValue(new Date(1000000));
+  }
+
+  @Test(expectedExceptions = UnsupportedValueException.class)
+  public void testSetCellValueUnsupported() {
+    Cell cell = mock(Cell.class);
+
+    List<String> list = new ArrayList();
+
+    xlsxWriter.setCellValue(cell, list);
   }
 }
