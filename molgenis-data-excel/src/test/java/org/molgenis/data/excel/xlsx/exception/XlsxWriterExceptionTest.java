@@ -9,7 +9,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class XlsxWriterExceptionTest  extends ExceptionMessageTest {
+public class XlsxWriterExceptionTest extends ExceptionMessageTest {
 
   @BeforeMethod
   public void setUp() {
@@ -30,8 +30,8 @@ public class XlsxWriterExceptionTest  extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     return new Object[][] {
-        new Object[] {"en", "An error occured while writing XLSX:  panic: stuff went wrong here!"},
-        {"nl", "Er is een fout opgetreden bij het schrijven van XLSX:  panic: stuff went wrong here!"}
+      new Object[] {"en", "An error occured while writing XLSX:  panic: stuff went wrong here!"},
+      {"nl", "Er is een fout opgetreden bij het schrijven van XLSX:  panic: stuff went wrong here!"}
     };
   }
 }

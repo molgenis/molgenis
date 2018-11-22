@@ -65,7 +65,8 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   /**
-   * @param row List of Objects, allowed Object classes: Boolean, LocalDate, Instant, Double, Integer, Long, String
+   * @param row List of Objects, allowed Object classes: Boolean, LocalDate, Instant, Double,
+   *     Integer, Long, String
    * @param sheetName
    */
   public void writeRow(List<Object> row, String sheetName) {
@@ -77,7 +78,8 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   /**
-   * @param rows List of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant, Double, Integer, Long, String
+   * @param rows List of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant,
+   *     Double, Integer, Long, String
    * @param sheetName
    */
   public void writeRows(List<List<Object>> rows, String sheetName) {
@@ -89,7 +91,8 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   /**
-   * @param rows Stream of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant, Double, Integer, Long, String
+   * @param rows Stream of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant,
+   *     Double, Integer, Long, String
    * @param sheetName
    */
   public void writeRows(Stream<List<Object>> rows, String sheetName) {
