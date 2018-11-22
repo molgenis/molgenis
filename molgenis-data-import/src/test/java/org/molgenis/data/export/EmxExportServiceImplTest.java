@@ -25,11 +25,9 @@ import org.molgenis.data.excel.xlsx.XlsxWriter;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
 import org.molgenis.test.AbstractMockitoTest;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -37,18 +35,13 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
 
   @Mock DataService dataService;
 
-  @Mock MessageSource messageSource;
-
-  @BeforeMethod
-  public void messageTestBeforeMethod() {
-    MessageSourceHolder.setMessageSource(messageSource);
-  }
+  @Mock ContextMessageSource contextMessageSource;
 
   private EmxExportServiceImpl service;
 
   @BeforeMethod
   public void setUp() {
-    service = new EmxExportServiceImpl(dataService);
+    service = new EmxExportServiceImpl(dataService, contextMessageSource);
   }
 
   @Test
@@ -113,13 +106,7 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     Set<Package> packages = new HashSet<>();
     packages.addAll(Arrays.asList(pack1, pack2));
 
-    doReturn("Finished")
-        .when(messageSource)
-        .getMessage(
-            "emx_export_metadata_message",
-            new Object[] {},
-            "Finished downloading package metadata",
-            LocaleContextHolder.getLocale());
+    doReturn("Finished").when(contextMessageSource).getMessage("emx_export_metadata_message");
 
     XlsxWriter writer = mock(XlsxWriter.class);
     Progress progress = mock(Progress.class);

@@ -119,8 +119,11 @@ public class AttributeMapper {
   }
 
   private static String getEnumOptions(Attribute attr) {
-
-    return attr.getEnumOptions() != null ? String.join(",", attr.getEnumOptions()) : null;
+    List<String> options = attr.getEnumOptions();
+    if (options != null && !options.isEmpty()) {
+      return String.join(",", attr.getEnumOptions());
+    }
+    return null;
   }
 
   private static String getLookupValue(Attribute attr) {
