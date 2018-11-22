@@ -50,6 +50,16 @@ public class EmxExportServiceImpl implements EmxExportService {
     this.dataService = requireNonNull(dataService);
   }
 
+  /**
+   * Isolation level needs to be 'SERIALIZABLE' in case IndexActions are being downloaded. The
+   * entities have their own transaction and can change during the download when executed with a
+   * default isolation level.
+   *
+   * @param entityTypes entityTypes to be exported to EMX.
+   * @param packages packages to be exported to EMX.
+   * @param downloadFilePath path for the resulting EMX file.
+   * @param progress Progress object to be updated during the export.
+   */
   @Override
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public void export(
