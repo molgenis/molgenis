@@ -5,20 +5,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.validation.constraints.NotNull;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.CodedRuntimeException;
-import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.CopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +29,19 @@ public class CopyServiceImpl implements CopyService {
   private final MetaDataService metaDataService;
   private final PackageCopier packageCopier;
   private final EntityTypeCopier entityTypeCopier;
+  private final ContextMessageSource contextMessageSource;
 
   CopyServiceImpl(
       ResourceCollector resourceCollector,
       MetaDataService metaDataService,
       PackageCopier packageCopier,
-      EntityTypeCopier entityTypeCopier) {
+      EntityTypeCopier entityTypeCopier,
+      ContextMessageSource contextMessageSource) {
     this.resourceCollector = requireNonNull(resourceCollector);
     this.metaDataService = requireNonNull(metaDataService);
     this.packageCopier = requireNonNull(packageCopier);
     this.entityTypeCopier = requireNonNull(entityTypeCopier);
+    this.contextMessageSource = requireNonNull(contextMessageSource);
   }
 
   @Override
@@ -63,24 +64,24 @@ public class CopyServiceImpl implements CopyService {
   private void copyResources(ResourceCollection resourceCollection, CopyState state) {
     Progress progress = state.progress();
     progress.setProgressMax(calculateMaxProgress(resourceCollection));
-    progress.progress(0, getMessage("progress-copy-started"));
+    progress.progress(0, contextMessageSource.getMessage("progress-copy-started"));
 
     copyPackages(resourceCollection.getPackages(), state);
     copyEntityTypes(resourceCollection.getEntityTypes(), state);
 
-    progress.status(getMessage("progress-copy-success"));
+    progress.status(contextMessageSource.getMessage("progress-copy-success"));
   }
 
   private void copyPackages(List<Package> packages, CopyState state) {
     if (!packages.isEmpty()) {
-      state.progress().status(getMessage("progress-copy-packages"));
+      state.progress().status(contextMessageSource.getMessage("progress-copy-packages"));
       packageCopier.copy(packages, state);
     }
   }
 
   private void copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
     if (!entityTypes.isEmpty() || !state.entityTypesInPackages().isEmpty()) {
-      state.progress().status(getMessage("progress-copy-entity-types"));
+      state.progress().status(contextMessageSource.getMessage("progress-copy-entity-types"));
       entityTypeCopier.copy(entityTypes, state);
     }
   }
@@ -91,12 +92,6 @@ public class CopyServiceImpl implements CopyService {
             .getPackage(targetPackageId)
             .orElseThrow(() -> new UnknownPackageException(targetPackageId))
         : null;
-  }
-
-  @NotNull
-  private String getMessage(String key) {
-    return MessageSourceHolder.getMessageSource()
-        .getMessage(key, new Object[0], LocaleContextHolder.getLocale());
   }
 
   private int calculateMaxProgress(ResourceCollection collection) {
