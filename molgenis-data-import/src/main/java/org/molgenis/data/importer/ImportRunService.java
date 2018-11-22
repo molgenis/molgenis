@@ -13,16 +13,13 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Locale;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.security.user.UserService;
-import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.ContextMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -35,16 +32,19 @@ public class ImportRunService {
   private final DataService dataService;
   private final MailSender mailSender;
   private final UserService userService;
+  private final ContextMessageSource contextMessageSource;
   private final ImportRunFactory importRunFactory;
 
   ImportRunService(
       DataService dataService,
       MailSender mailSender,
       UserService userService,
+      ContextMessageSource contextMessageSource,
       ImportRunFactory importRunFactory) {
     this.dataService = requireNonNull(dataService);
     this.mailSender = requireNonNull(mailSender);
     this.userService = requireNonNull(userService);
+    this.contextMessageSource = requireNonNull(contextMessageSource);
     this.importRunFactory = requireNonNull(importRunFactory);
   }
 
@@ -120,7 +120,7 @@ public class ImportRunService {
     try {
       String persistedMessage;
       if (message == null) {
-        persistedMessage = getUnknownErrorMessage();
+        persistedMessage = contextMessageSource.getMessage("import_unknown_error");
       } else {
         if (message.length() > TEXT.getMaxLength()) {
           persistedMessage = message.substring(0, toIntExact(TEXT.getMaxLength()));
@@ -141,11 +141,5 @@ public class ImportRunService {
     if (importRun.getNotify()) {
       createAndSendStatusMail(importRun);
     }
-  }
-
-  private String getUnknownErrorMessage() {
-    Locale locale = LocaleContextHolder.getLocale();
-    MessageSource messageSource = MessageSourceHolder.getMessageSource();
-    return messageSource.getMessage("import_unknown_error", null, locale);
   }
 }
