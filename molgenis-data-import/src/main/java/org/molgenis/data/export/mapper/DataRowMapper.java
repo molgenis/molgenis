@@ -8,7 +8,6 @@ import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 public class DataRowMapper {

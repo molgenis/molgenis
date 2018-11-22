@@ -35,7 +35,8 @@ public class ResourceDownloadConfig {
             getMessage("progress-download-running", "Starting preparing download."));
 
         return progress ->
-            resourceDownloadService.download(downloadJobExecution.getResources(), filename, progress);
+            resourceDownloadService.download(
+                downloadJobExecution.getResources(), filename, progress);
       }
     };
   }

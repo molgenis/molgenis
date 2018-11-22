@@ -56,7 +56,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
       roles = {ROLE_SU})
   @Test
   public void test() throws IOException {
-   Package pack = packageFactory.create("pack");
+    Package pack = packageFactory.create("pack");
     pack.setLabel("pack");
     dataService.getMeta().addPackage(pack);
 
@@ -71,14 +71,15 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
 
     EntityType refEntityType1 = entityTestHarness.createDynamicRefEntityType("pack_refTest1");
     refEntityType1.setPackage(pack);
-    EntityType entityType1 = entityTestHarness.createDynamicTestEntityType(refEntityType1, "pack_test1");
+    EntityType entityType1 =
+        entityTestHarness.createDynamicTestEntityType(refEntityType1, "pack_test1");
     entityType1.setPackage(pack);
 
     dataService.getMeta().addEntityType(refEntityType1);
     dataService.getMeta().addEntityType(entityType1);
     List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType1, 2);
-    List<Entity> testEntities = entityTestHarness.createTestEntities(entityType1, 4, refEntities)
-        .collect(toList());
+    List<Entity> testEntities =
+        entityTestHarness.createTestEntities(entityType1, 4, refEntities).collect(toList());
     dataService.add(refEntityType1.getId(), refEntities.stream());
     dataService.add(entityType1.getId(), testEntities.stream());
 
@@ -93,7 +94,8 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     Package actualIt = dataService.getMeta().getPackage("it").get();
     // We're testing the export service, not a job, use TestProgress to check if progress is updated
     Progress progress = new TestProgress();
-    emxDownloadService.export(newArrayList(entityType1, refEntityType1), newArrayList(actualIt), actual, progress);
+    emxDownloadService.export(
+        newArrayList(entityType1, refEntityType1), newArrayList(actualIt), actual, progress);
     try (XSSFWorkbook actualWorkbook = new XSSFWorkbook(Files.newInputStream(actual))) {
       try (Workbook expected =
           new XSSFWorkbook(

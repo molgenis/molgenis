@@ -149,9 +149,7 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   private void downloadData(EntityType entityType, XlsxWriter writer) {
     List<Object> headers =
-        Streams.stream(entityType.getAtomicAttributes())
-            .map(Attribute::getName)
-            .collect(toList());
+        Streams.stream(entityType.getAtomicAttributes()).map(Attribute::getName).collect(toList());
     if (!writer.hasSheet(entityType.getId())) {
       writer.createSheet(entityType.getId(), headers);
     }

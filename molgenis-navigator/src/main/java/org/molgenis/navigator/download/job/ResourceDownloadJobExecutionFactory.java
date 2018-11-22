@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceDownloadJobExecutionFactory
     extends AbstractSystemEntityFactory<
-    ResourceDownloadJobExecution, ResourceDownloadJobExecutionMetaData, String> {
+        ResourceDownloadJobExecution, ResourceDownloadJobExecutionMetaData, String> {
   ResourceDownloadJobExecutionFactory(
-      ResourceDownloadJobExecutionMetaData downloadJobExecutionMetaData, EntityPopulator entityPopulator) {
+      ResourceDownloadJobExecutionMetaData downloadJobExecutionMetaData,
+      EntityPopulator entityPopulator) {
     super(ResourceDownloadJobExecution.class, downloadJobExecutionMetaData, entityPopulator);
   }
 }

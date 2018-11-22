@@ -19,7 +19,8 @@ public class ResourceDownloadJobExecutionMetaData extends SystemEntityType {
 
   public static final String DOWNLOAD_JOB_TYPE = "ResourceDownloadJob";
 
-  ResourceDownloadJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {
+  ResourceDownloadJobExecutionMetaData(
+      JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {
     super(SIMPLE_NAME, PACKAGE_JOB);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
     this.jobPackage = requireNonNull(jobPackage);
