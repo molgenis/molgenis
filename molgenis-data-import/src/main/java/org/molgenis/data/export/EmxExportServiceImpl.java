@@ -33,9 +33,8 @@ import org.molgenis.data.export.mapper.PackageMapper;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.i18n.MessageSourceHolder;
+import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +44,11 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   private static final int BATCH_SIZE = 1000;
   private final DataService dataService;
+  private final ContextMessageSource contextMessageSource;
 
-  public EmxExportServiceImpl(DataService dataService) {
+  public EmxExportServiceImpl(DataService dataService, ContextMessageSource contextMessageSource) {
     this.dataService = requireNonNull(dataService);
+    this.contextMessageSource = requireNonNull(contextMessageSource);
   }
 
   /**
@@ -105,13 +106,7 @@ public class EmxExportServiceImpl implements EmxExportService {
       Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) throws IOException {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
-      String progressMessage =
-          MessageSourceHolder.getMessageSource()
-              .getMessage(
-                  "emx_export_progress_message",
-                  new Object[] {entityType.getLabel(LocaleContextHolder.getLocale().getLanguage())},
-                  "Downloading: ",
-                  LocaleContextHolder.getLocale());
+      String progressMessage = contextMessageSource.getMessage("emx_export_progress_message");
       if (progress != null) {
         progress.status(progressMessage + entityType.getLabel());
         progress.increment(1);
@@ -199,13 +194,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     addParentPackages(packages);
 
     writer.writeRows(packages.stream().map(PackageMapper::map), EMX_PACKAGES);
-    progress.status(
-        MessageSourceHolder.getMessageSource()
-            .getMessage(
-                "emx_export_metadata_message",
-                new Object[] {},
-                "Finished downloading package metadata",
-                LocaleContextHolder.getLocale()));
+    progress.status(contextMessageSource.getMessage("emx_export_metadata_message"));
     progress.increment(1);
   }
 
