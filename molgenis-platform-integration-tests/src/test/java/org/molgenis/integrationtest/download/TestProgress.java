@@ -91,6 +91,22 @@ public class TestProgress implements Progress {
     this.message = message + this.message;
   }
 
+  public int getProgress() {
+    return progress;
+  }
+
+  public int getProgressMax() {
+    return progressMax;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public String getResultUrl() {
+    return resultUrl;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
