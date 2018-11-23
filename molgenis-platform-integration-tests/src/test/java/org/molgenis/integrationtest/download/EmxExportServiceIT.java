@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.export.EmxExportServiceImpl;
+import org.molgenis.data.importer.ImportI18nConfig;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
@@ -36,7 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(
-    classes = {PlatformITConfig.class, FileTestConfig.class, EmxExportServiceImpl.class})
+    classes = {
+      PlatformITConfig.class,
+      FileTestConfig.class,
+      EmxExportServiceImpl.class,
+      ImportI18nConfig.class
+    })
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
 @Rollback
@@ -48,7 +54,6 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
   @Autowired private EntityTestHarness entityTestHarness;
   @Autowired private DataService dataService;
   @Autowired private PackageFactory packageFactory;
-
   @Autowired private EmxExportService emxDownloadService;
 
   @WithMockUser(
@@ -110,7 +115,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
         new TestProgress(
             4,
             4,
-            "Downloading: pack_refTest1\nDownloading: pack_test1\nDownloading: it_emx_test1\nFinished downloading package metadata",
+            "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata",
             "");
     assertEquals(((TestProgress) progress).getMessage(), expectedProgress.getMessage());
     assertEquals(((TestProgress) progress).getProgress(), expectedProgress.getProgress());

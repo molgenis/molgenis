@@ -105,9 +105,11 @@ public class EmxExportServiceImpl implements EmxExportService {
       Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
-      String progressMessage = contextMessageSource.getMessage("emx_export_progress_message");
+      String progressMessage =
+          contextMessageSource.getMessage(
+              "emx_export_progress_message", new Object[] {entityType.getLabel()});
       if (progress != null) {
-        progress.status(progressMessage + entityType.getLabel());
+        progress.status(progressMessage);
         progress.increment(1);
       }
       writeAttributes(entityType.getAllAttributes(), writer);
