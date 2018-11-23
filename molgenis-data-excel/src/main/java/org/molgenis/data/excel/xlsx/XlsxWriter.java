@@ -11,6 +11,7 @@ import static org.molgenis.data.DataConverter.toLocalDate;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,7 +19,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFCreationHelper;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -137,10 +142,11 @@ public class XlsxWriter implements AutoCloseable {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
       Instant instant = toLocalDate(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
-      Date date = Date.from(instant);
-      cell.setCellValue(date);
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+      cell.setCellValue(simpleDateFormat.format(Date.from(instant)));
     } else if (value instanceof Instant) {
-      cell.setCellValue(Date.from(toInstant(value)));
+      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");
+      cell.setCellValue(simpleDateFormat.format(Date.from((Instant) value)));
     } else if (value instanceof Double) {
       cell.setCellValue(toDouble(value));
     } else if (value instanceof Integer) {

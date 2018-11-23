@@ -223,7 +223,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    verify(cell).setCellValue(dateFormat.parse("2015-06-04"));
+    verify(cell).setCellValue("2015-06-04");
   }
 
   @Test
@@ -232,7 +232,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
 
     xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
 
-    verify(cell).setCellValue(new Date(1000000));
+    verify(cell).setCellValue("1970-01-01T01:16:40+0100");
   }
 
   @Test(expectedExceptions = UnsupportedValueException.class)
