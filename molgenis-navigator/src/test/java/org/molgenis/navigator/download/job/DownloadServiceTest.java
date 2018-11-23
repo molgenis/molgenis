@@ -77,8 +77,8 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     when(collection.getEntityTypes()).thenReturn(newArrayList(entityType1));
     when(collection.getPackages()).thenReturn(newArrayList(package1));
 
-    DownloadService downloadJob =
-        new DownloadService(
+    ResourceDownloadService downloadJob =
+        new ResourceDownloadService(
             downloadService, fileStore, fileMetaFactory, dataService, resourceCollector);
     List<ResourceIdentifier> resourceIdentifierList = new ArrayList<>();
     resourceIdentifierList.addAll(
