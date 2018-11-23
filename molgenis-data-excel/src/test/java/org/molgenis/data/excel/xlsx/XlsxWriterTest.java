@@ -11,6 +11,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class XlsxWriterTest extends AbstractMockitoTest {
-
   @Mock Workbook workbook;
 
   @Mock Sheet sheet;
@@ -219,6 +219,16 @@ public class XlsxWriterTest extends AbstractMockitoTest {
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
     verify(cell).setCellValue("2015-06-04");
+  }
+
+  @Test
+  public void testSetCellValueInstant() {
+    System.setProperty("user.timezone", "GMT");
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
+
+    verify(cell).setCellValue("1970-01-01T01:16:40+0100");
   }
 
   @Test(expectedExceptions = UnsupportedValueException.class)
