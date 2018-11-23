@@ -10,10 +10,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -221,17 +218,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     verify(cell).setCellValue("2015-06-04");
-  }
-
-  @Test
-  public void testSetCellValueInstant() {
-    Cell cell = mock(Cell.class);
-
-    xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
-
-    verify(cell).setCellValue("1970-01-01T01:16:40+0100");
   }
 
   @Test(expectedExceptions = UnsupportedValueException.class)
