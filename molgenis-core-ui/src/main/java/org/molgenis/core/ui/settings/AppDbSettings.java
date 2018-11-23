@@ -3,6 +3,8 @@ package org.molgenis.core.ui.settings;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.DECIMAL;
+import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -60,6 +62,13 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
         DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = true;
 
     private static final String CUSTOM_JAVASCRIPT = "custom_javascript";
+
+    private static final String RECAPTCHA = "recaptcha";
+    private static final String RECAPTCHA_PUBLIC_KEY = "recaptcha_public_key";
+    private static final String RECAPTCHA_PRIVATE_KEY = "recaptcha_private_key";
+    private static final String RECAPTCHA_IS_ENABLED = "recaptcha_is_enabled";
+    private static final String RECAPTCHA_VERIFY_URI = "recaptcha_verify_uri";
+    private static final String RECAPTCHA_BOT_THRESHOLD = "recaptcha_bot_threshold";
 
     private final MenuManagerServiceImpl menuManagerServiceImpl;
 
@@ -188,6 +197,47 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
           .setLabel("Tracking code footer")
           .setDescription(
               "JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
+
+      // Recaptcha settings
+      Attribute recaptchaAttr = addAttribute(RECAPTCHA).setDataType(COMPOUND).setLabel("Recaptcha");
+
+      addAttribute(RECAPTCHA_PRIVATE_KEY)
+          .setParent(recaptchaAttr)
+          .setDataType(STRING)
+          .setNillable(true)
+          .setLabel("Recaptcha secret")
+          .setDescription(
+              "The secret needed by the server to authenticate with the google servers");
+      addAttribute(RECAPTCHA_PUBLIC_KEY)
+          .setParent(recaptchaAttr)
+          .setDataType(STRING)
+          .setNillable(true)
+          .setLabel("Recaptcha site key")
+          .setDescription(
+              "The site key needed by the clients to authenticate with the google servers");
+      addAttribute(RECAPTCHA_IS_ENABLED)
+          .setParent(recaptchaAttr)
+          .setDataType(BOOL)
+          .setDefaultValue(String.valueOf(false))
+          .setNillable(false)
+          .setLabel("Enable recaptcha")
+          .setDescription("Recaptcha keys need to be set");
+      addAttribute(RECAPTCHA_VERIFY_URI)
+          .setParent(recaptchaAttr)
+          .setDataType(HYPERLINK)
+          .setDefaultValue("https://www.google.com/recaptcha/api/siteverify")
+          .setNillable(false)
+          .setLabel("The verifying URI for recaptcha")
+          .setDescription(
+              "This URI is used to verify the token which is determining if a bot is at work here.");
+      addAttribute(RECAPTCHA_BOT_THRESHOLD)
+          .setParent(recaptchaAttr)
+          .setDataType(DECIMAL)
+          .setDefaultValue(String.valueOf(0.5))
+          .setNillable(false)
+          .setLabel("Bot threshold")
+          .setDescription(
+              "A threshold to determine if a bot is at work here (0.5 is 50% likely to be a bot).");
     }
 
     private String getDefaultMenuValue() {
@@ -363,5 +413,30 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
   @Override
   public String getCustomJavascript() {
     return getString(Meta.CUSTOM_JAVASCRIPT);
+  }
+
+  @Override
+  public String getRecaptchaPrivateKey() {
+    return getString(Meta.RECAPTCHA_PRIVATE_KEY);
+  }
+
+  @Override
+  public String getRecaptchaPublicKey() {
+    return getString(Meta.RECAPTCHA_PUBLIC_KEY);
+  }
+
+  @Override
+  public String getRecaptchaVerifyURI() {
+    return getString(Meta.RECAPTCHA_VERIFY_URI);
+  }
+
+  @Override
+  public double getRecaptchaBotThreshold() {
+    return getDouble(Meta.RECAPTCHA_BOT_THRESHOLD);
+  }
+
+  @Override
+  public boolean getRecaptchaIsEnabled() {
+    return getBoolean(Meta.RECAPTCHA_IS_ENABLED);
   }
 }

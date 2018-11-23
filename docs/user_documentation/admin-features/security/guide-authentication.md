@@ -6,6 +6,7 @@ In MOLGENIS you can sign in using three methods.
 
 ## Username/password sign in
 The default way to authenticate in MOLGENIS is to click 'Sign in'. You can register a new account by using the 'Sign-up'-link. If there is no 'Sign-up'-link, you'll have to contact the administrator to register an account.
+>note: If you want to use reCaptcha when you enable 'Sign up' then you can configure that [here](../guide-settings.md).  
 
 ### Two-factor authentication
 If you have an existing MOLGENIS-account you can secure it with two-factor authentication, depending on the server's settings. 

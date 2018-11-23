@@ -21,7 +21,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.security.EntityIdentityUtils;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.molgenis.data.util.MetaUtils;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.security.acl.MutableAclClassService;
 import org.springframework.stereotype.Component;
 
@@ -123,7 +123,7 @@ public class SystemEntityTypePersister {
     Stream<Package> systemPackages =
         dataService
             .findAll(PACKAGE, Package.class)
-            .filter(MetaUtils::isSystemPackage)
+            .filter(PackageUtils::isSystemPackage)
             .filter(this::isNotExists);
 
     dataService.delete(PACKAGE, systemPackages);

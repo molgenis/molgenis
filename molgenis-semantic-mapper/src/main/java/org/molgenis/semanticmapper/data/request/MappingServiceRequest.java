@@ -9,6 +9,7 @@ public class MappingServiceRequest {
   @NotNull private final String sourceEntityName;
   @NotNull private final String targetAttributeName;
   @NotNull private final String algorithm;
+  private final int depth;
 
   @Min(0)
   private Long offset;
@@ -21,11 +22,13 @@ public class MappingServiceRequest {
       String targetEntityName,
       String sourceEntityName,
       String targetAttributeName,
-      String algorithm) {
+      String algorithm,
+      int depth) {
     this.targetEntityName = targetEntityName;
     this.sourceEntityName = sourceEntityName;
     this.targetAttributeName = targetAttributeName;
     this.algorithm = algorithm;
+    this.depth = depth;
   }
 
   public String getTargetEntityName() {
@@ -58,5 +61,9 @@ public class MappingServiceRequest {
 
   public void setNum(Long num) {
     this.num = num;
+  }
+
+  public int getDepth() {
+    return this.depth;
   }
 }

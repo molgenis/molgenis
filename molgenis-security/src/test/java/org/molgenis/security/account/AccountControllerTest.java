@@ -26,10 +26,10 @@ import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.account.AccountControllerTest.Config;
-import org.molgenis.security.captcha.CaptchaException;
-import org.molgenis.security.captcha.CaptchaService;
+import org.molgenis.security.captcha.ReCaptchaService;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
+import org.molgenis.settings.AppSettings;
 import org.molgenis.web.converter.MolgenisGsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,14 +53,16 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
 
   @Autowired private AccountService accountService;
 
-  @Autowired private CaptchaService captchaService;
+  @Autowired private ReCaptchaService reCaptchaService;
 
   @Autowired private AuthenticationSettings authenticationSettings;
+
+  @Autowired private AppSettings appSettings;
 
   private MockMvc mockMvc;
 
   @BeforeMethod
-  public void setUp() throws CaptchaException {
+  public void setUp() throws Exception {
     FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
     freeMarkerViewResolver.setSuffix(".ftl");
     mockMvc =
@@ -70,8 +72,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
             .build();
 
     reset(authenticationSettings);
-    reset(captchaService);
-    when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
+    reset(reCaptchaService);
+    reset(appSettings);
+    when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
     reset(accountService); // mocks in the config class are not resetted after each test
   }
 
@@ -131,7 +134,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptch", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isOk())
         .andExpect(
@@ -163,7 +166,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptch", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isOk())
         .andExpect(
@@ -183,6 +186,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
   public void registerUser_activationModeUser() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     when(authenticationSettings.getSignUpModeration()).thenReturn(false);
+    when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
+    when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
 
     this.mockMvc
         .perform(
@@ -193,7 +198,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptcha", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isOk())
         .andExpect(
@@ -202,13 +207,15 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                     "{\"message\":\""
                         + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER
                         + "\"}"));
-    verify(captchaService).validateCaptcha("validCaptcha");
+    verify(reCaptchaService).validate("validCaptcha");
   }
 
   @Test
   public void registerUser_activationModeAdmin() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
     when(authenticationSettings.getSignUpModeration()).thenReturn(true);
+    when(reCaptchaService.validate("validCaptcha")).thenReturn(true);
+    when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
 
     this.mockMvc
         .perform(
@@ -219,7 +226,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptcha", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isOk())
         .andExpect(
@@ -228,7 +235,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                     "{\"message\":\""
                         + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN
                         + "\"}"));
-    verify(captchaService).validateCaptcha("validCaptcha");
+    verify(reCaptchaService).validate("validCaptcha");
   }
 
   @Test
@@ -243,15 +250,16 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptcha", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isBadRequest());
-    verify(captchaService, times(0)).validateCaptcha("validCaptcha");
+    verify(reCaptchaService, times(0)).validate("validCaptcha");
   }
 
   @Test
   public void registerUser_invalidCaptcha() throws Exception {
     when(authenticationSettings.getSignUp()).thenReturn(true);
+    when(appSettings.getRecaptchaIsEnabled()).thenReturn(true);
     this.mockMvc
         .perform(
             post("/account/register")
@@ -261,7 +269,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "invalidCaptcha")
+                .param("recaptch", "invalidCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isBadRequest());
   }
@@ -288,7 +296,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
                 .param("email", "admin@molgenis.org")
                 .param("lastname", "min")
                 .param("firstname", "ad")
-                .param("captcha", "validCaptcha")
+                .param("recaptch", "validCaptcha")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
         .andExpect(status().isBadRequest());
   }
@@ -299,10 +307,11 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     public AccountController accountController() {
       return new AccountController(
           accountService(),
-          captchaService(),
+          reCaptchaV3Service(),
           redirectStrategy(),
           authenticationSettings(),
-          molgenisUserFactory());
+          molgenisUserFactory(),
+          appSettings());
     }
 
     @Bean
@@ -311,8 +320,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
     }
 
     @Bean
-    public CaptchaService captchaService() {
-      return mock(CaptchaService.class);
+    public ReCaptchaService reCaptchaV3Service() {
+      return mock(ReCaptchaService.class);
     }
 
     @Bean
@@ -346,6 +355,11 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests {
       UserFactory userFactory = mock(UserFactory.class);
       when(userFactory.create()).thenAnswer(invocationOnMock -> mock(User.class));
       return userFactory;
+    }
+
+    @Bean
+    public AppSettings appSettings() {
+      return mock(AppSettings.class);
     }
   }
 }

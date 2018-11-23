@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetadata.PARENT;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.data.util.MetaUtils.getEntityTypeFetch;
+import static org.molgenis.data.util.EntityTypeUtils.getEntityTypeFetch;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

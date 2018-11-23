@@ -33,7 +33,7 @@ public class RunAsSystemAspect {
     try {
       // Set a SystemSecurityToken
       SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-      SecurityContextHolder.getContext().setAuthentication(new SystemSecurityToken());
+      SecurityContextHolder.getContext().setAuthentication(SystemSecurityToken.getInstance());
       return runnable.run();
     } finally {
       // Set the original context back when method is finished

@@ -51,8 +51,6 @@ import org.slf4j.LoggerFactory;
 public class AlgorithmServiceImpl implements AlgorithmService {
   private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
-  private static final int ENTITY_REFERENCE_FETCHING_DEPTH = 3;
-
   private final SemanticSearchService semanticSearchService;
   private final AlgorithmGeneratorService algorithmGeneratorService;
   private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
@@ -116,7 +114,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
 
   @Override
   public Iterable<AlgorithmEvaluation> applyAlgorithm(
-      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities) {
+      Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth) {
     return stream(sourceEntities.spliterator(), false)
         .map(
             entity -> {
@@ -124,8 +122,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
               Object derivedValue;
 
               try {
-                Object result =
-                    jsMagmaScriptEvaluator.eval(algorithm, entity, ENTITY_REFERENCE_FETCHING_DEPTH);
+                Object result = jsMagmaScriptEvaluator.eval(algorithm, entity, depth);
 
                 // jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing
                 // it
@@ -149,13 +146,15 @@ public class AlgorithmServiceImpl implements AlgorithmService {
 
   @Override
   public Object apply(
-      AttributeMapping attributeMapping, Entity sourceEntity, EntityType sourceEntityType) {
+      AttributeMapping attributeMapping,
+      Entity sourceEntity,
+      EntityType sourceEntityType,
+      int depth) {
     String algorithm = attributeMapping.getAlgorithm();
     if (isEmpty(algorithm)) {
       return null;
     }
-    Object result =
-        jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, ENTITY_REFERENCE_FETCHING_DEPTH);
+    Object result = jsMagmaScriptEvaluator.eval(algorithm, sourceEntity, depth);
 
     // jsMagmaScriptEvaluator.eval() catches and returns the error instead of throwing it
     // so check instance of result object here
