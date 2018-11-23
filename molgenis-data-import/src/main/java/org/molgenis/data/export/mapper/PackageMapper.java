@@ -42,11 +42,11 @@ public class PackageMapper {
           break;
         case EMX_PACKAGE_PARENT:
           Package parent = pack.getParent();
-          row.add(parent != null ? parent.getId() : "");
+          row.add(parent != null ? parent.getId() : null);
           break;
         default:
           Object value = pack.get(entry.getValue());
-          row.add(value != null ? value.toString() : "");
+          row.add(value != null ? value.toString() : null);
       }
     }
     return row;
