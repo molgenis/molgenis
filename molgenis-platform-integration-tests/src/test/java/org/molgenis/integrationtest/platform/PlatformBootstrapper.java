@@ -8,6 +8,7 @@ import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
+import org.molgenis.data.i18n.I18nPopulator;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -41,6 +42,7 @@ public class PlatformBootstrapper {
       dynamicRepositoryDecoratorFactoryRegistrar;
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
   private final TransactionManager transactionManager;
+  private final I18nPopulator i18nPopulator;
   private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
   private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 
@@ -57,6 +59,7 @@ public class PlatformBootstrapper {
       DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
       BootstrappingEventPublisher bootstrappingEventPublisher,
       TransactionManager transactionManager,
+      I18nPopulator i18nPopulator,
       DynamicDecoratorPopulator dynamicDecoratorPopulator,
       EntityTypeRegistryPopulator entityTypeRegistryPopulator) {
     this.dataSourceAclTablesPopulator = dataSourceAclTablesPopulator;
@@ -71,6 +74,7 @@ public class PlatformBootstrapper {
     this.dynamicRepositoryDecoratorFactoryRegistrar = dynamicRepositoryDecoratorFactoryRegistrar;
     this.bootstrappingEventPublisher = bootstrappingEventPublisher;
     this.transactionManager = transactionManager;
+    this.i18nPopulator = i18nPopulator;
     this.dynamicDecoratorPopulator = dynamicDecoratorPopulator;
     this.entityTypeRegistryPopulator = entityTypeRegistryPopulator;
   }
@@ -127,6 +131,10 @@ public class PlatformBootstrapper {
                   LOG.trace("Registering job factories ...");
                   jobFactoryRegistrar.register(event);
                   LOG.trace("Registered job factories");
+
+                  LOG.trace("Populating database with I18N strings ...");
+                  i18nPopulator.populateL10nStrings();
+                  LOG.trace("Populated database with I18N strings");
 
                   LOG.trace("Populating database with Dynamic Decorator Configurations ...");
                   dynamicDecoratorPopulator.populate();
