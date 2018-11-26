@@ -140,6 +140,7 @@ public class XlsxWriter implements AutoCloseable {
     } else if (value instanceof LocalDate) {
       Instant instant = toLocalDate(value).atStartOfDay(timeZone.toZoneId()).toInstant();
       SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+      simpleDateFormat.setTimeZone(timeZone);
       cell.setCellValue(simpleDateFormat.format(Date.from(instant)));
     } else if (value instanceof Instant) {
       SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");

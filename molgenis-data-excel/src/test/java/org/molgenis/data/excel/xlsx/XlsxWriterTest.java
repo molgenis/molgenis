@@ -219,6 +219,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
+
     verify(cell).setCellValue("2015-06-04");
   }
 
