@@ -43,6 +43,7 @@ public class PlatformBootstrapper {
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
   private final TransactionManager transactionManager;
   private final I18nPopulator i18nPopulator;
+  private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
 
   PlatformBootstrapper(
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
@@ -57,7 +58,8 @@ public class PlatformBootstrapper {
       DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
       BootstrappingEventPublisher bootstrappingEventPublisher,
       TransactionManager transactionManager,
-      I18nPopulator i18nPopulator) {
+      I18nPopulator i18nPopulator,
+      DynamicDecoratorPopulator dynamicDecoratorPopulator) {
     this.dataSourceAclTablesPopulator = dataSourceAclTablesPopulator;
     this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
     this.repoCollectionBootstrapper = repoCollectionBootstrapper;
@@ -71,6 +73,7 @@ public class PlatformBootstrapper {
     this.bootstrappingEventPublisher = bootstrappingEventPublisher;
     this.transactionManager = transactionManager;
     this.i18nPopulator = i18nPopulator;
+    this.dynamicDecoratorPopulator = dynamicDecoratorPopulator;
   }
 
   public void bootstrap(ContextRefreshedEvent event) {
@@ -126,15 +129,18 @@ public class PlatformBootstrapper {
                   jobFactoryRegistrar.register(event);
                   LOG.trace("Registered job factories");
 
+                  LOG.trace("Populating database with I18N strings ...");
+                  i18nPopulator.populateL10nStrings();
+                  LOG.trace("Populated database with I18N strings");
+
+                  LOG.trace("Populating database with Dynamic Decorator Configurations ...");
+                  dynamicDecoratorPopulator.populate();
+                  LOG.trace("Populated database with Dynamic Decorators Configurations...");
+
                   event
                       .getApplicationContext()
                       .getBean(EntityTypeRegistryPopulator.class)
                       .populate();
-                  event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
-
-                  LOG.trace("Populating database with I18N strings ...");
-                  i18nPopulator.populateL10nStrings();
-                  LOG.trace("Populated database with I18N strings");
 
                   bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
                 });
