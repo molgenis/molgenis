@@ -28,6 +28,7 @@ public class PropertyType extends SystemEntityType {
     this.metaPackage = requireNonNull(metaPackage);
   }
 
+  @SuppressWarnings("squid:S1192") // String literals should not be duplicated
   @Override
   public void init() {
     setLabel("Property");
