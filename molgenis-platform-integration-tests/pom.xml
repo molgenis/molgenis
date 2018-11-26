@@ -240,16 +240,6 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
-    <dependency>
-    <groupId>com.github.mokka88</groupId>
-    <artifactId>simple-excel</artifactId>
-    <scope>test</scope>
-  </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml-schemas</artifactId>
-      <scope>test</scope>
-    </dependency>
     <!-- test dependencies -->
     <dependency>
       <groupId>org.molgenis</groupId>

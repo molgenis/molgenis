@@ -174,7 +174,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
       validateEntityValueUniqueness(entity, validationResource, validationMode);
     }
 
-    // FIXME validateEntityValueReferences(entity, validationResource);
+    validateEntityValueReferences(entity, validationResource);
 
     if (validationProfile.isValidateReadonly() && validationMode == ValidationMode.UPDATE) {
       validateEntityValueReadOnly(entity, validationResource);

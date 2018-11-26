@@ -8,7 +8,6 @@ import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactoryRegistrar;
 import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
 import org.molgenis.data.event.BootstrappingEventPublisher;
-import org.molgenis.data.i18n.I18nPopulator;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -42,9 +41,6 @@ public class PlatformBootstrapper {
       dynamicRepositoryDecoratorFactoryRegistrar;
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
   private final TransactionManager transactionManager;
-  private final I18nPopulator i18nPopulator;
-  private final DynamicDecoratorPopulator dynamicDecoratorPopulator;
-  private final EntityTypeRegistryPopulator entityTypeRegistryPopulator;
 
   PlatformBootstrapper(
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
@@ -58,10 +54,7 @@ public class PlatformBootstrapper {
       JobFactoryRegistrar jobFactoryRegistrar,
       DynamicRepositoryDecoratorFactoryRegistrar dynamicRepositoryDecoratorFactoryRegistrar,
       BootstrappingEventPublisher bootstrappingEventPublisher,
-      TransactionManager transactionManager,
-      I18nPopulator i18nPopulator,
-      DynamicDecoratorPopulator dynamicDecoratorPopulator,
-      EntityTypeRegistryPopulator entityTypeRegistryPopulator) {
+      TransactionManager transactionManager) {
     this.dataSourceAclTablesPopulator = dataSourceAclTablesPopulator;
     this.transactionExceptionTranslatorRegistrar = transactionExceptionTranslatorRegistrar;
     this.repoCollectionBootstrapper = repoCollectionBootstrapper;
@@ -74,9 +67,6 @@ public class PlatformBootstrapper {
     this.dynamicRepositoryDecoratorFactoryRegistrar = dynamicRepositoryDecoratorFactoryRegistrar;
     this.bootstrappingEventPublisher = bootstrappingEventPublisher;
     this.transactionManager = transactionManager;
-    this.i18nPopulator = i18nPopulator;
-    this.dynamicDecoratorPopulator = dynamicDecoratorPopulator;
-    this.entityTypeRegistryPopulator = entityTypeRegistryPopulator;
   }
 
   public void bootstrap(ContextRefreshedEvent event) {
@@ -132,17 +122,11 @@ public class PlatformBootstrapper {
                   jobFactoryRegistrar.register(event);
                   LOG.trace("Registered job factories");
 
-                  LOG.trace("Populating database with I18N strings ...");
-                  i18nPopulator.populateL10nStrings();
-                  LOG.trace("Populated database with I18N strings");
-
-                  LOG.trace("Populating database with Dynamic Decorator Configurations ...");
-                  dynamicDecoratorPopulator.populate();
-                  LOG.trace("Populated database with Dynamic Decorators Configurations");
-
-                  LOG.trace("Populating the entity type registry ...");
-                  entityTypeRegistryPopulator.populate();
-                  LOG.trace("Populated the entity type registry");
+                  event
+                      .getApplicationContext()
+                      .getBean(EntityTypeRegistryPopulator.class)
+                      .populate();
+                  event.getApplicationContext().getBean(DynamicDecoratorPopulator.class).populate();
 
                   bootstrappingEventPublisher.publishBootstrappingFinishedEvent();
                 });
