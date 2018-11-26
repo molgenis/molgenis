@@ -132,9 +132,9 @@ public class PlatformBootstrapper {
                   jobFactoryRegistrar.register(event);
                   LOG.trace("Registered job factories");
 
-                  // LOG.trace("Populating database with I18N strings ...");
-                  // i18nPopulator.populateL10nStrings();
-                  // LOG.trace("Populated database with I18N strings");
+                  LOG.trace("Populating database with I18N strings ...");
+                  i18nPopulator.populateL10nStrings();
+                  LOG.trace("Populated database with I18N strings");
 
                   LOG.trace("Populating database with Dynamic Decorator Configurations ...");
                   dynamicDecoratorPopulator.populate();
