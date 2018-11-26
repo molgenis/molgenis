@@ -45,10 +45,15 @@ public class EmxExportServiceImpl implements EmxExportService {
   private static final int BATCH_SIZE = 1000;
   private final DataService dataService;
   private final ContextMessageSource contextMessageSource;
+  private final TimeZoneProvider timeZoneProvider;
 
-  EmxExportServiceImpl(DataService dataService, ContextMessageSource contextMessageSource) {
+  EmxExportServiceImpl(
+      DataService dataService,
+      ContextMessageSource contextMessageSource,
+      TimeZoneProvider timeZoneProvider) {
     this.dataService = requireNonNull(dataService);
     this.contextMessageSource = requireNonNull(contextMessageSource);
+    this.timeZoneProvider = requireNonNull(timeZoneProvider);
   }
 
   /**
@@ -70,7 +75,8 @@ public class EmxExportServiceImpl implements EmxExportService {
       Progress progress) {
     requireNonNull(progress);
     if (!(entityTypes.isEmpty() && packages.isEmpty())) {
-      try (XlsxWriter writer = XlsxWriterFactory.create(downloadFilePath)) {
+      try (XlsxWriter writer =
+          XlsxWriterFactory.create(downloadFilePath, timeZoneProvider.getSystemTimeZone())) {
         exportEmx(entityTypes, packages, writer, progress);
       } catch (IOException | RuntimeException e) {
         throw new EmxExportException(e);

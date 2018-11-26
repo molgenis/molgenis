@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -41,7 +42,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   @BeforeMethod
   public void setUp() {
     file = new File("path");
-    xlsxWriter = new XlsxWriter(file.toPath(), workbook);
+    xlsxWriter = new XlsxWriter(file.toPath(), workbook, TimeZone.getTimeZone("Europe/Paris"));
   }
 
   @Test
@@ -223,7 +224,6 @@ public class XlsxWriterTest extends AbstractMockitoTest {
 
   @Test
   public void testSetCellValueInstant() {
-    System.setProperty("user.timezone", "GMT");
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));

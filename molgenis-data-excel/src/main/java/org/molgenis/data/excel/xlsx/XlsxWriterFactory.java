@@ -1,6 +1,7 @@
 package org.molgenis.data.excel.xlsx;
 
 import java.nio.file.Path;
+import java.util.TimeZone;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class XlsxWriterFactory {
@@ -9,7 +10,7 @@ public class XlsxWriterFactory {
 
   private XlsxWriterFactory() {}
 
-  public static XlsxWriter create(Path target) {
-    return new XlsxWriter(target, new SXSSFWorkbook(ROWS_IN_MEMORY));
+  public static XlsxWriter create(Path target, TimeZone timeZone) {
+    return new XlsxWriter(target, new SXSSFWorkbook(ROWS_IN_MEMORY), timeZone);
   }
 }

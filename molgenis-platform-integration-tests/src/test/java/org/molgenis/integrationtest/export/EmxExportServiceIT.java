@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.download;
+package org.molgenis.integrationtest.export;
 
 import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
@@ -41,7 +41,8 @@ import org.testng.annotations.Test;
       PlatformITConfig.class,
       FileTestConfig.class,
       EmxExportServiceImpl.class,
-      ImportI18nConfig.class
+      ImportI18nConfig.class,
+      TestTimeZoneProvider.class
     })
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional

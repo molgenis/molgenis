@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.download;
+package org.molgenis.integrationtest.export;
 
 import java.util.Objects;
 import javax.annotation.Nullable;

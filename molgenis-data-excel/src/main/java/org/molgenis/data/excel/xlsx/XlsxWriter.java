@@ -13,9 +13,9 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,10 +32,12 @@ public class XlsxWriter implements AutoCloseable {
   public static final int MAXIMUM_SHEET_LENGTH = 31;
   private final Path target;
   private final Workbook workbook;
+  private final TimeZone timeZone;
 
-  XlsxWriter(Path target, Workbook workbook) {
+  XlsxWriter(Path target, Workbook workbook, TimeZone timeZone) {
     this.target = requireNonNull(target);
     this.workbook = requireNonNull(workbook);
+    this.timeZone = requireNonNull(timeZone);
   }
 
   public boolean hasSheet(String name) {
@@ -136,11 +138,12 @@ public class XlsxWriter implements AutoCloseable {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
-      Instant instant = toLocalDate(value).atStartOfDay(ZoneId.systemDefault()).toInstant();
+      Instant instant = toLocalDate(value).atStartOfDay(timeZone.toZoneId()).toInstant();
       SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
       cell.setCellValue(simpleDateFormat.format(Date.from(instant)));
     } else if (value instanceof Instant) {
       SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");
+      simpleDateFormat.setTimeZone(timeZone);
       cell.setCellValue(simpleDateFormat.format(Date.from((Instant) value)));
     } else if (value instanceof Double) {
       cell.setCellValue(toDouble(value));
