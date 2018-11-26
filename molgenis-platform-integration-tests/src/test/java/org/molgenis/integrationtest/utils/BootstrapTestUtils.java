@@ -8,7 +8,6 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.SystemRepositoryDecoratorFactoryRegistrar;
-import org.molgenis.data.i18n.I18nPopulator;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistrar;
 import org.molgenis.data.meta.system.SystemPackageRegistrar;
 import org.molgenis.data.platform.bootstrap.SystemEntityTypeBootstrapper;
@@ -33,7 +32,6 @@ public class BootstrapTestUtils {
   @Autowired private SystemPackageRegistrar systemPackageRegistrar;
   @Autowired private EntityFactoryRegistrar entityFactoryRegistrar;
   @Autowired private SystemEntityTypeBootstrapper systemEntityTypeBootstrapper;
-  @Autowired private I18nPopulator i18nPopulator;
 
   @Autowired
   private SystemRepositoryDecoratorFactoryRegistrar systemRepositoryDecoratorFactoryRegistrar;
