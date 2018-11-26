@@ -29,7 +29,6 @@ import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
@@ -46,7 +45,6 @@ import org.testng.annotations.Test;
     })
 @TestExecutionListeners(listeners = {WithSecurityContextTestExecutionListener.class})
 @Transactional
-@Rollback
 public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContextTests {
 
   private static final String USERNAME = "emx_user";
