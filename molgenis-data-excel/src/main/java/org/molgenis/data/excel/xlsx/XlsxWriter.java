@@ -109,6 +109,7 @@ public class XlsxWriter implements AutoCloseable {
     }
   }
 
+  @Override
   public void close() throws IOException {
     try {
       workbook.write(Files.newOutputStream(target));
