@@ -26,7 +26,7 @@ public abstract class MenuItem {
       items =
           menu.getItems()
               .stream()
-              .map(menuItem -> MenuItem.create(menuItem))
+              .map(MenuItem::create)
               .collect(Collectors.toList());
     }
     return new AutoValue_MenuItem(
