@@ -49,6 +49,9 @@
 
 <form accept-charset="UTF-8" role="form" method="post" action="feedback" id="feedbackForm" class="form-horizontal"
       role="form">
+
+    <input type="hidden" name="recaptcha"/>
+
     <div class="form-group">
         <div class="col-md-1">
             <label class="control-label pull-right" for="form_name">Name</label>
@@ -91,23 +94,6 @@
         </div>
     </div>
 
-    <legend>Code validation</legend>
-    <div class="form-group">
-        <div class="col-md-10 col-md-offset-1">
-            <a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-1">
-            <label class="control-label pull-right" for="reg-captcha">Code</label>
-        </div>
-
-        <div class="col-md-4">
-            <input type="text" class="form-control" id="reg-captcha" name="captcha">
-        </div>
-    </div>
-
     <div class="form-group">
         <div class="col-md-1 col-md-offset-1">
             <button type="submit" class="btn btn-success">Send</button>
@@ -115,21 +101,20 @@
     </div>
 </form>
 
-<script>
-    $("#feedbackForm").validate();
-    $('#reg-captcha').rules('add', {
-        required: true,
-        remote: {
-            url: '/captcha',
-            type: 'POST'
-        }
-    });
-    $('#captcha-href').click(function (e) {
-        e.preventDefault();
-        $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
-        $('captcha').val('');
-    });
-</script>
+<#if isRecaptchaEnabled!false>
+    <script src='https://www.google.com/recaptcha/api.js?render=${recaptchaPublicKey!''}'></script>
+
+    <script>
+      $('#feedbackForm').off('submit').submit(function () {
+        grecaptcha.execute('${recaptchaPublicKey!''}', { action: 'action_feedback' })
+        .then(function(token) {
+          $('input[name="recaptcha"]').val(token);
+          $('#feedbackForm').off('submit').submit()
+        });
+        return false;
+      });
+    </script>
+</#if>
 
 <#else>
 <p>Admin email addresses not known.</p>

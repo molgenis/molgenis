@@ -16,8 +16,12 @@ function InvalidQuestionIdException (questionId: string) {
 (InvalidQuestionIdException.prototype: any).toString = function () { return 'Unknown questionId (' + this.questionId + ')' }
 
 const isFilledInValue = (value): boolean => {
-  if (value === undefined || value === null) return false
-  if (Array.isArray(value) && value.length === 0) return false
+  if (value === undefined || value === null) {
+    return false
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return false
+  }
   return value !== ''
 }
 
@@ -27,19 +31,28 @@ const isChapterComplete = (chapter: Object, formData: Object): boolean => {
       return isChapterComplete(child, formData)
     }
 
-    const visible = isVisible(child, formData)
-    if (!visible) return true
+    if (!isVisible(child, formData)) {
+      return true
+    }
+
+    if (!child.validate(formData)) {
+      return false
+    }
 
     const value = formData[child.id]
-    const filledInValue = isFilledInValue(value)
-    const required = child.required(formData)
-    const valid = child.validate(formData)
 
-    if (filledInValue) {
-      const inRange = child.range ? value => child.range.min && value <= child.range.max : true
-      return valid && inRange
+    if (isFilledInValue(value)) {
+      if (child.range) {
+        if (child.range.min && value < child.range.min) {
+          return false
+        }
+        if (child.range.max && value > child.range.max) {
+          return false
+        }
+      }
+      return true
     } else {
-      return valid && !required
+      return !child.required(formData)
     }
   })
 }

@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
-import org.molgenis.data.util.MetaUtils;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.validation.ConstraintViolation;
 import org.slf4j.Logger;
@@ -28,7 +28,8 @@ public class PackageValidator {
   }
 
   private void validatePackageAllowed(Package aPackage) {
-    if (MetaUtils.isSystemPackage(aPackage) && !systemPackageRegistry.containsPackage(aPackage)) {
+    if (PackageUtils.isSystemPackage(aPackage)
+        && !systemPackageRegistry.containsPackage(aPackage)) {
       LOG.error(
           "validatePackageAllowed, the system package registry does not contain package with id {} and label {}",
           aPackage.getId(),

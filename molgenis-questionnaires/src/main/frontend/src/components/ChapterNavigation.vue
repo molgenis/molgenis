@@ -4,7 +4,7 @@
       <button
         id="prev-chapter-btn"
         type="button"
-        :disabled="saving"
+        :disabled="saving || pending"
         v-if="showPreviousButton"
         @click="navigateToPreviousChapter"
         class="btn btn-outline-secondary float-left">
@@ -14,9 +14,7 @@
     </div>
 
     <div class="col-4 text-muted d-flex flex-column justify-content-center align-items-center">
-      <span v-if="saving">
-        {{ 'questionnaire_saving_changes' | i18n }} <i class="fa fa-spinner fa-spin"></i>
-      </span>
+      <span v-if="saving || pending"><span v-if="saving">{{ 'questionnaire_saving_changes' | i18n }}&nbsp;</span><i class="fa fa-spinner fa-spin"></i></span>
     </div>
 
     <div class="col-4">
@@ -24,7 +22,7 @@
         id="next-chapter-btn"
         type="button"
         v-if="showNextButton"
-        :disabled="saving"
+        :disabled="saving || pending"
         @click="validateBeforeNavigatingToNextChapter"
         class="btn btn-primary float-right">
         <span class="d-none d-md-block">{{ 'questionnaire_next_chapter' | i18n }}</span>
@@ -35,7 +33,7 @@
         id="submit-questionnaire-btn"
         class="btn btn-primary float-right"
         @click="validateBeforeSubmit"
-        :disabled="saving || submitting" v-else>
+        :disabled="saving || submitting || pending" v-else>
         <template v-if="submitting">
           <i class="fa fa-spinner fa-spin"></i>
         </template>
@@ -94,6 +92,9 @@
       },
       saving () {
         return this.$store.getters.isSaving
+      },
+      pending () {
+        return this.formState.$pending
       }
     },
     methods: {

@@ -27,9 +27,9 @@
         - [Groups and Roles](user_documentation/admin-features/security/guide-groups-roles.md)
         - [Permissions](user_documentation/admin-features/security/guide-permission-manager.md)
         - [Authentication](user_documentation/admin-features/security/guide-authentication.md)
+      - [Settings](user_documentation/admin-features/guide-settings.md)
       - [Customize MOLGENIS](user_documentation/admin-features/guide-customize.md)
-      - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)   
-      - [Mail Settings](user_documentation/admin-features/guide-mailsettings.md)     
+      - [Apps in MOLGENIS](user_documentation/admin-features/guide-app-manager.md)              
     - Catalogues
       - [Biobanking](user_documentation/catalogues/biobanking.md)
         - [Biobank Directory](user_documentation/catalogues/biobank-directory.md)

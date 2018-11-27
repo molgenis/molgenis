@@ -188,8 +188,6 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .permitAll()
         .antMatchers("/search")
         .permitAll()
-        .antMatchers("/captcha")
-        .permitAll()
         .antMatchers("/dataindexerstatus")
         .authenticated()
         .antMatchers("/permission/**/read/**")

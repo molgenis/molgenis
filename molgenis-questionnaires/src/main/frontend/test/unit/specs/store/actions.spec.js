@@ -283,6 +283,22 @@ describe('actions', () => {
       testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
     })
 
+    it('should do nothing, only resolve the promise when questionnaire has already been retrieved', done => {
+      const questionnaireId = 'test_quest'
+
+      const state = {
+        username: 'testuser'
+      }
+
+      const expectedMutations = [
+        {type: 'SET_ERROR', payload: ''},
+        {type: 'SET_LOADING', payload: true},
+        {type: 'SET_LOADING', payload: false}
+      ]
+
+      testAction(actions.GET_QUESTIONNAIRE, questionnaireId, state, expectedMutations, [], done)
+    })
+
     it('should commit any errors to the store', done => {
       const questionnaireId = 'other_test_quest'
       const error = 'error'
@@ -408,6 +424,8 @@ describe('actions', () => {
   })
 
   describe('AUTO_SAVE_QUESTIONNAIRE', () => {
+    let error = {}
+
     const state = {
       questionnaire: {
         meta: {
@@ -420,10 +438,11 @@ describe('actions', () => {
       },
       questionnaireRowId: 'test_row',
       field1: {
-        $valid: () => true
+        $valid: () => true,
+        $error: error
       }
     }
-    const payload = {formState: state, formData: {field1: 'updated value'}}
+    let payload = {formState: state, formData: {field1: 'updated value'}}
 
     const options = {
       body: JSON.stringify('updated value'),
@@ -443,8 +462,6 @@ describe('actions', () => {
 
       const expectedMutations = [
         {type: 'SET_FORM_DATA', payload: payload.formData},
-        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
-        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'DECREMENT_SAVING_QUEUE', payload}
       ]
@@ -459,12 +476,21 @@ describe('actions', () => {
 
       const expectedMutations = [
         {type: 'SET_FORM_DATA', payload: payload.formData},
-        {type: 'UPDATE_FORM_STATUS', payload: 'OPEN'},
-        {type: 'UPDATE_FORM_STATUS', payload: 'SUBMITTED'},
         {type: 'INCREMENT_SAVING_QUEUE', payload},
         {type: 'SET_ERROR', payload: error},
         {type: 'SET_LOADING', payload: false},
         {type: 'DECREMENT_SAVING_QUEUE', payload}
+      ]
+
+      testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
+    })
+
+    it('should not post when errors other then "required" field errors are present', done => {
+      state.field1.$error.other = 'other error'
+      payload = {formState: state, formData: {field1: 'updated value'}}
+
+      const expectedMutations = [
+        {type: 'SET_FORM_DATA', payload: payload.formData}
       ]
 
       testAction(actions.AUTO_SAVE_QUESTIONNAIRE, payload, state, expectedMutations, [], done)
