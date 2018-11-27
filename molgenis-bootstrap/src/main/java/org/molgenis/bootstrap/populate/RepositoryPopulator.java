@@ -5,6 +5,7 @@ import static org.molgenis.data.security.auth.UserMetaData.USER;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;
+import org.molgenis.data.i18n.I18nPopulator;
 import org.molgenis.script.core.ScriptTypePopulator;
 import org.molgenis.settings.SettingsPopulator;
 import org.molgenis.web.bootstrap.PluginPopulator;
