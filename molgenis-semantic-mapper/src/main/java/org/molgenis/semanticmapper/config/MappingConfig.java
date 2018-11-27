@@ -38,28 +38,22 @@ import org.springframework.context.annotation.Import;
 @Import(OntologyConfig.class)
 public class MappingConfig {
   private final DataService dataService;
-  private final OntologyTagService ontologyTagService;
   private final SemanticSearchService semanticSearchService;
   private final OntologyService ontologyService;
   private final IdGenerator idGenerator;
   private final PermissionSystemService permissionSystemService;
-  private final OntologyTermRepository ontologyTermRepository;
   private final AttributeMappingMetaData attributeMappingMetaData;
   private final AttributeFactory attrMetaFactory;
   private final MappingProjectMetaData mappingProjectMeta;
   private final EntityManager entityManager;
   private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
-  private final SystemPackageRegistry systemPackageRegistry;
 
   public MappingConfig(
       PermissionSystemService permissionSystemService,
       DataService dataService,
-      SystemPackageRegistry systemPackageRegistry,
-      OntologyTagService ontologyTagService,
       SemanticSearchService semanticSearchService,
       OntologyService ontologyService,
       IdGenerator idGenerator,
-      OntologyTermRepository ontologyTermRepository,
       AttributeMappingMetaData attributeMappingMetaData,
       AttributeFactory attrMetaFactory,
       MappingProjectMetaData mappingProjectMeta,
@@ -67,12 +61,9 @@ public class MappingConfig {
       JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
     this.permissionSystemService = requireNonNull(permissionSystemService);
     this.dataService = requireNonNull(dataService);
-    this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
-    this.ontologyTagService = requireNonNull(ontologyTagService);
     this.semanticSearchService = requireNonNull(semanticSearchService);
     this.ontologyService = requireNonNull(ontologyService);
     this.idGenerator = requireNonNull(idGenerator);
-    this.ontologyTermRepository = requireNonNull(ontologyTermRepository);
     this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
     this.attrMetaFactory = requireNonNull(attrMetaFactory);
     this.mappingProjectMeta = requireNonNull(mappingProjectMeta);

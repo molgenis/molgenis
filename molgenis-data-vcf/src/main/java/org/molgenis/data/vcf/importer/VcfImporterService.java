@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class VcfImporterService implements ImportService {
-  private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
   private static final int BATCH_SIZE = 10000;
 
   private final DataService dataService;

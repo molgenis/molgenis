@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /** O/R mapping between EntityMapping Entity and EntityMapping POJO */
 public class EntityMappingRepositoryImpl implements EntityMappingRepository {
-  private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
-
   @Autowired private DataService dataService;
 
   @Autowired private IdGenerator idGenerator;
