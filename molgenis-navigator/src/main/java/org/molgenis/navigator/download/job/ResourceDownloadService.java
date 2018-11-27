@@ -15,20 +15,20 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.download.exception.DownloadFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.model.util.ResourceCollection;
-import org.molgenis.navigator.model.util.ResourceCollector;
+import org.molgenis.navigator.util.ResourceCollection;
+import org.molgenis.navigator.util.ResourceCollector;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DownloadService {
+public class ResourceDownloadService {
   private final EmxExportService emxExportService;
   private final FileStore fileStore;
   private final FileMetaFactory fileMetaFactory;
   private final DataService dataService;
   private final ResourceCollector resourceCollector;
 
-  public DownloadService(
+  public ResourceDownloadService(
       EmxExportService emxExportService,
       FileStore fileStore,
       FileMetaFactory fileMetaFactory,

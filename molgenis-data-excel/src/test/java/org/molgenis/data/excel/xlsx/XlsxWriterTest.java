@@ -1,4 +1,4 @@
-package org.molgenis.data.excel.simple;
+package org.molgenis.data.excel.xlsx;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.doReturn;
@@ -10,6 +10,12 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,37 +25,37 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ExcelWriterTest extends AbstractMockitoTest {
-
+public class XlsxWriterTest extends AbstractMockitoTest {
   @Mock Workbook workbook;
 
   @Mock Sheet sheet;
 
   File file;
 
-  ExcelWriter excelWriter;
+  XlsxWriter xlsxWriter;
 
   @BeforeMethod
   public void setUp() {
     file = new File("path");
-    excelWriter = new ExcelWriter(file.toPath(), workbook);
+    xlsxWriter = new XlsxWriter(file.toPath(), workbook, TimeZone.getTimeZone("Europe/Paris"));
   }
 
   @Test
   public void testHasSheetTrue() {
     Sheet sheet = mock(Sheet.class);
     when(workbook.getSheet("test")).thenReturn(sheet);
-    assertTrue(excelWriter.hasSheet("test"));
+    assertTrue(xlsxWriter.hasSheet("test"));
   }
 
   @Test
   public void testHasSheetFalse() {
     when(workbook.getSheet("test")).thenReturn(null);
-    assertFalse(excelWriter.hasSheet("test"));
+    assertFalse(xlsxWriter.hasSheet("test"));
   }
 
   @Test
@@ -63,7 +69,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(workbook.getSheet("test")).thenReturn(null);
     when(workbook.createSheet("test")).thenReturn(sheet);
 
-    excelWriter.createSheet("test", newArrayList("head1", "head2"));
+    xlsxWriter.createSheet("test", newArrayList("head1", "head2"));
     verify(cell0).setCellValue("head1");
     verify(cell1).setCellValue("head2");
   }
@@ -78,7 +84,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
     when(sheet.createRow(1)).thenReturn(row);
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRow(newArrayList("value1", "value2"), "test");
+    xlsxWriter.writeRow(newArrayList("value1", "value2"), "test");
     verify(cell0).setCellValue("value1");
     verify(cell1).setCellValue("value2");
   }
@@ -115,7 +121,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRows(
+    xlsxWriter.writeRows(
         Stream.of(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
@@ -156,7 +162,7 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    excelWriter.writeRows(
+    xlsxWriter.writeRows(
         newArrayList(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
@@ -167,7 +173,71 @@ public class ExcelWriterTest extends AbstractMockitoTest {
 
   @Test
   public void testClose() throws IOException {
-    excelWriter.close();
+    xlsxWriter.close();
     verify(workbook).close();
+  }
+
+  @Test
+  public void testSetCellValueInt() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, 1);
+
+    verify(cell).setCellValue(1);
+  }
+
+  @Test
+  public void testSetCellValueString() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, "1");
+
+    verify(cell).setCellValue("1");
+  }
+
+  @Test
+  public void testSetCellValueLong() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, 1L);
+
+    verify(cell).setCellValue(1L);
+  }
+
+  @Test
+  public void testSetCellValueDouble() {
+    Cell cell = mock(Cell.class);
+    double test = 1.123;
+
+    xlsxWriter.setCellValue(cell, test);
+
+    verify(cell).setCellValue(test);
+  }
+
+  @Test
+  public void testSetCellValueLocalDate() throws ParseException {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
+
+    verify(cell).setCellValue("2015-06-04");
+  }
+
+  @Test
+  public void testSetCellValueInstant() {
+    Cell cell = mock(Cell.class);
+
+    xlsxWriter.setCellValue(cell, Instant.ofEpochMilli(1000000));
+
+    verify(cell).setCellValue("1970-01-01T01:16:40+0100");
+  }
+
+  @Test(expectedExceptions = UnsupportedValueException.class)
+  public void testSetCellValueUnsupported() {
+    Cell cell = mock(Cell.class);
+
+    List<String> list = new ArrayList();
+
+    xlsxWriter.setCellValue(cell, list);
   }
 }

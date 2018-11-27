@@ -1,14 +1,14 @@
-package org.molgenis.navigator.download.exception;
+package org.molgenis.data.excel.xlsx.exception;
 
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.i18n.CodedRuntimeException;
 
-public class DownloadFailedException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "NAV01";
+public class XlsxWriterException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "XLS03";
   private final Throwable cause;
 
-  public DownloadFailedException(Throwable cause) {
+  public XlsxWriterException(Throwable cause) {
     super(ERROR_CODE, cause);
     this.cause = requireNonNull(cause);
   }

@@ -8,7 +8,6 @@ import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 
 public class DataRowMapper {
@@ -17,9 +16,10 @@ public class DataRowMapper {
 
   public static List<Object> mapDataRow(Entity entity) {
     List<Object> dataRow = new ArrayList<>();
-    for (Attribute attribute : entity.getEntityType().getAttributes()) {
-      // MAPPED_BY and expressions
-      if (attribute.getDataType() != AttributeType.COMPOUND) {
+    for (Attribute attribute : entity.getEntityType().getAtomicAttributes()) {
+      if (attribute.hasExpression() || attribute.isMappedBy()) {
+        dataRow.add(null);
+      } else {
         if (isSingleReferenceType(attribute)) {
           Entity value = entity.getEntity(attribute.getName());
           dataRow.add(value != null ? value.getIdValue() : null);

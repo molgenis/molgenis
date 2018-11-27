@@ -1,4 +1,4 @@
-package org.molgenis.bootstrap.populate;
+package org.molgenis.data.i18n;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
@@ -6,7 +6,6 @@ import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import java.util.List;
 import java.util.Locale;
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LocalizationPopulator;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.i18n.PropertiesMessageSource;

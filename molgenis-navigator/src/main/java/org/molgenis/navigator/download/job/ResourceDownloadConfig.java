@@ -1,6 +1,7 @@
 package org.molgenis.navigator.download.job;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.core.ui.file.FileDownloadController.URI;
 import static org.molgenis.data.importer.emx.EmxFileExtensions.XLSX;
 
 import java.time.LocalDateTime;
@@ -13,28 +14,29 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DownloadConfig {
+public class ResourceDownloadConfig {
 
-  private final DownloadService downloadService;
+  private final ResourceDownloadService resourceDownloadService;
 
-  public DownloadConfig(DownloadService downloadService) {
-    this.downloadService = requireNonNull(downloadService);
+  public ResourceDownloadConfig(ResourceDownloadService resourceDownloadService) {
+    this.resourceDownloadService = requireNonNull(resourceDownloadService);
   }
 
   @Bean
-  public JobFactory<DownloadJobExecution> downloadJobExecutionJobFactory() {
-    return new JobFactory<DownloadJobExecution>() {
+  public JobFactory<ResourceDownloadJobExecution> downloadJobExecutionJobFactory() {
+    return new JobFactory<ResourceDownloadJobExecution>() {
       @Override
-      public Job createJob(DownloadJobExecution downloadJobExecution) {
+      public Job createJob(ResourceDownloadJobExecution downloadJobExecution) {
         String fileType = XLSX.toString().toLowerCase();
         final String filename = getDownloadFilename(fileType);
-        downloadJobExecution.setResultUrl("/files/" + filename);
+        downloadJobExecution.setResultUrl(URI + filename);
         downloadJobExecution.setProgressInt(0);
         downloadJobExecution.setProgressMessage(
             getMessage("progress-download-running", "Starting preparing download."));
 
         return progress ->
-            downloadService.download(downloadJobExecution.getResources(), filename, progress);
+            resourceDownloadService.download(
+                downloadJobExecution.getResources(), filename, progress);
       }
     };
   }

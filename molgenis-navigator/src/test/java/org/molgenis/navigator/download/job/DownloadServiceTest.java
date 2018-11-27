@@ -24,8 +24,8 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
-import org.molgenis.navigator.model.util.ResourceCollection;
-import org.molgenis.navigator.model.util.ResourceCollector;
+import org.molgenis.navigator.util.ResourceCollection;
+import org.molgenis.navigator.util.ResourceCollector;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -77,8 +77,8 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     when(collection.getEntityTypes()).thenReturn(newArrayList(entityType1));
     when(collection.getPackages()).thenReturn(newArrayList(package1));
 
-    DownloadService downloadJob =
-        new DownloadService(
+    ResourceDownloadService downloadJob =
+        new ResourceDownloadService(
             downloadService, fileStore, fileMetaFactory, dataService, resourceCollector);
     List<ResourceIdentifier> resourceIdentifierList = new ArrayList<>();
     resourceIdentifierList.addAll(

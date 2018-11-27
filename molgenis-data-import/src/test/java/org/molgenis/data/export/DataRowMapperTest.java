@@ -3,7 +3,6 @@ package org.molgenis.data.export;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
@@ -36,15 +35,11 @@ public class DataRowMapperTest {
     when(mref.getName()).thenReturn("mref");
     when(mref.getDataType()).thenReturn(MREF);
 
-    Attribute compound = mock(Attribute.class);
-    when(compound.getName()).thenReturn("compound");
-    when(compound.getDataType()).thenReturn(COMPOUND);
-
     Attribute xref = mock(Attribute.class);
     when(xref.getName()).thenReturn("xref");
     when(xref.getDataType()).thenReturn(XREF);
 
-    when(entityType.getAttributes()).thenReturn(newArrayList(string, xref, mref, compound));
+    when(entityType.getAtomicAttributes()).thenReturn(newArrayList(string, xref, mref));
 
     when(entity.getEntityType()).thenReturn(entityType);
     when(entity.get("string")).thenReturn("stringValue");

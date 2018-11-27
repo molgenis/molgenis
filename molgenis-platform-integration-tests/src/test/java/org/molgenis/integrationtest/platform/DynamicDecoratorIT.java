@@ -43,7 +43,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -58,7 +58,7 @@ import org.testng.annotations.Test;
     })
 @TestExecutionListeners(listeners = WithSecurityContextTestExecutionListener.class)
 @Transactional
-public class DynamicDecoratorIT extends AbstractTestNGSpringContextTests {
+public class DynamicDecoratorIT extends AbstractTransactionalTestNGSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(DynamicDecoratorIT.class);
 
   private static final String USERNAME = "dynamic-decorator-user";
