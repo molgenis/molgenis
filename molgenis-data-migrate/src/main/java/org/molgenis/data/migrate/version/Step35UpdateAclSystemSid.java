@@ -25,14 +25,14 @@ public class Step35UpdateAclSystemSid extends MolgenisUpgrade {
   public void upgrade() {
     LOG.debug("Updating acl_sid 'principal SYSTEM' to non-principal 'ROLE_SYSTEM' ...");
     try {
-      updateForeignKeys();
+      updateAclSystemSid();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
     LOG.info("Updated acl_sid 'principal SYSTEM' to non-principal 'ROLE_SYSTEM'");
   }
 
-  private void updateForeignKeys() throws IOException {
+  private void updateAclSystemSid() throws IOException {
     String sql = ResourceUtils.getString("step35-aclSystemSid.sql");
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     jdbcTemplate.execute(sql);

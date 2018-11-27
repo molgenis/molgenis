@@ -1043,7 +1043,6 @@
     <module>molgenis-data-platform</module>
     <module>molgenis-data-plugin</module>
     <module>molgenis-data-postgresql</module>
-    <module>molgenis-data-rest-client</module>
     <module>molgenis-data-rest</module>
     <module>molgenis-data-row-edit</module>
     <module>molgenis-data-security</module>

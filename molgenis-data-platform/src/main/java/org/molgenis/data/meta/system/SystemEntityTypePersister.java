@@ -7,6 +7,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -60,23 +61,22 @@ public class SystemEntityTypePersister {
     dataService.getMeta().upsertPackages(systemPackages.stream());
 
     // persist EntityType entities
-    List<EntityType> metaEntityMetaSet =
+    List<SystemEntityType> metaEntityMetaSet =
         systemEntityTypeRegistry.getSystemEntityTypes().collect(toList());
     injectExistingEntityTypeAttributeIdentifiers(metaEntityMetaSet);
     metaEntityMetaSet.forEach(
         systemEntityType -> {
           String aclClass = EntityIdentityUtils.toType(systemEntityType);
-          // TODO remove casting
-          if (((SystemEntityType) systemEntityType).isRowLevelSecured()
+          if (systemEntityType.isRowLevelSecured()
               && !mutableAclClassService.hasAclClass(aclClass)) {
             mutableAclClassService.createAclClass(
                 aclClass, EntityIdentityUtils.toIdType(systemEntityType));
-          } else if (!((SystemEntityType) systemEntityType).isRowLevelSecured()
+          } else if (!systemEntityType.isRowLevelSecured()
               && mutableAclClassService.hasAclClass(aclClass)) {
             mutableAclClassService.deleteAclClass(aclClass);
           }
         });
-    dataService.getMeta().upsertEntityTypes(metaEntityMetaSet);
+    dataService.getMeta().upsertEntityTypes(new ArrayList<>(metaEntityMetaSet));
 
     // remove non-existing metadata
     removeNonExistingSystemEntityTypes();
@@ -156,7 +156,8 @@ public class SystemEntityTypePersister {
    *
    * @param entityTypes system entity types
    */
-  private void injectExistingEntityTypeAttributeIdentifiers(List<EntityType> entityTypes) {
+  private void injectExistingEntityTypeAttributeIdentifiers(
+      List<? extends EntityType> entityTypes) {
     Map<String, EntityType> existingEntityTypeMap =
         dataService
             .findAll(ENTITY_TYPE_META_DATA, EntityType.class)

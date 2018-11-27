@@ -4,7 +4,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 import com.google.gson.Gson;
 import java.io.IOException;
@@ -13,9 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mockito.Mock;
 import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.http.ResponseEntity;
 import org.testng.annotations.BeforeMethod;
@@ -26,7 +24,6 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
   @Mock private ScriptJobExecutionFactory scriptJobExecutionFactory;
   @Mock private JobExecutor jobExecutor;
   @Mock private SavedScriptRunner savedScriptRunner;
-  @Mock private UserAccountService userAccountService;
   @Mock private JobsController jobsController;
   @Mock private ScriptJobExecution scriptJobExecution;
   private ScriptRunnerController controller;
@@ -35,7 +32,6 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
   @BeforeMethod
   public void setUp() {
     gson = new Gson();
-    User user = mock(User.class);
     EntityType entityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("sys_job_test");
     when(scriptJobExecution.getIdValue()).thenReturn("ID");
@@ -43,12 +39,7 @@ public class ScriptRunnerControllerTest extends AbstractMockitoTest {
     when(scriptJobExecutionFactory.create()).thenReturn(scriptJobExecution);
     controller =
         new ScriptRunnerController(
-            scriptJobExecutionFactory,
-            jobExecutor,
-            savedScriptRunner,
-            gson,
-            userAccountService,
-            jobsController);
+            scriptJobExecutionFactory, jobExecutor, savedScriptRunner, gson, jobsController);
   }
 
   @Test

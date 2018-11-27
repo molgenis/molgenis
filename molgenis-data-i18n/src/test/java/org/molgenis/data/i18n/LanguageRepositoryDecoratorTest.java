@@ -1,5 +1,8 @@
 package org.molgenis.data.i18n;
 
+import static java.util.stream.Collectors.toList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +13,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
 import org.mockito.Mock;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.test.AbstractMockitoTest;
@@ -18,11 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest {
-  private static final String MESSAGE_ADD_NOT_ALLOWED = "Adding languages is not allowed";
-  private static final String MESSAGE_DELETE_NOT_ALLOWED = "Deleting languages is not allowed";
-
   @Mock private Repository<Language> delegateRepository;
-
   private LanguageRepositoryDecorator languageRepositoryDecorator;
 
   @BeforeMethod
@@ -33,61 +31,59 @@ public class LanguageRepositoryDecoratorTest extends AbstractMockitoTest {
   @Test
   public void testAddExistingLanguage() {
     Language language = getMockLanguage(LANGUAGE_CODE_NL);
-    languageRepositoryDecorator.add(Stream.of(language));
+    languageRepositoryDecorator.add(language);
     verify(delegateRepository).add(language);
   }
 
-  @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
+  @Test(expectedExceptions = LanguageModificationException.class)
   public void testAddUnknownLanguage() {
     Language language = getMockLanguage("unknownLanguage");
-    languageRepositoryDecorator.add(Stream.of(language));
+    languageRepositoryDecorator.add(language);
   }
 
+  @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
   @Test
   public void testAddStreamExistingLanguages() {
     Language language0 = getMockLanguage(LANGUAGE_CODE_EN);
     Language language1 = getMockLanguage(LANGUAGE_CODE_NL);
-    Integer count = languageRepositoryDecorator.add(Stream.of(language0, language1));
-    assertEquals(count, Integer.valueOf(2));
-    verify(delegateRepository).add(language0);
-    verify(delegateRepository).add(language1);
+    doAnswer(
+            invocation -> {
+              ((Stream<Language>) invocation.getArguments()[0]).collect(toList());
+              return 2;
+            })
+        .when(delegateRepository)
+        .add(any(Stream.class));
+    assertEquals(
+        languageRepositoryDecorator.add(Stream.of(language0, language1)), Integer.valueOf(2));
   }
 
-  @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = MESSAGE_ADD_NOT_ALLOWED)
+  @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
+  @Test(expectedExceptions = LanguageModificationException.class)
   public void testAddStreamUnknownLanguage() {
-    Language language = mock(Language.class);
-    when(language.getCode()).thenReturn("unknownLanguage");
+    Language language = getMockLanguage("unknownLanguage");
+    doAnswer(
+            invocation -> {
+              ((Stream<Language>) invocation.getArguments()[0]).collect(toList());
+              return 1;
+            })
+        .when(delegateRepository)
+        .add(any(Stream.class));
     languageRepositoryDecorator.add(Stream.of(language));
   }
 
-  @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+  @Test(expectedExceptions = LanguageModificationException.class)
   public void testDelete() {
     languageRepositoryDecorator.delete(mock(Language.class));
   }
 
-  @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+  @Test(expectedExceptions = LanguageModificationException.class)
   public void testDeleteById() {
     Language language = mock(Language.class);
     when(delegateRepository.findOneById(LANGUAGE_CODE_NL)).thenReturn(language);
     languageRepositoryDecorator.deleteById(LANGUAGE_CODE_NL);
   }
 
-  @SuppressWarnings("deprecation")
-  @Test(
-      expectedExceptions = MolgenisDataException.class,
-      expectedExceptionsMessageRegExp = MESSAGE_DELETE_NOT_ALLOWED)
+  @Test(expectedExceptions = LanguageModificationException.class)
   public void testDeleteStream() {
     languageRepositoryDecorator.delete(Stream.of(mock(Language.class)));
   }
