@@ -34,10 +34,18 @@ public class XlsxWriter implements AutoCloseable {
   private final Workbook workbook;
   private final TimeZone timeZone;
 
+  private SimpleDateFormat simpleDateFormat;
+  private SimpleDateFormat simpleDateTimeFormat;
+
   XlsxWriter(Path target, Workbook workbook, TimeZone timeZone) {
     this.target = requireNonNull(target);
     this.workbook = requireNonNull(workbook);
     this.timeZone = requireNonNull(timeZone);
+
+    this.simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+    simpleDateFormat.setTimeZone(timeZone);
+    this.simpleDateTimeFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");
+    simpleDateTimeFormat.setTimeZone(timeZone);
   }
 
   public boolean hasSheet(String name) {
@@ -108,6 +116,14 @@ public class XlsxWriter implements AutoCloseable {
       throw new XlsxWriterException(e);
     }
   }
+  
+  public void setSimpleDateFormat(SimpleDateFormat simpleDateFormat) {
+    this.simpleDateFormat = simpleDateFormat;
+  }
+
+  public void setSimpleDateTimeFormat(SimpleDateFormat simpleDateTimeFormat) {
+    this.simpleDateTimeFormat = simpleDateTimeFormat;
+  }
 
   @Override
   public void close() throws IOException {
@@ -140,13 +156,9 @@ public class XlsxWriter implements AutoCloseable {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
       Instant instant = toLocalDate(value).atStartOfDay(timeZone.toZoneId()).toInstant();
-      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
-      simpleDateFormat.setTimeZone(timeZone);
       cell.setCellValue(simpleDateFormat.format(Date.from(instant)));
     } else if (value instanceof Instant) {
-      SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");
-      simpleDateFormat.setTimeZone(timeZone);
-      cell.setCellValue(simpleDateFormat.format(Date.from((Instant) value)));
+      cell.setCellValue(simpleDateTimeFormat.format(Date.from((Instant) value)));
     } else if (value instanceof Double) {
       cell.setCellValue(toDouble(value));
     } else if (value instanceof Integer) {
