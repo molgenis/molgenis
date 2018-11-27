@@ -34,7 +34,6 @@ public class ScriptRunnerController {
   private final JobExecutor jobExecutor;
   private final SavedScriptRunner savedScriptRunner;
   private final Gson gson;
-  private final UserAccountService userAccountService;
   private final JobsController jobsController;
 
   public ScriptRunnerController(
@@ -42,13 +41,11 @@ public class ScriptRunnerController {
       JobExecutor jobExecutor,
       SavedScriptRunner savedScriptRunner,
       Gson gson,
-      UserAccountService userAccountService,
       JobsController jobsController) {
     this.scriptJobExecutionFactory = requireNonNull(scriptJobExecutionFactory);
     this.jobExecutor = requireNonNull(jobExecutor);
     this.savedScriptRunner = requireNonNull(savedScriptRunner);
     this.gson = requireNonNull(gson);
-    this.userAccountService = requireNonNull(userAccountService);
     this.jobsController = requireNonNull(jobsController);
   }
 
