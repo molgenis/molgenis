@@ -34,7 +34,7 @@ describe('api', () => {
       }
 
       const get = td.function('molgenisApiClient.get')
-      td.when(get('/api/v2/sys_job_CopyJobExecution/jobId')).thenResolve(response)
+      td.when(get('/api/v2/sys_job_ResourceCopyJobExecution/jobId')).thenResolve(response)
       td.replace(molgenisApiClient, 'get', get)
 
       const updatedJob = {
@@ -66,7 +66,7 @@ describe('api', () => {
       }
 
       const get = td.function('molgenisApiClient.get')
-      td.when(get('/api/v2/sys_job_DownloadJobExecution/jobId')).thenResolve(response)
+      td.when(get('/api/v2/sys_job_ResourceDownloadJobExecution/jobId')).thenResolve(response)
       td.replace(molgenisApiClient, 'get', get)
 
       const updatedJob = {
@@ -93,7 +93,7 @@ describe('api', () => {
       const response = {errors: [{message: 'error'}]}
 
       const get = td.function('molgenisApiClient.get')
-      td.when(get('/api/v2/sys_job_DownloadJobExecution/jobId')).thenReject(response)
+      td.when(get('/api/v2/sys_job_ResourceDownloadJobExecution/jobId')).thenReject(response)
       td.replace(molgenisApiClient, 'get', get)
 
       expect(api.fetchJob(job)).to.eventually.be.rejectedWith(Error).then(() => done())

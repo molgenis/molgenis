@@ -31,10 +31,10 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.navigator.copy.job.CopyJobExecution;
-import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
-import org.molgenis.navigator.download.job.DownloadJobExecution;
-import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecution;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
+import org.molgenis.navigator.download.job.ResourceDownloadJobExecution;
+import org.molgenis.navigator.download.job.ResourceDownloadJobExecutionFactory;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
@@ -51,8 +51,8 @@ import org.testng.annotations.Test;
 public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContextTests {
   @Mock private DataService dataService;
   @Mock private JobExecutor jobExecutor;
-  @Mock private DownloadJobExecutionFactory downloadJobExecutionFactory;
-  @Mock private CopyJobExecutionFactory copyJobExecutionFactory;
+  @Mock private ResourceDownloadJobExecutionFactory downloadJobExecutionFactory;
+  @Mock private ResourceCopyJobExecutionFactory copyJobExecutionFactory;
   private NavigatorServiceImpl navigatorServiceImpl;
 
   @BeforeMethod
@@ -301,7 +301,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   @WithMockUser
   @Test
   public void testCopyResources() {
-    CopyJobExecution copyJobExecution = mock(CopyJobExecution.class);
+    ResourceCopyJobExecution copyJobExecution = mock(ResourceCopyJobExecution.class);
     when(copyJobExecutionFactory.create()).thenReturn(copyJobExecution);
 
     String targetFolderId = "targetFolderId";
@@ -315,9 +315,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
         .thenReturn(targetPackage);
 
     assertEquals(navigatorServiceImpl.copyResources(resources, targetFolderId), copyJobExecution);
-    verify(copyJobExecution)
-        .setResources(
-            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
+    verify(copyJobExecution).setResources(resources);
     verify(copyJobExecution).setTargetPackage(targetFolderId);
     verify(jobExecutor).submit(copyJobExecution);
   }
@@ -325,7 +323,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   @WithMockUser
   @Test
   public void testCopyResourcesRootPackage() {
-    CopyJobExecution copyJobExecution = mock(CopyJobExecution.class);
+    ResourceCopyJobExecution copyJobExecution = mock(ResourceCopyJobExecution.class);
     when(copyJobExecutionFactory.create()).thenReturn(copyJobExecution);
 
     List<ResourceIdentifier> resources =
@@ -334,9 +332,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
             ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
     assertEquals(navigatorServiceImpl.copyResources(resources, null), copyJobExecution);
-    verify(copyJobExecution)
-        .setResources(
-            "[{\"type\":\"PACKAGE\",\"id\":\"p0\"},{\"type\":\"ENTITY_TYPE\",\"id\":\"e0\"}]");
+    verify(copyJobExecution).setResources(resources);
     verify(copyJobExecution).setTargetPackage(null);
     verify(jobExecutor).submit(copyJobExecution);
   }
@@ -361,7 +357,7 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   @WithMockUser
   @Test
   public void testDownloadResources() {
-    DownloadJobExecution downloadJobExecution = mock(DownloadJobExecution.class);
+    ResourceDownloadJobExecution downloadJobExecution = mock(ResourceDownloadJobExecution.class);
     when(downloadJobExecutionFactory.create()).thenReturn(downloadJobExecution);
 
     List<ResourceIdentifier> resources =

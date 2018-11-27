@@ -9,7 +9,6 @@ import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE_ABSTRACT;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Streams;
-import com.google.gson.Gson;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +22,13 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
-import org.molgenis.data.util.MetaUtils;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecution;
-import org.molgenis.navigator.copy.job.CopyJobExecution;
-import org.molgenis.navigator.copy.job.CopyJobExecutionFactory;
-import org.molgenis.navigator.download.job.DownloadJobExecution;
-import org.molgenis.navigator.download.job.DownloadJobExecutionFactory;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecution;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
+import org.molgenis.navigator.download.job.ResourceDownloadJobExecution;
+import org.molgenis.navigator.download.job.ResourceDownloadJobExecutionFactory;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
@@ -42,14 +41,14 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   private final DataService dataService;
   private final JobExecutor jobExecutor;
-  private final DownloadJobExecutionFactory downloadJobExecutionFactory;
-  private final CopyJobExecutionFactory copyJobExecutionFactory;
+  private final ResourceDownloadJobExecutionFactory downloadJobExecutionFactory;
+  private final ResourceCopyJobExecutionFactory copyJobExecutionFactory;
 
   NavigatorServiceImpl(
       DataService dataService,
       JobExecutor jobExecutor,
-      DownloadJobExecutionFactory downloadJobExecutionFactory,
-      CopyJobExecutionFactory copyJobExecutionFactory) {
+      ResourceDownloadJobExecutionFactory downloadJobExecutionFactory,
+      ResourceCopyJobExecutionFactory copyJobExecutionFactory) {
     this.dataService = requireNonNull(dataService);
     this.jobExecutor = requireNonNull(jobExecutor);
     this.downloadJobExecutionFactory = requireNonNull(downloadJobExecutionFactory);
@@ -140,8 +139,8 @@ public class NavigatorServiceImpl implements NavigatorService {
 
     Package aPackage = getPackage(targetFolderId);
 
-    CopyJobExecution jobExecution = copyJobExecutionFactory.create();
-    jobExecution.setResources(new Gson().toJson(resources));
+    ResourceCopyJobExecution jobExecution = copyJobExecutionFactory.create();
+    jobExecution.setResources(resources);
     jobExecution.setTargetPackage(aPackage != null ? aPackage.getId() : null);
     jobExecutor.submit(jobExecution);
     return jobExecution;
@@ -153,7 +152,7 @@ public class NavigatorServiceImpl implements NavigatorService {
       throw new IllegalArgumentException("resources can't be empty");
     }
 
-    DownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
+    ResourceDownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
     jobExecution.setResources(resources);
     jobExecutor.submit(jobExecution);
     return jobExecution;
@@ -326,7 +325,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private Resource toResource(Package aPackage) {
-    boolean isSystemPackage = MetaUtils.isSystemPackage(aPackage);
+    boolean isSystemPackage = PackageUtils.isSystemPackage(aPackage);
     return Resource.builder()
         .setType(ResourceType.PACKAGE)
         .setId(aPackage.getId())
@@ -339,7 +338,7 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   private Resource toResource(EntityType entityType) {
     ResourceType type = entityType.isAbstract() ? ENTITY_TYPE_ABSTRACT : ENTITY_TYPE;
-    boolean isSystemEntityType = MetaUtils.isSystemPackage(entityType.getPackage());
+    boolean isSystemEntityType = PackageUtils.isSystemPackage(entityType.getPackage());
     return Resource.builder()
         .setType(type)
         .setId(entityType.getId())

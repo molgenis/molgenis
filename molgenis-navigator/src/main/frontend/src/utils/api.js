@@ -173,10 +173,10 @@ function toApiJobEntityType (job: Job): string {
   let apiType
   switch (job.type) {
     case 'COPY':
-      apiType = 'sys_job_CopyJobExecution'
+      apiType = 'sys_job_ResourceCopyJobExecution'
       break
     case 'DOWNLOAD':
-      apiType = 'sys_job_DownloadJobExecution'
+      apiType = 'sys_job_ResourceDownloadJobExecution'
       break
     default:
       throw new Error('unexpected job type \'' + job.type + '\'')
