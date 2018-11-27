@@ -39,7 +39,7 @@ public class OntologyImportServiceIT extends ImportServiceIT {
   User getTestUser() {
     User user = userFactory.create();
     user.setUsername(USERNAME);
-    user.setPassword("password");
+    user.setPassword_("password");
     user.setEmail("o@mail.com");
     return user;
   }

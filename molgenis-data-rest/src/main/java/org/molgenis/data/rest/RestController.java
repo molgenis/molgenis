@@ -829,7 +829,7 @@ public class RestController {
   private boolean isUser2fa() {
     return authenticationSettings.getTwoFactorAuthentication() == ENFORCED
         || (authenticationSettings.getTwoFactorAuthentication() == ENABLED
-            && userAccountService.getCurrentUser().isTwoFactorAuthentication());
+            && userAccountService.getCurrentUser().isUse2fa());
   }
 
   @PostMapping("/logout")

@@ -58,7 +58,7 @@ public class TwoFactorAuthenticationFilter extends OncePerRequestFilter {
   private boolean isUserShouldTwoFactorAuthenticate() {
     return authenticationSettings.getTwoFactorAuthentication() != DISABLED
         && (authenticationSettings.getTwoFactorAuthentication() == ENFORCED
-            || userAccountService.getCurrentUser().isTwoFactorAuthentication());
+            || userAccountService.getCurrentUser().isUse2fa());
   }
 
   private boolean isNotProtected(String requestURI) {

@@ -60,11 +60,11 @@ public class User extends StaticEntity {
     set(USERNAME, username);
   }
 
-  public String getPassword() {
+  public String getPassword_() {
     return getString(PASSWORD);
   }
 
-  public void setPassword(String password) {
+  public void setPassword_(String password) {
     set(PASSWORD, password);
   }
 
@@ -77,7 +77,7 @@ public class User extends StaticEntity {
     set(ACTIVATIONCODE, activationCode);
   }
 
-  public boolean isTwoFactorAuthentication() {
+  public boolean isUse2fa() {
     Boolean twoFactorAuthentication = getBoolean(TWO_FACTOR_AUTHENTICATION);
     if (twoFactorAuthentication == null) {
       twoFactorAuthentication = false;
@@ -85,7 +85,7 @@ public class User extends StaticEntity {
     return twoFactorAuthentication;
   }
 
-  public void setTwoFactorAuthentication(boolean twoFactorAuthentication) {
+  public void setUse2fa(boolean twoFactorAuthentication) {
     set(TWO_FACTOR_AUTHENTICATION, twoFactorAuthentication);
   }
 

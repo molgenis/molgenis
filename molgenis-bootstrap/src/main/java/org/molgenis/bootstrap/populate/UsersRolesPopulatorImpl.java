@@ -70,7 +70,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     // create admin user
     User userAdmin = userFactory.create();
     userAdmin.setUsername(USERNAME_ADMIN);
-    userAdmin.setPassword(adminPassword);
+    userAdmin.setPassword_(adminPassword);
     userAdmin.setEmail(adminEmail);
     userAdmin.setActive(true);
     userAdmin.setSuperuser(true);
@@ -79,7 +79,7 @@ public class UsersRolesPopulatorImpl implements UsersRolesPopulator {
     // create anonymous user
     User anonymousUser = userFactory.create();
     anonymousUser.setUsername(ANONYMOUS_USERNAME);
-    anonymousUser.setPassword(ANONYMOUS_USERNAME);
+    anonymousUser.setPassword_(ANONYMOUS_USERNAME);
     anonymousUser.setEmail(anonymousEmail);
     anonymousUser.setActive(true);
     anonymousUser.setSuperuser(false);

@@ -93,7 +93,7 @@ public class OidcUserMapperImpl implements OidcUserMapper {
   private User createUser(OidcUser oidcUser) {
     User user = userFactory.create();
     user.setUsername(oidcUser.getEmail());
-    user.setPassword(UUID.randomUUID().toString());
+    user.setPassword_(UUID.randomUUID().toString());
     user.setEmail(oidcUser.getEmail());
     user.setActive(true);
     user.setFirstName(oidcUser.getGivenName());

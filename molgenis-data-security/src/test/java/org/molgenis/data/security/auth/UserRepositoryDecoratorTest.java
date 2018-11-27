@@ -42,7 +42,7 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
   public void addEntity() {
     String password = "password";
     User user = mock(User.class);
-    when(user.getPassword()).thenReturn(password);
+    when(user.getPassword_()).thenReturn(password);
     userRepositoryDecorator.add(user);
     verify(passwordEncoder).encode(password);
     verify(delegateRepository).add(user);
@@ -53,9 +53,9 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
   public void addStream() {
     String password = "password";
     User user0 = mock(User.class);
-    when(user0.getPassword()).thenReturn(password);
+    when(user0.getPassword_()).thenReturn(password);
     User user1 = mock(User.class);
-    when(user1.getPassword()).thenReturn(password);
+    when(user1.getPassword_()).thenReturn(password);
 
     when(delegateRepository.add(any(Stream.class)))
         .thenAnswer(
@@ -113,37 +113,37 @@ public class UserRepositoryDecoratorTest extends AbstractMockitoTest {
     when(passwordEncoder.encode("password")).thenReturn("passwordHash");
 
     User currentUser = mock(User.class);
-    when(currentUser.getPassword()).thenReturn("currentPasswordHash");
+    when(currentUser.getPassword_()).thenReturn("currentPasswordHash");
     when(userRepositoryDecorator.findOneById("1")).thenReturn(currentUser);
 
     User user = mock(User.class);
     when(user.getId()).thenReturn("1");
-    when(user.getPassword()).thenReturn("password");
+    when(user.getPassword_()).thenReturn("password");
 
     Stream<User> entities = Stream.of(user);
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
     Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
-    verify(user).setPassword("passwordHash");
+    verify(user).setPassword_("passwordHash");
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
   public void updateStreamUnchangedPassword() {
     User currentUser = mock(User.class);
-    when(currentUser.getPassword()).thenReturn("currentPasswordHash");
+    when(currentUser.getPassword_()).thenReturn("currentPasswordHash");
     when(userRepositoryDecorator.findOneById("1")).thenReturn(currentUser);
 
     User user = mock(User.class);
     when(user.getId()).thenReturn("1");
-    when(user.getPassword()).thenReturn("currentPasswordHash");
+    when(user.getPassword_()).thenReturn("currentPasswordHash");
 
     Stream<User> entities = Stream.of(user);
     ArgumentCaptor<Stream<User>> captor = ArgumentCaptor.forClass(Stream.class);
     doNothing().when(delegateRepository).update(captor.capture());
     userRepositoryDecorator.update(entities);
     Assert.assertEquals(captor.getValue().collect(toList()), singletonList(user));
-    verify(user).setPassword("currentPasswordHash");
+    verify(user).setPassword_("currentPasswordHash");
   }
 }

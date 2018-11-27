@@ -59,7 +59,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
   public void testLoadUserByUsernameSuperuser() {
     String username = "user";
     when(user.getUsername()).thenReturn(username);
-    when(user.getPassword()).thenReturn("pw");
+    when(user.getPassword_()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(true);
     when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
@@ -93,7 +93,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
     String username = "user";
     User user = mock(User.class);
     when(user.getUsername()).thenReturn(username);
-    when(user.getPassword()).thenReturn("pw");
+    when(user.getPassword_()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);
 
@@ -124,7 +124,7 @@ public class UserDetailsServiceTest extends AbstractMockitoTest {
   public void testLoadUserByUsernameAnonymous() {
     String username = "anonymous";
     when(user.getUsername()).thenReturn(username);
-    when(user.getPassword()).thenReturn("pw");
+    when(user.getPassword_()).thenReturn("pw");
     when(user.isActive()).thenReturn(true);
     when(user.isSuperuser()).thenReturn(false);
     when(dataService.query(USER, User.class).eq(USERNAME, username).findOne()).thenReturn(user);

@@ -59,14 +59,14 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
     User existingUser = mock(User.class);
     when(existingUser.getId()).thenReturn("1");
     when(existingUser.getUsername()).thenReturn(USERNAME_USER);
-    when(existingUser.getPassword()).thenReturn("encrypted-password");
+    when(existingUser.getPassword_()).thenReturn("encrypted-password");
 
     when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
     User updatedUser = mock(User.class);
     when(updatedUser.getId()).thenReturn("1");
     when(updatedUser.getUsername()).thenReturn("username");
-    when(updatedUser.getPassword()).thenReturn("encrypted-password");
+    when(updatedUser.getPassword_()).thenReturn("encrypted-password");
 
     userAccountServiceImpl.updateCurrentUser(updatedUser);
     verify(passwordEncoder, never()).encode("encrypted-password");
@@ -76,14 +76,14 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
   public void updateCurrentUser_wrongUser() {
     User existingUser = mock(User.class);
     when(existingUser.getId()).thenReturn("1");
-    when(existingUser.getPassword()).thenReturn("encrypted-password");
+    when(existingUser.getPassword_()).thenReturn("encrypted-password");
 
     when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
     User updatedUser = mock(User.class);
     when(updatedUser.getId()).thenReturn("1");
     when(updatedUser.getUsername()).thenReturn("wrong-username");
-    when(updatedUser.getPassword()).thenReturn("encrypted-password");
+    when(updatedUser.getPassword_()).thenReturn("encrypted-password");
 
     userAccountServiceImpl.updateCurrentUser(updatedUser);
   }
@@ -93,14 +93,14 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
     when(passwordEncoder.matches("new-password", "encrypted-password")).thenReturn(true);
     User existingUser = mock(User.class);
     when(existingUser.getId()).thenReturn("1");
-    when(existingUser.getPassword()).thenReturn("encrypted-password");
+    when(existingUser.getPassword_()).thenReturn("encrypted-password");
     when(existingUser.getUsername()).thenReturn("username");
 
     when(userService.getUser(USERNAME_USER)).thenReturn(existingUser);
 
     User updatedUser = mock(User.class);
     when(updatedUser.getId()).thenReturn("1");
-    when(updatedUser.getPassword()).thenReturn("new-password");
+    when(updatedUser.getPassword_()).thenReturn("new-password");
     when(updatedUser.getUsername()).thenReturn("username");
 
     userAccountServiceImpl.updateCurrentUser(updatedUser);
@@ -110,7 +110,7 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
   public void validateCurrentUserPassword() {
     User existingUser = mock(User.class);
     when(existingUser.getId()).thenReturn("1");
-    when(existingUser.getPassword()).thenReturn("encrypted-password");
+    when(existingUser.getPassword_()).thenReturn("encrypted-password");
     when(existingUser.getUsername()).thenReturn("username");
     when(passwordEncoder.matches("password", "encrypted-password")).thenReturn(true);
     assertTrue(userAccountServiceImpl.validateCurrentUserPassword("password"));

@@ -98,7 +98,7 @@ public class UserAccountController extends PluginController {
     TwoFactorAuthenticationSetting twoFactorAuthenticationApp =
         authenticationSettings.getTwoFactorAuthentication();
     boolean isTwoFactorAuthenticationEnableForUser =
-        userAccountService.getCurrentUser().isTwoFactorAuthentication();
+        userAccountService.getCurrentUser().isUse2fa();
 
     model.addAttribute("user", userAccountService.getCurrentUser());
     model.addAttribute("countries", CountryCodes.get());
@@ -150,7 +150,7 @@ public class UserAccountController extends PluginController {
     // update current user
     User user = userAccountService.getCurrentUser();
 
-    if (isNotEmpty(newPassword)) user.setPassword(newPassword);
+    if (isNotEmpty(newPassword)) user.setPassword_(newPassword);
     if (isNotEmpty(updateRequest.getPhone())) user.setPhone(updateRequest.getPhone());
     if (isNotEmpty(updateRequest.getFax())) user.setFax(updateRequest.getFax());
     if (isNotEmpty(updateRequest.getTollFreePhone())) {

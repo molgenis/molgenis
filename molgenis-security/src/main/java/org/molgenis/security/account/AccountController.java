@@ -247,7 +247,7 @@ public class AccountController {
   private User toUser(RegisterRequest request) {
     User user = userFactory.create();
     user.setUsername(request.getUsername());
-    user.setPassword(request.getPassword());
+    user.setPassword_(request.getPassword());
     user.setEmail(request.getEmail());
     user.setPhone(request.getPhone());
     user.setFax(request.getFax());

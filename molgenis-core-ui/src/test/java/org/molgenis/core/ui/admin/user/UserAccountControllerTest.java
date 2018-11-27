@@ -59,7 +59,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   public void testShowAccountWithCodes() {
     when(authenticationSettings.getTwoFactorAuthentication()).thenReturn(ENABLED);
     when(userAccountService.getCurrentUser()).thenReturn(user);
-    when(user.isTwoFactorAuthentication()).thenReturn(true);
+    when(user.isUse2fa()).thenReturn(true);
 
     assertEquals(userAccountController.showAccount(model, true), "view-useraccount");
 
@@ -136,7 +136,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
 
     userAccountController.updateAccount(accountUpdateRequest);
 
-    verify(user).setPassword("abcdef");
+    verify(user).setPassword_("abcdef");
     verify(userAccountService).updateCurrentUser(user);
     verifyNoMoreInteractions(user);
   }
@@ -213,7 +213,7 @@ public class UserAccountControllerTest extends AbstractMockitoTestNGSpringContex
   @WithMockUser
   public void testDisableTwoFactorAuthentication() {
     when(userAccountService.getCurrentUser()).thenReturn(user);
-    when(user.isTwoFactorAuthentication()).thenReturn(false);
+    when(user.isUse2fa()).thenReturn(false);
     assertEquals(userAccountController.disableTwoFactorAuthentication(model), "view-useraccount");
 
     verify(twoFactorAuthenticationService).disableForUser();

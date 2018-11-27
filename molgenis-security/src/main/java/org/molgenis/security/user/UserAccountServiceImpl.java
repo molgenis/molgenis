@@ -49,6 +49,6 @@ public class UserAccountServiceImpl implements UserAccountService {
       throw new RuntimeException(
           "User does not exist [" + SecurityUtils.getCurrentUsername() + "]");
     }
-    return passwordEncoder.matches(password, currentUser.getPassword());
+    return passwordEncoder.matches(password, currentUser.getPassword_());
   }
 }

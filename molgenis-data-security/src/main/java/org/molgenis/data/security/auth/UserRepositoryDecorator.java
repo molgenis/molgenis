@@ -60,19 +60,19 @@ public class UserRepositoryDecorator extends AbstractRepositoryDecorator<User> {
   private void updatePassword(User user) {
     User currentUser = findOneById(user.getId());
 
-    String currentPassword = currentUser.getPassword();
-    String password = user.getPassword();
+    String currentPassword = currentUser.getPassword_();
+    String password = user.getPassword_();
     // password is updated
     if (!currentPassword.equals(password)) {
-      password = passwordEncoder.encode(user.getPassword());
+      password = passwordEncoder.encode(user.getPassword_());
     }
-    user.setPassword(password);
+    user.setPassword_(password);
   }
 
   private void encodePassword(User user) {
-    String password = user.getPassword();
+    String password = user.getPassword_();
     String encodedPassword = passwordEncoder.encode(password);
-    user.setPassword(encodedPassword);
+    user.setPassword_(encodedPassword);
   }
 
   @Override

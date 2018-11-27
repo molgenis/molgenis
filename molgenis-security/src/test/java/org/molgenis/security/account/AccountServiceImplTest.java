@@ -66,7 +66,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     when(user.getMiddleNames()).thenReturn("Piet Hein");
     when(user.getLastName()).thenReturn("Jansen");
     when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
-    when(user.getPassword()).thenReturn("password");
+    when(user.getPassword_()).thenReturn("password");
     when(user.isActive()).thenReturn(true);
   }
 
@@ -157,8 +157,8 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     accountService.resetPassword("user@molgenis.org");
 
     verify(dataService).update(USER, user);
-    verify(user).setPassword("newPassword");
-    when(user.getPassword()).thenReturn("newPassword");
+    verify(user).setPassword_("newPassword");
+    when(user.getPassword_()).thenReturn("newPassword");
 
     SimpleMailMessage expected = new SimpleMailMessage();
     expected.setTo("jan.jansen@activation.nl");
@@ -173,7 +173,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
   @Test(expectedExceptions = MolgenisUserException.class)
   public void resetPassword_invalidEmailAddress() {
     User user = mock(User.class);
-    when(user.getPassword()).thenReturn("password");
+    when(user.getPassword_()).thenReturn("password");
 
     @SuppressWarnings("unchecked")
     Query<User> q = mock(Query.class);
@@ -202,7 +202,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
   public void changePassword() {
     User user = when(mock(User.class).isActive()).thenReturn(true).getMock();
     when(user.getUsername()).thenReturn("test");
-    when(user.getPassword()).thenReturn("oldpass");
+    when(user.getPassword_()).thenReturn("oldpass");
 
     @SuppressWarnings("unchecked")
     Query<User> q = mock(Query.class);
@@ -213,7 +213,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     accountService.changePassword("test", "newpass");
 
     verify(dataService).update(USER, user);
-    verify(user).setPassword("newpass");
+    verify(user).setPassword_("newpass");
   }
 
   @Test(expectedExceptions = DisabledException.class)

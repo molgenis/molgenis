@@ -126,14 +126,14 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
   @Override
   public void enableForUser() {
     User user = getUser();
-    user.setTwoFactorAuthentication(true);
+    user.setUse2fa(true);
     userService.update(user);
   }
 
   @Override
   public void disableForUser() {
     User user = getUser();
-    user.setTwoFactorAuthentication(false);
+    user.setUse2fa(false);
     userService.update(user);
     UserSecret userSecret = getSecret();
     runAsSystem(() -> dataService.delete(USER_SECRET, userSecret));

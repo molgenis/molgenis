@@ -158,7 +158,7 @@ public class AccountServiceImpl implements AccountService {
     if (!user.isActive()) {
       throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
     }
-    user.setPassword(newPassword);
+    user.setPassword_(newPassword);
     user.setChangePassword(false);
     dataService.update(USER, user);
 
@@ -176,7 +176,7 @@ public class AccountServiceImpl implements AccountService {
       }
 
       String newPassword = idGenerator.generateId(SHORT_SECURE_RANDOM);
-      user.setPassword(newPassword);
+      user.setPassword_(newPassword);
       user.setChangePassword(true);
       dataService.update(USER, user);
 

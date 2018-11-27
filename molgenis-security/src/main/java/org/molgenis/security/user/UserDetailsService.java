@@ -47,7 +47,7 @@ public class UserDetailsService
 
     Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
     return new org.springframework.security.core.userdetails.User(
-        user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
+        user.getUsername(), user.getPassword_(), user.isActive(), true, true, true, authorities);
   }
 
   @RunAsSystem

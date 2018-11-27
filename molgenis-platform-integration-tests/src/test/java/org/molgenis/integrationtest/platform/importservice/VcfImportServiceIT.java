@@ -48,7 +48,7 @@ public class VcfImportServiceIT extends ImportServiceIT {
   User getTestUser() {
     User user = userFactory.create();
     user.setUsername(USERNAME);
-    user.setPassword("password");
+    user.setPassword_("password");
     user.setEmail("v@mail.com");
     return user;
   }

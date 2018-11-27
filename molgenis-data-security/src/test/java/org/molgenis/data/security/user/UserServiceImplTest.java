@@ -72,7 +72,7 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests {
     User existingUser = mock(User.class);
     when(existingUser.getId()).thenReturn("1");
     when(existingUser.getUsername()).thenReturn(username);
-    when(existingUser.getPassword()).thenReturn("encrypted-password");
+    when(existingUser.getPassword_()).thenReturn("encrypted-password");
 
     when(dataService.findOne(
             USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class))
