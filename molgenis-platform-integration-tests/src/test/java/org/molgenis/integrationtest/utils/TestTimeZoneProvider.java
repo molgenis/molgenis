@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.export;
+package org.molgenis.integrationtest.utils;
 
 import java.util.TimeZone;
 import org.molgenis.data.export.TimeZoneProvider;
