@@ -7,26 +7,25 @@ import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.model.util.ResourceIdentifierUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+@SuppressWarnings("unused")
 @Component
-public class CopyJobConfig {
+public class ResourceCopyJobConfig {
 
   private final CopyService copyService;
 
-  public CopyJobConfig(CopyService copyService) {
+  public ResourceCopyJobConfig(CopyService copyService) {
     this.copyService = requireNonNull(copyService);
   }
 
   @Bean
-  public JobFactory<CopyJobExecution> copyJobFactory() {
-    return new JobFactory<CopyJobExecution>() {
+  public JobFactory<ResourceCopyJobExecution> copyJobFactory() {
+    return new JobFactory<ResourceCopyJobExecution>() {
       @Override
-      public Job<String> createJob(CopyJobExecution jobExecution) {
-        final List<ResourceIdentifier> resources =
-            ResourceIdentifierUtil.getResourcesFromJson(jobExecution.getResources());
+      public Job<Void> createJob(ResourceCopyJobExecution jobExecution) {
+        final List<ResourceIdentifier> resources = jobExecution.getResources();
         final String targetPackageId = jobExecution.getTargetPackage();
         return progress -> copyService.copy(resources, targetPackageId, progress);
       }

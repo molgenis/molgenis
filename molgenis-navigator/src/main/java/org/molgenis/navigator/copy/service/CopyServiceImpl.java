@@ -1,17 +1,22 @@
 package org.molgenis.navigator.copy.service;
 
+import static com.google.common.collect.Iterables.size;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.CodedRuntimeException;
+import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.copy.exception.CopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
-import org.molgenis.navigator.model.util.ResourceCollection;
-import org.molgenis.navigator.model.util.ResourceCollector;
+import org.molgenis.navigator.util.ResourceCollection;
+import org.molgenis.navigator.util.ResourceCollector;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,34 +25,65 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CopyServiceImpl implements CopyService {
 
-  private final ResourceCopierFactory resourceCopierFactory;
   private final ResourceCollector resourceCollector;
   private final MetaDataService metaDataService;
+  private final PackageCopier packageCopier;
+  private final EntityTypeCopier entityTypeCopier;
+  private final ContextMessageSource contextMessageSource;
 
   CopyServiceImpl(
-      ResourceCopierFactory resourceCopierFactory,
       ResourceCollector resourceCollector,
-      MetaDataService metaDataService) {
-    this.resourceCopierFactory = requireNonNull(resourceCopierFactory);
+      MetaDataService metaDataService,
+      PackageCopier packageCopier,
+      EntityTypeCopier entityTypeCopier,
+      ContextMessageSource contextMessageSource) {
     this.resourceCollector = requireNonNull(resourceCollector);
     this.metaDataService = requireNonNull(metaDataService);
+    this.packageCopier = requireNonNull(packageCopier);
+    this.entityTypeCopier = requireNonNull(entityTypeCopier);
+    this.contextMessageSource = requireNonNull(contextMessageSource);
   }
 
   @Override
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public String copy(
-      List<ResourceIdentifier> resources, String targetPackageId, Progress progress) {
-    ResourceCollection resourceCollection = resourceCollector.get(resources);
-
-    Package targetPackage = getPackage(targetPackageId);
-
+  public Void copy(List<ResourceIdentifier> resources, String targetPackageId, Progress progress) {
     try {
-      resourceCopierFactory.newInstance(resourceCollection, targetPackage, progress).copy();
+      ResourceCollection resourceCollection = resourceCollector.get(resources);
+      Package targetPackage = getPackage(targetPackageId);
+      CopyState state = CopyState.create(targetPackage, progress);
+
+      copyResources(resourceCollection, state);
+
     } catch (CodedRuntimeException exception) {
       throw new CopyFailedException(exception);
     }
 
-    return "true";
+    return null;
+  }
+
+  private void copyResources(ResourceCollection resourceCollection, CopyState state) {
+    Progress progress = state.progress();
+    progress.setProgressMax(calculateMaxProgress(resourceCollection));
+    progress.progress(0, contextMessageSource.getMessage("progress-copy-started"));
+
+    copyPackages(resourceCollection.getPackages(), state);
+    copyEntityTypes(resourceCollection.getEntityTypes(), state);
+
+    progress.status(contextMessageSource.getMessage("progress-copy-success"));
+  }
+
+  private void copyPackages(List<Package> packages, CopyState state) {
+    if (!packages.isEmpty()) {
+      state.progress().status(contextMessageSource.getMessage("progress-copy-packages"));
+      packageCopier.copy(packages, state);
+    }
+  }
+
+  private void copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
+    if (!entityTypes.isEmpty() || !state.entityTypesInPackages().isEmpty()) {
+      state.progress().status(contextMessageSource.getMessage("progress-copy-entity-types"));
+      entityTypeCopier.copy(entityTypes, state);
+    }
   }
 
   private Package getPackage(String targetPackageId) {
@@ -56,5 +92,25 @@ public class CopyServiceImpl implements CopyService {
             .getPackage(targetPackageId)
             .orElseThrow(() -> new UnknownPackageException(targetPackageId))
         : null;
+  }
+
+  private int calculateMaxProgress(ResourceCollection collection) {
+    AtomicInteger maxProgress = new AtomicInteger();
+    maxProgress.addAndGet(collection.getEntityTypes().size());
+    maxProgress.addAndGet(collection.getPackages().size());
+
+    collection
+        .getPackages()
+        .forEach(
+            packToCopy ->
+                new PackageTreeTraverser()
+                    .postOrderTraversal(packToCopy)
+                    .forEach(
+                        pack -> {
+                          maxProgress.addAndGet(size(pack.getChildren()));
+                          maxProgress.addAndGet(size(pack.getEntityTypes()));
+                        }));
+
+    return maxProgress.get();
   }
 }

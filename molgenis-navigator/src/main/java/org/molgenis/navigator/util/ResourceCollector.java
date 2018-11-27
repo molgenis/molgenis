@@ -1,8 +1,8 @@
 package org.molgenis.navigator.util;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownPackageException;
@@ -22,7 +22,7 @@ public class ResourceCollector {
 
   private final MetaDataService metaDataService;
 
-  public ResourceCollector(MetaDataService metaDataService) {
+  ResourceCollector(MetaDataService metaDataService) {
     this.metaDataService = requireNonNull(metaDataService);
   }
 
@@ -35,8 +35,8 @@ public class ResourceCollector {
   }
 
   public ResourceCollection get(List<ResourceIdentifier> resources) {
-    List<Package> packages = newArrayList();
-    List<EntityType> entityTypes = newArrayList();
+    List<Package> packages = new ArrayList<>();
+    List<EntityType> entityTypes = new ArrayList<>();
 
     resources.forEach(
         resource -> {

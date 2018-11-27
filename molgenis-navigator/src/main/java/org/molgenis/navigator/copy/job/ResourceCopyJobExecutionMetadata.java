@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Component
-public class CopyJobExecutionMetadata extends SystemEntityType {
+public class ResourceCopyJobExecutionMetadata extends SystemEntityType {
 
-  private static final String SIMPLE_NAME = "CopyJobExecution";
+  private static final String SIMPLE_NAME = "ResourceCopyJobExecution";
   public static final String COPY_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String ID = "id";
@@ -27,7 +27,7 @@ public class CopyJobExecutionMetadata extends SystemEntityType {
   private final JobPackage jobPackage;
   private final JobExecutionMetaData jobExecutionMetaData;
 
-  public CopyJobExecutionMetadata(
+  public ResourceCopyJobExecutionMetadata(
       JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData) {
     super(SIMPLE_NAME, PACKAGE_JOB);
     this.jobPackage = requireNonNull(jobPackage);
@@ -38,7 +38,7 @@ public class CopyJobExecutionMetadata extends SystemEntityType {
   public void init() {
     setPackage(jobPackage);
     setExtends(jobExecutionMetaData);
-    setLabel("Copy Job Execution");
+    setLabel("Resource Copy Job Execution");
 
     addAttribute(RESOURCES)
         .setDataType(TEXT)
