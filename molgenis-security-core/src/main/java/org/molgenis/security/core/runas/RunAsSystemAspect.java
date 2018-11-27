@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class RunAsSystemAspect {
+  @SuppressWarnings("squid:S00112") // generic exceptions should never be thrown
   @Around("@annotation(RunAsSystem)")
   public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
     return runAsSystem((RunnableAsSystem<Object, Throwable>) joinPoint::proceed);
