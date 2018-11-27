@@ -97,6 +97,8 @@ public class DataExplorerController extends PluginController {
 
   @Autowired private DataExplorerService dataExplorerService;
 
+  private String Capitalized;
+
   public DataExplorerController() {
     super(URI);
   }
