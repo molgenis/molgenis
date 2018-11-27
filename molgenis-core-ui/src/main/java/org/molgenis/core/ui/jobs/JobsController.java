@@ -3,7 +3,6 @@ package org.molgenis.core.ui.jobs;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.core.ui.jobs.JobsController.URI;
-import static org.molgenis.data.rest.util.Href.concatEntityHref;
 import static org.molgenis.data.security.EntityTypePermission.READ_DATA;
 import static org.molgenis.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
@@ -20,7 +19,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -122,8 +120,7 @@ public class JobsController extends PluginController {
     jobScheduler.runNow(scheduledJobId);
   }
 
-  public String createJobExecutionViewHref(JobExecution jobExecution, int refreshTimeoutMillis) {
-    String jobHref = concatEntityHref(jobExecution);
+  public String createJobExecutionViewHref(String jobHref, int refreshTimeoutMillis) {
     String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(ID);
     return format(
         "%s/viewJob/?jobHref=%s&refreshTimeoutMillis=%s",
