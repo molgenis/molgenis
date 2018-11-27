@@ -26,19 +26,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class CopyServiceImpl implements CopyService {
 
   private final ResourceCollector resourceCollector;
-  private final MetaDataService metaDataService;
+  private final MetaDataService metadataService;
   private final PackageCopier packageCopier;
   private final EntityTypeCopier entityTypeCopier;
   private final ContextMessageSource contextMessageSource;
 
   CopyServiceImpl(
       ResourceCollector resourceCollector,
-      MetaDataService metaDataService,
+      MetaDataService metadataService,
       PackageCopier packageCopier,
       EntityTypeCopier entityTypeCopier,
       ContextMessageSource contextMessageSource) {
     this.resourceCollector = requireNonNull(resourceCollector);
-    this.metaDataService = requireNonNull(metaDataService);
+    this.metadataService = requireNonNull(metadataService);
     this.packageCopier = requireNonNull(packageCopier);
     this.entityTypeCopier = requireNonNull(entityTypeCopier);
     this.contextMessageSource = requireNonNull(contextMessageSource);
@@ -88,7 +88,7 @@ public class CopyServiceImpl implements CopyService {
 
   private Package getPackage(String targetPackageId) {
     return targetPackageId != null
-        ? metaDataService
+        ? metadataService
             .getPackage(targetPackageId)
             .orElseThrow(() -> new UnknownPackageException(targetPackageId))
         : null;

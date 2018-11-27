@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.molgenis.data.Entity;
+import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.Test;
 
@@ -111,5 +113,63 @@ public class PretendingEntityTest extends AbstractMockitoTest {
 
     assertEquals(actualRefEntities.get(0).getEntityType(), refEntityType);
     assertEquals(actualRefEntities.get(1).getEntityType(), refEntityType);
+  }
+
+  @Test
+  public void testTypedReferenceIsFileMeta() {
+    Entity entity = mock(Entity.class);
+    FileMeta refEntity = mock(FileMeta.class);
+    EntityType refEntityType = mock(EntityType.class);
+    when(refEntityType.getId()).thenReturn("oldId");
+    EntityType refEntityTypeCopy = mock(EntityType.class);
+    when(refEntity.getEntityType()).thenReturn(refEntityType);
+    when(entity.getEntity("ref", FileMeta.class)).thenReturn(refEntity);
+    Map<String, EntityType> copiedEntityTypes = ImmutableMap.of("oldId", refEntityTypeCopy);
+
+    PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
+    FileMeta actualRefEntity = pretendingEntity.getEntity("ref", FileMeta.class);
+
+    assertEquals(actualRefEntity.getEntityType(), refEntityTypeCopy);
+  }
+
+  @Test
+  public void testTypedMultiReferenceFileMeta() {
+    Entity entity = mock(Entity.class);
+    FileMeta refEntity1 = mock(FileMeta.class);
+    FileMeta refEntity2 = mock(FileMeta.class);
+    EntityType refEntityType = mock(EntityType.class);
+    when(refEntityType.getId()).thenReturn("oldId");
+    EntityType refEntityTypeCopy = mock(EntityType.class);
+    when(refEntity1.getEntityType()).thenReturn(refEntityType);
+    when(refEntity2.getEntityType()).thenReturn(refEntityType);
+    when(entity.getEntities("ref", FileMeta.class)).thenReturn(asList(refEntity1, refEntity2));
+    Map<String, EntityType> copiedEntityTypes = ImmutableMap.of("oldId", refEntityTypeCopy);
+
+    PretendingEntity pretendingEntity = new PretendingEntity(entity, copiedEntityTypes);
+    List<FileMeta> actualRefEntities =
+        newArrayList(pretendingEntity.getEntities("ref", FileMeta.class));
+
+    assertEquals(actualRefEntities.get(0).getEntityType(), refEntityTypeCopy);
+    assertEquals(actualRefEntities.get(1).getEntityType(), refEntityTypeCopy);
+  }
+
+  @Test(
+      expectedExceptions = UnsupportedOperationException.class,
+      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
+  public void testTypedReferenceIsNotFileMeta() {
+    Entity entity = mock(Entity.class);
+
+    PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
+    pretendingEntity.getEntity("ref", Plugin.class);
+  }
+
+  @Test(
+      expectedExceptions = UnsupportedOperationException.class,
+      expectedExceptionsMessageRegExp = "Can't return typed pretending entities")
+  public void testTypedMultiReferenceNotFileMeta() {
+    Entity entity = mock(Entity.class);
+
+    PretendingEntity pretendingEntity = new PretendingEntity(entity, new HashMap<>());
+    pretendingEntity.getEntities("ref", Plugin.class);
   }
 }
