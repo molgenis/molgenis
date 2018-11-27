@@ -33,6 +33,7 @@ import org.molgenis.data.export.mapper.PackageMapper;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,8 @@ public class EmxExportServiceImpl implements EmxExportService {
       try (XlsxWriter writer =
           XlsxWriterFactory.create(downloadFilePath, timeZoneProvider.getSystemTimeZone())) {
         exportEmx(entityTypes, packages, writer, progress);
+      } catch (CodedRuntimeException e) {
+        throw e;
       } catch (IOException | RuntimeException e) {
         throw new EmxExportException(e);
       }
