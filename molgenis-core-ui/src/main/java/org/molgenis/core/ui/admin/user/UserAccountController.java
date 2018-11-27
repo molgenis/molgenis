@@ -97,8 +97,7 @@ public class UserAccountController extends PluginController {
       Model model, @RequestParam(value = "showCodes", defaultValue = "false") boolean showCodes) {
     TwoFactorAuthenticationSetting twoFactorAuthenticationApp =
         authenticationSettings.getTwoFactorAuthentication();
-    boolean isTwoFactorAuthenticationEnableForUser =
-        userAccountService.getCurrentUser().isUse2fa();
+    boolean isTwoFactorAuthenticationEnableForUser = userAccountService.getCurrentUser().isUse2fa();
 
     model.addAttribute("user", userAccountService.getCurrentUser());
     model.addAttribute("countries", CountryCodes.get());

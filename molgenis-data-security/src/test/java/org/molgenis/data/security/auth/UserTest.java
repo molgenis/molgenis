@@ -11,21 +11,21 @@ import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
-        EntityBaseTestConfig.class,
-        UserMetaData.class,
-        UserFactory.class,
-        SecurityPackage.class
+      EntityBaseTestConfig.class,
+      UserMetaData.class,
+      UserFactory.class,
+      SecurityPackage.class
     })
 public class UserTest extends AbstractSystemEntityTest {
 
-  @Autowired
-  UserMetaData metadata;
-  @Autowired
-  UserFactory factory;
+  @Autowired UserMetaData metadata;
+  @Autowired UserFactory factory;
 
   private Map<String, Pair<Class, Object>> getOverriddenAttributes() {
-    //Add attributes with 'smart' getters and setters that covert back anf forth to correct values for MOLGENIS datatypes
-    //Provide the attribute name as key, and a pair of returntype (Class) and a Object to be used as test value
+    // Add attributes with 'smart' getters and setters that covert back anf forth to correct values
+    // for MOLGENIS datatypes
+    // Provide the attribute name as key, and a pair of returntype (Class) and a Object to be used
+    // as test value
     Map<String, Pair<Class, Object>> map = new HashMap<>();
     return map;
   }

@@ -6,12 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = {EntityBaseTestConfig.class, UserMetaData.class, UserFactory.class,
-    SecurityPackage.class})
+@ContextConfiguration(
+    classes = {
+      EntityBaseTestConfig.class,
+      UserMetaData.class,
+      UserFactory.class,
+      SecurityPackage.class
+    })
 public class UserFactoryTest extends AbstractEntityFactoryTest {
 
-  @Autowired
-  UserFactory factory;
+  @Autowired UserFactory factory;
 
   @Override
   @Test

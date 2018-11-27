@@ -12,21 +12,22 @@ import org.testng.annotations.Test;
 
 @ContextConfiguration(
     classes = {
-        EntityBaseTestConfig.class,
-        GroupMetadata.class,
-        GroupFactory.class,
-        SecurityPackage.class
-        , GroupTestConfig.class})
+      EntityBaseTestConfig.class,
+      GroupMetadata.class,
+      GroupFactory.class,
+      SecurityPackage.class,
+      GroupTestConfig.class
+    })
 public class GroupTest extends AbstractSystemEntityTest {
 
-  @Autowired
-  GroupMetadata metadata;
-  @Autowired
-  GroupFactory factory;
+  @Autowired GroupMetadata metadata;
+  @Autowired GroupFactory factory;
 
   private Map<String, Pair<Class, Object>> getOverriddenAttributes() {
-    //Add attributes with 'smart' getters and setters that covert back anf forth to correct values for MOLGENIS datatypes
-    //Provide the attribute name as key, and a pair of returntype (Class) and a Object to be used as test value
+    // Add attributes with 'smart' getters and setters that covert back anf forth to correct values
+    // for MOLGENIS datatypes
+    // Provide the attribute name as key, and a pair of returntype (Class) and a Object to be used
+    // as test value
     Map<String, Pair<Class, Object>> map = new HashMap<>();
     return map;
   }

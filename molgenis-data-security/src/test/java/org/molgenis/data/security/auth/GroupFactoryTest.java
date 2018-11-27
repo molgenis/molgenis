@@ -7,12 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = {EntityBaseTestConfig.class, GroupMetadata.class,
-    GroupFactory.class, SecurityPackage.class, GroupTestConfig.class})
+@ContextConfiguration(
+    classes = {
+      EntityBaseTestConfig.class,
+      GroupMetadata.class,
+      GroupFactory.class,
+      SecurityPackage.class,
+      GroupTestConfig.class
+    })
 public class GroupFactoryTest extends AbstractEntityFactoryTest {
 
-  @Autowired
-  GroupFactory factory;
+  @Autowired GroupFactory factory;
 
   @Override
   @Test
