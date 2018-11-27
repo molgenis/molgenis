@@ -13,7 +13,6 @@ import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.script.core.ScriptException;
 import org.molgenis.script.core.UnknownScriptException;
-import org.molgenis.security.user.UserAccountService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;

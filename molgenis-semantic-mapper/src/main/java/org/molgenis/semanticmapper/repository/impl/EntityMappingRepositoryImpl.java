@@ -9,14 +9,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.semanticmapper.controller.MappingServiceController;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.meta.EntityMappingMetaData;
 import org.molgenis.semanticmapper.repository.AttributeMappingRepository;
 import org.molgenis.semanticmapper.repository.EntityMappingRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** O/R mapping between EntityMapping Entity and EntityMapping POJO */
