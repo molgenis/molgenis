@@ -6,7 +6,7 @@ package org.molgenis.navigator.copy.exception;
 @SuppressWarnings({"squid:MaximumInheritanceDepth", "squid:S2166"})
 public class RecursiveCopyException extends CopyFailedException {
 
-  private static final String ERROR_CODE = "N01";
+  private static final String ERROR_CODE = "NAV02";
 
   public RecursiveCopyException() {
     super(ERROR_CODE);

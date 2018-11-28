@@ -115,7 +115,7 @@ public class DataConverter {
     return convert(source, Integer.class);
   }
 
-  private static Long toLong(Object source) {
+  public static Long toLong(Object source) {
     if (source == null) return null;
     if (source instanceof Long) return (Long) source;
     return convert(source, Long.class);
@@ -129,13 +129,13 @@ public class DataConverter {
     return convert(source, Boolean.class);
   }
 
-  private static Double toDouble(Object source) {
+  public static Double toDouble(Object source) {
     if (source == null) return null;
     if (source instanceof Double) return (Double) source;
     return convert(source, Double.class);
   }
 
-  static LocalDate toLocalDate(Object source) {
+  public static LocalDate toLocalDate(Object source) {
     if (source == null) return null;
     if (source instanceof LocalDate) return (LocalDate) source;
     return convert(source, LocalDate.class);
