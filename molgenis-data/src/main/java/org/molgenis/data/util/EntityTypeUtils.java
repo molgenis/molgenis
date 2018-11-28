@@ -297,12 +297,13 @@ public class EntityTypeUtils {
    * @return String entity full name
    */
   public static String buildFullName(Package aPackage, String simpleName) {
+    String fullName;
     if (aPackage != null) {
-      String sb = aPackage.getId() + PACKAGE_SEPARATOR + simpleName;
-      return sb;
+      fullName = aPackage.getId() + PACKAGE_SEPARATOR + simpleName;
     } else {
-      return simpleName;
+      fullName = simpleName;
     }
+    return fullName;
   }
 
   public static Fetch createFetchForReindexing(EntityType entityType) {

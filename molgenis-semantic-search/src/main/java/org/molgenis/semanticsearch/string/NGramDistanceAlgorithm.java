@@ -219,19 +219,15 @@ public class NGramDistanceAlgorithm {
   private NGramDistanceAlgorithm() {}
 
   public static double stringMatching(String queryOne, String queryTwo) {
-    double similarityScore =
-        calculateScore(
-            createNGrams(queryOne.toLowerCase().trim(), true),
-            createNGrams(queryTwo.toLowerCase().trim(), true));
-    return similarityScore;
+    return calculateScore(
+        createNGrams(queryOne.toLowerCase().trim(), true),
+        createNGrams(queryTwo.toLowerCase().trim(), true));
   }
 
   public static double stringMatching(String queryOne, String queryTwo, boolean removeStopWords) {
-    double similarityScore =
-        calculateScore(
-            createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
-            createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
-    return similarityScore;
+    return calculateScore(
+        createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
+        createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
   }
 
   /**
