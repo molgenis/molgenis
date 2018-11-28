@@ -10,16 +10,19 @@ import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceIdentifierUtil;
 
 public class ResourceDownloadJobExecution extends JobExecution {
+  @SuppressWarnings("unused")
   public ResourceDownloadJobExecution(Entity entity) {
     super(entity);
     setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
   }
 
+  @SuppressWarnings("unused")
   public ResourceDownloadJobExecution(EntityType entityType) {
     super(entityType);
     setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);
   }
 
+  @SuppressWarnings("unused")
   public ResourceDownloadJobExecution(String identifier, EntityType entityType) {
     super(identifier, entityType);
     setType(ResourceDownloadJobExecutionMetaData.DOWNLOAD_JOB_TYPE);

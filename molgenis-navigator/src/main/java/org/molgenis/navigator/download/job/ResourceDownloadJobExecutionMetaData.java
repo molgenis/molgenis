@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceDownloadJobExecutionMetaData extends SystemEntityType {
   private static final String SIMPLE_NAME = "ResourceDownloadJobExecution";
-  public static final String RESOURCES = "resources";
+  static final String RESOURCES = "resources";
 
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
-  public static final String DOWNLOAD_JOB_TYPE = "ResourceDownloadJob";
+  static final String DOWNLOAD_JOB_TYPE = "ResourceDownloadJob";
 
   ResourceDownloadJobExecutionMetaData(
       JobExecutionMetaData jobExecutionMetaData, JobPackage jobPackage) {

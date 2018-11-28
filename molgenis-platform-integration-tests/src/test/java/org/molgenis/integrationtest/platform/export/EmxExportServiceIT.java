@@ -26,7 +26,6 @@ import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
 import org.molgenis.integrationtest.utils.TestProgress;
 import org.molgenis.integrationtest.utils.TestTimeZoneProvider;
-import org.molgenis.jobs.Progress;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -50,7 +49,7 @@ import org.testng.annotations.Test;
 public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContextTests {
 
   private static final String USERNAME = "emx_user";
-  static final String ROLE_SU = "SU";
+  private static final String ROLE_SU = "SU";
 
   @Autowired private EntityTestHarness entityTestHarness;
   @Autowired private DataService dataService;
@@ -99,7 +98,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     // when using the "in memory" it package, created above, the "getChildern" returns null.
     Package actualIt = dataService.getMeta().getPackage("it").get();
     // We're testing the export service, not a job, use TestProgress to check if progress is updated
-    Progress progress = new TestProgress();
+    TestProgress progress = new TestProgress();
     emxDownloadService.export(
         newArrayList(entityType1, refEntityType1), newArrayList(actualIt), actual, progress);
     try (XSSFWorkbook actualWorkbook = new XSSFWorkbook(Files.newInputStream(actual))) {
@@ -118,9 +117,9 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
             4,
             "Downloading 'pack_refTest1'\nDownloading 'pack_test1'\nDownloading 'it_emx_test1'\nFinished downloading package metadata",
             "");
-    assertEquals(((TestProgress) progress).getMessage(), expectedProgress.getMessage());
-    assertEquals(((TestProgress) progress).getProgress(), expectedProgress.getProgress());
-    assertEquals(((TestProgress) progress).getProgressMax(), expectedProgress.getProgressMax());
-    assertEquals(((TestProgress) progress).getResultUrl(), expectedProgress.getResultUrl());
+    assertEquals(progress.getMessage(), expectedProgress.getMessage());
+    assertEquals(progress.getProgress(), expectedProgress.getProgress());
+    assertEquals(progress.getProgressMax(), expectedProgress.getProgressMax());
+    assertEquals(progress.getResultUrl(), expectedProgress.getResultUrl());
   }
 }

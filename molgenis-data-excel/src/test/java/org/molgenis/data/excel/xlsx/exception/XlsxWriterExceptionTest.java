@@ -2,7 +2,6 @@ package org.molgenis.data.excel.xlsx.exception;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;
 import org.testng.annotations.BeforeMethod;

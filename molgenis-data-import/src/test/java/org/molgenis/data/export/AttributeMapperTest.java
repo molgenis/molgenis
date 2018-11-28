@@ -234,7 +234,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
   @Test
   public void testMapAttributeOneToMany() {
     Attribute attr = mock(Attribute.class);
-    Attribute mapped = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
     EntityType refEntityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityId");
@@ -304,7 +303,6 @@ public class AttributeMapperTest extends AbstractMockitoTest {
   @Test
   public void testMapAttributeEnum() {
     Attribute attr = mock(Attribute.class);
-    Attribute mapped = mock(Attribute.class);
     EntityType entityType = mock(EntityType.class);
     EntityType refEntityType = mock(EntityType.class);
     when(entityType.getId()).thenReturn("entityId");

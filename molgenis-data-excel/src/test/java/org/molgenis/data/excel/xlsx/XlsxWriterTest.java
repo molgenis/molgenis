@@ -1,6 +1,7 @@
 package org.molgenis.data.excel.xlsx;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,11 +11,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,7 +21,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
 import org.molgenis.test.AbstractMockitoTest;
@@ -31,17 +28,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class XlsxWriterTest extends AbstractMockitoTest {
-  @Mock Workbook workbook;
-
-  @Mock Sheet sheet;
-
-  File file;
-
-  XlsxWriter xlsxWriter;
+  @Mock private Workbook workbook;
+  @Mock private Sheet sheet;
+  private XlsxWriter xlsxWriter;
 
   @BeforeMethod
   public void setUp() {
-    file = new File("path");
+    File file = new File("path");
     xlsxWriter = new XlsxWriter(file.toPath(), workbook, TimeZone.getTimeZone("Europe/Paris"));
   }
 
@@ -59,7 +52,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testCreateSheet() throws IOException {
+  public void testCreateSheet() {
     Cell cell0 = mock(Cell.class);
     Cell cell1 = mock(Cell.class);
     Row row = mock(Row.class);
@@ -69,28 +62,13 @@ public class XlsxWriterTest extends AbstractMockitoTest {
     when(workbook.getSheet("test")).thenReturn(null);
     when(workbook.createSheet("test")).thenReturn(sheet);
 
-    xlsxWriter.createSheet("test", newArrayList("head1", "head2"));
+    xlsxWriter.createSheet("test", asList("head1", "head2"));
     verify(cell0).setCellValue("head1");
     verify(cell1).setCellValue("head2");
   }
 
   @Test
-  public void testWriteRow() throws IOException {
-    Cell cell0 = mock(Cell.class);
-    Cell cell1 = mock(Cell.class);
-    Row row = mock(Row.class);
-    doReturn(cell0).when(row).createCell(0);
-    doReturn(cell1).when(row).createCell(1);
-    when(sheet.createRow(1)).thenReturn(row);
-    when(workbook.getSheet("test")).thenReturn(sheet);
-
-    xlsxWriter.writeRow(newArrayList("value1", "value2"), "test");
-    verify(cell0).setCellValue("value1");
-    verify(cell1).setCellValue("value2");
-  }
-
-  @Test
-  public void testWriteRowsStream() throws IOException {
+  public void testWriteRowsStream() {
     int[] number = {-1};
     Cell cell0 = mock(Cell.class);
     Cell cell1 = mock(Cell.class);
@@ -109,61 +87,17 @@ public class XlsxWriterTest extends AbstractMockitoTest {
     doReturn(row2).when(sheet).createRow(2);
 
     Mockito.doAnswer(
-            new Answer<Integer>() {
-              @Override
-              public Integer answer(InvocationOnMock invocation) throws Throwable {
-                number[0]++;
-                return number[0];
-              }
-            })
+            (Answer<Integer>)
+                invocation -> {
+                  number[0]++;
+                  return number[0];
+                })
         .when(sheet)
         .getLastRowNum();
 
     when(workbook.getSheet("test")).thenReturn(sheet);
 
-    xlsxWriter.writeRows(
-        Stream.of(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
-
-    verify(cell0).setCellValue("value1");
-    verify(cell1).setCellValue("value2");
-    verify(cell2).setCellValue("value3");
-    verify(cell3).setCellValue("value4");
-  }
-
-  @Test
-  public void testWriteRowsList() throws IOException {
-    int[] number = {-1};
-    Cell cell0 = mock(Cell.class);
-    Cell cell1 = mock(Cell.class);
-    Cell cell2 = mock(Cell.class);
-    Cell cell3 = mock(Cell.class);
-
-    Row row1 = mock(Row.class);
-    Row row2 = mock(Row.class);
-
-    doReturn(cell0).when(row1).createCell(0);
-    doReturn(cell1).when(row1).createCell(1);
-    doReturn(cell2).when(row2).createCell(0);
-    doReturn(cell3).when(row2).createCell(1);
-
-    doReturn(row1).when(sheet).createRow(1);
-    doReturn(row2).when(sheet).createRow(2);
-
-    Mockito.doAnswer(
-            new Answer<Integer>() {
-              @Override
-              public Integer answer(InvocationOnMock invocation) throws Throwable {
-                number[0]++;
-                return number[0];
-              }
-            })
-        .when(sheet)
-        .getLastRowNum();
-
-    when(workbook.getSheet("test")).thenReturn(sheet);
-
-    xlsxWriter.writeRows(
-        newArrayList(newArrayList("value1", "value2"), newArrayList("value3", "value4")), "test");
+    xlsxWriter.writeRows(Stream.of(asList("value1", "value2"), asList("value3", "value4")), "test");
 
     verify(cell0).setCellValue("value1");
     verify(cell1).setCellValue("value2");
@@ -215,7 +149,7 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   }
 
   @Test
-  public void testSetCellValueLocalDate() throws ParseException {
+  public void testSetCellValueLocalDate() {
     Cell cell = mock(Cell.class);
 
     xlsxWriter.setCellValue(cell, LocalDate.parse("2015-06-04"));
@@ -235,9 +169,6 @@ public class XlsxWriterTest extends AbstractMockitoTest {
   @Test(expectedExceptions = UnsupportedValueException.class)
   public void testSetCellValueUnsupported() {
     Cell cell = mock(Cell.class);
-
-    List<String> list = new ArrayList();
-
-    xlsxWriter.setCellValue(cell, list);
+    xlsxWriter.setCellValue(cell, emptyList());
   }
 }

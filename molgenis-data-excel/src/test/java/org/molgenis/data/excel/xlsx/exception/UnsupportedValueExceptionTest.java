@@ -1,7 +1,5 @@
 package org.molgenis.data.excel.xlsx.exception;
 
-import static org.testng.Assert.*;
-
 import java.util.Arrays;
 import java.util.List;
 import org.molgenis.i18n.test.exception.ExceptionMessageTest;

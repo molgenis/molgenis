@@ -26,10 +26,12 @@ import org.molgenis.data.excel.xlsx.exception.MaximumSheetNameLengthExceededExce
 import org.molgenis.data.excel.xlsx.exception.UnsupportedValueException;
 import org.molgenis.data.excel.xlsx.exception.XlsxWriterException;
 
+/** This class is <b>NOT</b> thread safe. */
 public class XlsxWriter implements AutoCloseable {
 
   // Apache poi library cuts of sheet names at 31 characters
-  public static final int MAXIMUM_SHEET_LENGTH = 31;
+  private static final int MAXIMUM_SHEET_LENGTH = 31;
+
   private final Path target;
   private final Workbook workbook;
   private final TimeZone timeZone;
@@ -37,15 +39,14 @@ public class XlsxWriter implements AutoCloseable {
   private SimpleDateFormat simpleDateFormat;
   private SimpleDateFormat simpleDateTimeFormat;
 
-  /** WARNING: This Class is not threadsafe because of the data formats!{@link SimpleDateFormat} */
   XlsxWriter(Path target, Workbook workbook, TimeZone timeZone) {
     this.target = requireNonNull(target);
     this.workbook = requireNonNull(workbook);
     this.timeZone = requireNonNull(timeZone);
 
-    this.simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+    this.simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     simpleDateFormat.setTimeZone(timeZone);
-    this.simpleDateTimeFormat = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ssZ");
+    this.simpleDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
     simpleDateTimeFormat.setTimeZone(timeZone);
   }
 
@@ -63,7 +64,7 @@ public class XlsxWriter implements AutoCloseable {
         Sheet sheet = workbook.getSheet(name);
         if (sheet == null) {
           sheet = workbook.createSheet(name);
-          internalWriteRow(headers, sheet, 0);
+          writeRow(headers, sheet, 0);
         }
       } else {
         throw new MaximumSheetNameLengthExceededException(name);
@@ -76,54 +77,16 @@ public class XlsxWriter implements AutoCloseable {
   }
 
   /**
-   * @param row List of Objects, allowed Object classes: Boolean, LocalDate, Instant, Double,
-   *     Integer, Long, String
-   * @param sheetName
-   */
-  public void writeRow(List<Object> row, String sheetName) {
-    try {
-      this.writeRows(Stream.of(row), sheetName);
-    } catch (RuntimeException e) {
-      throw new XlsxWriterException(e);
-    }
-  }
-
-  /**
-   * @param rows List of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant,
-   *     Double, Integer, Long, String
-   * @param sheetName
-   */
-  public void writeRows(List<List<Object>> rows, String sheetName) {
-    try {
-      this.writeRows(rows.stream(), sheetName);
-    } catch (RuntimeException e) {
-      throw new XlsxWriterException(e);
-    }
-  }
-
-  /**
    * @param rows Stream of Lists of Objects, allowed Object classes: Boolean, LocalDate, Instant,
    *     Double, Integer, Long, String
-   * @param sheetName
    */
   public void writeRows(Stream<List<Object>> rows, String sheetName) {
     try {
       Sheet sheet = workbook.getSheet(sheetName);
-      rows.forEach(
-          row -> {
-            internalWriteRow(row, sheet, sheet.getLastRowNum() + 1);
-          });
+      rows.forEach(row -> writeRow(row, sheet, sheet.getLastRowNum() + 1));
     } catch (RuntimeException e) {
       throw new XlsxWriterException(e);
     }
-  }
-
-  public void setSimpleDateFormat(SimpleDateFormat simpleDateFormat) {
-    this.simpleDateFormat = simpleDateFormat;
-  }
-
-  public void setSimpleDateTimeFormat(SimpleDateFormat simpleDateTimeFormat) {
-    this.simpleDateTimeFormat = simpleDateTimeFormat;
   }
 
   @Override
@@ -137,22 +100,21 @@ public class XlsxWriter implements AutoCloseable {
     }
   }
 
-  private void internalWriteRow(List<Object> values, Sheet sheet, int rowNr) {
+  private void writeRow(List<Object> values, Sheet sheet, int rowNr) {
     final Row row = sheet.createRow(rowNr);
     AtomicInteger counter = new AtomicInteger(0);
-    values
-        .stream()
-        .forEach(
-            record -> {
-              int index = counter.getAndIncrement();
-              if (record != null) {
-                Cell cell = row.createCell(index);
-                setCellValue(cell, record);
-              }
-            });
+    values.forEach(
+        record -> {
+          int index = counter.getAndIncrement();
+          if (record != null) {
+            Cell cell = row.createCell(index);
+            setCellValue(cell, record);
+          }
+        });
   }
 
-  protected void setCellValue(Cell cell, Object value) {
+  /** package-private for testability */
+  void setCellValue(Cell cell, Object value) {
     if (value instanceof Boolean) {
       cell.setCellValue(toBoolean(value));
     } else if (value instanceof LocalDate) {
