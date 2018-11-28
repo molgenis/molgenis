@@ -5,15 +5,14 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
-import org.molgenis.navigator.copy.exception.CopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
@@ -46,18 +45,13 @@ public class CopyServiceImpl implements CopyService {
 
   @Override
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public Void copy(List<ResourceIdentifier> resources, String targetPackageId, Progress progress) {
-    try {
-      ResourceCollection resourceCollection = resourceCollector.get(resources);
-      Package targetPackage = getPackage(targetPackageId);
-      CopyState state = CopyState.create(targetPackage, progress);
+  public Void copy(
+      List<ResourceIdentifier> resources, @Nullable String targetPackageId, Progress progress) {
+    ResourceCollection resourceCollection = resourceCollector.get(resources);
+    Package targetPackage = getPackage(targetPackageId);
+    CopyState state = CopyState.create(targetPackage, progress);
 
-      copyResources(resourceCollection, state);
-
-    } catch (CodedRuntimeException exception) {
-      throw new CopyFailedException(exception);
-    }
-
+    copyResources(resourceCollection, state);
     return null;
   }
 
@@ -86,7 +80,7 @@ public class CopyServiceImpl implements CopyService {
     }
   }
 
-  private Package getPackage(String targetPackageId) {
+  private Package getPackage(@Nullable String targetPackageId) {
     return targetPackageId != null
         ? metadataService
             .getPackage(targetPackageId)
