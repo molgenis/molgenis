@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.export;
+package org.molgenis.integrationtest.utils;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -15,14 +15,14 @@ public class TestProgress implements Progress {
   private String message;
   private String resultUrl;
 
-  TestProgress() {
+  public TestProgress() {
     this.progress = 0;
     this.progressMax = -1;
     this.message = "";
     this.resultUrl = "";
   }
 
-  TestProgress(int progress, int progressMax, String message, String resultUrl) {
+  public TestProgress(int progress, int progressMax, String message, String resultUrl) {
     this.progress = progress;
     this.progressMax = progressMax;
     this.message = message;

@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.export;
+package org.molgenis.integrationtest.platform.export;
 
 import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
@@ -24,6 +24,8 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.integrationtest.config.FileTestConfig;
 import org.molgenis.integrationtest.platform.PlatformITConfig;
+import org.molgenis.integrationtest.utils.TestProgress;
+import org.molgenis.integrationtest.utils.TestTimeZoneProvider;
 import org.molgenis.jobs.Progress;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
