@@ -8,8 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.mockito.Mock;
 import org.molgenis.data.AbstractMolgenisSpringTest;
@@ -80,11 +78,10 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     ResourceDownloadService downloadJob =
         new ResourceDownloadService(
             downloadService, fileStore, fileMetaFactory, dataService, resourceCollector);
-    List<ResourceIdentifier> resourceIdentifierList = new ArrayList<>();
-    resourceIdentifierList.addAll(
-        Arrays.asList(
+    List<ResourceIdentifier> resourceIdentifierList =
+        newArrayList(
             ResourceIdentifier.create(ResourceType.PACKAGE, "it"),
-            ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "test_entity")));
+            ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "test_entity"));
     downloadJob.download(resourceIdentifierList, "test", progress);
     verify(downloadService)
         .export(newArrayList(entityType1), newArrayList(package1), file.toPath(), progress);

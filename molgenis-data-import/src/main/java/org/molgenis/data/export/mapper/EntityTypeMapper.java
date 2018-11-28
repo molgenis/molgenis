@@ -43,7 +43,7 @@ public class EntityTypeMapper {
   private EntityTypeMapper() {}
 
   public static List<Object> map(EntityType entityType) {
-    List<Object> row = new ArrayList(ENTITIES_ATTRS.size());
+    List<Object> row = new ArrayList<>(ENTITIES_ATTRS.size());
     for (Entry<String, String> entry : ENTITIES_ATTRS.entrySet()) {
       switch (entry.getKey()) {
         case EMX_ENTITIES_TAGS:

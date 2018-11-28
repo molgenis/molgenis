@@ -28,7 +28,7 @@ public class ResourceDownloadService {
   private final DataService dataService;
   private final ResourceCollector resourceCollector;
 
-  public ResourceDownloadService(
+  ResourceDownloadService(
       EmxExportService emxExportService,
       FileStore fileStore,
       FileMetaFactory fileMetaFactory,

@@ -127,8 +127,8 @@ public class AttributeMapper {
   }
 
   private static String getLookupValue(Attribute attr) {
-    Boolean lookup = attr.getLookupAttributeIndex() != null;
-    return lookup.toString();
+    boolean lookup = attr.getLookupAttributeIndex() != null;
+    return Boolean.toString(lookup);
   }
 
   private static Object getTagsValue(Attribute attr) {

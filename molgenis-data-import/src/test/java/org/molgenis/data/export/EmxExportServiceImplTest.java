@@ -1,6 +1,7 @@
 package org.molgenis.data.export;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -9,10 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.export.mapper.PackageMapper.PACKAGE_ATTRS;
 import static org.molgenis.data.importer.emx.EmxMetadataParser.EMX_PACKAGES;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,10 +70,8 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     service.resolveMetadata(
         newArrayList(entityType1, entityType3), newArrayList(pack1, pack2), packages, entityTypes);
 
-    Set<Package> expectedPackages = new HashSet<>();
-    expectedPackages.addAll(newArrayList(pack1, pack2, pack3));
-    Set<EntityType> expectedEntityTypes = new HashSet<>();
-    expectedEntityTypes.addAll(newArrayList(entityType1, entityType2, entityType3));
+    Set<Package> expectedPackages = newHashSet(pack1, pack2, pack3);
+    Set<EntityType> expectedEntityTypes = newHashSet(entityType1, entityType2, entityType3);
 
     assertEquals(packages, expectedPackages);
     assertEquals(entityTypes, expectedEntityTypes);
@@ -103,59 +101,27 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     when(entityType1.getPackage()).thenReturn(entityPack1);
     when(entityType2.getPackage()).thenReturn(null);
 
-    Set<EntityType> entityTypes = new HashSet<>();
-    entityTypes.addAll(Arrays.asList(entityType1, entityType2));
-    Set<Package> packages = new HashSet<>();
-    packages.addAll(Arrays.asList(pack1, pack2));
+    Set<EntityType> entityTypes = newHashSet(entityType1, entityType2);
+    Set<Package> packages = newHashSet(pack1, pack2);
 
     doReturn("Finished").when(contextMessageSource).getMessage("emx_export_metadata_message");
 
     XlsxWriter writer = mock(XlsxWriter.class);
     Progress progress = mock(Progress.class);
 
-    List<Object> expectedRow1 = new ArrayList();
-    expectedRow1.add("pack1");
-    expectedRow1.add(null);
-    expectedRow1.add(null);
-    expectedRow1.add(null);
-    expectedRow1.add("");
-    List<Object> expectedRow2 = new ArrayList();
-    expectedRow2.add("parentPack");
-    expectedRow2.add(null);
-    expectedRow2.add(null);
-    expectedRow2.add(null);
-    expectedRow2.add("");
-    List<Object> expectedRow3 = new ArrayList();
-    expectedRow3.add("parentParentPack");
-    expectedRow3.add(null);
-    expectedRow3.add(null);
-    expectedRow3.add(null);
-    expectedRow3.add("");
-    List<Object> expectedRow4 = new ArrayList();
-    expectedRow4.add("entityPack");
-    expectedRow4.add(null);
-    expectedRow4.add(null);
-    expectedRow4.add(null);
-    expectedRow4.add("");
-    List<Object> expectedRow5 = new ArrayList();
-    expectedRow5.add("entityParentPack");
-    expectedRow5.add(null);
-    expectedRow5.add(null);
-    expectedRow5.add(null);
-    expectedRow5.add("");
-    List<Object> expectedRow6 = new ArrayList();
-    expectedRow6.add("pack2");
-    expectedRow6.add(null);
-    expectedRow6.add(null);
-    expectedRow6.add(null);
-    expectedRow6.add("");
-    List<List<Object>> expected = new ArrayList();
-    expected.addAll(
-        Arrays.asList(
-            expectedRow4, expectedRow6, expectedRow2, expectedRow1, expectedRow5, expectedRow3));
+    List<Object> expectedRow1 = newArrayList("pack1", null, null, null, "");
+    List<Object> expectedRow2 = newArrayList("parentPack", null, null, null, "");
+    List<Object> expectedRow3 = newArrayList("parentParentPack", null, null, null, "");
+    List<Object> expectedRow4 = newArrayList("entityPack", null, null, null, "");
+    List<Object> expectedRow5 = newArrayList("entityParentPack", null, null, null, "");
+    List<Object> expectedRow6 = newArrayList("pack2", null, null, null, "");
+    List<List<Object>> expected =
+        newArrayList(
+            expectedRow4, expectedRow6, expectedRow2, expectedRow1, expectedRow5, expectedRow3);
 
     service.writePackageSheet(packages, entityTypes, writer, progress);
     verify(writer).createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
+    @SuppressWarnings("unchecked")
     ArgumentCaptor<Stream<List<Object>>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(writer).writeRows(captor.capture(), eq("packages"));
     List<List<Object>> actual = captor.getValue().collect(Collectors.toList());

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ExcelL10nConfig {
-  public static final String NAMESPACE = "excel";
+  private static final String NAMESPACE = "excel";
 
   @Bean
   public PropertiesMessageSource excelMessageSource() {
