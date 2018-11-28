@@ -29,7 +29,7 @@ public class ResourceDownloadConfig {
       public Job createJob(ResourceDownloadJobExecution downloadJobExecution) {
         String fileType = XLSX.toString().toLowerCase();
         final String filename = getDownloadFilename(fileType);
-        downloadJobExecution.setResultUrl(URI + filename);
+        downloadJobExecution.setResultUrl(URI + '/' + filename);
         downloadJobExecution.setProgressInt(0);
         downloadJobExecution.setProgressMessage(
             getMessage("progress-download-running", "Starting preparing download."));
