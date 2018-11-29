@@ -1,5 +1,6 @@
 package org.molgenis.semanticsearch.explain.service;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Comparator;
@@ -48,22 +49,24 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
       Map<String, Double> matchedQueryRule =
           explainServiceHelper.findMatchQueries(matchedQueryTerm, originalQueryInMap);
 
-      Entry<String, Double> entry =
-          matchedQueryRule
-              .entrySet()
-              .stream()
-              .max(Comparator.comparingDouble(Entry::getValue))
-              .orElseThrow(
-                  () ->
-                      new IllegalStateException(
-                          "matchedQueryRule.entrySet() shouldn't return an empty Set"));
+      if (matchedQueryRule.size() > 0) {
+        Entry<String, Double> entry =
+            matchedQueryRule
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingDouble(Entry::getValue))
+                .orElseThrow(
+                    () ->
+                        new IllegalStateException(
+                            "matchedQueryRule.entrySet() shouldn't return an empty Set"));
 
-      matchedQueryStrings.add(
-          ExplainedQueryString.create(
-              matchedQueryTerm,
-              entry.getKey(),
-              originalQueryInMap.get(entry.getKey()),
-              entry.getValue()));
+        matchedQueryStrings.add(
+            ExplainedQueryString.create(
+                matchedQueryTerm,
+                entry.getKey(),
+                originalQueryInMap.get(entry.getKey()),
+                entry.getValue()));
+      }
     }
     return matchedQueryStrings;
   }

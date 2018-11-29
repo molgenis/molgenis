@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -151,5 +152,35 @@ public class ElasticSearchExplainServiceImplTest {
     assertEquals(second.getQueryString(), "medication");
     assertEquals(second.getTagName(), "medication");
     assertEquals((int) second.getScore(), 100);
+  }
+
+  @Test
+  public void testReverseSearchQueryStringsWithoutExpandedQueryMap() {
+    Explanation explanation_2 =
+        Explanation.match(
+            Float.valueOf("3.6267629"),
+            "sum of:",
+            Explanation.match(
+                Float.valueOf("2.0587344"),
+                "weight(label:high in 328) [PerFieldSimilarity], result of:"),
+            Explanation.match(
+                Float.valueOf("1.5680285"),
+                "weight(label:blood in 328) [PerFieldSimilarity], result of:"));
+    Explanation explanation_3 =
+        Explanation.match(
+            Float.valueOf("1.754909"),
+            "max of:",
+            Explanation.match(
+                Float.valueOf("1.754909"),
+                "weight(label:medication in 328) [PerFieldSimilarity], result of:"));
+    Explanation explanation_1 =
+        Explanation.match(Float.valueOf("5.381672"), "sum of:", explanation_2, explanation_3);
+
+    Map<String, String> expandedQueryMap = new HashMap<>();
+
+    Set<ExplainedQueryString> reverseSearchQueryStrings =
+        elasticSearchExplainService.findQueriesFromExplanation(expandedQueryMap, explanation_1);
+
+    assertEquals(reverseSearchQueryStrings, Collections.emptySet());
   }
 }
