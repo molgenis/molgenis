@@ -548,11 +548,8 @@ public class MappingServiceController extends PluginController {
             .map(sourceEntityType::getAttribute)
             .collect(toList());
 
-    String generateAlgorithm =
-        algorithmService.generateAlgorithm(
-            targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
-
-    return generateAlgorithm;
+    return algorithmService.generateAlgorithm(
+        targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
   }
 
   /**

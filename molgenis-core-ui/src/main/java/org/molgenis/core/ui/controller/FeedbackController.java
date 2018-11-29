@@ -47,7 +47,7 @@ public class FeedbackController extends AbstractStaticContentController {
   private final MailSender mailSender;
   private final MessageSource messageSource;
 
-  public FeedbackController(
+  FeedbackController(
       UserService userService,
       AppSettings appSettings,
       ReCaptchaService reCaptchaService,
@@ -246,9 +246,13 @@ public class FeedbackController extends AbstractStaticContentController {
 
     @Override
     public String toString() {
-      String builder =
-          "[From: " + getFrom() + "\nSubject: " + getSubject() + "\nBody: " + getFeedback() + ']';
-      return builder;
+      return "[From: "
+          + getFrom()
+          + "\nSubject: "
+          + getSubject()
+          + "\nBody: "
+          + getFeedback()
+          + ']';
     }
   }
 }
