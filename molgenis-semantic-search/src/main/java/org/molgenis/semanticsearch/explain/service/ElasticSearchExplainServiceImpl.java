@@ -1,6 +1,5 @@
 package org.molgenis.semanticsearch.explain.service;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Comparator;
