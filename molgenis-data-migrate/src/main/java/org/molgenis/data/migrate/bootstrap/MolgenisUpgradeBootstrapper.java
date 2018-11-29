@@ -23,6 +23,7 @@ public class MolgenisUpgradeBootstrapper {
   public void bootstrap() {
     upgradeService.addUpgrade(new Step33UpdateForeignKeyDeferred(dataSource));
     upgradeService.addUpgrade(new Step34AddRoleMetrics(dataSource));
+    upgradeService.addUpgrade(new Step35UpdateAclSystemSid(dataSource));
 
     upgradeService.upgrade();
   }
