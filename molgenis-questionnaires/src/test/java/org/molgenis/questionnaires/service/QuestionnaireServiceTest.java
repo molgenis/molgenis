@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
 import static org.testng.Assert.assertEquals;
@@ -16,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
@@ -43,7 +43,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class QuestionnaireServiceTest extends AbstractMockitoTest {
-  @Mock private DataService dataService;
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  private DataService dataService;
 
   @Mock private EntityManager entityManager;
 
@@ -130,7 +131,9 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
 
     doReturn(questionnaire).when(questionnaireFactory).create(questionnaireEntity);
     doReturn(null, questionnaire).when(questionnaireFactory).create(questionnaire);
-    doReturn(questionnaire).when(dataService).findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null));
+
+    when(dataService.query(QUESTIONNAIRE_ID).eq(OWNER_USERNAME, null).findOne())
+        .thenReturn(questionnaire);
 
     // =========== Test ===========
     QuestionnaireResponse actual = questionnaireService.startQuestionnaire(QUESTIONNAIRE_ID);
@@ -155,7 +158,7 @@ public class QuestionnaireServiceTest extends AbstractMockitoTest {
   public void testStartQuestionnaireAlreadyOpen() {
     // =========== Setup ===========
     Entity entity = mock(Entity.class);
-    when(dataService.findOne(QUESTIONNAIRE_ID, EQ(OWNER_USERNAME, null))).thenReturn(entity);
+    when(dataService.query(QUESTIONNAIRE_ID).eq(OWNER_USERNAME, null).findOne()).thenReturn(entity);
 
     Questionnaire questionnaire = mock(Questionnaire.class);
     when(questionnaire.getIdValue()).thenReturn(QUESTIONNAIRE_ID);

@@ -40,14 +40,6 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     return new QueryImpl<>();
   }
 
-  public static <T extends Entity> Query<T> EQ(String attributeName, Object value) {
-    return QueryImpl.<T>query().eq(attributeName, value);
-  }
-
-  public static <T extends Entity> Query<T> IN(String attributeName, Iterable<?> values) {
-    return QueryImpl.<T>query().in(attributeName, values);
-  }
-
   public QueryImpl() {
     this.rules.add(new ArrayList<>());
   }
