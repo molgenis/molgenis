@@ -24,7 +24,7 @@ import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-class EntityTypeCopier {
+public class EntityTypeCopier {
 
   private static final int BATCH_SIZE = 1000;
 
@@ -46,8 +46,13 @@ class EntityTypeCopier {
 
   public void copy(List<EntityType> entityTypes, CopyState state) {
     entityTypes.forEach(entityType -> assignUniqueLabel(entityType, state));
+    entityTypes.forEach(entityType -> setTargetPackage(entityType, state));
     List<EntityType> copiedEntityTypes = copyEntityTypes(entityTypes, state);
     persist(copiedEntityTypes, state);
+  }
+
+  private void setTargetPackage(EntityType entityType, CopyState state) {
+    entityType.setPackage(state.targetPackage());
   }
 
   private List<EntityType> copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
