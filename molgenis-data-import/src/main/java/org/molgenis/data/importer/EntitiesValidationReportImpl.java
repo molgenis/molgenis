@@ -62,6 +62,7 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport {
     return importOrder;
   }
 
+  @SuppressWarnings("squid:S2178") // Short-circuit logic should be used in boolean contexts
   @Override
   public boolean valid() {
     // determine if validation succeeded
