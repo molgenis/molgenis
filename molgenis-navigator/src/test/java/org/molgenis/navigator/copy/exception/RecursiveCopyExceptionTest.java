@@ -22,7 +22,7 @@ public class RecursiveCopyExceptionTest extends ExceptionMessageTest {
   @Override
   public Object[][] languageMessageProvider() {
     Object[] enParams = {"en", "You can't copy a package into itself."};
-    Object[] nlParams = {"nl", "Je kunt een map niet naar zichzelf kopieëren."};
+    Object[] nlParams = {"nl", "Je kunt een map niet naar zichzelf kopiëren."};
     return new Object[][] {enParams, nlParams};
   }
 }
