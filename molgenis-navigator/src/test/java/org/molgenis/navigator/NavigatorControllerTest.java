@@ -54,7 +54,6 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
     NavigatorController navigatorController =
         new NavigatorController(
             menuReaderService, appSettings, userAccountService, navigatorService);
-
     mockMvc =
         MockMvcBuilders.standaloneSetup(navigatorController)
             .setMessageConverters(gsonHttpMessageConverter)
