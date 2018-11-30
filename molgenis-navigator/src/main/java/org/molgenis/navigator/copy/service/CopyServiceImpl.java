@@ -12,7 +12,9 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
 import org.molgenis.i18n.ContextMessageSource;
+import org.molgenis.i18n.ErrorCoded;
 import org.molgenis.jobs.Progress;
+import org.molgenis.navigator.copy.exception.UnknownCopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
@@ -44,14 +46,24 @@ public class CopyServiceImpl implements CopyService {
   }
 
   @Override
+  @SuppressWarnings(
+      "squid:S1193") // Exception types should not be tested using "instanceof" in catch blocks
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Void copy(
       List<ResourceIdentifier> resources, @Nullable String targetPackageId, Progress progress) {
-    ResourceCollection resourceCollection = resourceCollector.get(resources);
-    Package targetPackage = getPackage(targetPackageId);
-    CopyState state = CopyState.create(targetPackage, progress);
+    try {
+      ResourceCollection resourceCollection = resourceCollector.get(resources);
+      Package targetPackage = getPackage(targetPackageId);
+      CopyState state = CopyState.create(targetPackage, progress);
 
-    copyResources(resourceCollection, state);
+      copyResources(resourceCollection, state);
+    } catch (RuntimeException e) {
+      if (e instanceof ErrorCoded) {
+        throw e;
+      } else {
+        throw new UnknownCopyFailedException(e);
+      }
+    }
     return null;
   }
 
@@ -64,7 +76,6 @@ public class CopyServiceImpl implements CopyService {
     copyEntityTypes(resourceCollection.getEntityTypes(), state);
 
     progress.status(contextMessageSource.getMessage("progress-copy-success"));
-    progress.success();
   }
 
   private void copyPackages(List<Package> packages, CopyState state) {

@@ -84,7 +84,6 @@ public class CopyServiceImplTest extends AbstractMockitoTest {
     copyService.copy(asList(id1, id2, id3), null, progress);
 
     verify(progress).setProgressMax(6);
-    verify(progress).success();
   }
 
   @Test
