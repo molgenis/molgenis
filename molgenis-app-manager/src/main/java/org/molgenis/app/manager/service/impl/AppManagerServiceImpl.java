@@ -111,8 +111,6 @@ public class AppManagerServiceImpl implements AppManagerService {
   public void deactivateApp(App app) {
     String pluginId = generatePluginId(app);
     dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
-
-    // TODO remove from menu JSON?
   }
 
   @Override

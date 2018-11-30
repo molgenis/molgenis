@@ -18,6 +18,8 @@ public class ScriptJobExecutionMetadata extends SystemEntityType {
   public static final String NAME = "name";
   public static final String PARAMETERS = "parameters";
 
+  static final String SCRIPT_JOB_TYPE = "Script";
+
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 

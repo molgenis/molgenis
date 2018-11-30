@@ -12,7 +12,10 @@ import org.molgenis.data.decorator.DynamicRepositoryDecoratorFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-@SuppressWarnings("unused")
+@SuppressWarnings({
+  "unused",
+  "common-java:DuplicatedBlocks"
+}) // Source files should not have any duplicated blocks
 public class Icd10ExpanderDecoratorFactory implements DynamicRepositoryDecoratorFactory<Entity> {
   private static final String ID = "icd10expander";
   private static final String ICD10_ENTITY_TYPE_ID = "icd10EntityTypeId";
