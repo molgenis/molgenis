@@ -2,6 +2,7 @@ package org.molgenis.navigator.download.job;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 import org.molgenis.data.meta.SystemEntityType;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Component;
 public class ResourceDownloadJobExecutionMetaData extends SystemEntityType {
   private static final String SIMPLE_NAME = "ResourceDownloadJobExecution";
   static final String RESOURCES = "resources";
+
+  public static final String RESOURCE_DOWNLOAD_JOB_EXECUTION =
+      PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
