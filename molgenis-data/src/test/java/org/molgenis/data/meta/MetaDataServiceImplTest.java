@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -52,7 +54,6 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.persist.PackagePersister;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -60,7 +61,9 @@ import org.testng.annotations.Test;
 
 @SuppressWarnings("deprecation")
 public class MetaDataServiceImplTest extends AbstractMockitoTest {
-  @Mock private DataService dataService;
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  private DataService dataService;
+
   @Mock private RepositoryCollectionRegistry repoCollectionRegistry;
   @Mock private SystemEntityTypeRegistry systemEntityTypeRegistry;
   @Mock private EntityTypeDependencyResolver entityTypeDependencyResolver;
@@ -68,13 +71,12 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
 
   private MetaDataServiceImpl metaDataServiceImpl;
 
+  public MetaDataServiceImplTest() {
+    super(Strictness.WARN);
+  }
+
   @BeforeMethod
   public void setUpBeforeMethod() {
-    dataService = mock(DataService.class);
-    repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
-    systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
-    entityTypeDependencyResolver = mock(EntityTypeDependencyResolver.class);
-    packagePersister = mock(PackagePersister.class);
     metaDataServiceImpl =
         new MetaDataServiceImpl(
             dataService,
@@ -113,7 +115,14 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
 
   @Test(expectedExceptions = UnknownEntityTypeException.class)
   public void getRepositoryUnknownEntity() {
-    metaDataServiceImpl.getRepository("unknownEntity");
+    String unknownEntityTypeId = "unknownEntity";
+    when(dataService.findOneById(
+            eq(ENTITY_TYPE_META_DATA),
+            eq(unknownEntityTypeId),
+            any(Fetch.class),
+            eq(EntityType.class)))
+        .thenReturn(null);
+    metaDataServiceImpl.getRepository(unknownEntityTypeId);
   }
 
   @SuppressWarnings("unchecked")
@@ -147,7 +156,14 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
 
   @Test(expectedExceptions = UnknownEntityTypeException.class)
   public void getRepositoryTypedUnknownEntity() {
-    metaDataServiceImpl.getRepository("unknownEntity", Package.class);
+    String unknownEntityTypeId = "unknownEntity";
+    when(dataService.findOneById(
+            eq(ENTITY_TYPE_META_DATA),
+            eq(unknownEntityTypeId),
+            any(Fetch.class),
+            eq(EntityType.class)))
+        .thenReturn(null);
+    metaDataServiceImpl.getRepository(unknownEntityTypeId, Package.class);
   }
 
   @Test
@@ -485,6 +501,10 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
   public void getEntityTypeUnknownEntity() {
     String entityTypeId = "entity";
 
+    when(dataService.findOneById(
+            eq(ENTITY_TYPE_META_DATA), eq(entityTypeId), any(), eq(EntityType.class)))
+        .thenReturn(null);
+
     assertEquals(metaDataServiceImpl.getEntityType(entityTypeId), Optional.empty());
 
     verify(systemEntityTypeRegistry).getSystemEntityType(entityTypeId);
@@ -524,8 +544,10 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
     Attribute attr1 = mock(Attribute.class);
     Attribute attr2 = mock(Attribute.class);
 
-    Query<Attribute> query = new QueryImpl<Attribute>().eq(REF_ENTITY_TYPE, entityTypeId);
-    when(dataService.findAll(ATTRIBUTE_META_DATA, query, Attribute.class))
+    when(dataService
+            .query(ATTRIBUTE_META_DATA, Attribute.class)
+            .eq(REF_ENTITY_TYPE, entityTypeId)
+            .findAll())
         .thenReturn(Stream.of(attr1, attr2));
 
     assertEquals(
@@ -611,6 +633,8 @@ public class MetaDataServiceImplTest extends AbstractMockitoTest {
     Attribute entity1Attr1 = mock(Attribute.class);
     when(entityType1.getOwnAllAttributes()).thenReturn(newArrayList(entity1Attr0, entity1Attr1));
 
+    when(dataService.findOneById(eq(ENTITY_TYPE_META_DATA), any(), eq(EntityType.class)))
+        .thenReturn(null);
     when(entityTypeDependencyResolver.resolve(newArrayList(entityType0, entityType1)))
         .thenReturn(newArrayList(entityType1, entityType0));
     metaDataServiceImpl.upsertEntityTypes(newArrayList(entityType0, entityType1));

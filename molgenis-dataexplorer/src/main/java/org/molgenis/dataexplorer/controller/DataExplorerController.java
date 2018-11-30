@@ -209,6 +209,8 @@ public class DataExplorerController extends PluginController {
         model.addAttribute("datasetRepository", dataService.getRepository(entityTypeId));
         model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityTypeId));
         break;
+      default:
+        break;
     }
 
     return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id

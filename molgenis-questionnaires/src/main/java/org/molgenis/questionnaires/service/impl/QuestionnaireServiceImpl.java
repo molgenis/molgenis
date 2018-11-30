@@ -3,7 +3,6 @@ package org.molgenis.questionnaires.service.impl;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
-import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.OWNER_USERNAME;
 import static org.molgenis.questionnaires.meta.QuestionnaireMetaData.QUESTIONNAIRE;
 import static org.molgenis.questionnaires.meta.QuestionnaireStatus.OPEN;
@@ -116,7 +115,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
   @Nullable
   public Questionnaire findQuestionnaireEntity(String entityTypeId) {
     Entity questionnaireInstance =
-        dataService.findOne(entityTypeId, EQ(OWNER_USERNAME, getCurrentUsername()));
+        dataService.query(entityTypeId).eq(OWNER_USERNAME, getCurrentUsername()).findOne();
 
     if (questionnaireInstance != null) {
       return questionnaireFactory.create(questionnaireInstance);

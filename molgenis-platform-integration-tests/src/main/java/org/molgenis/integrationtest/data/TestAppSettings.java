@@ -9,7 +9,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setTitle(String title) {}
+  public void setTitle(String title) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getLogoTopHref() {
@@ -17,7 +19,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setLogoTopHref(String logoHref) {}
+  public void setLogoTopHref(String logoHref) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public int getLogoTopMaxHeight() {
@@ -25,7 +29,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setLogoTopMaxHeight(int fixedHeight) {}
+  public void setLogoTopMaxHeight(int fixedHeight) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getLogoNavBarHref() {
@@ -33,7 +39,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setLogoNavBarHref(String logoHref) {}
+  public void setLogoNavBarHref(String logoHref) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getFooter() {
@@ -41,7 +49,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setFooter(String footerText) {}
+  public void setFooter(String footerText) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getLanguageCode() {
@@ -49,7 +59,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setLanguageCode(String languageCode) {}
+  public void setLanguageCode(String languageCode) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getBootstrapTheme() {
@@ -57,7 +69,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setBootstrapTheme(String bootstrapTheme) {}
+  public void setBootstrapTheme(String bootstrapTheme) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getCssHref() {
@@ -65,7 +79,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setCssHref(String cssHref) {}
+  public void setCssHref(String cssHref) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getMenu() {
@@ -73,7 +89,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setMenu(String menuJson) {}
+  public void setMenu(String menuJson) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public Integer getAggregateThreshold() {
@@ -81,7 +99,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setAggregateThreshold(Integer threshold) {}
+  public void setAggregateThreshold(Integer threshold) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getTrackingCodeFooter() {
@@ -89,7 +109,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setTrackingCodeFooter(String trackingCodeFooter) {}
+  public void setTrackingCodeFooter(String trackingCodeFooter) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public boolean getGoogleAnalyticsIpAnonymization() {
@@ -97,7 +119,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsPrivacyFriendlyTracking) {}
+  public void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsPrivacyFriendlyTracking) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getGoogleAnalyticsTrackingId() {
@@ -105,7 +129,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setGoogleAnalyticsTrackingId(String googleAnalyticsTrackingId) {}
+  public void setGoogleAnalyticsTrackingId(String googleAnalyticsTrackingId) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getGoogleAnalyticsTrackingIdMolgenis() {
@@ -113,7 +139,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setGoogleAnalyticsTrackingIdMolgenis(String googleAnalyticsTrackingIdMolgenis) {}
+  public void setGoogleAnalyticsTrackingIdMolgenis(String googleAnalyticsTrackingIdMolgenis) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public boolean getGoogleAnalyticsAccountPrivacyFriendly() {
@@ -122,7 +150,9 @@ public class TestAppSettings implements AppSettings {
 
   @Override
   public void setGoogleAnalyticsAccountPrivacyFriendly(
-      boolean googleAnalyticsAccountPrivacyFriendly) {}
+      boolean googleAnalyticsAccountPrivacyFriendly) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis() {
@@ -130,7 +160,9 @@ public class TestAppSettings implements AppSettings {
   }
 
   @Override
-  public void setCustomJavascript(String customJavascript) {}
+  public void setCustomJavascript(String customJavascript) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public String getCustomJavascript() {
