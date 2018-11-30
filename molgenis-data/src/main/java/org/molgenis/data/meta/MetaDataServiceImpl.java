@@ -568,7 +568,9 @@ public class MetaDataServiceImpl implements MetaDataService {
 
   @Override
   public Stream<Attribute> getReferringAttributes(String entityTypeId) {
-    return dataService.findAll(
-        ATTRIBUTE_META_DATA, QueryImpl.EQ(REF_ENTITY_TYPE, entityTypeId), Attribute.class);
+    return dataService
+        .query(ATTRIBUTE_META_DATA, Attribute.class)
+        .eq(REF_ENTITY_TYPE, entityTypeId)
+        .findAll();
   }
 }

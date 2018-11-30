@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -68,7 +68,10 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
 
   @Test
   public void testGetOntology() {
-    when(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, "http://www.ontology.com/test")))
+    when(dataService
+            .query(ONTOLOGY, org.molgenis.ontology.core.meta.Ontology.class)
+            .eq(ONTOLOGY_IRI, "http://www.ontology.com/test")
+            .findOne())
         .thenReturn(ontologyEntity);
     assertEquals(
         ontologyRepository.getOntology("http://www.ontology.com/test"),
@@ -79,7 +82,7 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests {
   public static class Config {
     @Bean
     public DataService dataService() {
-      return mock(DataService.class);
+      return mock(DataService.class, RETURNS_DEEP_STUBS);
     }
 
     @Bean
