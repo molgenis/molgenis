@@ -5,12 +5,22 @@
     </encoder>
   </appender>
   <appender name="jobExecutionLogAppender" class="org.molgenis.jobs.model.JobExecutionLogAppender"/>
+
+  <!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+  <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+  </appender>
+
   <logger name="org.molgenis" level="INFO"/>
   <root level="WARN">
     <appender-ref ref="STDOUT"/>
+    <appender-ref ref="Sentry" />
   </root>
   <logger name="org.molgenis.jobs.model.JobExecution" level="ALL">
     <appender-ref ref="jobExecutionLogAppender"/>
+    <appender-ref ref="Sentry" />
   </logger>
   <logger name="org.molgenis.i18n.properties.AllPropertiesMessageSource" level="ERROR"/>
 </configuration>
