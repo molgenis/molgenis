@@ -37,7 +37,6 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -70,8 +69,6 @@ public class EntityTestHarness {
   public static final String ATTR_COMPOUND_CHILD_INT = "compound_child_int_attr";
   public static final String ATTR_ENUM = "enum_attr";
 
-  @Autowired private PackageFactory packageFactory;
-
   @Autowired private EntityTypeFactory entityTypeFactory;
 
   @Autowired private AttributeFactory attributeFactory;
@@ -79,8 +76,6 @@ public class EntityTestHarness {
   @Autowired TestEntityStaticMetaData staticTestEntityStaticMetaData;
 
   @Autowired TestRefEntityStaticMetaData staticTestRefEntityStaticMetaData;
-
-  @Autowired private TestPackage testPackage;
 
   private final LocalDate date = LocalDate.parse("2012-12-21");
   private final Instant dateTime = Instant.parse("1985-08-12T06:12:13Z");

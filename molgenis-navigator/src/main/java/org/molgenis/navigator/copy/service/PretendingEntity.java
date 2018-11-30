@@ -48,7 +48,7 @@ class PretendingEntity extends AbstractEntityDecorator {
   @Override
   @SuppressWarnings("unchecked")
   public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {
-    Entity entity = delegate().getEntity(attributeName);
+    Entity entity = delegate().getEntity(attributeName, clazz);
     if (clazz.equals(FileMeta.class)) {
       return entity != null ? (E) new FileMeta(newPretendingEntity(entity)) : null;
     } else {

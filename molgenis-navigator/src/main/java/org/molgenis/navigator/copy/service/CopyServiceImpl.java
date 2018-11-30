@@ -5,15 +5,14 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
-import org.molgenis.i18n.CodedRuntimeException;
 import org.molgenis.i18n.ContextMessageSource;
 import org.molgenis.jobs.Progress;
-import org.molgenis.navigator.copy.exception.CopyFailedException;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.util.ResourceCollection;
 import org.molgenis.navigator.util.ResourceCollector;
@@ -26,19 +25,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class CopyServiceImpl implements CopyService {
 
   private final ResourceCollector resourceCollector;
-  private final MetaDataService metaDataService;
+  private final MetaDataService metadataService;
   private final PackageCopier packageCopier;
   private final EntityTypeCopier entityTypeCopier;
   private final ContextMessageSource contextMessageSource;
 
   CopyServiceImpl(
       ResourceCollector resourceCollector,
-      MetaDataService metaDataService,
+      MetaDataService metadataService,
       PackageCopier packageCopier,
       EntityTypeCopier entityTypeCopier,
       ContextMessageSource contextMessageSource) {
     this.resourceCollector = requireNonNull(resourceCollector);
-    this.metaDataService = requireNonNull(metaDataService);
+    this.metadataService = requireNonNull(metadataService);
     this.packageCopier = requireNonNull(packageCopier);
     this.entityTypeCopier = requireNonNull(entityTypeCopier);
     this.contextMessageSource = requireNonNull(contextMessageSource);
@@ -46,18 +45,13 @@ public class CopyServiceImpl implements CopyService {
 
   @Override
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public Void copy(List<ResourceIdentifier> resources, String targetPackageId, Progress progress) {
-    try {
-      ResourceCollection resourceCollection = resourceCollector.get(resources);
-      Package targetPackage = getPackage(targetPackageId);
-      CopyState state = CopyState.create(targetPackage, progress);
+  public Void copy(
+      List<ResourceIdentifier> resources, @Nullable String targetPackageId, Progress progress) {
+    ResourceCollection resourceCollection = resourceCollector.get(resources);
+    Package targetPackage = getPackage(targetPackageId);
+    CopyState state = CopyState.create(targetPackage, progress);
 
-      copyResources(resourceCollection, state);
-
-    } catch (CodedRuntimeException exception) {
-      throw new CopyFailedException(exception);
-    }
-
+    copyResources(resourceCollection, state);
     return null;
   }
 
@@ -86,9 +80,9 @@ public class CopyServiceImpl implements CopyService {
     }
   }
 
-  private Package getPackage(String targetPackageId) {
+  private Package getPackage(@Nullable String targetPackageId) {
     return targetPackageId != null
-        ? metaDataService
+        ? metadataService
             .getPackage(targetPackageId)
             .orElseThrow(() -> new UnknownPackageException(targetPackageId))
         : null;

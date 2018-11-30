@@ -5,6 +5,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,11 +16,16 @@ import static org.molgenis.navigator.copy.service.CopyTestUtils.setupPredictable
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.Attribute;
@@ -176,14 +183,52 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     verify(refAttrCopy).setDefaultValue("row1,row2,row3");
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  public void copyData() {
+    setupPredictableIdGeneratorMock(idGenerator);
+    EntityType entityType = mockEntityType("A");
+    when(entityType.getId()).thenReturn("originalId");
+    EntityType entityTypeCopy = mock(EntityType.class);
+    when(entityTypeCopy.getId()).thenReturn("id1");
+    when(entityTypeCopy.isAbstract()).thenReturn(false);
+    Repository<Entity> repository = mock(Repository.class);
+    when(dataService.getRepository("originalId")).thenReturn(repository);
+    Package targetPackage = mock(Package.class);
+    Progress progress = mock(Progress.class);
+    CopyState state = CopyState.create(targetPackage, progress);
+    Entity entity1 = mock(Entity.class);
+    when(entity1.getEntityType()).thenReturn(entityType);
+    Entity entity2 = mock(Entity.class);
+    when(entity2.getEntityType()).thenReturn(entityType);
+    doAnswer(
+            invocation -> {
+              Consumer<List<Entity>> consumer = invocation.getArgument(0);
+              consumer.accept(asList(entity1, entity2));
+              return null;
+            })
+        .when(repository)
+        .forEachBatched(any(), eq(1000));
+    when(entityTypeMetadataCopier.copy(entityType, state)).thenReturn(entityTypeCopy);
+    when(entityTypeDependencyResolver.resolve(singletonList(entityTypeCopy)))
+        .thenReturn(singletonList(entityTypeCopy));
+
+    copier.copy(singletonList(entityType), state);
+
+    ArgumentCaptor<Stream> streamCaptor = ArgumentCaptor.forClass(Stream.class);
+    verify(dataService).add(eq("id1"), streamCaptor.capture());
+    List<Entity> entities = (List<Entity>) streamCaptor.getValue().collect(Collectors.toList());
+    assertEquals(entities.get(0).getEntityType(), entityTypeCopy);
+    assertEquals(entities.get(1).getEntityType(), entityTypeCopy);
+  }
+
   private void setupMetadataCopierAnswers(Map<EntityType, EntityType> mocks) {
     when(entityTypeMetadataCopier.copy(any(EntityType.class), any(CopyState.class)))
         .thenAnswer(
-            (Answer<EntityType>)
-                invocation -> {
-                  EntityType entityType = invocation.getArgument(0);
-                  return mocks.get(entityType);
-                });
+            invocation -> {
+              EntityType entityType = invocation.getArgument(0);
+              return mocks.get(entityType);
+            });
   }
 
   private static EntityType mockEntityType(String idLabel) {
