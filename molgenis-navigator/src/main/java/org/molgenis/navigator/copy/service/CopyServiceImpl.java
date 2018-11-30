@@ -64,6 +64,7 @@ public class CopyServiceImpl implements CopyService {
     copyEntityTypes(resourceCollection.getEntityTypes(), state);
 
     progress.status(contextMessageSource.getMessage("progress-copy-success"));
+    progress.success();
   }
 
   private void copyPackages(List<Package> packages, CopyState state) {
