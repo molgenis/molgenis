@@ -10,4 +10,8 @@ public abstract class CopyFailedException extends CodedRuntimeException {
   public CopyFailedException(String errorCode) {
     super(errorCode);
   }
+
+  public CopyFailedException(String errorCode, Throwable cause) {
+    super(errorCode, cause);
+  }
 }

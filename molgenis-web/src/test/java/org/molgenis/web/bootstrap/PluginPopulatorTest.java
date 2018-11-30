@@ -5,6 +5,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -18,7 +19,6 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.quality.Strictness;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.plugin.model.Plugin;
@@ -43,10 +43,6 @@ public class PluginPopulatorTest extends AbstractMockitoTest {
   private static final String EXISTING_APP_PLUGIN = "app-existingAppPlugin";
 
   private PluginPopulator pluginPopulator;
-
-  public PluginPopulatorTest() {
-    super(Strictness.WARN);
-  }
 
   @BeforeMethod
   public void setUpBeforeMethod() {
@@ -77,8 +73,8 @@ public class PluginPopulatorTest extends AbstractMockitoTest {
         when(mock(Plugin.class).getId()).thenReturn(CHANGED_PLUGIN).getMock();
     Plugin deletedPlugin = when(mock(Plugin.class).getId()).thenReturn(DELETED_PLUGIN).getMock();
 
-    when(pluginFactory.create(NEW_PLUGIN)).thenReturn(newPlugin);
-    when(pluginFactory.create(CHANGED_PLUGIN)).thenReturn(changedPlugin);
+    doReturn(newPlugin).when(pluginFactory).create(NEW_PLUGIN);
+    doReturn(changedPlugin).when(pluginFactory).create(CHANGED_PLUGIN);
     when(dataService.getRepository(PluginMetadata.PLUGIN, Plugin.class))
         .thenReturn(pluginRepository);
     when(dataService.findAll(PluginMetadata.PLUGIN, Plugin.class))

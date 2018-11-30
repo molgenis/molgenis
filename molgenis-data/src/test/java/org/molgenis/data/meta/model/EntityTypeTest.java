@@ -146,6 +146,7 @@ public class EntityTypeTest {
     when(entityType.getExtends()).thenReturn(extendsEntityType);
     when(entityType.getTags()).thenReturn(asList(tag0, tag1));
     when(entityType.getBackend()).thenReturn("backend");
+    when(entityType.getIndexingDepth()).thenReturn(3);
 
     EntityType entityTypeCopy = EntityType.newInstance(entityType);
     assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
@@ -177,6 +178,7 @@ public class EntityTypeTest {
     assertSame(tagsCopy.get(0), tag0);
     assertSame(tagsCopy.get(1), tag1);
     assertEquals(entityTypeCopy.getBackend(), "backend");
+    assertEquals(entityTypeCopy.getIndexingDepth(), 3);
   }
 
   @Test(

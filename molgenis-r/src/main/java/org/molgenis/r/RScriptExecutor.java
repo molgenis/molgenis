@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 /** Executes an R script using OpenCPU */
 @Service
 public class RScriptExecutor {
+  private static final String FORMAT_UNEXPECTED_RESPONSE_STATUS = "Unexpected response status: %d";
+
   private final CloseableHttpClient httpClient;
   private final OpenCpuSettings openCpuSettings;
 
@@ -96,7 +98,7 @@ public class RScriptExecutor {
         EntityUtils.consume(entity);
         throw new ScriptException(rErrorMessage);
       } else {
-        throw new ClientProtocolException(format("Unexpected response status: %d", statusCode));
+        throw new ClientProtocolException(format(FORMAT_UNEXPECTED_RESPONSE_STATUS, statusCode));
       }
     }
     return openCpuSessionKey;
@@ -145,7 +147,7 @@ public class RScriptExecutor {
         Files.copy(entity.getContent(), Paths.get(outputPathname));
         EntityUtils.consume(entity);
       } else {
-        throw new ClientProtocolException(format("Unexpected response status: %d", statusCode));
+        throw new ClientProtocolException(format(FORMAT_UNEXPECTED_RESPONSE_STATUS, statusCode));
       }
     }
   }
@@ -168,7 +170,7 @@ public class RScriptExecutor {
         responseValue = EntityUtils.toString(entity);
         EntityUtils.consume(entity);
       } else {
-        throw new ClientProtocolException(format("Unexpected response status: %d", statusCode));
+        throw new ClientProtocolException(format(FORMAT_UNEXPECTED_RESPONSE_STATUS, statusCode));
       }
     }
     return responseValue;

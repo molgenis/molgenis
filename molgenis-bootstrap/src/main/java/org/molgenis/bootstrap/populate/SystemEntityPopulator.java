@@ -35,9 +35,7 @@ public class SystemEntityPopulator {
     ApplicationContext applicationContext = event.getApplicationContext();
     SystemEntityRegistry systemEntityRegistry =
         applicationContext.getBean(SystemEntityRegistry.class);
-    if (systemEntityRegistry != null) {
-      populate(systemEntityRegistry);
-    }
+    populate(systemEntityRegistry);
   }
 
   private void populate(SystemEntityRegistry systemEntityRegistry) {

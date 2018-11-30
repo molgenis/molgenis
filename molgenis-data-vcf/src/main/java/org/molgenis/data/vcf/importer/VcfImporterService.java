@@ -35,14 +35,11 @@ import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.data.vcf.VcfFileExtensions;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class VcfImporterService implements ImportService {
-  private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
   private static final int BATCH_SIZE = 10000;
 
   private final DataService dataService;

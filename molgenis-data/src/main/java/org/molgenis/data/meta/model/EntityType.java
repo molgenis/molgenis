@@ -123,6 +123,7 @@ public class EntityType extends StaticEntity implements Labeled {
     entityTypeCopy.setExtends(entityType.getExtends()); // do not deep-copy
     entityTypeCopy.setTags(newArrayList(entityType.getTags())); // do not deep-copy
     entityTypeCopy.setBackend(entityType.getBackend());
+    entityTypeCopy.setIndexingDepth(entityType.getIndexingDepth());
 
     return entityTypeCopy;
   }

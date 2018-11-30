@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService {
-  private final Logger LOG = LoggerFactory.getLogger(getClass());
+  private static final Logger LOG = LoggerFactory.getLogger(MolgenisUpgradeServiceImpl.class);
 
   private final MolgenisVersionService versionService;
   private final List<MolgenisUpgrade> upgrades = new ArrayList<>();

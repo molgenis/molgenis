@@ -437,12 +437,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
     }
   }
 
-  @Nullable
   public boolean isShowNavigatorLink() {
     return isTruthy(getBoolean(Meta.GENERAL_NAVIGATOR_LINK));
   }
 
-  @Nullable
   public void setShowNavigatorLink(boolean showNavigatorLink) {
     set(Meta.GENERAL_NAVIGATOR_LINK, showNavigatorLink);
   }

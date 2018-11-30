@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PythonScriptExecutor {
-
   private static final Logger LOG = LoggerFactory.getLogger(PythonScriptExecutor.class);
-  public static final char DOUBLEQUOTE = '"';
-
   private final String pythonScriptExecutable;
 
   public PythonScriptExecutor(
@@ -97,7 +94,10 @@ public class PythonScriptExecutor {
     }
   }
 
-  protected static String getCommand(String pythonScriptExecutable, String tempScriptFilePath) {
-    return pythonScriptExecutable + " " + DOUBLEQUOTE + tempScriptFilePath + DOUBLEQUOTE;
+  protected static String[] getCommand(String pythonScriptExecutable, String tempScriptFilePath) {
+    String[] cmdArray = new String[2];
+    cmdArray[0] = pythonScriptExecutable;
+    cmdArray[1] = tempScriptFilePath;
+    return cmdArray;
   }
 }
