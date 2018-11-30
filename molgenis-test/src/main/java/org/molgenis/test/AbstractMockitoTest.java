@@ -14,9 +14,10 @@ public class AbstractMockitoTest {
   private MockitoSession mockitoSession;
 
   public AbstractMockitoTest() {
-    this(Strictness.STRICT_STUBS);
+    this.strictness = Strictness.STRICT_STUBS;
   }
 
+  /** @deprecated use {{@link #AbstractMockitoTest()}} */
   @Deprecated
   public AbstractMockitoTest(Strictness strictness) {
     this.strictness = requireNonNull(strictness);

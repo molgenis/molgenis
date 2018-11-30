@@ -1,5 +1,6 @@
 package org.molgenis.data.semantic;
 
+@SuppressWarnings("squid:S00115") // Constant names should comply with a naming convention
 public enum Relation {
   instanceOf("http://molgenis.org/biobankconnect/instanceOf"),
   link("http://molgenis.org/biobankconnect/link"),

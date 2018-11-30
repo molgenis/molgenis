@@ -11,8 +11,6 @@ public class ReCaptchaHttpPostFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaHttpPostFactory.class);
 
-  public ReCaptchaHttpPostFactory() {}
-
   HttpPost create(String uri) {
     if (uri.isEmpty()) {
       LOG.error("No valid verification url provided");

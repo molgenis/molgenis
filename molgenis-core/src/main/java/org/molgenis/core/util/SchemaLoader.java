@@ -137,22 +137,34 @@ public class SchemaLoader implements LSResourceResolver {
     }
 
     @Override
-    public void setBaseURI(String baseURI) {}
+    public void setBaseURI(String baseURI) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void setByteStream(InputStream byteStream) {}
+    public void setByteStream(InputStream byteStream) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void setCertifiedText(boolean certifiedText) {}
+    public void setCertifiedText(boolean certifiedText) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void setCharacterStream(Reader characterStream) {}
+    public void setCharacterStream(Reader characterStream) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void setEncoding(String encoding) {}
+    public void setEncoding(String encoding) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
-    public void setStringData(String stringData) {}
+    public void setStringData(String stringData) {
+      throw new UnsupportedOperationException();
+    }
 
     @Override
     public String getSystemId() {

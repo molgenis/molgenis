@@ -12,7 +12,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +20,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
@@ -283,22 +281,5 @@ public class EntityManagerImpl implements EntityManager {
         .filter(attr -> attr.getExpression() == null)
         .filter(attr -> fetch.hasField(attr.getName()))
         .collect(Collectors.toList());
-  }
-
-  private static class EntityIdIterable implements Iterable<Object> {
-    private final Iterable<Entity> entities;
-
-    EntityIdIterable(Iterable<Entity> entities) {
-      this.entities = requireNonNull(entities);
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
-      return stream().iterator();
-    }
-
-    public Stream<Object> stream() {
-      return StreamSupport.stream(entities.spliterator(), false).map(Entity::getIdValue);
-    }
   }
 }

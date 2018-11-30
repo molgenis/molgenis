@@ -18,6 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.http.ResponseEntity.created;
+import static org.springframework.http.ResponseEntity.ok;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -547,11 +548,8 @@ public class MappingServiceController extends PluginController {
             .map(sourceEntityType::getAttribute)
             .collect(toList());
 
-    String generateAlgorithm =
-        algorithmService.generateAlgorithm(
-            targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
-
-    return generateAlgorithm;
+    return algorithmService.generateAlgorithm(
+        targetAttribute, targetEntityType, sourceAttributes, sourceEntityType);
   }
 
   /**
@@ -584,11 +582,11 @@ public class MappingServiceController extends PluginController {
       label = null;
     }
 
-    MappingJobExecution mappingJobExecution =
-        scheduleMappingJobInternal(
-            mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label);
+    String mappingJobExecutionHref =
+        submitMappingJob(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label)
+            .getBody();
     return format(
-        "redirect:{0}", jobsController.createJobExecutionViewHref(mappingJobExecution, 1000));
+        "redirect:{0}", jobsController.createJobExecutionViewHref(mappingJobExecutionHref, 1000));
   }
 
   /**
@@ -633,10 +631,9 @@ public class MappingServiceController extends PluginController {
       return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(mde.getMessage());
     }
 
-    MappingJobExecution mappingJobExecution =
-        scheduleMappingJobInternal(
-            mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label);
-    String jobHref = concatEntityHref(mappingJobExecution);
+    String jobHref =
+        submitMappingJob(mappingProjectId, targetEntityTypeId, addSourceAttribute, packageId, label)
+            .getBody();
     return created(new URI(jobHref)).contentType(TEXT_PLAIN).body(jobHref);
   }
 
@@ -649,12 +646,13 @@ public class MappingServiceController extends PluginController {
    *     EntityType}
    * @return the HREF for the scheduled {@link MappingJobExecution}
    */
-  private MappingJobExecution scheduleMappingJobInternal(
-      String mappingProjectId,
-      String targetEntityTypeId,
-      Boolean addSourceAttribute,
-      String packageId,
-      String label) {
+  @PostMapping(value = "/submit", produces = TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> submitMappingJob(
+      @RequestParam String mappingProjectId,
+      @RequestParam String targetEntityTypeId,
+      @RequestParam(required = false) Boolean addSourceAttribute,
+      @RequestParam(required = false, name = "package") String packageId,
+      @RequestParam(required = false) String label) {
     MappingJobExecution mappingJobExecution = mappingJobExecutionFactory.create();
     User currentUser = userAccountService.getCurrentUser();
     mappingJobExecution.setMappingProjectId(mappingProjectId);
@@ -665,7 +663,7 @@ public class MappingServiceController extends PluginController {
 
     jobExecutor.submit(mappingJobExecution);
 
-    return mappingJobExecution;
+    return ok(concatEntityHref(mappingJobExecution));
   }
 
   /**

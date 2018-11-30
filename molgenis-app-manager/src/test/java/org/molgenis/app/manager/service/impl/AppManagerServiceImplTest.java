@@ -1,8 +1,9 @@
-package org.molgenis.app.manager.service;
+package org.molgenis.app.manager.service.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.io.File.separator;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,14 +41,11 @@ import org.molgenis.app.manager.meta.AppFactory;
 import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
-import org.molgenis.app.manager.service.impl.AppManagerServiceImpl;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
 import org.molgenis.data.plugin.model.PluginMetadata;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.molgenis.i18n.test.exception.TestAllPropertiesMessageSource;
@@ -57,16 +55,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class AppManagerServiceTest {
-  private AppManagerService appManagerService;
-
+public class AppManagerServiceImplTest {
   @Mock private AppFactory appFactory;
 
-  @Mock private DataService dataService;
+  @Mock(answer = RETURNS_DEEP_STUBS)
+  private DataService dataService;
 
   @Mock private FileStore fileStore;
-
   @Mock private PluginFactory pluginFactory;
+  private AppManagerServiceImpl appManagerServiceImpl;
 
   private App app;
 
@@ -110,7 +107,7 @@ public class AppManagerServiceTest {
     when(fileStore.getFile("folder")).thenReturn(appDir);
 
     Gson gson = new Gson();
-    appManagerService =
+    appManagerServiceImpl =
         new AppManagerServiceImpl(appFactory, dataService, fileStore, gson, pluginFactory);
   }
 
@@ -130,20 +127,41 @@ public class AppManagerServiceTest {
     AppResponse appResponse = AppResponse.create(app);
 
     when(dataService.findAll(AppMetadata.APP, App.class)).thenReturn(newArrayList(app).stream());
-    List<AppResponse> actual = appManagerService.getApps();
+    List<AppResponse> actual = appManagerServiceImpl.getApps();
     List<AppResponse> expected = newArrayList(appResponse);
 
     assertEquals(actual, expected);
   }
 
   @Test
-  public void testGetAppByUri() {
-    Query<App> query = QueryImpl.EQ(AppMetadata.NAME, "test");
-    when(dataService.findOne(AppMetadata.APP, query, App.class)).thenReturn(app);
-    AppResponse actual = appManagerService.getAppByName("test");
-    AppResponse expected = AppResponse.create(app);
+  public void testGetAppByName() {
+    String id = "id";
+    String label = "label";
+    String description = "description";
+    String name = "name";
+    String templateContent = "templateContent";
+    String resourceFolder = "resourceFolder";
+    String appVersion = "appVersion";
+    App app = mock(App.class);
+    when(app.getId()).thenReturn(id);
+    when(app.getLabel()).thenReturn(label);
+    when(app.getDescription()).thenReturn(description);
+    when(app.getName()).thenReturn(name);
+    when(app.getTemplateContent()).thenReturn(templateContent);
+    when(app.getResourceFolder()).thenReturn(resourceFolder);
+    when(app.getAppVersion()).thenReturn(appVersion);
 
-    assertEquals(actual, expected);
+    when(dataService.query("sys_App", App.class).eq("name", name).findOne()).thenReturn(app);
+
+    AppResponse expectedAppResponse = AppResponse.create(app);
+    assertEquals(appManagerServiceImpl.getAppByName(name), expectedAppResponse);
+  }
+
+  @Test(expectedExceptions = AppForURIDoesNotExistException.class)
+  public void testGetAppByNameUnknownAppName() {
+    String name = "unknownName";
+    when(dataService.query("sys_App", App.class).eq("name", name).findOne()).thenReturn(null);
+    appManagerServiceImpl.getAppByName(name);
   }
 
   @Test
@@ -156,7 +174,7 @@ public class AppManagerServiceTest {
     plugin.setLabel("label");
     plugin.setDescription("description");
 
-    appManagerService.activateApp(app);
+    appManagerServiceImpl.activateApp(app);
 
     verify(dataService).add("sys_Plugin", plugin);
   }
@@ -166,7 +184,7 @@ public class AppManagerServiceTest {
     when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(app);
     app.setActive(false);
 
-    appManagerService.deactivateApp(app);
+    appManagerServiceImpl.deactivateApp(app);
     verify(dataService).deleteById(PluginMetadata.PLUGIN, APP_PREFIX + "app1");
   }
 
@@ -174,28 +192,16 @@ public class AppManagerServiceTest {
   public void testDeleteApp() {
     when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(app);
 
-    appManagerService.deleteApp("test");
+    appManagerServiceImpl.deleteApp("test");
 
     verify(dataService).deleteById(PluginMetadata.PLUGIN, APP_PREFIX + "app1");
-  }
-
-  @Test
-  public void testAppUriDoesNotExist() {
-    Query<App> query = QueryImpl.EQ(AppMetadata.NAME, "test");
-    when(dataService.findOne(AppMetadata.APP, query, App.class)).thenReturn(null);
-    try {
-      appManagerService.getAppByName("test");
-      fail();
-    } catch (AppForURIDoesNotExistException actual) {
-      assertEquals(actual.getUri(), "test");
-    }
   }
 
   @Test
   public void testAppIdDoesNotExist() {
     when(dataService.findOneById(AppMetadata.APP, "test", App.class)).thenReturn(null);
     try {
-      appManagerService.deleteApp("test");
+      appManagerServiceImpl.deleteApp("test");
       fail();
     } catch (AppForIDDoesNotExistException actual) {
       assertEquals(actual.getId(), "test");
@@ -204,7 +210,7 @@ public class AppManagerServiceTest {
 
   @Test
   public void testUploadApp() throws IOException {
-    InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
+    InputStream zipData = AppManagerServiceImplTest.class.getResourceAsStream("/valid-app.zip");
     String fileName = "valid-app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_valid-app.zip";
@@ -214,27 +220,27 @@ public class AppManagerServiceTest {
     doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
     when(configFile.exists()).thenReturn(true);
 
-    assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
+    assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
 
     verify(fileStore).createDirectory(tmpDirName);
   }
 
   @Test(expectedExceptions = InvalidAppArchiveException.class)
   public void testUploadAppInvalidZip() throws IOException {
-    InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/flip.zip");
+    InputStream zipData = AppManagerServiceImplTest.class.getResourceAsStream("/flip.zip");
     String fileName = "flip.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_flip.zip";
     doReturn(tempDir).when(fileStore).getFile(tmpDirName);
 
-    appManagerService.uploadApp(zipData, fileName, "app");
+    appManagerServiceImpl.uploadApp(zipData, fileName, "app");
   }
 
   @Test(
       expectedExceptions = AppArchiveMissingFilesException.class,
       expectedExceptionsMessageRegExp = "missingFromArchive:\\[index.html\\]")
   public void testUploadAppMissingRequiredIndexFile() throws IOException {
-    InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
+    InputStream zipData = AppManagerServiceImplTest.class.getResourceAsStream("/valid-app.zip");
     String fileName = "app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
@@ -243,7 +249,7 @@ public class AppManagerServiceTest {
     doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
     when(configFile.exists()).thenReturn(true);
 
-    assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
+    assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
 
     verify(fileStore).createDirectory(tmpDirName);
   }
@@ -252,7 +258,7 @@ public class AppManagerServiceTest {
       expectedExceptions = AppArchiveMissingFilesException.class,
       expectedExceptionsMessageRegExp = "missingFromArchive:\\[config.json\\]")
   public void testUploadAppMissingRequiredConfigFile() throws IOException {
-    InputStream zipData = AppManagerServiceTest.class.getResourceAsStream("/valid-app.zip");
+    InputStream zipData = AppManagerServiceImplTest.class.getResourceAsStream("/valid-app.zip");
     String fileName = "app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
@@ -261,7 +267,7 @@ public class AppManagerServiceTest {
     when(indexFile.exists()).thenReturn(true);
     doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
 
-    assertEquals(appManagerService.uploadApp(zipData, fileName, "app"), tmpDirName);
+    assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
 
     verify(fileStore).createDirectory(tmpDirName);
   }
@@ -270,13 +276,14 @@ public class AppManagerServiceTest {
   public void testCheckAndObtainConfig() throws IOException {
     String tempDir = "temp";
     String appUri = "example2";
-    InputStream configFile = AppManagerServiceTest.class.getResource("/config.json").openStream();
+    InputStream configFile =
+        AppManagerServiceImplTest.class.getResource("/config.json").openStream();
     String configContent = IOUtils.toString(configFile, UTF_8);
     File file = mock(File.class);
     when(fileStore.getFile(APPS_DIR + separator + appUri)).thenReturn(file);
     when(fileStore.getFile(APPS_DIR + separator + appUri).exists()).thenReturn(false);
 
-    appManagerService.checkAndObtainConfig(tempDir, configContent);
+    appManagerServiceImpl.checkAndObtainConfig(tempDir, configContent);
 
     verify(fileStore).move(tempDir, APPS_DIR + separator + appUri);
   }
@@ -287,7 +294,7 @@ public class AppManagerServiceTest {
     File appDir = mock(File.class);
     when(fileStore.getFile(APPS_DIR + separator + appUri)).thenReturn(appDir);
     when(fileStore.getFile(APPS_DIR + separator + appUri).exists()).thenReturn(false);
-    appManagerService.checkAndObtainConfig("tempDir", "");
+    appManagerServiceImpl.checkAndObtainConfig("tempDir", "");
   }
 
   @Test(
@@ -295,19 +302,20 @@ public class AppManagerServiceTest {
       expectedExceptionsMessageRegExp =
           "missingConfigParameters:\\[label, description, includeMenuAndFooter, name, version\\]")
   public void testCheckAndObtainConfigMissingRequiredConfigParameters() throws IOException {
-    InputStream is = AppManagerServiceTest.class.getResourceAsStream("/config-missing-keys.json");
-    appManagerService.checkAndObtainConfig("tempDir", IOUtils.toString(is, UTF_8));
+    InputStream is =
+        AppManagerServiceImplTest.class.getResourceAsStream("/config-missing-keys.json");
+    appManagerServiceImpl.checkAndObtainConfig("tempDir", IOUtils.toString(is, UTF_8));
   }
 
   @Test(
       expectedExceptions = AppAlreadyExistsException.class,
       expectedExceptionsMessageRegExp = "example2")
   public void testCheckAndObtainConfigAppAlreadyExists() throws IOException {
-    InputStream is = AppManagerServiceTest.class.getResourceAsStream("/config.json");
+    InputStream is = AppManagerServiceImplTest.class.getResourceAsStream("/config.json");
     File appDir = mock(File.class);
     when(fileStore.getFile(APPS_DIR + separator + "example2")).thenReturn(appDir);
     when(fileStore.getFile(APPS_DIR + separator + "example2").exists()).thenReturn(true);
-    appManagerService.checkAndObtainConfig(
+    appManagerServiceImpl.checkAndObtainConfig(
         APPS_DIR + separator + "tempDir", IOUtils.toString(is, UTF_8));
   }
 
@@ -316,7 +324,7 @@ public class AppManagerServiceTest {
     URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
     File testIndexHtml = new File(new URI(resourceUrl.toString()).getPath());
     when(fileStore.getFile("testDir" + separator + "test")).thenReturn(testIndexHtml);
-    appManagerService.extractFileContent("testDir", "test");
+    appManagerServiceImpl.extractFileContent("testDir", "test");
   }
 
   @Test
@@ -331,7 +339,7 @@ public class AppManagerServiceTest {
     when(appConfig.getName()).thenReturn("app1");
     when(appConfig.getApiDependency()).thenReturn("v2.0");
 
-    appManagerService.configureApp(appConfig, "<h1>Test</h1>");
+    appManagerServiceImpl.configureApp(appConfig, "<h1>Test</h1>");
 
     verify(dataService).add(AppMetadata.APP, app);
   }

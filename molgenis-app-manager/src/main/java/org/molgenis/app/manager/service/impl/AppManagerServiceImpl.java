@@ -33,12 +33,10 @@ import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
 import org.molgenis.data.plugin.model.PluginMetadata;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.file.UnzipException;
 import org.molgenis.util.file.ZipFileUtil;
 import org.molgenis.web.bootstrap.PluginPopulator;
@@ -86,8 +84,7 @@ public class AppManagerServiceImpl implements AppManagerService {
 
   @Override
   public AppResponse getAppByName(String appName) {
-    Query<App> query = QueryImpl.EQ(AppMetadata.NAME, appName);
-    App app = dataService.findOne(AppMetadata.APP, query, App.class);
+    App app = dataService.query(AppMetadata.APP, App.class).eq(AppMetadata.NAME, appName).findOne();
     if (app == null) {
       throw new AppForURIDoesNotExistException(appName);
     }
@@ -111,8 +108,6 @@ public class AppManagerServiceImpl implements AppManagerService {
   public void deactivateApp(App app) {
     String pluginId = generatePluginId(app);
     dataService.deleteById(PluginMetadata.PLUGIN, pluginId);
-
-    // TODO remove from menu JSON?
   }
 
   @Override

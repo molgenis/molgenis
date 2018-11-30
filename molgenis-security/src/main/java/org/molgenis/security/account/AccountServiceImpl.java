@@ -192,48 +192,42 @@ public class AccountServiceImpl implements AccountService {
   }
 
   private String createActivationEmailText(User user, URI activationUri) {
-    String strBuilder =
-        "User registration for "
-            + appSettings.getTitle()
-            + '\n'
-            + "User name: "
-            + user.getUsername()
-            + " Full name: "
-            + user.getFirstName()
-            + ' '
-            + user.getLastName()
-            + '\n'
-            + "In order to activate the user visit the following URL:"
-            + '\n'
-            + activationUri
-            + '\n'
-            + '\n';
-    return strBuilder;
+    return "User registration for "
+        + appSettings.getTitle()
+        + '\n'
+        + "User name: "
+        + user.getUsername()
+        + " Full name: "
+        + user.getFirstName()
+        + ' '
+        + user.getLastName()
+        + '\n'
+        + "In order to activate the user visit the following URL:"
+        + '\n'
+        + activationUri
+        + '\n'
+        + '\n';
   }
 
   private String createActivatedEmailText(User user, String appName) {
-    String strBuilder =
-        "Dear "
-            + user.getFirstName()
-            + " "
-            + user.getLastName()
-            + ",\n\n"
-            + "your registration request for "
-            + appName
-            + " was approved.\n"
-            + "Your account is now active.\n";
-    return strBuilder;
+    return "Dear "
+        + user.getFirstName()
+        + " "
+        + user.getLastName()
+        + ",\n\n"
+        + "your registration request for "
+        + appName
+        + " was approved.\n"
+        + "Your account is now active.\n";
   }
 
   private String createPasswordResettedEmailText(String newPassword) {
-    String strBuilder =
-        "Somebody, probably you, requested a new password for "
-            + appSettings.getTitle()
-            + ".\n"
-            + "The new password is: "
-            + newPassword
-            + '\n'
-            + "Note: we strongly recommend you reset your password after log-in!";
-    return strBuilder;
+    return "Somebody, probably you, requested a new password for "
+        + appSettings.getTitle()
+        + ".\n"
+        + "The new password is: "
+        + newPassword
+        + '\n'
+        + "Note: we strongly recommend you reset your password after log-in!";
   }
 }

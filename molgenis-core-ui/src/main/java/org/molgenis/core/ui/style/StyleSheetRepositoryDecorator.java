@@ -42,7 +42,7 @@ public class StyleSheetRepositoryDecorator extends AbstractRepositoryDecorator<S
 
   @Override
   public void deleteAll(Stream<Object> ids) {
-    ids.forEach(id -> checkAndUpdateAppSettings(id));
+    ids.forEach(this::checkAndUpdateAppSettings);
     super.deleteAll(ids);
   }
 

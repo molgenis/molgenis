@@ -13,6 +13,8 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeType;
+import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.LabeledResource;
@@ -116,7 +118,8 @@ public class EntityModelWriter {
       Attribute objectAttribute) {
     String name = objectAttribute.getName();
 
-    switch (objectAttribute.getDataType()) {
+    AttributeType attributeType = objectAttribute.getDataType();
+    switch (attributeType) {
       case MREF:
       case CATEGORICAL_MREF:
         addRelationForMrefTypeAttribute(model, subject, predicate, objectEntity.getEntities(name));
@@ -160,8 +163,7 @@ public class EntityModelWriter {
         addRelationForXrefTypeAttribute(model, subject, predicate, objectEntity.getEntity(name));
         break;
       default:
-        throw new RuntimeException(
-            "DataType " + objectAttribute.getDataType() + "is not supported");
+        throw new IllegalAttributeTypeException(attributeType);
     }
   }
 
