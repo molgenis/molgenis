@@ -288,5 +288,11 @@
       <artifactId>molgenis-metrics</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-navigator</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
