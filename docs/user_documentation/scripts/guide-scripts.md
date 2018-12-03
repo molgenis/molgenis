@@ -159,3 +159,11 @@ In the popup, specify the value for `snp_id`, for example `rs2287988`.
 Push Run.
 
 ![image](../../images/rs2287988.png)
+
+## Call the script via API
+Scripts can be scheduled by URL (for example using [Postman](https://www.getpostman.com/)).
+
+The URL to do this is "[MOLGENIS_SERVER]/scripts/{scriptname}/submit". 
+A Json object containing a map of parameters used by the script should be provided.
+
+The server will return a href to the jobExecution of the the scheduled ScriptJob, which can be used to poll the status or get the link to the result of the script.

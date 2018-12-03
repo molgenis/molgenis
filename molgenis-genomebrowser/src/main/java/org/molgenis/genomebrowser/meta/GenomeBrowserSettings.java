@@ -70,7 +70,7 @@ public class GenomeBrowserSettings extends StaticEntity {
                     GenomeBrowserSettings.class)
                 .spliterator(),
             false)
-        .map(settings -> GenomeBrowserTrack.create(settings));
+        .map(GenomeBrowserTrack::create);
   }
 
   public void setMolgenisReferenceTracks(GenomeBrowserSettings molgenisReferenceTracks) {

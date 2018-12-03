@@ -1,6 +1,5 @@
 package org.molgenis.data.i18n;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.MolgenisDataException;
@@ -8,19 +7,20 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.i18n.LanguageService;
 
-public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language> {
-  public LanguageRepositoryDecorator(Repository<Language> delegateRepository) {
+class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Language> {
+  LanguageRepositoryDecorator(Repository<Language> delegateRepository) {
     super(delegateRepository);
   }
 
   @Override
   public void delete(Language language) {
-    throw new MolgenisDataException("Deleting languages is not allowed");
+    throw new LanguageModificationException();
   }
 
   @Override
   public void delete(Stream<Language> entities) {
     entities.forEach(this::delete);
+    throw new MolgenisDataException();
   }
 
   @Override
@@ -41,23 +41,24 @@ public class LanguageRepositoryDecorator extends AbstractRepositoryDecorator<Lan
 
   @Override
   public void add(Language language) {
-
-    if (!LanguageService.hasLanguageCode(language.getCode())) {
-      throw new MolgenisDataException("Adding languages is not allowed");
-    } else {
-      // Add language
-      delegate().add(language);
-    }
+    validateLanguage(language);
+    delegate().add(language);
   }
 
   @Override
-  public Integer add(Stream<Language> entities) {
-    AtomicInteger count = new AtomicInteger();
-    entities.forEach(
-        entity -> {
-          add(entity); // FIXME inefficient, apply filter to stream
-          count.incrementAndGet();
-        });
-    return count.get();
+  public Integer add(Stream<Language> languageStream) {
+    return delegate().add(languageStream.filter(this::validateLanguage));
+  }
+
+  private boolean validateLanguage(Language language) {
+    String languageCode = language.getCode();
+    return validateLanguage(languageCode);
+  }
+
+  private boolean validateLanguage(String languageCode) {
+    if (!LanguageService.hasLanguageCode(languageCode)) {
+      throw new LanguageModificationException();
+    }
+    return true;
   }
 }

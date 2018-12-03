@@ -252,10 +252,7 @@ public class SemanticSearchServiceHelper {
   public List<OntologyTerm> findTags(String description, List<String> ontologyIds) {
     Set<String> searchTerms = removeStopWords(description);
 
-    List<OntologyTerm> matchingOntologyTerms =
-        ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
-
-    return matchingOntologyTerms;
+    return ontologyService.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
   }
 
   public String processQueryString(String queryString) {
@@ -276,13 +273,10 @@ public class SemanticSearchServiceHelper {
   }
 
   public Set<String> removeStopWords(String description) {
-    Set<String> searchTerms =
-        stream(description.split(ILLEGAL_CHARS_REGEX))
-            .map(String::toLowerCase)
-            .filter(
-                w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
-            .collect(Collectors.toSet());
-    return searchTerms;
+    return stream(description.split(ILLEGAL_CHARS_REGEX))
+        .map(String::toLowerCase)
+        .filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
+        .collect(Collectors.toSet());
   }
 
   private Double getBestInverseDocumentFrequency(List<String> terms) {

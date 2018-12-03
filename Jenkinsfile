@@ -44,7 +44,7 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
-                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K -C ${GIT_COMMIT}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
@@ -71,7 +71,7 @@ pipeline {
                 stage('Build [ master ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
@@ -116,7 +116,7 @@ pipeline {
                             unstash 'maven-settings'
                         }
                         container('maven') {
-                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
@@ -184,7 +184,7 @@ pipeline {
                 expression { BRANCH_NAME ==~ /feature\/.*/ }
             }
             environment {
-                TAG = "feature-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
+                TAG = "$BRANCH_NAME-$BUILD_NUMBER".replaceAll(~/[^\w.-]/, '-').toLowerCase()
             }
             stages {
                 stage('Build [ feature ]') {
@@ -192,7 +192,7 @@ pipeline {
                         container('maven') {
                             sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
-                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
+                            sh "mvn -q -B sonar:sonar -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                             }

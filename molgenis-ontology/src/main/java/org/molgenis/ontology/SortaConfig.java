@@ -3,18 +3,13 @@ package org.molgenis.ontology;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.DataService;
-import org.molgenis.jobs.Job;
-import org.molgenis.jobs.JobFactory;
 import org.molgenis.ontology.core.ic.OntologyTermFrequencyServiceImpl;
 import org.molgenis.ontology.core.ic.TermFrequencyService;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.roc.InformationContentService;
-import org.molgenis.ontology.sorta.job.SortaJobExecution;
-import org.molgenis.ontology.sorta.job.SortaJobProcessor;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -51,23 +46,5 @@ public class SortaConfig {
   @Bean
   public InformationContentService informationContentService() {
     return new InformationContentService(dataService);
-  }
-
-  @Autowired private SortaJobProcessor sortaJobProcessor;
-
-  @Bean
-  public JobFactory<SortaJobExecution> sortaJobExecutionJobFactory() {
-    return new JobFactory<SortaJobExecution>() {
-
-      @Override
-      public Job createJob(SortaJobExecution jobExecution) {
-        return progress ->
-            sortaJobProcessor.process(
-                jobExecution.getOntologyIri(),
-                jobExecution.getSourceEntityName(),
-                jobExecution.getResultEntityName(),
-                progress);
-      }
-    };
   }
 }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.3.0-SNAPSHOT</version>
+    <version>7.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-platform-integration-tests</artifactId>
 
@@ -287,6 +287,12 @@
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-metrics</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-navigator</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

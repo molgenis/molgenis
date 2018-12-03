@@ -23,11 +23,7 @@ public abstract class MenuItem {
     List<MenuItem> items = null;
     if (item.getType() == UiMenuItemType.MENU) {
       UiMenu menu = (UiMenu) item;
-      items =
-          menu.getItems()
-              .stream()
-              .map(menuItem -> MenuItem.create(menuItem))
-              .collect(Collectors.toList());
+      items = menu.getItems().stream().map(MenuItem::create).collect(Collectors.toList());
     }
     return new AutoValue_MenuItem(
         item.getId(), item.getName(), item.getUrl(), item.getType(), items);

@@ -1,10 +1,12 @@
 package org.molgenis.data.icd10;
 
+import static com.google.common.graph.Traverser.forTree;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
-import com.google.common.collect.TreeTraverser;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
 import java.util.Collection;
 import java.util.List;
 import org.molgenis.data.DataService;
@@ -15,8 +17,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CollectionsQueryTransformerImpl implements CollectionsQueryTransformer {
-  private static final TreeTraverser<QueryRule> RULE_TRAVERSER =
-      TreeTraverser.using(QueryRule::getNestedRules);
+  private static final Traverser<QueryRule> RULE_TRAVERSER = forTree(QueryRule::getNestedRules);
 
   private final Icd10ClassExpander icd10ClassExpander;
   private final DataService dataService;
@@ -34,8 +35,7 @@ public class CollectionsQueryTransformerImpl implements CollectionsQueryTransfor
           .getRules()
           .forEach(
               rule ->
-                  RULE_TRAVERSER
-                      .preOrderTraversal(rule)
+                  Streams.stream(RULE_TRAVERSER.depthFirstPreOrder(rule))
                       .filter(nestedRule -> isTransformableRule(nestedRule, expandAttribute))
                       .forEach(nestedRule -> transformQueryRule(nestedRule, icd10EntityTypeId)));
     }

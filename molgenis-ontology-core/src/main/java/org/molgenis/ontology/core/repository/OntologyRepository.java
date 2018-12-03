@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +38,12 @@ public class OntologyRepository {
    * @param iri the IRI of the ontology
    */
   public Ontology getOntology(String iri) {
-    return toOntology(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, iri)));
+    org.molgenis.ontology.core.meta.Ontology ontology =
+        dataService
+            .query(ONTOLOGY, org.molgenis.ontology.core.meta.Ontology.class)
+            .eq(ONTOLOGY_IRI, iri)
+            .findOne();
+    return toOntology(ontology);
   }
 
   private static Ontology toOntology(Entity entity) {

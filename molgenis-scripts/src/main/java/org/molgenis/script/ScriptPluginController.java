@@ -26,9 +26,9 @@ public class ScriptPluginController extends PluginController {
     this.dataService = dataService;
   }
 
+  @SuppressWarnings("squid:S1192") // String literals should not be duplicated
   @GetMapping
   public String listScripts(Model model) {
-
     model.addAttribute("scripts", dataService.findAll(SCRIPT, Script.class).collect(toList()));
     model.addAttribute(
         "parameters",
