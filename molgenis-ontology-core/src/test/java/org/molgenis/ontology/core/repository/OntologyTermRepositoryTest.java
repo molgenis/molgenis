@@ -6,6 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
@@ -53,7 +54,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Autowired private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
 
-  private Entity ontologyTermEntity;
+  private org.molgenis.ontology.core.meta.OntologyTerm ontologyTermEntity;
 
   public OntologyTermRepositoryTest() {
     super(Strictness.WARN);
@@ -64,7 +65,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
     Entity ontologyEntity = mock(Entity.class);
     when(ontologyEntity.getString(OntologyMetaData.ID)).thenReturn("34");
 
-    ontologyTermEntity = mock(Entity.class);
+    ontologyTermEntity = mock(org.molgenis.ontology.core.meta.OntologyTerm.class);
     when(ontologyTermEntity.getString(ID)).thenReturn("12");
     when(ontologyTermEntity.getEntity(ONTOLOGY)).thenReturn(ontologyEntity);
     when(ontologyTermEntity.getString(ONTOLOGY_TERM_IRI)).thenReturn("http://www.test.nl/iri");
@@ -223,8 +224,10 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetOntologyTerm() {
-    when(dataService.findOne(
-            ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")))
+    when(dataService
+            .query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class)
+            .eq(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")
+            .findOne())
         .thenReturn(ontologyTermEntity);
 
     String[] iris = {"http://www.test.nl/iri"};
@@ -240,6 +243,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @Import(OntologyTestConfig.class)
   public static class Config {
     @Autowired private DataService dataService;
+
+    @Bean
+    public DataService dataService() {
+      return mock(DataService.class, RETURNS_DEEP_STUBS);
+    }
 
     @Bean
     public OntologyTermRepository ontologyTermRepository() {

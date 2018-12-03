@@ -61,7 +61,9 @@ public class InMemoryRepository implements Repository<Entity> {
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() throws IOException {
+    // do nothing
+  }
 
   @Override
   public Query<Entity> query() {

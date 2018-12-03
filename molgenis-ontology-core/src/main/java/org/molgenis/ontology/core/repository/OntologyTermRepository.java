@@ -155,8 +155,12 @@ public class OntologyTermRepository {
   public OntologyTerm getOntologyTerm(String[] iris) {
     List<OntologyTerm> ontologyTerms = Lists.newArrayList();
     for (String iri : iris) {
-      OntologyTerm ontologyTerm =
-          toOntologyTerm(dataService.findOne(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
+      org.molgenis.ontology.core.meta.OntologyTerm ontologyTermEntity =
+          dataService
+              .query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class)
+              .eq(ONTOLOGY_TERM_IRI, iri)
+              .findOne();
+      OntologyTerm ontologyTerm = toOntologyTerm(ontologyTermEntity);
       if (ontologyTerm == null) {
         return null;
       }
@@ -228,10 +232,12 @@ public class OntologyTermRepository {
    * @return a list of {@link OntologyTerm}
    */
   public List<OntologyTerm> getChildren(OntologyTerm ontologyTerm) {
-    Iterable<Entity> ontologyTermEntities =
+    Iterable<org.molgenis.ontology.core.meta.OntologyTerm> ontologyTermEntities =
         () ->
             dataService
-                .findAll(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
+                .query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class)
+                .eq(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI())
+                .findAll()
                 .iterator();
 
     List<OntologyTerm> children = new ArrayList<>();
