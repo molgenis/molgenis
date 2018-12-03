@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.3.2-SNAPSHOT</version>
+    <version>7.3.2</version>
   </parent>
   <artifactId>molgenis-data-index</artifactId>
 
