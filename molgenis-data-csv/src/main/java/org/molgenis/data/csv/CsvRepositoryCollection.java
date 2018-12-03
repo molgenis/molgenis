@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -72,10 +71,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection {
     entityTypeIdsLowerCase = Lists.newArrayList();
 
     if (extension.equalsIgnoreCase("zip")) {
-      ZipFile zipFile = null;
-      try {
-        zipFile = new ZipFile(file);
-
+      try (ZipFile zipFile = new ZipFile(file)) {
         for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); ) {
           ZipEntry entry = e.nextElement();
           if (!entry.getName().contains(MAC_ZIP) && !entry.isDirectory()) {
@@ -86,8 +82,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection {
         }
       } catch (Exception e) {
         throw new MolgenisDataException(e);
-      } finally {
-        IOUtils.closeQuietly(zipFile);
       }
     } else {
       String name = getRepositoryName(file.getName());
