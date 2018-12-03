@@ -56,6 +56,39 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
   }
 
   @Test
+  public void testMapEntityTypeNotExtending() {
+    EntityType entityType = mock(EntityType.class);
+    Tag tag1 = mock(Tag.class);
+    Tag tag2 = mock(Tag.class);
+    when(tag1.getId()).thenReturn("tag1");
+    when(tag2.getId()).thenReturn("tag2");
+    Package pack = mock(Package.class);
+    when(pack.getId()).thenReturn("packageId");
+
+    when(entityType.getTags()).thenReturn(newArrayList(tag1, tag2));
+    doReturn("Elastic").when(entityType).get(EntityTypeMetadata.BACKEND);
+    doReturn("Human Readable").when(entityType).get(EntityTypeMetadata.LABEL);
+    doReturn("Description").when(entityType).get(EntityTypeMetadata.DESCRIPTION);
+    doReturn(false).when(entityType).get(EntityTypeMetadata.IS_ABSTRACT);
+    when(entityType.getExtends()).thenReturn(null);
+    when(entityType.getPackage()).thenReturn(pack);
+    when(entityType.getId()).thenReturn("packageId_ID");
+
+    List<Object> expected =
+        newArrayList(
+            "ID",
+            "packageId",
+            "Human Readable",
+            "Description",
+            "false",
+            null,
+            "Elastic",
+            "tag1,tag2");
+    List<Object> actual = EntityTypeMapper.map(entityType);
+    assertEquals(actual, expected);
+  }
+
+  @Test
   public void testGet() {
     EntityType entityType = mock(EntityType.class);
     Attribute attr1 = mock(Attribute.class);
