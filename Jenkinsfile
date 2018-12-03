@@ -6,6 +6,7 @@ pipeline {
     }
     environment {
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
+        CHART_VERSION = '0.8.1'
     }
     stages {
         stage('Retrieve build secrets') {
@@ -90,7 +91,7 @@ pipeline {
                         milestone(ordinal: 100, label: 'deploy to master.dev.molgenis.org')
                         container('rancher') {
                             sh "rancher context switch development"
-                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} master"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} master ${CHART_VERSION}"
                         }
                     }
                 }
@@ -145,7 +146,7 @@ pipeline {
                         milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
                         container('rancher') {
                             sh "rancher context switch test"
-                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
                 }
