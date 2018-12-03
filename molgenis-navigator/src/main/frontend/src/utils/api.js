@@ -29,7 +29,6 @@ export function getResourcesByQuery (query: string): Promise<FolderState> {
   return api.get(uri).catch(throwAlertError).then(toFolderState)
 }
 
-// TODO cleanup
 export function createResource (resource: Resource, folder: ?Folder) {
   let promise
   if (resource.type === 'PACKAGE') {

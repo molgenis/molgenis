@@ -18,6 +18,7 @@ import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.LESS;
 import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.NOT;
 import static org.molgenis.data.QueryRule.Operator.OR;
@@ -120,7 +121,18 @@ class PostgreSqlRepository extends AbstractRepository {
   private static final Set<Operator> QUERY_OPERATORS =
       unmodifiableSet(
           EnumSet.of(
-              EQUALS, IN, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, RANGE, NOT, AND, OR, NESTED));
+              EQUALS,
+              IN,
+              LESS,
+              LESS_EQUAL,
+              GREATER,
+              GREATER_EQUAL,
+              RANGE,
+              LIKE,
+              NOT,
+              AND,
+              OR,
+              NESTED));
 
   private final PostgreSqlEntityFactory postgreSqlEntityFactory;
   private final JdbcTemplate jdbcTemplate;
