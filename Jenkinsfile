@@ -184,7 +184,7 @@ pipeline {
                 expression { BRANCH_NAME ==~ /feature\/.*/ }
             }
             environment {
-                TAG = "feature-$BRANCH_NAME-$BUILD_NUMBER".toLowerCase()
+                TAG = "$BRANCH_NAME-$BUILD_NUMBER".replaceAll(~/[^\w.-]/, '-').toLowerCase()
             }
             stages {
                 stage('Build [ feature ]') {
@@ -192,7 +192,7 @@ pipeline {
                         container('maven') {
                             sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
-                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
+                            sh "mvn -q -B sonar:sonar -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                             }
