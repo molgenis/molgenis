@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.3.3</version>
+    <version>7.3.4-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-app</artifactId>
   <packaging>war</packaging>
