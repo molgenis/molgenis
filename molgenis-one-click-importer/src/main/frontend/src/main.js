@@ -16,8 +16,8 @@ Vue.use(i18n, {
     new Vue({
       el: '#app',
       store,
-      template: '<App />',
-      components: {App}
+      render: h => h(App),
+      components: { App }
     })
   }
 })

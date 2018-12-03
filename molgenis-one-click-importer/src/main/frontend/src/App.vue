@@ -3,12 +3,12 @@
 </template>
 
 <script>
-  import OneClickImporter from './components/OneClickImporter'
+import OneClickImporter from './components/OneClickImporter'
 
-  export default {
-    name: 'molgenis-one-click-importer',
-    components: {
-      OneClickImporter
-    }
+export default {
+  name: 'molgenis-one-click-importer',
+  components: {
+    OneClickImporter
   }
+}
 </script>

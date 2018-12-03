@@ -50,7 +50,7 @@
               </span>
 
               <ul class="list-unstyled">
-                <li v-for="table in JSON.parse(job.entityTypes)">
+                <li :key="table.id" v-for="table in JSON.parse(job.entityTypes)">
 
                   <span v-if="dataExplorerBaseUrl">
                     <a target="_blank" :href="dataExplorerBaseUrl + '?entity=' + table.id">
@@ -100,28 +100,28 @@
 </style>
 
 <script>
-  import { mapState } from 'vuex'
-  import { IMPORT_FILE } from '../store/actions'
+import { mapState } from 'vuex'
+import { IMPORT_FILE } from '../store/actions'
 
-  export default {
-    name: 'one-click-importer',
-    data () {
-      return {
-        navigatorBaseUrl: window.__INITIAL_STATE__.navigatorBaseUrl,
-        dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl
-      }
-    },
-    computed: {
-      ...mapState(['job', 'finishedJobs'])
-    },
-    methods: {
-      importFile (event) {
-        const file = event.target.files[0]
-        if (!file) return
+export default {
+  name: 'one-click-importer',
+  data () {
+    return {
+      navigatorBaseUrl: window.__INITIAL_STATE__.navigatorBaseUrl,
+      dataExplorerBaseUrl: window.__INITIAL_STATE__.dataExplorerBaseUrl
+    }
+  },
+  computed: {
+    ...mapState(['job', 'finishedJobs'])
+  },
+  methods: {
+    importFile (event) {
+      const file = event.target.files[0]
+      if (!file) return
 
-        this.$store.dispatch(IMPORT_FILE, file)
-        this.$refs.fileInput.value = null
-      }
+      this.$store.dispatch(IMPORT_FILE, file)
+      this.$refs.fileInput.value = null
     }
   }
+}
 </script>

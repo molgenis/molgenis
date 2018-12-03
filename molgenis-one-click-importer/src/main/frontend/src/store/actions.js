@@ -17,7 +17,7 @@ const pollJobUrl = (commit, dispatch, jobUrl) => {
 }
 
 export default {
-  [IMPORT_FILE] ({commit, dispatch}, file) {
+  [IMPORT_FILE] ({ commit, dispatch }, file) {
     api.postFile('/plugin/one-click-importer/upload', file).then(response => {
       pollJobUrl(commit, dispatch, response)
     })

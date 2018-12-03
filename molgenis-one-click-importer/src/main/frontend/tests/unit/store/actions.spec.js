@@ -1,5 +1,6 @@
 import utils from '@molgenis/molgenis-vue-test-utils'
 import td from 'testdouble'
+import { expect } from 'chai'
 import api from '@molgenis/molgenis-api-client'
 import actions from 'store/actions'
 import { ADD_FINISHED_JOB, UPDATE_JOB } from 'store/mutations'
@@ -32,9 +33,9 @@ describe('actions', () => {
       const options = {
         payload: file,
         expectedMutations: [
-          {type: UPDATE_JOB, payload: job1},
-          {type: UPDATE_JOB, payload: job2},
-          {type: ADD_FINISHED_JOB, payload: job2}
+          { type: UPDATE_JOB, payload: job1 },
+          { type: UPDATE_JOB, payload: job2 },
+          { type: ADD_FINISHED_JOB, payload: job2 }
         ]
       }
 
@@ -65,9 +66,9 @@ describe('actions', () => {
       const options = {
         payload: file,
         expectedMutations: [
-          {type: UPDATE_JOB, payload: job1},
-          {type: UPDATE_JOB, payload: job2},
-          {type: ADD_FINISHED_JOB, payload: job2}
+          { type: UPDATE_JOB, payload: job1 },
+          { type: UPDATE_JOB, payload: job2 },
+          { type: ADD_FINISHED_JOB, payload: job2 }
         ]
       }
 
@@ -93,8 +94,8 @@ describe('actions', () => {
       const options = {
         payload: file,
         expectedMutations: [
-          {type: UPDATE_JOB, payload: job},
-          {type: ADD_FINISHED_JOB, payload: job}
+          { type: UPDATE_JOB, payload: job },
+          { type: ADD_FINISHED_JOB, payload: job }
         ]
       }
 
