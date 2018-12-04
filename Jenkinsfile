@@ -27,6 +27,9 @@ pipeline {
                 dir('/home/jenkins/.m2') {
                     stash includes: 'settings.xml', name: 'maven-settings'
                 }
+                dir('/home/jenkins/.rancher') {
+                    stash includes: 'cli2.json', name: 'rancher-config'
+                }
             }
         }
         stage('Steps [ PR ]') {
@@ -144,6 +147,9 @@ pipeline {
                 stage('Deploy to test [ x.x ]') {
                     steps {
                         milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
+                        dir('/home/jenkins/.rancher') {
+                            unstash 'rancher-config'
+                        }
                         container('rancher') {
                             sh "rancher context switch test"
                             sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
