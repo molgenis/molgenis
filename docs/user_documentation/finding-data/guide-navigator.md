@@ -52,7 +52,19 @@ The upload/download allow for adding resources to the current package or downloa
 Uploading is enabled for users with access to the import plugin.
 
 ### Download
-**TODO BC add documentation**
+Packages and entities can be downloaded in EMX format by selecting them and clicking the download button.
+A progress message will be shown on screen, this message will contain the link to download the EMX file once the download is ready.
+
+Downloading is enabled for users with permissions to create download jobs and files in the system. 
+By default this is true for users with the role "Manager" or "Editor" and superusers. 
+
+#####Limitations
+Only entities that follow the naming scheme "PACKAGE_ENITYNAME" as identifier can be downloaded.
+Also the identifier cannot be longer that 31 characters due to sheet name length limitations in some older spreadsheet programs.
+
+Tags on your metadata will not be downloaded, these need to be added to the file manually before it can be uploaded into MOLGENIS via the import plugin.
+
+![Navigator_screen](../../images/navigator/navigator-download.png?raw=true, "navigator/screen")
 
 ## Delete
 Select one or more resources and use the 'delete' icon to delete the selected resources.
