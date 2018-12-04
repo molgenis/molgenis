@@ -1,32 +1,34 @@
+// This is a karma config file. For more details see
+//   http://karma-runner.github.io/0.13/config/configuration-file.html
+// we are also using it with karma-webpack
+//   https://github.com/webpack/karma-webpack
+
 var webpackConfig = require('../../build/webpack.test.conf')
 
-module.exports = function (config) {
+module.exports = function karmaConfig (config) {
   config.set({
-    browsers: ['PhantomJS'], //ChromeCanary
-    frameworks: ['mocha', 'sinon-chai'],
+    // to run in additional browsers:
+    // 1. install corresponding karma launcher
+    //    http://karma-runner.github.io/0.13/config/browsers.html
+    // 2. add it to the `browsers` array below.
+    browsers: ['PhantomJS'],
+    frameworks: ['mocha', 'chai-as-promised', 'chai'],
     reporters: ['spec', 'coverage'],
-    files: [
-      '../../node_modules/babel-polyfill/dist/polyfill.js',
-      '../../node_modules/es6-promise/dist/es6-promise.auto.js',
-      './index.js'
-    ],
+    files: ['../../node_modules/babel-polyfill/dist/polyfill.js', './index.js'],
     preprocessors: {
-      './index.js': ['webpack', 'sourcemap']
+      './index.js': ['webpack', 'sourcemap'],
+      [require.resolve('chai-as-promised')]: ['webpack']
     },
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true
     },
     coverageReporter: {
-      dir: '../../../../../target/generated-sources/coverage',
+      dir: './coverage',
       reporters: [
-        {type: 'cobertura', subdir: 'cobertura'}
+        { type: 'lcov', subdir: '.' },
+        { type: 'text-summary' }
       ]
-    },
-    junitReporter: {
-      outputDir: '../../../../../target/surefire-reports',
-      outputFile: 'TEST-results.xml',
-      useBrowserName: false
     }
   })
 }
