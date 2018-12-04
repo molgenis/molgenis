@@ -2,8 +2,7 @@ package org.molgenis.validation;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.join;
+import static java.util.stream.Collectors.joining;
 
 import java.util.Set;
 import org.molgenis.i18n.CodedRuntimeException;
@@ -37,6 +36,6 @@ public class JsonValidationException extends CodedRuntimeException {
 
   private String getViolationMessages() {
     if ((violations == null) || (violations.isEmpty())) return "Unknown validation exception.";
-    return join(violations.stream().map(ConstraintViolation::getMessage).collect(toList()), '.');
+    return violations.stream().map(ConstraintViolation::getMessage).collect(joining("."));
   }
 }
