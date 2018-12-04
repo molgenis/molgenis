@@ -68,7 +68,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
     when(entityType.getTags()).thenReturn(newArrayList(tag1, tag2));
     doReturn("Elastic").when(entityType).get(EntityTypeMetadata.BACKEND);
     doReturn("Human Readable").when(entityType).get(EntityTypeMetadata.LABEL);
-    doReturn("Description").when(entityType).get(EntityTypeMetadata.DESCRIPTION);
+    doReturn(null).when(entityType).get(EntityTypeMetadata.DESCRIPTION);
     doReturn(false).when(entityType).get(EntityTypeMetadata.IS_ABSTRACT);
     when(entityType.getExtends()).thenReturn(null);
     when(entityType.getPackage()).thenReturn(pack);
@@ -79,7 +79,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
             "ID",
             "packageId",
             "Human Readable",
-            "Description",
+            null,
             "false",
             null,
             "Elastic",
