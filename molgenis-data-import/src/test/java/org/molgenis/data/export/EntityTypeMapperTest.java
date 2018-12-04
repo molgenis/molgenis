@@ -76,14 +76,7 @@ public class EntityTypeMapperTest extends AbstractMockitoTest {
 
     List<Object> expected =
         newArrayList(
-            "ID",
-            "packageId",
-            "Human Readable",
-            null,
-            "false",
-            null,
-            "Elastic",
-            "tag1,tag2");
+            "ID", "packageId", "Human Readable", null, "false", null, "Elastic", "tag1,tag2");
     List<Object> actual = EntityTypeMapper.map(entityType);
     assertEquals(actual, expected);
   }
