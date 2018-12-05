@@ -61,6 +61,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("ERROR: value too long for type character varying(255)");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e = postgreSqlExceptionTranslator.translateValueTooLongViolation();
     assertEquals(e.getMessage(), "One of the values being added is too long.");
   }
@@ -72,6 +73,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "Updating read-only column \"myColumn\" of table \"myTable\" with id [abc] is not allowed");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateReadonlyViolation(
             new PSQLException(serverErrorMessage));
@@ -87,6 +89,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "Updating read-only column myColumn of table myTable with id [abc] is not allowed");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateReadonlyViolation(
             new PSQLException(serverErrorMessage));
@@ -103,6 +106,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "constraint my_foreign_key_constraint on table \"myTable\" depends on table \"myDependentTable\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             new PSQLException(serverErrorMessage));
@@ -119,6 +123,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "constraint my_foreign_key_constraint on table \"myTable\" depends on table \"myDependentTable\"\nconstraint myOther_foreign_key_constraint on table \"myTable\" depends on table \"myDependentTable\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             new PSQLException(serverErrorMessage));
@@ -135,6 +140,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "constraint my_foreign_key_constraint on table \"myTable\" depends on table \"myDependentTable\"\nconstraint myOther_foreign_key_constraint on table \"myTable\" depends on table \"myOtherDependentTable\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             new PSQLException(serverErrorMessage));
@@ -151,6 +157,7 @@ public class PostgreSqlExceptionTranslatorTest {
         .thenReturn(
             "constraint my_foreign_key_constraint on table myTable depends on table myDependentTable");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateDependentObjectsStillExist(
             new PSQLException(serverErrorMessage));
@@ -167,6 +174,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("null value in column \"myColumn\" violates not-null constraint");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateNotNullViolation(
             new PSQLException(serverErrorMessage));
@@ -191,6 +199,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("null value in column myColumn violates not-null constraint");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateNotNullViolation(
             new PSQLException(serverErrorMessage));
@@ -204,6 +213,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getDetail()).thenReturn("... (myColumn) ... (myValue) ...");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -220,6 +230,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getDetail())
         .thenReturn("Key (myColumn)=(myValue) is not present in table \"myTable\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -240,6 +251,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getDetail())
         .thenReturn("Key (myColumn)=(myValue) is still referenced from table \"myTable\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateForeignKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -260,12 +272,45 @@ public class PostgreSqlExceptionTranslatorTest {
   }
 
   @Test
+  public void translateForeignKeyViolationCannotResolveAttribute() {
+    ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+    when(serverErrorMessage.getSQLState()).thenReturn("23503");
+    when(serverErrorMessage.getTable()).thenReturn("myTable");
+    when(serverErrorMessage.getDetail()).thenReturn("... (myUnknownColumn) ... (myValue) ...");
+    //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
+    MolgenisValidationException e =
+        postgreSqlExceptionTranslator.translateForeignKeyViolation(
+            new PSQLException(serverErrorMessage));
+    assertEquals(
+        e.getMessage(),
+        "Unknown xref value 'myValue' for attribute '<unknown>' of entity 'myEntity'.");
+  }
+
+  @Test
+  public void translateForeignKeyViolationCannotResolveEntityType() {
+    ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+    when(serverErrorMessage.getSQLState()).thenReturn("23503");
+    when(serverErrorMessage.getTable()).thenReturn("myUnknownTable");
+    when(serverErrorMessage.getDetail()).thenReturn("... (myColumn) ... (myValue) ...");
+    //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
+    MolgenisValidationException e =
+        postgreSqlExceptionTranslator.translateForeignKeyViolation(
+            new PSQLException(serverErrorMessage));
+    assertEquals(
+        e.getMessage(),
+        "Unknown xref value 'myValue' for attribute '<unknown>' of entity '<unknown>'.");
+  }
+
+  @Test
   public void translateUniqueKeyViolation() {
     ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
     when(serverErrorMessage.getSQLState()).thenReturn("23505");
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getDetail()).thenReturn("Key (myColumn)=(myValue) already exists.");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -281,6 +326,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getDetail()).thenReturn("Key (\"myColumn\")=(myValue) already exists.");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -297,6 +343,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getDetail())
         .thenReturn("Key (myIdColumn, myColumn)=(myIdValue, myValue) already exists.");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -312,6 +359,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getDetail()).thenReturn("Key (myColumn)=(myValue) is duplicated.");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -327,6 +375,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getDetail()).thenReturn("Key (\"myColumn\")=(myValue) is duplicated.");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateUniqueKeyViolation(
             new PSQLException(serverErrorMessage));
@@ -351,6 +400,7 @@ public class PostgreSqlExceptionTranslatorTest {
     ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
     when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for integer: \"str1\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             new PSQLException(serverErrorMessage));
@@ -364,6 +414,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("invalid input syntax for type boolean: \"str1\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             new PSQLException(serverErrorMessage));
@@ -376,6 +427,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("invalid input syntax for type double precision: \"str1\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             new PSQLException(serverErrorMessage));
@@ -388,6 +440,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("invalid input syntax for type date: \"str1\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             new PSQLException(serverErrorMessage));
@@ -400,6 +453,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("invalid input syntax for type timestamp with time zone: \"str1\"");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateInvalidIntegerException(
             new PSQLException(serverErrorMessage));
@@ -413,6 +467,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getTable()).thenReturn("myTable");
     when(serverErrorMessage.getConstraint()).thenReturn("myTable_myColumn_chk");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         postgreSqlExceptionTranslator.translateCheckConstraintViolation(
             new PSQLException(serverErrorMessage));
@@ -426,6 +481,7 @@ public class PostgreSqlExceptionTranslatorTest {
     when(serverErrorMessage.getMessage())
         .thenReturn("Undefined column: 7 ERROR: column \"test\" does not exist");
     //noinspection ThrowableResultOfMethodCallIgnored
+    @SuppressWarnings("deprecation")
     MolgenisValidationException e =
         PostgreSqlExceptionTranslator.translateUndefinedColumnException(
             new PSQLException(serverErrorMessage));
