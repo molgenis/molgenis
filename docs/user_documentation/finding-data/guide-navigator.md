@@ -43,7 +43,16 @@ selecting the paste icon.
 ![Navigator_screen](../../images/navigator/navigator-paste.png?raw=true, "navigator/screen")
 
 ### Copy
-**TODO TdB add documentation**
+Copied resources on the clipboard can be pasted anywhere with the paste button. When copying one or
+more packages, the contents of those packages will be copied as well. 
+
+![Navigator_screen](../../images/navigator/navigator-copy.png?raw=true, "navigator/screen") 
+
+If you are copying multiple entity types at the same time, references between those entity types 
+will also be copied. References to resources that are not being copied at the moment will keep 
+pointing to that resource. The following diagram depicts how references are copied:
+
+![Navigator_screen](../../images/navigator/navigator-copy-diagram.png?raw=true, "navigator/screen")
 
 ## Upload and Download
 The upload/download allow for adding resources to the current package or downloading selected resources.
