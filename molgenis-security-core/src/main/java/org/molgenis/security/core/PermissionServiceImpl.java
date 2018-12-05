@@ -1,5 +1,6 @@
 package org.molgenis.security.core;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
@@ -28,5 +29,11 @@ public class PermissionServiceImpl implements PermissionService {
     MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity);
     acl.insertAce(acl.getEntries().size(), permissionSet, sid, true);
     mutableAclService.updateAcl(acl);
+  }
+
+  @Override
+  public boolean exists(ObjectIdentity objectIdentity, Sid sid) {
+    MutableAcl acl = (MutableAcl) mutableAclService.readAclById(objectIdentity, singletonList(sid));
+    return acl.getEntries().stream().anyMatch(ace -> ace.getSid().equals(sid));
   }
 }

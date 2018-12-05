@@ -1,7 +1,9 @@
 package org.molgenis.bootstrap.populate;
 
+import static com.google.common.collect.Multimaps.filterEntries;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.Multimap;
 import java.util.Collection;
 import org.molgenis.security.core.PermissionService;
 import org.molgenis.security.core.PermissionSet;
@@ -20,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PermissionPopulator {
   private final PermissionService permissionService;
 
-  public PermissionPopulator(PermissionService permissionService) {
+  PermissionPopulator(PermissionService permissionService) {
     this.permissionService = requireNonNull(permissionService);
   }
 
@@ -32,7 +34,20 @@ public class PermissionPopulator {
   }
 
   private void populate(PermissionRegistry systemPermissionRegistry) {
-    systemPermissionRegistry.getPermissions().asMap().forEach(this::populate);
+    Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> systemPermissions =
+        systemPermissionRegistry.getPermissions();
+
+    Multimap<ObjectIdentity, Pair<PermissionSet, Sid>> newSystemPermissions =
+        filterEntries(
+            systemPermissions,
+            entry -> entry != null && isNewPermission(entry.getKey(), entry.getValue()));
+
+    newSystemPermissions.asMap().forEach(this::populate);
+  }
+
+  private boolean isNewPermission(
+      ObjectIdentity objectIdentity, Pair<PermissionSet, Sid> permission) {
+    return !permissionService.exists(objectIdentity, permission.getB());
   }
 
   private void populate(ObjectIdentity objectIdentity, Collection<Pair<PermissionSet, Sid>> pairs) {
