@@ -84,7 +84,7 @@ export default {
       return !(this.query || (this.folder && this.folder.readonly))
     },
     canEdit () {
-      let canEdit = !(this.query || (this.folder && this.folder.readonly)) && this.nrSelectedResources === 1
+      let canEdit = this.nrSelectedResources === 1 && !(this.query || this.selectedResources[0].readonly)
       if (canEdit) {
         switch (this.getSelectedResourceType) {
           case 'PACKAGE':
