@@ -137,15 +137,16 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   private void resolveEntityTypes(List<EntityType> entityTypes, Set<EntityType> entityTypeSet) {
     for (EntityType entityType : entityTypes) {
-      checkIfEmxEntityType(entityType);
+      checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypeSet.add(entityType);
     }
   }
 
   private void resolvePackage(Package pack, Set<Package> packages, Set<EntityType> entityTypes) {
+    checkIfEmxIdentifier(pack, pack.getParent());
     packages.add(pack);
     for (EntityType entityType : pack.getEntityTypes()) {
-      checkIfEmxEntityType(entityType);
+      checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypes.add(entityType);
     }
     for (Package child : pack.getChildren()) {
@@ -153,12 +154,12 @@ public class EmxExportServiceImpl implements EmxExportService {
     }
   }
 
-  private void checkIfEmxEntityType(EntityType entityType) {
-    String entityTypeId = entityType.getId();
-    String packageName = entityType.getPackage() != null ? entityType.getPackage().getId() : null;
+  private void checkIfEmxIdentifier(Entity entity, Package pack) {
+    String entityId = entity.getIdValue().toString();
+    String packageName = pack != null ? pack.getId() : null;
     // Entity type name should be fully qualified if it resides in a package
-    if (!(Strings.isNullOrEmpty(packageName) || entityTypeId.startsWith(packageName))) {
-      throw new InvalidEmxIdentifierException(entityTypeId);
+    if (!(Strings.isNullOrEmpty(packageName) || entityId.startsWith(packageName))) {
+      throw new InvalidEmxIdentifierException(entity);
     }
   }
 
