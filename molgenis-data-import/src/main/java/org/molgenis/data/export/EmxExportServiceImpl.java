@@ -220,6 +220,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     for (EntityType entityType : entityTypes) {
       Package pack = entityType.getPackage();
       if (pack != null) {
+        checkIfEmxIdentifier(pack, pack.getParent());
         packages.put(pack.getId(), pack);
       }
     }
@@ -237,6 +238,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     List<Package> parents = new ArrayList<>();
     Package parent = pack.getParent();
     if (parent != null) {
+      checkIfEmxIdentifier(parent, parent.getParent());
       parents.add(parent);
       parents.addAll(getParentPackages(parent));
     }
