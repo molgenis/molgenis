@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +49,7 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       "Error translating postgres exception: ";
   private static final String ERROR_TRANSLATING_EXCEPTION_MSG = "Error translating exception";
   private final EntityTypeRegistry entityTypeRegistry;
+  private static final String TOKEN_UNKNOWN = "<unknown>";
 
   PostgreSqlExceptionTranslator(DataSource dataSource, EntityTypeRegistry entityTypeRegistry) {
     super(requireNonNull(dataSource));
@@ -154,7 +156,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
         new ConstraintViolation(
             format(
                 "Updating read-only attribute '%s' of entity '%s' with id '%s' is not allowed.",
-                getAttributeName(tableName, colName), getEntityTypeName(tableName), id));
+                tryGetAttributeName(tableName, colName).orElse(TOKEN_UNKNOWN),
+                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
+                id));
     return new MolgenisValidationException(singleton(constraintViolation));
   }
 
@@ -177,8 +181,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       String tableName = matcher.group(2);
       String dependentTableName = matcher.group(3);
 
-      String entityTypeName = getEntityTypeName(tableName);
-      String dependentEntityTypeName = getEntityTypeName(dependentTableName);
+      String entityTypeName = tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN);
+      String dependentEntityTypeName =
+          tryGetEntityTypeName(dependentTableName).orElse(TOKEN_UNKNOWN);
       Set<String> dependentTableNames =
           entityTypeDependencyMap.computeIfAbsent(
               dependentEntityTypeName, k -> new LinkedHashSet<>());
@@ -290,7 +295,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
           new ConstraintViolation(
               format(
                   "The attribute '%s' of entity '%s' can not be null.",
-                  getAttributeName(tableName, columnName), getEntityTypeName(tableName)),
+                  tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
+                  tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
               null);
       return new MolgenisValidationException(singleton(constraintViolation));
     } else {
@@ -306,7 +312,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
           new ConstraintViolation(
               format(
                   "The attribute '%s' of entity '%s' contains null values.",
-                  getAttributeName(tableName, columnName), getEntityTypeName(tableName)),
+                  tryGetAttributeName(tableName, columnName),
+                  tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
               null);
       return new MolgenisValidationException(singleton(constraintViolation));
     }
@@ -342,18 +349,21 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
       constraintViolationMessageTemplate =
           "Value '%s' for attribute '%s' is referenced by entity '%s'.";
       String refTableName = getRefTableFromForeignKeyPsqlException(pSqlException);
-      attrName = getAttributeName(refTableName, colName);
+      attrName = tryGetAttributeName(refTableName, colName).orElse(TOKEN_UNKNOWN);
     } else {
       // ERROR: insert or update on table "x" violates foreign key constraint "y"
       // Detail: Key (k)=(v) is not present in table "z".
       constraintViolationMessageTemplate =
           "Unknown xref value '%s' for attribute '%s' of entity '%s'.";
-      attrName = getAttributeName(tableName, colName);
+      attrName = tryGetAttributeName(tableName, colName).orElse(TOKEN_UNKNOWN);
     }
     ConstraintViolation constraintViolation =
         new ConstraintViolation(
             format(
-                constraintViolationMessageTemplate, value, attrName, getEntityTypeName(tableName)),
+                constraintViolationMessageTemplate,
+                value,
+                attrName,
+                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
             null);
     return new MolgenisValidationException(singleton(constraintViolation));
   }
@@ -397,7 +407,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
             new ConstraintViolation(
                 format(
                     "Duplicate value '%s' for unique attribute '%s' from entity '%s'.",
-                    value, getAttributeName(tableName, columnName), getEntityTypeName(tableName)),
+                    value,
+                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
+                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
                 null);
       } else {
         String columnName = columnNames[columnNames.length - 1];
@@ -410,8 +422,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
                 format(
                     "Duplicate list value '%s' for attribute '%s' from entity '%s' with id '%s'.",
                     value,
-                    getAttributeName(tableName, columnName),
-                    getEntityTypeName(tableName),
+                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
+                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
                     idValue),
                 null);
       }
@@ -430,7 +442,9 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
             new ConstraintViolation(
                 format(
                     "The attribute '%s' of entity '%s' contains duplicate value '%s'.",
-                    getAttributeName(tableName, columnName), getEntityTypeName(tableName), value),
+                    tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
+                    tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN),
+                    value),
                 null);
         return new MolgenisValidationException(singleton(constraintViolation));
       } else {
@@ -457,7 +471,8 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
         new ConstraintViolation(
             format(
                 "Unknown enum value for attribute '%s' of entity '%s'.",
-                getAttributeName(tableName, columnName), getEntityTypeName(tableName)),
+                tryGetAttributeName(tableName, columnName).orElse(TOKEN_UNKNOWN),
+                tryGetEntityTypeName(tableName).orElse(TOKEN_UNKNOWN)),
             null);
     return new MolgenisValidationException(singleton(constraintViolation));
   }
@@ -487,39 +502,32 @@ class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTranslator
     return doTranslate(pSqlException);
   }
 
-  /**
-   * Returns the entity type fully qualified name for this table name
-   *
-   * @param tableName table name
-   * @return entity type fully qualified name
-   */
-  private String getEntityTypeName(String tableName) {
+  /** Tries to determine the entity type identifier for this table name */
+  private Optional<String> tryGetEntityTypeName(String tableName) {
     EntityTypeDescription entityTypeDescription =
         entityTypeRegistry.getEntityTypeDescription(tableName);
-    if (entityTypeDescription == null) {
-      throw new RuntimeException(format("Unknown entity for table name [%s]", tableName));
-    }
-    return entityTypeDescription.getId();
+    String entityTypeId = entityTypeDescription != null ? entityTypeDescription.getId() : null;
+    return Optional.ofNullable(entityTypeId);
   }
 
-  /**
-   * Returns the attribute name for this table name
-   *
-   * @param tableName table name
-   * @param colName column name
-   * @return attribute name
-   */
-  private String getAttributeName(String tableName, String colName) {
+  /** Tries to determine the attribute name for this table column name */
+  private Optional<String> tryGetAttributeName(String tableName, String colName) {
+    String attributeName;
+
     EntityTypeDescription entityTypeDescription =
         entityTypeRegistry.getEntityTypeDescription(tableName);
-    if (entityTypeDescription == null) {
-      throw new RuntimeException(format("Unknown entity for table name [%s]", tableName));
+    if (entityTypeDescription != null) {
+      AttributeDescription attrDescription =
+          entityTypeDescription.getAttributeDescriptionMap().get(colName);
+      if (attrDescription != null) {
+        attributeName = attrDescription.getName();
+      } else {
+        attributeName = null;
+      }
+    } else {
+      attributeName = null;
     }
-    AttributeDescription attrDescription =
-        entityTypeDescription.getAttributeDescriptionMap().get(colName);
-    if (attrDescription == null) {
-      throw new RuntimeException(format("Unknown attribute for column name [%s]", colName));
-    }
-    return attrDescription.getName();
+
+    return Optional.ofNullable(attributeName);
   }
 }
