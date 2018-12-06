@@ -78,7 +78,7 @@ import org.testng.annotations.Test;
 @Transactional
 public class OneToManyIT extends AbstractTestNGSpringContextTests {
   private final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
-  static final String USERNAME = "onetomany-user";
+  private static final String USERNAME = "onetomany-user";
 
   @Autowired private IndexJobScheduler indexService;
   @Autowired private OneToManyTestHarness oneToManyTestHarness;

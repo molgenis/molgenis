@@ -1,9 +1,9 @@
 <template>
-  <router-view></router-view>
+  <router-view/>
 </template>
 
 <script>
-  export default {
-    name: 'molgenis-navigator'
-  }
+export default {
+  name: 'Navigator'
+}
 </script>

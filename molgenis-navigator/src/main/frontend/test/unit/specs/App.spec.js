@@ -1,7 +1,7 @@
-import App from 'App'
+import App from '@/App'
 
 describe('App', () => {
-  it('should use "molgenis-navigator" as name', () => {
-    expect(App.name).to.equal('molgenis-navigator')
+  it('should use "Navigator" as name', () => {
+    expect(App.name).to.equal('Navigator')
   })
 })

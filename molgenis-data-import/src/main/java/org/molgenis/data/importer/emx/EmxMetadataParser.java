@@ -87,54 +87,54 @@ import org.molgenis.i18n.LanguageService;
  */
 public class EmxMetadataParser implements MetadataParser {
   // Table names in the emx file
-  static final String EMX_PACKAGES = "packages";
-  static final String EMX_ENTITIES = "entities";
-  static final String EMX_ATTRIBUTES = "attributes";
+  public static final String EMX_PACKAGES = "packages";
+  public static final String EMX_ENTITIES = "entities";
+  public static final String EMX_ATTRIBUTES = "attributes";
   static final String EMX_TAGS = "tags";
   static final String EMX_LANGUAGES = "languages";
   static final String EMX_I18NSTRINGS = "i18nstrings";
 
   // Column names in the package sheet
-  private static final String EMX_PACKAGE_NAME = "name";
-  private static final String EMX_PACKAGE_DESCRIPTION = "description";
-  private static final String EMX_PACKAGE_PARENT = "parent";
-  private static final String EMX_PACKAGE_TAGS = "tags";
-  private static final String EMX_PACKAGE_LABEL = "label";
+  public static final String EMX_PACKAGE_NAME = "name";
+  public static final String EMX_PACKAGE_DESCRIPTION = "description";
+  public static final String EMX_PACKAGE_PARENT = "parent";
+  public static final String EMX_PACKAGE_TAGS = "tags";
+  public static final String EMX_PACKAGE_LABEL = "label";
 
   // Column names in the entities sheet
-  private static final String EMX_ENTITIES_NAME = "name";
-  private static final String EMX_ENTITIES_PACKAGE = "package";
-  private static final String EMX_ENTITIES_LABEL = "label";
-  private static final String EMX_ENTITIES_DESCRIPTION = "description";
-  private static final String EMX_ENTITIES_ABSTRACT = "abstract";
-  private static final String EMX_ENTITIES_EXTENDS = "extends";
-  private static final String EMX_ENTITIES_BACKEND = "backend";
-  private static final String EMX_ENTITIES_TAGS = "tags";
+  public static final String EMX_ENTITIES_NAME = "name";
+  public static final String EMX_ENTITIES_PACKAGE = "package";
+  public static final String EMX_ENTITIES_LABEL = "label";
+  public static final String EMX_ENTITIES_DESCRIPTION = "description";
+  public static final String EMX_ENTITIES_ABSTRACT = "abstract";
+  public static final String EMX_ENTITIES_EXTENDS = "extends";
+  public static final String EMX_ENTITIES_BACKEND = "backend";
+  public static final String EMX_ENTITIES_TAGS = "tags";
 
   // Column names in the attributes sheet
-  private static final String EMX_ATTRIBUTES_NAME = "name";
-  private static final String EMX_ATTRIBUTES_ENTITY = "entity";
-  private static final String EMX_ATTRIBUTES_REF_ENTITY = "refEntity";
-  private static final String EMX_ATTRIBUTES_MAPPED_BY = "mappedBy";
-  private static final String EMX_ATTRIBUTES_DEFAULT_VALUE = "defaultValue";
-  private static final String EMX_ATTRIBUTES_ID_ATTRIBUTE = "idAttribute";
-  private static final String EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE = "lookupAttribute";
-  private static final String EMX_ATTRIBUTES_LABEL_ATTRIBUTE = "labelAttribute";
-  private static final String EMX_ATTRIBUTES_PART_OF_ATTRIBUTE = "partOfAttribute";
-  private static final String EMX_ATTRIBUTES_AGGREGATEABLE = "aggregateable";
-  private static final String EMX_ATTRIBUTES_DATA_TYPE = "dataType";
-  private static final String EMX_ATTRIBUTES_EXPRESSION = "expression";
-  private static final String EMX_ATTRIBUTES_NILLABLE = "nillable";
-  private static final String EMX_ATTRIBUTES_VISIBLE = "visible";
-  private static final String EMX_ATTRIBUTES_LABEL = "label";
-  private static final String EMX_ATTRIBUTES_DESCRIPTION = "description";
-  private static final String EMX_ATTRIBUTES_ENUM_OPTIONS = "enumOptions";
-  private static final String EMX_ATTRIBUTES_RANGE_MIN = "rangeMin";
-  private static final String EMX_ATTRIBUTES_RANGE_MAX = "rangeMax";
-  private static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
-  private static final String EMX_ATTRIBUTES_UNIQUE = "unique";
-  private static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
-  private static final String EMX_ATTRIBUTES_TAGS = "tags";
+  public static final String EMX_ATTRIBUTES_NAME = "name";
+  public static final String EMX_ATTRIBUTES_ENTITY = "entity";
+  public static final String EMX_ATTRIBUTES_REF_ENTITY = "refEntity";
+  public static final String EMX_ATTRIBUTES_MAPPED_BY = "mappedBy";
+  public static final String EMX_ATTRIBUTES_DEFAULT_VALUE = "defaultValue";
+  public static final String EMX_ATTRIBUTES_ID_ATTRIBUTE = "idAttribute";
+  public static final String EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE = "lookupAttribute";
+  public static final String EMX_ATTRIBUTES_LABEL_ATTRIBUTE = "labelAttribute";
+  public static final String EMX_ATTRIBUTES_PART_OF_ATTRIBUTE = "partOfAttribute";
+  public static final String EMX_ATTRIBUTES_AGGREGATEABLE = "aggregateable";
+  public static final String EMX_ATTRIBUTES_DATA_TYPE = "dataType";
+  public static final String EMX_ATTRIBUTES_EXPRESSION = "expression";
+  public static final String EMX_ATTRIBUTES_NILLABLE = "nillable";
+  public static final String EMX_ATTRIBUTES_VISIBLE = "visible";
+  public static final String EMX_ATTRIBUTES_LABEL = "label";
+  public static final String EMX_ATTRIBUTES_DESCRIPTION = "description";
+  public static final String EMX_ATTRIBUTES_ENUM_OPTIONS = "enumOptions";
+  public static final String EMX_ATTRIBUTES_RANGE_MIN = "rangeMin";
+  public static final String EMX_ATTRIBUTES_RANGE_MAX = "rangeMax";
+  public static final String EMX_ATTRIBUTES_READ_ONLY = "readOnly";
+  public static final String EMX_ATTRIBUTES_UNIQUE = "unique";
+  public static final String EMX_ATTRIBUTES_VALIDATION_EXPRESSION = "validationExpression";
+  public static final String EMX_ATTRIBUTES_TAGS = "tags";
 
   // NOT YET SUPPORTED
   // private static final String EMX_ATTRIBUTES_AUTO = "auto";
@@ -206,7 +206,7 @@ public class EmxMetadataParser implements MetadataParser {
           EMX_ATTRIBUTES_DEFAULT_VALUE,
           EMX_ATTRIBUTES_TAGS);
 
-  private static final String AUTO = "auto";
+  public static final String AUTO = "auto";
 
   private final DataService dataService;
   private final PackageFactory packageFactory;
