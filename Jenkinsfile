@@ -5,10 +5,8 @@ pipeline {
         }
     }
     environment {
-        npm_config_registry = 'http://nexus.molgenis-nexus:8081/repository/npm-central/'
-        HELM_REPO = 'https://registry.molgenis.org/repository/helm/'
-        LOCAL_REGISTRY = 'registry.molgenis.org'
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
+        CHART_VERSION = '0.8.1'
     }
     stages {
         stage('Retrieve build secrets') {
@@ -16,6 +14,8 @@ pipeline {
                 container('vault') {
                     script {
                         sh "mkdir /home/jenkins/.m2"
+                        sh "mkdir /home/jenkins/.rancher"
+                        sh(script: 'vault read -field=value secret/ops/jenkins/rancher/cli2.json > /home/jenkins/.rancher/cli2.json')
                         sh(script: 'vault read -field=value secret/ops/jenkins/maven/settings.xml > /home/jenkins/.m2/settings.xml')
                         env.SONAR_TOKEN = sh(script: 'vault read -field=value secret/ops/token/sonar', returnStdout: true)
                         env.GITHUB_TOKEN = sh(script: 'vault read -field=value secret/ops/token/github', returnStdout: true)
@@ -27,6 +27,9 @@ pipeline {
                 dir('/home/jenkins/.m2') {
                     stash includes: 'settings.xml', name: 'maven-settings'
                 }
+                dir('/home/jenkins/.rancher') {
+                    stash includes: 'cli2.json', name: 'rancher-config'
+                }
             }
         }
         stage('Steps [ PR ]') {
@@ -34,9 +37,9 @@ pipeline {
                 changeRequest()
             }
             environment {
-                //PR-1234-231
+                // PR-1234-231
                 TAG = "PR-${CHANGE_ID}-${BUILD_NUMBER}"
-                //0.0.0-SNAPSHOT-PR-1234-231
+                // 0.0.0-SNAPSHOT-PR-1234-231
                 PREVIEW_VERSION = "0.0.0-SNAPSHOT-${TAG}"
             }
             stages {
@@ -88,12 +91,10 @@ pipeline {
                 }
                 stage("Deploy to dev [ master ]") {
                     steps {
-                        milestone(ordinal: 100, label: 'deploy to dev.molgenis.org')
-                        container('helm') {
-                            sh "helm init --client-only"
-                            sh "helm repo add molgenis ${HELM_REPO}"
-                            sh "helm repo update"
-                            sh "helm upgrade master molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                        milestone(ordinal: 100, label: 'deploy to master.dev.molgenis.org')
+                        container('rancher') {
+                            sh "rancher context switch development"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} master ${CHART_VERSION}"
                         }
                     }
                 }
@@ -118,6 +119,7 @@ pipeline {
                         container('maven') {
                             sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
+                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
                                 sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest"
@@ -132,7 +134,7 @@ pipeline {
                         }
                         container('maven') {
                             sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
-                            sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true\""
+                            sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                             script {
                                 env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
                             }
@@ -144,12 +146,13 @@ pipeline {
                 }
                 stage('Deploy to test [ x.x ]') {
                     steps {
-                        milestone(ordinal: 100, label: 'deploy to test.molgenis.org')
-                        container('helm') {
-                            sh "helm init --client-only"
-                            sh "helm repo add molgenis ${HELM_REPO}"
-                            sh "helm repo update"
-                            sh "helm upgrade latest molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                        milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
+                        dir('/home/jenkins/.rancher') {
+                            unstash 'rancher-config'
+                        }
+                        container('rancher') {
+                            sh "rancher context switch test"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
                 }
@@ -167,7 +170,7 @@ pipeline {
                             }
                         }
                         container('maven') {
-                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true\""
+                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                             // Can not use DSL here because of bug in Jenkins
                             // The build wants to create a tmp directory in the target/checkout/molgenis-app
                             // This is not permitted
