@@ -57,10 +57,6 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
         when(mock(EntityType.class).getId()).thenReturn(entityType2Id).getMock();
     EntityType entityType3 =
         when(mock(EntityType.class).getId()).thenReturn(entityType3Id).getMock();
-    EntityType entityType1 = mock(EntityType.class);
-    EntityType entityType2 = mock(EntityType.class);
-    EntityType entityType3 = mock(EntityType.class);
-
     String pack1Id = "p1";
     String pack2Id = "p2";
     String pack3Id = "p3";
@@ -71,9 +67,6 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     doReturn("test").when(entityType1).getIdValue();
     doReturn("test").when(entityType2).getIdValue();
     doReturn("test").when(entityType3).getIdValue();
-    doReturn("test").when(pack1).getIdValue();
-    doReturn("test").when(pack2).getIdValue();
-    doReturn("test").when(pack3).getIdValue();
 
     doReturn(newArrayList(pack3)).when(pack1).getChildren();
     doReturn(emptyList()).when(pack2).getChildren();

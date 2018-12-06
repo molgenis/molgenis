@@ -141,22 +141,15 @@ public class EmxExportServiceImpl implements EmxExportService {
       List<EntityType> entityTypes, Map<String, EntityType> entityTypeSet) {
     for (EntityType entityType : entityTypes) {
       checkIfEmxIdentifier(entityType, entityType.getPackage());
-      entityTypeSet.add(entityType);
-      checkIfEmxEntityType(entityType);
       entityTypeSet.put(entityType.getId(), entityType);
     }
   }
 
-  private void resolvePackage(Package pack, Set<Package> packages, Set<EntityType> entityTypes) {
-    checkIfEmxIdentifier(pack, pack.getParent());
-    packages.add(pack);
   private void resolvePackage(
       Package pack, Map<String, Package> packages, Map<String, EntityType> entityTypes) {
     packages.put(pack.getId(), pack);
     for (EntityType entityType : pack.getEntityTypes()) {
       checkIfEmxIdentifier(entityType, entityType.getPackage());
-      entityTypes.add(entityType);
-      checkIfEmxEntityType(entityType);
       entityTypes.put(entityType.getId(), entityType);
     }
     for (Package child : pack.getChildren()) {
