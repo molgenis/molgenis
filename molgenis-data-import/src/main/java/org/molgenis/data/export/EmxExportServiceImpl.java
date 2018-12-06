@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.excel.xlsx.XlsxWriter;
@@ -91,27 +91,27 @@ public class EmxExportServiceImpl implements EmxExportService {
 
   private void exportEmx(
       List<EntityType> entityTypes, List<Package> packages, XlsxWriter writer, Progress progress) {
-    Set<Package> packageSet = new LinkedHashSet<>();
-    Set<EntityType> entityTypeSet = new LinkedHashSet<>();
-    resolveMetadata(entityTypes, packages, packageSet, entityTypeSet);
+    Map<String, Package> deduppedPackageMap = new LinkedHashMap<>();
+    Map<String, EntityType> deduppedEntityTypeMap = new LinkedHashMap<>();
+    resolveMetadata(entityTypes, packages, deduppedPackageMap, deduppedEntityTypeMap);
 
     // Progress per entity type plus package sheet + finished message
     progress.setProgressMax(entityTypes.size() + 2);
-    writePackageSheet(packageSet, entityTypeSet, writer, progress);
-    writeEntityTypeSheets(entityTypeSet, writer, progress);
+    writePackageSheet(deduppedPackageMap, deduppedEntityTypeMap, writer, progress);
+    writeEntityTypeSheets(deduppedEntityTypeMap.values(), writer, progress);
   }
 
   void resolveMetadata(
       List<EntityType> entityTypes,
       List<Package> packages,
-      Set<Package> packageSet,
-      Set<EntityType> entityTypeSet) {
+      Map<String, Package> packageSet,
+      Map<String, EntityType> entityTypeSet) {
     resolvePackages(packages, packageSet, entityTypeSet);
     resolveEntityTypes(entityTypes, entityTypeSet);
   }
 
   private void writeEntityTypeSheets(
-      Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
+      Collection<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
     writeEntityTypes(entityTypes, writer);
     for (EntityType entityType : entityTypes) {
       String progressMessage =
@@ -129,25 +129,35 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   private void resolvePackages(
-      List<Package> packages, Set<Package> packageSet, Set<EntityType> entityTypes) {
+      List<Package> packages,
+      Map<String, Package> packageSet,
+      Map<String, EntityType> entityTypes) {
     for (Package pack : packages) {
       resolvePackage(pack, packageSet, entityTypes);
     }
   }
 
-  private void resolveEntityTypes(List<EntityType> entityTypes, Set<EntityType> entityTypeSet) {
+  private void resolveEntityTypes(
+      List<EntityType> entityTypes, Map<String, EntityType> entityTypeSet) {
     for (EntityType entityType : entityTypes) {
       checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypeSet.add(entityType);
+      checkIfEmxEntityType(entityType);
+      entityTypeSet.put(entityType.getId(), entityType);
     }
   }
 
   private void resolvePackage(Package pack, Set<Package> packages, Set<EntityType> entityTypes) {
     checkIfEmxIdentifier(pack, pack.getParent());
     packages.add(pack);
+  private void resolvePackage(
+      Package pack, Map<String, Package> packages, Map<String, EntityType> entityTypes) {
+    packages.put(pack.getId(), pack);
     for (EntityType entityType : pack.getEntityTypes()) {
       checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypes.add(entityType);
+      checkIfEmxEntityType(entityType);
+      entityTypes.put(entityType.getId(), entityType);
     }
     for (Package child : pack.getChildren()) {
       resolvePackage(child, packages, entityTypes);
@@ -194,36 +204,40 @@ public class EmxExportServiceImpl implements EmxExportService {
   }
 
   void writePackageSheet(
-      Set<Package> packages, Set<EntityType> entityTypes, XlsxWriter writer, Progress progress) {
+      Map<String, Package> packages,
+      Map<String, EntityType> entityTypes,
+      XlsxWriter writer,
+      Progress progress) {
     if (!writer.hasSheet(EMX_PACKAGES)) {
       writer.createSheet(EMX_PACKAGES, newArrayList(PACKAGE_ATTRS.keySet()));
     }
 
     // add the packages that should be write to the packages sheet, but for which the entityTypes
     // should not be exported
-    addEntityPackages(entityTypes, packages);
+    addEntityPackages(entityTypes.values(), packages);
     addParentPackages(packages);
 
-    writer.writeRows(packages.stream().map(PackageMapper::map), EMX_PACKAGES);
+    writer.writeRows(packages.values().stream().map(PackageMapper::map), EMX_PACKAGES);
     progress.status(contextMessageSource.getMessage("emx_export_metadata_message"));
     progress.increment(1);
   }
 
-  private void addEntityPackages(Set<EntityType> entityTypes, Set<Package> packages) {
+  private void addEntityPackages(
+      Collection<EntityType> entityTypes, Map<String, Package> packages) {
     for (EntityType entityType : entityTypes) {
       Package pack = entityType.getPackage();
       if (pack != null) {
-        packages.add(pack);
+        packages.put(pack.getId(), pack);
       }
     }
   }
 
-  private void addParentPackages(Set<Package> packages) {
-    List<Package> parents = new ArrayList<>();
-    for (Package pack : packages) {
-      parents.addAll(getParentPackages(pack));
+  private void addParentPackages(Map<String, Package> packages) {
+    List<Package> parentPackages = new ArrayList<>();
+    for (Package pack : packages.values()) {
+      parentPackages.addAll(getParentPackages(pack));
     }
-    packages.addAll(parents);
+    parentPackages.forEach(parentPackage -> packages.put(parentPackage.getId(), parentPackage));
   }
 
   private Collection<Package> getParentPackages(Package pack) {

@@ -50,7 +50,7 @@ public class EntityTypeMapper {
           row.add(getTags(entityType));
           break;
         case EMX_ENTITIES_EXTENDS:
-          row.add(entityType.getExtends() != null ? entityType.getExtends().getId() : "");
+          row.add(entityType.getExtends() != null ? entityType.getExtends().getId() : null);
           break;
         case EMX_ENTITIES_PACKAGE:
           row.add(getPackageId(entityType));
@@ -60,7 +60,7 @@ public class EntityTypeMapper {
           break;
         default:
           Object value = entityType.get(entry.getValue());
-          row.add(value != null ? value.toString() : "");
+          row.add(value != null ? value.toString() : null);
           break;
       }
     }
