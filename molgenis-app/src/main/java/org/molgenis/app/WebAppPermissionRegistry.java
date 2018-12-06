@@ -45,7 +45,9 @@ import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.datarowedit.controller.DataRowEditController;
+import org.molgenis.metadata.manager.controller.MetadataManagerController;
 import org.molgenis.navigator.NavigatorController;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata;
 import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
@@ -115,6 +117,8 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, manager, WRITE);
     register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
     register(PLUGIN, SecurityUiController.ID, manager, READ);
+    register(PLUGIN, MetadataManagerController.METADATA_MANAGER, manager, READ);
+    register(ENTITY_TYPE, ResourceCopyJobExecutionMetadata.COPY_JOB_EXECUTION, manager, WRITE);
   }
 
   @Override
