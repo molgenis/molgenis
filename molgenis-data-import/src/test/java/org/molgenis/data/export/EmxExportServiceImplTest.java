@@ -57,13 +57,16 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
         when(mock(EntityType.class).getId()).thenReturn(entityType2Id).getMock();
     EntityType entityType3 =
         when(mock(EntityType.class).getId()).thenReturn(entityType3Id).getMock();
-
     String pack1Id = "p1";
     String pack2Id = "p2";
     String pack3Id = "p3";
     Package pack1 = when(mock(Package.class).getId()).thenReturn(pack1Id).getMock();
     Package pack2 = when(mock(Package.class).getId()).thenReturn(pack2Id).getMock();
     Package pack3 = when(mock(Package.class).getId()).thenReturn(pack3Id).getMock();
+
+    doReturn("test").when(entityType1).getIdValue();
+    doReturn("test").when(entityType2).getIdValue();
+    doReturn("test").when(entityType3).getIdValue();
 
     doReturn(newArrayList(pack3)).when(pack1).getChildren();
     doReturn(emptyList()).when(pack2).getChildren();
@@ -93,26 +96,30 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     EntityType entityType1 = mock(EntityType.class);
     String entityType2Id = "e2";
     EntityType entityType2 = mock(EntityType.class);
-    String pack1Id = "pack1";
+    String pack1Id = "parentParentPack_parentPack_pack1";
     Package pack1 = mock(Package.class);
     doReturn(pack1Id).when(pack1).get(PackageMetadata.ID);
-    String parentPackId = "parentPack";
+    String parentPackId = "parentParentPack_parentPack";
     Package parentPack = when(mock(Package.class).getId()).thenReturn(parentPackId).getMock();
     doReturn(parentPackId).when(parentPack).get(PackageMetadata.ID);
+    doReturn(parentPackId).when(parentPack).getIdValue();
     String parentParentPackId = "parentParentPack";
     Package parentParentPack =
         when(mock(Package.class).getId()).thenReturn(parentParentPackId).getMock();
     doReturn(parentParentPackId).when(parentParentPack).get(PackageMetadata.ID);
+    doReturn(parentParentPackId).when(parentParentPack).getIdValue();
     String pack2Id = "pack2";
     Package pack2 = mock(Package.class);
     doReturn(pack2Id).when(pack2).get(PackageMetadata.ID);
-    String entityPackId = "entityPack";
+    String entityPackId = "entityParentPack_entityPack";
     Package entityPack1 = when(mock(Package.class).getId()).thenReturn(entityPackId).getMock();
     doReturn(entityPackId).when(entityPack1).get(PackageMetadata.ID);
+    doReturn(entityPackId).when(entityPack1).getIdValue();
     String entityParentPackId = "entityParentPack";
     Package entityParentPack1 =
         when(mock(Package.class).getId()).thenReturn(entityParentPackId).getMock();
     doReturn(entityParentPackId).when(entityParentPack1).get(PackageMetadata.ID);
+    doReturn(entityParentPackId).when(entityParentPack1).getIdValue();
 
     when(pack1.getParent()).thenReturn(parentPack);
     when(parentPack.getParent()).thenReturn(parentParentPack);
@@ -133,10 +140,14 @@ public class EmxExportServiceImplTest extends AbstractMockitoTest {
     XlsxWriter writer = mock(XlsxWriter.class);
     Progress progress = mock(Progress.class);
 
-    List<Object> expectedRow1 = newArrayList("pack1", null, null, "parentPack", "");
-    List<Object> expectedRow2 = newArrayList("parentPack", null, null, "parentParentPack", "");
+    List<Object> expectedRow1 =
+        newArrayList(
+            "parentParentPack_parentPack_pack1", null, null, "parentParentPack_parentPack", "");
+    List<Object> expectedRow2 =
+        newArrayList("parentParentPack_parentPack", null, null, "parentParentPack", "");
     List<Object> expectedRow3 = newArrayList("parentParentPack", null, null, null, "");
-    List<Object> expectedRow4 = newArrayList("entityPack", null, null, "entityParentPack", "");
+    List<Object> expectedRow4 =
+        newArrayList("entityParentPack_entityPack", null, null, "entityParentPack", "");
     List<Object> expectedRow5 = newArrayList("entityParentPack", null, null, null, "");
     List<Object> expectedRow6 = newArrayList("pack2", null, null, null, "");
     List<List<Object>> expected =

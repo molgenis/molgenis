@@ -140,7 +140,7 @@ public class EmxExportServiceImpl implements EmxExportService {
   private void resolveEntityTypes(
       List<EntityType> entityTypes, Map<String, EntityType> entityTypeSet) {
     for (EntityType entityType : entityTypes) {
-      checkIfEmxEntityType(entityType);
+      checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypeSet.put(entityType.getId(), entityType);
     }
   }
@@ -149,7 +149,7 @@ public class EmxExportServiceImpl implements EmxExportService {
       Package pack, Map<String, Package> packages, Map<String, EntityType> entityTypes) {
     packages.put(pack.getId(), pack);
     for (EntityType entityType : pack.getEntityTypes()) {
-      checkIfEmxEntityType(entityType);
+      checkIfEmxIdentifier(entityType, entityType.getPackage());
       entityTypes.put(entityType.getId(), entityType);
     }
     for (Package child : pack.getChildren()) {
@@ -157,12 +157,12 @@ public class EmxExportServiceImpl implements EmxExportService {
     }
   }
 
-  private void checkIfEmxEntityType(EntityType entityType) {
-    String entityTypeId = entityType.getId();
-    String packageName = entityType.getPackage() != null ? entityType.getPackage().getId() : null;
+  private void checkIfEmxIdentifier(Entity entity, Package pack) {
+    String entityId = entity.getIdValue().toString();
+    String packageName = pack != null ? pack.getId() : null;
     // Entity type name should be fully qualified if it resides in a package
-    if (!(Strings.isNullOrEmpty(packageName) || entityTypeId.startsWith(packageName))) {
-      throw new InvalidEmxIdentifierException(entityTypeId);
+    if (!(Strings.isNullOrEmpty(packageName) || entityId.startsWith(packageName))) {
+      throw new InvalidEmxIdentifierException(entity);
     }
   }
 
@@ -220,6 +220,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     for (EntityType entityType : entityTypes) {
       Package pack = entityType.getPackage();
       if (pack != null) {
+        checkIfEmxIdentifier(pack, pack.getParent());
         packages.put(pack.getId(), pack);
       }
     }
@@ -237,6 +238,7 @@ public class EmxExportServiceImpl implements EmxExportService {
     List<Package> parents = new ArrayList<>();
     Package parent = pack.getParent();
     if (parent != null) {
+      checkIfEmxIdentifier(parent, parent.getParent());
       parents.add(parent);
       parents.addAll(getParentPackages(parent));
     }
