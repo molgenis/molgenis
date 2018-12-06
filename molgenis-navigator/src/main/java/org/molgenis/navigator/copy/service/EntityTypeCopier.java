@@ -13,6 +13,7 @@ import static org.molgenis.navigator.copy.service.RelationTransformer.transformR
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
@@ -45,14 +46,22 @@ public class EntityTypeCopier {
   }
 
   public void copy(List<EntityType> entityTypes, CopyState state) {
-    entityTypes.forEach(entityType -> assignUniqueLabel(entityType, state));
-    entityTypes.forEach(entityType -> setTargetPackage(entityType, state));
-    List<EntityType> copiedEntityTypes = copyEntityTypes(entityTypes, state);
+    List<EntityType> preparedEntityTypes = prepareEntityTypes(entityTypes, state);
+    List<EntityType> copiedEntityTypes = copyEntityTypes(preparedEntityTypes, state);
     persist(copiedEntityTypes, state);
   }
 
-  private void setTargetPackage(EntityType entityType, CopyState state) {
-    entityType.setPackage(state.targetPackage());
+  private List<EntityType> prepareEntityTypes(List<EntityType> entityTypes, CopyState state) {
+    return removeDoubles(entityTypes, state)
+        .map(entityType -> assignUniqueLabel(entityType, state))
+        .map(entityType -> setTargetPackage(entityType, state))
+        .collect(toList());
+  }
+
+  private Stream<EntityType> removeDoubles(List<EntityType> entityTypes, CopyState state) {
+    Set<String> idsInPackages =
+        state.entityTypesInPackages().stream().map(EntityType::getId).collect(toSet());
+    return entityTypes.stream().filter(e -> !idsInPackages.contains(e.getId()));
   }
 
   private List<EntityType> copyEntityTypes(List<EntityType> entityTypes, CopyState state) {
@@ -81,11 +90,16 @@ public class EntityTypeCopier {
         .forEach(e -> state.progress().increment(1));
   }
 
+  private EntityType setTargetPackage(EntityType entityType, CopyState state) {
+    entityType.setPackage(state.targetPackage());
+    return entityType;
+  }
+
   /**
    * Checks if there's an EntityType in the target location with the same label. If so, keeps adding
    * a postfix until the label is unique.
    */
-  private void assignUniqueLabel(EntityType entityType, CopyState state) {
+  private EntityType assignUniqueLabel(EntityType entityType, CopyState state) {
     Set<String> existingLabels;
     if (state.targetPackage() != null) {
       //noinspection ConstantConditions
@@ -101,6 +115,7 @@ public class EntityTypeCopier {
               .collect(toSet());
     }
     entityType.setLabel(LabelGenerator.generateUniqueLabel(entityType.getLabel(), existingLabels));
+    return entityType;
   }
 
   private EntityType copyEntityType(EntityType original, CopyState state) {

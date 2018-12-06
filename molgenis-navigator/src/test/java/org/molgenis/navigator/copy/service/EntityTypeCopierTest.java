@@ -183,6 +183,30 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     verify(refAttrCopy).setDefaultValue("row1,row2,row3");
   }
 
+  @Test
+  public void copyDoubleEntityType() {
+    setupPredictableIdGeneratorMock(idGenerator);
+    EntityType entityTypeA = mock(EntityType.class);
+    when(entityTypeA.getId()).thenReturn("A");
+    EntityType entityTypeACopy = mock(EntityType.class);
+    Package targetPackage = mock(Package.class);
+    Progress progress = mock(Progress.class);
+    CopyState state = CopyState.create(targetPackage, progress);
+    setupMetadataCopierAnswers(ImmutableMap.of(entityTypeA, entityTypeACopy));
+    when(entityTypeDependencyResolver.resolve(singletonList(entityTypeACopy)))
+        .thenReturn(singletonList(entityTypeACopy));
+    state.entityTypesInPackages().add(entityTypeA);
+
+    copier.copy(singletonList(entityTypeA), state);
+
+    verify(entityTypeACopy).setId("id1");
+    assertEquals(state.copiedEntityTypes(), ImmutableMap.of("A", entityTypeACopy));
+    assertEquals(state.originalEntityTypeIds(), ImmutableMap.of("id1", "A"));
+    assertEquals(state.referenceDefaultValues(), emptyMap());
+    verify(dataService.getMeta()).addEntityType(entityTypeACopy);
+    verify(progress, times(1)).increment(1);
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void copyData() {
