@@ -30,4 +30,11 @@ public class RunAsSystemPermissionService implements PermissionService {
   public void grant(ObjectIdentity objectIdentity, PermissionSet permissionSet, Sid sid) {
     permissionService.grant(objectIdentity, permissionSet, sid);
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  @RunAsSystem
+  public boolean exists(ObjectIdentity objectIdentity, Sid sid) {
+    return permissionService.exists(objectIdentity, sid);
+  }
 }

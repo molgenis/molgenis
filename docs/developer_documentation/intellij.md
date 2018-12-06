@@ -72,6 +72,14 @@ Maven will invoke `fmt:check` at build time and fail if the code isn't formatted
 * Download and import the [IntelliJ Java Google Style file](https://github.com/molgenis/molgenis/blob/master/intellij-molgenis-style.xml) to fix the import order.
 * Uncheck the reformat checkbox in the git commit dialog, [it is broken](https://github.com/google/google-java-format/issues/228).
 
+## Git commit hook
+If you miss the reformat checkbox, you can configure a git commit hook in the folder where you checked out the molgenis repository.
+Add a file called `.git/hooks/pre-commit` with the following contents:
+
+```#!/bin/sh
+mvn fmt:format
+```
+
 ## Use MOLGENIS file-templates
 
 * Make sure that your .idea project folder lives inside your molgenis git project root! Only then will we be able to auto-share templates.

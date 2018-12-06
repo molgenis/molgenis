@@ -5,14 +5,14 @@ var webpack = require('webpack');
 var configuration = {
 	// Resolve location of node modules and molgenis modules specific javascript
 	resolve : {
-		root : [ path.resolve('./src/main/javascript'), path.resolve('./node_modules') ],
+		root : [ path.resolve('./src'), path.resolve('./node_modules') ],
 		alias : {
 			'react-components' : 'modules/react-components',
 			'rest-client' : 'modules/rest-client',
 			'i18n' : 'modules/i18n',
-			'jquery-ui' : 'plugins/jquery-ui-1.9.2.custom.min',
-			'jq-edit-rangeslider' : 'plugins/jQEditRangeSlider-min',
-			'select2' : 'plugins/select2-patched',
+			'jquery-ui' : '../../resources/js/jquery-ui-1.9.2.custom.min',
+			'jq-edit-rangeslider' : '../../resources/js/jQEditRangeSlider-min',
+			'select2' : '../../resources/js/select2-patched',
 			'utils' : 'modules/utils'
 		}
 	},
@@ -20,19 +20,19 @@ var configuration = {
 	context : __dirname,
 	devtool: 'eval',
 	entry : {
-		'global-ui' : [ './src/main/javascript/molgenis-global-ui-webpack' ],
-		'global' : [ './src/main/javascript/molgenis-global-webpack' ],
-		'vendor-bundle' : [ './src/main/javascript/molgenis-vendor-webpack' ]
+		'global-ui' : [ 'molgenis-global-ui-webpack' ],
+		'global' : [ 'molgenis-global-webpack' ],
+		'vendor-bundle' : [ 'molgenis-vendor-webpack' ]
 	},
 	output : {
-		path : './target/classes/js/dist/',
+		path : '../../../target/classes/js/dist',
 		filename : 'molgenis-[name].js',
 		publicPath : '/js/dist/'
 	},
 	plugins : [ new webpack.PrefetchPlugin('react/lib/React'), new webpack.PrefetchPlugin('react/lib/ReactWithAddons'),
 			new webpack.PrefetchPlugin('react/lib/DOMChildrenOperations.js'), new webpack.PrefetchPlugin('react/lib/ReactDOMComponent'),
 			new webpack.PrefetchPlugin('react/lib/ReactReconcileTransaction'), new webpack.PrefetchPlugin('react-components'),
-			new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'), new webpack.ProvidePlugin({
+			new webpack.PrefetchPlugin('./src/modules/react-components/wrapper/JQRangeSlider.js'), new webpack.ProvidePlugin({
 				$ : "jquery",
 				jQuery : "jquery"
 			}), new webpack.optimize.OccurenceOrderPlugin(), new webpack.optimize.CommonsChunkPlugin([ 'vendor-bundle' ], 'molgenis-[name].js') ],
@@ -49,7 +49,7 @@ var configuration = {
 			// select these two presets that make it compile jsx -> js and es6
 			// -> js
 			loader : 'babel',
-			exclude : [ /node_modules/, /src[/\\]main[/\\]javascript[/\\]plugins/]
+			exclude : [ /node_modules/, /src[/\\]main[/\\]resources[/\\]js/]
 		}, {
 			test : /\.css$/,
 			loader : 'style-loader!css-loader'
