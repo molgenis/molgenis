@@ -44,10 +44,8 @@ public class StyleController {
         bootstrapVersion.equals("4") ? BOOTSTRAP_VERSION_4 : BOOTSTRAP_VERSION_3;
     Resource styleSheetResource = styleService.getThemeData(themeName, version);
 
-    try {
-      InputStream inputStream = styleSheetResource.getInputStream();
+    try (InputStream inputStream = styleSheetResource.getInputStream()) {
       IOUtils.copy(inputStream, response.getOutputStream());
-      IOUtils.closeQuietly(inputStream);
       response.flushBuffer();
     } catch (IOException e) {
       throw new MolgenisStyleException("Unable to return theme data", e);

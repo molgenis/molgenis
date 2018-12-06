@@ -2,7 +2,7 @@ package org.molgenis.web.converter;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import org.apache.commons.io.IOUtils;
+import java.nio.charset.Charset;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.csv.CsvWriter;
 import org.springframework.http.HttpInputMessage;
@@ -19,14 +19,11 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
   @Override
   protected void writeInternal(EntityCollection entities, HttpOutputMessage outputMessage)
       throws IOException {
-    OutputStreamWriter out =
-        new OutputStreamWriter(outputMessage.getBody(), getCharset(outputMessage.getHeaders()));
-    CsvWriter writer = new CsvWriter(out);
-    try {
-      writer.writeAttributeNames(entities.getAttributeNames());
-      writer.add(entities.stream());
-    } finally {
-      IOUtils.closeQuietly(writer);
+    Charset charset = getCharset(outputMessage.getHeaders());
+    try (CsvWriter csvWriter =
+        new CsvWriter(new OutputStreamWriter(outputMessage.getBody(), charset))) {
+      csvWriter.writeAttributeNames(entities.getAttributeNames());
+      csvWriter.add(entities.stream());
     }
   }
 

@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -170,10 +169,20 @@ public class CsvIterator implements CloseableIterator<Entity> {
 
   @Override
   public void close() {
-    IOUtils.closeQuietly(csvReader);
+    if (csvReader != null) {
+      try {
+        csvReader.close();
+      } catch (IOException e) {
+        // ignore
+      }
+    }
 
     if (zipFile != null) {
-      IOUtils.closeQuietly(zipFile);
+      try {
+        zipFile.close();
+      } catch (IOException e) {
+        // ignore
+      }
     }
   }
 
