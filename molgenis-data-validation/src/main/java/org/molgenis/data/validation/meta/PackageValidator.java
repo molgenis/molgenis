@@ -1,7 +1,11 @@
 package org.molgenis.data.validation.meta;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemPackageRegistry;
 import org.molgenis.data.util.PackageUtils;
@@ -14,17 +18,18 @@ import org.springframework.stereotype.Component;
 /** {@link Package} validator */
 @Component
 public class PackageValidator {
-  private final SystemPackageRegistry systemPackageRegistry;
-
   private static final Logger LOG = LoggerFactory.getLogger(PackageValidator.class);
 
-  public PackageValidator(SystemPackageRegistry systemPackageRegistry) {
+  private final SystemPackageRegistry systemPackageRegistry;
+
+  PackageValidator(SystemPackageRegistry systemPackageRegistry) {
     this.systemPackageRegistry = requireNonNull(systemPackageRegistry);
   }
 
   public void validate(Package aPackage) {
     validatePackageAllowed(aPackage);
     validatePackageName(aPackage);
+    runAsSystem(() -> validatePackageParent(aPackage));
   }
 
   private void validatePackageAllowed(Package aPackage) {
@@ -41,5 +46,21 @@ public class PackageValidator {
 
   private static void validatePackageName(Package aPackage) {
     NameValidator.validatePackageId(aPackage.getId());
+  }
+
+  private static void validatePackageParent(Package aPackage) {
+    Set<String> packageIds = new HashSet<>();
+    for (Package currentPackage = aPackage;
+        currentPackage != null;
+        currentPackage = currentPackage.getParent()) {
+      boolean isNewPackageId = packageIds.add(currentPackage.getId());
+      if (!isNewPackageId) {
+        throw new MolgenisValidationException(
+            new ConstraintViolation(
+                format(
+                    "Package '%s' with id '%s' parent contains cycles",
+                    aPackage.getLabel(), aPackage.getId())));
+      }
+    }
   }
 }
