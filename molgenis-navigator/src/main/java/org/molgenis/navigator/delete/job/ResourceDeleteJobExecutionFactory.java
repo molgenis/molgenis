@@ -1,4 +1,4 @@
-package org.molgenis.navigator.delete;
+package org.molgenis.navigator.delete.job;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.populate.EntityPopulator;

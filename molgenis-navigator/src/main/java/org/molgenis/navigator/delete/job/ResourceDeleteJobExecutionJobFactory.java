@@ -1,10 +1,11 @@
-package org.molgenis.navigator.delete;
+package org.molgenis.navigator.delete.job;
 
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
+import org.molgenis.navigator.delete.ResourceDeleteService;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.springframework.stereotype.Component;
 

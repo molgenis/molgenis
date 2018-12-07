@@ -1,4 +1,4 @@
-package org.molgenis.navigator.delete;
+package org.molgenis.navigator.delete.job;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.TEXT;

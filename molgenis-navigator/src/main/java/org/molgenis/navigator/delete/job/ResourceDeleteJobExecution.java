@@ -1,7 +1,7 @@
-package org.molgenis.navigator.delete;
+package org.molgenis.navigator.delete.job;
 
 import static org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata.RESOURCES;
-import static org.molgenis.navigator.delete.ResourceDeleteJobExecutionMetadata.DELETE_JOB_TYPE;
+import static org.molgenis.navigator.delete.job.ResourceDeleteJobExecutionMetadata.DELETE_JOB_TYPE;
 import static org.molgenis.navigator.util.ResourceIdentifierUtil.getResourcesFromJson;
 
 import com.google.gson.Gson;
