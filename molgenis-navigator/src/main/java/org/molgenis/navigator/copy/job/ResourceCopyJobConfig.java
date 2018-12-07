@@ -8,10 +8,10 @@ import org.molgenis.jobs.JobFactory;
 import org.molgenis.navigator.copy.service.CopyService;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 @SuppressWarnings("unused")
-@Component
+@Configuration
 public class ResourceCopyJobConfig {
 
   private final CopyService copyService;

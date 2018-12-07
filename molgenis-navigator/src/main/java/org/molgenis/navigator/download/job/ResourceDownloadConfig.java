@@ -10,10 +10,10 @@ import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Service;
 
-@Service
+@Configuration
 public class ResourceDownloadConfig {
 
   private final ResourceDownloadService resourceDownloadService;

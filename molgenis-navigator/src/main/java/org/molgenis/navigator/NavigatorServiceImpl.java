@@ -9,13 +9,10 @@ import static org.molgenis.navigator.model.ResourceType.ENTITY_TYPE_ABSTRACT;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Streams;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotEmpty;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
@@ -27,6 +24,8 @@ import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.copy.job.ResourceCopyJobExecution;
 import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
+import org.molgenis.navigator.delete.job.ResourceDeleteJobExecution;
+import org.molgenis.navigator.delete.job.ResourceDeleteJobExecutionFactory;
 import org.molgenis.navigator.download.job.ResourceDownloadJobExecution;
 import org.molgenis.navigator.download.job.ResourceDownloadJobExecutionFactory;
 import org.molgenis.navigator.model.Resource;
@@ -39,20 +38,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class NavigatorServiceImpl implements NavigatorService {
 
+  private static final String MESSAGE_EMPTY_RESOURCES = "resources can't be empty";
+
   private final DataService dataService;
   private final JobExecutor jobExecutor;
   private final ResourceDownloadJobExecutionFactory downloadJobExecutionFactory;
   private final ResourceCopyJobExecutionFactory copyJobExecutionFactory;
+  private final ResourceDeleteJobExecutionFactory resourceDeleteJobExecutionFactory;
 
   NavigatorServiceImpl(
       DataService dataService,
       JobExecutor jobExecutor,
       ResourceDownloadJobExecutionFactory downloadJobExecutionFactory,
-      ResourceCopyJobExecutionFactory copyJobExecutionFactory) {
+      ResourceCopyJobExecutionFactory copyJobExecutionFactory,
+      ResourceDeleteJobExecutionFactory resourceDeleteJobExecutionFactory) {
     this.dataService = requireNonNull(dataService);
     this.jobExecutor = requireNonNull(jobExecutor);
     this.downloadJobExecutionFactory = requireNonNull(downloadJobExecutionFactory);
     this.copyJobExecutionFactory = requireNonNull(copyJobExecutionFactory);
+    this.resourceDeleteJobExecutionFactory = requireNonNull(resourceDeleteJobExecutionFactory);
   }
 
   @Transactional(readOnly = true)
@@ -134,7 +138,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   public JobExecution copyResources(
       List<ResourceIdentifier> resources, @Nullable String targetFolderId) {
     if (resources.isEmpty()) {
-      throw new IllegalArgumentException("resources can't be empty");
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
     Package aPackage = getPackage(targetFolderId);
@@ -149,7 +153,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Override
   public JobExecution downloadResources(List<ResourceIdentifier> resources) {
     if (resources.isEmpty()) {
-      throw new IllegalArgumentException("resources can't be empty");
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
     ResourceDownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
@@ -160,77 +164,15 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   @Transactional
   @Override
-  public void deleteResources(List<ResourceIdentifier> resources) {
+  public JobExecution deleteResources(List<ResourceIdentifier> resources) {
     if (resources.isEmpty()) {
-      return;
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
-    Set<Object> packageIds = new LinkedHashSet<>();
-    Set<Object> entityTypeIds = new LinkedHashSet<>();
-    resources.forEach(
-        resource -> {
-          switch (resource.getType()) {
-            case PACKAGE:
-              packageIds.add(resource.getId());
-              break;
-            case ENTITY_TYPE:
-            case ENTITY_TYPE_ABSTRACT:
-              entityTypeIds.add(resource.getId());
-              break;
-            default:
-              throw new UnexpectedEnumException(resource.getType());
-          }
-        });
-
-    if (!entityTypeIds.isEmpty()) {
-      deleteEntityTypes(entityTypeIds);
-    }
-    if (!packageIds.isEmpty()) {
-      deletePackages(packageIds);
-    }
-  }
-
-  private void deleteEntityTypes(@NotEmpty Set<Object> entityTypeIds) {
-    List<EntityType> entityTypes =
-        dataService
-            .findAll(ENTITY_TYPE_META_DATA, entityTypeIds.stream(), EntityType.class)
-            .collect(toList());
-
-    if (!entityTypes.isEmpty()) {
-      dataService.delete(ENTITY_TYPE_META_DATA, entityTypes.stream());
-    }
-  }
-
-  private void deletePackages(Set<Object> packageIds) {
-    List<Package> packages =
-        dataService
-            .findAll(PackageMetadata.PACKAGE, packageIds.stream(), Package.class)
-            .collect(toList());
-
-    if (!packages.isEmpty()) {
-      List<Package> deletablePackages = getDeletablePackages(packages, packageIds);
-      if (!deletablePackages.isEmpty()) {
-        dataService.delete(PackageMetadata.PACKAGE, deletablePackages.stream());
-      }
-    }
-  }
-
-  private List<Package> getDeletablePackages(List<Package> packages, Set<Object> packageIds) {
-    return packages
-        .stream()
-        .filter(aPackage -> isDeletablePackage(aPackage, packageIds))
-        .collect(toList());
-  }
-
-  private boolean isDeletablePackage(Package aPackage, Set<Object> packageIds) {
-    Package parentPackage = aPackage.getParent();
-    while (parentPackage != null) {
-      if (packageIds.contains(parentPackage.getId())) {
-        return false;
-      }
-      parentPackage = parentPackage.getParent();
-    }
-    return true;
+    ResourceDeleteJobExecution jobExecution = resourceDeleteJobExecutionFactory.create();
+    jobExecution.setResources(resources);
+    jobExecutor.submit(jobExecution);
+    return jobExecution;
   }
 
   @Transactional

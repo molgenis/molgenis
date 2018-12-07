@@ -29,7 +29,7 @@ public interface NavigatorService {
 
   JobExecution downloadResources(@NotEmpty List<ResourceIdentifier> resources);
 
-  void deleteResources(List<ResourceIdentifier> resources);
+  JobExecution deleteResources(@NotEmpty List<ResourceIdentifier> resources);
 
   void updateResource(Resource resource);
 }

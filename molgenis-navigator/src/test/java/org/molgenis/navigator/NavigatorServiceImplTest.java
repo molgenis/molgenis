@@ -4,8 +4,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -18,7 +16,6 @@ import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +30,8 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.navigator.copy.job.ResourceCopyJobExecution;
 import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionFactory;
+import org.molgenis.navigator.delete.job.ResourceDeleteJobExecution;
+import org.molgenis.navigator.delete.job.ResourceDeleteJobExecutionFactory;
 import org.molgenis.navigator.download.job.ResourceDownloadJobExecution;
 import org.molgenis.navigator.download.job.ResourceDownloadJobExecutionFactory;
 import org.molgenis.navigator.model.Resource;
@@ -53,18 +52,23 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
   @Mock private JobExecutor jobExecutor;
   @Mock private ResourceDownloadJobExecutionFactory downloadJobExecutionFactory;
   @Mock private ResourceCopyJobExecutionFactory copyJobExecutionFactory;
+  @Mock private ResourceDeleteJobExecutionFactory deleteJobExecutionFactory;
   private NavigatorServiceImpl navigatorServiceImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
     navigatorServiceImpl =
         new NavigatorServiceImpl(
-            dataService, jobExecutor, downloadJobExecutionFactory, copyJobExecutionFactory);
+            dataService,
+            jobExecutor,
+            downloadJobExecutionFactory,
+            copyJobExecutionFactory,
+            deleteJobExecutionFactory);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testNavigatorServiceImpl() {
-    new NavigatorServiceImpl(null, null, null, null);
+    new NavigatorServiceImpl(null, null, null, null, null);
   }
 
   @Test
@@ -535,99 +539,20 @@ public class NavigatorServiceImplTest extends AbstractMockitoTestNGSpringContext
     assertEquals(navigatorServiceImpl.findResources(query), expectedResources);
   }
 
-  @SuppressWarnings("unchecked")
+  @WithMockUser
   @Test
-  public void testDeleteResourcesPackagesAndEntityTypes() {
-    EntityType entityTypeA0 = mock(EntityType.class);
-    EntityType entityTypeA1 = mock(EntityType.class);
+  public void testDeleteResources() {
+    ResourceDeleteJobExecution deleteJobExecution = mock(ResourceDeleteJobExecution.class);
+    when(deleteJobExecutionFactory.create()).thenReturn(deleteJobExecution);
 
-    Package packageA = mock(Package.class);
-    Package packageB = mock(Package.class);
-
-    doReturn(Stream.of(packageA, packageB))
-        .when(dataService)
-        .findAll(eq(PACKAGE), any(Stream.class), eq(Package.class));
-
-    doReturn(Stream.of(entityTypeA0, entityTypeA1))
-        .when(dataService)
-        .findAll(eq(ENTITY_TYPE_META_DATA), any(Stream.class), eq(EntityType.class));
-
-    navigatorServiceImpl.deleteResources(
+    List<ResourceIdentifier> resources =
         asList(
-            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("pA").build(),
-            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("pB").build(),
-            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("eA0").build(),
-            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("eA1").build()));
+            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("p0").build(),
+            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build());
 
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
-    assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
-
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
-    assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
-
-    verifyNoMoreInteractions(dataService);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testDeleteResourcesPackages() {
-    Package packageA = mock(Package.class);
-    Package packageB = mock(Package.class);
-
-    doReturn(Stream.of(packageA, packageB))
-        .when(dataService)
-        .findAll(eq(PACKAGE), any(Stream.class), eq(Package.class));
-
-    navigatorServiceImpl.deleteResources(
-        asList(
-            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("pA").build(),
-            ResourceIdentifier.builder().setType(ResourceType.PACKAGE).setId("pB").build()));
-
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<Package>> packageCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).delete(eq(PACKAGE), packageCaptor.capture());
-    assertEquals(
-        packageCaptor.getValue().collect(toSet()), new HashSet<>(asList(packageA, packageB)));
-
-    verifyNoMoreInteractions(dataService);
-  }
-
-  @Test
-  public void testDeleteResourcesEntityTypes() {
-
-    EntityType entityTypeA0 = mock(EntityType.class);
-    EntityType entityTypeA1 = mock(EntityType.class);
-
-    doReturn(Stream.of(entityTypeA0, entityTypeA1))
-        .when(dataService)
-        .findAll(eq(ENTITY_TYPE_META_DATA), any(Stream.class), eq(EntityType.class));
-
-    navigatorServiceImpl.deleteResources(
-        asList(
-            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e0").build(),
-            ResourceIdentifier.builder().setType(ResourceType.ENTITY_TYPE).setId("e1").build()));
-
-    @SuppressWarnings("unchecked")
-    ArgumentCaptor<Stream<EntityType>> entityTypeCaptor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).delete(eq(ENTITY_TYPE_META_DATA), entityTypeCaptor.capture());
-    assertEquals(
-        entityTypeCaptor.getValue().collect(toSet()),
-        new HashSet<>(asList(entityTypeA0, entityTypeA1)));
-
-    verifyNoMoreInteractions(dataService);
-  }
-
-  @Test
-  public void testDeleteResourcesNothing() {
-    navigatorServiceImpl.deleteResources(emptyList());
-    verifyZeroInteractions(dataService);
+    assertEquals(navigatorServiceImpl.deleteResources(resources), deleteJobExecution);
+    verify(deleteJobExecution).setResources(resources);
+    verify(jobExecutor).submit(deleteJobExecution);
   }
 
   static class Config {}
