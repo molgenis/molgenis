@@ -62,12 +62,12 @@ export function downloadResources (resources: Array<Resource>): Promise<Job> {
   }).catch(throwAlertError).then(toJob)
 }
 
-export function deleteResources (resources: Array<Resource>): Promise<string> {
+export function deleteResources (resources: Array<Resource>): Promise<Job> {
   return api.delete_(NAVIGATOR_URI + '/delete', {
     body: JSON.stringify({
       resources: resources.map(resource => toApiResourceIdentifier(resource))
     })
-  }).catch(throwAlertError)
+  }).catch(throwAlertError).then(toJob)
 }
 
 export function copyResources (resources: Array<Resource>, folder: ?Folder): Promise<Job> {
@@ -114,6 +114,9 @@ function toJobType (response: Object): JobType {
       break
     case 'ResourceDownloadJob':
       type = 'DOWNLOAD'
+      break
+    case 'ResourceDeleteJob':
+      type = 'DELETE'
       break
     default:
       throw new Error('Unknown job type \'' + response._meta.name + '\'')
@@ -176,6 +179,9 @@ function toApiJobEntityType (job: Job): string {
       break
     case 'DOWNLOAD':
       apiType = 'sys_job_ResourceDownloadJobExecution'
+      break
+    case 'DELETE':
+      apiType = 'sys_job_ResourceDeleteJobExecution'
       break
     default:
       throw new Error('unexpected job type \'' + job.type + '\'')

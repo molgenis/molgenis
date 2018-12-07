@@ -235,6 +235,46 @@ describe('api', () => {
       })
     }
 
+    it('should call download endpoint and return job on success', () => {
+      const response = {
+        type: 'DeleteJob',
+        identifier: 'jobId',
+        status: 'SUCCESS'
+      }
+
+      const delete_ = td.function('molgenisApiClient.delete_')
+      td.when(delete_('/plugin/navigator/delete', body)).thenResolve(response)
+      td.replace(molgenisApiClient, 'delete_', delete_)
+
+      const expectedjob = {
+        type: 'DELETE',
+        id: 'jobId',
+        status: 'SUCCESS',
+        progress: undefined,
+        progressMax: undefined,
+        progressMessage: undefined,
+        resultUrl: undefined
+      }
+      expect(api.deleteResources(resources)).to.eventually.eql(expectedjob).then(done, done)
+    })
+    it('should return alerts in case of errors', (done) => {
+      const response = {errors: [{message: 'error'}]}
+
+      const delete_ = td.function('molgenisApiClient.delete_')
+      td.when(delete_('/plugin/navigator/delete', body)).thenResolve(response)
+      td.replace(molgenisApiClient, 'delete_', delete_)
+
+      expect(api.deleteResources(resources)).to.eventually.be.rejectedWith(Error).then(() => done())
+    })
+  })
+
+  describe('deleteResources', (done) => {
+    const body = {
+      body: JSON.stringify({
+        resources: [{id: 'package0', type: 'PACKAGE'}]
+      })
+    }
+
     it('should call delete endpoint and do nothing on success', () => {
       const response = 'OK'
 

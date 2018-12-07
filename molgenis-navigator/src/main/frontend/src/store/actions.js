@@ -40,6 +40,7 @@ function finishJob (commit: Function, dispatch: Function, state: State,
   job: Job) {
   switch (job.type) {
     case 'COPY':
+    case 'DELETE':
       if (job.status === 'SUCCESS') {
         dispatch(FETCH_RESOURCES)
       }
@@ -77,7 +78,6 @@ export default {
       dispatch(FETCH_RESOURCES_BY_FOLDER, state.route.params.folderId)
     }
   },
-  // TODO rename to FETCH_STATE_BY_QUERY
   [FETCH_RESOURCES_BY_QUERY] ({commit}: { commit: Function }, query: string) {
     getResourcesByQuery(query).then(data => {
       commit(SET_RESOURCES, data.resources)
@@ -85,7 +85,6 @@ export default {
       commit(ADD_ALERTS, error.alerts)
     })
   },
-  // TODO rename to FETCH_STATE_BY_FOLDER
   [FETCH_RESOURCES_BY_FOLDER] ({commit, dispatch}: { commit: Function, dispatch: Function }, folderId: ?string) {
     getResourcesByFolderId(folderId).then(data => {
       // if folder changed, then remove selection
@@ -111,8 +110,10 @@ export default {
   },
   [DELETE_SELECTED_RESOURCES] ({commit, state, dispatch}: { commit: Function, state: State, dispatch: Function }) {
     if (state.selectedResources.length > 0) {
-      deleteResources(state.selectedResources).then(() => {
-        dispatch(FETCH_RESOURCES)
+      deleteResources(state.selectedResources).then(job => {
+        commit(SET_SELECTED_RESOURCES, [])
+        commit(ADD_JOB, job)
+        setTimeout(() => dispatch(POLL_JOB, job), 500)
       }).catch(error => {
         commit(ADD_ALERTS, error.alerts)
       })

@@ -8,7 +8,7 @@ export type Alert = {
   code: ?string
 }
 
-export type JobType = 'COPY' | 'DOWNLOAD'
+export type JobType = 'COPY' | 'DOWNLOAD' | 'DELETE'
 
 export type JobStatus = 'RUNNING' | 'SUCCESS' | 'FAILED'
 

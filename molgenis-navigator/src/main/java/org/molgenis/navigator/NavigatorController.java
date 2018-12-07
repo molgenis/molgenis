@@ -101,8 +101,9 @@ public class NavigatorController extends VuePluginController {
   }
 
   @DeleteMapping("/delete")
-  @ResponseStatus(OK)
-  public void deleteResources(@RequestBody @Valid DeleteResourcesRequest deleteItemsRequest) {
-    navigatorService.deleteResources(deleteItemsRequest.getResources());
+  @ResponseBody
+  public JobExecution deleteResources(
+      @RequestBody @Valid DeleteResourcesRequest deleteItemsRequest) {
+    return navigatorService.deleteResources(deleteItemsRequest.getResources());
   }
 }

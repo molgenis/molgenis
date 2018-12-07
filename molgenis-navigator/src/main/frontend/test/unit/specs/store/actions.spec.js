@@ -172,11 +172,13 @@ describe('actions', () => {
     })
   })
   describe('DELETE_SELECTED_RESOURCES', () => {
-    it('should delete the selected resources', done => {
-      const resources = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+    const resources = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
+    const deleteResources = td.function('api.deleteResources')
 
-      const deleteResources = td.function('api.deleteResources')
-      td.when(deleteResources(resources)).thenResolve(Promise.resolve())
+    it('should delete selected resources', done => {
+      const job = {type: 'DELETE', id: 'id', status: 'RUNNING'}
+
+      td.when(deleteResources(resources)).thenResolve(Promise.resolve(job))
       td.replace(api, 'deleteResources', deleteResources)
 
       const options = {
@@ -184,17 +186,19 @@ describe('actions', () => {
           selectedResources: resources
         },
         expectedActions: [
-          {type: '__FETCH_RESOURCES__'}
+          {type: '__POLL_JOB__', payload: job}
+        ],
+        expectedMutations: [
+          {type: '__SET_SELECTED_RESOURCES__', payload: []},
+          {type: '__ADD_JOB__', payload: job}
         ]
       }
       utils.testAction(actions.__DELETE_SELECTED_RESOURCES__, options, done)
     })
     it('should set alerts in the state in case of errors', done => {
-      const resources = [{type: 'PACKAGE', id: 'id', label: 'label', readonly: false}]
-
-      const deleteResources = td.function('api.deleteResources')
       const error = new Error()
       error.alerts = [{type: 'ERROR', message: 'message'}]
+
       td.when(deleteResources(resources)).thenResolve(Promise.reject(error))
       td.replace(api, 'deleteResources', deleteResources)
 
