@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class NavigatorServiceImpl implements NavigatorService {
 
+  private static final String MESSAGE_EMPTY_RESOURCES = "resources can't be empty";
+
   private final DataService dataService;
   private final JobExecutor jobExecutor;
   private final ResourceDownloadJobExecutionFactory downloadJobExecutionFactory;
@@ -136,7 +138,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   public JobExecution copyResources(
       List<ResourceIdentifier> resources, @Nullable String targetFolderId) {
     if (resources.isEmpty()) {
-      throw new IllegalArgumentException("resources can't be empty");
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
     Package aPackage = getPackage(targetFolderId);
@@ -151,7 +153,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Override
   public JobExecution downloadResources(List<ResourceIdentifier> resources) {
     if (resources.isEmpty()) {
-      throw new IllegalArgumentException("resources can't be empty");
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
     ResourceDownloadJobExecution jobExecution = downloadJobExecutionFactory.create();
@@ -164,7 +166,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Override
   public JobExecution deleteResources(List<ResourceIdentifier> resources) {
     if (resources.isEmpty()) {
-      throw new IllegalArgumentException("resources can't be empty");
+      throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
 
     ResourceDeleteJobExecution jobExecution = resourceDeleteJobExecutionFactory.create();
