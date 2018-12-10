@@ -46,7 +46,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
   private final BootstrapThemePopulator bootstrapThemePopulator;
   private final BootstrappingEventPublisher bootstrappingEventPublisher;
 
-  public MolgenisBootstrapper(
+  MolgenisBootstrapper(
       MolgenisUpgradeBootstrapper upgradeBootstrapper,
       DataSourceAclTablesPopulator dataSourceAclTablesPopulator,
       TransactionExceptionTranslatorRegistrar transactionExceptionTranslatorRegistrar,
@@ -102,14 +102,12 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
     LOG.debug("Bootstrapped system entity meta data");
 
     LOG.trace("Populating repositories ...");
-    boolean wasDatabasePopulated = repositoryPopulator.populate(event);
+    repositoryPopulator.populate(event);
     LOG.debug("Populated repositories");
 
-    if (!wasDatabasePopulated) {
-      LOG.trace("Populating permissions ...");
-      systemPermissionPopulator.populate(event.getApplicationContext());
-      LOG.debug("Populated permissions");
-    }
+    LOG.trace("Populating permissions ...");
+    systemPermissionPopulator.populate(event.getApplicationContext());
+    LOG.debug("Populated permissions");
 
     LOG.trace("Bootstrapping jobs ...");
     jobBootstrapper.bootstrap();

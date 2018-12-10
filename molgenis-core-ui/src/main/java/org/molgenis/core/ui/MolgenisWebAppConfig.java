@@ -15,13 +15,13 @@ import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.molgenis.core.ui.converter.RdfConverter;
-import org.molgenis.core.ui.freemarker.LimitMethod;
 import org.molgenis.core.ui.freemarker.MolgenisFreemarkerObjectWrapper;
 import org.molgenis.core.ui.menu.MenuMolgenisUi;
 import org.molgenis.core.ui.menu.MenuReaderService;
@@ -30,7 +30,6 @@ import org.molgenis.core.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
-import org.molgenis.data.DataService;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.convert.StringToDateTimeConverter;
 import org.molgenis.data.file.FileStore;
@@ -78,8 +77,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @Import({PlatformConfig.class, RdfConverter.class})
 public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
-  @Autowired private DataService dataService;
-
   @Autowired private AppSettings appSettings;
 
   @Autowired private AuthenticationSettings authenticationSettings;
@@ -270,7 +267,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         Paths.get(appDataRoot.toString(), "data", "filestore").toString();
     File molgenisDataDir = new File(molgenisFileStoreDirStr);
     if (!molgenisDataDir.exists() && !molgenisDataDir.mkdirs()) {
-      throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
+      throw new UncheckedIOException(
+          new IOException("failed to create directory: " + molgenisFileStoreDirStr));
     }
 
     return new FileStore(molgenisFileStoreDirStr);
@@ -312,7 +310,6 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
     freemarkerSettings.setProperty(Configuration.NUMBER_FORMAT_KEY, "computer");
     result.setFreemarkerSettings(freemarkerSettings);
     Map<String, Object> freemarkerVariables = Maps.newHashMap();
-    freemarkerVariables.put("limit", new LimitMethod());
     freemarkerVariables.put("hasPermission", new HasPermissionDirective(permissionService));
     freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(permissionService));
     addFreemarkerVariables(freemarkerVariables);

@@ -3,7 +3,6 @@ package org.molgenis.data;
 import static java.util.Collections.singletonList;
 import static java.util.stream.StreamSupport.stream;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,9 +19,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-@SuppressFBWarnings(
-    value = "NP_BOOLEAN_RETURN_NULL",
-    justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter {
   private static ConversionService conversionService;
 
@@ -115,7 +111,7 @@ public class DataConverter {
     return convert(source, Integer.class);
   }
 
-  private static Long toLong(Object source) {
+  public static Long toLong(Object source) {
     if (source == null) return null;
     if (source instanceof Long) return (Long) source;
     return convert(source, Long.class);
@@ -129,13 +125,13 @@ public class DataConverter {
     return convert(source, Boolean.class);
   }
 
-  private static Double toDouble(Object source) {
+  public static Double toDouble(Object source) {
     if (source == null) return null;
     if (source instanceof Double) return (Double) source;
     return convert(source, Double.class);
   }
 
-  static LocalDate toLocalDate(Object source) {
+  public static LocalDate toLocalDate(Object source) {
     if (source == null) return null;
     if (source instanceof LocalDate) return (LocalDate) source;
     return convert(source, LocalDate.class);

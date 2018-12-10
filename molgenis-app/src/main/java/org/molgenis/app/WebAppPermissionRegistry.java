@@ -3,6 +3,7 @@ package org.molgenis.app;
 import static org.molgenis.beacon.config.BeaconPackage.PACKAGE_BEACON;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
+import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
@@ -17,6 +18,7 @@ import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorPackage.PACKAGE_NEGOTIATOR;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserPackage.PACKAGE_GENOME_BROWSER;
+import static org.molgenis.navigator.download.job.ResourceDownloadJobExecutionMetaData.RESOURCE_DOWNLOAD_JOB_EXECUTION;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.ONE_CLICK_IMPORTER;
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ONE_CLICK_IMPORT_JOB_EXECUTION;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
@@ -43,7 +45,10 @@ import org.molgenis.core.ui.jobs.JobsController;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.dataexplorer.negotiator.NegotiatorController;
 import org.molgenis.datarowedit.controller.DataRowEditController;
+import org.molgenis.metadata.manager.controller.MetadataManagerController;
 import org.molgenis.navigator.NavigatorController;
+import org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata;
+import org.molgenis.navigator.delete.job.ResourceDeleteJobExecutionMetadata;
 import org.molgenis.questionnaires.controller.QuestionnaireController;
 import org.molgenis.searchall.controller.SearchAllPluginController;
 import org.molgenis.security.core.PermissionSet;
@@ -107,10 +112,15 @@ public class WebAppPermissionRegistry implements PermissionRegistry {
     register(ENTITY_TYPE, DECORATOR_CONFIGURATION, user, READ);
     register(PACKAGE, PACKAGE_META, manager, WRITE);
     register(PLUGIN, NavigatorController.ID, viewer, READ);
+    register(ENTITY_TYPE, RESOURCE_DOWNLOAD_JOB_EXECUTION, editor, WRITE);
+    register(ENTITY_TYPE, FILE_META, editor, WRITE);
     register(PLUGIN, ONE_CLICK_IMPORTER, manager, READ);
     register(ENTITY_TYPE, ONE_CLICK_IMPORT_JOB_EXECUTION, manager, WRITE);
     register(PACKAGE, PACKAGE_SYSTEM, user, READMETA);
     register(PLUGIN, SecurityUiController.ID, manager, READ);
+    register(PLUGIN, MetadataManagerController.METADATA_MANAGER, manager, READ);
+    register(ENTITY_TYPE, ResourceCopyJobExecutionMetadata.COPY_JOB_EXECUTION, manager, WRITE);
+    register(ENTITY_TYPE, ResourceDeleteJobExecutionMetadata.DELETE_JOB_EXECUTION, manager, WRITE);
   }
 
   @Override

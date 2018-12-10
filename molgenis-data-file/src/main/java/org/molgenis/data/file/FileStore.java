@@ -29,11 +29,8 @@ public class FileStore {
 
   public File store(InputStream is, String fileName) throws IOException {
     File file = new File(storageDir + separator + fileName);
-    FileOutputStream fos = new FileOutputStream(file);
-    try {
+    try (FileOutputStream fos = new FileOutputStream(file)) {
       IOUtils.copy(is, fos);
-    } finally {
-      IOUtils.closeQuietly(fos);
     }
     return file;
   }

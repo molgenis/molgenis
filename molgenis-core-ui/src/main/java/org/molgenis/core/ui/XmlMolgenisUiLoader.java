@@ -7,7 +7,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
-import org.apache.commons.io.IOUtils;
 import org.molgenis.core.util.SchemaLoader;
 
 public class XmlMolgenisUiLoader {
@@ -17,8 +16,7 @@ public class XmlMolgenisUiLoader {
   public Molgenis load() throws IOException {
     InputStream xsdStream = this.getClass().getResourceAsStream(UI_XSD);
     if (xsdStream == null) throw new IOException("unable to find " + UI_XSD);
-    try {
-      InputStream xmlStream = this.getClass().getResourceAsStream(UI_XML);
+    try (InputStream xmlStream = this.getClass().getResourceAsStream(UI_XML)) {
       if (xmlStream == null) throw new IOException("unable to find " + UI_XML);
       try {
         SchemaLoader schemaLoader = new SchemaLoader(xsdStream);
@@ -30,11 +28,9 @@ public class XmlMolgenisUiLoader {
         return unmarshaller.unmarshal(new StreamSource(xmlStream), Molgenis.class).getValue();
       } catch (JAXBException e) {
         throw new IOException(e);
-      } finally {
-        IOUtils.closeQuietly(xmlStream);
       }
     } finally {
-      IOUtils.closeQuietly(xsdStream);
+      xsdStream.close();
     }
   }
 }

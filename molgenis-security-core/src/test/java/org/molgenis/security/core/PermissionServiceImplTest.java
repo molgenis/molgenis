@@ -1,5 +1,6 @@
 package org.molgenis.security.core;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -7,12 +8,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.collections.Maps.newHashMap;
 
 import java.util.Map;
 import org.mockito.Mock;
 import org.mockito.exceptions.misusing.InvalidUseOfMatchersException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.security.acls.model.AccessControlEntry;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
@@ -80,5 +84,26 @@ public class PermissionServiceImplTest extends AbstractMockitoTest {
     verify(acl2, times(1)).insertAce(1, PermissionSet.WRITEMETA, sid, true);
     verify(mutableAclService, times(1)).updateAcl(acl2);
     verifyNoMoreInteractions(mutableAclService);
+  }
+
+  @Test
+  public void testExists() {
+    ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
+    Sid sid = mock(Sid.class);
+    MutableAcl acl = mock(MutableAcl.class);
+    when(mutableAclService.readAclById(objectIdentity, singletonList(sid))).thenReturn(acl);
+    AccessControlEntry ace = mock(AccessControlEntry.class);
+    when(ace.getSid()).thenReturn(sid);
+    when(acl.getEntries()).thenReturn(singletonList(ace));
+    assertTrue(permissionService.exists(objectIdentity, sid));
+  }
+
+  @Test
+  public void testExistsNotExists() {
+    ObjectIdentity objectIdentity = mock(ObjectIdentity.class);
+    Sid sid = mock(Sid.class);
+    MutableAcl acl = mock(MutableAcl.class);
+    when(mutableAclService.readAclById(objectIdentity, singletonList(sid))).thenReturn(acl);
+    assertFalse(permissionService.exists(objectIdentity, sid));
   }
 }

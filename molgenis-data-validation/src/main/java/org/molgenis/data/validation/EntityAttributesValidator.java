@@ -1,6 +1,7 @@
 package org.molgenis.data.validation;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.EMAIL;
@@ -15,6 +16,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
@@ -39,7 +41,7 @@ public class EntityAttributesValidator {
   private final ExpressionValidator expressionValidator;
   private EmailValidator emailValidator;
 
-  public EntityAttributesValidator(ExpressionValidator expressionValidator) {
+  EntityAttributesValidator(ExpressionValidator expressionValidator) {
     this.expressionValidator = requireNonNull(expressionValidator);
   }
 
@@ -47,79 +49,85 @@ public class EntityAttributesValidator {
     Set<ConstraintViolation> violations = checkNullableExpressions(entity, meta);
     violations.addAll(checkValidationExpressions(entity, meta));
 
-    for (Attribute attr : meta.getAtomicAttributes()) {
-      ConstraintViolation violation = null;
-
-      AttributeType attrType = attr.getDataType();
-      switch (attrType) {
-        case EMAIL:
-          violation = checkEmail(entity, attr, meta);
-          break;
-        case BOOL:
-          violation = checkBoolean(entity, attr, meta);
-          break;
-        case DATE:
-          violation = checkDate(entity, attr, meta);
-          break;
-        case DATE_TIME:
-          violation = checkDateTime(entity, attr, meta);
-          break;
-        case DECIMAL:
-          violation = checkDecimal(entity, attr, meta);
-          break;
-        case HYPERLINK:
-          violation = checkHyperlink(entity, attr, meta);
-          break;
-        case INT:
-          violation = checkInt(entity, attr, meta);
-          if ((violation == null) && (attr.getRange() != null)) {
-            violation = checkRange(entity, attr, meta);
-          }
-          break;
-        case LONG:
-          violation = checkLong(entity, attr, meta);
-          if ((violation == null) && (attr.getRange() != null)) {
-            violation = checkRange(entity, attr, meta);
-          }
-          break;
-        case ENUM:
-          violation = checkEnum(entity, attr, meta);
-          break;
-        case HTML:
-          violation = checkText(entity, attr, meta, HTML);
-          break;
-        case SCRIPT:
-          violation = checkText(entity, attr, meta, SCRIPT);
-          break;
-        case TEXT:
-          violation = checkText(entity, attr, meta, TEXT);
-          break;
-        case STRING:
-          violation = checkText(entity, attr, meta, STRING);
-          break;
-        case CATEGORICAL:
-        case FILE:
-        case XREF:
-          violation = checkXref(entity, attr, meta);
-          break;
-        case CATEGORICAL_MREF:
-        case MREF:
-        case ONE_TO_MANY:
-          violation = checkMref(entity, attr, meta);
-          break;
-        case COMPOUND:
-          // no op
-          break;
-        default:
-          throw new UnexpectedEnumException(attrType);
-      }
-
-      if (violation != null) {
-        violations.add(violation);
-      }
-    }
+    stream(meta.getAtomicAttributes())
+        .filter(this::isValidationAttribute)
+        .forEach(attr -> validateAttribute(entity, meta, attr).ifPresent(violations::add));
 
     return violations;
+  }
+
+  private boolean isValidationAttribute(Attribute attribute) {
+    return !attribute.hasExpression() && !attribute.isMappedBy();
+  }
+
+  private Optional<ConstraintViolation> validateAttribute(
+      Entity entity, EntityType entityType, Attribute attribute) {
+    ConstraintViolation violation = null;
+
+    AttributeType attrType = attribute.getDataType();
+    switch (attrType) {
+      case EMAIL:
+        violation = checkEmail(entity, attribute, entityType);
+        break;
+      case BOOL:
+        violation = checkBoolean(entity, attribute, entityType);
+        break;
+      case DATE:
+        violation = checkDate(entity, attribute, entityType);
+        break;
+      case DATE_TIME:
+        violation = checkDateTime(entity, attribute, entityType);
+        break;
+      case DECIMAL:
+        violation = checkDecimal(entity, attribute, entityType);
+        break;
+      case HYPERLINK:
+        violation = checkHyperlink(entity, attribute, entityType);
+        break;
+      case INT:
+        violation = checkInt(entity, attribute, entityType);
+        if ((violation == null) && (attribute.getRange() != null)) {
+          violation = checkRange(entity, attribute, entityType);
+        }
+        break;
+      case LONG:
+        violation = checkLong(entity, attribute, entityType);
+        if ((violation == null) && (attribute.getRange() != null)) {
+          violation = checkRange(entity, attribute, entityType);
+        }
+        break;
+      case ENUM:
+        violation = checkEnum(entity, attribute, entityType);
+        break;
+      case HTML:
+        violation = checkText(entity, attribute, entityType, HTML);
+        break;
+      case SCRIPT:
+        violation = checkText(entity, attribute, entityType, SCRIPT);
+        break;
+      case TEXT:
+        violation = checkText(entity, attribute, entityType, TEXT);
+        break;
+      case STRING:
+        violation = checkText(entity, attribute, entityType, STRING);
+        break;
+      case CATEGORICAL:
+      case FILE:
+      case XREF:
+        violation = checkXref(entity, attribute, entityType);
+        break;
+      case CATEGORICAL_MREF:
+      case MREF:
+      case ONE_TO_MANY:
+        violation = checkMref(entity, attribute, entityType);
+        break;
+      case COMPOUND:
+        // no op
+        break;
+      default:
+        throw new UnexpectedEnumException(attrType);
+    }
+    return Optional.ofNullable(violation);
   }
 
   private ConstraintViolation checkMref(Entity entity, Attribute attr, EntityType entityType) {
