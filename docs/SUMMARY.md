@@ -12,7 +12,8 @@
         - [Advanced data upload](user_documentation/import-data/guide-upload.md)
             - [EMX format](user_documentation/import-data/ref-emx.md)
             - [Localization](user_documentation/import-data/guide-l10n.md)
-      - Finding data 
+      - Finding data
+        - [Using Navigator](user_documentation/finding-data/guide-navigator.md)
         - [Using search-all](user_documentation/finding-data/guide-search.md)
         - [Using dataexplorer](user_documentation/finding-data/guide-explore.md)
       - Modify data
