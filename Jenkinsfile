@@ -27,6 +27,9 @@ pipeline {
                 dir('/home/jenkins/.m2') {
                     stash includes: 'settings.xml', name: 'maven-settings'
                 }
+                dir('/home/jenkins/.rancher') {
+                    stash includes: 'cli2.json', name: 'rancher-config'
+                }
             }
         }
         stage('Steps [ PR ]') {
@@ -116,6 +119,7 @@ pipeline {
                         container('maven') {
                             sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
                             sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
+                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
                                 sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest"
@@ -143,6 +147,9 @@ pipeline {
                 stage('Deploy to test [ x.x ]') {
                     steps {
                         milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
+                        dir('/home/jenkins/.rancher') {
+                            unstash 'rancher-config'
+                        }
                         container('rancher') {
                             sh "rancher context switch test"
                             sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
