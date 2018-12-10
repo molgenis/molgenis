@@ -3,6 +3,8 @@ package org.molgenis.genomebrowser.service;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata.GENOMEBROWSERATTRIBUTES;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata.GENOMEBROWSERSETTINGS;
+import static org.molgenis.genomebrowser.service.GenomeBrowserService.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -13,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.json.JSONObject;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -25,11 +26,19 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettingsMetadata;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /** Service implements genomeBrowser specific business logic. */
-@Component
+@Service
+@RequestMapping(URI)
 public class GenomeBrowserService {
+  public static final String API = "/api";
+  public static final String URI = API + "/genomebrowser";
+
   private final DataService dataService;
   private final UserPermissionEvaluator userPermissionEvaluator;
 
@@ -37,6 +46,13 @@ public class GenomeBrowserService {
       DataService dataService, UserPermissionEvaluator userPermissionEvaluator) {
     this.dataService = requireNonNull(dataService);
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
+  }
+
+  @GetMapping(value = "/tracks", produces = APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public List<String> getGenomeBrowserTracksAsString(@RequestParam String entityTypeId) {
+    EntityType entityType = dataService.getEntityType(entityTypeId);
+    return getTracksString(getGenomeBrowserTracks(entityType));
   }
 
   public Map<String, GenomeBrowserTrack> getGenomeBrowserTracks(EntityType entityType) {
@@ -47,8 +63,8 @@ public class GenomeBrowserService {
   }
 
   /** Get readable genome entities */
-  public List<JSONObject> getTracksJson(Map<String, GenomeBrowserTrack> entityTracks) {
-    List<JSONObject> results = new ArrayList<>();
+  public List<String> getTracksString(Map<String, GenomeBrowserTrack> entityTracks) {
+    List<String> results = new ArrayList<>();
     if (hasPermission()) {
       Map<String, GenomeBrowserTrack> allTracks = new HashMap<>(entityTracks);
       for (GenomeBrowserTrack track : entityTracks.values()) {
@@ -58,7 +74,7 @@ public class GenomeBrowserService {
           allTracks
               .values()
               .stream()
-              .map(GenomeBrowserTrack::toTrackJson)
+              .map(GenomeBrowserTrack::toTrackString)
               .collect(Collectors.toList());
     }
     return results;
@@ -164,6 +180,7 @@ public class GenomeBrowserService {
         Collections.emptyList(),
         GenomeBrowserSettings.MolgenisReferenceMode.ALL,
         attrs,
+        null,
         null,
         null,
         null,

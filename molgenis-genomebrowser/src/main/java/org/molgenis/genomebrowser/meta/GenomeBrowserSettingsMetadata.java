@@ -38,6 +38,7 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
   public static final String ALL = "ALL";
   public static final String CONFIGURED = "CONFIGURED";
   public static final String NONE = "NONE";
+  public static final String FEATURE_INFO_PLUGIN = "feature_info_plugin";
 
   private final GenomeBrowserPackage genomeBrowserPackage;
   private EntityTypeMetadata entityTypeMetadata;
@@ -119,5 +120,10 @@ public class GenomeBrowserSettingsMetadata extends SystemEntityType {
         .setDataType(TEXT)
         .setDescription(
             "a javascript array containing object that specify actions to be available in the genome browser popup, format: [{label:\"action1\" run:\"alert('action1')\"},{label:\"action2\" run:\"alert('action2')\"}]");
+    addAttribute(FEATURE_INFO_PLUGIN)
+        .setLabel("Feature info plugin")
+        .setDataType(TEXT)
+        .setDescription(
+            "contents of the addFeaturePlugin method ('function(f, info) {YOUR_CODE_HERE}')");
   }
 }
