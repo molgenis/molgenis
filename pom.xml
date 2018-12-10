@@ -985,6 +985,8 @@
         <groupId>io.sentry</groupId>
         <artifactId>sentry-logback</artifactId>
         <version>${sentry-logback.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.github.mokka88</groupId>
         <artifactId>simple-excel</artifactId>
         <version>${simple-excel.version}</version>
