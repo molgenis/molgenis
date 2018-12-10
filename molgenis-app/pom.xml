@@ -356,5 +356,13 @@
       <artifactId>molgenis-metrics</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.sentry</groupId>
+      <artifactId>sentry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.sentry</groupId>
+      <artifactId>sentry-logback</artifactId>
+    </dependency>
   </dependencies>
 </project>
