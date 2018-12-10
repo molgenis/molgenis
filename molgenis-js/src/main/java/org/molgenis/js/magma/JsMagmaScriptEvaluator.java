@@ -112,7 +112,7 @@ public class JsMagmaScriptEvaluator {
     try {
       return jsScriptEngine.eval(bindings, expression);
     } catch (javax.script.ScriptException t) {
-      return new ScriptException(t.getCause());
+      return new ScriptException(t.getCause().getMessage(), t.getCause());
     } catch (Exception t) {
       return new ScriptException(t);
     }

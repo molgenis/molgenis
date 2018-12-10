@@ -421,8 +421,12 @@ MagmaScript.prototype.toUnit = function (targetUnit) {
  * @version 1.0
  * @namespace MagmaScript
  */
-MagmaScript.$ = function (attr) {
-  return new MagmaScript(this[attr])
+MagmaScript.$ = function (attrName) {
+  if(!(attrName in this)) {
+    throw 'Unknown attribute \'' + attrName + '\''
+  }
+  var attr = this[attrName]
+  return new MagmaScript(this[attrName])
 }
 
 MagmaScript._isNull = function (value) {
