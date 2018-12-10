@@ -61,8 +61,18 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest {
       expectedExceptions = MolgenisDataException.class,
       expectedExceptionsMessageRegExp =
           "Number of values \\(2\\) doesn't match the number of headers \\(3\\): \\[val1,val2\\]")
-  public void testIteratorValueHeaderMismatch() throws IOException {
+  public void testIteratorValueHeaderMismatchTooLittle() throws IOException {
     File csvFile = new ClassPathResource("testdatamissingvalue2.csv").getFile();
+    new CsvIterator(csvFile, "testdatamissingvalue", null, ',', entityType).next();
+  }
+
+  @SuppressWarnings("deprecation")
+  @Test(
+      expectedExceptions = MolgenisDataException.class,
+      expectedExceptionsMessageRegExp =
+          "Number of values \\(4\\) doesn't match the number of headers \\(3\\): \\[val1,val2,val3,val4\\]")
+  public void testIteratorValueHeaderMismatchTooMuch() throws IOException {
+    File csvFile = new ClassPathResource("testdatamissingvalue3.csv").getFile();
     new CsvIterator(csvFile, "testdatamissingvalue", null, ',', entityType).next();
   }
 
