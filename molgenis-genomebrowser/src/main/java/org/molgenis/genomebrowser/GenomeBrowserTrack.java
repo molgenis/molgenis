@@ -1,6 +1,7 @@
 package org.molgenis.genomebrowser;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.base.Strings;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.json.JSONArray;
@@ -15,6 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GenomeBrowserTrack {
+
+  @SuppressWarnings("squid:S00107") // Methods should not have too many parameters
   public static GenomeBrowserTrack create(
       String id,
       String label,
@@ -27,7 +30,8 @@ public abstract class GenomeBrowserTrack {
       String actions,
       String attrs,
       String scoreAttr,
-      String exonKey) {
+      String exonKey,
+      String featureInfoPlugin) {
     return new AutoValue_GenomeBrowserTrack(
         id,
         label,
@@ -40,7 +44,8 @@ public abstract class GenomeBrowserTrack {
         actions,
         attrs,
         scoreAttr,
-        exonKey);
+        exonKey,
+        featureInfoPlugin);
   }
 
   public static GenomeBrowserTrack create(GenomeBrowserSettings settings) {
@@ -56,7 +61,8 @@ public abstract class GenomeBrowserTrack {
         settings.getActions(),
         settings.getAttrs(),
         settings.getScoreAttr(),
-        settings.getExonKey());
+        settings.getExonKey(),
+        settings.getFeatureInfoPlugin());
   }
 
   public abstract String getId();
@@ -88,24 +94,57 @@ public abstract class GenomeBrowserTrack {
   @Nullable
   public abstract String getExonKey();
 
-  public JSONObject toTrackJson() {
-    JSONObject json = new JSONObject();
-    json.put("name", getLabel());
-    json.put("entity", getEntity().getId());
-    json.put("tier_type", "molgenis");
-    json.put(
-        "uri",
-        UriComponentsBuilder.fromPath(RestControllerV2.BASE_URI)
-            .pathSegment(getEntity().getId())
-            .toUriString());
-    json.put("genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()));
-    if (getLabelAttr() != null) json.put("label_attr", getLabelAttr());
-    if (getAttrs() != null) json.put("attrs", getAttrsJSON(getAttrs()));
-    if (getActions() != null) json.put("actions", getActions());
-    if (getTrackType() != null) json.put("track_type", getTrackType());
-    if (getScoreAttr() != null) json.put("score_attr", getScoreAttr());
-    if (getExonKey() != null) json.put("exon_key", getExonKey());
-    return json;
+  @Nullable
+  public abstract String getFeatureInfoPlugin();
+
+  public String toTrackString() {
+    StringBuilder config = new StringBuilder("{");
+    config.append(getConfigStringValue("name", getLabel()));
+    config.append(",").append(getConfigStringValue("entity", getEntity().getId()));
+    config.append(",").append(getConfigStringValue("tier_type", "molgenis"));
+    config
+        .append(",")
+        .append(
+            getConfigStringValue(
+                "uri",
+                UriComponentsBuilder.fromPath(RestControllerV2.BASE_URI)
+                    .pathSegment(getEntity().getId())
+                    .toUriString()));
+    config
+        .append(",")
+        .append(
+            String.format(
+                "\"%s\":%s",
+                "genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()).toString()));
+    if (getLabelAttr() != null)
+      config.append(",").append(getConfigStringValue("label_attr", getLabelAttr()));
+    if (getAttrs() != null)
+      config.append(",").append(getConfigObjectValue("attrs", getAttrsJSON(getAttrs()).toString()));
+    if (getActions() != null)
+      config.append(",").append(getConfigObjectValue("actions", JSONObject.quote(getActions())));
+    if (getTrackType() != null)
+      config.append(",").append(getConfigStringValue("track_type", getTrackType().name()));
+    if (getScoreAttr() != null)
+      config.append(",").append(getConfigStringValue("score_attr", getScoreAttr()));
+    if (getExonKey() != null)
+      config.append(",").append(getConfigStringValue("exon_key", getExonKey()));
+    if (!Strings.isNullOrEmpty(getFeatureInfoPlugin()))
+      config
+          .append(",")
+          .append(
+              getConfigObjectValue(
+                  "featureInfoPlugin",
+                  String.format("function(f, info) {%s}", getFeatureInfoPlugin())));
+    config.append("}");
+    return config.toString();
+  }
+
+  private String getConfigObjectValue(String key, String value) {
+    return String.format("\"%s\":%s", key, value);
+  }
+
+  private String getConfigStringValue(String key, String value) {
+    return String.format("\"%s\":\"%s\"", key, value);
   }
 
   private JSONObject getGenomeBrowserAttrsJSON(GenomeBrowserAttributes genomeBrowserAttrs) {
