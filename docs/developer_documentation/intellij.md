@@ -229,5 +229,5 @@ Building the project can be sped up by not building the javascript. To skip buil
 to the maven build command.
 
 * Note: 
-    - If javascript was not already build, javascript will be missing and the application will not function properly.
+    - If javascript was not already built, javascript will be missing and the application will not function properly.
     - If changes where made to de javascript these changes will not be build into the application ( as building will be skipped). 
