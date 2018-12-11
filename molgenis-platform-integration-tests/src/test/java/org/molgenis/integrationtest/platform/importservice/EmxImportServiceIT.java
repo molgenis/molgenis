@@ -1010,5 +1010,4 @@ public class EmxImportServiceIT extends ImportServiceIT {
     permissionMap.put(new PackageIdentity("sys_md"), PermissionSet.WRITE);
     testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
   }
-
 }
