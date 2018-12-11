@@ -51,6 +51,9 @@ public class EmxImportService implements ImportService {
         if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)) {
           return true;
         }
+        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_PACKAGES)) {
+          return true;
+        }
         if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)) {
           return true;
         }

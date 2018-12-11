@@ -71,6 +71,22 @@ public class EmxImportServiceIT extends ImportServiceIT {
     testDoImportEmxCsvZip();
   }
 
+  @WithMockUser(username = USERNAME)
+  @Test
+  private void testDoImportEmxPackagesOnly() {
+    populateManagerPermissions();
+    String fileName = "it_emx_package_only.xlsx";
+    File file = getFile("/xls/" + fileName);
+    FileRepositoryCollection repoCollection =
+        fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+    ImportService importService = importServiceFactory.getImportService(file, repoCollection);
+    importService.doImport(repoCollection, MetadataAction.UPSERT, ADD, null);
+    assertNotNull(dataService.getMeta().getPackage("it_emx_package_only"));
+    assertNotNull(dataService.getMeta().getPackage("it_emx_package"));
+    assertNotNull(dataService.getMeta().getPackage("it_emx"));
+    assertNotNull(dataService.getMeta().getPackage("it"));
+  }
+
   @WithMockUser(
       username = USERNAME,
       roles = {ROLE_SU})
@@ -987,4 +1003,12 @@ public class EmxImportServiceIT extends ImportServiceIT {
 
     testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
   }
+
+  private void populateManagerPermissions() {
+    populateUserPermissions();
+    Map<ObjectIdentity, PermissionSet> permissionMap = new HashMap<>();
+    permissionMap.put(new PackageIdentity("sys_md"), PermissionSet.WRITE);
+    testPermissionService.grant(permissionMap, SidUtils.createUserSid(USERNAME));
+  }
+
 }

@@ -264,30 +264,29 @@ public class EmxMetadataParser implements MetadataParser {
           intermediateResults.getLanguages(),
           intermediateResults.getL10nStrings());
     } else {
-        List<EntityType> metadataList = new ArrayList<>();
-        for (String emxName : source.getEntityTypeIds()) {
-          String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
-          if (repoName == null) repoName = emxName;
-          metadataList.add(dataService.getRepository(repoName).getEntityType());
-        }
-        IntermediateParseResults intermediateResults =
-            parseTagsSheet(source.getRepository(EMX_TAGS));
-        parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
+      List<EntityType> metadataList = new ArrayList<>();
+      for (String emxName : source.getEntityTypeIds()) {
+        String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+        if (repoName == null) repoName = emxName;
+        metadataList.add(dataService.getRepository(repoName).getEntityType());
+      }
+      IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(EMX_TAGS));
+      parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
 
-        if (source.hasRepository(EMX_LANGUAGES)) {
-          parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
-        }
+      if (source.hasRepository(EMX_LANGUAGES)) {
+        parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
+      }
 
-        if (source.hasRepository(EMX_I18NSTRINGS)) {
-          parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
-        }
+      if (source.hasRepository(EMX_I18NSTRINGS)) {
+        parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
+      }
 
-        return new ParsedMetaData(
-            entityTypeDependencyResolver.resolve(metadataList),
-            intermediateResults.getPackages(),
-            intermediateResults.getTags(),
-            intermediateResults.getLanguages(),
-            intermediateResults.getL10nStrings());
+      return new ParsedMetaData(
+          entityTypeDependencyResolver.resolve(metadataList),
+          intermediateResults.getPackages(),
+          intermediateResults.getTags(),
+          intermediateResults.getLanguages(),
+          intermediateResults.getL10nStrings());
     }
   }
 
@@ -301,9 +300,22 @@ public class EmxMetadataParser implements MetadataParser {
   private ImmutableMap<String, EntityType> getEntityTypeMap(
       DataService dataService, RepositoryCollection source) {
     // If there is no attribute sheet, we assume the entity is already known in MOLGENIS
-    Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
-    if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
-    else return getEntityTypeFromDataService(dataService, source.getEntityTypeIds());
+    if (source.getRepository(EMX_ATTRIBUTES) != null) {
+      return getEntityTypeFromSource(source).getEntityMap();
+    } else {
+      ImmutableMap<String, EntityType> entityTypeMap =
+          getEntityTypeFromDataService(dataService, source.getEntityTypeIds());
+      if (source.getRepository(EMX_PACKAGES) != null) {
+        IntermediateParseResults intermediateParseResults =
+            new IntermediateParseResults(entityTypeFactory);
+        parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateParseResults);
+        return ImmutableMap.<String, EntityType>builder()
+            .putAll(intermediateParseResults.getEntityMap())
+            .putAll(entityTypeMap)
+            .build();
+      }
+      return entityTypeMap;
+    }
   }
 
   private EntitiesValidationReport buildValidationReport(
