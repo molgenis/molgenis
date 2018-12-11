@@ -10,6 +10,7 @@ import org.molgenis.data.support.StaticEntity;
 import org.molgenis.genomebrowser.GenomeBrowserTrack;
 
 public class GenomeBrowserSettings extends StaticEntity {
+
   public GenomeBrowserSettings(Entity entity) {
     super(entity);
   }
@@ -130,8 +131,17 @@ public class GenomeBrowserSettings extends StaticEntity {
     return getString(GenomeBrowserSettingsMetadata.EXON_KEY);
   }
 
-  public void setExonKey(String exonKe) {
-    set(GenomeBrowserSettingsMetadata.EXON_KEY, exonKe);
+  public void setExonKey(String exonKey) {
+    set(GenomeBrowserSettingsMetadata.EXON_KEY, exonKey);
+  }
+
+  @Nullable
+  public String getFeatureInfoPlugin() {
+    return getString(GenomeBrowserSettingsMetadata.FEATURE_INFO_PLUGIN);
+  }
+
+  public void setFeatureInfoPlugin(String featureInfoPlugin) {
+    set(GenomeBrowserSettingsMetadata.FEATURE_INFO_PLUGIN, featureInfoPlugin);
   }
 
   public enum TrackType {

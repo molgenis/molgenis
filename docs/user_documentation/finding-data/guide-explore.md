@@ -111,6 +111,13 @@ If additional molgenis datasets should be shown in the genome browser when this 
 
 **Actions**	Javascript functions to be added to the dalliance feature popup. Actions are executed when the link in the feature popup is clicked. Actions should be provided in an javascrip object with 'label' (which will be used as the link) and 'run', example: *[{label:"action1" run:"alert('action1')"},{label:"action2" run:"alert('action2')"}]*.
 
+**feature_info_plugin**	Javascript code that will be added within the function fot the featureInfoPlugin option.  
+The function itself is provided by MOLGENIS: ```function(f, info) {CONFIGURED_CODE_WILL_BE_ADDED_HERE}```
+
+More information on the "featureInfoPlugin" functionallity can be found [here](http://www.biodalliance.org/plugins.html).
+
+** **
+
 ## Try it out
 
 Upload the [vcf_example_file](../../data/Documentation_VCF.vcf "VCF example file") using the importer.

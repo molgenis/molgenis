@@ -47,6 +47,7 @@ public class GenomeBrowserTrackTest extends AbstractMockitoTestNGSpringContextTe
             null,
             null,
             null,
+            null,
             null);
 
     EntityType molgenisEntityType =
@@ -64,11 +65,12 @@ public class GenomeBrowserTrackTest extends AbstractMockitoTestNGSpringContextTe
             "alert(\"test\")",
             "attr 1:attr1,reference attribute:REF,position on genome:POS",
             null,
-            null);
+            null,
+            "if (f.id) {info.add('Label', makeElement('a', f.id, {href: 'https://www.theonion.com/', target:'_newtab'}))}");
 
     String expected =
-        "{\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"position\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"name\":\"label\",\"label_attr\":\"entityLabel\",\"tier_type\":\"molgenis\",\"uri\":\"/api/v2/molgenisEntityType\",\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"entity\":\"molgenisEntityType\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"]}";
+        "{\"name\":\"label\",\"entity\":\"molgenisEntityType\",\"tier_type\":\"molgenis\",\"uri\":\"/api/v2/molgenisEntityType\",\"genome_attrs\":{\"ref\":\"normal\",\"pos\":\"position\",\"alt\":\"mutant\",\"chr\":\"chrom\"},\"label_attr\":\"entityLabel\",\"attrs\":[\"attr 1:attr1\",\"reference attribute:REF\",\"position on genome:POS\"],\"actions\":\"alert(\\\"test\\\")\",\"track_type\":\"VARIANT\",\"featureInfoPlugin\":function(f, info) {if (f.id) {info.add('Label', makeElement('a', f.id, {href: 'https://www.theonion.com/', target:'_newtab'}))}}}";
 
-    assertEquals(track.toTrackJson().toString(), expected);
+    assertEquals(track.toTrackString(), expected);
   }
 }

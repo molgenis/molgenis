@@ -183,7 +183,7 @@ public class DataExplorerController extends PluginController {
       case MOD_DATA:
         selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
         entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
-        model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
+        model.addAttribute("genomeTracks", genomeBrowserService.getTracksString(entityTracks));
         // if multiple tracks are available we assume chrom and pos attribute are the same
         if (!entityTracks.isEmpty()) {
           // FIXME: how to do this cleaner
@@ -200,7 +200,7 @@ public class DataExplorerController extends PluginController {
         // TODO: figure out if we need to know pos and chrom attrs here
         selectedEntityType = dataService.getMeta().getEntityType(entityTypeId).orElse(null);
         entityTracks = genomeBrowserService.getGenomeBrowserTracks(selectedEntityType);
-        model.addAttribute("genomeTracks", genomeBrowserService.getTracksJson(entityTracks));
+        model.addAttribute("genomeTracks", genomeBrowserService.getTracksString(entityTracks));
         model.addAttribute(
             "showDirectoryButton", directoryController.showDirectoryButton(entityTypeId));
         model.addAttribute(
