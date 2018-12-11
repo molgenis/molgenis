@@ -219,3 +219,15 @@ Now, whenever you make changes to one or more JavaScript files, the correspondin
 the npm watch task. Once it's built, tab out of IntelliJ to trigger a refresh of the exploded war.
 As soon as IntelliJ loses focus, you'll see a task progress bar in the bottom right corner of IntelliJ.
 Wait for that task to finish and then refresh the browser. The changes will be loaded.
+
+## Speed up building the project by skipping the javascript build
+
+Building the project can be sped up by not building the javascript. To skip building the javascript, use:
+
+`-Dskip.js=true`
+
+to the maven build command.
+
+* Note: 
+    - If javascript was not already built, javascript will be missing and the application will not function properly.
+    - If changes were made to the javascript these changes will not be built into the application (as building will be skipped). 
