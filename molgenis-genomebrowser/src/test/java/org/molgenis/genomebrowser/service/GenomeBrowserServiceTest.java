@@ -72,6 +72,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             null,
             null,
             null,
+            null,
             null);
 
     EntityType molgenisEntity = mock(EntityType.class);
@@ -87,6 +88,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             genomeBrowserAttributes,
             "alert(\"test\")",
             "attr 1:attr1,reference attribute:REF,position on genome:POS",
+            null,
             null,
             null);
     GenomeBrowserService genomeBrowserService =
@@ -118,6 +120,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             null,
             null,
             null,
+            null,
             null);
 
     EntityType molgenisEntity = mock(EntityType.class);
@@ -133,6 +136,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             genomeBrowserAttributes,
             "alert(\"test\")",
             "attr 1:attr1,reference attribute:REF,position on genome:POS",
+            null,
             null,
             null);
 
@@ -200,6 +204,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             null,
             null,
             null,
+            null,
             null));
     assertEquals(
         result.get("type1"),
@@ -212,6 +217,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             Collections.emptyList(),
             GenomeBrowserSettings.MolgenisReferenceMode.ALL,
             refGenomeBrowserAttributes2,
+            null,
             null,
             null,
             null,
@@ -239,6 +245,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             null,
             null,
             null,
+            null,
             null);
 
     EntityType molgenisEntity = mock(EntityType.class);
@@ -254,6 +261,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             genomeBrowserAttributes,
             "alert(\"test\")",
             "attr 1:attr1,reference attribute:REF,position on genome:POS",
+            null,
             null,
             null);
     GenomeBrowserService genomeBrowserService =
@@ -285,6 +293,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             null,
             null,
             null,
+            null,
             null);
 
     EntityType molgenisEntity = mock(EntityType.class);
@@ -300,6 +309,7 @@ public class GenomeBrowserServiceTest extends AbstractMockitoTestNGSpringContext
             genomeBrowserAttributes,
             "alert(\"test\")",
             "attr 1:attr1,reference attribute:REF,position on genome:POS",
+            null,
             null,
             null);
 
