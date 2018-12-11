@@ -222,7 +222,7 @@ Wait for that task to finish and then refresh the browser. The changes will be l
 
 ## Speed up building the project by skipping the javascript build
 
-Building the project can be sped up by not building the javascript. To skip building the javascript use add:
+Building the project can be sped up by not building the javascript. To skip building the javascript, use:
 
 `-Dskip.js=true`
 
