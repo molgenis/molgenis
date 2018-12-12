@@ -135,7 +135,7 @@ export default {
    * Resets the current EditorEntityType
    */
   [RESET_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
-    if(state.selectedEntityTypeId != null && state.selectedEntityTypeId !== undefined) {
+    if (state.selectedEntityTypeId != null && state.selectedEntityTypeId !== undefined) {
       getEditorEntityType(commit, state.selectedEntityTypeId)
     }
   },
