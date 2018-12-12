@@ -36,12 +36,4 @@ public interface AttributeMappingRepository {
    * @return a list of Entities that have been added or updated
    */
   List<Entity> upsert(Collection<AttributeMapping> collection);
-
-  /**
-   * Translates an algorithm to a list of {@link Attribute} based on the algorithm, and the {@link
-   * EntityType} of the source entity
-   *
-   * @return a list of {@link Attribute}
-   */
-  List<Attribute> retrieveAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType);
 }
