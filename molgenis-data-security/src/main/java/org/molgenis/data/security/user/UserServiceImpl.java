@@ -7,6 +7,7 @@ import static org.molgenis.data.security.auth.UserMetaData.USER;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserMetaData;
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @RunAsSystem
-  public @CheckForNull User getUser(String username) {
+  public @Nullable @CheckForNull User getUser(String username) {
     return dataService.findOne(
         USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class);
   }

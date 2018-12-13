@@ -3,6 +3,7 @@ package org.molgenis.metadata.manager.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -12,19 +13,21 @@ import org.molgenis.util.AutoGson;
 public abstract class EditorEntityTypeParent {
   public abstract String getId();
 
+  @Nullable
   @CheckForNull
   public abstract String getLabel();
 
   public abstract List<EditorAttributeIdentifier> getAttributes();
 
+  @Nullable
   @CheckForNull
   public abstract EditorEntityTypeParent getParent();
 
   public static EditorEntityTypeParent create(
       String id,
-      @CheckForNull String label,
+      @Nullable @CheckForNull String label,
       List<EditorAttributeIdentifier> attributes,
-      @CheckForNull EditorEntityTypeParent parent) {
+      @Nullable @CheckForNull EditorEntityTypeParent parent) {
     return new AutoValue_EditorEntityTypeParent(id, label, attributes, parent);
   }
 }

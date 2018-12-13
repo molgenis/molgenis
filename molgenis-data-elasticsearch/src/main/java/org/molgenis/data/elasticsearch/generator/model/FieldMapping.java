@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.generator.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 @AutoValue
 @SuppressWarnings(
@@ -12,6 +13,7 @@ public abstract class FieldMapping {
 
   public abstract MappingType getType();
 
+  @Nullable
   @CheckForNull
   public abstract List<FieldMapping> getNestedFieldMappings();
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.meta.model.Attribute;
 
 /**
@@ -54,12 +55,14 @@ public class Fetch implements Iterable<Entry<String, Fetch>> {
    * @param field the field for which the Fetch is retrieved
    * @return the Fetch for this field, or null if none was provided
    */
+  @Nullable
   @CheckForNull
   public Fetch getFetch(String field) {
     return attrFetchMap.get(field);
   }
 
   /** Retrieves the Fetch for an attribute */
+  @Nullable
   @CheckForNull
   public Fetch getFetch(Attribute attr) {
     return getFetch(attr.getName());

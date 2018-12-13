@@ -8,6 +8,7 @@ import com.google.auto.value.AutoValue;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -19,6 +20,7 @@ public abstract class OntologyTerm {
 
   public abstract String getLabel();
 
+  @Nullable
   @CheckForNull
   public abstract String getDescription();
 

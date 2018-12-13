@@ -3,10 +3,12 @@ package org.molgenis.searchall.model;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 public interface Described {
   String getLabel();
 
+  @Nullable
   @CheckForNull
   String getDescription();
 

@@ -7,6 +7,7 @@ import static org.molgenis.data.file.model.FileMetaMetaData.SIZE;
 import static org.molgenis.data.file.model.FileMetaMetaData.URL;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -44,6 +45,7 @@ public class FileMeta extends StaticEntity {
     set(CONTENT_TYPE, contentType);
   }
 
+  @Nullable
   @CheckForNull
   public String getContentType() {
     return getString(CONTENT_TYPE);
@@ -53,6 +55,7 @@ public class FileMeta extends StaticEntity {
     set(SIZE, size);
   }
 
+  @Nullable
   @CheckForNull
   public Long getSize() {
     return getLong(SIZE);

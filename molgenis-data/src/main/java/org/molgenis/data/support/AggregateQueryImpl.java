@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.aggregation.AggregateQuery;
@@ -58,24 +59,28 @@ public class AggregateQueryImpl implements AggregateQuery {
     this.q = q;
   }
 
+  @Nullable
   @CheckForNull
   @Override
   public Query<Entity> getQuery() {
     return q;
   }
 
+  @Nullable
   @CheckForNull
   @Override
   public Attribute getAttributeX() {
     return attrX;
   }
 
+  @Nullable
   @CheckForNull
   @Override
   public Attribute getAttributeY() {
     return attrY;
   }
 
+  @Nullable
   @CheckForNull
   @Override
   public Attribute getAttributeDistinct() {

@@ -2,6 +2,7 @@ package org.molgenis.app.manager.model;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.util.AutoGson;
 
@@ -28,6 +29,7 @@ public abstract class AppResponse {
 
   public abstract String getResourceFolder();
 
+  @Nullable
   @CheckForNull
   public abstract String getAppConfig();
 

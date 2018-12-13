@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -48,7 +49,7 @@ public class OntologyImportService implements ImportService {
       RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @CheckForNull String packageId) {
+      @Nullable @CheckForNull String packageId) {
     if (dataAction != DataAction.ADD) {
       throw new IllegalArgumentException("Only ADD is supported");
     }

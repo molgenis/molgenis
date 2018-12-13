@@ -3,6 +3,7 @@ package org.molgenis.navigator.copy;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.util.AutoGson;
 
@@ -14,6 +15,7 @@ public abstract class CopyResourceRequest {
 
   public abstract List<ResourceIdentifier> getResources();
 
+  @Nullable
   @CheckForNull
   public abstract String getTargetPackage();
 

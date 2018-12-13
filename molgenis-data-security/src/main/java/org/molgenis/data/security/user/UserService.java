@@ -2,6 +2,7 @@ package org.molgenis.data.security.user;
 
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.security.auth.User;
 
 public interface UserService {
@@ -11,6 +12,7 @@ public interface UserService {
   List<String> getSuEmailAddresses();
 
   /** Returns the given user */
+  @Nullable
   @CheckForNull
   User getUser(String username);
 

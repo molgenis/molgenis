@@ -9,6 +9,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -36,6 +37,7 @@ public class IndexAction extends StaticEntity {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public IndexActionGroup getIndexActionGroup() {
     return getEntity(INDEX_ACTION_GROUP_ATTR, IndexActionGroup.class);
@@ -64,6 +66,7 @@ public class IndexAction extends StaticEntity {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public String getEntityId() {
     return getString(ENTITY_ID);

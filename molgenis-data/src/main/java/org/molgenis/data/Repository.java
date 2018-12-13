@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
@@ -135,10 +136,12 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
    *
    * @param q query
    */
+  @Nullable
   @CheckForNull
   E findOne(Query<E> q);
 
   /** Type-safe find one entity based on id. Returns null if not exists */
+  @Nullable
   @CheckForNull
   E findOneById(Object id);
 
@@ -150,6 +153,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable {
    * @return entity or null
    * @throws MolgenisDataAccessException if access to entity with the given id is not allowed
    */
+  @Nullable
   @CheckForNull
   E findOneById(Object id, Fetch fetch);
 

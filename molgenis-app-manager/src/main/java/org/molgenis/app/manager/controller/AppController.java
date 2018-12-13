@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.molgenis.app.manager.exception.AppIsInactiveException;
@@ -61,6 +62,7 @@ public class AppController extends PluginController {
   }
 
   @GetMapping("/{appName}/**")
+  @Nullable
   @CheckForNull
   public ModelAndView serveApp(
       @PathVariable String appName,

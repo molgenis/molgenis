@@ -12,6 +12,7 @@ import static org.molgenis.beacon.config.BeaconMetadata.WELCOME_URL;
 
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
@@ -44,21 +45,25 @@ public class Beacon extends StaticEntity {
     return getString(API_VERSION);
   }
 
+  @Nullable
   @CheckForNull
   public BeaconOrganization getOrganization() {
     return getEntity(BEACON_ORGANIZATION, BeaconOrganization.class);
   }
 
+  @Nullable
   @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
   }
 
+  @Nullable
   @CheckForNull
   public String getVersion() {
     return getString(VERSION);
   }
 
+  @Nullable
   @CheckForNull
   public String getWelcomeUrl() {
     return getString(WELCOME_URL);

@@ -4,6 +4,7 @@ import static org.molgenis.settings.PropertyType.KEY;
 import static org.molgenis.settings.PropertyType.VALUE;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -30,6 +31,7 @@ public class JavaMailProperty extends StaticEntity {
     set(KEY, key);
   }
 
+  @Nullable
   @CheckForNull
   public String getValue() {
     return getString(VALUE);

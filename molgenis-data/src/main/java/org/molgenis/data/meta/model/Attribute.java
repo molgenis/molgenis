@@ -50,6 +50,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
@@ -211,6 +212,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Integer getLookupAttributeIndex() {
     return getInt(LOOKUP_ATTRIBUTE_INDEX);
@@ -226,6 +228,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return attribute label
    */
+  @Nullable
   @CheckForNull
   public String getLabel() {
     String label = getString(LABEL);
@@ -237,6 +240,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return attribute label
    */
+  @Nullable
   @CheckForNull
   public String getLabel(String languageCode) {
     String i18nString = getString(getI18nAttributeName(LABEL, languageCode));
@@ -258,6 +262,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return attribute description or <tt>null</tt>
    */
+  @Nullable
   @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
@@ -268,6 +273,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return attribute description or <tt>null</tt>
    */
+  @Nullable
   @CheckForNull
   public String getDescription(String languageCode) {
     String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
@@ -300,6 +306,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Boolean getCascadeDelete() {
     return getBoolean(IS_CASCADE_DELETE);
@@ -324,6 +331,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return referenced entity
    */
+  @Nullable
   @CheckForNull
   public EntityType getRefEntity() {
     return getEntity(REF_ENTITY_TYPE, EntityType.class);
@@ -334,6 +342,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Attribute getMappedBy() {
     return getEntity(MAPPED_BY, Attribute.class);
@@ -352,6 +361,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return getMappedBy() != null;
   }
 
+  @Nullable
   @CheckForNull
   public Sort getOrderBy() {
     String orderByStr = getString(ORDER_BY);
@@ -369,6 +379,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return String representation of expression, in JSON format
    */
+  @Nullable
   @CheckForNull
   public String getExpression() {
     return getString(EXPRESSION);
@@ -465,6 +476,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Long getRangeMin() {
     return getLong(RANGE_MIN);
@@ -475,6 +487,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Long getRangeMax() {
     return getLong(RANGE_MAX);
@@ -518,6 +531,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return expression
    */
+  @Nullable
   @CheckForNull
   public String getNullableExpression() {
     return getString(NULLABLE_EXPRESSION);
@@ -534,6 +548,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return expression
    */
+  @Nullable
   @CheckForNull
   public String getVisibleExpression() {
     return getString(VISIBLE_EXPRESSION);
@@ -545,6 +560,7 @@ public class Attribute extends StaticEntity implements Labeled {
   }
 
   /** JavaScript expression to validate the value of the attribute */
+  @Nullable
   @CheckForNull
   public String getValidationExpression() {
     return getString(VALIDATION_EXPRESSION);
@@ -564,6 +580,7 @@ public class Attribute extends StaticEntity implements Labeled {
    *
    * @return attribute default value
    */
+  @Nullable
   @CheckForNull
   public String getDefaultValue() {
     return getString(DEFAULT_VALUE);
@@ -591,6 +608,7 @@ public class Attribute extends StaticEntity implements Labeled {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public Attribute getParent() {
     return getEntity(PARENT, Attribute.class);

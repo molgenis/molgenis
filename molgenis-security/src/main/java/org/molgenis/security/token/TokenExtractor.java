@@ -3,6 +3,7 @@ package org.molgenis.security.token;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -22,11 +23,11 @@ public class TokenExtractor implements HandlerMethodArgumentResolver {
   }
 
   @Override
-  public @CheckForNull Object resolveArgument(
+  public @Nullable @CheckForNull Object resolveArgument(
       MethodParameter parameter,
-      @CheckForNull ModelAndViewContainer mavContainer,
+      @Nullable @CheckForNull ModelAndViewContainer mavContainer,
       NativeWebRequest webRequest,
-      @CheckForNull WebDataBinderFactory binderFactory)
+      @Nullable @CheckForNull WebDataBinderFactory binderFactory)
       throws Exception {
     return getTokenInternal(
         webRequest.getHeader(TOKEN_HEADER),

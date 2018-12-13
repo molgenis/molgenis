@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 public class ErrorMessageResponse {
   private List<ErrorMessage> errors;
@@ -39,7 +40,8 @@ public class ErrorMessageResponse {
     return create(errorMessage, null);
   }
 
-  public static ErrorMessageResponse create(String errorMessage, @CheckForNull String errorCode) {
+  public static ErrorMessageResponse create(
+      String errorMessage, @Nullable @CheckForNull String errorCode) {
     return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage, errorCode));
   }
 

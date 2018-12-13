@@ -10,6 +10,7 @@ import static org.molgenis.data.security.auth.TokenMetaData.USER;
 
 import java.time.Instant;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -52,6 +53,7 @@ public class Token extends StaticEntity {
     set(TOKEN_ATTR, token);
   }
 
+  @Nullable
   @CheckForNull
   public Instant getExpirationDate() {
     return getInstant(EXPIRATIONDATE);
@@ -69,6 +71,7 @@ public class Token extends StaticEntity {
     set(CREATIONDATE, creationDate);
   }
 
+  @Nullable
   @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);

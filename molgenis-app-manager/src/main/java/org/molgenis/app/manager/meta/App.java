@@ -13,6 +13,7 @@ import static org.molgenis.app.manager.meta.AppMetadata.RESOURCE_FOLDER;
 import static org.molgenis.app.manager.meta.AppMetadata.TEMPLATE_CONTENT;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -55,6 +56,7 @@ public class App extends StaticEntity {
     set(LABEL, label);
   }
 
+  @Nullable
   @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);

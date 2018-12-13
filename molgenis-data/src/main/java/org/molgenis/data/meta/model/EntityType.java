@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.StaticEntity;
@@ -216,6 +217,7 @@ public class EntityType extends StaticEntity implements Labeled {
    *
    * @return entity description
    */
+  @Nullable
   @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
@@ -226,6 +228,7 @@ public class EntityType extends StaticEntity implements Labeled {
    *
    * @return entity description
    */
+  @Nullable
   @CheckForNull
   public String getDescription(String languageCode) {
     String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
@@ -261,6 +264,7 @@ public class EntityType extends StaticEntity implements Labeled {
    *
    * @return package
    */
+  @Nullable
   @CheckForNull
   public Package getPackage() {
     return getEntity(PACKAGE, Package.class);
@@ -422,6 +426,7 @@ public class EntityType extends StaticEntity implements Labeled {
    *
    * @return parent entity
    */
+  @Nullable
   @CheckForNull
   public EntityType getExtends() {
     return getEntity(EXTENDS, EntityType.class);

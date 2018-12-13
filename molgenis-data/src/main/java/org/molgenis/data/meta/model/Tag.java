@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -41,6 +42,7 @@ public class Tag extends StaticEntity {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public String getObjectIri() {
     return getString(TagMetadata.OBJECT_IRI);
@@ -78,6 +80,7 @@ public class Tag extends StaticEntity {
     return this;
   }
 
+  @Nullable
   @CheckForNull
   public String getCodeSystem() {
     return getString(TagMetadata.CODE_SYSTEM);

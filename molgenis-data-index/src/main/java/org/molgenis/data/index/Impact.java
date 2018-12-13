@@ -2,6 +2,7 @@ package org.molgenis.data.index;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.EntityKey;
 
 /** Value object to store the impact of changes. */
@@ -11,6 +12,7 @@ import org.molgenis.data.EntityKey;
 public abstract class Impact {
   public abstract String getEntityTypeId();
 
+  @Nullable
   @CheckForNull
   public abstract Object getId();
 

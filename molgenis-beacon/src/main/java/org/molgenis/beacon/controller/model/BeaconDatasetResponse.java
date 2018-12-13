@@ -2,6 +2,7 @@ package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 /** Dataset of a beacon. */
@@ -17,6 +18,7 @@ public abstract class BeaconDatasetResponse {
   public abstract String getName();
 
   /** Description of the dataset. */
+  @Nullable
   @CheckForNull
   public abstract String getDescription();
 

@@ -9,6 +9,7 @@ import static org.molgenis.jobs.model.JobExecution.Status.SUCCESS;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -95,7 +96,7 @@ public class ProgressImpl implements Progress {
   }
 
   @Override
-  public void failed(String message, @CheckForNull Throwable throwable) {
+  public void failed(String message, @Nullable @CheckForNull Throwable throwable) {
     JOB_EXECUTION_LOG.error("Failed. " + message, throwable);
     jobExecution.setEndDate(Instant.now());
     jobExecution.setStatus(FAILED);

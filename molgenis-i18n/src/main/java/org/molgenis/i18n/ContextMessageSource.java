@@ -1,6 +1,7 @@
 package org.molgenis.i18n;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -24,5 +25,5 @@ public interface ContextMessageSource {
    * @return the resolved message, never <tt>null</tt>
    * @throws NoSuchMessageException if the message wasn't found
    */
-  String getMessage(String code, @CheckForNull Object[] args);
+  String getMessage(String code, @Nullable @CheckForNull Object[] args);
 }

@@ -3,6 +3,7 @@ package org.molgenis.security.core.model;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 @AutoValue
 @SuppressWarnings(
@@ -12,6 +13,7 @@ public abstract class GroupValue {
 
   public abstract String getLabel();
 
+  @Nullable
   @CheckForNull
   public abstract String getDescription();
 

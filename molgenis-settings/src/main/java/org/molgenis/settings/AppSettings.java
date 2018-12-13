@@ -1,6 +1,7 @@
 package org.molgenis.settings;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 /** Application settings */
 public interface AppSettings {
@@ -11,6 +12,7 @@ public interface AppSettings {
   void setTitle(String title);
 
   /** @return href of logo displayed above top menu */
+  @Nullable
   @CheckForNull
   String getLogoTopHref();
 
@@ -24,6 +26,7 @@ public interface AppSettings {
   void setLogoTopMaxHeight(int fixedHeight);
 
   /** @return href of logo displayed in menu */
+  @Nullable
   @CheckForNull
   String getLogoNavBarHref();
 
@@ -31,6 +34,7 @@ public interface AppSettings {
   void setLogoNavBarHref(String logoHref);
 
   /** @return footer text */
+  @Nullable
   @CheckForNull
   String getFooter();
 
@@ -50,6 +54,7 @@ public interface AppSettings {
   void setBootstrapTheme(String bootstrapTheme);
 
   /** @return file name containing custom CSS without path */
+  @Nullable
   @CheckForNull
   String getCssHref();
 
@@ -57,6 +62,7 @@ public interface AppSettings {
   void setCssHref(String cssHref);
 
   /** @return JSON object string representation of menu */
+  @Nullable
   @CheckForNull
   String getMenu();
 
@@ -64,6 +70,7 @@ public interface AppSettings {
   void setMenu(String menuJson);
 
   /** @return data aggregation threshold or <code>null</code> if no threshold exists */
+  @Nullable
   @CheckForNull
   Integer getAggregateThreshold();
 
@@ -71,6 +78,7 @@ public interface AppSettings {
   void setAggregateThreshold(Integer threshold);
 
   /** @return JS string containing tracking code to be placed in the footer */
+  @Nullable
   @CheckForNull
   String getTrackingCodeFooter();
 
@@ -87,6 +95,7 @@ public interface AppSettings {
   void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsPrivacyFriendlyTracking);
 
   /** @return 3rd party Google analytics tracking ID */
+  @Nullable
   @CheckForNull
   String getGoogleAnalyticsTrackingId();
 
@@ -94,6 +103,7 @@ public interface AppSettings {
   void setGoogleAnalyticsTrackingId(String googleAnalyticsTrackingId);
 
   /** @return MOLGENIS Google analytics tracking ID */
+  @Nullable
   @CheckForNull
   String getGoogleAnalyticsTrackingIdMolgenis();
 
@@ -170,6 +180,7 @@ public interface AppSettings {
    * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated
    *     list
    */
+  @Nullable
   @CheckForNull
   String getCustomJavascript();
 }

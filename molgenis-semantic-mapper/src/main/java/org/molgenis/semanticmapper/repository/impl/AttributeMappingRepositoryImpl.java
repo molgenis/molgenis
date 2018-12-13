@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -64,8 +65,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
   @Override
   public List<AttributeMapping> getAttributeMappings(
       List<Entity> attributeMappingEntities,
-      @CheckForNull EntityType sourceEntityType,
-      @CheckForNull EntityType targetEntityType) {
+      @Nullable @CheckForNull EntityType sourceEntityType,
+      @Nullable @CheckForNull EntityType targetEntityType) {
     return Lists.transform(
         attributeMappingEntities,
         attributeMappingEntity ->
@@ -93,8 +94,8 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
   private AttributeMapping toAttributeMapping(
       Entity attributeMappingEntity,
-      @CheckForNull EntityType sourceEntityType,
-      @CheckForNull EntityType targetEntityType) {
+      @Nullable @CheckForNull EntityType sourceEntityType,
+      @Nullable @CheckForNull EntityType targetEntityType) {
     String identifier = attributeMappingEntity.getString(IDENTIFIER);
     String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
     Attribute targetAttribute =

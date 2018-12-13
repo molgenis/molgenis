@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.api.tests.utils.RestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +95,7 @@ public class ImportPublicDataIT {
     return envVariable;
   }
 
+  @Nullable
   @CheckForNull
   private String getOptionalEnvVariable(String envName) {
     String envVariable = System.getenv(envName);

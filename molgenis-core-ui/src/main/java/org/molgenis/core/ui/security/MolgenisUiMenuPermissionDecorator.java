@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.util.UnexpectedEnumException;
@@ -84,6 +85,7 @@ public class MolgenisUiMenuPermissionDecorator implements UiMenu {
   }
 
   @Override
+  @Nullable
   @CheckForNull
   public UiMenuItem getActiveItem() {
     return molgenisUiMenu.getItems().stream().filter(this::isActiveItem).findFirst().orElse(null);

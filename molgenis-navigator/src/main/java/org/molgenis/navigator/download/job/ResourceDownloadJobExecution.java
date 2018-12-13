@@ -3,6 +3,7 @@ package org.molgenis.navigator.download.job;
 import com.google.gson.Gson;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
@@ -32,6 +33,7 @@ public class ResourceDownloadJobExecution extends JobExecution {
     set(ResourceDownloadJobExecutionMetaData.RESOURCES, new Gson().toJson(resourceIdentifiers));
   }
 
+  @Nullable
   @CheckForNull
   public List<ResourceIdentifier> getResources() {
     String resourceJson = getString(ResourceDownloadJobExecutionMetaData.RESOURCES);

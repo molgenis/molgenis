@@ -3,6 +3,7 @@ package org.molgenis.data;
 import static java.util.Objects.requireNonNull;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"squid:MaximumInheritanceDepth"})
 public class RepositoryAlreadyExistsException extends DataAlreadyExistsException {
@@ -16,7 +17,8 @@ public class RepositoryAlreadyExistsException extends DataAlreadyExistsException
   }
 
   @SuppressWarnings("unused")
-  public RepositoryAlreadyExistsException(String repositoryId, @CheckForNull Throwable cause) {
+  public RepositoryAlreadyExistsException(
+      String repositoryId, @Nullable @CheckForNull Throwable cause) {
     super(ERROR_CODE, cause);
     this.repositoryId = requireNonNull(repositoryId);
   }

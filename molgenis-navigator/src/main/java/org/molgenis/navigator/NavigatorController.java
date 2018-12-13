@@ -7,6 +7,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
 import org.molgenis.core.ui.menu.Menu;
@@ -60,7 +61,7 @@ public class NavigatorController extends VuePluginController {
   @GetMapping("/get")
   @ResponseBody
   public GetResourcesResponse getResources(
-      @RequestParam(value = "folderId", required = false) @CheckForNull String folderId) {
+      @RequestParam(value = "folderId", required = false) @Nullable @CheckForNull String folderId) {
     Folder folder = navigatorService.getFolder(folderId);
     List<Resource> resources = navigatorService.getResources(folderId);
     return GetResourcesResponse.create(folder, resources);

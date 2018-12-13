@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityType;
@@ -61,14 +62,14 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   @Transactional(readOnly = true)
   @Override
-  public @CheckForNull Folder getFolder(@CheckForNull String folderId) {
+  public @Nullable @CheckForNull Folder getFolder(@Nullable @CheckForNull String folderId) {
     Package aPackage = getPackage(folderId);
     return toFolder(aPackage);
   }
 
   @Transactional(readOnly = true)
   @Override
-  public List<Resource> getResources(@CheckForNull String folderId) {
+  public List<Resource> getResources(@Nullable @CheckForNull String folderId) {
     try (Stream<Resource> packageResources =
         dataService
             .query(PackageMetadata.PACKAGE, Package.class)
@@ -110,7 +111,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   @Transactional
   @Override
   public void moveResources(
-      List<ResourceIdentifier> resources, @CheckForNull String targetFolderId) {
+      List<ResourceIdentifier> resources, @Nullable @CheckForNull String targetFolderId) {
     if (resources.isEmpty()) {
       return;
     }
@@ -137,7 +138,7 @@ public class NavigatorServiceImpl implements NavigatorService {
 
   @Override
   public JobExecution copyResources(
-      List<ResourceIdentifier> resources, @CheckForNull String targetFolderId) {
+      List<ResourceIdentifier> resources, @Nullable @CheckForNull String targetFolderId) {
     if (resources.isEmpty()) {
       throw new IllegalArgumentException(MESSAGE_EMPTY_RESOURCES);
     }
@@ -224,7 +225,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private void movePackages(
-      List<ResourceIdentifier> typeResources, @CheckForNull Package targetPackage) {
+      List<ResourceIdentifier> typeResources, @Nullable @CheckForNull Package targetPackage) {
     List<Package> packages =
         dataService
             .findAll(
@@ -240,7 +241,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private void moveEntityTypes(
-      List<ResourceIdentifier> typeResources, @CheckForNull Package targetPackage) {
+      List<ResourceIdentifier> typeResources, @Nullable @CheckForNull Package targetPackage) {
     List<EntityType> entityTypes =
         dataService
             .findAll(
@@ -256,7 +257,7 @@ public class NavigatorServiceImpl implements NavigatorService {
   }
 
   private boolean isDifferentPackage(
-      @CheckForNull Package thisPackage, @CheckForNull Package thatPackage) {
+      @Nullable @CheckForNull Package thisPackage, @Nullable @CheckForNull Package thatPackage) {
     boolean isSame;
     if (thisPackage == null && thatPackage == null) {
       isSame = true;
@@ -297,7 +298,7 @@ public class NavigatorServiceImpl implements NavigatorService {
    * @param aPackage <tt>null</tt> implies the root package
    * @return folder or <tt>null</tt> for the root folder
    */
-  private @CheckForNull Folder toFolder(@CheckForNull Package aPackage) {
+  private @Nullable @CheckForNull Folder toFolder(@Nullable @CheckForNull Package aPackage) {
     if (aPackage == null) {
       return null;
     }
@@ -310,7 +311,7 @@ public class NavigatorServiceImpl implements NavigatorService {
    * @param folderId <tt>null</tt> implies the root folder
    * @return package or <tt>null</tt> for the root package
    */
-  private @CheckForNull Package getPackage(@CheckForNull String folderId) {
+  private @Nullable @CheckForNull Package getPackage(@Nullable @CheckForNull String folderId) {
     if (folderId == null) {
       return null;
     }

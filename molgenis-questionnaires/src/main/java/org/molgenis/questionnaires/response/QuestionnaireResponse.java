@@ -2,6 +2,7 @@ package org.molgenis.questionnaires.response;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
 import org.molgenis.util.AutoGson;
@@ -15,6 +16,7 @@ public abstract class QuestionnaireResponse {
 
   public abstract String getLabel();
 
+  @Nullable
   @CheckForNull
   public abstract String getDescription();
 
