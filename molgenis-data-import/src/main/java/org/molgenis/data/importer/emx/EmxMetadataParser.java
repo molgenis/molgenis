@@ -221,24 +221,6 @@ public class EmxMetadataParser implements MetadataParser {
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
   public EmxMetadataParser(
-      PackageFactory packageFactory,
-      AttributeFactory attrMetaFactory,
-      EntityTypeFactory entityTypeFactory,
-      EntityTypeDependencyResolver entityTypeDependencyResolver) {
-    this.dataService = null;
-    this.packageFactory = requireNonNull(packageFactory);
-    this.attrMetaFactory = requireNonNull(attrMetaFactory);
-    this.entityTypeFactory = requireNonNull(entityTypeFactory);
-    this.tagFactory = null;
-    this.languageFactory = null;
-    this.l10nStringFactory = null;
-    this.entityTypeValidator = null;
-    this.attributeValidator = null;
-    this.tagValidator = null;
-    this.entityTypeDependencyResolver = requireNonNull(entityTypeDependencyResolver);
-  }
-
-  public EmxMetadataParser(
       DataService dataService,
       PackageFactory packageFactory,
       AttributeFactory attrMetaFactory,
@@ -282,34 +264,29 @@ public class EmxMetadataParser implements MetadataParser {
           intermediateResults.getLanguages(),
           intermediateResults.getL10nStrings());
     } else {
-      if (dataService != null) {
-        List<EntityType> metadataList = new ArrayList<>();
-        for (String emxName : source.getEntityTypeIds()) {
-          String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
-          if (repoName == null) repoName = emxName;
-          metadataList.add(dataService.getRepository(repoName).getEntityType());
-        }
-        IntermediateParseResults intermediateResults =
-            parseTagsSheet(source.getRepository(EMX_TAGS));
-        parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
-
-        if (source.hasRepository(EMX_LANGUAGES)) {
-          parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
-        }
-
-        if (source.hasRepository(EMX_I18NSTRINGS)) {
-          parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
-        }
-
-        return new ParsedMetaData(
-            entityTypeDependencyResolver.resolve(metadataList),
-            intermediateResults.getPackages(),
-            intermediateResults.getTags(),
-            intermediateResults.getLanguages(),
-            intermediateResults.getL10nStrings());
-      } else {
-        throw new UnsupportedOperationException();
+      List<EntityType> metadataList = new ArrayList<>();
+      for (String emxName : source.getEntityTypeIds()) {
+        String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+        if (repoName == null) repoName = emxName;
+        metadataList.add(dataService.getRepository(repoName).getEntityType());
       }
+      IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(EMX_TAGS));
+      parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
+
+      if (source.hasRepository(EMX_LANGUAGES)) {
+        parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
+      }
+
+      if (source.hasRepository(EMX_I18NSTRINGS)) {
+        parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
+      }
+
+      return new ParsedMetaData(
+          entityTypeDependencyResolver.resolve(metadataList),
+          intermediateResults.getPackages(),
+          intermediateResults.getTags(),
+          intermediateResults.getLanguages(),
+          intermediateResults.getL10nStrings());
     }
   }
 
@@ -323,9 +300,22 @@ public class EmxMetadataParser implements MetadataParser {
   private ImmutableMap<String, EntityType> getEntityTypeMap(
       DataService dataService, RepositoryCollection source) {
     // If there is no attribute sheet, we assume the entity is already known in MOLGENIS
-    Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
-    if (attributeSourceRepository != null) return getEntityTypeFromSource(source).getEntityMap();
-    else return getEntityTypeFromDataService(dataService, source.getEntityTypeIds());
+    if (source.getRepository(EMX_ATTRIBUTES) != null) {
+      return getEntityTypeFromSource(source).getEntityMap();
+    } else {
+      ImmutableMap<String, EntityType> entityTypeMap =
+          getEntityTypeFromDataService(dataService, source.getEntityTypeIds());
+      if (source.getRepository(EMX_PACKAGES) != null) {
+        IntermediateParseResults intermediateParseResults =
+            new IntermediateParseResults(entityTypeFactory);
+        parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateParseResults);
+        return ImmutableMap.<String, EntityType>builder()
+            .putAll(intermediateParseResults.getEntityMap())
+            .putAll(entityTypeMap)
+            .build();
+      }
+      return entityTypeMap;
+    }
   }
 
   private EntitiesValidationReport buildValidationReport(
@@ -609,16 +599,14 @@ public class EmxMetadataParser implements MetadataParser {
           entityType = intermediateResults.addEntityType(entityTypeId);
         }
 
-        if (dataService != null) {
-          if (emxEntityBackend != null) {
-            if (!dataService.getMeta().hasBackend(emxEntityBackend)) {
-              throw new UnknownRepositoryCollectionException(emxEntityBackend);
-            }
-          } else {
-            emxEntityBackend = dataService.getMeta().getDefaultBackend().getName();
+        if (emxEntityBackend != null) {
+          if (!dataService.getMeta().hasBackend(emxEntityBackend)) {
+            throw new UnknownRepositoryCollectionException(emxEntityBackend);
           }
-          entityType.setBackend(emxEntityBackend);
+        } else {
+          emxEntityBackend = dataService.getMeta().getDefaultBackend().getName();
         }
+        entityType.setBackend(emxEntityBackend);
 
         if (emxEntityPackage != null) {
           Package p = intermediateResults.getPackage(emxEntityPackage);
@@ -669,10 +657,7 @@ public class EmxMetadataParser implements MetadataParser {
           if (intermediateResults.knowsEntity(emxEntityExtends)) {
             extendsEntityType = intermediateResults.getEntityType(emxEntityExtends);
           } else {
-            if (dataService != null) {
-              extendsEntityType =
-                  dataService.getMeta().getEntityType(emxEntityExtends).orElse(null);
-            }
+            extendsEntityType = dataService.getMeta().getEntityType(emxEntityExtends).orElse(null);
           }
 
           if (extendsEntityType == null) {
@@ -818,7 +803,7 @@ public class EmxMetadataParser implements MetadataParser {
       EntityType md = intermediateResults.getEntityType(emxEntityName);
       if (md == null) {
         md = intermediateResults.addEntityType(emxEntityName);
-        if (dataService != null) md.setBackend(dataService.getMeta().getDefaultBackend().getName());
+        md.setBackend(dataService.getMeta().getDefaultBackend().getName());
       }
 
       String emxName = emxAttrEntity.getString(EMX_ATTRIBUTES_NAME);
@@ -1112,46 +1097,39 @@ public class EmxMetadataParser implements MetadataParser {
       if (attribute.getDataType().equals(FILE)) {
         // If attribute is of type file, set refEntity to file meta and continue to the next
         // attribute
-        if (dataService == null) {
-          throw new NullPointerException(format("Can't set %s if dataService is null", FILE_META));
-        }
         attribute.setRefEntity(dataService.getEntityType(FILE_META));
         continue;
       }
 
       rowIndex++;
       if (refEntityName != null) {
-        if (dataService != null) {
-          EntityType refEntityType;
-          if (intermediateResults.knowsEntity(refEntityName)) {
-            refEntityType = intermediateResults.getEntityType(refEntityName);
-          } else {
-            refEntityType = dataService.getEntityType(refEntityName);
-            if (refEntityType == null) {
-              throw new IllegalArgumentException(
-                  "attributes.refEntity error on line "
-                      + rowIndex
-                      + ": "
-                      + refEntityName
-                      + " unknown");
-            }
-          }
-          attribute.setRefEntity(refEntityType);
-
-          if (mappedByAttrName != null) {
-            Attribute mappedByAttr = refEntityType.getAttribute(mappedByAttrName);
-            if (mappedByAttr == null) {
-              throw new IllegalArgumentException(
-                  "attributes.mappedBy error on line "
-                      + rowIndex
-                      + ": "
-                      + mappedByAttrName
-                      + " unknown");
-            }
-            attribute.setMappedBy(mappedByAttr);
-          }
+        EntityType refEntityType;
+        if (intermediateResults.knowsEntity(refEntityName)) {
+          refEntityType = intermediateResults.getEntityType(refEntityName);
         } else {
-          attribute.setRefEntity(intermediateResults.getEntityType(refEntityName));
+          refEntityType = dataService.getEntityType(refEntityName);
+          if (refEntityType == null) {
+            throw new IllegalArgumentException(
+                "attributes.refEntity error on line "
+                    + rowIndex
+                    + ": "
+                    + refEntityName
+                    + " unknown");
+          }
+        }
+        attribute.setRefEntity(refEntityType);
+
+        if (mappedByAttrName != null) {
+          Attribute mappedByAttr = refEntityType.getAttribute(mappedByAttrName);
+          if (mappedByAttr == null) {
+            throw new IllegalArgumentException(
+                "attributes.mappedBy error on line "
+                    + rowIndex
+                    + ": "
+                    + mappedByAttrName
+                    + " unknown");
+          }
+          attribute.setMappedBy(mappedByAttr);
         }
       }
     }
@@ -1161,7 +1139,7 @@ public class EmxMetadataParser implements MetadataParser {
   private List<EntityType> putEntitiesInDefaultPackage(
       IntermediateParseResults intermediateResults, String defaultPackageId) {
     Package p = getPackage(intermediateResults, defaultPackageId);
-    if (p == null && dataService != null) {
+    if (p == null) {
       throw new IllegalArgumentException(format("Unknown package [%s]", defaultPackageId));
     }
 
@@ -1186,7 +1164,7 @@ public class EmxMetadataParser implements MetadataParser {
    */
   private Package getPackage(IntermediateParseResults intermediateResults, String packageId) {
     Package aPackage = intermediateResults.getPackage(packageId);
-    if (aPackage == null && dataService != null) {
+    if (aPackage == null) {
       aPackage = dataService.findOneById(PackageMetadata.PACKAGE, packageId, Package.class);
     }
     return aPackage;

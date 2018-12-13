@@ -48,13 +48,7 @@ public class EmxImportService implements ImportService {
     String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
     if (getSupportedFileExtensions().contains(fileNameExtension.toLowerCase())) {
       for (String entityTypeId : source.getEntityTypeIds()) {
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)) {
-          return true;
-        }
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)) {
-          return true;
-        }
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS)) {
+        if (isMetadataSheet(entityTypeId) || isI18nSheet(entityTypeId)) {
           return true;
         }
         if (dataService.getMeta().hasEntityType(entityTypeId)) return true;
@@ -62,6 +56,16 @@ public class EmxImportService implements ImportService {
     }
 
     return false;
+  }
+
+  private boolean isMetadataSheet(String entityTypeId) {
+    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)
+        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_PACKAGES);
+  }
+
+  private boolean isI18nSheet(String entityTypeId) {
+    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)
+        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS);
   }
 
   @Override
