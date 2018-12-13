@@ -15,10 +15,9 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.mockito.Mock;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
@@ -27,6 +26,8 @@ import org.molgenis.questionnaires.service.QuestionnaireService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -50,6 +51,8 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
 
   @Mock private MenuReaderService menuReaderService;
 
+  @Mock private Menu menu;
+
   @Mock private AppSettings appSettings;
 
   @Mock private UserAccountService userAccountService;
@@ -64,13 +67,12 @@ public class QuestionnaireControllerTest extends AbstractTestNGSpringContextTest
   private void beforeMethod() {
     initMocks(this);
 
-    Menu menu = mock(Menu.class);
-    when(menu.findMenuItemPath(QuestionnaireController.ID)).thenReturn("/test/path");
+    when(menuReaderService.findMenuItemPath(QuestionnaireController.ID)).thenReturn("/test/path");
 
     User user = mock(User.class);
     when(user.isSuperuser()).thenReturn(false);
 
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
     when(appSettings.getLanguageCode()).thenReturn("en");
     when(userAccountService.getCurrentUser()).thenReturn(user);
 

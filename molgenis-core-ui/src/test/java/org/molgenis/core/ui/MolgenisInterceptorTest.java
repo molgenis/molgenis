@@ -2,7 +2,9 @@ package org.molgenis.core.ui;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.web.PluginAttributes.KEY_GSON;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import com.google.gson.Gson;
@@ -26,6 +28,7 @@ public class MolgenisInterceptorTest {
   private AppSettings appSettings;
   private AuthenticationSettings authenticationSettings;
   private MessageSource messageSource;
+  private Gson gson;
 
   @BeforeMethod
   public void setUp() {
@@ -34,11 +37,12 @@ public class MolgenisInterceptorTest {
     appSettings = when(mock(AppSettings.class).getLanguageCode()).thenReturn("en").getMock();
     authenticationSettings = mock(AuthenticationSettings.class);
     messageSource = mock(MessageSource.class);
+    gson = new Gson();
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void MolgenisInterceptor() {
-    new MolgenisInterceptor(null, null, null, null, null, null);
+    new MolgenisInterceptor(null, null, null, null, null, null, null);
   }
 
   @Test
@@ -52,7 +56,8 @@ public class MolgenisInterceptorTest {
             appSettings,
             authenticationSettings,
             environment,
-            messageSource);
+            messageSource,
+            gson);
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     Object handler = mock(Object.class);
@@ -63,7 +68,6 @@ public class MolgenisInterceptorTest {
     assertEquals(
         model.get(PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
 
-    Gson gson = new Gson();
     Map<String, String> environmentAttributes =
         gson.fromJson(String.valueOf(model.get(PluginAttributes.KEY_ENVIRONMENT)), HashMap.class);
 
@@ -71,5 +75,6 @@ public class MolgenisInterceptorTest {
     assertEquals(
         environmentAttributes.get(MolgenisInterceptor.ATTRIBUTE_ENVIRONMENT_TYPE), environment);
     assertTrue(model.containsKey(PluginAttributes.KEY_I18N));
+    assertSame(model.get(KEY_GSON), gson);
   }
 }

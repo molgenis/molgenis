@@ -42,7 +42,6 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -85,6 +84,7 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -652,6 +652,6 @@ public class SortaController extends PluginController {
   }
 
   private String getSortaServiceMenuUrl() {
-    return menuReaderService.getMenu().findMenuItemPath(ID);
+    return menuReaderService.findMenuItemPath(ID);
   }
 }

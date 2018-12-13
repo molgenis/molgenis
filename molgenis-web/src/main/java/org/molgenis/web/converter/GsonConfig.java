@@ -1,6 +1,10 @@
 package org.molgenis.web.converter;
 
+import com.google.gson.TypeAdapterFactory;
 import org.molgenis.data.Entity;
+import org.molgenis.web.menu.model.Menu;
+import org.molgenis.web.menu.model.MenuItem;
+import org.molgenis.web.menu.model.MenuNode;
 import org.molgenis.web.support.EntitySerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +22,15 @@ public class GsonConfig {
   }
 
   @Bean
+  public TypeAdapterFactory menuTypeAdapterFactory() {
+    RuntimeTypeAdapterFactory<MenuNode> menuRuntimeTypeAdapterFactory =
+        RuntimeTypeAdapterFactory.of(MenuNode.class, "type");
+    menuRuntimeTypeAdapterFactory.registerAutoValueSubtype(MenuItem.class, "plugin");
+    menuRuntimeTypeAdapterFactory.registerAutoValueSubtype(Menu.class, "menu");
+    return menuRuntimeTypeAdapterFactory;
+  }
+
+  @Bean
   public GsonFactoryBean gsonFactoryBean() {
     boolean prettyPrinting =
         environment != null && (environment.equals("development") || environment.equals("test"));
@@ -28,6 +41,7 @@ public class GsonConfig {
     gsonFactoryBean.setDisableHtmlEscaping(true);
     gsonFactoryBean.setPrettyPrinting(prettyPrinting);
     gsonFactoryBean.setSerializeNulls(false);
+    gsonFactoryBean.registerTypeAdapterFactory(menuTypeAdapterFactory());
     gsonFactoryBean.registerTypeAdapterFactory(new AutoValueTypeAdapterFactory());
     return gsonFactoryBean;
   }

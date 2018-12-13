@@ -9,6 +9,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -17,9 +18,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownPluginException;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.web.PluginController;
-import org.molgenis.web.Ui;
-import org.molgenis.web.UiMenu;
-import org.molgenis.web.UiMenuItem;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
+import org.molgenis.web.menu.model.MenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
 
+/**
+ * Looks up the plugin that will handle the request. Adds context attributes to the Model so the
+ * freemarker view can use them when rendering the header and footer.
+ */
 @Controller
 @RequestMapping(URI)
 public class MolgenisMenuController {
@@ -41,18 +46,18 @@ public class MolgenisMenuController {
   private static final String KEY_MOLGENIS_VERSION = "molgenis_version";
   private static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
 
-  private final Ui molgenisUi;
+  private final MenuReaderService menuReaderService;
   private final String molgenisVersion;
   private final String molgenisBuildData;
   private final DataService dataService;
 
   MolgenisMenuController(
-      Ui molgenisUi,
+      MenuReaderService menuReaderService,
       @Value("${molgenis.version}") String molgenisVersion,
       @Value("${molgenis.build.date}") String molgenisBuildData,
       DataService dataService) {
     this.dataService = requireNonNull(dataService);
-    this.molgenisUi = requireNonNull(molgenisUi, "molgenisUi is null");
+    this.menuReaderService = requireNonNull(menuReaderService);
     this.molgenisVersion = requireNonNull(molgenisVersion, "molgenisVersion is null");
     requireNonNull(molgenisBuildData, "molgenisBuildDate is null");
 
@@ -65,30 +70,31 @@ public class MolgenisMenuController {
 
   @RequestMapping
   public String forwardDefaultMenuDefaultPlugin(Model model) {
-    UiMenu menu = molgenisUi.getMenu();
-    if (menu == null) throw new RuntimeException("main menu does not exist");
+    Menu menu =
+        menuReaderService
+            .getMenu()
+            .orElseThrow(() -> new RuntimeException("main menu does not exist"));
     String menuId = menu.getId();
     model.addAttribute(KEY_MENU_ID, menuId);
 
-    UiMenuItem activeItem = menu.getActiveItem();
-    if (activeItem == null) {
+    Optional<MenuItem> optionalActiveItem = menu.firstItem();
+    if (!optionalActiveItem.isPresent()) {
       LOG.warn("main menu does not contain any (accessible) items");
       return "forward:/login";
     }
+    MenuItem activeItem = optionalActiveItem.get();
     String pluginId = activeItem.getId();
 
     String contextUri = URI + '/' + menuId + '/' + pluginId;
-    model.addAttribute(KEY_CONTEXT_URL, contextUri);
-    model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
-    model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
+    addModelAttributes(model, contextUri);
 
     return getForwardPluginUri(activeItem.getId(), null, getQueryString(activeItem));
   }
 
-  private @Nullable String getQueryString(UiMenuItem menuItem) {
+  private @Nullable String getQueryString(MenuItem menuItem) {
     String pathRemainder;
 
-    String url = menuItem.getUrl();
+    String url = Optional.ofNullable(menuItem.getParams()).orElse("");
     int index = url.indexOf('?');
     if (index != -1) {
       pathRemainder = url.substring(index + 1);
@@ -100,18 +106,25 @@ public class MolgenisMenuController {
 
   @RequestMapping("/{menuId}")
   public String forwardMenuDefaultPlugin(@Valid @NotNull @PathVariable String menuId, Model model) {
-    UiMenu menu = molgenisUi.getMenu(menuId);
-    if (menu == null) throw new RuntimeException("menu with id [" + menuId + "] does not exist");
+    Menu menu =
+        menuReaderService
+            .getMenu()
+            .flatMap(it -> it.findMenu(menuId))
+            .orElseThrow(
+                () -> new RuntimeException("menu with id [" + menuId + "] does not exist"));
     model.addAttribute(KEY_MENU_ID, menuId);
 
-    UiMenuItem activeItem = menu.getActiveItem();
-    String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
+    String pluginId = menu.firstItem().map(MenuItem::getId).orElse(VoidPluginController.ID);
 
     String contextUri = URI + '/' + menuId + '/' + pluginId;
+    addModelAttributes(model, contextUri);
+    return getForwardPluginUri(pluginId);
+  }
+
+  private void addModelAttributes(Model model, String contextUri) {
     model.addAttribute(KEY_CONTEXT_URL, contextUri);
     model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
     model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
-    return getForwardPluginUri(pluginId);
   }
 
   @RequestMapping("/{menuId}/{pluginId}/**")
@@ -125,10 +138,8 @@ public class MolgenisMenuController {
         (String) (request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
     String remainder = mappingUri.substring(contextUri.length());
 
-    model.addAttribute(KEY_CONTEXT_URL, contextUri);
-    model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
-    model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
     model.addAttribute(KEY_MENU_ID, menuId);
+    addModelAttributes(model, contextUri);
     return getForwardPluginUri(pluginId, remainder);
   }
 

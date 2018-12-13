@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import org.mockito.Mock;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -39,13 +39,12 @@ public class SecurityUiControllerTest {
     initMocks(this);
 
     Menu menu = mock(Menu.class);
-    when(menuReaderService.getMenu()).thenReturn(menu);
     when(appSettings.getLanguageCode()).thenReturn(DEFAULT_LANG);
     User user = mock(User.class);
     when(userAccountService.getCurrentUser()).thenReturn(user);
     when(user.isSuperuser()).thenReturn(false);
-    when(menu.findMenuItemPath(SecurityUiController.ID)).thenReturn(MENU_PATH_SECURITY_UI);
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.findMenuItemPath(SecurityUiController.ID))
+        .thenReturn(MENU_PATH_SECURITY_UI);
 
     SecurityUiController securityUiController =
         new SecurityUiController(menuReaderService, appSettings, userAccountService);

@@ -1,6 +1,5 @@
 package org.molgenis.core.ui;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.testng.Assert.assertEquals;
@@ -10,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownPluginException;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.test.AbstractMockitoTest;
-import org.molgenis.web.Ui;
+import org.molgenis.web.menu.MenuReaderService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -18,10 +17,12 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   private MolgenisMenuController molgenisMenuController;
 
   @Mock private DataService dataService;
+  @Mock private MenuReaderService menuReaderService;
+  @Mock private Plugin plugin;
 
   @BeforeMethod
   public void beforeMethod() {
-    molgenisMenuController = new MolgenisMenuController(mock(Ui.class), "1", "1", dataService);
+    molgenisMenuController = new MolgenisMenuController(menuReaderService, "1", "1", dataService);
   }
 
   @Test(
@@ -36,7 +37,6 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   @Test
   public void testGetForwardPluginUri() {
     String pluginId = "pluginB";
-    Plugin plugin = mock(Plugin.class);
     when(plugin.getPath()).thenReturn("app/test");
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
 
@@ -49,7 +49,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   public void testGetForwardPluginPathRemainder() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
-    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
         molgenisMenuController.getForwardPluginUri(pluginId, "remainder", null),
@@ -60,7 +60,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   public void testGetForwardPluginUriQueryString() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
-    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
         molgenisMenuController.getForwardPluginUri(pluginId, null, "key=value"),
@@ -71,7 +71,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   public void testGetForwardPluginUriQueryStringEmpty() {
     String pluginId = "pluginId";
     String pluginPath = "pluginPath";
-    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
         molgenisMenuController.getForwardPluginUri(pluginId, null, ""),
@@ -82,7 +82,7 @@ public class MolgenisMenuControllerTest extends AbstractMockitoTest {
   public void testGetForwardAppPlugin() {
     String pluginId = "app-pluginId";
     String pluginPath = "pluginPath";
-    Plugin plugin = when(mock(Plugin.class).getPath()).thenReturn(pluginPath).getMock();
+    when(plugin.getPath()).thenReturn(pluginPath);
     when(dataService.findOneById(PLUGIN, pluginId, Plugin.class)).thenReturn(plugin);
     assertEquals(
         molgenisMenuController.getForwardPluginUri(pluginId, null, null),

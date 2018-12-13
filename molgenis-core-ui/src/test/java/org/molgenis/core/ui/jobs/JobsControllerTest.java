@@ -8,8 +8,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.mockito.Mock;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -19,6 +17,8 @@ import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,11 +49,10 @@ public class JobsControllerTest extends AbstractMockitoTest {
 
   @Test
   public void testCreateJobExecutionViewHref() {
-    when(menuReaderService.getMenu()).thenReturn(menu);
-    when(menu.findMenuItemPath(JobsController.ID)).thenReturn("/jobs");
+    when(menuReaderService.findMenuItemPath(JobsController.ID)).thenReturn("/menu/jobs");
     assertEquals(
         jobsController.createJobExecutionViewHref("/api/v2/sys_MappingJobExecution/abcde", 2345),
-        "/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345");
+        "/menu/jobs/viewJob/?jobHref=/api/v2/sys_MappingJobExecution/abcde&refreshTimeoutMillis=2345");
   }
 
   @Test

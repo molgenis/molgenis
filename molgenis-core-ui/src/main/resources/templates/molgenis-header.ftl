@@ -92,10 +92,10 @@
                 <#assign plugin_id="NULL">
             </#if>
 
-            <@topmenu molgenis_ui.getMenu() plugin_id pluginid_with_query_string/>
+            <@topmenu menu plugin_id pluginid_with_query_string/>
         </#if>
     <#else>
-        <#assign menu=molgenis_ui.getMenuJson()>
+        <#assign menu=gson.toJson(menu)>
 
         <#-- VUE -->
         <div id="molgenis-menu"></div>
@@ -184,7 +184,7 @@
             </#if>
             <div class="navbar-header">
                 <#list menu.items as item>
-                    <#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
+                    <#if !item.menu && item.label == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
                             <img class="img-responsive" style="max-width:100%;max-height:100%;"
                                  src="${app_settings.logoNavBarHref?html}"
@@ -208,23 +208,23 @@
                     <#list menu.items as item>
 
                     <#-- Single menu items -->
-                        <#if item.type != "MENU">
-                            <#if item.name != "Home" || !app_settings.logoNavBarHref?has_content>
+                        <#if !item.menu>
+                            <#if item.label != "Home" || !app_settings.logoNavBarHref?has_content>
                                 <#if item.url == pluginid_with_query_string>
-                                    <li class="active"><a href="#">${item.name?html}</a></li>
+                                    <li class="active"><a href="#">${item.label?html}</a></li>
                                 <#else>
-                                    <li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.name?html}</a>
+                                    <li><a href="/menu/${menu.id?url('UTF-8')}/${item.url?html}">${item.label?html}</a>
                                     </li>
                                 </#if>
                             </#if>
 
                         <#-- Dropdown menu items -->
-                        <#elseif item.type == "MENU">
+                        <#else>
                             <#assign sub_menu = item>
                             <#assign menu_counter = 0>
                             <li class="dropdown">
                                 <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button"
-                                   aria-expanded="false">${item.name?html}<b class="caret"></b></a>
+                                   aria-expanded="false">${item.label?html}<b class="caret"></b></a>
 
                                 <ul class="dropdown-menu" role="menu">
                                     <@dropdown sub_menu menu_counter />
@@ -273,20 +273,20 @@
     </nav> <#-- close navbar -->
 </#macro>
 
-<#-- dropdown for entity -->
+<#-- dropdown for sub_menu -->
 <#macro dropdown sub_menu menu_counter>
     <#assign this_menu_counter = menu_counter + 1>
 
     <#list sub_menu.items as sub_item>
-        <#if sub_item.type != "MENU">
+        <#if !sub_item.menu>
             <li>
                 <a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if>
-                   href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.name?html}</a>
+                   href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.label?html}</a>
             </li>
-        <#elseif sub_item.type == "MENU">
+        <#else>
             <li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
                 <a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if>
-                   href="#">${sub_item.name?html}</a>
+                   href="#">${sub_item.label?html}</a>
             </li>
 
             <@dropdown sub_item this_menu_counter />

@@ -10,6 +10,7 @@ import static org.molgenis.core.ui.FileStoreConstants.FILE_STORE_PLUGIN_APPS_PAT
 import static org.molgenis.security.UriConstants.PATH_SEGMENT_APPS;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
@@ -23,10 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.core.ui.freemarker.MolgenisFreemarkerObjectWrapper;
-import org.molgenis.core.ui.menu.MenuMolgenisUi;
-import org.molgenis.core.ui.menu.MenuReaderService;
-import org.molgenis.core.ui.menu.MenuReaderServiceImpl;
-import org.molgenis.core.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
@@ -45,8 +42,9 @@ import org.molgenis.util.AppDataRootProvider;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.PluginInterceptor;
-import org.molgenis.web.Ui;
 import org.molgenis.web.converter.CsvHttpMessageConverter;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.MenuReaderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -85,11 +83,15 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+  @Autowired private Gson gson;
+
   @Autowired private RdfConverter rdfConverter;
 
   @Autowired private StyleService styleService;
 
   @Autowired private MessageSource messageSource;
+
+  @Autowired private UserPermissionEvaluator userPermissionEvaluator;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -208,7 +210,8 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
         appSettings,
         authenticationSettings,
         environment,
-        messageSource);
+        messageSource,
+        gson);
   }
 
   @Bean
@@ -233,7 +236,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Bean
   public PluginInterceptor molgenisPluginInterceptor() {
-    return new PluginInterceptor(molgenisUi(), permissionService);
+    return new PluginInterceptor(menuReaderService(), permissionService);
   }
 
   @Bean
@@ -330,7 +333,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Bean
   public MenuReaderService menuReaderService() {
-    return new MenuReaderServiceImpl(appSettings);
+    return new MenuReaderServiceImpl(appSettings, gson, userPermissionEvaluator);
   }
 
   /**
@@ -339,11 +342,5 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Bean
   public ApplicationContextProvider applicationContextProvider() {
     return new ApplicationContextProvider();
-  }
-
-  @Bean
-  public Ui molgenisUi() {
-    Ui molgenisUi = new MenuMolgenisUi(menuReaderService());
-    return new MolgenisUiPermissionDecorator(molgenisUi, permissionService);
   }
 }

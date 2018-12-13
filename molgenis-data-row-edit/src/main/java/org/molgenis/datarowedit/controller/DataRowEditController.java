@@ -3,11 +3,11 @@ package org.molgenis.datarowedit.controller;
 import static org.molgenis.datarowedit.controller.DataRowEditController.URI;
 
 import org.molgenis.core.ui.controller.VuePluginController;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

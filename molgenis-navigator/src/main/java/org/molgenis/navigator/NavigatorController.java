@@ -9,12 +9,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import org.molgenis.core.ui.controller.VuePluginController;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.jobs.model.JobExecution;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,11 +47,11 @@ public class NavigatorController extends VuePluginController {
   public String init(Model model) {
     super.init(model, ID);
 
-    Menu menu = menuReaderService.getMenu();
     asList("dataexplorer", "metadata-manager", "importwizard")
         .forEach(
             pluginId ->
-                model.addAttribute(pluginId.replace('-', '_'), menu.findMenuItemPath(pluginId)));
+                model.addAttribute(
+                    pluginId.replace('-', '_'), menuReaderService.findMenuItemPath(pluginId)));
 
     return "view-navigator";
   }
