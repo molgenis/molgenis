@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
@@ -40,6 +41,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * @throws UnknownEntityTypeException when the repository can not be found
    * @throws MolgenisDataException if the repository doesn't implement CrudRepository
    */
+  @Nullable
   Repository<Entity> getRepository(String entityTypeId);
 
   /**
@@ -49,6 +51,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * @param <E> entity type
    * @return typed entity {@link Repository}
    */
+  @Nullable
   <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
 
   /**
@@ -56,6 +59,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    *
    * @return entity type
    */
+  @Nullable
   EntityType getEntityType(String entityTypeId);
 
   /**
@@ -142,6 +146,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    *
    * <p>throws MolgenisDataException if the repository of the entity isn't a Queryable
    */
+  @Nullable
   Entity findOneById(String entityTypeId, Object id);
 
   /**
@@ -149,6 +154,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * @param clazz entity type
    * @return typed entity
    */
+  @Nullable
   <E extends Entity> E findOneById(String entityTypeId, Object id, Class<E> clazz);
 
   /**
@@ -158,6 +164,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * @param fetch fetch defining which attributes to retrieve
    * @return entity or null
    */
+  @Nullable
   Entity findOneById(String entityTypeId, Object id, Fetch fetch);
 
   /**
@@ -168,6 +175,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * @param clazz typed entity class
    * @return entity of the given type or null
    */
+  @Nullable
   <E extends Entity> E findOneById(String entityTypeId, Object id, Fetch fetch, Class<E> clazz);
 
   /**
@@ -175,6 +183,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    *
    * @throws MolgenisDataException if the repository of the entity isn't a Queryable
    */
+  @Nullable
   Entity findOne(String entityTypeId, Query<Entity> q);
 
   /**
@@ -182,6 +191,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    *
    * @param q query
    */
+  @Nullable
   <E extends Entity> E findOne(String entityTypeId, Query<E> q, Class<E> clazz);
 
   /**
