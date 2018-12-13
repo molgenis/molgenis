@@ -5,6 +5,21 @@
 
     <div class="row mb-3  ">
       <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <router-link :to="{ name: 'groupOverView' }">{{ 'security-ui-breadcrumb-groups' | i18n
+                }}
+              </router-link>
+            </li>
+            <li class="breadcrumb-item active text-capitalize" aria-current="page">{{this.groupName}}</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="row mb-3  ">
+      <div class="col">
         <h1>{{ 'security-ui-add-member-title' | i18n }}</h1>
       </div>
     </div>
