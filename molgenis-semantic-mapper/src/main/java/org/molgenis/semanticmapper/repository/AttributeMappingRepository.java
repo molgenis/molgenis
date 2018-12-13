@@ -2,7 +2,7 @@ package org.molgenis.semanticmapper.repository;
 
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -26,8 +26,8 @@ public interface AttributeMappingRepository {
    */
   List<AttributeMapping> getAttributeMappings(
       List<Entity> attributeMappingEntities,
-      @Nullable EntityType sourceEntityType,
-      @Nullable EntityType targetEntityType);
+      @CheckForNull EntityType sourceEntityType,
+      @CheckForNull EntityType targetEntityType);
 
   /**
    * Inserts or updates a {@link Collection} of {@link AttributeMapping}. Will generate IDs if they

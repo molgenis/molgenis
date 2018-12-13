@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -11,10 +11,10 @@ import org.molgenis.util.AutoGson;
 public abstract class EditorEntityTypeIdentifier {
   public abstract String getId();
 
-  @Nullable
+  @CheckForNull
   public abstract String getLabel();
 
-  public static EditorEntityTypeIdentifier create(String id, @Nullable String label) {
+  public static EditorEntityTypeIdentifier create(String id, @CheckForNull String label) {
     return new AutoValue_EditorEntityTypeIdentifier(id, label);
   }
 }

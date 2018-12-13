@@ -1,7 +1,7 @@
 package org.molgenis.dataexplorer.controller;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -11,7 +11,7 @@ import org.molgenis.util.AutoGson;
 public abstract class NavigatorLink {
   public abstract String getHref();
 
-  @Nullable
+  @CheckForNull
   public abstract String getLabel();
 
   public static NavigatorLink create(String href, String label) {

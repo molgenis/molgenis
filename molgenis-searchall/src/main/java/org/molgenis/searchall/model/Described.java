@@ -2,12 +2,12 @@ package org.molgenis.searchall.model;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 public interface Described {
   String getLabel();
 
-  @Nullable
+  @CheckForNull
   String getDescription();
 
   default boolean isLabelOrDescriptionMatch(String searchterm) {

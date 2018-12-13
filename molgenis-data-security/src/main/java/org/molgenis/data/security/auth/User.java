@@ -25,7 +25,7 @@ import static org.molgenis.data.security.auth.UserMetaData.TOLLFREEPHONE;
 import static org.molgenis.data.security.auth.UserMetaData.TWO_FACTOR_AUTHENTICATION;
 import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -68,7 +68,7 @@ public class User extends StaticEntity {
     set(PASSWORD, password);
   }
 
-  @Nullable
+  @CheckForNull
   public String getActivationCode() {
     return getString(ACTIVATIONCODE);
   }
@@ -105,7 +105,7 @@ public class User extends StaticEntity {
     set(SUPERUSER, superuser);
   }
 
-  @Nullable
+  @CheckForNull
   public String getFirstName() {
     return getString(FIRSTNAME);
   }
@@ -114,7 +114,7 @@ public class User extends StaticEntity {
     set(FIRSTNAME, firstName);
   }
 
-  @Nullable
+  @CheckForNull
   public String getMiddleNames() {
     return getString(MIDDLENAMES);
   }
@@ -123,7 +123,7 @@ public class User extends StaticEntity {
     set(MIDDLENAMES, middleNames);
   }
 
-  @Nullable
+  @CheckForNull
   public String getLastName() {
     return getString(LASTNAME);
   }
@@ -132,7 +132,7 @@ public class User extends StaticEntity {
     set(LASTNAME, lastName);
   }
 
-  @Nullable
+  @CheckForNull
   public String getTitle() {
     return getString(TITLE);
   }
@@ -141,7 +141,7 @@ public class User extends StaticEntity {
     set(TITLE, title);
   }
 
-  @Nullable
+  @CheckForNull
   public String getAffiliation() {
     return getString(AFFILIATION);
   }
@@ -150,7 +150,7 @@ public class User extends StaticEntity {
     set(AFFILIATION, affiliation);
   }
 
-  @Nullable
+  @CheckForNull
   public String getDepartment() {
     return getString(DEPARTMENT);
   }
@@ -159,7 +159,7 @@ public class User extends StaticEntity {
     set(DEPARTMENT, department);
   }
 
-  @Nullable
+  @CheckForNull
   public String getRole() {
     return getString(ROLE);
   }
@@ -168,7 +168,7 @@ public class User extends StaticEntity {
     set(ROLE, role);
   }
 
-  @Nullable
+  @CheckForNull
   public String getAddress() {
     return getString(ADDRESS);
   }
@@ -177,7 +177,7 @@ public class User extends StaticEntity {
     set(ADDRESS, address);
   }
 
-  @Nullable
+  @CheckForNull
   public String getPhone() {
     return getString(PHONE);
   }
@@ -194,7 +194,7 @@ public class User extends StaticEntity {
     set(EMAIL, email);
   }
 
-  @Nullable
+  @CheckForNull
   public String getFax() {
     return getString(FAX);
   }
@@ -203,7 +203,7 @@ public class User extends StaticEntity {
     set(FAX, fax);
   }
 
-  @Nullable
+  @CheckForNull
   public String getTollFreePhone() {
     return getString(TOLLFREEPHONE);
   }
@@ -212,7 +212,7 @@ public class User extends StaticEntity {
     set(TOLLFREEPHONE, tollFreePhone);
   }
 
-  @Nullable
+  @CheckForNull
   public String getCity() {
     return getString(CITY);
   }
@@ -221,7 +221,7 @@ public class User extends StaticEntity {
     set(CITY, city);
   }
 
-  @Nullable
+  @CheckForNull
   public String getCountry() {
     return getString(COUNTRY);
   }
@@ -238,7 +238,7 @@ public class User extends StaticEntity {
     set(CHANGE_PASSWORD, changePassword);
   }
 
-  @Nullable
+  @CheckForNull
   public String getLanguageCode() {
     return getString(LANGUAGECODE);
   }
@@ -247,7 +247,7 @@ public class User extends StaticEntity {
     set(LANGUAGECODE, languageCode);
   }
 
-  @Nullable
+  @CheckForNull
   public String getGoogleAccountId() {
     return getString(GOOGLEACCOUNTID);
   }

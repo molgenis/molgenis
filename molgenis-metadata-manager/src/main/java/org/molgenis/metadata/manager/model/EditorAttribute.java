@@ -3,7 +3,7 @@ package org.molgenis.metadata.manager.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -13,27 +13,27 @@ import org.molgenis.util.AutoGson;
 public abstract class EditorAttribute {
   public abstract String getId();
 
-  @Nullable
+  @CheckForNull
   public abstract String getName();
 
-  @Nullable
+  @CheckForNull
   public abstract String getType();
 
-  @Nullable
+  @CheckForNull
   public abstract EditorAttributeIdentifier getParent();
 
-  @Nullable
+  @CheckForNull
   public abstract EditorEntityTypeIdentifier getRefEntityType();
 
   public abstract boolean isCascadeDelete();
 
-  @Nullable
+  @CheckForNull
   public abstract EditorAttributeIdentifier getMappedByAttribute();
 
-  @Nullable
+  @CheckForNull
   public abstract EditorSort getOrderBy();
 
-  @Nullable
+  @CheckForNull
   public abstract String getExpression();
 
   public abstract boolean isNullable();
@@ -42,25 +42,25 @@ public abstract class EditorAttribute {
 
   public abstract boolean isVisible();
 
-  @Nullable
+  @CheckForNull
   public abstract String getLabel();
 
   public abstract Map<String, String> getLabelI18n();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public abstract Map<String, String> getDescriptionI18n();
 
   public abstract boolean isAggregatable();
 
-  @Nullable
+  @CheckForNull
   public abstract List<String> getEnumOptions();
 
-  @Nullable
+  @CheckForNull
   public abstract Long getRangeMin();
 
-  @Nullable
+  @CheckForNull
   public abstract Long getRangeMax();
 
   public abstract boolean isReadonly();
@@ -69,24 +69,24 @@ public abstract class EditorAttribute {
 
   public abstract List<EditorTagIdentifier> getTags();
 
-  @Nullable
+  @CheckForNull
   public abstract String getNullableExpression();
 
-  @Nullable
+  @CheckForNull
   public abstract String getVisibleExpression();
 
-  @Nullable
+  @CheckForNull
   public abstract String getValidationExpression();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDefaultValue();
 
   public abstract Integer getSequenceNumber();
 
   public static EditorAttribute create(
       String id,
-      @Nullable String name,
-      @Nullable String type,
+      @CheckForNull String name,
+      @CheckForNull String type,
       EditorAttributeIdentifier parent,
       EditorEntityTypeIdentifier refEntityType,
       boolean cascadeDelete,
@@ -96,21 +96,21 @@ public abstract class EditorAttribute {
       boolean nullable,
       boolean auto,
       boolean visible,
-      @Nullable String label,
+      @CheckForNull String label,
       Map<String, String> i18nLabel,
-      @Nullable String description,
+      @CheckForNull String description,
       Map<String, String> i18nDescription,
       boolean aggregatable,
-      @Nullable List<String> enumOptions,
-      @Nullable Long rangeMin,
-      @Nullable Long rangeMax,
+      @CheckForNull List<String> enumOptions,
+      @CheckForNull Long rangeMin,
+      @CheckForNull Long rangeMax,
       boolean readonly,
       boolean unique,
       List<EditorTagIdentifier> tags,
-      @Nullable String nullableExpression,
-      @Nullable String visibleExpression,
-      @Nullable String validationExpression,
-      @Nullable String defaultValue,
+      @CheckForNull String nullableExpression,
+      @CheckForNull String visibleExpression,
+      @CheckForNull String validationExpression,
+      @CheckForNull String defaultValue,
       Integer sequenceNumber) {
     return new AutoValue_EditorAttribute(
         id,

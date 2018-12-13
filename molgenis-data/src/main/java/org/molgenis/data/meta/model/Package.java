@@ -10,7 +10,7 @@ import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 import static org.molgenis.data.meta.model.PackageMetadata.ID;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -80,7 +80,7 @@ public class Package extends StaticEntity {
    *
    * @return parent package or <tt>null</tt>
    */
-  @Nullable
+  @CheckForNull
   public Package getParent() {
     return getEntity(PackageMetadata.PARENT, Package.class);
   }
@@ -119,7 +119,7 @@ public class Package extends StaticEntity {
    *
    * @return package description or <tt>null</tt>
    */
-  @Nullable
+  @CheckForNull
   public String getDescription() {
     return getString(PackageMetadata.DESCRIPTION);
   }

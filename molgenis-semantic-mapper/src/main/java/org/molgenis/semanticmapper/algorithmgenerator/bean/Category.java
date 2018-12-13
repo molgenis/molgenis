@@ -1,7 +1,7 @@
 package org.molgenis.semanticmapper.algorithmgenerator.bean;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -13,7 +13,7 @@ public abstract class Category {
 
   public abstract String getLabel();
 
-  @Nullable
+  @CheckForNull
   public abstract AmountWrapper getAmountWrapper();
 
   public static Category create(String code, String label) {

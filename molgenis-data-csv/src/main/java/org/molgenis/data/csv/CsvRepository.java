@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.file.processor.CellProcessor;
@@ -44,7 +44,7 @@ public class CsvRepository extends AbstractRepository {
       File file,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
-      @Nullable List<CellProcessor> cellProcessors,
+      @CheckForNull List<CellProcessor> cellProcessors,
       Character separator) {
     this(
         file,
@@ -59,7 +59,7 @@ public class CsvRepository extends AbstractRepository {
       File file,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
-      @Nullable List<CellProcessor> cellProcessors) {
+      @CheckForNull List<CellProcessor> cellProcessors) {
     this(
         file,
         entityTypeFactory,
@@ -73,7 +73,7 @@ public class CsvRepository extends AbstractRepository {
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
       String sheetName,
-      @Nullable List<CellProcessor> cellProcessors) {
+      @CheckForNull List<CellProcessor> cellProcessors) {
     this.file = file;
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attrMetaFactory = requireNonNull(attrMetaFactory);

@@ -1,7 +1,7 @@
 package org.molgenis.dataexplorer.negotiator;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -17,7 +17,7 @@ public abstract class NegotiatorRequest {
 
   public abstract String getHumanReadable();
 
-  @Nullable
+  @CheckForNull
   public abstract String getnToken();
 
   public static NegotiatorRequest create(

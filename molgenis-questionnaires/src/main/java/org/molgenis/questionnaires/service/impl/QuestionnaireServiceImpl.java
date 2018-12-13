@@ -10,7 +10,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -112,7 +112,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
   }
 
   @Override
-  @Nullable
+  @CheckForNull
   public Questionnaire findQuestionnaireEntity(String entityTypeId) {
     Entity questionnaireInstance =
         dataService.query(entityTypeId).eq(OWNER_USERNAME, getCurrentUsername()).findOne();

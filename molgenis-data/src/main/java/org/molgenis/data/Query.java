@@ -2,11 +2,11 @@ package org.molgenis.data;
 
 import java.util.List;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 /** Definition of a query */
 public interface Query<E extends Entity> extends Iterable<E> {
-  @Nullable
+  @CheckForNull
   Repository<E> getRepository();
 
   /**
@@ -18,7 +18,7 @@ public interface Query<E extends Entity> extends Iterable<E> {
 
   Stream<E> findAll();
 
-  @Nullable
+  @CheckForNull
   E findOne();
 
   /** Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses */
@@ -31,7 +31,7 @@ public interface Query<E extends Entity> extends Iterable<E> {
   int getOffset();
 
   /** Returns sort */
-  @Nullable
+  @CheckForNull
   Sort getSort();
 
   /** Search all fields */
@@ -100,7 +100,7 @@ public interface Query<E extends Entity> extends Iterable<E> {
    *
    * @return the query {@link Fetch} or null
    */
-  @Nullable
+  @CheckForNull
   Fetch getFetch();
 
   /**

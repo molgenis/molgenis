@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.util.Optional;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.core.ui.wizard.Wizard;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.importer.MetadataAction;
@@ -15,7 +15,7 @@ import org.springframework.validation.ObjectError;
 class ImportWizardUtil {
   private ImportWizardUtil() {}
 
-  static @Nullable MetadataAction toMetadataAction(String actionStr) {
+  static @CheckForNull MetadataAction toMetadataAction(String actionStr) {
     // convert input to database action
     MetadataAction metadataAction;
 
@@ -40,7 +40,7 @@ class ImportWizardUtil {
     return metadataAction;
   }
 
-  static @Nullable DataAction toDataAction(String actionStr) {
+  static @CheckForNull DataAction toDataAction(String actionStr) {
     // convert input to database action
     DataAction dataAction;
 

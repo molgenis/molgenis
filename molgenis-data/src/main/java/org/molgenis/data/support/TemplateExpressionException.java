@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import java.io.IOException;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.meta.model.Attribute;
 
 class TemplateExpressionException extends RuntimeException {
@@ -9,7 +9,7 @@ class TemplateExpressionException extends RuntimeException {
     this(attribute, null);
   }
 
-  TemplateExpressionException(Attribute attribute, @Nullable IOException e) {
+  TemplateExpressionException(Attribute attribute, @CheckForNull IOException e) {
     super("Attribute " + attribute.getName() + " expression is null", e);
   }
 }

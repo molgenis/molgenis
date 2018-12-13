@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
@@ -26,7 +26,7 @@ public class QueryImpl<E extends Entity> implements Query<E> {
   /** {@link Fetch} that defines which entity attributes to retrieve. */
   private Fetch fetch;
 
-  @Nullable
+  @CheckForNull
   @Override
   public Repository<E> getRepository() {
     return repository;
@@ -88,7 +88,7 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     return repository.findAll(this);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public E findOne() {
     if (repository == null) throw new RuntimeException("Query failed: repository not set");
@@ -127,7 +127,7 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     return this;
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Sort getSort() {
     return sort;
@@ -274,7 +274,7 @@ public class QueryImpl<E extends Entity> implements Query<E> {
     return repository.findAll(this).iterator();
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Fetch getFetch() {
     return fetch;

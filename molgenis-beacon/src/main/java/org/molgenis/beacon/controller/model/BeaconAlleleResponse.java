@@ -1,7 +1,7 @@
 package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.beacon.config.Beacon;
 import org.molgenis.util.AutoGson;
 
@@ -20,7 +20,7 @@ public abstract class BeaconAlleleResponse {
    * <p>This should be non-null, unless there was an error, in which case `error` has to be
    * non-null.
    */
-  @Nullable
+  @CheckForNull
   public abstract Boolean getExists();
 
   /**
@@ -29,7 +29,7 @@ public abstract class BeaconAlleleResponse {
    * <p>This should be non-null in exceptional situations only, in which case `exists` has to be
    * null.
    */
-  @Nullable
+  @CheckForNull
   public abstract BeaconError getError();
 
   /** Allele request as interpreted by the beacon. */

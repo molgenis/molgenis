@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -11,10 +11,10 @@ import org.molgenis.util.AutoGson;
 public abstract class EditorOrder {
   public abstract String getAttributeName();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDirection();
 
-  public static EditorOrder create(String attributeName, @Nullable String direction) {
+  public static EditorOrder create(String attributeName, @CheckForNull String direction) {
     return new AutoValue_EditorOrder(attributeName, direction);
   }
 }

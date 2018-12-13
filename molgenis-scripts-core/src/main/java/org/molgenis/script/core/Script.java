@@ -10,7 +10,7 @@ import static org.molgenis.script.core.ScriptMetaData.TYPE;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -53,7 +53,7 @@ public class Script extends StaticEntity {
     set(CONTENT, content);
   }
 
-  @Nullable
+  @CheckForNull
   public String getResultFileExtension() {
     return getString(RESULT_FILE_EXTENSION);
   }

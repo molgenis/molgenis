@@ -2,7 +2,7 @@ package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.util.AutoGson;
 
@@ -12,7 +12,7 @@ import org.molgenis.util.AutoGson;
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class GetResourcesResponse {
   /** @return <tt>null</tt> folder implies the root package */
-  @Nullable
+  @CheckForNull
   public abstract Folder getFolder();
 
   public abstract List<Resource> getResources();

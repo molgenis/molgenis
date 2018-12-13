@@ -1,6 +1,6 @@
 package org.molgenis.jobs;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.jobs.model.JobExecution;
 
 public interface Progress {
@@ -14,7 +14,7 @@ public interface Progress {
 
   void status(String message);
 
-  void failed(String message, @Nullable Throwable throwable);
+  void failed(String message, @CheckForNull Throwable throwable);
 
   void canceled();
 

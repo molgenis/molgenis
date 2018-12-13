@@ -1,6 +1,6 @@
 package org.molgenis.data.importer;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.RepositoryCollection;
 
 public interface MetadataParser {
@@ -11,7 +11,7 @@ public interface MetadataParser {
    * @param packageId , the package where the entities should go. Default if none was supplied
    * @return {@link ParsedMetaData}
    */
-  ParsedMetaData parse(RepositoryCollection source, @Nullable String packageId);
+  ParsedMetaData parse(RepositoryCollection source, @CheckForNull String packageId);
 
   /** Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source */
   EntitiesValidationReport validate(RepositoryCollection source);

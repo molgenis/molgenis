@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.StringUtils.join;
 import com.google.auto.value.AutoValue;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -19,7 +19,7 @@ public abstract class OntologyTerm {
 
   public abstract String getLabel();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public abstract List<String> getSynonyms();

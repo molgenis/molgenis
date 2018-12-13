@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
@@ -166,13 +166,13 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   }
 
   @Override
-  @Nullable
+  @CheckForNull
   public String getUsername() {
     return getString(Meta.USERNAME);
   }
 
   @Override
-  @Nullable
+  @CheckForNull
   public String getPassword() {
     return getString(Meta.PASSWORD);
   }

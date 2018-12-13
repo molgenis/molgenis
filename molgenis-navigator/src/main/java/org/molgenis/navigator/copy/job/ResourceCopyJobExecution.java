@@ -7,7 +7,7 @@ import static org.molgenis.navigator.util.ResourceIdentifierUtil.getResourcesFro
 
 import com.google.gson.Gson;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.jobs.model.JobExecution;
@@ -39,11 +39,11 @@ public class ResourceCopyJobExecution extends JobExecution {
     return getResourcesFromJson(getString(RESOURCES));
   }
 
-  public void setTargetPackage(@Nullable String targetPackageId) {
+  public void setTargetPackage(@CheckForNull String targetPackageId) {
     set(TARGET_PACKAGE, targetPackageId);
   }
 
-  @Nullable
+  @CheckForNull
   public String getTargetPackage() {
     return getString(TARGET_PACKAGE);
   }

@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -28,7 +28,7 @@ public class DataServiceImpl implements DataService {
     this.metaDataService = requireNonNull(metaDataService);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public EntityType getEntityType(String entityTypeId) {
     return metaDataService.getEntityType(entityTypeId).orElse(null);
@@ -64,13 +64,13 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId).findAll(q);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Entity findOneById(String entityTypeId, Object id) {
     return getRepository(entityTypeId).findOneById(id);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Entity findOne(String entityTypeId, Query<Entity> q) {
     return getRepository(entityTypeId).findOne(q);
@@ -133,13 +133,13 @@ public class DataServiceImpl implements DataService {
     getRepository(entityTypeId).deleteAll();
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Repository<Entity> getRepository(String entityTypeId) {
     return metaDataService.getRepository(entityTypeId).orElse(null);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass) {
     return metaDataService.getRepository(entityTypeId, entityClass).orElse(null);
@@ -160,13 +160,13 @@ public class DataServiceImpl implements DataService {
     return getRepository(entityTypeId, clazz).findAll(q);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public <E extends Entity> E findOneById(String entityTypeId, Object id, Class<E> clazz) {
     return getRepository(entityTypeId, clazz).findOneById(id);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public <E extends Entity> E findOne(String entityTypeId, Query<E> q, Class<E> clazz) {
     return getRepository(entityTypeId, clazz).findOne(q);
@@ -197,13 +197,13 @@ public class DataServiceImpl implements DataService {
     return getRepository(repositoryName).getCapabilities();
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public Entity findOneById(String entityTypeId, Object id, Fetch fetch) {
     return getRepository(entityTypeId).findOneById(id, fetch);
   }
 
-  @Nullable
+  @CheckForNull
   @Override
   public <E extends Entity> E findOneById(
       String entityTypeId, Object id, Fetch fetch, Class<E> clazz) {

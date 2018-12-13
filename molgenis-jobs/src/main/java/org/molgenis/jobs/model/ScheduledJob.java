@@ -11,7 +11,7 @@ import static org.molgenis.jobs.model.ScheduledJobMetadata.SUCCESS_EMAIL;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.TYPE;
 import static org.molgenis.jobs.model.ScheduledJobMetadata.USER;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
@@ -42,7 +42,7 @@ public class ScheduledJob extends StaticEntity {
     return getString(NAME);
   }
 
-  @Nullable
+  @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
   }
@@ -56,22 +56,22 @@ public class ScheduledJob extends StaticEntity {
     return active != null && active;
   }
 
-  @Nullable
+  @CheckForNull
   public String getFailureEmail() {
     return getString(FAILURE_EMAIL);
   }
 
-  @Nullable
+  @CheckForNull
   public String getSuccessEmail() {
     return getString(SUCCESS_EMAIL);
   }
 
-  @Nullable
+  @CheckForNull
   public String getUser() {
     return getString(USER);
   }
 
-  public void setUser(@Nullable String username) {
+  public void setUser(@CheckForNull String username) {
     set(USER, username);
   }
 

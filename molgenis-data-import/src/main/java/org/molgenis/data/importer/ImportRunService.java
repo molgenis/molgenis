@@ -13,7 +13,7 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.security.user.UserService;
@@ -111,7 +111,7 @@ public class ImportRunService {
     return "importRun " + importRun.getStatus();
   }
 
-  void failImportRun(String importRunId, @Nullable String message) {
+  void failImportRun(String importRunId, @CheckForNull String message) {
     ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
     if (importRun == null) {
       return;

@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -247,7 +247,7 @@ public class EmxMetadataParser implements MetadataParser {
 
   @Override
   // FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
-  public ParsedMetaData parse(final RepositoryCollection source, @Nullable String packageId) {
+  public ParsedMetaData parse(final RepositoryCollection source, @CheckForNull String packageId) {
     if (source.getRepository(EMX_ATTRIBUTES) != null) {
       IntermediateParseResults intermediateResults = getEntityTypeFromSource(source);
       List<EntityType> entities;

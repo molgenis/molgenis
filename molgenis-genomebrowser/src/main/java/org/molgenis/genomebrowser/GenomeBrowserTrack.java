@@ -3,7 +3,7 @@ package org.molgenis.genomebrowser;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.molgenis.data.meta.model.EntityType;
@@ -75,26 +75,26 @@ public abstract class GenomeBrowserTrack {
 
   public abstract GenomeBrowserSettings.TrackType getTrackType();
 
-  @Nullable
+  @CheckForNull
   public abstract Iterable<GenomeBrowserTrack> getMolgenisReferenceTracks();
 
   public abstract GenomeBrowserSettings.MolgenisReferenceMode getMolgenisReferenceMode();
 
   public abstract GenomeBrowserAttributes getGenomeBrowserAttrs();
 
-  @Nullable
+  @CheckForNull
   public abstract String getActions();
 
-  @Nullable
+  @CheckForNull
   public abstract String getAttrs();
 
-  @Nullable
+  @CheckForNull
   public abstract String getScoreAttr();
 
-  @Nullable
+  @CheckForNull
   public abstract String getExonKey();
 
-  @Nullable
+  @CheckForNull
   public abstract String getFeatureInfoPlugin();
 
   public String toTrackString() {

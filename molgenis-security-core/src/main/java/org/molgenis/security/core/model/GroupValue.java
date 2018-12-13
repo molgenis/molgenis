@@ -2,7 +2,7 @@ package org.molgenis.security.core.model;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 @AutoValue
 @SuppressWarnings(
@@ -12,7 +12,7 @@ public abstract class GroupValue {
 
   public abstract String getLabel();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public abstract boolean isPublic();

@@ -1,7 +1,7 @@
 package org.molgenis.semanticmapper.mapping.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 
 /** Result of applying algorithm to one source entity row */
@@ -9,10 +9,10 @@ import org.molgenis.data.Entity;
 @SuppressWarnings(
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class AlgorithmResult {
-  @Nullable
+  @CheckForNull
   public abstract Object getValue();
 
-  @Nullable
+  @CheckForNull
   public abstract Exception getException();
 
   public abstract Entity getSourceEntity();

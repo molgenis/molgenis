@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.UnknownPackageException;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -50,7 +50,7 @@ public class CopyServiceImpl implements CopyService {
       "squid:S1193") // Exception types should not be tested using "instanceof" in catch blocks
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Void copy(
-      List<ResourceIdentifier> resources, @Nullable String targetPackageId, Progress progress) {
+      List<ResourceIdentifier> resources, @CheckForNull String targetPackageId, Progress progress) {
     try {
       ResourceCollection resourceCollection = resourceCollector.get(resources);
       Package targetPackage = getPackage(targetPackageId);
@@ -92,7 +92,7 @@ public class CopyServiceImpl implements CopyService {
     }
   }
 
-  private Package getPackage(@Nullable String targetPackageId) {
+  private Package getPackage(@CheckForNull String targetPackageId) {
     return targetPackageId != null
         ? metadataService
             .getPackage(targetPackageId)

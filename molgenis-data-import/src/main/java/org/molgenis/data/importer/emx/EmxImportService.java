@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
@@ -73,7 +73,7 @@ public class EmxImportService implements ImportService {
       final RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @Nullable String packageId) {
+      @CheckForNull String packageId) {
     ParsedMetaData parsedMetaData = parser.parse(source, packageId);
 
     // TODO altered entities (merge, see getEntityType)

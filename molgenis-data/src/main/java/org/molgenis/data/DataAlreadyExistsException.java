@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 /**
  * Thrown when a data or metadata element already exist.
@@ -13,7 +13,7 @@ public abstract class DataAlreadyExistsException extends ErrorCodedDataAccessExc
     super(errorCode);
   }
 
-  DataAlreadyExistsException(String errorCode, @Nullable Throwable cause) {
+  DataAlreadyExistsException(String errorCode, @CheckForNull Throwable cause) {
     super(errorCode, cause);
   }
 }

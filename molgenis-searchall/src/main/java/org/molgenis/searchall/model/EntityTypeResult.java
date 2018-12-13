@@ -3,7 +3,7 @@ package org.molgenis.searchall.model;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -13,7 +13,7 @@ import org.molgenis.util.AutoGson;
 public abstract class EntityTypeResult implements Described {
   public abstract String getId();
 
-  @Nullable
+  @CheckForNull
   public abstract String getPackageId();
 
   public abstract boolean isLabelMatch();

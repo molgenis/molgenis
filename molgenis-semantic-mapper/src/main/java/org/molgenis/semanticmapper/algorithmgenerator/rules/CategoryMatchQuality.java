@@ -1,7 +1,7 @@
 package org.molgenis.semanticmapper.algorithmgenerator.rules;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.semanticmapper.algorithmgenerator.bean.Category;
 import org.molgenis.semanticmapper.algorithmgenerator.rules.quality.Quality;
 import org.molgenis.util.AutoGson;
@@ -13,7 +13,7 @@ import org.molgenis.util.AutoGson;
 public abstract class CategoryMatchQuality<T> implements Comparable<CategoryMatchQuality<T>> {
   public abstract boolean isRuleApplied();
 
-  @Nullable
+  @CheckForNull
   public abstract Quality<T> getQuality();
 
   public abstract Category getTargetCategory();

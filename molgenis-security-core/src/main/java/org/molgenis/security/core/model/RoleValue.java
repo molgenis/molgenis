@@ -1,7 +1,7 @@
 package org.molgenis.security.core.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 @AutoValue
 @SuppressWarnings(
@@ -11,7 +11,7 @@ public abstract class RoleValue {
 
   public abstract String getLabel();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public static Builder builder() {

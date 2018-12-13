@@ -1,7 +1,7 @@
 package org.molgenis.navigator.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -16,7 +16,7 @@ public abstract class Resource {
 
   public abstract String getLabel();
 
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public abstract boolean isHidden();

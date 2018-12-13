@@ -6,7 +6,7 @@ import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.LOADE
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.TARGET_ENTITY_ID;
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.URL;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.meta.model.EntityType;
@@ -28,7 +28,7 @@ public class FileIngestJobExecution extends JobExecution {
     setType(FILE_INGEST_JOB_TYPE);
   }
 
-  @Nullable
+  @CheckForNull
   public FileMeta getFile() {
     return getEntity(FILE, FileMeta.class);
   }

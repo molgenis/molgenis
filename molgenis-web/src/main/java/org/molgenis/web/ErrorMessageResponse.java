@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 public class ErrorMessageResponse {
   private List<ErrorMessage> errors;
@@ -39,7 +39,7 @@ public class ErrorMessageResponse {
     return create(errorMessage, null);
   }
 
-  public static ErrorMessageResponse create(String errorMessage, @Nullable String errorCode) {
+  public static ErrorMessageResponse create(String errorMessage, @CheckForNull String errorCode) {
     return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(errorMessage, errorCode));
   }
 

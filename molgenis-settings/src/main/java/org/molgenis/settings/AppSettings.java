@@ -1,6 +1,6 @@
 package org.molgenis.settings;
 
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 
 /** Application settings */
 public interface AppSettings {
@@ -11,7 +11,7 @@ public interface AppSettings {
   void setTitle(String title);
 
   /** @return href of logo displayed above top menu */
-  @Nullable
+  @CheckForNull
   String getLogoTopHref();
 
   /** @param logoHref href of logo displayed above top menu */
@@ -24,14 +24,14 @@ public interface AppSettings {
   void setLogoTopMaxHeight(int fixedHeight);
 
   /** @return href of logo displayed in menu */
-  @Nullable
+  @CheckForNull
   String getLogoNavBarHref();
 
   /** @param logoHref href of logo displayed in menu */
   void setLogoNavBarHref(String logoHref);
 
   /** @return footer text */
-  @Nullable
+  @CheckForNull
   String getFooter();
 
   /** @param footerText footer text */
@@ -50,28 +50,28 @@ public interface AppSettings {
   void setBootstrapTheme(String bootstrapTheme);
 
   /** @return file name containing custom CSS without path */
-  @Nullable
+  @CheckForNull
   String getCssHref();
 
   /** @param cssHref file name containing custom CSS without path */
   void setCssHref(String cssHref);
 
   /** @return JSON object string representation of menu */
-  @Nullable
+  @CheckForNull
   String getMenu();
 
   /** @param menuJson JSON object string representation of menu */
   void setMenu(String menuJson);
 
   /** @return data aggregation threshold or <code>null</code> if no threshold exists */
-  @Nullable
+  @CheckForNull
   Integer getAggregateThreshold();
 
   /** @param threshold data aggregation threshold, <code>null</code> implies no threshold */
   void setAggregateThreshold(Integer threshold);
 
   /** @return JS string containing tracking code to be placed in the footer */
-  @Nullable
+  @CheckForNull
   String getTrackingCodeFooter();
 
   /** @param trackingCodeFooter JS string containing tracking code to be placed in the footer */
@@ -87,14 +87,14 @@ public interface AppSettings {
   void setGoogleAnalyticsIpAnonymization(boolean googleAnalyticsPrivacyFriendlyTracking);
 
   /** @return 3rd party Google analytics tracking ID */
-  @Nullable
+  @CheckForNull
   String getGoogleAnalyticsTrackingId();
 
   /** @param googleAnalyticsTrackingId 3rd party Google analytics tracking ID */
   void setGoogleAnalyticsTrackingId(String googleAnalyticsTrackingId);
 
   /** @return MOLGENIS Google analytics tracking ID */
-  @Nullable
+  @CheckForNull
   String getGoogleAnalyticsTrackingIdMolgenis();
 
   /** @param googleAnalyticsTrackingIdMolgenis MOLGENIS Google analytics tracking ID */
@@ -170,6 +170,6 @@ public interface AppSettings {
    * @return Custom JavaScript <script src="..."></script> headers, specified as comma separated
    *     list
    */
-  @Nullable
+  @CheckForNull
   String getCustomJavascript();
 }

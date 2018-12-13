@@ -1,7 +1,7 @@
 package org.molgenis.beacon.controller.model;
 
 import com.google.auto.value.AutoValue;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.util.AutoGson;
 
 /** Organization owning a beacon. */
@@ -17,26 +17,26 @@ public abstract class BeaconOrganizationResponse {
   public abstract String getName();
 
   /** Description of the organization. */
-  @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   /** Address of the organization. */
-  @Nullable
+  @CheckForNull
   public abstract String getAddress();
 
   /** URL of the website of the organization (RFC 3986 format). */
-  @Nullable
+  @CheckForNull
   public abstract String getWelcomeUrl();
 
   /**
    * URL with the contact for the beacon operator/maintainer, e.g. link to a contact form (RFC 3986
    * format) or an email (RFC 2368 format).
    */
-  @Nullable
+  @CheckForNull
   public abstract String getContactUrl();
 
   /** URL to the logo (PNG/JPG format) of the organization (RFC 3986 format). */
-  @Nullable
+  @CheckForNull
   public abstract String getLogoUrl();
 
   public static BeaconOrganizationResponse create(

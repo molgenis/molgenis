@@ -3,7 +3,7 @@ package org.molgenis.data;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
-import javax.annotation.Nullable;
+import javax.annotation.CheckForNull;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.EntityType;
 public class UnknownEntityException extends UnknownDataException {
   private static final String ERROR_CODE = "D02";
 
-  @Nullable private final transient EntityType entityType;
+  @CheckForNull private final transient EntityType entityType;
 
   // the attribute you used to look up the entity, defaults to id
   private final transient Attribute attribute;
