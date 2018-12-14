@@ -114,7 +114,30 @@
         </script>
 
         <#-- Include the Vue version of the molgenis menu  -->
-        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>
+        <#--<script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>-->
+
+    <#--<script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>-->
+    <script type=text/javascript src="<@resource_href "/js/navBar.umd.min.js"/>"></script>
+    <div id="new-nav">
+      <nav-bar></nav-bar>
+    </div>
+    <script type="text/javascript">
+      require('vue')
+      Vue.config.productionTip = false
+      new Vue({
+        render: function (h) {
+          console.log(h)
+          h(navBar)
+        }
+      }).$mount(document.getElementById('myinner'))
+
+      new Vue({
+        el: '#new-nav',
+        components: {
+          'NavBar': navBar
+        }
+      })
+    </script>
     </#if>
 
 <#-- Start application content -->
