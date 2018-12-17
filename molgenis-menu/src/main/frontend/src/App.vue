@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="molgenis-site-menu">
     <NavBar></NavBar>
   </div>
 </template>
@@ -9,7 +9,7 @@ import Vue from 'vue'
 import NavBar from '../node_modules/molgenis-ui-context/src/components/NavBar.vue'
 
 export default Vue.extend({
-  name: 'app',
+  name: 'molgenis-site-menu',
   components: {
     NavBar
   }

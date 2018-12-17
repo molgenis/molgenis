@@ -3,6 +3,6 @@ import App from './App.vue'
 
 Vue.config.productionTip = false
 
-const root= new Vue({
+new Vue({
   render: createElement => createElement(App)
-}).$mount('#app')
+}).$mount('#molgenis-site-menu')
