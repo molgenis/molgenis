@@ -743,10 +743,8 @@ class PostgreSqlQueryGenerator {
   private static String getSqlColumnConstraints(
       EntityType entityType, Attribute attr, ColumnMode columnConstraintsMode) {
     StringBuilder sqlBuilder = new StringBuilder();
-    if (!attr.getName().equals(entityType.getIdAttribute().getName())) {
-      if (!attr.isNillable()) {
-        sqlBuilder.append("NOT NULL");
-      }
+    if (!attr.getName().equals(entityType.getIdAttribute().getName()) && !attr.isNillable()) {
+      sqlBuilder.append("NOT NULL");
     }
     if (columnConstraintsMode == INCLUDE_DEFAULT_CONSTRAINT
         && generateSqlColumnDefaultConstraint(attr)) {

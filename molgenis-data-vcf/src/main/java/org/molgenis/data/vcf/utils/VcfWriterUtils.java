@@ -362,19 +362,19 @@ public class VcfWriterUtils {
     StringBuilder refEntityInfoFields = new StringBuilder();
     for (Attribute attribute : attributes) {
       String attributeName = attribute.getName();
-      if (isReferenceType(attribute) && !attributeName.equals(SAMPLES)) {
-        // If the MREF field is empty, no effects were found, so we do not add an EFFECT field to
-        // this entity
-        if (vcfEntity.get(attributeName) != null
-            && isOutputAttribute(attribute, annotatorAttributes, attributesToInclude)) {
+      // If the MREF field is empty, no effects were found, so we do not add an EFFECT field to
+      // this entity
+      if (isReferenceType(attribute)
+          && !attributeName.equals(SAMPLES)
+          && vcfEntity.get(attributeName) != null
+          && isOutputAttribute(attribute, annotatorAttributes, attributesToInclude)) {
 
-          parseRefFieldsToInfoField(
-              vcfEntity.getEntities(attributeName),
-              attribute,
-              refEntityInfoFields,
-              annotatorAttributes,
-              attributesToInclude);
-        }
+        parseRefFieldsToInfoField(
+            vcfEntity.getEntities(attributeName),
+            attribute,
+            refEntityInfoFields,
+            annotatorAttributes,
+            attributesToInclude);
       }
     }
     if (refEntityInfoFields.length() > 0
@@ -491,18 +491,17 @@ public class VcfWriterUtils {
     EntityType entityType = sample.getEntityType();
     for (Attribute sampleAttribute : entityType.getAttributes()) {
       String sampleAttributeName = sampleAttribute.getName();
+      // skip the field that were generated for the use of the entity within molgenis
       if (!sampleAttributeName.equals(FORMAT_GT)
-          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)) {
-        // skip the field that were generated for the use of the entity within molgenis
-        if (!sampleAttribute.equals(entityType.getIdAttribute())
-            && !sampleAttribute.equals(entityType.getLabelAttribute())) {
-          if (sampleColumn.length() != 0) sampleColumn.append(":");
-          Object sampleAttrValue = sample.get(sampleAttributeName);
-          if (sampleAttrValue != null) {
-            sampleColumn.append(sampleAttrValue.toString());
-          } else {
-            sampleColumn.append(".");
-          }
+          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)
+          && !sampleAttribute.equals(entityType.getIdAttribute())
+          && !sampleAttribute.equals(entityType.getLabelAttribute())) {
+        if (sampleColumn.length() != 0) sampleColumn.append(":");
+        Object sampleAttrValue = sample.get(sampleAttributeName);
+        if (sampleAttrValue != null) {
+          sampleColumn.append(sampleAttrValue.toString());
+        } else {
+          sampleColumn.append(".");
         }
       }
     }
@@ -518,14 +517,13 @@ public class VcfWriterUtils {
     EntityType entityType = sample.getEntityType();
     for (Attribute sampleAttribute : entityType.getAttributes()) {
       String sampleAttributeName = sampleAttribute.getName();
+      // skip the field that were generated for the use of the entity within molgenis
       if (!sampleAttributeName.equals(FORMAT_GT)
-          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)) {
-        // skip the field that were generated for the use of the entity within molgenis
-        if (!sampleAttribute.equals(entityType.getIdAttribute())
-            && !sampleAttribute.equals(entityType.getLabelAttribute())) {
-          if (formatColumn.length() != 0) formatColumn.append(':');
-          formatColumn.append(sampleAttributeName);
-        }
+          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)
+          && !sampleAttribute.equals(entityType.getIdAttribute())
+          && !sampleAttribute.equals(entityType.getLabelAttribute())) {
+        if (formatColumn.length() != 0) formatColumn.append(':');
+        formatColumn.append(sampleAttributeName);
       }
     }
     if (formatColumn.length() > 0) {

@@ -404,10 +404,8 @@ public class MappingServiceController extends PluginController {
 
         if (null != attributeMapping) {
           AlgorithmState algorithmState = attributeMapping.getAlgorithmState();
-          if (null != skipAlgorithmStates) {
-            if (skipAlgorithmStates.contains(algorithmState)) {
-              continue;
-            }
+          if (null != skipAlgorithmStates && skipAlgorithmStates.contains(algorithmState)) {
+            continue;
           }
         }
 

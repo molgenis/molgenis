@@ -325,10 +325,8 @@ public class EntityTypeUtils {
 
   public static boolean hasSelfReferences(EntityType entityType) {
     for (Attribute attr : entityType.getAtomicAttributes()) {
-      if (attr.getRefEntity() != null) {
-        if (EntityUtils.equals(attr.getRefEntity(), entityType)) {
-          return true;
-        }
+      if (attr.getRefEntity() != null && EntityUtils.equals(attr.getRefEntity(), entityType)) {
+        return true;
       }
     }
     return false;

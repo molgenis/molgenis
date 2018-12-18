@@ -160,14 +160,12 @@ public class DataExplorerController extends PluginController {
         permissionService.hasPermission(
             new EntityTypeIdentity(selectedEntityName), EntityTypePermission.READ_METADATA);
 
-    if (!(entityExists && hasEntityPermission)) {
-      if (selectedEntityName != null) {
-        message.append("Entity does not exist or you do not have permission on this entity");
-        if (!SecurityUtils.currentUserIsAuthenticated()) {
-          message.append(", log in to view more entities");
-        } else {
-          message.append(", please specify the fully qualified entity name");
-        }
+    if (!(entityExists && hasEntityPermission) && selectedEntityName != null) {
+      message.append("Entity does not exist or you do not have permission on this entity");
+      if (!SecurityUtils.currentUserIsAuthenticated()) {
+        message.append(", log in to view more entities");
+      } else {
+        message.append(", please specify the fully qualified entity name");
       }
     }
   }

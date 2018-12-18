@@ -99,13 +99,11 @@ public class AttributeValidator {
   }
 
   private static void validateParent(Attribute attr) {
-    if (attr.getParent() != null) {
-      if (attr.getParent().getDataType() != COMPOUND) {
-        throw new MolgenisDataException(
-            format(
-                "Parent attribute [%s] of attribute [%s] is not of type compound",
-                attr.getParent().getName(), attr.getName()));
-      }
+    if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND) {
+      throw new MolgenisDataException(
+          format(
+              "Parent attribute [%s] of attribute [%s] is not of type compound",
+              attr.getParent().getName(), attr.getName()));
     }
   }
 

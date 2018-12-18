@@ -355,10 +355,9 @@ public class EntityUtils {
       return false;
     }
 
-    if (checkIdentifier)
-      if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) {
-        return false;
-      }
+    if (checkIdentifier && !Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) {
+      return false;
+    }
     if (!Objects.equals(attr.getName(), otherAttr.getName())) {
       return false;
     }
