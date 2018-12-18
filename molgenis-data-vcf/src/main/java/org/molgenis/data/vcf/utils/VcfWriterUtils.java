@@ -1,8 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
-import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Iterables.transform;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -20,6 +18,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -275,15 +274,14 @@ public class VcfWriterUtils {
 
   private static String refAttributesToString(
       Iterable<Attribute> atomicAttributes, List<String> attributesToInclude) {
-    Iterable<Attribute> attributes =
-        StreamSupport.stream(atomicAttributes.spliterator(), false)
-            .filter(
-                attribute ->
-                    (attribute.isVisible()
-                        && isOutputAttribute(
-                            attribute, Lists.newArrayList(atomicAttributes), attributesToInclude)))
-            .collect(Collectors.toList());
-    return on(SPACE_PIPE_SEPERATOR).join(transform(attributes, Attribute::getName));
+    return Streams.stream(atomicAttributes)
+        .filter(
+            attribute ->
+                attribute.isVisible()
+                    && isOutputAttribute(
+                        attribute, Lists.newArrayList(atomicAttributes), attributesToInclude))
+        .map(Attribute::getName)
+        .collect(Collectors.joining(SPACE_PIPE_SEPERATOR));
   }
 
   private static void writeExistingInfoHeaders(

@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -70,7 +69,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
   private static final int MAX_NUM_TAGS = 100;
   private static final float CUTOFF = 0.4f;
   private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
-  private Joiner termJoiner = Joiner.on(' ');
   private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
 
   // We only explain the top 10 suggested attributes because beyond that the attributes are not high
@@ -334,7 +332,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
         Set<String> jointTerms =
             Sets.union(
                 splitIntoTerms(bestMatchingSynonym), splitIntoTerms(bestMatchingSynonymForHit));
-        String joinedSynonyms = termJoiner.join(jointTerms);
+        String joinedSynonyms = String.join(" ", jointTerms);
         Hit<OntologyTerm> joinedHit =
             Hit.create(
                 OntologyTerm.and(result.getResult(), hit.getResult()),
