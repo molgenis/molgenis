@@ -28,7 +28,7 @@ public class LogoController {
       @PathVariable("extension") String extension,
       HttpServletResponse response)
       throws IOException {
-    File f = fileStore.getFile("/logo/" + name + "." + extension);
+    File f = fileStore.getFileUnchecked("/logo/" + name + "." + extension);
     if (!f.exists()) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;

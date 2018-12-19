@@ -7,6 +7,7 @@ import static org.molgenis.core.ui.style.StyleSheetMetadata.STYLE_SHEET;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,7 +105,7 @@ public class StyleServiceImpl implements StyleService {
     FileMeta fileMeta = fileMetaFactory.create(fileId);
     fileMeta.setContentType("css");
     fileMeta.setFilename(fileName);
-    fileMeta.setSize(fileStore.getFile(fileId).length());
+    fileMeta.setSize(fileStore.getFileUnchecked(fileId).length());
     fileMeta.setUrl(buildFileUrl(fileId));
     dataService.add(FileMetaMetaData.FILE_META, fileMeta);
     return fileMeta;
@@ -168,7 +169,12 @@ public class StyleServiceImpl implements StyleService {
       }
     }
 
-    File file = fileStore.getFile(fileMeta.getId());
+    File file;
+    try {
+      file = fileStore.getFile(fileMeta.getId());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
     return new FileSystemResource(file);
   }
 

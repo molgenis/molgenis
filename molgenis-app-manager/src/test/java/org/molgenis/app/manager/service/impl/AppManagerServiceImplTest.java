@@ -104,7 +104,7 @@ public class AppManagerServiceImplTest {
     when(app.getResourceFolder()).thenReturn("folder");
 
     File appDir = mock(File.class);
-    when(fileStore.getFile("folder")).thenReturn(appDir);
+    when(fileStore.getFileUnchecked("folder")).thenReturn(appDir);
 
     Gson gson = new Gson();
     appManagerServiceImpl =
@@ -214,10 +214,14 @@ public class AppManagerServiceImplTest {
     String fileName = "valid-app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_valid-app.zip";
-    doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-    doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
+    doReturn(tempDir).when(fileStore).getFileUnchecked(tmpDirName);
+    doReturn(indexFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "index.html");
     when(indexFile.exists()).thenReturn(true);
-    doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
+    doReturn(configFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "config.json");
     when(configFile.exists()).thenReturn(true);
 
     assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
@@ -231,7 +235,7 @@ public class AppManagerServiceImplTest {
     String fileName = "flip.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_flip.zip";
-    doReturn(tempDir).when(fileStore).getFile(tmpDirName);
+    doReturn(tempDir).when(fileStore).getFileUnchecked(tmpDirName);
 
     appManagerServiceImpl.uploadApp(zipData, fileName, "app");
   }
@@ -244,9 +248,13 @@ public class AppManagerServiceImplTest {
     String fileName = "app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
-    doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-    doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
-    doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
+    doReturn(tempDir).when(fileStore).getFileUnchecked(tmpDirName);
+    doReturn(indexFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "index.html");
+    doReturn(configFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "config.json");
     when(configFile.exists()).thenReturn(true);
 
     assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
@@ -262,10 +270,14 @@ public class AppManagerServiceImplTest {
     String fileName = "app.zip";
 
     String tmpDirName = "apps_tmp" + File.separator + "extracted_app.zip";
-    doReturn(tempDir).when(fileStore).getFile(tmpDirName);
-    doReturn(indexFile).when(fileStore).getFile(tmpDirName + File.separator + "index.html");
+    doReturn(tempDir).when(fileStore).getFileUnchecked(tmpDirName);
+    doReturn(indexFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "index.html");
     when(indexFile.exists()).thenReturn(true);
-    doReturn(configFile).when(fileStore).getFile(tmpDirName + File.separator + "config.json");
+    doReturn(configFile)
+        .when(fileStore)
+        .getFileUnchecked(tmpDirName + File.separator + "config.json");
 
     assertEquals(appManagerServiceImpl.uploadApp(zipData, fileName, "app"), tmpDirName);
 
@@ -280,8 +292,8 @@ public class AppManagerServiceImplTest {
         AppManagerServiceImplTest.class.getResource("/config.json").openStream();
     String configContent = IOUtils.toString(configFile, UTF_8);
     File file = mock(File.class);
-    when(fileStore.getFile(APPS_DIR + separator + appUri)).thenReturn(file);
-    when(fileStore.getFile(APPS_DIR + separator + appUri).exists()).thenReturn(false);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri)).thenReturn(file);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri).exists()).thenReturn(false);
 
     appManagerServiceImpl.checkAndObtainConfig(tempDir, configContent);
 
@@ -292,8 +304,8 @@ public class AppManagerServiceImplTest {
   public void testCheckAndObtainConfigInvalidJsonConfigFile() throws IOException {
     String appUri = "";
     File appDir = mock(File.class);
-    when(fileStore.getFile(APPS_DIR + separator + appUri)).thenReturn(appDir);
-    when(fileStore.getFile(APPS_DIR + separator + appUri).exists()).thenReturn(false);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri)).thenReturn(appDir);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri).exists()).thenReturn(false);
     appManagerServiceImpl.checkAndObtainConfig("tempDir", "");
   }
 
@@ -313,8 +325,8 @@ public class AppManagerServiceImplTest {
   public void testCheckAndObtainConfigAppAlreadyExists() throws IOException {
     InputStream is = AppManagerServiceImplTest.class.getResourceAsStream("/config.json");
     File appDir = mock(File.class);
-    when(fileStore.getFile(APPS_DIR + separator + "example2")).thenReturn(appDir);
-    when(fileStore.getFile(APPS_DIR + separator + "example2").exists()).thenReturn(true);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + "example2")).thenReturn(appDir);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + "example2").exists()).thenReturn(true);
     appManagerServiceImpl.checkAndObtainConfig(
         APPS_DIR + separator + "tempDir", IOUtils.toString(is, UTF_8));
   }
@@ -323,7 +335,7 @@ public class AppManagerServiceImplTest {
   public void testExtractFileContent() throws URISyntaxException {
     URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
     File testIndexHtml = new File(new URI(resourceUrl.toString()).getPath());
-    when(fileStore.getFile("testDir" + separator + "test")).thenReturn(testIndexHtml);
+    when(fileStore.getFileUnchecked("testDir" + separator + "test")).thenReturn(testIndexHtml);
     appManagerServiceImpl.extractFileContent("testDir", "test");
   }
 

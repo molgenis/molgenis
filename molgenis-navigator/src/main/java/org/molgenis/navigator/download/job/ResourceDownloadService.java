@@ -46,7 +46,7 @@ public class ResourceDownloadService {
     FileMeta fileMeta;
     try {
       ResourceCollection resourceCollection = resourceCollector.get(resourceIdentifiers);
-      File emxFile = fileStore.getFile(filename);
+      File emxFile = fileStore.getFileUnchecked(filename);
       fileMeta = createFileMeta(emxFile);
       dataService.add(FileMetaMetaData.FILE_META, fileMeta);
       emxExportService.export(
