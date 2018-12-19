@@ -143,7 +143,7 @@ public class CsvIterator implements CloseableIterator<Entity> {
           }
         } else if (values != null
             && (values.length > 1 || (values.length == 1 && values[0].length() > 0))
-            && values.length < colNamesMap.size()) {
+            && (values.length < colNamesMap.size() || values.length > colNamesMap.size())) {
           throw new MolgenisDataException(
               format(
                   "Number of values (%d) doesn't match the number of headers (%d): [%s]",
