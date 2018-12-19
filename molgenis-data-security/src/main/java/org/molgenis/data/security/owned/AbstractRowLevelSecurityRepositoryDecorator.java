@@ -1,9 +1,9 @@
 package org.molgenis.data.security.owned;
 
 import static com.google.common.collect.Iterators.partition;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.COUNT;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.DELETE;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.READ;
@@ -51,9 +51,7 @@ public abstract class AbstractRowLevelSecurityRepositoryDecorator<E extends Enti
   @Override
   public Iterator<E> iterator() {
     Iterable<E> iterable = () -> delegate().iterator();
-    return stream(iterable.spliterator(), false)
-        .filter(entity -> isActionPermitted(entity, READ))
-        .iterator();
+    return stream(iterable).filter(entity -> isActionPermitted(entity, READ)).iterator();
   }
 
   @Override

@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.generator;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,8 +33,7 @@ class MappingGenerator {
   }
 
   private List<FieldMapping> createFieldMappings(EntityType entityType, int depth, int maxDepth) {
-    Stream<Attribute> attributeStream =
-        stream(entityType.getAtomicAttributes().spliterator(), false);
+    Stream<Attribute> attributeStream = stream(entityType.getAtomicAttributes());
     return attributeStream
         .map(attribute -> createFieldMapping(attribute, depth, maxDepth))
         .collect(toList());

@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.DataService;
@@ -31,7 +31,7 @@ class EntityTypeReferenceMapper {
   ImmutableList<EditorEntityTypeIdentifier> toEditorEntityTypeIdentifiers(
       Iterable<EntityType> extendedBy) {
     return ImmutableList.copyOf(
-        stream(extendedBy.spliterator(), false).map(this::toEditorEntityTypeIdentifier).iterator());
+        stream(extendedBy).map(this::toEditorEntityTypeIdentifier).iterator());
   }
 
   EditorEntityTypeIdentifier toEditorEntityTypeIdentifier(EntityType entityType) {

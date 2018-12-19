@@ -1,11 +1,11 @@
 package org.molgenis.data.cache.l2;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.guava.CaffeinatedGuava;
@@ -197,7 +197,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener {
        */
       @Override
       public Map<Object, Optional<Map<String, Object>>> loadAll(Iterable<?> ids) {
-        Stream<Object> typedIds = stream(ids.spliterator(), false).map(id -> id);
+        Stream<Object> typedIds = stream(ids).map(id -> id);
         Map<Object, Optional<Map<String, Object>>> result =
             repository.findAll(typedIds).collect(toMap(Entity::getIdValue, this::dehydrateEntity));
         for (Object key : ids) {

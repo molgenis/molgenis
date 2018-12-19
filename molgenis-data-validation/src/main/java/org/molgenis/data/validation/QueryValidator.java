@@ -1,11 +1,11 @@
 package org.molgenis.data.validation;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
@@ -103,7 +103,7 @@ public class QueryValidator {
             // fix value types
             Iterable<?> queryRuleValues = (Iterable<?>) queryRuleValue;
             List<Object> values =
-                stream(queryRuleValues.spliterator(), false)
+                stream(queryRuleValues)
                     .map(value -> toQueryRuleValue(value, attr))
                     .collect(toList());
             queryRule.setValue(values);

@@ -3,7 +3,6 @@ package org.molgenis.data.importer.emx;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -142,7 +141,8 @@ public class EmxImportService implements ImportService {
         parser.parse(repositoryCollection, selectedPackage).getEntityMap();
 
     LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-    stream(entityTypeMap.keySet().spliterator(), false)
+    entityTypeMap
+        .keySet()
         .forEach(
             entityTypeId -> {
               boolean importable =

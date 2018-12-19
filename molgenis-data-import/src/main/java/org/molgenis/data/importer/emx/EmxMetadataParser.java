@@ -438,10 +438,9 @@ public class EmxMetadataParser implements MetadataParser {
                 }
 
                 Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-                if (ownLabelAttr != null) {
-                  if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName())) {
-                    ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
-                  }
+                if (ownLabelAttr != null
+                    && (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))) {
+                  ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
                 }
               }
             });
@@ -865,13 +864,11 @@ public class EmxMetadataParser implements MetadataParser {
                   "Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
                   rowIndex));
         }
-        if (emxIdAttrValue.equalsIgnoreCase("true")) {
-          if (!isIdAttributeTypeAllowed(attr)) {
-            throw new MolgenisDataException(
-                "Identifier is of type ["
-                    + attr.getDataType()
-                    + "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
-          }
+        if (emxIdAttrValue.equalsIgnoreCase("true") && !isIdAttributeTypeAllowed(attr)) {
+          throw new MolgenisDataException(
+              "Identifier is of type ["
+                  + attr.getDataType()
+                  + "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
         }
 
         attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
@@ -962,12 +959,12 @@ public class EmxMetadataParser implements MetadataParser {
         attr.setEnumOptions(enumOptions);
       }
 
-      if (attr.getDataType() != FILE) {
-        // Only if an attribute is not of type file we apply the normal reference rules
-        if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity)) {
-          throw new IllegalArgumentException(
-              format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
-        }
+      // Only if an attribute is not of type file we apply the normal reference rules
+      if (attr.getDataType() != FILE
+          && isReferenceType(attr)
+          && StringUtils.isEmpty(emxRefEntity)) {
+        throw new IllegalArgumentException(
+            format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
       }
 
       if (isReferenceType(attr) && attr.isNillable() && attr.isAggregatable()) {
@@ -1309,13 +1306,12 @@ public class EmxMetadataParser implements MetadataParser {
           for (Attribute att : target.getAttributes()) {
             // See comment above regarding import of bi-directional one-to-many data
             if (att.getDataType() != COMPOUND
-                && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy())) {
-              if (!att.isAuto()
-                  && att.getExpression() == null
-                  && !report.getFieldsImportable().get(sheet).contains(att.getName())) {
-                boolean required = !att.isNillable() && !att.isAuto();
-                report = report.addAttribute(att.getName(), required ? REQUIRED : AVAILABLE);
-              }
+                && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy())
+                && !att.isAuto()
+                && att.getExpression() == null
+                && !report.getFieldsImportable().get(sheet).contains(att.getName())) {
+              boolean required = !att.isNillable() && !att.isAuto();
+              report = report.addAttribute(att.getName(), required ? REQUIRED : AVAILABLE);
             }
           }
         }

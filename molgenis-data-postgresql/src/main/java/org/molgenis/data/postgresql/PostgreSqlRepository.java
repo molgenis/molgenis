@@ -3,6 +3,7 @@ package org.molgenis.data.postgresql;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
@@ -10,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER;
@@ -188,7 +188,7 @@ class PostgreSqlRepository extends AbstractRepository {
 
   @Override
   public Stream<Entity> findAll(Query<Entity> q) {
-    return stream(findAllBatching(q).spliterator(), false);
+    return stream(findAllBatching(q));
   }
 
   @Override

@@ -1,12 +1,12 @@
 package org.molgenis.integrationtest.platform.importservice;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
@@ -155,7 +155,7 @@ public abstract class ImportServiceIT extends AbstractTransactionalTestNGSpringC
   }
 
   static Set<Object> getIdsAsSet(Iterable<? extends Entity> entities) {
-    return asStream(entities).map(Entity::getIdValue).collect(toSet());
+    return stream(entities).map(Entity::getIdValue).collect(toSet());
   }
 
   @Import(

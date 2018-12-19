@@ -8,16 +8,17 @@ import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
+import com.google.common.collect.Streams;
 import com.google.common.collect.TreeTraverser;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -87,7 +88,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
   @Override
   public void deleteAll() {
-    delete(stream(spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false));
+    delete(StreamSupport.stream(spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false));
   }
 
   @Override
@@ -164,7 +165,7 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
   }
 
   private Map<String, Attribute> toAttributesMap(EntityType entityType) {
-    return stream(entityType.getOwnAllAttributes().spliterator(), false)
+    return Streams.stream(entityType.getOwnAllAttributes())
         .collect(toMap(Attribute::getName, identity()));
   }
 
@@ -225,10 +226,10 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
   private void deleteEntityAttributes(EntityType entityType) {
     Iterable<Attribute> rootAttrs = entityType.getOwnAttributes();
     Stream<Attribute> allAttrs =
-        stream(rootAttrs.spliterator(), false)
+        Streams.stream(rootAttrs)
             .flatMap(
                 attrEntity ->
-                    stream(
+                    StreamSupport.stream(
                         new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
                         false));
     dataService.delete(ATTRIBUTE_META_DATA, allAttrs);

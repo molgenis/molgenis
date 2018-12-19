@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 
 import java.util.stream.Stream;
@@ -56,13 +56,12 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
   private void deleteEntityTypesInPackageAndSubPackages(Package aPackage) {
     Repository<EntityType> entityRepo = getEntityRepository();
     Stream<EntityType> entityTypesToDelete =
-        getPackageTreeTraversal(aPackage)
-            .flatMap(p -> stream(p.getEntityTypes().spliterator(), false));
+        getPackageTreeTraversal(aPackage).flatMap(p -> stream(p.getEntityTypes()));
     entityRepo.delete(entityTypesToDelete);
   }
 
   private static Stream<Package> getPackageTreeTraversal(Package aPackage) {
-    return stream(new PackageTreeTraverser().postOrderTraversal(aPackage).spliterator(), false);
+    return stream(new PackageTreeTraverser().postOrderTraversal(aPackage));
   }
 
   private Repository<EntityType> getEntityRepository() {

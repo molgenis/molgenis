@@ -2,11 +2,11 @@ package org.molgenis.data.vcf.format;
 
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -437,7 +437,7 @@ public class VcfToEntity {
    * @return Set of VCF info fields of type 'Flag'
    */
   private static Set<String> determineVcfInfoFlagFields(VcfMeta vcfMeta) {
-    return stream(vcfMeta.getInfoMeta().spliterator(), false)
+    return stream(vcfMeta.getInfoMeta())
         .filter(vcfInfoMeta -> vcfInfoMeta.getType().equals(VcfMetaInfo.Type.FLAG))
         .map(VcfMetaInfo::getId)
         .collect(toSet());

@@ -13,6 +13,7 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -199,9 +200,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
     Stream<EntityKey> backreffingEntities =
         getEntityType()
             .getMappedByAttributes()
-            .flatMap(
-                mappedByAttr ->
-                    stream(entity.getEntities(mappedByAttr.getName()).spliterator(), false))
+            .flatMap(mappedByAttr -> Streams.stream(entity.getEntities(mappedByAttr.getName())))
             .map(EntityKey::create);
     Stream<EntityKey> manyToOneEntities =
         getEntityType()

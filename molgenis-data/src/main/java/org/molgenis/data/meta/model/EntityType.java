@@ -3,11 +3,11 @@ package org.molgenis.data.meta.model;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -144,7 +143,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
     // step #1: deep copy attributes
     Map<String, Attribute> ownAttrMap =
-        stream(entityType.getOwnAllAttributes().spliterator(), false)
+        stream(entityType.getOwnAllAttributes())
             .map(
                 attr -> {
                   Attribute attrCopy = Attribute.newInstance(attr, DEEP_COPY_ATTRS, attrFactory);
@@ -169,9 +168,7 @@ public class EntityType extends StaticEntity implements Labeled {
 
   @Override
   public Iterable<String> getAttributeNames() {
-    return stream(getEntities(ATTRIBUTES, Attribute.class).spliterator(), false)
-            .map(Attribute::getName)
-        ::iterator;
+    return stream(getEntities(ATTRIBUTES, Attribute.class)).map(Attribute::getName)::iterator;
   }
 
   public String getId() {
@@ -367,7 +364,7 @@ public class EntityType extends StaticEntity implements Labeled {
    * @return lookup attribute or <tt>null</tt>
    */
   public Attribute getLookupAttribute(String lookupAttrName) {
-    return stream(getLookupAttributes().spliterator(), false)
+    return stream(getLookupAttributes())
         .filter(lookupAttr -> lookupAttr.getName().equals(lookupAttrName))
         .findFirst()
         .orElse(null);
@@ -394,7 +391,7 @@ public class EntityType extends StaticEntity implements Labeled {
    */
   public Iterable<Attribute> getOwnLookupAttributes() {
     List<Attribute> ownLookupAttrs =
-        stream(getOwnAllAttributes().spliterator(), false)
+        stream(getOwnAllAttributes())
             .filter(attr -> attr.getLookupAttributeIndex() != null)
             .collect(toCollection(ArrayList::new));
     if (ownLookupAttrs.size() > 1) {
@@ -443,9 +440,7 @@ public class EntityType extends StaticEntity implements Labeled {
    * @return entity attributes without extended entity attributes
    */
   public Iterable<Attribute> getOwnAttributes() {
-    return stream(getOwnAllAttributes().spliterator(), false)
-        .filter(attr -> attr.getParent() == null)
-        .collect(toList());
+    return stream(getOwnAllAttributes()).filter(attr -> attr.getParent() == null).collect(toList());
   }
 
   public EntityType setOwnAllAttributes(Iterable<Attribute> attrs) {
@@ -559,7 +554,7 @@ public class EntityType extends StaticEntity implements Labeled {
     Integer sequenceNumber = attr.getSequenceNumber();
     if (null == sequenceNumber) {
       int i =
-          StreamSupport.stream(attrs.spliterator(), false)
+          stream(attrs)
               .filter(a -> null != a.getSequenceNumber())
               .mapToInt(Attribute::getSequenceNumber)
               .max()
@@ -613,8 +608,7 @@ public class EntityType extends StaticEntity implements Labeled {
   private boolean getCachedHasAttrWithExpession() {
     if (cachedHasAttrWithExpression == null) {
       cachedHasAttrWithExpression =
-          stream(getAtomicAttributes().spliterator(), false)
-              .anyMatch(attr -> attr.getExpression() != null);
+          stream(getAtomicAttributes()).anyMatch(attr -> attr.getExpression() != null);
     }
     return cachedHasAttrWithExpression;
   }
@@ -701,11 +695,11 @@ public class EntityType extends StaticEntity implements Labeled {
   }
 
   public Stream<Attribute> getOwnMappedByAttributes() {
-    return stream(getOwnAtomicAttributes().spliterator(), false).filter(Attribute::isMappedBy);
+    return stream(getOwnAtomicAttributes()).filter(Attribute::isMappedBy);
   }
 
   public Stream<Attribute> getMappedByAttributes() {
-    return stream(getAtomicAttributes().spliterator(), false).filter(Attribute::isMappedBy);
+    return stream(getAtomicAttributes()).filter(Attribute::isMappedBy);
   }
 
   public boolean hasInversedByAttributes() {
@@ -713,7 +707,7 @@ public class EntityType extends StaticEntity implements Labeled {
   }
 
   public Stream<Attribute> getInversedByAttributes() {
-    return stream(getAtomicAttributes().spliterator(), false).filter(Attribute::isInversedBy);
+    return stream(getAtomicAttributes()).filter(Attribute::isInversedBy);
   }
 
   @Override

@@ -111,10 +111,8 @@ public class MenuManagerController extends PluginController {
     } else {
       // Create the logo subdir in the filestore if it doesn't exist
       File logoDir = new File(fileStore.getStorageDir() + "/logo");
-      if (!logoDir.exists()) {
-        if (!logoDir.mkdir()) {
-          throw new IOException("Unable to create directory [" + logoDir.getAbsolutePath() + "]");
-        }
+      if (!logoDir.exists() && !logoDir.mkdir()) {
+        throw new IOException("Unable to create directory [" + logoDir.getAbsolutePath() + "]");
       }
 
       // Store the logo in the logo dir of the filestore

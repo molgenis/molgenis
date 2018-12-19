@@ -7,7 +7,6 @@ import static org.molgenis.script.core.ScriptMetaData.TYPE;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.QueryImpl;
@@ -69,7 +68,9 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService {
         .filter(entry -> !entry.getExplainedQueryStrings().isEmpty())
         .filter(
             entry ->
-                StreamSupport.stream(entry.getExplainedQueryStrings().spliterator(), false)
+                entry
+                    .getExplainedQueryStrings()
+                    .stream()
                     .allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
         .map(ExplainedAttribute::getAttribute)
         .findFirst()

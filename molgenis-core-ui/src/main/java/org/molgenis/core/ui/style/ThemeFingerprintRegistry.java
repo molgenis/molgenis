@@ -6,8 +6,8 @@ import static org.molgenis.core.ui.style.BootstrapVersion.BOOTSTRAP_VERSION_4;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.IOUtils;
@@ -40,7 +40,7 @@ public class ThemeFingerprintRegistry {
     FileSystemResource styleData = styleService.getThemeData(fileName, version);
     byte[] bytes = IOUtils.toByteArray(styleData.getInputStream());
     HashCode crc32 = Hashing.crc32().hashBytes(bytes);
-    return BaseEncoding.base64Url().omitPadding().encode(crc32.asBytes());
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(crc32.asBytes());
   }
 
   private String extractThemeNameFromThemeUri(String themeUri) {
