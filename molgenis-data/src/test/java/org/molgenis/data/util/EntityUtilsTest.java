@@ -132,21 +132,6 @@ public class EntityUtilsTest {
   }
 
   @Test
-  public void doesExtend() {
-    EntityType grandfather =
-        when(mock(EntityType.class).getId()).thenReturn("grandfather").getMock();
-    assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
-
-    EntityType father = when(mock(EntityType.class).getId()).thenReturn("father").getMock();
-    when(father.getExtends()).thenReturn(grandfather);
-    assertTrue(EntityUtils.doesExtend(father, "grandfather"));
-
-    EntityType child = when(mock(EntityType.class).getId()).thenReturn("child").getMock();
-    when(child.getExtends()).thenReturn(father);
-    assertTrue(EntityUtils.doesExtend(child, "grandfather"));
-  }
-
-  @Test
   public void getTypedValueStringAttributeEntityManagerOneToMany() {
     String valueStr = "0,1,2";
     Attribute attr = mock(Attribute.class);

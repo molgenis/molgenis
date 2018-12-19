@@ -112,16 +112,6 @@ public class EntityUtils {
     }
   }
 
-  /** Checks if an entity has another entity as one of its parents */
-  public static boolean doesExtend(EntityType entityType, String entityTypeId) {
-    EntityType parent = entityType.getExtends();
-    while (parent != null) {
-      if (parent.getId().equalsIgnoreCase(entityTypeId)) return true;
-      parent = parent.getExtends();
-    }
-    return false;
-  }
-
   /** Returns true if entity metadata equals another entity metadata. TODO docs */
   public static boolean equals(EntityType entityType, EntityType otherEntityType) {
     if (entityType == null && otherEntityType != null) return false;
