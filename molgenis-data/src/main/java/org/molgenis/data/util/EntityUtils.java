@@ -1,13 +1,9 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
@@ -122,22 +118,6 @@ public class EntityUtils {
       if (entity.get(attr) != null) return false;
     }
     return true;
-  }
-
-  /** Gets all attribute names of an EntityType (atomic + compound) */
-  public static Iterable<String> getAttributeNames(EntityType entityType) {
-    // atomic
-    Iterable<String> atomicAttributes =
-        transform(entityType.getAtomicAttributes(), Attribute::getName);
-
-    // compound
-    Iterable<String> compoundAttributes =
-        transform(
-            filter(entityType.getAttributes(), attribute -> attribute.getDataType() == COMPOUND),
-            Attribute::getName);
-
-    // all = atomic + compound
-    return concat(atomicAttributes, compoundAttributes);
   }
 
   /** Checks if an entity has another entity as one of its parents */
