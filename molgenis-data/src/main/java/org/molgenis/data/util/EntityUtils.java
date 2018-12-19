@@ -1,6 +1,5 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -11,7 +10,6 @@ import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 import com.google.common.collect.Iterables;
 import java.time.format.DateTimeParseException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.molgenis.data.Entity;
@@ -552,15 +550,6 @@ public class EntityUtils {
 
     int result = entity.getEntityType().getId().hashCode();
     return 31 * result + h;
-  }
-
-  public static boolean entitiesEquals(Iterable<Entity> entities, Iterable<Entity> other) {
-    if (size(entities) != size(other)) return false;
-    Iterator<Entity> otherIt = other.iterator();
-    for (Entity entity : entities) {
-      if (!equals(entity, otherIt.next())) return false;
-    }
-    return true;
   }
 
   /**
