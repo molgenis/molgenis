@@ -27,7 +27,6 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -428,11 +427,20 @@ public class EntityUtilsTest {
       testCases.add(new Object[] {attr, otherAttr, false});
     }
 
+    { // nullableExpression not equals
+      Attribute attr = getMockAttr("nullableExpressionA");
+      Attribute otherAttr = getMockAttr("nullableExpressionB");
+      when(attr.getNullableExpression()).thenReturn("A");
+      when(otherAttr.getNullableExpression()).thenReturn("B");
+
+      testCases.add(new Object[] {attr, otherAttr, false});
+    }
+
     { // defaultValue not equals
       Attribute attr = getMockAttr("defaultValueA");
       Attribute otherAttr = getMockAttr("defaultValueB");
-      when(attr.getValidationExpression()).thenReturn("A");
-      when(otherAttr.getValidationExpression()).thenReturn("B");
+      when(attr.getDefaultValue()).thenReturn("A");
+      when(otherAttr.getDefaultValue()).thenReturn("B");
 
       testCases.add(new Object[] {attr, otherAttr, false});
     }
