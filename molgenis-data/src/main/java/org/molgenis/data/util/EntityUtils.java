@@ -18,7 +18,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
@@ -29,7 +28,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.ListEscapeUtils;
-import org.molgenis.util.Pair;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class EntityUtils {
@@ -124,37 +122,6 @@ public class EntityUtils {
       if (entity.get(attr) != null) return false;
     }
     return true;
-  }
-
-  public static List<Pair<EntityType, List<Attribute>>> getReferencingEntityType(
-      EntityType entityType, DataService dataService) {
-    List<Pair<EntityType, List<Attribute>>> referencingEntityType = newArrayList();
-
-    // get entity types that referencing the given entity (including self)
-    String entityTypeId = entityType.getId();
-    dataService
-        .getEntityTypeIds()
-        .forEach(
-            otherEntityName -> {
-              EntityType otherEntityType = dataService.getEntityType(otherEntityName);
-
-              // get referencing attributes for other entity
-              List<Attribute> referencingAttributes = null;
-              for (Attribute attribute : otherEntityType.getAtomicAttributes()) {
-                EntityType refEntityType = attribute.getRefEntity();
-                if (refEntityType != null && refEntityType.getId().equals(entityTypeId)) {
-                  if (referencingAttributes == null) referencingAttributes = newArrayList();
-                  referencingAttributes.add(attribute);
-                }
-              }
-
-              // store references
-              if (referencingAttributes != null) {
-                referencingEntityType.add(new Pair<>(otherEntityType, referencingAttributes));
-              }
-            });
-
-    return referencingEntityType;
   }
 
   /** Gets all attribute names of an EntityType (atomic + compound) */
