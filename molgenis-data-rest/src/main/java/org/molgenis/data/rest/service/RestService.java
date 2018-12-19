@@ -1,12 +1,12 @@
 package org.molgenis.data.rest.service;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
@@ -498,11 +498,11 @@ public class RestService {
 
     // update ref entities of created/updated entity
     Attribute refAttr = attr.getMappedBy();
-    Stream<Entity> stream = stream(entity.getEntities(attr.getName()).spliterator(), false);
+    Stream<Entity> stream = stream(entity.getEntities(attr.getName()));
     if (existingEntity != null) {
       // filter out unchanged ref entities
       Set<Object> refEntityIds =
-          stream(existingEntity.getEntities(attr.getName()).spliterator(), false)
+          stream(existingEntity.getEntities(attr.getName()))
               .map(Entity::getIdValue)
               .collect(toSet());
       stream = stream.filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue()));
@@ -529,11 +529,9 @@ public class RestService {
     // update ref entities of existing entity
     if (existingEntity != null) {
       Set<Object> refEntityIds =
-          stream(entity.getEntities(attr.getName()).spliterator(), false)
-              .map(Entity::getIdValue)
-              .collect(toSet());
+          stream(entity.getEntities(attr.getName())).map(Entity::getIdValue).collect(toSet());
       List<Entity> updatedRefEntitiesExistingEntity =
-          stream(existingEntity.getEntities(attr.getName()).spliterator(), false)
+          stream(existingEntity.getEntities(attr.getName()))
               .filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue()))
               .map(
                   refEntity -> {

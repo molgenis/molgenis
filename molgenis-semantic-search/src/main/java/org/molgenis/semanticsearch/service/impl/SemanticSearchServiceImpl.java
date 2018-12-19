@@ -1,9 +1,9 @@
 package org.molgenis.semanticsearch.service.impl;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 import com.google.common.base.Splitter;
@@ -178,7 +178,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
   public EntityTypeSearchResults findAttributes(
       EntityType sourceEntityType, EntityType targetEntityType, Set<String> searchTerms) {
     List<AttributeSearchResults> attributeSearchResults =
-        stream(targetEntityType.getAtomicAttributes().spliterator(), false)
+        stream(targetEntityType.getAtomicAttributes())
             .filter(targetAttribute -> targetAttribute.getExpression() == null)
             .map(
                 targetAttribute ->

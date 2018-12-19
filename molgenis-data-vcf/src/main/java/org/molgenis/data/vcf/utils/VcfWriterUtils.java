@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Streams.stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -18,7 +19,6 @@ import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -274,7 +273,7 @@ public class VcfWriterUtils {
 
   private static String refAttributesToString(
       Iterable<Attribute> atomicAttributes, List<String> attributesToInclude) {
-    return Streams.stream(atomicAttributes)
+    return stream(atomicAttributes)
         .filter(
             attribute ->
                 attribute.isVisible()
@@ -322,7 +321,7 @@ public class VcfWriterUtils {
     boolean hasInfoFields = false;
 
     List<Attribute> attributes =
-        StreamSupport.stream(vcfEntity.getEntityType().getAllAttributes().spliterator(), false)
+        stream(vcfEntity.getEntityType().getAllAttributes())
             .filter(
                 attr ->
                     !(VCF_ATTRIBUTE_NAMES.contains(attr.getName()) || attr.getName().equals(INFO)))

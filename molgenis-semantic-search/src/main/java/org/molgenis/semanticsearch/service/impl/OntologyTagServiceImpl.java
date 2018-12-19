@@ -1,6 +1,7 @@
 package org.molgenis.semanticsearch.service.impl;
 
 import static com.google.common.collect.LinkedHashMultimap.create;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.validation.constraints.NotNull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -73,7 +73,7 @@ public class OntologyTagServiceImpl implements OntologyTagService {
     Entity attributeEntity = findAttributeEntity(entity, attribute);
     Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetadata.TAGS);
     Iterable<Entity> newTags =
-        StreamSupport.stream(tags.spliterator(), false)
+        stream(tags)
             .filter(e -> !isSameTag(relationIRI, ontologyTermIRI, e))
             .collect(Collectors.toList());
     attributeEntity.set(AttributeMetadata.TAGS, newTags);
@@ -245,7 +245,7 @@ public class OntologyTagServiceImpl implements OntologyTagService {
     Iterable<Attribute> attributes = entityEntity.getOwnAllAttributes();
     entityEntity.set(
         ATTRIBUTES,
-        StreamSupport.stream(attributes.spliterator(), false)
+        stream(attributes)
             .map(att -> att.getName().equals(attribute) ? attributeEntity : att)
             .collect(Collectors.toList()));
     dataService.update(ENTITY_TYPE_META_DATA, entityEntity);

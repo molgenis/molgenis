@@ -1,9 +1,9 @@
 package org.molgenis.data.meta.system;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 
@@ -171,7 +171,7 @@ public class SystemEntityTypePersister {
             entityType.setId(existingEntityType.getId());
 
             Map<String, Attribute> existingAttrs =
-                stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+                stream(existingEntityType.getOwnAllAttributes())
                     .collect(toMap(Attribute::getName, Function.identity()));
             entityType
                 .getOwnAllAttributes()

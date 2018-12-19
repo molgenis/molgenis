@@ -1,8 +1,8 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -257,8 +257,7 @@ public class QueryRule {
    */
   public void setValue(Object value) {
     if (value instanceof Iterable<?>) {
-      this.value =
-          stream(((Iterable<?>) value).spliterator(), false).map(this::toValue).collect(toList());
+      this.value = stream((Iterable<?>) value).map(this::toValue).collect(toList());
     } else {
       this.value = toValue(value);
     }

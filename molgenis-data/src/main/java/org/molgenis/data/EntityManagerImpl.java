@@ -11,6 +11,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Streams;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,7 @@ public class EntityManagerImpl implements EntityManager {
     }
 
     Iterable<List<Entity>> iterable = () -> Iterators.partition(entities.iterator(), BATCH_SIZE);
-    return stream(iterable.spliterator(), false)
+    return Streams.stream(iterable)
         .flatMap(
             batch -> {
               List<Entity> batchWithReferences = resolveReferences(resolvableAttrs, batch, fetch);
@@ -276,7 +277,7 @@ public class EntityManagerImpl implements EntityManager {
    * @return resolved attributes
    */
   private static List<Attribute> getResolvableAttrs(EntityType entityType, Fetch fetch) {
-    return stream(entityType.getAtomicAttributes().spliterator(), false)
+    return Streams.stream(entityType.getAtomicAttributes())
         .filter(EntityTypeUtils::isReferenceType)
         .filter(attr -> attr.getExpression() == null)
         .filter(attr -> fetch.hasField(attr.getName()))

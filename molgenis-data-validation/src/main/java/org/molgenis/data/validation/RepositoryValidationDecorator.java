@@ -1,5 +1,6 @@
 package org.molgenis.data.validation;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -10,7 +11,6 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_READONLY_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
@@ -198,7 +198,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
   private void initRequiredValueValidation(ValidationResource validationResource) {
     if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT)) {
       List<Attribute> requiredValueAttrs =
-          stream(getEntityType().getAtomicAttributes().spliterator(), false)
+          stream(getEntityType().getAtomicAttributes())
               .filter(attr -> !attr.isNillable() && attr.getExpression() == null)
               .collect(toList());
 
@@ -212,7 +212,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
     if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT)) {
       // get reference attrs
       refAttrs =
-          stream(getEntityType().getAtomicAttributes().spliterator(), false)
+          stream(getEntityType().getAtomicAttributes())
               .filter(attr -> isReferenceType(attr) && attr.getExpression() == null)
               .collect(toList());
     } else {
@@ -221,7 +221,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
       // validating other reference constraints
       String backend = dataService.getMeta().getBackend(getEntityType()).getName();
       refAttrs =
-          stream(getEntityType().getAtomicAttributes().spliterator(), false)
+          stream(getEntityType().getAtomicAttributes())
               .filter(
                   attr ->
                       isReferenceType(attr)
@@ -272,7 +272,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
     if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT)) {
       // get unique attributes
       List<Attribute> uniqueAttrs =
-          stream(getEntityType().getAtomicAttributes().spliterator(), false)
+          stream(getEntityType().getAtomicAttributes())
               .filter(attr -> attr.isUnique() && attr.getExpression() == null)
               .collect(toList());
 
@@ -316,7 +316,7 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
     if (!getCapabilities().contains(VALIDATE_READONLY_CONSTRAINT)) {
       String idAttrName = getEntityType().getIdAttribute().getName();
       List<Attribute> readonlyAttrs =
-          stream(getEntityType().getAtomicAttributes().spliterator(), false)
+          stream(getEntityType().getAtomicAttributes())
               .filter(
                   attr ->
                       attr.isReadOnly()
@@ -461,12 +461,12 @@ public class RepositoryValidationDecorator extends AbstractRepositoryDecorator<E
                 }
               } else if (isMultipleReferenceType(readonlyAttr)) {
                 value =
-                    stream(entity.getEntities(readonlyAttr.getName()).spliterator(), false)
+                    stream(entity.getEntities(readonlyAttr.getName()))
                         .map(Entity::getIdValue)
                         .collect(toList());
 
                 existingValue =
-                    stream(entityToUpdate.getEntities(readonlyAttr.getName()).spliterator(), false)
+                    stream(entityToUpdate.getEntities(readonlyAttr.getName()))
                         .map(Entity::getIdValue)
                         .collect(toList());
               }

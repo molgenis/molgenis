@@ -9,7 +9,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetadata.AttributeCopyMode;
 import static org.molgenis.data.meta.model.AttributeMetadata.CHILDREN;
@@ -48,6 +47,7 @@ import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -635,7 +635,7 @@ public class Attribute extends StaticEntity implements Labeled {
    */
   public Attribute getChild(String attrName) {
     Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
-    return stream(attrParts.spliterator(), false)
+    return Streams.stream(attrParts)
         .filter(attrPart -> attrPart.getName().equals(attrName))
         .findFirst()
         .orElse(null);
@@ -650,7 +650,7 @@ public class Attribute extends StaticEntity implements Labeled {
     Iterable<Attribute> attrParts = getEntities(CHILDREN, Attribute.class);
     set(
         CHILDREN,
-        stream(attrParts.spliterator(), false)
+        Streams.stream(attrParts)
             .filter(attr -> !attr.getName().equals(attrPart.getName()))
             .collect(toList()));
   }
@@ -735,7 +735,7 @@ public class Attribute extends StaticEntity implements Labeled {
     // FIXME besides checking mappedBy attr name also check
     // attr.getRefEntity().getFullyQualifiedName
     if (isReferenceType(this)) {
-      return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
+      return Streams.stream(getRefEntity().getAtomicAttributes())
           .filter(Attribute::isMappedBy)
           .filter(attr -> getName().equals(attr.getMappedBy().getName()))
           .findFirst()

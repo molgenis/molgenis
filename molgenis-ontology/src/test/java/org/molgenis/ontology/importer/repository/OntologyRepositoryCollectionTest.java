@@ -1,5 +1,6 @@
 package org.molgenis.ontology.importer.repository;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -21,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -479,7 +479,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 
   private static List<String> getMrefAttributeList(
       Entity entity, String attributeName, String refEntityAttributeName) {
-    return StreamSupport.stream(entity.getEntities(attributeName).spliterator(), false)
+    return stream(entity.getEntities(attributeName))
         .map(e -> e.getString(refEntityAttributeName))
         .collect(Collectors.toList());
   }

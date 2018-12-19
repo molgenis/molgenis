@@ -1,6 +1,6 @@
 package org.molgenis.data.util;
 
-import static java.util.stream.StreamSupport.stream;
+import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.BACKEND;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.DESCRIPTION;
@@ -288,7 +288,7 @@ public class EntityTypeUtils {
    * @return attribute names
    */
   public static Iterable<String> getAttributeNames(Iterable<Attribute> attrs) {
-    return () -> stream(attrs.spliterator(), false).map(Attribute::getName).iterator();
+    return () -> stream(attrs).map(Attribute::getName).iterator();
   }
 
   /**

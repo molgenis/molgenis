@@ -3,9 +3,9 @@ package org.molgenis.data.meta.model;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.PackageMetadata.CHILDREN;
 import static org.molgenis.data.meta.model.PackageMetadata.ENTITY_TYPES;
 import static org.molgenis.data.meta.model.PackageMetadata.ID;
@@ -63,7 +63,7 @@ public class Package extends StaticEntity {
     Package parent = aPackage.getParent();
     packageCopy.setParent(parent != null ? Package.newInstance(parent) : null);
     Iterable<Tag> tags = aPackage.getTags();
-    packageCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+    packageCopy.setTags(stream(tags).map(Tag::newInstance).collect(toList()));
     return packageCopy;
   }
 

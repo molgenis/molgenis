@@ -2,12 +2,12 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -225,7 +225,7 @@ public class MetaDataServiceImpl implements MetaDataService {
     dataService.add(ENTITY_TYPE_META_DATA, entityType);
 
     // create attributes
-    Stream<Attribute> attrs = stream(entityType.getOwnAllAttributes().spliterator(), false);
+    Stream<Attribute> attrs = stream(entityType.getOwnAllAttributes());
     dataService.add(ATTRIBUTE_META_DATA, attrs);
   }
 
@@ -460,10 +460,10 @@ public class MetaDataServiceImpl implements MetaDataService {
   private void upsertAttributes(EntityType entityType, EntityType existingEntityType) {
     // analyze both compound and atomic attributes owned by the entity
     Map<String, Attribute> attrsMap =
-        stream(entityType.getOwnAllAttributes().spliterator(), false)
+        stream(entityType.getOwnAllAttributes())
             .collect(toMap(Attribute::getName, Function.identity()));
     Map<String, Attribute> existingAttrsMap =
-        stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
+        stream(existingEntityType.getOwnAllAttributes())
             .collect(toMap(Attribute::getName, Function.identity()));
 
     // determine attributes to add, update and delete
@@ -503,7 +503,7 @@ public class MetaDataServiceImpl implements MetaDataService {
   public Map<String, Boolean> determineImportableEntities(
       RepositoryCollection repositoryCollection) {
     LinkedHashMap<String, Boolean> entitiesImportable = Maps.newLinkedHashMap();
-    stream(repositoryCollection.getEntityTypeIds().spliterator(), false)
+    stream(repositoryCollection.getEntityTypeIds())
         .forEach(
             id ->
                 entitiesImportable.put(
@@ -520,10 +520,10 @@ public class MetaDataServiceImpl implements MetaDataService {
     if (dataService.hasRepository(newEntityTypeId)) {
       EntityType oldEntityType = dataService.getEntityType(newEntityTypeId);
       List<Attribute> oldAtomicAttributes =
-          stream(oldEntityType.getAtomicAttributes().spliterator(), false).collect(toList());
+          stream(oldEntityType.getAtomicAttributes()).collect(toList());
 
       LinkedHashMap<String, Attribute> newAtomicAttributesMap = newLinkedHashMap();
-      stream(newEntityType.getAtomicAttributes().spliterator(), false)
+      stream(newEntityType.getAtomicAttributes())
           .forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
       for (Attribute oldAttribute : oldAtomicAttributes) {

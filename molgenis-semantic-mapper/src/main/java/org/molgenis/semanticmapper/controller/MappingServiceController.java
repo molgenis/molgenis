@@ -37,7 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
@@ -1019,7 +1018,8 @@ public class MappingServiceController extends PluginController {
    * @param target the selected target
    */
   private List<EntityType> getNewSources(MappingTarget target) {
-    return StreamSupport.stream(dataService.getEntityTypeIds().spliterator(), false)
+    return dataService
+        .getEntityTypeIds()
         .filter(name -> isValidSource(target, name))
         .map(dataService::getEntityType)
         .collect(toList());

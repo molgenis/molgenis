@@ -1,7 +1,7 @@
 package org.molgenis.settings.mail;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.settings.PropertyType.KEY;
@@ -189,7 +189,7 @@ public class MailSettingsImpl extends DefaultSettingsEntity implements MailSetti
   public Properties getJavaMailProperties() {
     Properties result = new Properties();
     result.putAll(
-        stream(getEntities(Meta.JAVA_MAIL_PROPS, JavaMailProperty.class).spliterator(), false)
+        stream(getEntities(Meta.JAVA_MAIL_PROPS, JavaMailProperty.class))
             .collect(toMap(JavaMailProperty::getKey, JavaMailProperty::getValue)));
     return result;
   }

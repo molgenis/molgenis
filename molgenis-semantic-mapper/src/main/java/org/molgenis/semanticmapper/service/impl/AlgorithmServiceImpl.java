@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.service.impl;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.Double.parseDouble;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
@@ -8,7 +9,6 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.data.DataConverter.toBoolean;
 import static org.molgenis.data.meta.AttributeType.DATE;
@@ -115,7 +115,7 @@ public class AlgorithmServiceImpl implements AlgorithmService {
   @Override
   public Iterable<AlgorithmEvaluation> applyAlgorithm(
       Attribute targetAttribute, String algorithm, Iterable<Entity> sourceEntities, int depth) {
-    return stream(sourceEntities.spliterator(), false)
+    return stream(sourceEntities)
         .map(
             entity -> {
               AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);

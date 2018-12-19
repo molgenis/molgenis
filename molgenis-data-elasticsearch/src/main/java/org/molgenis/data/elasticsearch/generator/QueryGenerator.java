@@ -10,12 +10,12 @@ import static org.molgenis.data.QueryRule.Operator.LIKE;
 import static org.molgenis.data.elasticsearch.FieldConstants.DEFAULT_ANALYZER;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
+import com.google.common.collect.Streams;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.StreamSupport;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -410,7 +410,7 @@ public class QueryGenerator {
               + "]");
     }
     Object[] queryValues =
-        StreamSupport.stream(((Iterable<?>) queryRuleValue).spliterator(), false)
+        Streams.stream((Iterable<?>) queryRuleValue)
             .map(aQueryRuleValue -> getQueryValue(attr, aQueryRuleValue))
             .toArray();
 
