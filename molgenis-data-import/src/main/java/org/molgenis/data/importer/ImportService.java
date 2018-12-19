@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.RepositoryCollection;
@@ -20,7 +21,7 @@ public interface ImportService extends Ordered {
       RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @Nullable String packageId);
+      @Nullable @CheckForNull String packageId);
 
   EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 

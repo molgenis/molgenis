@@ -5,6 +5,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import com.google.common.collect.TreeTraverser;
 import java.util.Objects;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.molgenis.data.meta.model.Package;
@@ -20,7 +21,7 @@ public class PackageUtils {
    * @param aPackage package
    * @return whether package is a system package
    */
-  public static boolean isSystemPackage(@Nullable Package aPackage) {
+  public static boolean isSystemPackage(@Nullable @CheckForNull Package aPackage) {
     if (aPackage == null) {
       return false;
     }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -455,7 +456,8 @@ public class RestService {
    * @param entity created or updated entity
    * @param existingEntity existing entity
    */
-  public void updateMappedByEntities(@Nonnull Entity entity, @Nullable Entity existingEntity) {
+  public void updateMappedByEntities(
+      @Nonnull Entity entity, @Nullable @CheckForNull Entity existingEntity) {
     entity
         .getEntityType()
         .getMappedByAttributes()
@@ -484,7 +486,9 @@ public class RestService {
    * @param attr bidirectional one-to-many attribute
    */
   private void updateMappedByEntitiesOneToMany(
-      @Nonnull Entity entity, @Nullable Entity existingEntity, @Nonnull Attribute attr) {
+      @Nonnull Entity entity,
+      @Nullable @CheckForNull Entity existingEntity,
+      @Nonnull Attribute attr) {
     if (attr.getDataType() != ONE_TO_MANY || !attr.isMappedBy()) {
       throw new IllegalArgumentException(
           format(

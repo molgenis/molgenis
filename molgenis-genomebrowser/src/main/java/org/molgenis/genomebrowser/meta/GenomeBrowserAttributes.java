@@ -1,5 +1,6 @@
 package org.molgenis.genomebrowser.meta;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -36,6 +37,7 @@ public class GenomeBrowserAttributes extends StaticEntity
   }
 
   @Nullable
+  @CheckForNull
   public Integer getOrder() {
     return getInt(GenomeBrowserAttributesMetadata.ORDER);
   }
@@ -61,6 +63,7 @@ public class GenomeBrowserAttributes extends StaticEntity
   }
 
   @Nullable
+  @CheckForNull
   public String getRef() {
     return getString(GenomeBrowserAttributesMetadata.REF);
   }
@@ -70,6 +73,7 @@ public class GenomeBrowserAttributes extends StaticEntity
   }
 
   @Nullable
+  @CheckForNull
   public String getAlt() {
     return getString(GenomeBrowserAttributesMetadata.ALT);
   }
@@ -79,6 +83,7 @@ public class GenomeBrowserAttributes extends StaticEntity
   }
 
   @Nullable
+  @CheckForNull
   public String getStop() {
     return getString(GenomeBrowserAttributesMetadata.STOP);
   }

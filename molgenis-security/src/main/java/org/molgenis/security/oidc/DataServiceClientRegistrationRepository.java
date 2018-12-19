@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
@@ -31,7 +32,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
         });
   }
 
-  private @Nullable OidcClient findOidcClient(String registrationId) {
+  private @Nullable @CheckForNull OidcClient findOidcClient(String registrationId) {
     return stream(authenticationSettings.getOidcClients())
         .filter(oidcClient -> oidcClient.getRegistrationId().equals(registrationId))
         .findFirst()

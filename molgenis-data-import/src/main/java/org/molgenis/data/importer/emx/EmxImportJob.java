@@ -3,6 +3,7 @@ package org.molgenis.data.importer.emx;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.RepositoryCollection;
@@ -27,7 +28,7 @@ public class EmxImportJob {
       DataAction dataAction,
       RepositoryCollection source,
       ParsedMetaData parsedMetaData,
-      @Nullable String packageId) {
+      @Nullable @CheckForNull String packageId) {
     this.metadataAction = requireNonNull(metadataAction);
     this.dataAction = dataAction;
     this.source = source;

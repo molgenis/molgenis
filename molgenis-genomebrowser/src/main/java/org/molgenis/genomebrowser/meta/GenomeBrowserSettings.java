@@ -2,6 +2,7 @@ package org.molgenis.genomebrowser.meta;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -100,6 +101,7 @@ public class GenomeBrowserSettings extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getActions() {
     return getString(GenomeBrowserSettingsMetadata.ACTIONS);
   }
@@ -109,6 +111,7 @@ public class GenomeBrowserSettings extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getAttrs() {
     return getString(GenomeBrowserSettingsMetadata.ATTRS);
   }
@@ -118,6 +121,7 @@ public class GenomeBrowserSettings extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getScoreAttr() {
     return getString(GenomeBrowserSettingsMetadata.SCORE_ATTR);
   }
@@ -127,6 +131,7 @@ public class GenomeBrowserSettings extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getExonKey() {
     return getString(GenomeBrowserSettingsMetadata.EXON_KEY);
   }
@@ -136,6 +141,7 @@ public class GenomeBrowserSettings extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getFeatureInfoPlugin() {
     return getString(GenomeBrowserSettingsMetadata.FEATURE_INFO_PLUGIN);
   }

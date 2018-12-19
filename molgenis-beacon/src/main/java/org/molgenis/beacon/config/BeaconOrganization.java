@@ -8,6 +8,7 @@ import static org.molgenis.beacon.config.BeaconOrganizationMetadata.LOGO_URL;
 import static org.molgenis.beacon.config.BeaconOrganizationMetadata.NAME;
 import static org.molgenis.beacon.config.BeaconOrganizationMetadata.WELCOME_URL;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.data.Entity;
@@ -36,26 +37,31 @@ public class BeaconOrganization extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
   }
 
   @Nullable
+  @CheckForNull
   public String getAddress() {
     return getString(ADDRESS);
   }
 
   @Nullable
+  @CheckForNull
   public String getWelcomeUrl() {
     return getString(WELCOME_URL);
   }
 
   @Nullable
+  @CheckForNull
   public String getContactUrl() {
     return getString(CONTACT_URL);
   }
 
   @Nullable
+  @CheckForNull
   public String getLogoUrl() {
     return getString(LOGO_URL);
   }

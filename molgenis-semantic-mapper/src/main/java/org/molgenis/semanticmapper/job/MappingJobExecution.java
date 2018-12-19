@@ -6,6 +6,7 @@ import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.MAPPIN
 import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.PACKAGE_ID;
 import static org.molgenis.semanticmapper.job.MappingJobExecutionMetadata.TARGET_ENTITY_TYPE_ID;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -44,6 +45,7 @@ public class MappingJobExecution extends JobExecution {
   }
 
   @Nullable
+  @CheckForNull
   public Boolean isAddSourceAttribute() {
     return getBoolean(ADD_SOURCE_ATTRIBUTE);
   }
@@ -53,6 +55,7 @@ public class MappingJobExecution extends JobExecution {
   }
 
   @Nullable
+  @CheckForNull
   public String getPackageId() {
     return getString(PACKAGE_ID);
   }
@@ -62,6 +65,7 @@ public class MappingJobExecution extends JobExecution {
   }
 
   @Nullable
+  @CheckForNull
   public String getLabel() {
     return getString(LABEL);
   }

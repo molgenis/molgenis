@@ -3,6 +3,7 @@ package org.molgenis.security.core;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.core.model.GroupValue;
 import org.molgenis.security.core.model.PackageValue;
@@ -14,7 +15,7 @@ public class GroupValueFactory {
   public GroupValue createGroup(
       String groupName,
       String label,
-      @Nullable String description,
+      @Nullable @CheckForNull String description,
       boolean publiclyVisible,
       Collection<String> roleLabels) {
     GroupValue.Builder groupBuilder =

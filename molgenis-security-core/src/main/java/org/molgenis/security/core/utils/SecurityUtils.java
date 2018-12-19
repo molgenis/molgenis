@@ -1,6 +1,7 @@
 package org.molgenis.security.core.utils;
 
 import java.util.Collection;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.core.MappedAuthenticatedPrincipal;
 import org.molgenis.security.core.runas.SystemSecurityToken.SystemPrincipal;
@@ -29,7 +30,7 @@ public class SecurityUtils {
    * @return username or <tt>null</tt> if 1) the current authentication is null or 2) the currently
    *     authenticated principal is the system.
    */
-  public static @Nullable String getCurrentUsername() {
+  public static @Nullable @CheckForNull String getCurrentUsername() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null) {
       return null;
@@ -37,7 +38,7 @@ public class SecurityUtils {
     return getUsername(authentication);
   }
 
-  private static @Nullable String getUsername(Authentication authentication) {
+  private static @Nullable @CheckForNull String getUsername(Authentication authentication) {
     String username;
 
     Object principal = authentication.getPrincipal();
