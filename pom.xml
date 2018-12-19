@@ -63,7 +63,7 @@
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
     <sonar.sources>.</sonar.sources>
-    <sonar.inclusions>src/main/**</sonar.inclusions>
+    <sonar.inclusions>src/main/java/**,src/main/resources/js/**,src/main/frontend/src/**</sonar.inclusions>
 
     <!-- plugin versions -->
     <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
