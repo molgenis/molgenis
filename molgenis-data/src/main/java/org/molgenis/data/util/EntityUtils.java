@@ -112,14 +112,6 @@ public class EntityUtils {
     }
   }
 
-  /** Checks if an entity contains data or not */
-  public static boolean isEmpty(Entity entity) {
-    for (String attr : entity.getAttributeNames()) {
-      if (entity.get(attr) != null) return false;
-    }
-    return true;
-  }
-
   /** Checks if an entity has another entity as one of its parents */
   public static boolean doesExtend(EntityType entityType, String entityTypeId) {
     EntityType parent = entityType.getExtends();

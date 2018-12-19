@@ -1,10 +1,8 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -45,7 +43,6 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -132,33 +129,6 @@ public class EntityUtilsTest {
   public void testEqualsEntityType(
       EntityType entityType, EntityType otherEntityType, boolean equals) {
     assertEquals(EntityUtils.equals(entityType, otherEntityType), equals);
-  }
-
-  @Test
-  public void isEmptyNoAttributes() {
-    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
-    when(entityType.getAtomicAttributes()).thenReturn(emptyList());
-    assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityType)));
-  }
-
-  @Test
-  public void isEmptyAttributeValuesNull() {
-    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
-    Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-    when(attr.getDataType()).thenReturn(STRING);
-    when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
-    when(entityType.getAttribute("attr")).thenReturn(attr);
-    assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityType, singletonMap("attr", null))));
-  }
-
-  @Test
-  public void isEmptyAttributeValuesNotNull() {
-    EntityType entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
-    Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
-    when(attr.getDataType()).thenReturn(STRING);
-    when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
-    when(entityType.getAttribute("attr")).thenReturn(attr);
-    assertFalse(EntityUtils.isEmpty(new DynamicEntity(entityType, of("attr", "val"))));
   }
 
   @Test
