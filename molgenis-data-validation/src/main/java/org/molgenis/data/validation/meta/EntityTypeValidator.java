@@ -1,13 +1,12 @@
 package org.molgenis.data.validation.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
-import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.molgenis.data.util.PackageUtils.isSystemPackage;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
@@ -51,7 +50,7 @@ public class EntityTypeValidator {
     validateOwnAttributes(entityType);
 
     Map<String, Attribute> ownAllAttrMap =
-        stream(entityType.getOwnAllAttributes().spliterator(), false)
+        stream(entityType.getOwnAllAttributes())
             .collect(toLinkedMap(Attribute::getIdentifier, Function.identity()));
 
     validateOwnIdAttribute(entityType, ownAllAttrMap);
@@ -237,7 +236,7 @@ public class EntityTypeValidator {
    */
   static void validateOwnAttributes(EntityType entityType) {
     // Validate that entity has attributes
-    if (asStream(entityType.getAllAttributes()).collect(toList()).isEmpty()) {
+    if (stream(entityType.getAllAttributes()).collect(toList()).isEmpty()) {
       throw new MolgenisValidationException(
           new ConstraintViolation(
               format(
@@ -247,7 +246,7 @@ public class EntityTypeValidator {
 
     // Validate that entity does not contain multiple attributes with the same name
     Multimap<String, Attribute> attrMultiMap =
-        asStream(entityType.getAllAttributes())
+        stream(entityType.getAllAttributes())
             .collect(
                 MultimapCollectors.toArrayListMultimap(Attribute::getName, Function.identity()));
     attrMultiMap

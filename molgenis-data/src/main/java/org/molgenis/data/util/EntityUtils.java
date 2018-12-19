@@ -7,7 +7,6 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
@@ -19,7 +18,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -183,16 +181,6 @@ public class EntityUtils {
       parent = parent.getExtends();
     }
     return false;
-  }
-
-  /**
-   * Get an Iterable of entities as a stream of entities
-   *
-   * @param entities entities iterable
-   * @return entities stream
-   */
-  public static <E extends Entity> Stream<E> asStream(Iterable<E> entities) {
-    return stream(entities.spliterator(), false);
   }
 
   /** Returns true if entity metadata equals another entity metadata. TODO docs */
