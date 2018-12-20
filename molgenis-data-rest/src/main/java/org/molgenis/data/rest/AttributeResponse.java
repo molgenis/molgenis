@@ -280,26 +280,6 @@ public class AttributeResponse {
     return isAggregatable;
   }
 
-  public Boolean getNillable() {
-    return nillable;
-  }
-
-  public Boolean getReadOnly() {
-    return readOnly;
-  }
-
-  public Boolean getLabelAttribute() {
-    return labelAttribute;
-  }
-
-  public Boolean getUnique() {
-    return unique;
-  }
-
-  public Boolean getAggregatable() {
-    return isAggregatable;
-  }
-
   public Range getRange() {
     return range;
   }
