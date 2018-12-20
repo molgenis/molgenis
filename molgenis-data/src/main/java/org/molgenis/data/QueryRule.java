@@ -286,15 +286,29 @@ public class QueryRule {
   @Override
   public String toString() {
     StringBuilder strBuilder = new StringBuilder();
+    fieldToString(strBuilder);
+    operatorToString(strBuilder);
+    valueToString(strBuilder);
+    nestedRulesToString(strBuilder);
+    return strBuilder.toString();
+  }
+
+  private void fieldToString(StringBuilder strBuilder) {
     if (field != null) {
       strBuilder.append('\'').append(field).append('\'');
     }
+  }
+
+  private void operatorToString(StringBuilder strBuilder) {
     if (operator != null && operator != Operator.NESTED) {
       if (strBuilder.length() > 0) {
         strBuilder.append(' ');
       }
       strBuilder.append(operator);
     }
+  }
+
+  private void valueToString(StringBuilder strBuilder) {
     if (operator != Operator.AND
         && operator != Operator.OR
         && operator != Operator.NOT
@@ -310,6 +324,9 @@ public class QueryRule {
         strBuilder.append(value);
       }
     }
+  }
+
+  private void nestedRulesToString(StringBuilder strBuilder) {
     if (nestedRules != null && !nestedRules.isEmpty()) {
       if (strBuilder.length() > 0) {
         strBuilder.append(' ');
@@ -324,7 +341,6 @@ public class QueryRule {
       }
       strBuilder.append(')');
     }
-    return strBuilder.toString();
   }
 
   public static QueryRule eq(String name, Object value) {
