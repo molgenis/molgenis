@@ -242,9 +242,7 @@ public class EntityUtils {
     if (!Objects.equals(tag.getLabel(), otherTag.getLabel())) return false;
     if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri())) return false;
     if (!Objects.equals(tag.getRelationLabel(), otherTag.getRelationLabel())) return false;
-    if (!Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem())) return false;
-
-    return true;
+    return Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem());
   }
 
   /** Returns true if an attribute equals another attribute. */
@@ -264,10 +262,7 @@ public class EntityUtils {
    */
   public static boolean equals(Attribute attr, Attribute otherAttr, boolean checkIdentifier) {
     if (attr == null || otherAttr == null) {
-      if (attr == null && otherAttr == null) {
-        return true;
-      }
-      return false;
+      return (attr == null && otherAttr == null);
     }
 
     if (checkIdentifier && !Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) {
