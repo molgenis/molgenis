@@ -106,12 +106,12 @@ public class CsvIterator implements CloseableIterator<Entity> {
 
   @Override
   public boolean hasNext() {
-    boolean next = get() != null;
-    if (!next) {
+    boolean hasNext = get() != null;
+    if (!hasNext) {
       close();
     }
 
-    return next;
+    return hasNext;
   }
 
   @Override

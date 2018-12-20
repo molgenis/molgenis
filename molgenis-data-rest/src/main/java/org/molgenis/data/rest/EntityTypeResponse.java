@@ -56,14 +56,14 @@ public class EntityTypeResponse {
       Map<String, Set<String>> attributeExpandsSet,
       UserPermissionEvaluator userPermissionEvaluator,
       DataService dataService) {
-    String name = meta.getId();
-    this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
+    String metaId = meta.getId();
+    this.href = Href.concatMetaEntityHref(RestController.BASE_URI, metaId);
     this.hrefCollection =
-        String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
+        String.format("%s/%s", RestController.BASE_URI, metaId); // FIXME apply Href escaping fix
     this.languageCode = getCurrentUserLanguageCode();
 
     if (attributesSet == null || attributesSet.contains("name".toLowerCase())) {
-      this.name = name;
+      this.name = metaId;
     } else this.name = null;
 
     if (attributesSet == null || attributesSet.contains("description".toLowerCase())) {
@@ -86,7 +86,7 @@ public class EntityTypeResponse {
             this.attributes.put(
                 attr.getName(),
                 new AttributeResponse(
-                    name,
+                    metaId,
                     meta,
                     attr,
                     subAttributesSet,
@@ -96,7 +96,7 @@ public class EntityTypeResponse {
                     dataService));
           } else {
             String attrHref =
-                Href.concatMetaAttributeHref(RestController.BASE_URI, name, attr.getName());
+                Href.concatMetaAttributeHref(RestController.BASE_URI, metaId, attr.getName());
             this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
           }
         }
@@ -104,20 +104,20 @@ public class EntityTypeResponse {
     } else this.attributes = null;
 
     if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase())) {
-      Attribute labelAttribute = meta.getLabelAttribute(this.languageCode);
-      this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+      Attribute metaLabelAttribute = meta.getLabelAttribute(this.languageCode);
+      this.labelAttribute = metaLabelAttribute != null ? metaLabelAttribute.getName() : null;
     } else this.labelAttribute = null;
 
     if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase())) {
-      Attribute idAttribute = meta.getIdAttribute();
-      this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
+      Attribute metaIdAttribute = meta.getIdAttribute();
+      this.idAttribute = metaIdAttribute != null ? metaIdAttribute.getName() : null;
     } else this.idAttribute = null;
 
     if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase())) {
-      Iterable<Attribute> lookupAttributes = meta.getLookupAttributes();
+      Iterable<Attribute> metaLookupAttributes = meta.getLookupAttributes();
       this.lookupAttributes =
-          lookupAttributes != null
-              ? Lists.newArrayList(Iterables.transform(lookupAttributes, Attribute::getName))
+          metaLookupAttributes != null
+              ? Lists.newArrayList(Iterables.transform(metaLookupAttributes, Attribute::getName))
               : null;
     } else this.lookupAttributes = null;
 
@@ -127,17 +127,17 @@ public class EntityTypeResponse {
 
     boolean hasWritePermission =
         userPermissionEvaluator.hasPermission(
-            new EntityTypeIdentity(name), EntityTypePermission.UPDATE_DATA);
+            new EntityTypeIdentity(metaId), EntityTypePermission.UPDATE_DATA);
     boolean hasWriteMetaPermission =
         userPermissionEvaluator.hasPermission(
-            new EntityTypeIdentity(name), EntityTypePermission.UPDATE_METADATA);
+            new EntityTypeIdentity(metaId), EntityTypePermission.UPDATE_METADATA);
     this.writable =
         (hasWritePermission || hasWriteMetaPermission)
-            && dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+            && dataService.getCapabilities(metaId).contains(RepositoryCapability.WRITABLE);
 
     this.permissions =
         userPermissionEvaluator.getPermissions(
-            new EntityTypeIdentity(name), EntityTypePermission.values());
+            new EntityTypeIdentity(metaId), EntityTypePermission.values());
   }
 
   public String getHref() {
