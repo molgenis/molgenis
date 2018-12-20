@@ -26,10 +26,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@Component
 public class EmxImportService implements ImportService {
   private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
