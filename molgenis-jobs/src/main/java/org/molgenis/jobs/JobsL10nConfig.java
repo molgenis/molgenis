@@ -9,7 +9,7 @@ public class JobsL10nConfig {
   public static final String NAMESPACE = "jobs";
 
   @Bean
-  public PropertiesMessageSource dataMessageSource() {
+  public PropertiesMessageSource jobsMessageSource() {
     return new PropertiesMessageSource(NAMESPACE);
   }
 }
