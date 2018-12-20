@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.DataService;
 import org.molgenis.ontology.core.ic.OntologyTermFrequencyServiceImpl;
-import org.molgenis.ontology.core.ic.TermFrequencyService;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
@@ -12,7 +11,9 @@ import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
+@Import(OntologyTermFrequencyServiceImpl.class)
 @Configuration
 public class SortaConfig {
   private final DataService dataService;
@@ -27,11 +28,6 @@ public class SortaConfig {
     this.dataService = requireNonNull(dataService);
     this.ontologyTermHitMetaData = requireNonNull(ontologyTermHitMetaData);
     this.ontologyTermSynonymFactory = requireNonNull(ontologyTermSynonymFactory);
-  }
-
-  @Bean
-  public TermFrequencyService termFrequencyService() {
-    return new OntologyTermFrequencyServiceImpl(dataService);
   }
 
   @Bean
