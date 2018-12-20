@@ -9,7 +9,7 @@ cache:
     - '$HOME/.m2/repository'
 env:
   # This configures the parallel jobs to run
-  - COV_FLAG="api"                       SCRIPT="set -e ./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
+  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
   - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
 services:
   - postgresql
@@ -26,8 +26,9 @@ install:
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - sudo sysctl -w vm.max_map_count=262144
-script:
-  - $SCRIPT
+script: |
+  set -e &&
+  $SCRIPT
 notifications:
   slack:
     rooms:
