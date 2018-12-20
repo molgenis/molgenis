@@ -16,9 +16,7 @@ import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.semantic.Hits;
-import org.springframework.stereotype.Service;
 
-@Service
 public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService {
   private final DataService dataService;
 
