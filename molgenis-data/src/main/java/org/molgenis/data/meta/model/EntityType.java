@@ -4,6 +4,7 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Streams.stream;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
@@ -410,7 +411,7 @@ public class EntityType extends StaticEntity implements Labeled {
    */
   public boolean isAbstract() {
     Boolean isAbstract = getBoolean(IS_ABSTRACT);
-    return isAbstract != null ? isAbstract : false;
+    return TRUE.equals(isAbstract);
   }
 
   public EntityType setAbstract(boolean isAbstract) {
