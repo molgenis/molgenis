@@ -39,9 +39,9 @@ public class FileDownloadController {
       response.setStatus(HttpStatus.NOT_FOUND.value());
     } else {
       // Not so nice but keep to serve old legacy files
-      File fileStoreFile = fileStore.getFile(fileMeta.getFilename());
+      File fileStoreFile = fileStore.getFileUnchecked(fileMeta.getFilename());
       if (!fileStoreFile.exists()) {
-        fileStoreFile = fileStore.getFile(id);
+        fileStoreFile = fileStore.getFileUnchecked(id);
       }
       if (!fileStoreFile.exists()) {
         response.setStatus(HttpStatus.NOT_FOUND.value());

@@ -118,7 +118,7 @@ public class AppManagerServiceImpl implements AppManagerService {
       deactivateApp(app);
     }
     try {
-      deleteDirectory(fileStore.getFile(app.getResourceFolder()));
+      deleteDirectory(fileStore.getFileUnchecked(app.getResourceFolder()));
     } catch (IOException err) {
       throw new CouldNotDeleteAppException(id);
     }
@@ -133,7 +133,7 @@ public class AppManagerServiceImpl implements AppManagerService {
     fileStore.createDirectory(tempAppDirectoryName);
 
     try {
-      ZipFileUtil.unzip(zipData, fileStore.getFile(tempAppDirectoryName));
+      ZipFileUtil.unzip(zipData, fileStore.getFileUnchecked(tempAppDirectoryName));
     } catch (UnzipException unzipException) {
       fileStore.delete(tempAppDirectoryName);
       throw new InvalidAppArchiveException(formFieldName, unzipException);
@@ -167,7 +167,7 @@ public class AppManagerServiceImpl implements AppManagerService {
       throw new IllegalAppNameException(appConfig.getName());
     }
 
-    if (fileStore.getFile(APPS_DIR + separator + appConfig.getName()).exists()) {
+    if (fileStore.getFileUnchecked(APPS_DIR + separator + appConfig.getName()).exists()) {
       fileStore.deleteDirectory(APPS_TMP_DIR);
       throw new AppAlreadyExistsException(appConfig.getName());
     }
@@ -206,7 +206,7 @@ public class AppManagerServiceImpl implements AppManagerService {
 
   @Override
   public String extractFileContent(String appDir, String fileName) {
-    File indexFile = fileStore.getFile(appDir + separator + fileName);
+    File indexFile = fileStore.getFileUnchecked(appDir + separator + fileName);
     return utf8Encodedfiletostring(indexFile);
   }
 
@@ -242,12 +242,12 @@ public class AppManagerServiceImpl implements AppManagerService {
   private List<String> buildMissingRequiredFiles(String appDirectoryName) {
     List<String> missingFromArchive = newArrayList();
 
-    File indexFile = fileStore.getFile(appDirectoryName + separator + ZIP_INDEX_FILE);
+    File indexFile = fileStore.getFileUnchecked(appDirectoryName + separator + ZIP_INDEX_FILE);
     if (!indexFile.exists()) {
       missingFromArchive.add(ZIP_INDEX_FILE);
     }
 
-    File configFile = fileStore.getFile(appDirectoryName + separator + ZIP_CONFIG_FILE);
+    File configFile = fileStore.getFileUnchecked(appDirectoryName + separator + ZIP_CONFIG_FILE);
     if (!configFile.exists()) {
       missingFromArchive.add(ZIP_CONFIG_FILE);
     }
