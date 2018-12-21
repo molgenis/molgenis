@@ -19,14 +19,15 @@ import org.springframework.stereotype.Service;
 public class EntityListenersService {
   private final Logger LOG = LoggerFactory.getLogger(EntityListenersService.class);
   private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-  private final Map<String, SetMultimap<Object, EntityListener>> entityListeners = new HashMap<>();
+  private final Map<String, SetMultimap<Object, EntityListener>> entityListenersByRepo =
+      new HashMap<>();
 
   /** Register a repository to the entity listeners service once */
   void register(String repoFullName) {
     lock.writeLock().lock();
     try {
-      if (!entityListeners.containsKey(requireNonNull(repoFullName))) {
-        entityListeners.put(repoFullName, HashMultimap.create());
+      if (!entityListenersByRepo.containsKey(requireNonNull(repoFullName))) {
+        entityListenersByRepo.put(repoFullName, HashMultimap.create());
       }
     } finally {
       lock.writeLock().unlock();
@@ -42,7 +43,8 @@ public class EntityListenersService {
     lock.readLock().lock();
     try {
       verifyRepoRegistered(repoFullName);
-      SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+      SetMultimap<Object, EntityListener> entityListeners =
+          this.entityListenersByRepo.get(repoFullName);
       return entities.filter(
           entity -> {
             Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
@@ -59,7 +61,8 @@ public class EntityListenersService {
     lock.readLock().lock();
     try {
       verifyRepoRegistered(repoFullName);
-      SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+      SetMultimap<Object, EntityListener> entityListeners =
+          this.entityListenersByRepo.get(repoFullName);
       Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
       entityEntityListeners.forEach(entityListener -> entityListener.postUpdate(entity));
     } finally {
@@ -76,7 +79,8 @@ public class EntityListenersService {
     lock.writeLock().lock();
     try {
       verifyRepoRegistered(repoFullName);
-      SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+      SetMultimap<Object, EntityListener> entityListeners =
+          this.entityListenersByRepo.get(repoFullName);
       entityListeners.put(entityListener.getEntityId(), entityListener);
     } finally {
       lock.writeLock().unlock();
@@ -93,7 +97,8 @@ public class EntityListenersService {
     lock.writeLock().lock();
     try {
       verifyRepoRegistered(repoFullName);
-      SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+      SetMultimap<Object, EntityListener> entityListeners =
+          this.entityListenersByRepo.get(repoFullName);
       if (entityListeners.containsKey(entityListener.getEntityId())) {
         entityListeners.remove(entityListener.getEntityId(), entityListener);
         return true;
@@ -113,7 +118,7 @@ public class EntityListenersService {
     lock.readLock().lock();
     try {
       verifyRepoRegistered(repoFullName);
-      return entityListeners.get(repoFullName).isEmpty();
+      return entityListenersByRepo.get(repoFullName).isEmpty();
     } finally {
       lock.readLock().unlock();
     }
@@ -123,7 +128,7 @@ public class EntityListenersService {
   private void verifyRepoRegistered(String repoFullName) {
     lock.readLock().lock();
     try {
-      if (!entityListeners.containsKey(requireNonNull(repoFullName))) {
+      if (!entityListenersByRepo.containsKey(requireNonNull(repoFullName))) {
         LOG.error(
             "Repository [{}] is not registered in the entity listeners service", repoFullName);
         throw new MolgenisDataException(

@@ -1,6 +1,7 @@
 package org.molgenis.data.rest.service;
 
 import static com.google.common.collect.Streams.stream;
+import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -434,7 +435,7 @@ public class RestService {
       }
     } else {
       // boolean false is not posted (http feature), so if null and required, should be false
-      value = !attr.isNillable() ? false : null;
+      value = !attr.isNillable() ? FALSE : null;
     }
     return value;
   }

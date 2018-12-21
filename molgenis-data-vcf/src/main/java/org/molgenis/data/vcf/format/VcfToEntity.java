@@ -104,16 +104,16 @@ public class VcfToEntity {
   private EntityType createEntityType(String entityTypeId, VcfMeta vcfMeta) {
     Attribute idAttribute = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
 
-    EntityType entityType = entityTypeFactory.create(entityTypeId);
-    entityType.setLabel(entityTypeId);
-    entityType.addAttribute(vcfAttributes.getChromAttribute());
-    entityType.addAttribute(vcfAttributes.getAltAttribute());
-    entityType.addAttribute(vcfAttributes.getPosAttribute());
-    entityType.addAttribute(vcfAttributes.getRefAttribute());
-    entityType.addAttribute(vcfAttributes.getFilterAttribute());
-    entityType.addAttribute(vcfAttributes.getQualAttribute());
-    entityType.addAttribute(vcfAttributes.getIdAttribute());
-    entityType.addAttribute(idAttribute, ROLE_ID);
+    EntityType newEntityType = entityTypeFactory.create(entityTypeId);
+    newEntityType.setLabel(entityTypeId);
+    newEntityType.addAttribute(vcfAttributes.getChromAttribute());
+    newEntityType.addAttribute(vcfAttributes.getAltAttribute());
+    newEntityType.addAttribute(vcfAttributes.getPosAttribute());
+    newEntityType.addAttribute(vcfAttributes.getRefAttribute());
+    newEntityType.addAttribute(vcfAttributes.getFilterAttribute());
+    newEntityType.addAttribute(vcfAttributes.getQualAttribute());
+    newEntityType.addAttribute(vcfAttributes.getIdAttribute());
+    newEntityType.addAttribute(idAttribute, ROLE_ID);
 
     Attribute infoMetaData =
         attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
@@ -134,9 +134,9 @@ public class VcfToEntity {
               .setAggregatable(true)
               .setParent(infoMetaData);
 
-      entityType.addAttribute(attribute);
+      newEntityType.addAttribute(attribute);
     }
-    entityType.addAttribute(infoMetaData);
+    newEntityType.addAttribute(infoMetaData);
     if (sampleEntityType != null) {
       Attribute samplesAttributeMeta =
           attrMetaFactory
@@ -145,9 +145,9 @@ public class VcfToEntity {
               .setDataType(MREF)
               .setRefEntity(sampleEntityType)
               .setLabel("SAMPLES");
-      entityType.addAttribute(samplesAttributeMeta);
+      newEntityType.addAttribute(samplesAttributeMeta);
     }
-    return entityType;
+    return newEntityType;
   }
 
   private EntityType createSampleEntityType(
@@ -330,7 +330,6 @@ public class VcfToEntity {
         for (int i = 0; i < format.length; i = i + 1) {
           String strValue = sample.getData(i);
           Object value = null;
-          EntityType sampleEntityType = sampleEntity.getEntityType();
           Attribute attr = sampleEntityType.getAttribute(format[i]);
           if (attr != null) {
             if (strValue != null) {

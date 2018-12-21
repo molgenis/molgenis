@@ -1,7 +1,6 @@
 package org.molgenis.data.vcf.datastructures;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.Objects;
 import org.molgenis.data.Entity;
 
 public class Sample {
@@ -41,33 +40,21 @@ public class Sample {
   }
 
   @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 31).append(id).toHashCode();
-  }
-
-  /** Allows compare with String or Sample object */
-  public boolean equalsSampleOrString(Object obj) {
-    if (obj instanceof String) {
-      return new EqualsBuilder().append(id, obj.toString()).isEquals();
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    if (!(obj instanceof Sample)) return false;
-    if (obj == this) return true;
-    Sample rhs = (Sample) obj;
-    return new EqualsBuilder().append(id, rhs.id).isEquals();
+    if (!(o instanceof Sample)) {
+      return false;
+    }
+    Sample sample = (Sample) o;
+    return Objects.equals(getId(), sample.getId())
+        && Objects.equals(getGenotype(), sample.getGenotype());
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Sample)) return false;
-
-    Sample sample = (Sample) o;
-
-    if (genotype != null ? !genotype.equals(sample.genotype) : sample.genotype != null)
-      return false;
-    if (id != null ? !id.equals(sample.id) : sample.id != null) return false;
-
-    return true;
+  public int hashCode() {
+    return Objects.hash(getId(), getGenotype());
   }
 
   @Override

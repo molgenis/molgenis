@@ -2,6 +2,7 @@ package org.molgenis.core.ui.menu;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.Objects;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -74,37 +75,24 @@ public class MenuItem {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((items == null) ? 0 : items.hashCode());
-    result = prime * result + ((label == null) ? 0 : label.hashCode());
-    result = prime * result + ((params == null) ? 0 : params.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MenuItem)) {
+      return false;
+    }
+    MenuItem menuItem = (MenuItem) o;
+    return getType() == menuItem.getType()
+        && Objects.equals(getId(), menuItem.getId())
+        && Objects.equals(getLabel(), menuItem.getLabel())
+        && Objects.equals(getParams(), menuItem.getParams())
+        && Objects.equals(getItems(), menuItem.getItems());
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    MenuItem other = (MenuItem) obj;
-    if (id == null) {
-      if (other.id != null) return false;
-    } else if (!id.equals(other.id)) return false;
-    if (items == null) {
-      if (other.items != null) return false;
-    } else if (!items.equals(other.items)) return false;
-    if (label == null) {
-      if (other.label != null) return false;
-    } else if (!label.equals(other.label)) return false;
-    if (params == null) {
-      if (other.params != null) return false;
-    } else if (!params.equals(other.params)) return false;
-    if (type != other.type) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(getType(), getId(), getLabel(), getParams(), getItems());
   }
 
   @Override
