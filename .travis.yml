@@ -21,6 +21,7 @@ before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
   - sudo sysctl -w vm.max_map_count=262144
+  - psql -U postgres -c "drop database molgenis_${TRAVIS_PULL_REQUEST}_${TRAVIS_BUILD_ID}"
 script:
   - $SCRIPT
 after_script:
