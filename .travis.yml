@@ -9,8 +9,7 @@ cache:
     - '$HOME/.m2/repository'
 env:
   # This configures the parallel jobs to run
-  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
-  - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
+  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
 services:
   - postgresql
 addons:
@@ -18,13 +17,9 @@ addons:
   postgresql: '9.6'
 sudo: required
 fail_fast: true
-before_install:
-  # Use wrapper script to install fixed maven version
-  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
-install:
-  - ./mvnw install -DskipTests -Dmaven.javadoc.skip=true -B -V -T4
 before_script:
   # Set the max_map_count for elasticsearch, as instructed by maven Elasticsearch plugin docs
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
   - sudo sysctl -w vm.max_map_count=262144
 script: |
   set -e &&
