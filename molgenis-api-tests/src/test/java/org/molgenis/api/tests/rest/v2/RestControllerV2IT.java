@@ -137,6 +137,26 @@ public class RestControllerV2IT {
   }
 
   @Test
+  public void testApiFail() {
+    given()
+        .log()
+        .all()
+        .header("Access-Control-Request-Method", "DELETE ")
+        .header("Access-Control-Request-Headers", "x-molgenis-token")
+        .header("Origin", "https://foo.bar.org")
+        .when()
+        .options(API_V2 + "sido")
+        .then()
+        .statusCode(OKE)
+        .log()
+        .all()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET")
+        .header("Access-Control-Allow-Headers", "x-molgenis-token")
+        .header("Access-Control-Max-Age", "1800");
+  }
+
+  @Test
   public void batchRetrieveEntityCollectionTemplateExpression() {
     ValidatableResponse response =
         given()
