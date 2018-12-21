@@ -1,7 +1,7 @@
 language: java
 jdk: oraclejdk8
 # Trusty dist needed for postgresql version 9.6
-dist: trusty
+dist: xenial
 # Caches downloaded libraries between builds
 cache:
   yarn: true
