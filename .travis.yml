@@ -9,7 +9,7 @@ cache:
     - '$HOME/.m2/repository'
 env:
   # This configures the parallel jobs to run
-  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis-${TRAVIS_COMMIT}"
+  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password -Dit_db_name=molgenis-${TRAVIS_PULL_REQUEST}-${TRAVIS_JOB_NUMBER}"
 services:
   - postgresql
 addons:
