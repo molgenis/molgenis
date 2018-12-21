@@ -2,6 +2,7 @@ package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.navigator.model.Resource;
 import org.molgenis.util.AutoGson;
@@ -13,6 +14,7 @@ import org.molgenis.util.AutoGson;
 public abstract class GetResourcesResponse {
   /** @return <tt>null</tt> folder implies the root package */
   @Nullable
+  @CheckForNull
   public abstract Folder getFolder();
 
   public abstract List<Resource> getResources();

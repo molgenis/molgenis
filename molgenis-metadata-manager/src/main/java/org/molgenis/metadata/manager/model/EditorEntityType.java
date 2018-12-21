@@ -3,6 +3,7 @@ package org.molgenis.metadata.manager.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
@@ -14,11 +15,13 @@ public abstract class EditorEntityType {
   public abstract String getId();
 
   @Nullable
+  @CheckForNull
   public abstract String getLabel();
 
   public abstract Map<String, String> getLabelI18n();
 
   @Nullable
+  @CheckForNull
   public abstract String getDescription();
 
   public abstract Map<String, String> getDescriptionI18n();
@@ -28,9 +31,11 @@ public abstract class EditorEntityType {
   public abstract String getBackend();
 
   @Nullable
+  @CheckForNull
   public abstract EditorPackageIdentifier getPackage();
 
   @Nullable
+  @CheckForNull
   public abstract EditorEntityTypeParent getEntityTypeParent();
 
   public abstract List<EditorAttribute> getAttributes();
@@ -40,28 +45,30 @@ public abstract class EditorEntityType {
   public abstract List<EditorTagIdentifier> getTags();
 
   @Nullable
+  @CheckForNull
   public abstract EditorAttributeIdentifier getIdAttribute();
 
   @Nullable
+  @CheckForNull
   public abstract EditorAttributeIdentifier getLabelAttribute();
 
   public abstract List<EditorAttributeIdentifier> getLookupAttributes();
 
   public static EditorEntityType create(
       String id,
-      @Nullable String label,
+      @Nullable @CheckForNull String label,
       Map<String, String> i18nLabel,
-      @Nullable String description,
+      @Nullable @CheckForNull String description,
       Map<String, String> i18nDescription,
       boolean isAbstract,
       String backend,
-      @Nullable EditorPackageIdentifier aPackage,
-      @Nullable EditorEntityTypeParent entityTypeParent,
+      @Nullable @CheckForNull EditorPackageIdentifier aPackage,
+      @Nullable @CheckForNull EditorEntityTypeParent entityTypeParent,
       List<EditorAttribute> attributes,
       List<EditorAttributeIdentifier> referringAttributes,
       List<EditorTagIdentifier> tags,
-      @Nullable EditorAttributeIdentifier idAttribute,
-      @Nullable EditorAttributeIdentifier labelAttribute,
+      @Nullable @CheckForNull EditorAttributeIdentifier idAttribute,
+      @Nullable @CheckForNull EditorAttributeIdentifier labelAttribute,
       List<EditorAttributeIdentifier> lookupAttributes) {
     return new AutoValue_EditorEntityType(
         id,

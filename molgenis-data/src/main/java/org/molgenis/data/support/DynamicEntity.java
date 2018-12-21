@@ -1,11 +1,11 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.StreamSupport.stream;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -60,8 +60,7 @@ public class DynamicEntity implements Entity {
 
   @Override
   public Iterable<String> getAttributeNames() {
-    return stream(entityType.getAtomicAttributes().spliterator(), false).map(Attribute::getName)
-        ::iterator;
+    return stream(entityType.getAtomicAttributes()).map(Attribute::getName)::iterator;
   }
 
   @Override
@@ -311,7 +310,7 @@ public class DynamicEntity implements Entity {
   public String toString() {
     StringBuilder strBuilder = new StringBuilder(entityType.getId()).append('{');
     strBuilder.append(
-        stream(entityType.getAtomicAttributes().spliterator(), false)
+        stream(entityType.getAtomicAttributes())
             .map(
                 attr -> {
                   StringBuilder attrStrBuilder = new StringBuilder(attr.getName()).append('=');
@@ -322,7 +321,7 @@ public class DynamicEntity implements Entity {
                     attrStrBuilder
                         .append('[')
                         .append(
-                            stream(getEntities(attr.getName()).spliterator(), false)
+                            stream(getEntities(attr.getName()))
                                 .map(Entity::getIdValue)
                                 .map(Object::toString)
                                 .collect(joining(",")))

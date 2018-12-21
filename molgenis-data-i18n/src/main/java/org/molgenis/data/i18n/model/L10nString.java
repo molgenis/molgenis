@@ -6,6 +6,7 @@ import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
 import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
 
 import java.util.Locale;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -54,6 +55,7 @@ public class L10nString extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getDescription() {
     return getString(DESCRIPTION);
   }

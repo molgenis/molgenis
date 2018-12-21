@@ -1,13 +1,14 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -257,8 +258,7 @@ public class QueryRule {
    */
   public void setValue(Object value) {
     if (value instanceof Iterable<?>) {
-      this.value =
-          stream(((Iterable<?>) value).spliterator(), false).map(this::toValue).collect(toList());
+      this.value = stream((Iterable<?>) value).map(this::toValue).collect(toList());
     } else {
       this.value = toValue(value);
     }
@@ -287,15 +287,29 @@ public class QueryRule {
   @Override
   public String toString() {
     StringBuilder strBuilder = new StringBuilder();
+    fieldToString(strBuilder);
+    operatorToString(strBuilder);
+    valueToString(strBuilder);
+    nestedRulesToString(strBuilder);
+    return strBuilder.toString();
+  }
+
+  private void fieldToString(StringBuilder strBuilder) {
     if (field != null) {
       strBuilder.append('\'').append(field).append('\'');
     }
+  }
+
+  private void operatorToString(StringBuilder strBuilder) {
     if (operator != null && operator != Operator.NESTED) {
       if (strBuilder.length() > 0) {
         strBuilder.append(' ');
       }
       strBuilder.append(operator);
     }
+  }
+
+  private void valueToString(StringBuilder strBuilder) {
     if (operator != Operator.AND
         && operator != Operator.OR
         && operator != Operator.NOT
@@ -311,6 +325,9 @@ public class QueryRule {
         strBuilder.append(value);
       }
     }
+  }
+
+  private void nestedRulesToString(StringBuilder strBuilder) {
     if (nestedRules != null && !nestedRules.isEmpty()) {
       if (strBuilder.length() > 0) {
         strBuilder.append(' ');
@@ -325,7 +342,6 @@ public class QueryRule {
       }
       strBuilder.append(')');
     }
-    return strBuilder.toString();
   }
 
   public static QueryRule eq(String name, Object value) {
@@ -333,28 +349,22 @@ public class QueryRule {
   }
 
   @Override
-  public int hashCode() {
-    int result = operator != null ? operator.hashCode() : 0;
-    result = 31 * result + (field != null ? field.hashCode() : 0);
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    result = 31 * result + (nestedRules != null ? nestedRules.hashCode() : 0);
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof QueryRule)) {
+      return false;
+    }
+    QueryRule queryRule = (QueryRule) o;
+    return getOperator() == queryRule.getOperator()
+        && Objects.equals(getField(), queryRule.getField())
+        && Objects.equals(getValue(), queryRule.getValue())
+        && Objects.equals(getNestedRules(), queryRule.getNestedRules());
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    QueryRule queryRule = (QueryRule) o;
-
-    if (field != null ? !field.equals(queryRule.field) : queryRule.field != null) return false;
-    if (nestedRules != null
-        ? !nestedRules.equals(queryRule.nestedRules)
-        : queryRule.nestedRules != null) return false;
-    if (operator != queryRule.operator) return false;
-    if (value != null ? !value.equals(queryRule.value) : queryRule.value != null) return false;
-
-    return true;
+  public int hashCode() {
+    return Objects.hash(getOperator(), getField(), getValue(), getNestedRules());
   }
 }

@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.settings;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
@@ -377,7 +378,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
   @Override
   public boolean getGoogleAnalyticsIpAnonymization() {
     Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_IP_ANONYMIZATION);
-    return value != null ? value : false;
+    return TRUE.equals(value);
   }
 
   @Override
@@ -388,7 +389,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
   @Override
   public boolean getGoogleAnalyticsAccountPrivacyFriendly() {
     Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS);
-    return value != null ? value : false;
+    return TRUE.equals(value);
   }
 
   @Override
@@ -402,7 +403,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
   @Override
   public boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis() {
     Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
-    return value != null ? value : false;
+    return TRUE.equals(value);
   }
 
   @Override

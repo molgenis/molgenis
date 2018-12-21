@@ -60,7 +60,7 @@ public class OneClickImportJobTest {
         .thenReturn("simple_valid");
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     List<Sheet> sheets = new ArrayList<>();
     when(excelService.buildExcelSheetsFromFile(file)).thenReturn(sheets);
@@ -102,7 +102,7 @@ public class OneClickImportJobTest {
         .thenReturn("simple_valid");
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     List<String[]> lines = new ArrayList<>();
     lines.add(new String[] {"name,age", "piet,25"});
@@ -145,7 +145,7 @@ public class OneClickImportJobTest {
         .thenReturn("simple_valid");
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     File zipFile1 = loadFile(OneClickImportJobTest.class, "/zip_file_1.csv");
     when(oneClickImporterNamingService.createValidIdFromFileName("zip_file_1.csv"))
@@ -258,7 +258,7 @@ public class OneClickImportJobTest {
     String filename = "unsupported-file-zip.zip";
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     oneClickImporterJob =
         new OneClickImportJob(
@@ -282,7 +282,7 @@ public class OneClickImportJobTest {
     String filename = "unsupported-file-zip2.zip";
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     oneClickImporterJob =
         new OneClickImportJob(
@@ -307,7 +307,7 @@ public class OneClickImportJobTest {
     String filename = "unsupported-file-type.nft";
 
     File file = loadFile(OneClickImportJobTest.class, "/" + filename);
-    when(fileStore.getFile(filename)).thenReturn(file);
+    when(fileStore.getFileUnchecked(filename)).thenReturn(file);
 
     oneClickImporterJob =
         new OneClickImportJob(

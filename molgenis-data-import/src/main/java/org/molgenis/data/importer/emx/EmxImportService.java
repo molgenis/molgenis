@@ -3,7 +3,6 @@ package org.molgenis.data.importer.emx;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -11,6 +10,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
@@ -26,10 +26,8 @@ import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@Component
 public class EmxImportService implements ImportService {
   private static final Logger LOG = LoggerFactory.getLogger(EmxImportService.class);
 
@@ -48,13 +46,7 @@ public class EmxImportService implements ImportService {
     String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
     if (getSupportedFileExtensions().contains(fileNameExtension.toLowerCase())) {
       for (String entityTypeId : source.getEntityTypeIds()) {
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)) {
-          return true;
-        }
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)) {
-          return true;
-        }
-        if (entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS)) {
+        if (isMetadataSheet(entityTypeId) || isI18nSheet(entityTypeId)) {
           return true;
         }
         if (dataService.getMeta().hasEntityType(entityTypeId)) return true;
@@ -64,12 +56,22 @@ public class EmxImportService implements ImportService {
     return false;
   }
 
+  private boolean isMetadataSheet(String entityTypeId) {
+    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_ATTRIBUTES)
+        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_PACKAGES);
+  }
+
+  private boolean isI18nSheet(String entityTypeId) {
+    return entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_LANGUAGES)
+        || entityTypeId.equalsIgnoreCase(EmxMetadataParser.EMX_I18NSTRINGS);
+  }
+
   @Override
   public EntityImportReport doImport(
       final RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @Nullable String packageId) {
+      @Nullable @CheckForNull String packageId) {
     ParsedMetaData parsedMetaData = parser.parse(source, packageId);
 
     // TODO altered entities (merge, see getEntityType)
@@ -137,7 +139,8 @@ public class EmxImportService implements ImportService {
         parser.parse(repositoryCollection, selectedPackage).getEntityMap();
 
     LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-    stream(entityTypeMap.keySet().spliterator(), false)
+    entityTypeMap
+        .keySet()
         .forEach(
             entityTypeId -> {
               boolean importable =

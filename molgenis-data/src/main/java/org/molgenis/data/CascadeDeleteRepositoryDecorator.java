@@ -1,8 +1,8 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.util.EntityTypeUtils.isSingleReferenceType;
-import static org.molgenis.data.util.EntityUtils.asStream;
 
 import com.google.common.collect.Iterators;
 import java.util.stream.Stream;
@@ -106,7 +106,7 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
       refEntityStream = refEntity != null ? Stream.of(refEntity) : Stream.empty();
     } else {
       Iterable<Entity> entities = entity.getEntities(attribute.getName());
-      refEntityStream = asStream(entities);
+      refEntityStream = stream(entities);
     }
 
     // delete one-by-one and first check if exists because entities might not exist due to earlier
@@ -121,12 +121,12 @@ public class CascadeDeleteRepositoryDecorator extends AbstractRepositoryDecorato
   }
 
   private Stream<Attribute> getCascadeDeleteAttributes() {
-    return asStream(getEntityType().getAtomicAttributes())
+    return stream(getEntityType().getAtomicAttributes())
         .filter(attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
   }
 
   private boolean hasCascadeDeleteAttributes() {
-    return asStream(getEntityType().getAtomicAttributes())
+    return stream(getEntityType().getAtomicAttributes())
         .anyMatch(
             attribute -> attribute.getCascadeDelete() != null && attribute.getCascadeDelete());
   }

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -108,25 +109,31 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>> {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((attributes == null) ? 0 : attributes.hashCode());
-    result = prime * result + (includeAllAttrs ? 1231 : 1237);
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AttributeFilter)) {
+      return false;
+    }
+    AttributeFilter entries = (AttributeFilter) o;
+    return isIncludeAllAttrs() == entries.isIncludeAllAttrs()
+        && isIncludeIdAttr() == entries.isIncludeIdAttr()
+        && isIncludeLabelAttr() == entries.isIncludeLabelAttr()
+        && Objects.equals(attributes, entries.attributes)
+        && Objects.equals(idAttrFilter, entries.idAttrFilter)
+        && Objects.equals(labelAttrFilter, entries.labelAttrFilter);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    AttributeFilter other = (AttributeFilter) obj;
-    if (attributes == null) {
-      if (other.attributes != null) return false;
-    } else if (!attributes.equals(other.attributes)) return false;
-    if (includeAllAttrs != other.includeAllAttrs) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(
+        attributes,
+        isIncludeAllAttrs(),
+        isIncludeIdAttr(),
+        isIncludeLabelAttr(),
+        idAttrFilter,
+        labelAttrFilter);
   }
 
   @Override

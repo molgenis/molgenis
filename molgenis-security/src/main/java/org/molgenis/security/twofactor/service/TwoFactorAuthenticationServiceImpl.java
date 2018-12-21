@@ -79,18 +79,17 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
   @Override
   public boolean userIsBlocked() {
     UserSecret userSecret = getSecret();
-    if (userSecret.getFailedLoginAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS) {
-      if (userSecret.getLastFailedAuthentication() != null
-          && (Instant.now().toEpochMilli()
-              < userSecret
-                  .getLastFailedAuthentication()
-                  .plus(Duration.ofSeconds(BLOCKED_USER_INTERVAL))
-                  .toEpochMilli())) {
-        throw new TooManyLoginAttemptsException(
-            format(
-                "You entered the wrong verification code {0} times, please wait for {1} seconds before you try again",
-                MAX_FAILED_LOGIN_ATTEMPTS, BLOCKED_USER_INTERVAL));
-      }
+    if (userSecret.getFailedLoginAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS
+        && userSecret.getLastFailedAuthentication() != null
+        && (Instant.now().toEpochMilli()
+            < userSecret
+                .getLastFailedAuthentication()
+                .plus(Duration.ofSeconds(BLOCKED_USER_INTERVAL))
+                .toEpochMilli())) {
+      throw new TooManyLoginAttemptsException(
+          format(
+              "You entered the wrong verification code {0} times, please wait for {1} seconds before you try again",
+              MAX_FAILED_LOGIN_ATTEMPTS, BLOCKED_USER_INTERVAL));
     }
     return false;
   }

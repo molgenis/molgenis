@@ -1,11 +1,11 @@
 package org.molgenis.data.postgresql;
 
+import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.util.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -21,7 +21,7 @@ class PostgreSqlQueryUtils {
    * @return stream of persisted attributes
    */
   static Stream<Attribute> getPersistedAttributes(EntityType entityType) {
-    return StreamSupport.stream(entityType.getAtomicAttributes().spliterator(), false)
+    return stream(entityType.getAtomicAttributes())
         .filter(atomicAttr -> atomicAttr.getExpression() == null);
   }
 

@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
@@ -76,8 +76,7 @@ public class AttributeMapper {
   }
 
   ImmutableList<EditorAttribute> toEditorAttributes(Iterable<Attribute> attributes) {
-    return ImmutableList.copyOf(
-        stream(attributes.spliterator(), false).map(this::toEditorAttribute).iterator());
+    return ImmutableList.copyOf(stream(attributes).map(this::toEditorAttribute).iterator());
   }
 
   private EditorAttribute toEditorAttribute(Attribute attribute) {

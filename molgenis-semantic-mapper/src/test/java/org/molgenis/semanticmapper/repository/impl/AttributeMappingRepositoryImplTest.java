@@ -1,13 +1,13 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
@@ -167,53 +167,6 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
     }
   }
 
-  @Test
-  public void testRetrieveAttributesFromAlgorithm() {
-    String algorithm = "$('attribute_1').value()$('attribute_2').value()";
-
-    Attribute attr1 = attrMetaFactory.create().setName("attribute_1");
-    Attribute attr2 = attrMetaFactory.create().setName("attribute_2");
-
-    EntityType sourceEntityType = entityTypeFactory.create("source");
-    sourceEntityType.addAttribute(attr1);
-    sourceEntityType.addAttribute(attr2);
-
-    List<Attribute> sourceAttributes = newArrayList();
-    sourceAttributes.add(attr1);
-    sourceAttributes.add(attr2);
-
-    assertEquals(
-        attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
-        sourceAttributes);
-  }
-
-  @Test
-  public void testRetrieveAttributesFromAlgorithmWithDotNotation() {
-    String algorithm = "$('person.name').value()";
-
-    Attribute id = attrMetaFactory.create().setName("id");
-    Attribute name = attrMetaFactory.create().setName("name");
-    EntityType referenceEntityType = entityTypeFactory.create("reference");
-    referenceEntityType.addAttribute(id);
-    referenceEntityType.addAttribute(name);
-
-    Attribute person =
-        attrMetaFactory
-            .create()
-            .setName("person")
-            .setDataType(XREF)
-            .setRefEntity(referenceEntityType);
-    EntityType sourceEntityType = entityTypeFactory.create("source");
-    sourceEntityType.addAttribute(person);
-
-    List<Attribute> expectedSourceAttributes = newArrayList();
-    expectedSourceAttributes.add(person);
-
-    assertEquals(
-        attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityType),
-        expectedSourceAttributes);
-  }
-
   // regression test for https://github.com/molgenis/molgenis/issues/7831
   @Test
   public void testGetAttributeMappingsUnknownSourceAndTargetEntityType() {
@@ -235,6 +188,47 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
         attributeMappingRepository.getAttributeMappings(
             singletonList(attributeMappingEntity), null, null),
         singletonList(attributeMapping));
+  }
+
+  @Test
+  public void testGetAlgorithmSourceAttributes() {
+    Entity attributeMappingEntity = mock(Entity.class);
+    String sourceAttributes = "attr0,attr1";
+    when(attributeMappingEntity.getString("sourceAttributes")).thenReturn(sourceAttributes);
+    EntityType sourceEntityType = mock(EntityType.class);
+    Attribute attribute0 = mock(Attribute.class);
+    Attribute attribute1 = mock(Attribute.class);
+    doReturn(attribute0).when(sourceEntityType).getAttribute("attr0");
+    doReturn(attribute1).when(sourceEntityType).getAttribute("attr1");
+    assertEquals(
+        attributeMappingRepository.getAlgorithmSourceAttributes(
+            attributeMappingEntity, sourceEntityType),
+        asList(attribute0, attribute1));
+  }
+
+  @Test
+  public void testGetAlgorithmSourceAttributesNone() {
+    Entity attributeMappingEntity = mock(Entity.class);
+    EntityType sourceEntityType = mock(EntityType.class);
+    assertEquals(
+        attributeMappingRepository.getAlgorithmSourceAttributes(
+            attributeMappingEntity, sourceEntityType),
+        emptyList());
+  }
+
+  @Test
+  public void testGetAlgorithmSourceAttributesUnknownAttribute() {
+    Entity attributeMappingEntity = mock(Entity.class);
+    String sourceAttributes = "unknownAttr,attr0";
+    when(attributeMappingEntity.getString("sourceAttributes")).thenReturn(sourceAttributes);
+    EntityType sourceEntityType = mock(EntityType.class);
+    Attribute attribute0 = mock(Attribute.class);
+    doReturn(null).when(sourceEntityType).getAttribute("unknownAttr");
+    doReturn(attribute0).when(sourceEntityType).getAttribute("attr0");
+    assertEquals(
+        attributeMappingRepository.getAlgorithmSourceAttributes(
+            attributeMappingEntity, sourceEntityType),
+        singletonList(attribute0));
   }
 
   @Configuration

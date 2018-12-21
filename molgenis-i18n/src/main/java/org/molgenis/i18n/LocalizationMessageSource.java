@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.i18n.format.MessageFormatFactory;
 import org.springframework.context.MessageSource;
@@ -82,7 +83,7 @@ public class LocalizationMessageSource extends AbstractMessageSource {
    * @return The message, or null if none found.
    */
   @Override
-  protected String resolveCodeWithoutArguments(String code, @Nullable Locale locale) {
+  protected String resolveCodeWithoutArguments(String code, @Nullable @CheckForNull Locale locale) {
     Stream<Locale> candidates = Stream.of(locale, tryGetFallbackLocale(), DEFAULT_LOCALE);
     return candidates
         .filter(Objects::nonNull)

@@ -2,8 +2,8 @@ package org.molgenis.core.util;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.molgenis.util.ResourceUtils;
@@ -34,6 +34,6 @@ public class ResourceFingerprintRegistry {
             ? ResourceUtils.getBytes(contextClass, resourceName)
             : ResourceUtils.getBytes(resourceName);
     HashCode crc32 = Hashing.crc32().hashBytes(bytes);
-    return BaseEncoding.base64Url().omitPadding().encode(crc32.asBytes());
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(crc32.asBytes());
   }
 }

@@ -1,6 +1,7 @@
 package org.molgenis.integrationtest.utils;
 
 import java.util.Objects;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.jobs.Progress;
 import org.molgenis.jobs.model.JobExecution;
@@ -56,7 +57,7 @@ public class TestProgress implements Progress {
   }
 
   @Override
-  public void failed(String message, @Nullable Throwable throwable) {
+  public void failed(String message, @Nullable @CheckForNull Throwable throwable) {
     updateMessage(FAILED + ": " + throwable.getMessage());
   }
 

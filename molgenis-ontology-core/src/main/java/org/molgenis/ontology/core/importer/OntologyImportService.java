@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.importer;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 
 import com.google.common.collect.ImmutableList;
@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
@@ -48,7 +49,7 @@ public class OntologyImportService implements ImportService {
       RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @Nullable String packageId) {
+      @Nullable @CheckForNull String packageId) {
     if (dataAction != DataAction.ADD) {
       throw new IllegalArgumentException("Only ADD is supported");
     }
@@ -58,7 +59,7 @@ public class OntologyImportService implements ImportService {
     for (String entityTypeId : source.getEntityTypeIds()) {
       try (Repository<Entity> sourceRepository = source.getRepository(entityTypeId)) {
         Repository<Entity> targetRepository = dataService.getRepository(entityTypeId);
-        Integer count = targetRepository.add(asStream(sourceRepository));
+        Integer count = targetRepository.add(stream(sourceRepository));
         report.addEntityCount(entityTypeId, count);
       } catch (IOException e) {
         LOG.error("", e);

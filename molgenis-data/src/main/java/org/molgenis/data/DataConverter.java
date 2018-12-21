@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.singletonList;
-import static java.util.stream.StreamSupport.stream;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -153,7 +153,7 @@ public class DataConverter {
   public static List<String> toList(Object source) {
     if (source == null) return null;
     else if (source instanceof Iterable<?>) {
-      return stream(((Iterable<?>) source).spliterator(), false)
+      return stream((Iterable<?>) source)
           .map(
               obj -> {
                 Object objValue;

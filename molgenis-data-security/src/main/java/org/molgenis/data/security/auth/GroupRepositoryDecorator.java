@@ -1,9 +1,9 @@
 package org.molgenis.data.security.auth;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -53,7 +53,7 @@ public class GroupRepositoryDecorator extends AbstractRepositoryDecorator<Group>
     Group group = dataService.findOneById(GroupMetadata.GROUP, id, Group.class);
     Iterable<Role> roles = group.getRoles();
     roles.forEach(this::removeMembers);
-    dataService.delete(RoleMetadata.ROLE, StreamSupport.stream(roles.spliterator(), false));
+    dataService.delete(RoleMetadata.ROLE, stream(roles));
     delegate().deleteById(id);
     mutableAclService.deleteAcl(new GroupIdentity(group.getName()), true);
   }

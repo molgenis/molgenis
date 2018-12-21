@@ -146,10 +146,7 @@ public class ExcelUtils {
 
   public static boolean isExcelFile(String filename) {
     String extension = FilenameUtils.getExtension(filename);
-    if (ExcelFileExtensions.getExcel().contains(extension)) {
-      return true;
-    }
-    return false;
+    return ExcelFileExtensions.getExcel().contains(extension);
   }
 
   /**

@@ -49,13 +49,13 @@ public class FrequencyCategoryMapper extends CategoryMapper {
       Amount<?> targetAmount = targetAmountWrapper.getAmount().to(STANDARD_UNIT);
 
       if (unitsCompatible(sourceAmount, targetAmount)) {
-        if (!sourceAmountWrapper.isDetermined() && !targetAmountWrapper.isDetermined()) {
-          if (sourceAmountWrapper
-              .getAmount()
-              .getUnit()
-              .equals(targetAmountWrapper.getAmount().getUnit())) {
-            return (double) 0;
-          }
+        if (!sourceAmountWrapper.isDetermined()
+            && !targetAmountWrapper.isDetermined()
+            && sourceAmountWrapper
+                .getAmount()
+                .getUnit()
+                .equals(targetAmountWrapper.getAmount().getUnit())) {
+          return (double) 0;
         }
 
         if (!sourceAmountWrapper.isDetermined()) {

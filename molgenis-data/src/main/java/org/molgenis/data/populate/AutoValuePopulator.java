@@ -1,9 +1,9 @@
 package org.molgenis.data.populate;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.STRING;
@@ -49,7 +49,7 @@ public class AutoValuePopulator {
       Iterable<? extends Entity> entities, Iterable<Attribute> attrs) {
     // get auto date and datetime attributes
     Iterable<Attribute> autoAttrs =
-        stream(attrs.spliterator(), false)
+        stream(attrs)
             .filter(
                 attr -> {
                   if (attr.isAuto()) {

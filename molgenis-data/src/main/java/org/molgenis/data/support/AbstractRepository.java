@@ -5,6 +5,7 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.partition;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.collect.Streams.stream;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -98,8 +98,7 @@ public abstract class AbstractRepository implements Repository<Entity> {
   public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch) {
     Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
     Iterable<List<Object>> iterable = () -> batches;
-    return StreamSupport.stream(iterable.spliterator(), false)
-        .flatMap(batch -> StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false));
+    return stream(iterable).flatMap(batch -> stream(findAllBatched(batch, fetch)));
   }
 
   private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch) {

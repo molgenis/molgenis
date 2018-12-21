@@ -3,6 +3,7 @@ package org.molgenis.data;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 @SuppressWarnings({"squid:MaximumInheritanceDepth"})
@@ -16,7 +17,7 @@ public class EntityAlreadyExistsException extends DataAlreadyExistsException {
     this.entity = requireNonNull(entity);
   }
 
-  public EntityAlreadyExistsException(Entity entity, @Nullable Throwable cause) {
+  public EntityAlreadyExistsException(Entity entity, @Nullable @CheckForNull Throwable cause) {
     super(ERROR_CODE, cause);
     this.entity = requireNonNull(entity);
   }

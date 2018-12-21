@@ -5,6 +5,7 @@ import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetada
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ONE_CLICK_IMPORT_JOB_TYPE;
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.PACKAGE;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -27,6 +28,7 @@ public class OneClickImportJobExecution extends JobExecution {
   }
 
   @Nullable
+  @CheckForNull
   public String getFile() {
     return getString(FILE);
   }
@@ -44,6 +46,7 @@ public class OneClickImportJobExecution extends JobExecution {
   }
 
   @Nullable
+  @CheckForNull
   public String getPackage() {
     return getString(PACKAGE);
   }

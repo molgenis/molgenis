@@ -1,9 +1,9 @@
 package org.molgenis.data.postgresql;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -44,7 +44,7 @@ class PostgreSqlUtils {
       case MREF:
       case ONE_TO_MANY:
         Iterable<Entity> entities = entity.getEntities(attrName);
-        return stream(entities.spliterator(), false)
+        return stream(entities)
             .map(
                 mrefEntity ->
                     getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()))

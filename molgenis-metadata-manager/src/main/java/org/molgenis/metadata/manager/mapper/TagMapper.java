@@ -1,8 +1,8 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -33,8 +33,7 @@ class TagMapper {
   }
 
   ImmutableList<EditorTagIdentifier> toEditorTags(Iterable<Tag> tags) {
-    return ImmutableList.copyOf(
-        stream(tags.spliterator(), false).map(this::toEditorTag).iterator());
+    return ImmutableList.copyOf(stream(tags).map(this::toEditorTag).iterator());
   }
 
   private EditorTagIdentifier toEditorTag(Tag tag) {

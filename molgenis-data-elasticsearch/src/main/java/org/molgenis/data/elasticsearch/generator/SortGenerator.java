@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.generator;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.elasticsearch.FieldConstants.FIELD_NOT_ANALYZED;
 
 import java.util.List;
@@ -27,7 +27,7 @@ class SortGenerator {
   }
 
   Sort generateSort(org.molgenis.data.Sort sort, EntityType entityType) {
-    Stream<org.molgenis.data.Sort.Order> orderStream = stream(sort.spliterator(), false);
+    Stream<org.molgenis.data.Sort.Order> orderStream = stream(sort);
     List<SortOrder> sortOrders =
         orderStream.map(order -> this.toSortOrder(order, entityType)).collect(toList());
     return Sort.create(sortOrders);

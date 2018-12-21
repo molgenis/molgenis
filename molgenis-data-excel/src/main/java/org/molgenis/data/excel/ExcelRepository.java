@@ -146,7 +146,7 @@ public class ExcelRepository extends AbstractRepository {
   public EntityType getEntityType() {
     if (entityType == null) {
       String sheetName = sheet.getSheetName();
-      EntityType entityType = entityTypeFactory.create(sheetName).setLabel(sheetName);
+      EntityType newEntityType = entityTypeFactory.create(sheetName).setLabel(sheetName);
 
       if (colNamesMap == null) {
         Iterator<Row> it = sheet.iterator();
@@ -158,10 +158,10 @@ public class ExcelRepository extends AbstractRepository {
 
       if (colNamesMap != null) {
         for (String colName : colNamesMap.keySet()) {
-          entityType.addAttribute(attrMetaFactory.create().setName(colName).setDataType(STRING));
+          newEntityType.addAttribute(attrMetaFactory.create().setName(colName).setDataType(STRING));
         }
       }
-      this.entityType = entityType;
+      this.entityType = newEntityType;
     }
 
     return entityType;

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 @AutoValue
@@ -22,11 +23,13 @@ public abstract class CategoryMapping<S, T> {
   public abstract Map<S, T> getMap();
 
   @Nullable
+  @CheckForNull
   public abstract T getDefaultValue();
 
   public abstract boolean isDefaultValueUndefined();
 
   @Nullable
+  @CheckForNull
   public abstract T getNullValue();
 
   public abstract boolean isNullValueUndefined();

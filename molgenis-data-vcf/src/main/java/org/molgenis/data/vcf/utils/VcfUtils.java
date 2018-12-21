@@ -10,10 +10,10 @@ import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
 import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 
-import com.google.common.io.BaseEncoding;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,8 +72,7 @@ public class VcfUtils {
     byte[] md5Hash = messageDigest.digest(idStr.getBytes(UTF_8));
 
     // convert MD5 hash to string ids that can be safely used in URLs
-
-    return BaseEncoding.base64Url().omitPadding().encode(md5Hash);
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(md5Hash);
   }
 
   public static String getIdFromInfoField(String line) {

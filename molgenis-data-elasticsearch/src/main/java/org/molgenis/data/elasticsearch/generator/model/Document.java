@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.generator.model;
 
 import com.google.auto.value.AutoValue;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
@@ -11,6 +12,7 @@ public abstract class Document {
   public abstract String getId();
 
   @Nullable
+  @CheckForNull
   public abstract XContentBuilder getContent();
 
   public static Document create(String newId, XContentBuilder newContent) {

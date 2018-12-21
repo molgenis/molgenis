@@ -139,10 +139,9 @@ public class OptionsWizardPage extends AbstractWizardPage {
 
     List<String> entitiesInDefaultPackage = new ArrayList<>();
     for (String entityTypeId : validationReport.getSheetsImportable().keySet()) {
-      if (validationReport.getSheetsImportable().get(entityTypeId)) {
-        if (isInDefaultPackage(entityTypeId, allPackages))
-          entitiesInDefaultPackage.add(entityTypeId);
-      }
+      if (validationReport.getSheetsImportable().get(entityTypeId)
+          && isInDefaultPackage(entityTypeId, allPackages))
+        entitiesInDefaultPackage.add(entityTypeId);
     }
     wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
 

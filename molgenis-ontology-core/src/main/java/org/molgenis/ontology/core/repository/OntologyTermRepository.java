@@ -80,10 +80,7 @@ public class OntologyTermRepository {
         return true;
       }
     }
-    if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel().toLowerCase())) {
-      return true;
-    }
-    return false;
+    return (lowerCaseSearchTerms.contains(ontologyTerm.getLabel().toLowerCase()));
   }
 
   /**

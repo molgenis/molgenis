@@ -18,8 +18,9 @@ package org.molgenis.web.converter;
 import com.google.gson.Gson;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
-import org.springframework.lang.Nullable;
 
 /**
  * Subclassed customization of {@link GsonHttpMessageConverter} that works around
@@ -32,7 +33,8 @@ public class MolgenisGsonHttpMessageConverter extends GsonHttpMessageConverter {
   }
 
   @Override
-  protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
+  protected void writeInternal(Object o, @Nullable @CheckForNull Type type, Writer writer)
+      throws Exception {
     super.writeInternal(o, null, writer);
   }
 }

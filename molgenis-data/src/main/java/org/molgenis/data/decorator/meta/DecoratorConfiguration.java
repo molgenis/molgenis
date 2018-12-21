@@ -1,7 +1,7 @@
 package org.molgenis.data.decorator.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.PARAMETERS;
 
@@ -28,7 +28,7 @@ public class DecoratorConfiguration extends StaticEntity {
   }
 
   public Stream<DecoratorParameters> getDecoratorParameters() {
-    return stream(getEntities(PARAMETERS, DecoratorParameters.class).spliterator(), false);
+    return stream(getEntities(PARAMETERS, DecoratorParameters.class));
   }
 
   public void setDecoratorParameters(Stream<DecoratorParameters> parameters) {
