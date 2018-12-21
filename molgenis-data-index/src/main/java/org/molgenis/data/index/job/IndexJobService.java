@@ -29,10 +29,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 /** Executes the {@link IndexAction}s stored in an {@link IndexActionGroup}. */
-@Service
 public class IndexJobService {
   private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);
 
