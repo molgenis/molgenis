@@ -1,11 +1,11 @@
 package org.molgenis.data.postgresql;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.QueryRule.Operator.GREATER;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.IN;
@@ -743,10 +743,8 @@ class PostgreSqlQueryGenerator {
   private static String getSqlColumnConstraints(
       EntityType entityType, Attribute attr, ColumnMode columnConstraintsMode) {
     StringBuilder sqlBuilder = new StringBuilder();
-    if (!attr.getName().equals(entityType.getIdAttribute().getName())) {
-      if (!attr.isNillable()) {
-        sqlBuilder.append("NOT NULL");
-      }
+    if (!attr.getName().equals(entityType.getIdAttribute().getName()) && !attr.isNillable()) {
+      sqlBuilder.append("NOT NULL");
     }
     if (columnConstraintsMode == INCLUDE_DEFAULT_CONSTRAINT
         && generateSqlColumnDefaultConstraint(attr)) {
@@ -920,7 +918,7 @@ class PostgreSqlQueryGenerator {
             StringBuilder in = new StringBuilder();
             Attribute inAttr = attr;
             Stream<Object> postgreSqlIds =
-                stream(((Iterable<?>) inValue).spliterator(), false)
+                stream((Iterable<?>) inValue)
                     .map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
             for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); ) {
               Object postgreSqlId = it.next();

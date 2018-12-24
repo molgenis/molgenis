@@ -7,7 +7,6 @@ import static org.molgenis.script.core.ScriptMetaData.TYPE;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.QueryImpl;
@@ -17,9 +16,7 @@ import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.semantic.Hits;
-import org.springframework.stereotype.Service;
 
-@Service
 public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService {
   private final DataService dataService;
 
@@ -69,7 +66,9 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService {
         .filter(entry -> !entry.getExplainedQueryStrings().isEmpty())
         .filter(
             entry ->
-                StreamSupport.stream(entry.getExplainedQueryStrings().spliterator(), false)
+                entry
+                    .getExplainedQueryStrings()
+                    .stream()
                     .allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
         .map(ExplainedAttribute::getAttribute)
         .findFirst()

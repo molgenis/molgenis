@@ -10,6 +10,7 @@ import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -91,7 +92,7 @@ public class MolgenisMenuController {
     return getForwardPluginUri(activeItem.getId(), null, getQueryString(activeItem));
   }
 
-  private @Nullable String getQueryString(MenuItem menuItem) {
+  private @Nullable @CheckForNull String getQueryString(MenuItem menuItem) {
     String pathRemainder;
 
     String url = Optional.ofNullable(menuItem.getParams()).orElse("");
@@ -147,13 +148,16 @@ public class MolgenisMenuController {
     return getForwardPluginUri(pluginId, null);
   }
 
-  private String getForwardPluginUri(String pluginId, @Nullable String pathRemainder) {
+  private String getForwardPluginUri(
+      String pluginId, @Nullable @CheckForNull String pathRemainder) {
     return getForwardPluginUri(pluginId, pathRemainder, null);
   }
 
   /** package-private for testability */
   String getForwardPluginUri(
-      String pluginId, @Nullable String pathRemainder, @Nullable String queryString) {
+      String pluginId,
+      @Nullable @CheckForNull String pathRemainder,
+      @Nullable @CheckForNull String queryString) {
     // get plugin path with elevated permissions because the anonymous user can also request plugins
     Plugin plugin = runAsSystem(() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class));
     if (plugin == null) {

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +63,7 @@ public class AppController extends PluginController {
 
   @GetMapping("/{appName}/**")
   @Nullable
+  @CheckForNull
   public ModelAndView serveApp(
       @PathVariable String appName,
       Model model,
@@ -112,7 +114,8 @@ public class AppController extends PluginController {
   private void serveAppResource(
       HttpServletResponse response, String wildCardPath, AppResponse appResponse)
       throws IOException {
-    File requestedResource = fileStore.getFile(appResponse.getResourceFolder() + wildCardPath);
+    File requestedResource =
+        fileStore.getFileUnchecked(appResponse.getResourceFolder() + wildCardPath);
     response.setContentType(guessMimeType(requestedResource.getName()));
     response.setContentLength((int) requestedResource.length());
     response.setHeader(

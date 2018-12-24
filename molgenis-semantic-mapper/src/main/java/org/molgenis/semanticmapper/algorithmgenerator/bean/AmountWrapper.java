@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.algorithmgenerator.bean;
 
 import com.google.auto.value.AutoValue;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.util.AutoGson;
@@ -11,6 +12,7 @@ import org.molgenis.util.AutoGson;
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class AmountWrapper {
   @Nullable
+  @CheckForNull
   public abstract Amount<?> getAmount();
 
   public abstract boolean isDetermined();

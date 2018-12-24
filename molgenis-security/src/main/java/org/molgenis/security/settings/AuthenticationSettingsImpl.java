@@ -1,5 +1,6 @@
 package org.molgenis.security.settings;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -104,7 +105,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
   @Override
   public boolean getSignUp() {
     Boolean value = getBoolean(Meta.SIGNUP);
-    return value != null ? value : false;
+    return TRUE.equals(value);
   }
 
   @Override
@@ -115,7 +116,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
   @Override
   public boolean getSignUpModeration() {
     Boolean value = getBoolean(Meta.SIGNUP_MODERATION);
-    return value != null ? value : false;
+    return TRUE.equals(value);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -46,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
@@ -202,9 +202,7 @@ public class DataServiceIT extends AbstractTestNGSpringContextTests {
 
     // Repository equals not implemented: repository from dataService and dataService.getRepository
     // are not the same
-    assertTrue(
-        StreamSupport.stream(dataService.spliterator(), false)
-            .anyMatch(e -> repo.getName().equals(e.getName())));
+    assertTrue(stream(dataService).anyMatch(e -> repo.getName().equals(e.getName())));
   }
 
   @WithMockUser(username = USERNAME_READ)

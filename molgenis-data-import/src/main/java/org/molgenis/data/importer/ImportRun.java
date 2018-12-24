@@ -13,6 +13,7 @@ import static org.molgenis.data.importer.ImportRunMetaData.USERNAME;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -64,6 +65,7 @@ public class ImportRun extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public Instant getEndDate() {
     return getInstant(ENDDATE);
   }
@@ -89,6 +91,7 @@ public class ImportRun extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getMessage() {
     return getString(MESSAGE);
   }
@@ -107,6 +110,7 @@ public class ImportRun extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getImportedEntities() {
     return getString(IMPORTEDENTITIES);
   }

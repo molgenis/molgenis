@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
@@ -407,11 +408,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getEntityReports() {
     return getString(Meta.REPORTS_ENTITIES);
   }
 
   @Nullable
+  @CheckForNull
   public String getEntityReport(String entityTypeId) {
     Map<String, String> entityReports = getEntityReportsAsMap();
     return entityReports != null ? entityReports.get(entityTypeId) : null;
@@ -454,7 +457,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity {
    * @return boolean Indicates if input is truthy; Returns false when input is null, else it returns
    *     the input value
    */
-  private boolean isTruthy(@Nullable Boolean input) {
+  private boolean isTruthy(@Nullable @CheckForNull Boolean input) {
     return input != null && input;
   }
 }

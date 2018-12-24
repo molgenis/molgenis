@@ -1,6 +1,7 @@
 package org.molgenis.semanticmapper.mapping.model;
 
 import com.google.auto.value.AutoValue;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 
@@ -10,9 +11,11 @@ import org.molgenis.data.Entity;
     "squid:S1610") // Abstract classes without fields should be converted to interfaces
 public abstract class AlgorithmResult {
   @Nullable
+  @CheckForNull
   public abstract Object getValue();
 
   @Nullable
+  @CheckForNull
   public abstract Exception getException();
 
   public abstract Entity getSourceEntity();

@@ -1,12 +1,13 @@
 package org.molgenis.data.rest.service;
 
+import static com.google.common.collect.Streams.stream;
+import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILENAME;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -433,7 +435,7 @@ public class RestService {
       }
     } else {
       // boolean false is not posted (http feature), so if null and required, should be false
-      value = !attr.isNillable() ? false : null;
+      value = !attr.isNillable() ? FALSE : null;
     }
     return value;
   }
@@ -455,7 +457,8 @@ public class RestService {
    * @param entity created or updated entity
    * @param existingEntity existing entity
    */
-  public void updateMappedByEntities(@Nonnull Entity entity, @Nullable Entity existingEntity) {
+  public void updateMappedByEntities(
+      @Nonnull Entity entity, @Nullable @CheckForNull Entity existingEntity) {
     entity
         .getEntityType()
         .getMappedByAttributes()
@@ -484,7 +487,9 @@ public class RestService {
    * @param attr bidirectional one-to-many attribute
    */
   private void updateMappedByEntitiesOneToMany(
-      @Nonnull Entity entity, @Nullable Entity existingEntity, @Nonnull Attribute attr) {
+      @Nonnull Entity entity,
+      @Nullable @CheckForNull Entity existingEntity,
+      @Nonnull Attribute attr) {
     if (attr.getDataType() != ONE_TO_MANY || !attr.isMappedBy()) {
       throw new IllegalArgumentException(
           format(
@@ -494,11 +499,11 @@ public class RestService {
 
     // update ref entities of created/updated entity
     Attribute refAttr = attr.getMappedBy();
-    Stream<Entity> stream = stream(entity.getEntities(attr.getName()).spliterator(), false);
+    Stream<Entity> stream = stream(entity.getEntities(attr.getName()));
     if (existingEntity != null) {
       // filter out unchanged ref entities
       Set<Object> refEntityIds =
-          stream(existingEntity.getEntities(attr.getName()).spliterator(), false)
+          stream(existingEntity.getEntities(attr.getName()))
               .map(Entity::getIdValue)
               .collect(toSet());
       stream = stream.filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue()));
@@ -525,11 +530,9 @@ public class RestService {
     // update ref entities of existing entity
     if (existingEntity != null) {
       Set<Object> refEntityIds =
-          stream(entity.getEntities(attr.getName()).spliterator(), false)
-              .map(Entity::getIdValue)
-              .collect(toSet());
+          stream(entity.getEntities(attr.getName())).map(Entity::getIdValue).collect(toSet());
       List<Entity> updatedRefEntitiesExistingEntity =
-          stream(existingEntity.getEntities(attr.getName()).spliterator(), false)
+          stream(existingEntity.getEntities(attr.getName()))
               .filter(refEntity -> !refEntityIds.contains(refEntity.getIdValue()))
               .map(
                   refEntity -> {

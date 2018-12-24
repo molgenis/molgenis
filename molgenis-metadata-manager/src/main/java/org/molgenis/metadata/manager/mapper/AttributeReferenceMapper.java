@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.DataService;
@@ -25,7 +25,7 @@ class AttributeReferenceMapper {
   ImmutableList<EditorAttributeIdentifier> toEditorAttributeIdentifiers(
       Iterable<Attribute> attributes) {
     return ImmutableList.copyOf(
-        stream(attributes.spliterator(), false).map(this::toEditorAttributeIdentifier).iterator());
+        stream(attributes).map(this::toEditorAttributeIdentifier).iterator());
   }
 
   EditorAttributeIdentifier toEditorAttributeIdentifier(Attribute attribute) {

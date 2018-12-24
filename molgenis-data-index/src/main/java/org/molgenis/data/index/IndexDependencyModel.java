@@ -1,8 +1,8 @@
 package org.molgenis.data.index;
 
 import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptySet;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.EXTENDS;
@@ -96,7 +96,7 @@ class IndexDependencyModel {
    */
   private boolean hasAttributeThatReferences(EntityType candidate, String entityTypeId) {
     Iterable<Attribute> attributes = candidate.getOwnAtomicAttributes();
-    return stream(attributes.spliterator(), false)
+    return stream(attributes)
         .map(Attribute::getRefEntity)
         .filter(Objects::nonNull)
         .map(EntityType::getId)

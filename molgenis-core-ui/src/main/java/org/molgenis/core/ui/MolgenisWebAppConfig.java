@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import org.molgenis.core.ui.converter.RdfConverter;
 import org.molgenis.core.ui.freemarker.MolgenisFreemarkerObjectWrapper;
-import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.convert.StringToDateConverter;
@@ -87,7 +86,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Autowired private RdfConverter rdfConverter;
 
-  @Autowired private StyleService styleService;
+  @Autowired ThemeFingerprintRegistry themeFingerprintRegistry;
 
   @Autowired private MessageSource messageSource;
 
@@ -198,15 +197,10 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public ThemeFingerprintRegistry themeFingerprintRegistry() {
-    return new ThemeFingerprintRegistry(styleService);
-  }
-
-  @Bean
   public MolgenisInterceptor molgenisInterceptor() {
     return new MolgenisInterceptor(
         resourceFingerprintRegistry(),
-        themeFingerprintRegistry(),
+        themeFingerprintRegistry,
         appSettings,
         authenticationSettings,
         environment,

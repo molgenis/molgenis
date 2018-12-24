@@ -1,6 +1,7 @@
 package org.molgenis.data.file.processor;
 
 import java.util.List;
+import java.util.Objects;
 
 public abstract class AbstractCellProcessor implements CellProcessor {
   private static final long serialVersionUID = 1L;
@@ -41,22 +42,19 @@ public abstract class AbstractCellProcessor implements CellProcessor {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (processData ? 1231 : 1237);
-    result = prime * result + (processHeader ? 1231 : 1237);
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof AbstractCellProcessor)) {
+      return false;
+    }
+    AbstractCellProcessor that = (AbstractCellProcessor) o;
+    return processHeader == that.processHeader && processData == that.processData;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    AbstractCellProcessor other = (AbstractCellProcessor) obj;
-    if (processData != other.processData) return false;
-    if (processHeader != other.processHeader) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(processHeader, processData);
   }
 }

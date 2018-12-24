@@ -1,5 +1,6 @@
 package org.molgenis.data.security.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -9,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -50,7 +50,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
     if (currentUserIsSuOrSystem()) {
       return delegate().count();
     } else {
-      Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
+      Stream<Attribute> attrs = stream(delegate());
       return filterReadMetadataPermission(attrs).count();
     }
   }
@@ -92,7 +92,7 @@ public class AttributeRepositorySecurityDecorator extends AbstractRepositoryDeco
     if (currentUserIsSuOrSystem()) {
       return delegate().iterator();
     } else {
-      Stream<Attribute> attrs = StreamSupport.stream(delegate().spliterator(), false);
+      Stream<Attribute> attrs = stream(delegate());
       return filterReadMetadataPermission(attrs).iterator();
     }
   }

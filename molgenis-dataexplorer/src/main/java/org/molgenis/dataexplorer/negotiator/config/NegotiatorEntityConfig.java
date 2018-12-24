@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.negotiator.config;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
@@ -19,6 +20,7 @@ public class NegotiatorEntityConfig extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public NegotiatorConfig getNegotiatorConfig() {
     return getEntity(NegotiatorEntityConfigMeta.NEGOTIATOR_CONFIG, NegotiatorConfig.class);
   }

@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
@@ -167,19 +167,13 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
     assertEquals(person3.getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
 
     assertEquals(
-        StreamSupport.stream(person1.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(person1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_2));
     assertEquals(
-        StreamSupport.stream(person2.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(person2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_3));
     assertEquals(
-        StreamSupport.stream(person3.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(person3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_1));
   }
 
@@ -213,9 +207,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
       // expected behavior: book.author changed, new author.books order is undefined
       Set<Object> retrievedAuthor2BookIds =
-          StreamSupport.stream(author2Books.spliterator(), false)
-              .map(Entity::getIdValue)
-              .collect(toSet());
+          stream(author2Books).map(Entity::getIdValue).collect(toSet());
       assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
@@ -253,9 +245,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
       // expected behavior: book.author changed, new author.books order is undefined
       Set<Object> retrievedAuthor2BookIds =
-          StreamSupport.stream(author2Books.spliterator(), false)
-              .map(Entity::getIdValue)
-              .collect(toSet());
+          stream(author2Books).map(Entity::getIdValue).collect(toSet());
       assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
     } finally {
       dataService.deleteAll(authorsAndBooks.getBookMetaData().getId());
@@ -338,16 +328,12 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
     assertEquals(
-        StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(BOOK_2));
 
     Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
     assertEquals(
-        StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(updatedAuthor2.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(BOOK_1));
   }
 
@@ -379,23 +365,17 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
     assertEquals(
-        StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(updatedPerson1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_3));
 
     Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
     assertEquals(
-        StreamSupport.stream(updatedPerson2.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(updatedPerson2.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_1));
 
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
     assertEquals(
-        StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toSet()),
+        stream(updatedPerson3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toSet()),
         newHashSet(PERSON_2));
   }
 
@@ -417,9 +397,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
     assertEquals(
-        StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toList()),
+        stream(updatedAuthor3.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()),
         newArrayList(BOOK_1, BOOK_2, BOOK_3));
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
@@ -446,9 +424,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
     assertEquals(
-        StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toList()),
+        stream(updatedAuthor1.getEntities(ATTR_BOOKS)).map(Entity::getIdValue).collect(toList()),
         newArrayList(BOOK_3, BOOK_2, BOOK_1));
 
     Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
@@ -475,9 +451,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
     assertEquals(
-        StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toList()),
+        stream(updatedPerson3.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toList()),
         newArrayList(PERSON_1, PERSON_2, PERSON_3));
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
@@ -504,9 +478,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests {
 
     Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
     assertEquals(
-        StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false)
-            .map(Entity::getIdValue)
-            .collect(toList()),
+        stream(updatedPerson1.getEntities(ATTR_CHILDREN)).map(Entity::getIdValue).collect(toList()),
         newArrayList(PERSON_3, PERSON_2, PERSON_1));
 
     Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);

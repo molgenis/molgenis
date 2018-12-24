@@ -1,5 +1,6 @@
 package org.molgenis.ontology.sorta.controller;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -38,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -636,13 +636,13 @@ public class SortaController extends PluginController {
   }
 
   private boolean validateFileHeader(Repository<Entity> repository) {
-    return StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
+    return stream(repository.getEntityType().getAttributes())
         .map(Attribute::getName)
         .anyMatch(name -> name.equalsIgnoreCase(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
   }
 
   private boolean validateEmptyFileHeader(Repository<Entity> repository) {
-    return StreamSupport.stream(repository.getEntityType().getAttributes().spliterator(), false)
+    return stream(repository.getEntityType().getAttributes())
         .map(Attribute::getName)
         .anyMatch(StringUtils::isNotBlank);
   }

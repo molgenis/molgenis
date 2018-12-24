@@ -1,11 +1,11 @@
 package org.molgenis.data.populate;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.util.EntityUtils.asStream;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
@@ -41,7 +41,7 @@ public class DefaultValuePopulator {
    * @param entity populated entity
    */
   public void populate(Entity entity) {
-    asStream(entity.getEntityType().getAllAttributes())
+    stream(entity.getEntityType().getAllAttributes())
         .filter(Attribute::hasDefaultValue)
         .forEach(attr -> populateDefaultValues(entity, attr));
   }

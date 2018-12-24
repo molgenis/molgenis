@@ -1,12 +1,12 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -87,7 +87,7 @@ public class EntityTypeDependencyResolver {
       // get referenced entities excluding entities of mappedBy attributes
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
-          stream(entityType.getOwnAllAttributes().spliterator(), false)
+          stream(entityType.getOwnAllAttributes())
               .flatMap(
                   attr -> {
                     EntityType refEntity = attr.getRefEntity();
@@ -127,7 +127,7 @@ public class EntityTypeDependencyResolver {
       // get referenced entities excluding entities of mappedBy attributes
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
-          stream(entityType.getOwnAllAttributes().spliterator(), false)
+          stream(entityType.getOwnAllAttributes())
               .flatMap(
                   attr -> {
                     EntityType refEntity = attr.getRefEntity();

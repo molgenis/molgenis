@@ -3,15 +3,16 @@ package org.molgenis.data.cache.utils;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 public class CacheHit<T> {
 
   private static final CacheHit<?> EMPTY = new CacheHit<>(null);
 
-  @Nullable private T value;
+  @Nullable @CheckForNull private T value;
 
-  private CacheHit(@Nullable T value) {
+  private CacheHit(@Nullable @CheckForNull T value) {
     this.value = value;
   }
 
@@ -28,6 +29,7 @@ public class CacheHit<T> {
   }
 
   @Nullable
+  @CheckForNull
   public T getValue() {
     return value;
   }

@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataConverter;
@@ -247,7 +248,8 @@ public class EmxMetadataParser implements MetadataParser {
 
   @Override
   // FIXME The source is parsed twice!!! Once by determineImportableEntities and once by doImport
-  public ParsedMetaData parse(final RepositoryCollection source, @Nullable String packageId) {
+  public ParsedMetaData parse(
+      final RepositoryCollection source, @Nullable @CheckForNull String packageId) {
     if (source.getRepository(EMX_ATTRIBUTES) != null) {
       IntermediateParseResults intermediateResults = getEntityTypeFromSource(source);
       List<EntityType> entities;
@@ -436,10 +438,9 @@ public class EmxMetadataParser implements MetadataParser {
                 }
 
                 Attribute ownLabelAttr = entityType.getOwnLabelAttribute();
-                if (ownLabelAttr != null) {
-                  if (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName())) {
-                    ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
-                  }
+                if (ownLabelAttr != null
+                    && (ownIdAttr == null || !ownIdAttr.getName().equals(ownLabelAttr.getName()))) {
+                  ownLabelAttr.setLookupAttributeIndex(lookupAttrIdx);
                 }
               }
             });
@@ -863,13 +864,11 @@ public class EmxMetadataParser implements MetadataParser {
                   "Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
                   rowIndex));
         }
-        if (emxIdAttrValue.equalsIgnoreCase("true")) {
-          if (!isIdAttributeTypeAllowed(attr)) {
-            throw new MolgenisDataException(
-                "Identifier is of type ["
-                    + attr.getDataType()
-                    + "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
-          }
+        if (emxIdAttrValue.equalsIgnoreCase("true") && !isIdAttributeTypeAllowed(attr)) {
+          throw new MolgenisDataException(
+              "Identifier is of type ["
+                  + attr.getDataType()
+                  + "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
         }
 
         attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
@@ -960,12 +959,12 @@ public class EmxMetadataParser implements MetadataParser {
         attr.setEnumOptions(enumOptions);
       }
 
-      if (attr.getDataType() != FILE) {
-        // Only if an attribute is not of type file we apply the normal reference rules
-        if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity)) {
-          throw new IllegalArgumentException(
-              format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
-        }
+      // Only if an attribute is not of type file we apply the normal reference rules
+      if (attr.getDataType() != FILE
+          && isReferenceType(attr)
+          && StringUtils.isEmpty(emxRefEntity)) {
+        throw new IllegalArgumentException(
+            format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
       }
 
       if (isReferenceType(attr) && attr.isNillable() && attr.isAggregatable()) {
@@ -1307,13 +1306,12 @@ public class EmxMetadataParser implements MetadataParser {
           for (Attribute att : target.getAttributes()) {
             // See comment above regarding import of bi-directional one-to-many data
             if (att.getDataType() != COMPOUND
-                && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy())) {
-              if (!att.isAuto()
-                  && att.getExpression() == null
-                  && !report.getFieldsImportable().get(sheet).contains(att.getName())) {
-                boolean required = !att.isNillable() && !att.isAuto();
-                report = report.addAttribute(att.getName(), required ? REQUIRED : AVAILABLE);
-              }
+                && !(att.getDataType() == ONE_TO_MANY && att.isMappedBy())
+                && !att.isAuto()
+                && att.getExpression() == null
+                && !report.getFieldsImportable().get(sheet).contains(att.getName())) {
+              boolean required = !att.isNillable() && !att.isAuto();
+              report = report.addAttribute(att.getName(), required ? REQUIRED : AVAILABLE);
             }
           }
         }

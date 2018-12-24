@@ -1,14 +1,8 @@
 package org.molgenis.data.util;
 
-import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.size;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATETIME_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.FAILED_TO_PARSE_ATTRIBUTE_AS_DATE_MESSAGE;
 import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
@@ -16,11 +10,8 @@ import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 
 import com.google.common.collect.Iterables;
 import java.time.format.DateTimeParseException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
@@ -31,7 +22,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.i18n.LanguageService;
 import org.molgenis.util.ListEscapeUtils;
-import org.molgenis.util.Pair;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class EntityUtils {
@@ -118,81 +108,6 @@ public class EntityUtils {
       default:
         throw new UnexpectedEnumException(attr.getDataType());
     }
-  }
-
-  /** Checks if an entity contains data or not */
-  public static boolean isEmpty(Entity entity) {
-    for (String attr : entity.getAttributeNames()) {
-      if (entity.get(attr) != null) return false;
-    }
-    return true;
-  }
-
-  public static List<Pair<EntityType, List<Attribute>>> getReferencingEntityType(
-      EntityType entityType, DataService dataService) {
-    List<Pair<EntityType, List<Attribute>>> referencingEntityType = newArrayList();
-
-    // get entity types that referencing the given entity (including self)
-    String entityTypeId = entityType.getId();
-    dataService
-        .getEntityTypeIds()
-        .forEach(
-            otherEntityName -> {
-              EntityType otherEntityType = dataService.getEntityType(otherEntityName);
-
-              // get referencing attributes for other entity
-              List<Attribute> referencingAttributes = null;
-              for (Attribute attribute : otherEntityType.getAtomicAttributes()) {
-                EntityType refEntityType = attribute.getRefEntity();
-                if (refEntityType != null && refEntityType.getId().equals(entityTypeId)) {
-                  if (referencingAttributes == null) referencingAttributes = newArrayList();
-                  referencingAttributes.add(attribute);
-                }
-              }
-
-              // store references
-              if (referencingAttributes != null) {
-                referencingEntityType.add(new Pair<>(otherEntityType, referencingAttributes));
-              }
-            });
-
-    return referencingEntityType;
-  }
-
-  /** Gets all attribute names of an EntityType (atomic + compound) */
-  public static Iterable<String> getAttributeNames(EntityType entityType) {
-    // atomic
-    Iterable<String> atomicAttributes =
-        transform(entityType.getAtomicAttributes(), Attribute::getName);
-
-    // compound
-    Iterable<String> compoundAttributes =
-        transform(
-            filter(entityType.getAttributes(), attribute -> attribute.getDataType() == COMPOUND),
-            Attribute::getName);
-
-    // all = atomic + compound
-    return concat(atomicAttributes, compoundAttributes);
-  }
-
-  /** Checks if an entity has another entity as one of its parents */
-  public static boolean doesExtend(EntityType entityType, String entityTypeId) {
-    EntityType parent = entityType.getExtends();
-    while (parent != null) {
-      if (parent.getId().equalsIgnoreCase(entityTypeId)) return true;
-      parent = parent.getExtends();
-    }
-    return false;
-  }
-
-  /**
-   * Get an Iterable of entities as a stream of entities
-   *
-   * @param entities entities iterable
-   * @return entities stream
-   */
-  public static <E extends Entity> Stream<E> asStream(Iterable<E> entities) {
-    return stream(entities.spliterator(), false);
   }
 
   /** Returns true if entity metadata equals another entity metadata. TODO docs */
@@ -327,9 +242,7 @@ public class EntityUtils {
     if (!Objects.equals(tag.getLabel(), otherTag.getLabel())) return false;
     if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri())) return false;
     if (!Objects.equals(tag.getRelationLabel(), otherTag.getRelationLabel())) return false;
-    if (!Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem())) return false;
-
-    return true;
+    return Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem());
   }
 
   /** Returns true if an attribute equals another attribute. */
@@ -349,16 +262,12 @@ public class EntityUtils {
    */
   public static boolean equals(Attribute attr, Attribute otherAttr, boolean checkIdentifier) {
     if (attr == null || otherAttr == null) {
-      if (attr == null && otherAttr == null) {
-        return true;
-      }
-      return false;
+      return (attr == null && otherAttr == null);
     }
 
-    if (checkIdentifier)
-      if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) {
-        return false;
-      }
+    if (checkIdentifier && !Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) {
+      return false;
+    }
     if (!Objects.equals(attr.getName(), otherAttr.getName())) {
       return false;
     }
@@ -636,15 +545,6 @@ public class EntityUtils {
 
     int result = entity.getEntityType().getId().hashCode();
     return 31 * result + h;
-  }
-
-  public static boolean entitiesEquals(Iterable<Entity> entities, Iterable<Entity> other) {
-    if (size(entities) != size(other)) return false;
-    Iterator<Entity> otherIt = other.iterator();
-    for (Entity entity : entities) {
-      if (!equals(entity, otherIt.next())) return false;
-    }
-    return true;
   }
 
   /**
