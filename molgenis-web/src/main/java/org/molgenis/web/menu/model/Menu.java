@@ -39,18 +39,23 @@ public abstract class Menu implements MenuNode {
     if (it instanceof MenuItem) {
       return it.getId().equals(itemId);
     } else {
-      return !((Menu) it).getItems().isEmpty();
+      return it.getId().equals(itemId) || !((Menu) it).getItems().isEmpty();
     }
   }
 
   @Override
   public Optional<List<String>> getPath(String id) {
-    return filter(menu -> containsMenuItem(menu, id))
-        .flatMap(child -> ((Menu) child).getItems().get(0).getPath(id))
-        .map(this::prefixId);
+    return id.equals(getId())
+        ? Optional.of(ImmutableList.of(id))
+        : filter(menu -> containsMenuItem(menu, id))
+            .flatMap(child -> ((Menu) child).getItems().get(0).getPath(id))
+            .map(this::prefixId);
   }
 
   private List<String> prefixId(List<String> path) {
+    if (path.size() == 2) {
+      return path;
+    }
     Builder<String> result = ImmutableList.builder();
     result.add(getId());
     result.addAll(path);

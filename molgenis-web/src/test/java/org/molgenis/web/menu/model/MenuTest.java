@@ -17,9 +17,7 @@ public class MenuTest {
   private Menu menu;
   private Gson gson;
 
-  Class menuItemClass =
-      TypeToken.of(MenuItem.class).getRawType().getAnnotation(AutoGson.class).autoValueClass();
-  Class menuClass =
+  private Class menuAutoValueClass =
       TypeToken.of(Menu.class).getRawType().getAnnotation(AutoGson.class).autoValueClass();
 
   @BeforeMethod
@@ -45,19 +43,19 @@ public class MenuTest {
   }
 
   @Test
-  public void findMenuItemPath() {
-    assertEquals(menu.getPath("p1_0"), Optional.of(asList("menu/root/p1_0".split("/"))));
-    assertEquals(menu.getPath("p1_1"), Optional.of(asList("menu/root/p1_1".split("/"))));
-    assertEquals(menu.getPath("p2_0"), Optional.of(asList("menu/p1_1/p2_0".split("/"))));
-    assertEquals(menu.getPath("p2_1"), Optional.of(asList("menu/p1_1/p2_1".split("/"))));
-    assertEquals(menu.getPath("p3_0"), Optional.of(asList("menu/p2_0/p3_0".split("/"))));
-    assertEquals(menu.getPath("p3_1"), Optional.of(asList("menu/p2_0/p3_1".split("/"))));
+  public void getPath() {
+    assertEquals(menu.getPath("p1_0"), Optional.of(asList("root/p1_0".split("/"))));
+    assertEquals(menu.getPath("p1_1"), Optional.of(asList("root/p1_1".split("/"))));
+    assertEquals(menu.getPath("p2_0"), Optional.of(asList("p1_1/p2_0".split("/"))));
+    assertEquals(menu.getPath("p2_1"), Optional.of(asList("p1_1/p2_1".split("/"))));
+    assertEquals(menu.getPath("p3_0"), Optional.of(asList("p2_0/p3_0".split("/"))));
+    assertEquals(menu.getPath("p3_1"), Optional.of(asList("p2_0/p3_1".split("/"))));
     assertEquals(menu.getPath("non_existing"), Optional.empty());
   }
 
   @Test
   public void toJsonAndBackAgain() {
     String json = gson.toJson(menu);
-    assertEquals(gson.fromJson(json, menuClass), menu);
+    assertEquals(gson.fromJson(json, menuAutoValueClass), menu);
   }
 }
