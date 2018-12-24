@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.security;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.plugin.model.PluginPermission.VIEW_PLUGIN;
@@ -7,36 +8,47 @@ import static org.springframework.security.access.AccessDecisionVoter.ACCESS_DEN
 import static org.springframework.security.access.AccessDecisionVoter.ACCESS_GRANTED;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Optional;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoTest;
-import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.web.menu.MenuReaderService;
-import org.springframework.context.ApplicationContext;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.security.web.FilterInvocation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MolgenisAccessDecisionVoterTest extends AbstractMockitoTest {
   @Mock MenuReaderService menuReaderService;
+  @Mock UserPermissionEvaluator userPermissionEvaluator;
+  @Mock Menu menu;
 
   private MolgenisAccessDecisionVoter voter;
 
+  public MolgenisAccessDecisionVoterTest() {
+    super(Strictness.LENIENT);
+  }
+
   @BeforeMethod
   public void setUp() {
-    UserPermissionEvaluator permissionService = mock(UserPermissionEvaluator.class);
-    when(permissionService.hasPermission(new PluginIdentity("plugingranted"), VIEW_PLUGIN))
-        .thenReturn(true);
-    when(permissionService.hasPermission(new PluginIdentity("plugindenied"), VIEW_PLUGIN))
-        .thenReturn(false);
-
-    ApplicationContext ctx = mock(ApplicationContext.class);
-    when(ctx.getBean(UserPermissionEvaluator.class)).thenReturn(permissionService);
+    doReturn(true)
+        .when(userPermissionEvaluator)
+        .hasPermission(new PluginIdentity("plugingranted"), VIEW_PLUGIN);
+    doReturn(false)
+        .when(userPermissionEvaluator)
+        .hasPermission(new PluginIdentity("plugindenied"), VIEW_PLUGIN);
 
     voter = new MolgenisAccessDecisionVoter();
+    voter.setMenuReaderService(menuReaderService);
+    voter.setUserPermissionEvaluator(userPermissionEvaluator);
 
-    new ApplicationContextProvider().setApplicationContext(ctx);
+    when(menuReaderService.getMenu()).thenReturn(Optional.of(menu));
+    when(menu.getPath("menugranted"))
+        .thenReturn(Optional.of(ImmutableList.of("menu", "main", "menugranted")));
+    when(menu.findMenu("menudenied")).thenReturn(Optional.empty());
   }
 
   @Test

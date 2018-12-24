@@ -71,10 +71,6 @@ public abstract class Menu implements MenuNode {
         .findFirst();
   }
 
-  public static Menu create(String id, String label, List<MenuNode> items) {
-    return new AutoValue_Menu(id, label, items);
-  }
-
   public Optional<Menu> findMenu(String menuId) {
     if (menuId.equals(getId())) {
       return Optional.of(this);
@@ -88,5 +84,9 @@ public abstract class Menu implements MenuNode {
       }
     }
     return Optional.empty();
+  }
+
+  public static Menu create(String id, String label, List<MenuNode> items) {
+    return new AutoValue_Menu(id, label, items);
   }
 }
