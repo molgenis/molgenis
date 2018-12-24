@@ -142,8 +142,8 @@ import org.molgenis.util.AutoGson;
 public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
   private final Class<?> baseType;
   private final String typeFieldName;
-  private final Map<String, Class<?>> labelToSubtype = new LinkedHashMap<String, Class<?>>();
-  private final Map<Class<?>, String> subtypeToLabel = new LinkedHashMap<Class<?>, String>();
+  private final Map<String, Class<?>> labelToSubtype = new LinkedHashMap<>();
+  private final Map<Class<?>, String> subtypeToLabel = new LinkedHashMap<>();
 
   private RuntimeTypeAdapterFactory(Class<?> baseType, String typeFieldName) {
     if (typeFieldName == null || baseType == null) {
@@ -213,9 +213,8 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
       return null;
     }
 
-    final Map<String, TypeAdapter<?>> labelToDelegate = new LinkedHashMap<String, TypeAdapter<?>>();
-    final Map<Class<?>, TypeAdapter<?>> subtypeToDelegate =
-        new LinkedHashMap<Class<?>, TypeAdapter<?>>();
+    final Map<String, TypeAdapter<?>> labelToDelegate = new LinkedHashMap<>();
+    final Map<Class<?>, TypeAdapter<?>> subtypeToDelegate = new LinkedHashMap<>();
     for (Map.Entry<String, Class<?>> entry : labelToSubtype.entrySet()) {
       TypeAdapter<?> delegate = gson.getDelegateAdapter(this, TypeToken.get(entry.getValue()));
       labelToDelegate.put(entry.getKey(), delegate);
