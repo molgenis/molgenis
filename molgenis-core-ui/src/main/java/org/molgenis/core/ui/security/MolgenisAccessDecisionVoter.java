@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.web.menu.MenuReaderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
@@ -56,10 +57,12 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
     return ACCESS_DENIED;
   }
 
+  @Autowired
   void setUserPermissionEvaluator(UserPermissionEvaluator userPermissionEvaluator) {
     this.userPermissionEvaluator = requireNonNull(userPermissionEvaluator);
   }
 
+  @Autowired
   void setMenuReaderService(MenuReaderService menuReaderService) {
     this.menuReaderService = requireNonNull(menuReaderService);
   }
