@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --dest ../../../target/classes/js/menu",
+    "build": "vue-cli-service build --target lib --name menu src/main.ts --dest ../../../target/classes/js/menu",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
