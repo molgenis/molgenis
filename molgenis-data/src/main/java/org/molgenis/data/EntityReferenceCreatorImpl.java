@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.LazyEntity;
@@ -38,7 +38,7 @@ public class EntityReferenceCreatorImpl implements EntityReferenceCreator {
     EntityFactory<? extends Entity, ?> entityFactory =
         entityFactoryRegistry.getEntityFactory(entityType);
     return () ->
-        stream(ids.spliterator(), false)
+        stream(ids)
             .map(
                 id -> {
                   Entity lazyEntity = getReference(entityType, id);

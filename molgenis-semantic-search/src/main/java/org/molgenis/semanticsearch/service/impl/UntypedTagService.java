@@ -1,7 +1,7 @@
 package org.molgenis.semanticsearch.service.impl;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -49,7 +49,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
   private Entity findAttributeEntity(EntityType entityType, String attributeName) {
     Entity entityTypeEntity = dataService.findOneById(ENTITY_TYPE_META_DATA, entityType.getId());
     Optional<Entity> result =
-        stream(entityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
+        stream(entityTypeEntity.getEntities(ATTRIBUTES))
             .filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME)))
             .findFirst();
     return result.orElse(null);

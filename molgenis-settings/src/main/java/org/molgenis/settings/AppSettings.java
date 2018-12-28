@@ -1,5 +1,6 @@
 package org.molgenis.settings;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 /** Application settings */
@@ -12,6 +13,7 @@ public interface AppSettings {
 
   /** @return href of logo displayed above top menu */
   @Nullable
+  @CheckForNull
   String getLogoTopHref();
 
   /** @param logoHref href of logo displayed above top menu */
@@ -25,6 +27,7 @@ public interface AppSettings {
 
   /** @return href of logo displayed in menu */
   @Nullable
+  @CheckForNull
   String getLogoNavBarHref();
 
   /** @param logoHref href of logo displayed in menu */
@@ -32,6 +35,7 @@ public interface AppSettings {
 
   /** @return footer text */
   @Nullable
+  @CheckForNull
   String getFooter();
 
   /** @param footerText footer text */
@@ -51,6 +55,7 @@ public interface AppSettings {
 
   /** @return file name containing custom CSS without path */
   @Nullable
+  @CheckForNull
   String getCssHref();
 
   /** @param cssHref file name containing custom CSS without path */
@@ -58,6 +63,7 @@ public interface AppSettings {
 
   /** @return JSON object string representation of menu */
   @Nullable
+  @CheckForNull
   String getMenu();
 
   /** @param menuJson JSON object string representation of menu */
@@ -65,6 +71,7 @@ public interface AppSettings {
 
   /** @return data aggregation threshold or <code>null</code> if no threshold exists */
   @Nullable
+  @CheckForNull
   Integer getAggregateThreshold();
 
   /** @param threshold data aggregation threshold, <code>null</code> implies no threshold */
@@ -72,6 +79,7 @@ public interface AppSettings {
 
   /** @return JS string containing tracking code to be placed in the footer */
   @Nullable
+  @CheckForNull
   String getTrackingCodeFooter();
 
   /** @param trackingCodeFooter JS string containing tracking code to be placed in the footer */
@@ -88,6 +96,7 @@ public interface AppSettings {
 
   /** @return 3rd party Google analytics tracking ID */
   @Nullable
+  @CheckForNull
   String getGoogleAnalyticsTrackingId();
 
   /** @param googleAnalyticsTrackingId 3rd party Google analytics tracking ID */
@@ -95,6 +104,7 @@ public interface AppSettings {
 
   /** @return MOLGENIS Google analytics tracking ID */
   @Nullable
+  @CheckForNull
   String getGoogleAnalyticsTrackingIdMolgenis();
 
   /** @param googleAnalyticsTrackingIdMolgenis MOLGENIS Google analytics tracking ID */
@@ -171,5 +181,6 @@ public interface AppSettings {
    *     list
    */
   @Nullable
+  @CheckForNull
   String getCustomJavascript();
 }

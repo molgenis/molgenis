@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
-import static java.util.stream.StreamSupport.stream;
-
+import com.google.common.collect.Streams;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +44,7 @@ public class QueryUtils {
 
   public static boolean containsComputedAttribute(Sort sort, EntityType entityType) {
     return ((sort != null)
-        && stream(sort.spliterator(), false)
+        && Streams.stream(sort)
             .anyMatch(order -> entityType.getAttribute(order.getAttr()).hasExpression()));
   }
 

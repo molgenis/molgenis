@@ -1,8 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
-import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Streams.stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.meta.AttributeType.BOOL;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import net.sf.samtools.util.BlockCompressedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -275,15 +273,14 @@ public class VcfWriterUtils {
 
   private static String refAttributesToString(
       Iterable<Attribute> atomicAttributes, List<String> attributesToInclude) {
-    Iterable<Attribute> attributes =
-        StreamSupport.stream(atomicAttributes.spliterator(), false)
-            .filter(
-                attribute ->
-                    (attribute.isVisible()
-                        && isOutputAttribute(
-                            attribute, Lists.newArrayList(atomicAttributes), attributesToInclude)))
-            .collect(Collectors.toList());
-    return on(SPACE_PIPE_SEPERATOR).join(transform(attributes, Attribute::getName));
+    return stream(atomicAttributes)
+        .filter(
+            attribute ->
+                attribute.isVisible()
+                    && isOutputAttribute(
+                        attribute, Lists.newArrayList(atomicAttributes), attributesToInclude))
+        .map(Attribute::getName)
+        .collect(Collectors.joining(SPACE_PIPE_SEPERATOR));
   }
 
   private static void writeExistingInfoHeaders(
@@ -324,7 +321,7 @@ public class VcfWriterUtils {
     boolean hasInfoFields = false;
 
     List<Attribute> attributes =
-        StreamSupport.stream(vcfEntity.getEntityType().getAllAttributes().spliterator(), false)
+        stream(vcfEntity.getEntityType().getAllAttributes())
             .filter(
                 attr ->
                     !(VCF_ATTRIBUTE_NAMES.contains(attr.getName()) || attr.getName().equals(INFO)))
@@ -362,19 +359,19 @@ public class VcfWriterUtils {
     StringBuilder refEntityInfoFields = new StringBuilder();
     for (Attribute attribute : attributes) {
       String attributeName = attribute.getName();
-      if (isReferenceType(attribute) && !attributeName.equals(SAMPLES)) {
-        // If the MREF field is empty, no effects were found, so we do not add an EFFECT field to
-        // this entity
-        if (vcfEntity.get(attributeName) != null
-            && isOutputAttribute(attribute, annotatorAttributes, attributesToInclude)) {
+      // If the MREF field is empty, no effects were found, so we do not add an EFFECT field to
+      // this entity
+      if (isReferenceType(attribute)
+          && !attributeName.equals(SAMPLES)
+          && vcfEntity.get(attributeName) != null
+          && isOutputAttribute(attribute, annotatorAttributes, attributesToInclude)) {
 
-          parseRefFieldsToInfoField(
-              vcfEntity.getEntities(attributeName),
-              attribute,
-              refEntityInfoFields,
-              annotatorAttributes,
-              attributesToInclude);
-        }
+        parseRefFieldsToInfoField(
+            vcfEntity.getEntities(attributeName),
+            attribute,
+            refEntityInfoFields,
+            annotatorAttributes,
+            attributesToInclude);
       }
     }
     if (refEntityInfoFields.length() > 0
@@ -491,18 +488,17 @@ public class VcfWriterUtils {
     EntityType entityType = sample.getEntityType();
     for (Attribute sampleAttribute : entityType.getAttributes()) {
       String sampleAttributeName = sampleAttribute.getName();
+      // skip the field that were generated for the use of the entity within molgenis
       if (!sampleAttributeName.equals(FORMAT_GT)
-          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)) {
-        // skip the field that were generated for the use of the entity within molgenis
-        if (!sampleAttribute.equals(entityType.getIdAttribute())
-            && !sampleAttribute.equals(entityType.getLabelAttribute())) {
-          if (sampleColumn.length() != 0) sampleColumn.append(":");
-          Object sampleAttrValue = sample.get(sampleAttributeName);
-          if (sampleAttrValue != null) {
-            sampleColumn.append(sampleAttrValue.toString());
-          } else {
-            sampleColumn.append(".");
-          }
+          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)
+          && !sampleAttribute.equals(entityType.getIdAttribute())
+          && !sampleAttribute.equals(entityType.getLabelAttribute())) {
+        if (sampleColumn.length() != 0) sampleColumn.append(":");
+        Object sampleAttrValue = sample.get(sampleAttributeName);
+        if (sampleAttrValue != null) {
+          sampleColumn.append(sampleAttrValue.toString());
+        } else {
+          sampleColumn.append(".");
         }
       }
     }
@@ -518,14 +514,13 @@ public class VcfWriterUtils {
     EntityType entityType = sample.getEntityType();
     for (Attribute sampleAttribute : entityType.getAttributes()) {
       String sampleAttributeName = sampleAttribute.getName();
+      // skip the field that were generated for the use of the entity within molgenis
       if (!sampleAttributeName.equals(FORMAT_GT)
-          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)) {
-        // skip the field that were generated for the use of the entity within molgenis
-        if (!sampleAttribute.equals(entityType.getIdAttribute())
-            && !sampleAttribute.equals(entityType.getLabelAttribute())) {
-          if (formatColumn.length() != 0) formatColumn.append(':');
-          formatColumn.append(sampleAttributeName);
-        }
+          && !sampleAttributeName.equals(VcfRepository.ORIGINAL_NAME)
+          && !sampleAttribute.equals(entityType.getIdAttribute())
+          && !sampleAttribute.equals(entityType.getLabelAttribute())) {
+        if (formatColumn.length() != 0) formatColumn.append(':');
+        formatColumn.append(sampleAttributeName);
       }
     }
     if (formatColumn.length() > 0) {

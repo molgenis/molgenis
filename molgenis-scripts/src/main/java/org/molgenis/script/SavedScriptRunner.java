@@ -95,7 +95,7 @@ public class SavedScriptRunner {
     FileMeta fileMeta = null;
     if (StringUtils.isNotEmpty(script.getResultFileExtension())) {
       String name = generateRandomString();
-      File file = fileStore.getFile(name + "." + script.getResultFileExtension());
+      File file = fileStore.getFileUnchecked(name + "." + script.getResultFileExtension());
       parameters.put("outputFile", file.getAbsolutePath());
       fileMeta = createFileMeta(name, file);
       dataService.add(FILE_META, fileMeta);

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataAction;
 import org.molgenis.data.DataService;
@@ -62,7 +63,7 @@ public class VcfImporterService implements ImportService {
       RepositoryCollection source,
       MetadataAction metadataAction,
       DataAction dataAction,
-      @Nullable String packageId) {
+      @Nullable @CheckForNull String packageId) {
     if (dataAction != DataAction.ADD) {
       throw new IllegalArgumentException("Only ADD is supported");
     }

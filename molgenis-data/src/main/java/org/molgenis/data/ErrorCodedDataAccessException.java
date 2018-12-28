@@ -3,6 +3,7 @@ package org.molgenis.data;
 import static java.util.Objects.requireNonNull;
 
 import java.text.MessageFormat;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.i18n.ErrorCoded;
 import org.molgenis.i18n.MessageSourceHolder;
@@ -18,7 +19,7 @@ public abstract class ErrorCodedDataAccessException
     this(errorCode, null);
   }
 
-  public ErrorCodedDataAccessException(String errorCode, @Nullable Throwable cause) {
+  public ErrorCodedDataAccessException(String errorCode, @Nullable @CheckForNull Throwable cause) {
     super("", cause);
     this.errorCode = requireNonNull(errorCode);
   }

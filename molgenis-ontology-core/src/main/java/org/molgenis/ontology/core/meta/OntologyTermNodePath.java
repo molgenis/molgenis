@@ -1,5 +1,6 @@
 package org.molgenis.ontology.core.meta;
 
+import static java.lang.Boolean.TRUE;
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ID;
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.NODE_PATH;
 import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ROOT;
@@ -40,7 +41,7 @@ public class OntologyTermNodePath extends StaticEntity {
 
   public boolean isRoot() {
     Boolean isRoot = getBoolean(ROOT);
-    return isRoot != null ? isRoot : false;
+    return TRUE.equals(isRoot);
   }
 
   public void setRoot(boolean root) {

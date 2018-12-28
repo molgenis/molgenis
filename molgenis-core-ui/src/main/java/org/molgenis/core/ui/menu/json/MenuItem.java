@@ -3,6 +3,7 @@ package org.molgenis.core.ui.menu.json;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 import org.molgenis.web.UiMenu;
@@ -34,10 +35,12 @@ public abstract class MenuItem {
   abstract String getLabel();
 
   @Nullable
+  @CheckForNull
   abstract String getHref();
 
   abstract UiMenuItemType getType();
 
   @Nullable
+  @CheckForNull
   abstract List<MenuItem> getItems();
 }

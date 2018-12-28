@@ -3,6 +3,7 @@ package org.molgenis.data.file;
 import static java.io.File.separator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ public class FileStore {
   }
 
   public void deleteDirectory(String dirName) throws IOException {
-    FileUtils.deleteDirectory(getFile(dirName));
+    FileUtils.deleteDirectory(getFileUnchecked(dirName));
   }
 
   public File store(InputStream is, String fileName) throws IOException {
@@ -54,7 +55,32 @@ public class FileStore {
         Paths.get(getStorageDir() + File.separator + targetDir));
   }
 
-  public File getFile(String fileName) {
+  /**
+   * Returns a {@link File} for the given filename in the store.
+   *
+   * @throws FileNotFoundException if no file with the given filename exists
+   * @throws IOException if the given filename does not refer to a file
+   */
+  public File getFile(String fileName) throws IOException {
+    String pathname = storageDir + separator + fileName;
+
+    File file = new File(pathname);
+    if (!file.exists()) {
+      throw new FileNotFoundException(pathname);
+    }
+    if (!file.isFile()) {
+      throw new IOException('\'' + pathname + '\'' + " is not a file");
+    }
+    return file;
+  }
+
+  /**
+   * Returns a {@link File} for the given filename in the store. The filename may denote a
+   * nonexistent file in the store or refer to a directory.
+   *
+   * @see #getFile(String)
+   */
+  public File getFileUnchecked(String fileName) {
     return new File(storageDir + separator + fileName);
   }
 
@@ -68,6 +94,6 @@ public class FileStore {
   }
 
   public void writeToFile(InputStream inputStream, String fileName) throws IOException {
-    FileUtils.copyInputStreamToFile(inputStream, getFile(fileName));
+    FileUtils.copyInputStreamToFile(inputStream, getFileUnchecked(fileName));
   }
 }

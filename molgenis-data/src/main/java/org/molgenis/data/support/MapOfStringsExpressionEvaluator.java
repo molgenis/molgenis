@@ -41,11 +41,11 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator {
       Map<String, String> attributeExpressions = gson.fromJson(expression, Map.class);
       ImmutableMap.Builder<String, ExpressionEvaluator> builder = ImmutableMap.builder();
       for (Entry<String, String> entry : attributeExpressions.entrySet()) {
-        Attribute targetAttribute = refEntity.getAttribute(entry.getKey());
-        if (targetAttribute == null) {
+        Attribute targetAttr = refEntity.getAttribute(entry.getKey());
+        if (targetAttr == null) {
           throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
         }
-        Attribute amd = new AttributeWithJsonExpression(targetAttribute, entry.getValue());
+        Attribute amd = new AttributeWithJsonExpression(targetAttr, entry.getValue());
         StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityType);
         builder.put(entry.getKey(), evaluator);
       }

@@ -21,6 +21,7 @@ import static org.molgenis.jobs.model.JobExecutionMetaData.USER;
 
 import java.time.Instant;
 import java.util.Optional;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -72,7 +73,7 @@ public class JobExecution extends StaticEntity {
     return Optional.ofNullable(getString(USER));
   }
 
-  public void setUser(@Nullable String username) {
+  public void setUser(@Nullable @CheckForNull String username) {
     set(USER, username);
   }
 
@@ -101,6 +102,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public Instant getStartDate() {
     return getInstant(START_DATE);
   }
@@ -110,6 +112,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public Instant getEndDate() {
     return getInstant(END_DATE);
   }
@@ -119,6 +122,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public Integer getProgressInt() {
     return getInt(PROGRESS_INT);
   }
@@ -128,6 +132,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getProgressMessage() {
     return getString(PROGRESS_MESSAGE);
   }
@@ -137,6 +142,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public Integer getProgressMax() {
     return getInt(PROGRESS_MAX);
   }
@@ -146,6 +152,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getLog() {
     return getString(LOG);
   }
@@ -155,6 +162,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getResultUrl() {
     return getString(RESULT_URL);
   }
@@ -192,6 +200,7 @@ public class JobExecution extends StaticEntity {
   }
 
   @Nullable
+  @CheckForNull
   public String getScheduledJobId() {
     return getString(SCHEDULED_JOB_ID);
   }

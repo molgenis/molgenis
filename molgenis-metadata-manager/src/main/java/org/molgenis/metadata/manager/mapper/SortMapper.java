@@ -1,7 +1,7 @@
 package org.molgenis.metadata.manager.mapper;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -44,8 +44,7 @@ class SortMapper {
   }
 
   private ImmutableList<EditorOrder> toEditorOrders(Iterable<Sort.Order> orders) {
-    return ImmutableList.copyOf(
-        stream(orders.spliterator(), false).map(this::toEditorOrder).iterator());
+    return ImmutableList.copyOf(stream(orders).map(this::toEditorOrder).iterator());
   }
 
   private EditorOrder toEditorOrder(Sort.Order order) {

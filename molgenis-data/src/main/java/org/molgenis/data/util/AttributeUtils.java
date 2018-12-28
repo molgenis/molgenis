@@ -1,10 +1,10 @@
 package org.molgenis.data.util;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeType.EMAIL;
 import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.AttributeType.INT;
@@ -185,8 +185,7 @@ public class AttributeUtils {
 
     @Override
     public Iterable<Entity> getReferences(EntityType entityType, Iterable<?> ids) {
-      return () ->
-          stream(ids.spliterator(), false).map(id -> getReference(entityType, id)).iterator();
+      return () -> stream(ids).map(id -> getReference(entityType, id)).iterator();
     }
   }
 }

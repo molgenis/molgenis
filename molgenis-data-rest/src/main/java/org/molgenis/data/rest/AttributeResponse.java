@@ -95,14 +95,14 @@ public class AttributeResponse {
     } else this.expression = null;
 
     if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase())) {
-      EntityType refEntity = attr.getRefEntity();
+      EntityType attrRefEntity = attr.getRefEntity();
       if (attributeExpandsSet != null
           && attributeExpandsSet.containsKey("refEntity".toLowerCase())) {
         Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
         this.refEntity =
-            refEntity != null
+            attrRefEntity != null
                 ? new EntityTypeResponse(
-                    refEntity,
+                    attrRefEntity,
                     subAttributesSet,
                     Collections.singletonMap("attributes".toLowerCase(), null),
                     permissionService,
@@ -110,10 +110,10 @@ public class AttributeResponse {
                 : null;
       } else {
         this.refEntity =
-            refEntity != null
+            attrRefEntity != null
                 ? new Href(
-                    Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getId()),
-                    String.format("%s/%s", RestController.BASE_URI, refEntity.getId()))
+                    Href.concatMetaEntityHref(RestController.BASE_URI, attrRefEntity.getId()),
+                    String.format("%s/%s", RestController.BASE_URI, attrRefEntity.getId()))
                 : null; // FIXME apply Href escaping fix
       }
     } else this.refEntity = null;
@@ -277,26 +277,6 @@ public class AttributeResponse {
   }
 
   public Boolean isAggregatable() {
-    return isAggregatable;
-  }
-
-  public Boolean getNillable() {
-    return nillable;
-  }
-
-  public Boolean getReadOnly() {
-    return readOnly;
-  }
-
-  public Boolean getLabelAttribute() {
-    return labelAttribute;
-  }
-
-  public Boolean getUnique() {
-    return unique;
-  }
-
-  public Boolean getAggregatable() {
     return isAggregatable;
   }
 

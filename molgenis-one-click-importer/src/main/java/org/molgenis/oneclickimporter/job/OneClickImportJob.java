@@ -54,7 +54,7 @@ public class OneClickImportJob {
   @Transactional
   public List<EntityType> getEntityType(Progress progress, String filename)
       throws UnknownFileTypeException, IOException, InvalidFormatException, EmptySheetException {
-    File file = fileStore.getFile(filename);
+    File file = fileStore.getFileUnchecked(filename);
     String fileExtension =
         findExtensionFromPossibilities(filename, newHashSet("csv", "xlsx", "zip", "xls"));
 

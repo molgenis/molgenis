@@ -1,9 +1,9 @@
 package org.molgenis.core.ui.style;
 
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,7 +12,6 @@ import static org.molgenis.core.ui.style.StyleSheetMetadata.STYLE_SHEET;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -32,38 +32,28 @@ import org.molgenis.data.file.model.FileMetaMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.settings.AppSettings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = StyleServiceTest.Config.class)
-public class StyleServiceTest extends AbstractTestNGSpringContextTests {
+public class StyleServiceTest extends AbstractMockitoTest {
   private static final String THEME_MOLGENIS_NAME = "molgenis";
   private static final String THEME_MOLGENIS = "bootstrap-" + THEME_MOLGENIS_NAME + ".min.css";
 
-  @Autowired private StyleService styleService;
-
-  @Autowired private StyleSheetFactory styleSheetFactory;
-
-  @Autowired private IdGenerator idGenerator;
-
-  @Autowired private FileMetaFactory fileMetaFactory;
-
-  @Autowired private FileStore fileStore;
-
-  @Autowired private AppSettings appSettings;
-
-  @Autowired private DataService dataService;
+  @Mock private AppSettings appSettings;
+  @Mock private IdGenerator idGenerator;
+  @Mock private FileStore fileStore;
+  @Mock private FileMetaFactory fileMetaFactory;
+  @Mock private StyleSheetFactory styleSheetFactory;
+  @Mock private DataService dataService;
+  private StyleServiceImpl styleServiceImpl;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
-    reset(appSettings, dataService, styleSheetFactory, idGenerator, fileMetaFactory, fileStore);
-    when(appSettings.getBootstrapTheme()).thenReturn(THEME_MOLGENIS);
+    styleServiceImpl =
+        new StyleServiceImpl(
+            appSettings, idGenerator, fileStore, fileMetaFactory, styleSheetFactory, dataService);
   }
 
   @Test
@@ -74,20 +64,20 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class))
         .thenReturn(styleSheets.stream());
 
-    Set<Style> availableStyles = styleService.getAvailableStyles();
+    Set<Style> availableStyles = styleServiceImpl.getAvailableStyles();
     assertTrue(
-        Iterables.any(availableStyles, style -> style.getName().equals(THEME_MOLGENIS_NAME)));
+        availableStyles.stream().anyMatch(style -> style.getName().equals(THEME_MOLGENIS_NAME)));
   }
 
   @Test
   public void testSetSelectedStyleUndefined() {
-    styleService.setSelectedStyle("undefined");
+    styleServiceImpl.setSelectedStyle("undefined");
     verify(appSettings, never()).setBootstrapTheme(anyString());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void testSetSelectedStyleUnknownStyle() {
-    styleService.setSelectedStyle("unknown");
+    styleServiceImpl.setSelectedStyle("unknown");
   }
 
   @Test
@@ -99,7 +89,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class))
         .thenReturn(styleSheets.stream());
 
-    styleService.setSelectedStyle(newTheme);
+    styleServiceImpl.setSelectedStyle(newTheme);
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
     verify(appSettings).setBootstrapTheme(argument.capture());
@@ -108,15 +98,18 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
 
   @Test
   public void testGetSelectedStyle() {
+    when(appSettings.getBootstrapTheme()).thenReturn(THEME_MOLGENIS);
+
     StyleSheet styleSheet = mock(StyleSheet.class);
     List<StyleSheet> styleSheets = Collections.singletonList(styleSheet);
     when(styleSheet.getName()).thenReturn(THEME_MOLGENIS);
     when(dataService.findAll(StyleSheetMetadata.STYLE_SHEET, StyleSheet.class))
         .thenReturn(styleSheets.stream());
 
-    assertEquals(styleService.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
+    assertEquals(styleServiceImpl.getSelectedStyle().getName(), THEME_MOLGENIS_NAME);
   }
 
+  @SuppressWarnings("deprecation")
   @Test(expectedExceptions = MolgenisStyleException.class)
   public void addStylesWithExistingId() throws IOException, MolgenisStyleException {
     String styleId = "style";
@@ -130,9 +123,10 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     Repository<Entity> styleSheetRepository = mock(Repository.class);
     when(dataService.getRepository(STYLE_SHEET)).thenReturn(styleSheetRepository);
     when(styleSheetRepository.findOneById(styleId)).thenReturn(styleSheet);
-    styleService.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
+    styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void addBootstrap3And4Styles() throws IOException, MolgenisStyleException {
     // setup
@@ -159,10 +153,10 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
 
     File storedFile = mock(File.class);
     when(storedFile.length()).thenReturn(123L);
-    when(fileStore.getFile(generatedId)).thenReturn(storedFile);
+    when(fileStore.getFileUnchecked(generatedId)).thenReturn(storedFile);
 
     // execute
-    styleService.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
+    styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, bs4FileName, bs4Data);
 
     // verify
     verify(styleSheet).setName(styleId);
@@ -173,6 +167,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     verify(dataService, times(2)).add(FileMetaMetaData.FILE_META, fileMeta);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void addBootstrap3StyleOnly() throws IOException, MolgenisStyleException {
     // setup
@@ -197,10 +192,10 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
 
     File storedFile = mock(File.class);
     when(storedFile.length()).thenReturn(123L);
-    when(fileStore.getFile(generatedId)).thenReturn(storedFile);
+    when(fileStore.getFileUnchecked(generatedId)).thenReturn(storedFile);
 
     // execute
-    styleService.addStyle(styleId, bs3FileName, bs3Data, null, null);
+    styleServiceImpl.addStyle(styleId, bs3FileName, bs3Data, null, null);
 
     // verify
     verify(styleSheet).setName(styleId);
@@ -209,6 +204,7 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     verify(dataService, times(1)).add(FileMetaMetaData.FILE_META, fileMeta);
   }
 
+  @SuppressWarnings("deprecation")
   @Test(expectedExceptions = MolgenisStyleException.class)
   public void getUnknownThemeData() throws MolgenisStyleException {
     String styleName = "no-body";
@@ -217,14 +213,14 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(null);
 
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
-    styleService.getThemeData(styleName, version);
+    styleServiceImpl.getThemeData(styleName, version);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap3ThemeData() throws MolgenisStyleException {
+  public void getBootstrap3ThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
-    when(styleSheet.getId()).thenReturn(styleName);
     FileMeta fileMeta = mock(FileMeta.class);
     String fileId = "fileId";
     when(fileMeta.getId()).thenReturn(fileId);
@@ -232,22 +228,22 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     Query<StyleSheet> expectedQuery =
         new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
     when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
-    File styleFile = mock(File.class);
     String mockFilePath = "mock/file/path";
-    when(styleFile.getPath()).thenReturn(mockFilePath);
-    when(fileStore.getFile(fileId)).thenReturn(styleFile);
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_3;
 
-    FileSystemResource themeData = styleService.getThemeData(styleName, version);
+    File file = mock(File.class);
+    when(file.getPath()).thenReturn(mockFilePath);
+    when(fileStore.getFile(fileId)).thenReturn(file);
+    FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
     assertEquals(themeData.getPath(), mockFilePath);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap4ThemeData() throws MolgenisStyleException {
+  public void getBootstrap4ThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
-    when(styleSheet.getId()).thenReturn(styleName);
     FileMeta fileMeta = mock(FileMeta.class);
     String fileId = "fileId";
     when(fileMeta.getId()).thenReturn(fileId);
@@ -261,13 +257,14 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
     when(fileStore.getFile(fileId)).thenReturn(styleFile);
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_4;
 
-    FileSystemResource themeData = styleService.getThemeData(styleName, version);
+    FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
     assertEquals(themeData.getPath(), mockFilePath);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  public void getBootstrap4FallBackThemeData() throws MolgenisStyleException {
+  public void getBootstrap4FallBackThemeData() throws MolgenisStyleException, IOException {
     String styleName = "my-style";
     StyleSheet styleSheet = mock(StyleSheet.class);
     StyleSheet fallBackTheme = mock(StyleSheet.class);
@@ -280,61 +277,16 @@ public class StyleServiceTest extends AbstractTestNGSpringContextTests {
         new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, styleName);
     Query<StyleSheet> fallBackQuery =
         new QueryImpl<StyleSheet>().eq(StyleSheetMetadata.NAME, BOOTSTRAP_FALL_BACK_THEME);
-    when(dataService.findOne(STYLE_SHEET, expectedQuery, StyleSheet.class)).thenReturn(styleSheet);
-    when(dataService.findOne(STYLE_SHEET, fallBackQuery, StyleSheet.class))
-        .thenReturn(fallBackTheme);
+    doReturn(styleSheet).when(dataService).findOne(STYLE_SHEET, expectedQuery, StyleSheet.class);
+    doReturn(fallBackTheme).when(dataService).findOne(STYLE_SHEET, fallBackQuery, StyleSheet.class);
     File styleFile = mock(File.class);
     String mockFilePath = "mock/file/path";
     when(styleFile.getPath()).thenReturn(mockFilePath);
     when(fileStore.getFile(fileId)).thenReturn(styleFile);
     BootstrapVersion version = BootstrapVersion.BOOTSTRAP_VERSION_4;
 
-    FileSystemResource themeData = styleService.getThemeData(styleName, version);
+    FileSystemResource themeData = styleServiceImpl.getThemeData(styleName, version);
 
     assertEquals(themeData.getPath(), mockFilePath);
-  }
-
-  @Configuration
-  static class Config {
-    @Bean
-    StyleService styleService() {
-      return new StyleServiceImpl(
-          appSettings(),
-          idGenerator(),
-          fileStore(),
-          fileMetaFactory(),
-          styleSheetFactory(),
-          dataService());
-    }
-
-    @Bean
-    AppSettings appSettings() {
-      return mock(AppSettings.class);
-    }
-
-    @Bean
-    StyleSheetFactory styleSheetFactory() {
-      return mock(StyleSheetFactory.class);
-    }
-
-    @Bean
-    IdGenerator idGenerator() {
-      return mock(IdGenerator.class);
-    }
-
-    @Bean
-    FileStore fileStore() {
-      return mock(FileStore.class);
-    }
-
-    @Bean
-    FileMetaFactory fileMetaFactory() {
-      return mock(FileMetaFactory.class);
-    }
-
-    @Bean
-    DataService dataService() {
-      return mock(DataService.class);
-    }
   }
 }

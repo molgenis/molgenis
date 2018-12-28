@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.emx.EmxMetadataParser.EmxAttribute;
@@ -188,38 +189,23 @@ public final class IntermediateParseResults {
   }
 
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((entities == null) ? 0 : entities.hashCode());
-    result = prime * result + ((l10nStrings == null) ? 0 : l10nStrings.hashCode());
-    result = prime * result + ((languages == null) ? 0 : languages.hashCode());
-    result = prime * result + ((packages == null) ? 0 : packages.hashCode());
-    result = prime * result + ((tags == null) ? 0 : tags.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof IntermediateParseResults)) {
+      return false;
+    }
+    IntermediateParseResults that = (IntermediateParseResults) o;
+    return Objects.equals(getEntities(), that.getEntities())
+        && Objects.equals(getPackages(), that.getPackages())
+        && Objects.equals(getTags(), that.getTags())
+        && Objects.equals(getLanguages(), that.getLanguages())
+        && Objects.equals(getL10nStrings(), that.getL10nStrings());
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    IntermediateParseResults other = (IntermediateParseResults) obj;
-    if (entities == null) {
-      if (other.entities != null) return false;
-    } else if (!entities.equals(other.entities)) return false;
-    if (l10nStrings == null) {
-      if (other.l10nStrings != null) return false;
-    } else if (!l10nStrings.equals(other.l10nStrings)) return false;
-    if (languages == null) {
-      if (other.languages != null) return false;
-    } else if (!languages.equals(other.languages)) return false;
-    if (packages == null) {
-      if (other.packages != null) return false;
-    } else if (!packages.equals(other.packages)) return false;
-    if (tags == null) {
-      if (other.tags != null) return false;
-    } else if (!tags.equals(other.tags)) return false;
-    return true;
+  public int hashCode() {
+    return Objects.hash(getEntities(), getPackages(), getTags(), getLanguages(), getL10nStrings());
   }
 }

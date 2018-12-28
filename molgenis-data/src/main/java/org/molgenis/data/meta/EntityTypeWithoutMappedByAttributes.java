@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetadata.MAPPED_BY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
 
@@ -57,7 +57,7 @@ public class EntityTypeWithoutMappedByAttributes extends EntityType {
     Iterable<Entity> entities = entityType.getEntities(attributeName);
     if (attributeName.equals(ATTRIBUTES)) {
       return () ->
-          stream(entities.spliterator(), false)
+          stream(entities)
               .filter(
                   entity -> {
                     if (existingEntityType != null) {
@@ -283,7 +283,7 @@ public class EntityTypeWithoutMappedByAttributes extends EntityType {
   public Iterable<Attribute> getOwnAttributes() {
     // FIXME mappedBy attribute in compound not removed
     return () ->
-        stream(entityType.getOwnAttributes().spliterator(), false)
+        stream(entityType.getOwnAttributes())
             .filter(
                 attr -> {
                   if (existingEntityType != null) {
@@ -319,7 +319,7 @@ public class EntityTypeWithoutMappedByAttributes extends EntityType {
   @Override
   public Iterable<Attribute> getOwnAllAttributes() {
     return () ->
-        stream(entityType.getOwnAllAttributes().spliterator(), false)
+        stream(entityType.getOwnAllAttributes())
             .filter(
                 attr -> {
                   if (existingEntityType != null) {

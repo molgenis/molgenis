@@ -2,10 +2,10 @@ package org.molgenis.data.icd10;
 
 import static java.util.stream.Collectors.toList;
 
+import com.google.common.collect.Streams;
 import com.google.common.collect.TreeTraverser;
 import java.util.Collection;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import org.molgenis.data.Entity;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class Icd10ClassExpanderImpl implements Icd10ClassExpander {
   private Stream<Entity> expandClass(Entity diseaseClass) {
     Iterable<Entity> diseaseClasses =
         new DiseaseClassTreeTraverser().postOrderTraversal(diseaseClass);
-    return StreamSupport.stream(diseaseClasses.spliterator(), false);
+    return Streams.stream(diseaseClasses);
   }
 
   private DiseaseClass toDiseaseClass(Entity entity) {

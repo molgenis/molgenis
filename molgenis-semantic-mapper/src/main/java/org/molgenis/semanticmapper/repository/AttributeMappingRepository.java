@@ -2,6 +2,7 @@ package org.molgenis.semanticmapper.repository;
 
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
@@ -26,8 +27,8 @@ public interface AttributeMappingRepository {
    */
   List<AttributeMapping> getAttributeMappings(
       List<Entity> attributeMappingEntities,
-      @Nullable EntityType sourceEntityType,
-      @Nullable EntityType targetEntityType);
+      @Nullable @CheckForNull EntityType sourceEntityType,
+      @Nullable @CheckForNull EntityType targetEntityType);
 
   /**
    * Inserts or updates a {@link Collection} of {@link AttributeMapping}. Will generate IDs if they
@@ -36,12 +37,4 @@ public interface AttributeMappingRepository {
    * @return a list of Entities that have been added or updated
    */
   List<Entity> upsert(Collection<AttributeMapping> collection);
-
-  /**
-   * Translates an algorithm to a list of {@link Attribute} based on the algorithm, and the {@link
-   * EntityType} of the source entity
-   *
-   * @return a list of {@link Attribute}
-   */
-  List<Attribute> retrieveAttributesFromAlgorithm(String algorithm, EntityType sourceEntityType);
 }

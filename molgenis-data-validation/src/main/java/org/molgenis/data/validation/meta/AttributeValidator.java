@@ -1,5 +1,6 @@
 package org.molgenis.data.validation.meta;
 
+import static com.google.common.collect.Streams.stream;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -40,7 +41,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.StreamSupport;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -99,13 +99,11 @@ public class AttributeValidator {
   }
 
   private static void validateParent(Attribute attr) {
-    if (attr.getParent() != null) {
-      if (attr.getParent().getDataType() != COMPOUND) {
-        throw new MolgenisDataException(
-            format(
-                "Parent attribute [%s] of attribute [%s] is not of type compound",
-                attr.getParent().getName(), attr.getName()));
-      }
+    if (attr.getParent() != null && attr.getParent().getDataType() != COMPOUND) {
+      throw new MolgenisDataException(
+          format(
+              "Parent attribute [%s] of attribute [%s] is not of type compound",
+              attr.getParent().getName(), attr.getName()));
     }
   }
 
@@ -222,9 +220,7 @@ public class AttributeValidator {
                   .query(refEntityType.getId())
                   .in(
                       refEntityType.getIdAttribute().getName(),
-                      StreamSupport.stream(refEntitiesValue.spliterator(), false)
-                          .map(Entity::getIdValue)
-                          .collect(toList()))
+                      stream(refEntitiesValue).map(Entity::getIdValue).collect(toList()))
                   .count()
               < Iterables.size(refEntitiesValue)) {
             throw new MolgenisValidationException(

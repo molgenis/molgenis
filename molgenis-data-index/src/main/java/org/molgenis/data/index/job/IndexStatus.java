@@ -1,7 +1,7 @@
 package org.molgenis.data.index.job;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
 
 import com.google.common.util.concurrent.AtomicLongMap;
 import java.util.Map;
@@ -78,7 +78,7 @@ public class IndexStatus {
       return true;
     }
     Set<String> referencedEntityIds =
-        stream(emd.getAtomicAttributes().spliterator(), false)
+        stream(emd.getAtomicAttributes())
             .map(Attribute::getRefEntity)
             .filter(Objects::nonNull)
             .map(EntityType::getId)

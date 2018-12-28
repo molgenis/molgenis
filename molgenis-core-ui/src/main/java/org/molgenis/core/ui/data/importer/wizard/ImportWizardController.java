@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.core.ui.wizard.AbstractWizardController;
@@ -283,7 +284,7 @@ public class ImportWizardController extends AbstractWizardController {
     return importRun;
   }
 
-  private MetadataAction getMetadataAction(@Nullable String action) {
+  private MetadataAction getMetadataAction(@Nullable @CheckForNull String action) {
     MetadataAction metadataAction;
     if (action == null) {
       metadataAction = MetadataAction.ADD;

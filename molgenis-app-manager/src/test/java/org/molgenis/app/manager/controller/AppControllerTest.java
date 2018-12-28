@@ -114,7 +114,7 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
     URL resourceUrl = Resources.getResource(AppControllerTest.class, "/index.html");
     File testJs = new File(new URI(resourceUrl.toString()).getPath());
 
-    when(fileStore.getFile("fake-app/js/test.js")).thenReturn(testJs);
+    when(fileStore.getFileUnchecked("fake-app/js/test.js")).thenReturn(testJs);
 
     appResponse = AppResponse.create(app);
     when(appManagerService.getAppByName(appName)).thenReturn(appResponse);

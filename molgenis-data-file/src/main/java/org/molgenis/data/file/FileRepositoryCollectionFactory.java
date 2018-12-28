@@ -27,12 +27,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class FileRepositoryCollectionFactory {
-  private final Map<String, Class<? extends FileRepositoryCollection>> fileRepositoryCollection;
+
+  private final Map<String, Class<? extends FileRepositoryCollection>> fileRepositoryCollections;
   private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
   public FileRepositoryCollectionFactory(AutowireCapableBeanFactory autowireCapableBeanFactory) {
     this.autowireCapableBeanFactory = requireNonNull(autowireCapableBeanFactory);
-    this.fileRepositoryCollection = Maps.newHashMap();
+    this.fileRepositoryCollections = Maps.newHashMap();
   }
 
   /**
@@ -41,7 +42,7 @@ public class FileRepositoryCollectionFactory {
   public void addFileRepositoryCollectionClass(
       Class<? extends FileRepositoryCollection> clazz, Set<String> fileExtensions) {
     for (String extension : fileExtensions) {
-      fileRepositoryCollection.put(extension.toLowerCase(), clazz);
+      fileRepositoryCollections.put(extension.toLowerCase(), clazz);
     }
   }
 
@@ -55,9 +56,9 @@ public class FileRepositoryCollectionFactory {
 
     String extension =
         FileExtensionUtils.findExtensionFromPossibilities(
-            file.getName(), fileRepositoryCollection.keySet());
+            file.getName(), fileRepositoryCollections.keySet());
 
-    clazz = fileRepositoryCollection.get(extension);
+    clazz = fileRepositoryCollections.get(extension);
 
     if (clazz == null) {
       throw new MolgenisDataException("Unknown extension for file '" + file.getName() + "'");

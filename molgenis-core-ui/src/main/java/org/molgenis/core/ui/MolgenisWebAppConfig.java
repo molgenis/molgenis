@@ -27,7 +27,6 @@ import org.molgenis.core.ui.menu.MenuMolgenisUi;
 import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.core.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.core.ui.security.MolgenisUiPermissionDecorator;
-import org.molgenis.core.ui.style.StyleService;
 import org.molgenis.core.ui.style.ThemeFingerprintRegistry;
 import org.molgenis.core.util.ResourceFingerprintRegistry;
 import org.molgenis.data.convert.StringToDateConverter;
@@ -87,7 +86,7 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
 
   @Autowired private RdfConverter rdfConverter;
 
-  @Autowired private StyleService styleService;
+  @Autowired ThemeFingerprintRegistry themeFingerprintRegistry;
 
   @Autowired private MessageSource messageSource;
 
@@ -196,15 +195,10 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public ThemeFingerprintRegistry themeFingerprintRegistry() {
-    return new ThemeFingerprintRegistry(styleService);
-  }
-
-  @Bean
   public MolgenisInterceptor molgenisInterceptor() {
     return new MolgenisInterceptor(
         resourceFingerprintRegistry(),
-        themeFingerprintRegistry(),
+        themeFingerprintRegistry,
         appSettings,
         authenticationSettings,
         environment,

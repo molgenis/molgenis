@@ -9,11 +9,11 @@ import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_A
 import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -64,37 +64,44 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
   @Override
   public List<AttributeMapping> getAttributeMappings(
       List<Entity> attributeMappingEntities,
-      @Nullable EntityType sourceEntityType,
-      @Nullable EntityType targetEntityType) {
+      @Nullable @CheckForNull EntityType sourceEntityType,
+      @Nullable @CheckForNull EntityType targetEntityType) {
     return Lists.transform(
         attributeMappingEntities,
         attributeMappingEntity ->
             toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType));
   }
 
-  @Override
-  public List<Attribute> retrieveAttributesFromAlgorithm(
-      String algorithm, EntityType sourceEntityType) {
-    List<Attribute> sourceAttributes = Lists.newArrayList();
+  /**
+   * Returns attributes for the source attribute names in the given entity. Ignores attribute names
+   * for which no attribute exists in the source entity type due to (see
+   * https://github.com/molgenis/molgenis/issues/8051).
+   *
+   * <p>package-private for testability
+   */
+  List<Attribute> getAlgorithmSourceAttributes(
+      Entity attributeMappingEntity, EntityType sourceEntityType) {
+    List<Attribute> attributes;
 
-    Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
-    Matcher matcher = pattern.matcher(algorithm);
-
-    while (matcher.find()) {
-      String sourceAttribute = matcher.group(1).split("\\.")[0];
-      Attribute attribute = sourceEntityType.getAttribute(sourceAttribute);
-      if (!sourceAttributes.contains(attribute)) {
-        sourceAttributes.add(attribute);
+    String sourceAttributesString = attributeMappingEntity.getString(SOURCE_ATTRIBUTES);
+    if (sourceAttributesString != null) {
+      attributes = new ArrayList<>();
+      for (String sourceAttributeStr : sourceAttributesString.split(",")) {
+        Attribute sourceAttribute = sourceEntityType.getAttribute(sourceAttributeStr);
+        if (sourceAttribute != null) {
+          attributes.add(sourceAttribute);
+        }
       }
+    } else {
+      attributes = emptyList();
     }
-
-    return sourceAttributes;
+    return attributes;
   }
 
   private AttributeMapping toAttributeMapping(
       Entity attributeMappingEntity,
-      @Nullable EntityType sourceEntityType,
-      @Nullable EntityType targetEntityType) {
+      @Nullable @CheckForNull EntityType sourceEntityType,
+      @Nullable @CheckForNull EntityType targetEntityType) {
     String identifier = attributeMappingEntity.getString(IDENTIFIER);
     String targetAttributeName = attributeMappingEntity.getString(TARGET_ATTRIBUTE);
     Attribute targetAttribute =
@@ -103,7 +110,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
     String algorithmState = attributeMappingEntity.getString(ALGORITHM_STATE);
     List<Attribute> sourceAttributes =
         sourceEntityType != null
-            ? retrieveAttributesFromAlgorithm(algorithm, sourceEntityType)
+            ? getAlgorithmSourceAttributes(attributeMappingEntity, sourceEntityType)
             : emptyList();
 
     return new AttributeMapping(

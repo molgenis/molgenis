@@ -1,8 +1,8 @@
 package org.molgenis.data.importer.emx;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -71,8 +71,7 @@ class EmxDataProvider implements DataProvider {
     if (repository == null) {
       throw new UnknownRepositoryException(entityType.getId());
     }
-    return stream(repository.spliterator(), false)
-        .map(sourceEntity -> toEntity(entityType, sourceEntity));
+    return stream(repository).map(sourceEntity -> toEntity(entityType, sourceEntity));
   }
 
   /**

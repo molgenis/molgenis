@@ -64,7 +64,7 @@ public class DownloadServiceTest extends AbstractMolgenisSpringTest {
     when(fileMetaFactory.create(anyString())).thenReturn(fileMeta);
     File file = mock(File.class);
     when(file.getName()).thenReturn("test");
-    when(fileStore.getFile(anyString())).thenReturn(file);
+    when(fileStore.getFileUnchecked(anyString())).thenReturn(file);
 
     ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.PACKAGE, "it");
     ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "test_entity");
