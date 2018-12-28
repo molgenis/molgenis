@@ -235,11 +235,19 @@ public class AttributeMapper {
     return attribute;
   }
 
+  /** Find index of editorAttribute in editorEntityType lookupAttributes or return null */
   private Integer getLookupAttributeIndex(
       EditorAttribute editorAttribute, EditorEntityType editorEntityType) {
-    EditorAttributeIdentifier editorAttributeIdentifier =
-        EditorAttributeIdentifier.create(editorAttribute.getId(), editorAttribute.getLabel());
-    int index = editorEntityType.getLookupAttributes().indexOf(editorAttributeIdentifier);
+
+    String editorAttributeId = editorAttribute.getId();
+    List<EditorAttributeIdentifier> lookupAttributes = editorEntityType.getLookupAttributes();
+
+    int index =
+        IntStream.range(0, lookupAttributes.size())
+            .map(idx -> lookupAttributes.get(idx).getId().equals(editorAttributeId) ? idx : -1)
+            .reduce(Integer::max)
+            .orElse(-1);
+
     return index != -1 ? index : null;
   }
 
