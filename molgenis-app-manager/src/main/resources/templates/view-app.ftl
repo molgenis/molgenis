@@ -29,4 +29,7 @@
 
 <#if app.includeMenuAndFooter>
     <@footer version/>
+    <script>
+      window.molgenisFooter.appVersion = '${app.version}'
+    </script>
 </#if>
