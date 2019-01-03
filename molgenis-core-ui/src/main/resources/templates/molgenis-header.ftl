@@ -184,7 +184,7 @@
             </#if>
             <div class="navbar-header">
                 <#list menu.items as item>
-                    <#if !item.menu && item.label == "Home" && app_settings.logoNavBarHref?has_content>
+                    <#if !item.isMenu() && item.label == "Home" && app_settings.logoNavBarHref?has_content>
                         <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
                             <img class="img-responsive" style="max-width:100%;max-height:100%;"
                                  src="${app_settings.logoNavBarHref?html}"
@@ -208,7 +208,7 @@
                     <#list menu.items as item>
 
                     <#-- Single menu items -->
-                        <#if !item.menu>
+                        <#if !item.isMenu()>
                             <#if item.label != "Home" || !app_settings.logoNavBarHref?has_content>
                                 <#if item.url == pluginid_with_query_string>
                                     <li class="active"><a href="#">${item.label?html}</a></li>
@@ -278,7 +278,7 @@
     <#assign this_menu_counter = menu_counter + 1>
 
     <#list sub_menu.items as sub_item>
-        <#if !sub_item.menu>
+        <#if !sub_item.isMenu()>
             <li>
                 <a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if>
                    href="/menu/${sub_menu.id?url('UTF-8')}/${sub_item.url?html}">${sub_item.label?html}</a>
