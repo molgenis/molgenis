@@ -1,4 +1,4 @@
-package org.molgenis.core.ui.menu;
+package org.molgenis.web.menu;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,7 +17,6 @@ import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.converter.GsonConfig;
-import org.molgenis.web.menu.MenuReaderServiceImpl;
 import org.molgenis.web.menu.model.Menu;
 import org.molgenis.web.menu.model.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
