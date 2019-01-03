@@ -8,10 +8,13 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
+/** A menu item. */
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MenuItem.class)
 @SuppressWarnings("squid:S1610") // Autovalue class cannot be an interface
 public abstract class MenuItem implements MenuNode {
+
+  /** @return the parameters for this menu item */
   @Nullable
   public abstract String getParams();
 
@@ -40,6 +43,7 @@ public abstract class MenuItem implements MenuNode {
     return false;
   }
 
+  /** @return the URL of this menu item, which is the combination of its ID and its parameters. */
   public String getUrl() {
     return Optional.ofNullable(getParams()).map(it -> getId() + "/" + it).orElse(getId());
   }

@@ -10,10 +10,13 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import org.molgenis.util.AutoGson;
 
+/** Menu grouping a list of child items. */
 @AutoGson(autoValueClass = AutoValue_Menu.class)
 @AutoValue
 @SuppressWarnings("squid:S1610") // Autovalue class cannot be an interface
 public abstract class Menu implements MenuNode {
+
+  /** @return the child items grouped in this menu */
   public abstract List<MenuNode> getItems();
 
   @Override
