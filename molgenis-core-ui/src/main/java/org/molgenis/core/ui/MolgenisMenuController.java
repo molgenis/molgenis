@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Looks up the plugin that will handle the request. Adds context attributes to the Model so the
- * freemarker view can use them when rendering the header and footer.
+ * Responsibilities of this class: Looks up the plugin that will handle the request. Adds context
+ * attributes to the Model so the freemarker view can use them when rendering the header and footer.
  */
 @Controller
 @RequestMapping(URI)
@@ -69,6 +69,10 @@ public class MolgenisMenuController {
             : molgenisBuildData;
   }
 
+  /**
+   * Forwards to the first plugin of the fist menu that the user can read since no menu path is
+   * provided.
+   */
   @RequestMapping
   public String forwardDefaultMenuDefaultPlugin(Model model) {
     Menu menu =
@@ -105,6 +109,13 @@ public class MolgenisMenuController {
     return pathRemainder;
   }
 
+  /**
+   * Forwards to the first menu item in the specified menu, or to the plugin if the specified menuId
+   * belongs to a plugin. Forwards to the void controller if the user has no permissions to view
+   * anything, i.e. the menu is empty.
+   *
+   * @param menuId ID of the menu or plugin
+   */
   @RequestMapping("/{menuId}")
   public String forwardMenuDefaultPlugin(@Valid @NotNull @PathVariable String menuId, Model model) {
     Menu menu =
@@ -128,6 +139,13 @@ public class MolgenisMenuController {
     model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
   }
 
+  /**
+   * Forwards to the specified plugin in the specified menu. This may be a submenu. Only the last
+   * two levels of the possibly very deep menu tree are used to construct the URL.
+   *
+   * @param menuId ID of the menu parent of the pluginID
+   * @param pluginId ID of the plugin
+   */
   @RequestMapping("/{menuId}/{pluginId}/**")
   public String forwardMenuPlugin(
       HttpServletRequest request,
@@ -153,7 +171,16 @@ public class MolgenisMenuController {
     return getForwardPluginUri(pluginId, pathRemainder, null);
   }
 
-  /** package-private for testability */
+  /**
+   * Forwards to the plugin.
+   *
+   * @param pluginId ID of the plugin to forward to. Adds a trailing slash if this refers to the app
+   *     controller
+   * @param pathRemainder remainder of the path to add after the pluginID with / in between if it is
+   *     nonempty
+   * @param queryString query params to add to the forward url with ? in between if it is nonempty
+   * @return forward URL String
+   */
   String getForwardPluginUri(
       String pluginId,
       @Nullable @CheckForNull String pathRemainder,
@@ -181,7 +208,7 @@ public class MolgenisMenuController {
     return strBuilder.toString();
   }
 
-  /** Plugin without content */
+  /** Controller used to render an empty page if the user has no permissions to view anything. */
   @Controller
   @RequestMapping(VoidPluginController.URI)
   public static class VoidPluginController extends PluginController {
