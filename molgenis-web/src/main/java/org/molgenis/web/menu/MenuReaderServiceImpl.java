@@ -49,7 +49,7 @@ public class MenuReaderServiceImpl implements MenuReaderService {
     return getMenu()
         .flatMap(it -> it.getPath(menuItemId))
         .map(Collection::stream)
-        .map(stream -> stream.collect(joining(",", "menu/", "")))
+        .map(stream -> stream.collect(joining("/", "menu/", "")))
         .orElse(null);
   }
 }
