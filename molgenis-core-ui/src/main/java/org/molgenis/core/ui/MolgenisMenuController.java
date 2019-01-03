@@ -118,15 +118,15 @@ public class MolgenisMenuController {
    */
   @RequestMapping("/{menuId}")
   public String forwardMenuDefaultPlugin(@Valid @NotNull @PathVariable String menuId, Model model) {
-    Menu menu =
+    Menu filteredMenu =
         menuReaderService
             .getMenu()
-            .flatMap(it -> it.findMenu(menuId))
+            .flatMap(menu -> menu.findMenu(menuId))
             .orElseThrow(
                 () -> new RuntimeException("menu with id [" + menuId + "] does not exist"));
     model.addAttribute(KEY_MENU_ID, menuId);
 
-    String pluginId = menu.firstItem().map(MenuItem::getId).orElse(VoidPluginController.ID);
+    String pluginId = filteredMenu.firstItem().map(MenuItem::getId).orElse(VoidPluginController.ID);
 
     String contextUri = URI + '/' + menuId + '/' + pluginId;
     addModelAttributes(model, contextUri);
