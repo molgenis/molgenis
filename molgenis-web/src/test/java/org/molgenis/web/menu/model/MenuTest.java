@@ -1,6 +1,7 @@
 package org.molgenis.web.menu.model;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
@@ -40,6 +41,11 @@ public class MenuTest {
     menuRuntimeTypeAdapterFactory.registerAutoValueSubtype(Menu.class, "menu");
 
     gson = new GsonBuilder().registerTypeAdapterFactory(menuRuntimeTypeAdapterFactory).create();
+  }
+
+  @Test
+  public void testFilterMenuNodeFiltersAllChildren() {
+    assertEquals(menu.filter(it -> false), Optional.of(Menu.create("root", "", emptyList())));
   }
 
   @Test

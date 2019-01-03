@@ -27,10 +27,9 @@ public abstract class Menu implements MenuNode {
             .map(item -> item.filter(predicate))
             .filter(Optional::isPresent)
             .map(Optional::get)
+            .filter(predicate)
             .collect(toList());
-    return Optional.of(create(getId(), getLabel(), filteredItems))
-        .filter(predicate)
-        .map(MenuNode.class::cast);
+    return Optional.of(create(getId(), getLabel(), filteredItems)).map(MenuNode.class::cast);
   }
 
   @Override
@@ -51,7 +50,8 @@ public abstract class Menu implements MenuNode {
     return id.equals(getId())
         ? Optional.of(ImmutableList.of(id))
         : filter(menu -> containsMenuItem(menu, id))
-            .flatMap(child -> ((Menu) child).getItems().get(0).getPath(id))
+            .filter(menu -> !((Menu) menu).getItems().isEmpty())
+            .flatMap(menu -> ((Menu) menu).getItems().get(0).getPath(id))
             .map(this::prefixId);
   }
 

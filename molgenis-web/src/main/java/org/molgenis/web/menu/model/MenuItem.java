@@ -20,7 +20,7 @@ public abstract class MenuItem implements MenuNode {
 
   @Override
   public Optional<MenuNode> filter(Predicate<MenuNode> predicate) {
-    return Optional.of(this).filter(predicate).map(MenuNode.class::cast);
+    return Optional.of(this);
   }
 
   @Override

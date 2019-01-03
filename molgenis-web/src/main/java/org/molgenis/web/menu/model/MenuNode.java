@@ -22,14 +22,10 @@ public interface MenuNode {
   boolean isMenu();
 
   /**
-   * Filters this menu node and its items using a predicate.
+   * Filters all Menu nodes by applying the predicate to their items.
    *
-   * <p>Menus filter the item list using the predicate and then call the predicate to see if the
-   * menu node matches the predicate or not.
-   *
-   * @param predicate {@link Predicate} to apply to the menu nodes
-   * @return the filtered menu node or {@link Optional#empty()} if this menu does not match the
-   *     predicate after filtering
+   * @param predicate {@link Predicate} to apply to the items
+   * @return the filtered menu node
    */
   Optional<MenuNode> filter(Predicate<MenuNode> predicate);
 
