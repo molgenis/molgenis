@@ -70,7 +70,7 @@ public class MolgenisMenuController {
   }
 
   /**
-   * Forwards to the first plugin of the fist menu that the user can read since no menu path is
+   * Forwards to the first plugin of the first menu that the user can read since no menu path is
    * provided.
    */
   @RequestMapping
@@ -110,9 +110,8 @@ public class MolgenisMenuController {
   }
 
   /**
-   * Forwards to the first menu item in the specified menu, or to the plugin if the specified menuId
-   * belongs to a plugin. Forwards to the void controller if the user has no permissions to view
-   * anything, i.e. the menu is empty.
+   * Forwards to the first menu item in the specified menu. Forwards to the void controller if the
+   * user has no permissions to view anything in that menu, i.e. the menu is empty.
    *
    * @param menuId ID of the menu or plugin
    */
