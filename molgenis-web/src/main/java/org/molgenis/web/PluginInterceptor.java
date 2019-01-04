@@ -9,23 +9,25 @@ import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /** Interceptor that adds default model objects to all plugin requests that return a view. */
 public class PluginInterceptor extends HandlerInterceptorAdapter {
-  private final Ui molgenisUi;
+  private final MenuReaderService menuReaderService;
   private final UserPermissionEvaluator permissionService;
 
-  public PluginInterceptor(Ui molgenisUi, UserPermissionEvaluator permissionService) {
-    this.molgenisUi = requireNonNull(molgenisUi);
+  public PluginInterceptor(
+      MenuReaderService menuReaderService, UserPermissionEvaluator permissionService) {
+    this.menuReaderService = requireNonNull(menuReaderService);
     this.permissionService = requireNonNull(permissionService);
   }
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-      throws Exception {
+  public boolean preHandle(
+      HttpServletRequest request, HttpServletResponse response, Object handler) {
     PluginController molgenisPlugin = validateHandler(handler);
 
     // determine context url for this plugin if no context exists
@@ -42,8 +44,7 @@ public class PluginInterceptor extends HandlerInterceptorAdapter {
       HttpServletRequest request,
       HttpServletResponse response,
       Object handler,
-      ModelAndView modelAndView)
-      throws Exception {
+      ModelAndView modelAndView) {
     if (modelAndView != null) {
       PluginController molgenisPlugin = validateHandler(handler);
       String pluginId = molgenisPlugin.getId();
@@ -66,7 +67,8 @@ public class PluginInterceptor extends HandlerInterceptorAdapter {
       }
 
       modelAndView.addObject(PluginAttributes.KEY_PLUGIN_SHOW_SETTINGS_COG, pluginSettingsCanWrite);
-      modelAndView.addObject(PluginAttributes.KEY_MOLGENIS_UI, molgenisUi);
+      modelAndView.addObject(PluginAttributes.KEY_MENU, menuReaderService.getMenu().orElse(null));
+
       modelAndView.addObject(
           PluginAttributes.KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
       modelAndView.addObject(
