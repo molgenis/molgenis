@@ -21,8 +21,6 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
@@ -33,6 +31,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -84,10 +83,8 @@ public class OneClickImporterControllerTest extends AbstractMockitoTestNGSpringC
             oneClickImportJobExecutionFactory,
             jobExecutor);
 
-    Menu menu = mock(Menu.class);
-    when(menu.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER))
+    when(menuReaderService.findMenuItemPath(OneClickImporterController.ONE_CLICK_IMPORTER))
         .thenReturn("/test-path");
-    when(menuReaderService.getMenu()).thenReturn(menu);
     when(localeResolver.resolveLocale(any())).thenReturn(new Locale("nl"));
     when(appSettings.getLanguageCode()).thenReturn("en");
     User user = mock(User.class);

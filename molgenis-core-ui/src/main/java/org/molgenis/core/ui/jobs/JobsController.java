@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -24,6 +23,7 @@ import org.molgenis.jobs.schedule.JobScheduler;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -121,7 +121,7 @@ public class JobsController extends PluginController {
   }
 
   public String createJobExecutionViewHref(String jobHref, int refreshTimeoutMillis) {
-    String jobControllerURL = menuReaderService.getMenu().findMenuItemPath(ID);
+    String jobControllerURL = menuReaderService.findMenuItemPath(ID);
     return format(
         "%s/viewJob/?jobHref=%s&refreshTimeoutMillis=%s",
         jobControllerURL, jobHref, refreshTimeoutMillis);

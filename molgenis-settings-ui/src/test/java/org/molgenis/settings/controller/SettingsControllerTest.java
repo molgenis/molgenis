@@ -10,11 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import org.mockito.Mock;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -36,9 +35,7 @@ public class SettingsControllerTest {
   public void before() {
     initMocks(this);
 
-    Menu menu = mock(Menu.class);
-    when(menu.findMenuItemPath(SettingsController.ID)).thenReturn("/test/path");
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.findMenuItemPath(SettingsController.ID)).thenReturn("/test/path");
     when(appSettings.getLanguageCode()).thenReturn("DDEEFF");
     User user = mock(User.class);
     when(userAccountService.getCurrentUser()).thenReturn(user);

@@ -8,11 +8,13 @@ import static org.molgenis.web.PluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_OIDC_CLIENTS;
 import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_SIGN_UP;
 import static org.molgenis.web.PluginAttributes.KEY_ENVIRONMENT;
+import static org.molgenis.web.PluginAttributes.KEY_GSON;
 import static org.molgenis.web.PluginAttributes.KEY_I18N;
 import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.molgenis.web.PluginAttributes.KEY_THEME_FINGERPRINT_REGISTRY;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
+import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +39,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
   private final AppSettings appSettings;
   private final String environment;
   private final MessageSource messageSource;
+  private final Gson gson;
 
   public static final String ATTRIBUTE_ENVIRONMENT_TYPE = "environmentType";
 
@@ -46,13 +49,15 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       AppSettings appSettings,
       AuthenticationSettings authenticationSettings,
       @Value("${environment}") String environment,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      Gson gson) {
     this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
     this.themeFingerprintRegistry = requireNonNull(themeFingerprintRegistry);
     this.appSettings = requireNonNull(appSettings);
     this.authenticationSettings = requireNonNull(authenticationSettings);
     this.environment = requireNonNull(environment);
     this.messageSource = requireNonNull(messageSource);
+    this.gson = requireNonNull(gson);
   }
 
   @Override
@@ -71,6 +76,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
       modelAndView.addObject(
           KEY_I18N,
           new MessageSourceResourceBundle(messageSource, LocaleContextHolder.getLocale()));
+      modelAndView.addObject(KEY_GSON, gson);
     }
   }
 

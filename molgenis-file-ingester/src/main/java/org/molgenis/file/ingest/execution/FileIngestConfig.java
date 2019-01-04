@@ -6,13 +6,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.jobs.model.ScheduledJobType;
 import org.molgenis.jobs.model.ScheduledJobTypeFactory;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -50,7 +50,7 @@ public class FileIngestConfig {
         final String targetEntityId = fileIngestJobExecution.getTargetEntityId();
         final String url = fileIngestJobExecution.getUrl();
         final String loader = fileIngestJobExecution.getLoader();
-        String dataExplorerURL = menuReaderService.getMenu().findMenuItemPath("dataexplorer");
+        String dataExplorerURL = menuReaderService.findMenuItemPath("dataexplorer");
         fileIngestJobExecution.setResultUrl(
             format("{0}?entity={1}", dataExplorerURL, targetEntityId));
         return progress ->

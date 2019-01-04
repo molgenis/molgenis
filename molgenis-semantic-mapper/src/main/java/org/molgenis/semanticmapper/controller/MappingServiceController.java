@@ -41,7 +41,6 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.core.ui.data.importer.wizard.ImportWizardController;
 import org.molgenis.core.ui.jobs.JobsController;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -84,6 +83,7 @@ import org.molgenis.semanticsearch.semantic.Hit;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -158,7 +158,7 @@ public class MappingServiceController extends PluginController {
     model.addAttribute("user", getCurrentUsername());
     model.addAttribute("admin", currentUserIsSu());
     model.addAttribute(
-        "importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
+        "importerUri", menuReaderService.findMenuItemPath(ImportWizardController.ID));
     return VIEW_MAPPING_PROJECTS;
   }
 
@@ -699,7 +699,7 @@ public class MappingServiceController extends PluginController {
 
     model.addAttribute("tags", tagsForAttribute.values());
     model.addAttribute(
-        "dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
+        "dataExplorerUri", menuReaderService.findMenuItemPath(DataExplorerController.ID));
     model.addAttribute("mappingProject", project);
     model.addAttribute("entityMapping", entityMapping);
     model.addAttribute(
@@ -792,7 +792,7 @@ public class MappingServiceController extends PluginController {
     model.addAttribute("missing", missing);
     model.addAttribute("error", error);
     model.addAttribute(
-        "dataexplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
+        "dataexplorerUri", menuReaderService.findMenuItemPath(DataExplorerController.ID));
     return VIEW_ATTRIBUTE_MAPPING_FEEDBACK;
   }
 
@@ -1057,6 +1057,6 @@ public class MappingServiceController extends PluginController {
   }
 
   private String getMappingServiceMenuUrl() {
-    return menuReaderService.getMenu().findMenuItemPath(ID);
+    return menuReaderService.findMenuItemPath(ID);
   }
 }

@@ -19,8 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Locale;
 import org.mockito.Mock;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.jobs.model.JobExecution;
@@ -31,6 +29,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
@@ -74,9 +73,7 @@ public class NavigatorControllerTest extends AbstractMockitoTestNGSpringContextT
   /** Test that a get call to the plugin returns the correct view */
   @Test
   public void testInit() throws Exception {
-    Menu menu = mock(Menu.class);
-    when(menu.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.findMenuItemPath(NavigatorController.ID)).thenReturn("/test/path");
     when(appSettings.getLanguageCode()).thenReturn("de");
     User user = mock(User.class);
     when(userAccountService.getCurrentUser()).thenReturn(user);

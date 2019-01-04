@@ -32,8 +32,6 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.quality.Strictness;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -52,6 +50,7 @@ import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTestNGSpringContextTests;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
@@ -94,7 +93,6 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
   @Mock private MenuReaderService menuReaderService;
   @Mock private LocaleResolver localeResolver;
 
-  @Mock private Menu menu;
   @Mock private Package package_;
   @Mock private Package parentPackage;
 
@@ -130,9 +128,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
     when(freemarkerConfigurer.getConfiguration()).thenReturn(configuration);
 
-    Menu menu = mock(Menu.class);
-    when(menuReaderService.getMenu()).thenReturn(menu);
-    when(menu.findMenuItemPath(NAVIGATOR)).thenReturn(null);
+    when(menuReaderService.findMenuItemPath(NAVIGATOR)).thenReturn(null);
 
     when(localeResolver.resolveLocale(any())).thenReturn(Locale.ENGLISH);
     MockMvcBuilders.standaloneSetup(controller)
@@ -279,8 +275,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
   @Test
   public void testPackageLink() {
-    when(menu.findMenuItemPath(NAVIGATOR)).thenReturn("menu/main/navigation/navigator");
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.findMenuItemPath(NAVIGATOR))
+        .thenReturn("menu/main/navigation/navigator");
     List<NavigatorLink> expected = new LinkedList<>();
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/", "glyphicon-home"));
     expected.add(NavigatorLink.create("menu/main/navigation/navigator/parentId", "parent"));
