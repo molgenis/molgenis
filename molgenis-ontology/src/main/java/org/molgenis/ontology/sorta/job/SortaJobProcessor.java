@@ -8,7 +8,6 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
 import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.populate.IdGenerator;
@@ -20,6 +19,7 @@ import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemAspect;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -121,7 +121,7 @@ public class SortaJobProcessor {
           }
           progress.progress(counter.get(), "Processed " + counter + " input terms.");
           progress.setResultUrl(
-              menuReaderService.getMenu().findMenuItemPath(SortaController.ID)
+              menuReaderService.findMenuItemPath(SortaController.ID)
                   + "/result/"
                   + resultRepositoryName);
         });

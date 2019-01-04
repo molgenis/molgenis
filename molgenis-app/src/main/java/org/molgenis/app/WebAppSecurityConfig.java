@@ -39,7 +39,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig {
           expressionInterceptUrlRegistry) {
     List<AccessDecisionVoter<?>> listOfVoters = new ArrayList<>();
     listOfVoters.add(new WebExpressionVoter());
-    listOfVoters.add(new MolgenisAccessDecisionVoter());
+    listOfVoters.add(molgenisAccessDecisionVoter());
     expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
     expressionInterceptUrlRegistry.antMatchers("/").permitAll();

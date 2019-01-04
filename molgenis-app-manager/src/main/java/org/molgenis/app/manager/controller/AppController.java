@@ -18,13 +18,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermissionDeniedException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -133,7 +133,7 @@ public class AppController extends PluginController {
   }
 
   private String findAppMenuURL(String appName) {
-    return menuReaderService.getMenu().findMenuItemPath(APP_PREFIX + appName);
+    return menuReaderService.findMenuItemPath(APP_PREFIX + appName);
   }
 
   private static String guessMimeType(String fileName) {

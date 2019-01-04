@@ -3,9 +3,9 @@ package org.molgenis.searchall.controller;
 import static org.molgenis.searchall.controller.SearchAllPluginController.URI;
 
 import org.molgenis.core.ui.controller.VuePluginController;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +30,8 @@ public class SearchAllPluginController extends VuePluginController {
   @GetMapping("/**")
   public String init(Model model) {
     super.init(model, ID);
-    model.addAttribute("navigatorBaseUrl", menuReaderService.getMenu().findMenuItemPath(NAVIGATOR));
-    model.addAttribute(
-        "dataExplorerBaseUrl", menuReaderService.getMenu().findMenuItemPath(DATAEXPLORER));
+    model.addAttribute("navigatorBaseUrl", menuReaderService.findMenuItemPath(NAVIGATOR));
+    model.addAttribute("dataExplorerBaseUrl", menuReaderService.findMenuItemPath(DATAEXPLORER));
     return "view-search-all";
   }
 }

@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
@@ -13,6 +12,7 @@ import org.molgenis.jobs.model.ScheduledJobType;
 import org.molgenis.jobs.model.ScheduledJobTypeFactory;
 import org.molgenis.semanticmapper.service.MappingService;
 import org.molgenis.semanticmapper.service.impl.MappingServiceImpl;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +53,7 @@ public class MappingJobConfig {
         final String label = mappingJobExecution.getLabel();
         final Boolean addSourceAttribute = mappingJobExecution.isAddSourceAttribute();
         final String resultUrl =
-            menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID)
+            menuReaderService.findMenuItemPath(DataExplorerController.ID)
                 + "?entity="
                 + targetEntityTypeId;
         mappingJobExecution.setResultUrl(resultUrl);

@@ -12,7 +12,7 @@
         </p>
 
         <div id="menu-editor-tree">
-        <@create_menu_list molgenis_ui.menu true/>
+        <@create_menu_list menu true/>
         </div>
     </div>
 
@@ -44,7 +44,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <hr></hr>
+                <hr/>
                 <form name="save-menu-form" action="${context_url?html}/save" method="POST">
                     <button type="submit" class="btn btn-info pull-right">Save the new menu layout</button>
                 </form>
@@ -53,7 +53,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <br></br>
+                <br/>
             </div>
         </div>
 
@@ -76,7 +76,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <hr></hr>
+        <hr/>
     </div>
 </div>
 
@@ -190,11 +190,11 @@
     <#if is_root>
     <ol class="vertical root">
     </#if>
-    <li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.name?html}">
+    <li class="node highlight<#if is_root> root</#if>" data-id="${menu.id?html}" data-label="${menu.label?html}">
         <#if !is_root>
             <span class="glyphicon glyphicon-move"></span>
         </#if>
-        <span>${menu.name?html}</span>
+        <span>${menu.label?html}</span>
         <div class="pull-right">
             <#if !is_root>
                 <span class="glyphicon glyphicon-edit edit-menu-btn" data-toggle="modal"
@@ -206,14 +206,14 @@
         </div>
         <ol>
             <#list menu.items as item>
-                <#if item.type == "MENU">
+                <#if item.menu>
                     <@create_menu_list item false/>
                 <#else>
                 <#-- extract query string from url -->
-                    <li class="node" data-id="${item.id?html}" data-label="${item.name?html}" <#if item.id != item.url>
+                    <li class="node" data-id="${item.id?html}" data-label="${item.label?html}" <#if item.id != item.url>
                         data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
                         <span class="glyphicon glyphicon-move"></span>
-                        <span>${item.name?html}</span>
+                        <span>${item.label?html}</span>
                         <div class="pull-right">
                             <span class="glyphicon glyphicon-edit edit-item-btn" data-toggle="modal"
                                   data-target="#edit-item-modal"></span>
