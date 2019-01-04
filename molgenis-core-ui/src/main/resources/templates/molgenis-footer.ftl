@@ -44,11 +44,11 @@
 
     <script type=text/javascript>
         window.molgenisFooter = {
-                <#if app_settings.footer??>additionalMessage: '${app_settings.footer}'</#if>
-            <#if app_settings.footer?? && (molgenis_version??||molgenis_build_date??)>,</#if>
-                <#if molgenis_version??>version: '${molgenis_version}'</#if>
-            <#if molgenis_version?? && molgenis_build_date??>,</#if>
-                <#if molgenis_build_date??>buildDate: '${molgenis_build_date}'</#if>}
+                <#if app_settings.footer??>additionalMessage: '${app_settings.footer}',</#if>
+                <#if molgenis_version??>version: '${molgenis_version}',</#if>
+                <#if molgenis_build_date??>buildDate: '${molgenis_build_date}',</#if>
+                <#if molgenis_app_version??>appVersion: '${molgenis_app_version}',</#if>
+        }
     </script>
 
     <#-- Include the Vue version of the molgenis footer  -->
