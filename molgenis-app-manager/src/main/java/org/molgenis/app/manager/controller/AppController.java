@@ -104,6 +104,7 @@ public class AppController extends PluginController {
   private ModelAndView serveAppTemplate(String appName, Model model, AppResponse appResponse) {
     model.addAttribute("baseUrl", findAppMenuURL(appName));
     model.addAttribute("template", appResponse.getTemplateContent());
+    model.addAttribute("molgenis_app_version", appResponse.getVersion());
     model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
     model.addAttribute("fallbackLng", appSettings.getLanguageCode());
     model.addAttribute("app", appResponse);
