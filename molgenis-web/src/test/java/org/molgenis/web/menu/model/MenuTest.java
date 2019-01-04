@@ -5,12 +5,11 @@ import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import java.util.Optional;
 import org.molgenis.util.AutoGson;
-import org.molgenis.web.converter.RuntimeTypeAdapterFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -18,8 +17,13 @@ public class MenuTest {
   private Menu menu;
   private Gson gson;
 
-  private Class menuAutoValueClass =
-      TypeToken.of(Menu.class).getRawType().getAnnotation(AutoGson.class).autoValueClass();
+  @SuppressWarnings("unchecked")
+  private Class<? extends Menu> menuAutoValueClass =
+      (Class<? extends Menu>) Menu.class.getAnnotation(AutoGson.class).autoValueClass();
+
+  @SuppressWarnings("unchecked")
+  private Class<? extends MenuItem> menuItemAutoValueClass =
+      (Class<? extends MenuItem>) MenuItem.class.getAnnotation(AutoGson.class).autoValueClass();
 
   @BeforeMethod
   public void setUp() {
@@ -37,8 +41,8 @@ public class MenuTest {
     RuntimeTypeAdapterFactory<MenuNode> menuRuntimeTypeAdapterFactory =
         RuntimeTypeAdapterFactory.of(MenuNode.class, "type");
 
-    menuRuntimeTypeAdapterFactory.registerAutoValueSubtype(MenuItem.class, "plugin");
-    menuRuntimeTypeAdapterFactory.registerAutoValueSubtype(Menu.class, "menu");
+    menuRuntimeTypeAdapterFactory.registerSubtype(menuItemAutoValueClass, "plugin");
+    menuRuntimeTypeAdapterFactory.registerSubtype(menuAutoValueClass, "menu");
 
     gson = new GsonBuilder().registerTypeAdapterFactory(menuRuntimeTypeAdapterFactory).create();
   }
