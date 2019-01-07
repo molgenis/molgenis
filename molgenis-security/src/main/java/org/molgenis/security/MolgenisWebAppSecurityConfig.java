@@ -43,6 +43,7 @@ import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.web.i18n.HttpLocaleResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthoritiesMapper;
 import org.springframework.security.access.intercept.RunAsImplAuthenticationProvider;
@@ -80,6 +81,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.LocaleResolver;
 
+@Import(DataServiceClientRegistrationRepository.class)
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter {
   private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
 
@@ -100,6 +102,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   @Autowired private RecoveryService recoveryService;
 
   @Autowired private UserAccountService userAccountService;
+
+  @Autowired private ClientRegistrationRepository clientRegistrationRepository;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -215,7 +219,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
         .failureUrl(MolgenisLoginController.URI + "?error")
         .and()
         .oauth2Login()
-        .clientRegistrationRepository(clientRegistrationRepository())
+        .clientRegistrationRepository(clientRegistrationRepository)
         .authorizedClientService(authorizedClientService())
         .loginPage(MolgenisLoginController.URI)
         .failureUrl(MolgenisLoginController.URI)
@@ -403,13 +407,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
   }
 
   @Bean
-  public ClientRegistrationRepository clientRegistrationRepository() {
-    return new DataServiceClientRegistrationRepository(authenticationSettings);
-  }
-
-  @Bean
   public ResettableOAuth2AuthorizedClientService authorizedClientService() {
-    return new ResettableOAuth2AuthorizedClientService(clientRegistrationRepository());
+    return new ResettableOAuth2AuthorizedClientService(clientRegistrationRepository);
   }
 
   @Bean
