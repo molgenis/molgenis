@@ -103,6 +103,7 @@
     <yarn.version>v1.7.0</yarn.version>
     <simple-excel.version>1.2</simple-excel.version>
     <poi-ooxml-schemas.version>4.0.0</poi-ooxml-schemas.version>
+    <gson-extras.version>0.2.1</gson-extras.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -995,6 +996,11 @@
         <groupId>org.apache.poi</groupId>
         <artifactId>poi-ooxml-schemas</artifactId>
         <version>${poi-ooxml-schemas.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.danilopianini</groupId>
+        <artifactId>gson-extras</artifactId>
+        <version>${gson-extras.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-header">
       <h4 v-html="highlight(entityType.label)"></h4>
-      <a v-if="navigator" :href="navigator + '/' + entityType.packageId" class="card-link"><i
+      <a v-if="navigator" :href="navigatorLink" class="card-link"><i
         class="fa fa-folder-open-o" aria-hidden="true"></i>
         {{'show-in-navigator-link' | i18n }}</a>
       <a v-if="dataexplorer" :href="dataexplorer + '?entity=' + entityType.id" class="card-link"><i
@@ -46,6 +46,12 @@
 <script>
   export default {
     name: 'entity-result',
-    props: ['entityType', 'dataexplorer', 'navigator', 'highlight']
+    props: ['entityType', 'dataexplorer', 'navigator', 'highlight'],
+    computed: {
+      navigatorLink () {
+        const packageId = this.entityType.packageId
+        return packageId !== undefined ? this.navigator + '/' + packageId : this.navigator
+      }
+    }
   }
 </script>

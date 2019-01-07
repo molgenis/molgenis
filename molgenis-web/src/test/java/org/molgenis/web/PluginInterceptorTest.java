@@ -6,9 +6,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.UserPermissionEvaluator;
+import org.molgenis.web.menu.MenuReaderService;
+import org.molgenis.web.menu.model.Menu;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,13 +21,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class PluginInterceptorTest {
-  private Ui molgenisUi;
+  private MenuReaderService menuReaderService;
   private UserPermissionEvaluator permissionService;
   private Authentication authentication;
 
   @BeforeMethod
   public void setUp() {
-    molgenisUi = mock(Ui.class);
+    menuReaderService = mock(MenuReaderService.class);
+    when(menuReaderService.getMenu()).thenReturn(Optional.of(mock(Menu.class)));
     permissionService = mock(UserPermissionEvaluator.class);
     authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn("username");
@@ -37,14 +41,14 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void preHandle() throws Exception {
+  public void preHandle() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = createMolgenisPluginController(uri);
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
     when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
 
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
 
     MockHttpServletRequest request = new MockHttpServletRequest();
     assertTrue(molgenisPluginInterceptor.preHandle(request, null, handlerMethod));
@@ -52,14 +56,14 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void preHandle_hasContextUrl() throws Exception {
+  public void preHandle_hasContextUrl() {
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     PluginController molgenisPlugin = createMolgenisPluginController(uri);
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
     when(handlerMethod.getBean()).thenReturn(molgenisPlugin);
 
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
 
     String contextUri = "/plugin/not-test";
     MockHttpServletRequest request = new MockHttpServletRequest();
@@ -69,23 +73,23 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle() throws Exception {
+  public void postHandle() {
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     ModelAndView modelAndView = new ModelAndView();
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
     when(handlerMethod.getBean()).thenReturn(createMolgenisPluginController(uri));
     molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID), "test");
-    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MOLGENIS_UI));
+    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MENU));
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_AUTHENTICATED), false);
   }
 
   @Test
-  public void postHandle_pluginIdExists() throws Exception {
+  public void postHandle_pluginIdExists() {
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     ModelAndView modelAndView = new ModelAndView();
     modelAndView.addObject(PluginAttributes.KEY_PLUGIN_ID, "plugin_id");
@@ -93,14 +97,14 @@ public class PluginInterceptorTest {
     when(handlerMethod.getBean()).thenReturn(createMolgenisPluginController(uri));
     molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID), "plugin_id");
-    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MOLGENIS_UI));
+    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MENU));
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_AUTHENTICATED), false);
   }
 
   @Test
-  public void postHandlePluginidWithQueryString() throws Exception {
+  public void postHandlePluginidWithQueryString() {
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "plugin_id_test";
 
     HttpServletRequest mockHttpServletRequest = mock(HttpServletRequest.class);
@@ -112,7 +116,7 @@ public class PluginInterceptorTest {
     ModelAndView modelAndView = new ModelAndView();
     molgenisPluginInterceptor.postHandle(mockHttpServletRequest, null, handlerMethod, modelAndView);
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID), "plugin_id_test");
-    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MOLGENIS_UI));
+    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MENU));
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_AUTHENTICATED), false);
     assertEquals(
         modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING),
@@ -120,12 +124,12 @@ public class PluginInterceptorTest {
   }
 
   @Test
-  public void postHandle_authenticated() throws Exception {
+  public void postHandle_authenticated() {
     boolean isAuthenticated = true;
     when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     ModelAndView modelAndView = new ModelAndView();
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
@@ -135,24 +139,24 @@ public class PluginInterceptorTest {
     when(handlerMethod.getBean()).thenReturn(pluginController);
     molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID), "test");
-    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MOLGENIS_UI));
+    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MENU));
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_AUTHENTICATED), isAuthenticated);
   }
 
   @Test
-  public void postHandle_notAuthenticated() throws Exception {
+  public void postHandle_notAuthenticated() {
     boolean isAuthenticated = false;
     when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
 
     PluginInterceptor molgenisPluginInterceptor =
-        new PluginInterceptor(molgenisUi, permissionService);
+        new PluginInterceptor(menuReaderService, permissionService);
     String uri = PluginController.PLUGIN_URI_PREFIX + "test";
     ModelAndView modelAndView = new ModelAndView();
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
     when(handlerMethod.getBean()).thenReturn(createMolgenisPluginController(uri));
     molgenisPluginInterceptor.postHandle(null, null, handlerMethod, modelAndView);
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_PLUGIN_ID), "test");
-    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MOLGENIS_UI));
+    assertNotNull(modelAndView.getModel().get(PluginAttributes.KEY_MENU));
     assertEquals(modelAndView.getModel().get(PluginAttributes.KEY_AUTHENTICATED), isAuthenticated);
   }
 

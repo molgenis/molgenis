@@ -20,8 +20,6 @@ import java.net.URL;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.PluginIdentity;
@@ -34,6 +32,7 @@ import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.exception.FallbackExceptionHandler;
 import org.molgenis.web.exception.GlobalControllerExceptionHandler;
 import org.molgenis.web.exception.SpringExceptionHandler;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -93,10 +92,8 @@ public class AppControllerTest extends AbstractTestNGSpringContextTests {
   public void beforeMethod() throws URISyntaxException {
     initMocks(this);
 
-    Menu menu = mock(Menu.class);
     String appName = "app1";
-    when(menu.findMenuItemPath(APP_PREFIX + appName)).thenReturn("/test/path");
-    when(menuReaderService.getMenu()).thenReturn(menu);
+    when(menuReaderService.findMenuItemPath(APP_PREFIX + appName)).thenReturn("/test/path");
     when(appSettings.getLanguageCode()).thenReturn("en");
     when(localeResolver.resolveLocale(any())).thenReturn(ENGLISH);
 

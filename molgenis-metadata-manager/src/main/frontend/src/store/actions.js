@@ -27,7 +27,7 @@ export const CREATE_ATTRIBUTE: string = '__CREATE_ATTRIBUTE__'
 export const SAVE_EDITOR_ENTITY_TYPE: string = '__SAVE_EDITOR_ENTITY_TYPE__'
 export const GET_ATTRIBUTE_TYPES: string = '__GET_ATTRIBUTE_TYPES__'
 
-export const toLanguageCodes = (languageCodes: Object): Array<string> => {
+export const toLanguageCodes = (languageCodes: Array<string>): Array<string> => {
   return languageCodes
 }
 
@@ -135,7 +135,9 @@ export default {
    * Resets the current EditorEntityType
    */
   [RESET_EDITOR_ENTITY_TYPE] ({commit, state}: { commit: Function, state: State }) {
-    getEditorEntityType(commit, state.selectedEntityTypeId)
+    if (state.selectedEntityTypeId != null && state.selectedEntityTypeId !== undefined) {
+      getEditorEntityType(commit, state.selectedEntityTypeId)
+    }
   },
   /**
    * Retrieve EditorEntityType based on EntityType ID

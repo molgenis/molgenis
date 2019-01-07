@@ -2,10 +2,10 @@ package org.molgenis.core.ui.controller;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 
@@ -37,7 +37,7 @@ public abstract class VuePluginController extends PluginController {
   }
 
   protected String getBaseUrl(final String pluginId) {
-    return menuReaderService.getMenu().findMenuItemPath(pluginId);
+    return menuReaderService.findMenuItemPath(pluginId);
   }
 
   protected String getLanguageCode() {

@@ -1,7 +1,7 @@
 <template>
     <div class="app-card-carousel">
         <div class="app-card-container row">
-            <div v-for="app in apps" :key="app.id" class="col-4">
+            <div v-for="app in apps" :key="app.id" class="col-md-6 col-lg-4">
                 <app-card :app="app"></app-card>
             </div>
         </div>
