@@ -11,7 +11,7 @@
     "unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "molgenis-ui-context": "https://github.com/ConnorStroomberg/molgenis-ui-context#task/redo-nav-bar",
+    "@molgenis/molgenis-ui-context": "^0.1.2",
     "vue": "^2.5.17"
   },
   "devDependencies": {
