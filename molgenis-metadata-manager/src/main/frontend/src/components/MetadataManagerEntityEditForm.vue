@@ -1,4 +1,5 @@
 <template>
+<template>
   <div>
     <div class="row">
       <!-- Column containing  Entity ID, Extends, Extended by, Abstract-->

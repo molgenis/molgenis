@@ -74,6 +74,9 @@
 
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
+
+        <#-- Include the molgenis-menu plugin css -->
+         <#--<link rel="stylesheet" href="<@resource_href "/js/menu/css/chunk-vendors.css"/>" type="text/css">-->
     </#if>
 
     <#-- Load css specified by plugins -->
@@ -98,8 +101,6 @@
         <#assign menu=gson.toJson(menu)>
 
         <#-- VUE -->
-        <div id="molgenis-menu"></div>
-
         <script type="text/javascript">
             window.molgenisMenu = {
                 menu: ${menu}
@@ -114,7 +115,9 @@
         </script>
 
         <#-- Include the Vue version of the molgenis menu  -->
-        <script type=text/javascript src="<@resource_href "/js/bootstrap-4/menu/molgenis-menu.js"/>"></script>
+        <div id="molgenis-site-menu"></div>
+        <script type=text/javascript src="<@resource_href "/js/menu/menu.umd.js"/>"></script>
+
     </#if>
 
 <#-- Start application content -->
