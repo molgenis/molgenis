@@ -8,7 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -30,7 +30,7 @@ import org.molgenis.data.security.auth.RoleMembershipFactory;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.test.AbstractMockitoTest;
 import org.testng.annotations.BeforeMethod;
@@ -44,7 +44,7 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private DataService dataService;
 
-  @Mock private UserMetaData userMetaData;
+  @Mock private UserMetadata userMetadata;
 
   @Mock private RoleMetadata roleMetadata;
   @Mock private RoleMembership roleMembership;
@@ -60,7 +60,7 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   public void beforeMethod() {
     roleMembershipService =
         new RoleMembershipServiceImpl(
-            userService, roleMembershipFactory, dataService, userMetaData, roleMetadata);
+            userService, roleMembershipFactory, dataService, userMetadata, roleMetadata);
   }
 
   @Test
@@ -113,8 +113,8 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   public void addNonExistingUserToRole() {
     Attribute userNameAttr = mock(Attribute.class);
     when(userNameAttr.getName()).thenReturn("username");
-    when(userMetaData.getAttribute(USERNAME)).thenReturn(userNameAttr);
-    when(userMetaData.getId()).thenReturn("sys_sec_User");
+    when(userMetadata.getAttribute(USERNAME)).thenReturn(userNameAttr);
+    when(userMetadata.getId()).thenReturn("sys_sec_User");
 
     String username = "henk";
     when(userService.getUser(username)).thenReturn(null);
@@ -153,7 +153,7 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   @Test
   public void testGetMemberships() {
     Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
-    Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+    Fetch userFetch = new Fetch().field(UserMetadata.USERNAME).field(UserMetadata.ID);
     Fetch fetch =
         new Fetch()
             .field(RoleMembershipMetadata.ROLE, roleFetch)

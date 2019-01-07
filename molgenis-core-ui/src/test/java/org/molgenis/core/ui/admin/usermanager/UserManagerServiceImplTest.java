@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import org.molgenis.core.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,9 +110,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
     User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
     when(user1.getIdValue()).thenReturn(molgenisUserId1);
     when(user1.getUsername()).thenReturn(molgenisUserName1);
-    when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class)).thenReturn(user0);
-    when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class)).thenReturn(user1);
-    when(dataService.findAll(UserMetaData.USER, User.class)).thenReturn(Stream.of(user0, user1));
+    when(dataService.findOneById(UserMetadata.USER, molgenisUserId0, User.class)).thenReturn(user0);
+    when(dataService.findOneById(UserMetadata.USER, molgenisUserId1, User.class)).thenReturn(user1);
+    when(dataService.findAll(UserMetadata.USER, User.class)).thenReturn(Stream.of(user0, user1));
     this.setSecurityContextSuperUser();
     assertEquals(
         userManagerService.getAllUsers(),

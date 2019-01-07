@@ -10,7 +10,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.molgenis.core.ui.admin.permission.PermissionManagerController.URI;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.security.core.PermissionSet.COUNT_MASK;
 import static org.molgenis.security.core.PermissionSet.READ_MASK;
 import static org.molgenis.security.core.PermissionSet.READ_META_MASK;

@@ -6,8 +6,8 @@ import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN_ATTR;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Token;

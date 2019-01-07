@@ -56,7 +56,7 @@ import org.molgenis.data.rest.service.ServletUriComponentsBuilderFactory;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.exception.EntityTypePermissionDeniedException;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -290,8 +290,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
     User user = mock(User.class);
     when(user.isChangePassword()).thenReturn(true);
     when(dataService.findOne(
-            UserMetaData.USER,
-            new QueryImpl<User>().eq(UserMetaData.USERNAME, username),
+            UserMetadata.USER,
+            new QueryImpl<User>().eq(UserMetadata.USERNAME, username),
             User.class))
         .thenReturn(user);
 

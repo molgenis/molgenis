@@ -2,7 +2,7 @@ package org.molgenis.core.ui.admin.usermanager;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 
 import java.util.List;
 import java.util.stream.Stream;

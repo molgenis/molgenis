@@ -13,7 +13,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(
-    classes = {TokenFactory.class, TokenMetaData.class, SecurityPackage.class, UserMetaData.class})
+    classes = {TokenFactory.class, TokenMetaData.class, SecurityPackage.class, UserMetadata.class})
 public class TokenTest extends AbstractMolgenisSpringTest {
   @Autowired private TokenFactory tokenFactory;
 
