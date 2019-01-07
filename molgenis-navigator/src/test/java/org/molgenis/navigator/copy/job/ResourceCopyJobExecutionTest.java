@@ -1,97 +1,73 @@
 package org.molgenis.navigator.copy.job;
 
-import static freemarker.template.utility.Collections12.singletonList;
-import static java.util.Arrays.asList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.jobs.model.JobExecutionMetaData.TYPE;
-import static org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata.COPY_JOB_TYPE;
-import static org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata.RESOURCES;
-import static org.molgenis.navigator.copy.job.ResourceCopyJobExecutionMetadata.TARGET_PACKAGE;
-import static org.testng.Assert.assertEquals;
-
-import com.google.gson.Gson;
-import org.mockito.stubbing.Answer;
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeType;
-import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.EntityType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.molgenis.data.config.EntityBaseTestConfig;
+import org.molgenis.data.meta.AbstractSystemEntityTest;
+import org.molgenis.jobs.config.JobTestConfig;
+import org.molgenis.jobs.model.JobExecution.Status;
+import org.molgenis.jobs.model.JobExecutionMetaData;
+import org.molgenis.jobs.model.JobPackage;
 import org.molgenis.navigator.model.ResourceIdentifier;
 import org.molgenis.navigator.model.ResourceType;
-import org.molgenis.test.AbstractMockitoTest;
+import org.molgenis.util.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-public class ResourceCopyJobExecutionTest extends AbstractMockitoTest {
+@ContextConfiguration(
+    classes = {
+      EntityBaseTestConfig.class,
+      ResourceCopyJobExecutionMetadata.class,
+      ResourceCopyJobExecutionFactory.class,
+      JobPackage.class,
+      JobTestConfig.class
+    })
+public class ResourceCopyJobExecutionTest extends AbstractSystemEntityTest {
 
-  @Test
-  public void testConstructor() {
-    Entity entity = mock(Entity.class);
-    new ResourceCopyJobExecution(entity);
-    verify(entity).set(TYPE, COPY_JOB_TYPE);
+  @Autowired ResourceCopyJobExecutionMetadata metadata;
+  @Autowired ResourceCopyJobExecutionFactory factory;
+
+  private Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
+    // Add attributes with 'smart' getters and setters that convert back and forth to correct values
+    // for MOLGENIS datatypes
+    // Provide the attribute name as key, and a pair of return type (Class) and a Object to be used
+    // as test value
+    Map<String, Pair<Class, Object>> map = new HashMap<>();
+
+    Pair<Class, Object> resourcesPair = new Pair<>();
+    resourcesPair.setA(List.class);
+    ResourceIdentifier resource =
+        ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "testResource");
+    resourcesPair.setB(Collections.singletonList(resource));
+
+    Pair<Class, Object> statusPair = new Pair<>();
+    statusPair.setA(Status.class);
+    statusPair.setB(Status.SUCCESS);
+
+    map.put(ResourceCopyJobExecutionMetadata.RESOURCES, resourcesPair);
+    map.put(JobExecutionMetaData.STATUS, statusPair);
+
+    return map;
+  }
+
+  private List<String> getExcludedAttrs() {
+    List<String> attrs = new ArrayList<>();
+    attrs.add(JobExecutionMetaData.FAILURE_EMAIL);
+    attrs.add(JobExecutionMetaData.SUCCESS_EMAIL);
+    return attrs;
   }
 
   @Test
-  public void testConstructor2() {
-    EntityType entityType = mock(EntityType.class);
-    Attribute typeAttribute = mock(Attribute.class);
-    when(entityType.getAttribute(TYPE)).thenReturn(typeAttribute);
-    when(typeAttribute.getDataType()).thenReturn(AttributeType.STRING);
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution(entityType);
-    assertEquals(copyJobExecution.getType(), COPY_JOB_TYPE);
-  }
-
-  @Test
-  public void testConstructor3() {
-    EntityType entityType = mock(EntityType.class);
-    when(entityType.getAttribute(any(String.class)))
-        .thenAnswer(
-            (Answer)
-                invocation -> {
-                  Attribute attribute = mock(Attribute.class);
-                  when(attribute.getDataType()).thenReturn(AttributeType.STRING);
-                  return attribute;
-                });
-
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution("", entityType);
-    assertEquals(copyJobExecution.getType(), COPY_JOB_TYPE);
-  }
-
-  @Test
-  public void testSetResources() {
-    Entity entity = mock(Entity.class);
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution(entity);
-    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "id1");
-    ResourceIdentifier id2 = ResourceIdentifier.create(ResourceType.PACKAGE, "id2");
-    copyJobExecution.setResources(asList(id1, id2));
-    verify(entity).set(eq(RESOURCES), any(String.class));
-  }
-
-  @Test
-  public void testGetResources() {
-    Entity entity = mock(Entity.class);
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution(entity);
-    ResourceIdentifier id1 = ResourceIdentifier.create(ResourceType.ENTITY_TYPE, "id1");
-    when(entity.getString(RESOURCES)).thenReturn(new Gson().toJson(singletonList(id1)));
-    copyJobExecution.getResources();
-    verify(entity).getString(RESOURCES);
-  }
-
-  @Test
-  public void testSetTargetPackage() {
-    Entity entity = mock(Entity.class);
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution(entity);
-    copyJobExecution.setTargetPackage("test");
-    verify(entity).set(TARGET_PACKAGE, "test");
-  }
-
-  @Test
-  public void testGetTargetPackage() {
-    Entity entity = mock(Entity.class);
-    ResourceCopyJobExecution copyJobExecution = new ResourceCopyJobExecution(entity);
-    copyJobExecution.getTargetPackage();
-    verify(entity).getString(TARGET_PACKAGE);
+  public void testSystemEntity() {
+    internalTestAttributes(
+        metadata,
+        ResourceCopyJobExecution.class,
+        factory,
+        getOverriddenReturnTypes(),
+        getExcludedAttrs());
   }
 }
