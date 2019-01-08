@@ -1,8 +1,8 @@
 package org.molgenis.semanticmapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.core.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
+import static org.molgenis.script.core.ScriptMetadata.TYPE;
 
 import java.util.HashMap;
 import java.util.Map;

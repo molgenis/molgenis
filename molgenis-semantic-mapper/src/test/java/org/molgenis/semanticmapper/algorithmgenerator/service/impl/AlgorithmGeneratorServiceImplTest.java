@@ -6,8 +6,8 @@ import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.core.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
+import static org.molgenis.script.core.ScriptMetadata.TYPE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Lists;

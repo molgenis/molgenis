@@ -9,7 +9,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptTypeMetaData extends SystemEntityType {
+public class ScriptTypeMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "ScriptType";
   public static final String SCRIPT_TYPE = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -17,7 +17,7 @@ public class ScriptTypeMetaData extends SystemEntityType {
 
   private final ScriptPackage scriptPackage;
 
-  ScriptTypeMetaData(ScriptPackage scriptPackage) {
+  ScriptTypeMetadata(ScriptPackage scriptPackage) {
     super(SIMPLE_NAME, PACKAGE_SCRIPT);
     this.scriptPackage = requireNonNull(scriptPackage);
   }

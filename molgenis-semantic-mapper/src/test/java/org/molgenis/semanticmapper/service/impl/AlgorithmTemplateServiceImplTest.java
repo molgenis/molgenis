@@ -4,9 +4,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.core.ScriptMetaData.TYPE;
-import static org.molgenis.script.core.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
+import static org.molgenis.script.core.ScriptMetadata.TYPE;
+import static org.molgenis.script.core.ScriptParameterMetadata.SCRIPT_PARAMETER;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.Maps;
@@ -25,7 +25,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptFactory;
-import org.molgenis.script.core.ScriptMetaData;
+import org.molgenis.script.core.ScriptMetadata;
 import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.script.core.ScriptParameterFactory;
 import org.molgenis.script.core.config.ScriptTestConfig;
@@ -70,7 +70,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
     script0 = scriptFactory.create();
     script0.setName("name");
     script0.setContent(String.format("$('%s'),$('%s')", param0, param1));
-    script0.set(ScriptMetaData.PARAMETERS, asList(param0, param1));
+    script0.set(ScriptMetadata.PARAMETERS, asList(param0, param1));
 
     Query<Script> q = new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME);
     when(dataService.findAll(SCRIPT, q, Script.class)).thenReturn(Stream.of(script0));

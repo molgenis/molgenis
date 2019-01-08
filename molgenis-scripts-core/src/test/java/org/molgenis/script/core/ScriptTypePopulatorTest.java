@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.script.core.ScriptTypeMetaData.SCRIPT_TYPE;
+import static org.molgenis.script.core.ScriptTypeMetadata.SCRIPT_TYPE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.stream.Stream;
