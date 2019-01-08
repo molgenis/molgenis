@@ -31,11 +31,8 @@ public class ResourceDownloadJobExecutionTest extends AbstractSystemEntityTest {
   @Autowired ResourceDownloadJobExecutionMetadata metadata;
   @Autowired ResourceDownloadJobExecutionFactory factory;
 
-  private Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
-    // Add attributes with 'smart' getters and setters that convert back and forth to correct values
-    // for MOLGENIS datatypes
-    // Provide the attribute name as key, and a pair of return type (Class) and a Object to be used
-    // as test value
+  @Override
+  protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
     Map<String, Pair<Class, Object>> map = new HashMap<>();
 
     Pair<Class, Object> resourcesPair = new Pair<>();
@@ -53,7 +50,8 @@ public class ResourceDownloadJobExecutionTest extends AbstractSystemEntityTest {
     return map;
   }
 
-  private List<String> getExcludedAttrs() {
+  @Override
+  protected List<String> getExcludedAttrs() {
     List<String> attrs = new ArrayList<>();
     attrs.add(JobExecutionMetaData.FAILURE_EMAIL);
     attrs.add(JobExecutionMetaData.SUCCESS_EMAIL);
