@@ -7,25 +7,25 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {SecurityTestConfig.class})
-public class UserFactoryTest extends AbstractEntityFactoryTest {
+public class RoleMembershipFactoryTest extends AbstractEntityFactoryTest {
 
-  @Autowired UserFactory factory;
+  @Autowired RoleMembershipFactory factory;
 
   @Override
   @Test
   public void testCreate() {
-    super.testCreate(factory, User.class);
+    super.testCreate(factory, RoleMembership.class);
   }
 
   @Override
   @Test
   public void testCreateWithId() {
-    super.testCreateWithId(factory, User.class);
+    super.testCreateWithId(factory, RoleMembership.class);
   }
 
   @Override
   @Test
   public void testCreateWithEntity() {
-    super.testCreateWithEntity(factory, User.class);
+    super.testCreateWithEntity(factory, RoleMembership.class);
   }
 }

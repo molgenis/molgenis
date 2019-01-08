@@ -13,7 +13,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TokenMetaData extends SystemEntityType {
+public class TokenMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "Token";
   public static final String TOKEN = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -27,7 +27,7 @@ public class TokenMetaData extends SystemEntityType {
   private final SecurityPackage securityPackage;
   private final UserMetadata userMetadata;
 
-  TokenMetaData(SecurityPackage securityPackage, UserMetadata userMetadata) {
+  TokenMetadata(SecurityPackage securityPackage, UserMetadata userMetadata) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
     this.userMetadata = requireNonNull(userMetadata);

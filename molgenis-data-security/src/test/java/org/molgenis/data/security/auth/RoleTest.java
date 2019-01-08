@@ -7,14 +7,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {SecurityTestConfig.class})
-public class UserTest extends AbstractSystemEntityTest {
+public class RoleTest extends AbstractSystemEntityTest {
 
-  @Autowired UserMetadata metadata;
-  @Autowired UserFactory factory;
+  @Autowired RoleMetadata metadata;
+  @Autowired RoleFactory factory;
 
   @Test
   public void testSystemEntity() {
     internalTestAttributes(
-        metadata, User.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
+        metadata, Role.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }
 }

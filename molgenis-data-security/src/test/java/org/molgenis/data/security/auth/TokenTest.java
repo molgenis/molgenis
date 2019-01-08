@@ -1,43 +1,20 @@
 package org.molgenis.data.security.auth;
 
-import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.meta.AbstractSystemEntityTest;
+import org.molgenis.data.security.config.SecurityTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {TokenFactory.class, TokenMetaData.class, SecurityPackage.class, UserMetadata.class})
-public class TokenTest extends AbstractMolgenisSpringTest {
-  @Autowired private TokenFactory tokenFactory;
+@ContextConfiguration(classes = {SecurityTestConfig.class})
+public class TokenTest extends AbstractSystemEntityTest {
 
-  private Token token;
-
-  @BeforeMethod
-  public void setup() {
-    token = tokenFactory.create();
-  }
+  @Autowired TokenMetadata metadata;
+  @Autowired TokenFactory factory;
 
   @Test
-  public void testIsExpiredNoExpirationDate() throws Exception {
-    assertFalse(token.isExpired());
-  }
-
-  @Test
-  public void testIsExpiredExpirationDateInFuture() throws Exception {
-    token.setExpirationDate(now().plus(1, MINUTES));
-    assertFalse(token.isExpired());
-  }
-
-  @Test
-  public void testIsExpiredExpirationDateInPast() throws Exception {
-    token.setExpirationDate(now().minus(1, SECONDS));
-    assertTrue(token.isExpired());
+  public void testSystemEntity() {
+    internalTestAttributes(
+        metadata, Token.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
   }
 }
