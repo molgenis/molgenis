@@ -253,6 +253,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
     testPermissionService.grant(
         ImmutableMap.of(new PackageIdentity(id), PermissionSet.WRITEMETA),
         createUserSid(requireNonNull(getCurrentUsername())));
+
+    waitForWorkToBeFinished(indexService, LOG);
   }
 
   private void cleanupTargetPackage(String id) {
@@ -269,6 +271,8 @@ public class CopyServiceIT extends AbstractTestNGSpringContextTests {
 
     metadataService.addPackage(packageA);
     metadataService.addPackage(packageB);
+
+    waitForWorkToBeFinished(indexService, LOG);
   }
 
   @AfterClass
