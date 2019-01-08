@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /** User secret key for 2 factor authentication */
 @Component
-public class UserSecretMetaData extends SystemEntityType {
+public class UserSecretMetadata extends SystemEntityType {
   public static final String ID = "id";
   public static final String USER_ID = "userId";
   public static final String SECRET = "secret";
@@ -23,7 +23,7 @@ public class UserSecretMetaData extends SystemEntityType {
   public static final String USER_SECRET = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
   private final SecurityPackage securityPackage;
 
-  public UserSecretMetaData(SecurityPackage securityPackage) {
+  public UserSecretMetadata(SecurityPackage securityPackage) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
   }

@@ -21,7 +21,7 @@ import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.RecoveryCodeMetadata;
 import org.molgenis.security.twofactor.model.UserSecret;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
+import org.molgenis.security.twofactor.model.UserSecretMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,13 +80,13 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests {
             .findOne())
         .thenReturn(recoveryCode);
     when(dataService
-            .query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-            .eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+            .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
+            .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
             .findOne())
         .thenReturn(userSecret);
     recoveryService.useRecoveryCode(recoveryCodeId);
     verify(userSecret).setFailedLoginAttempts(0);
-    verify(dataService).update(UserSecretMetaData.USER_SECRET, userSecret);
+    verify(dataService).update(UserSecretMetadata.USER_SECRET, userSecret);
   }
 
   @Test

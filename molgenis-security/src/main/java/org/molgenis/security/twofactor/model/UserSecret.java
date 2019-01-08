@@ -20,42 +20,42 @@ public class UserSecret extends StaticEntity {
   }
 
   public String getId() {
-    return getString(UserSecretMetaData.ID);
+    return getString(UserSecretMetadata.ID);
   }
 
   public void setId(String id) {
-    set(UserSecretMetaData.ID, id);
+    set(UserSecretMetadata.ID, id);
   }
 
   public String getUserId() {
-    return getString(UserSecretMetaData.USER_ID);
+    return getString(UserSecretMetadata.USER_ID);
   }
 
   public void setUserId(String userId) {
-    set(UserSecretMetaData.USER_ID, userId);
+    set(UserSecretMetadata.USER_ID, userId);
   }
 
   public String getSecret() {
-    return getString(UserSecretMetaData.SECRET);
+    return getString(UserSecretMetadata.SECRET);
   }
 
   public void setSecret(String secret) {
-    set(UserSecretMetaData.SECRET, secret);
+    set(UserSecretMetadata.SECRET, secret);
   }
 
   public Instant getLastFailedAuthentication() {
-    return getInstant(UserSecretMetaData.LAST_FAILED_AUTHENICATION);
+    return getInstant(UserSecretMetadata.LAST_FAILED_AUTHENICATION);
   }
 
   public void setLastFailedAuthentication(Instant lastFailedAuthentication) {
-    set(UserSecretMetaData.LAST_FAILED_AUTHENICATION, lastFailedAuthentication);
+    set(UserSecretMetadata.LAST_FAILED_AUTHENICATION, lastFailedAuthentication);
   }
 
   public int getFailedLoginAttempts() {
-    return getInt(UserSecretMetaData.FAILED_LOGIN_ATTEMPTS);
+    return getInt(UserSecretMetadata.FAILED_LOGIN_ATTEMPTS);
   }
 
   public void setFailedLoginAttempts(int failedLoginAttempts) {
-    set(UserSecretMetaData.FAILED_LOGIN_ATTEMPTS, failedLoginAttempts);
+    set(UserSecretMetadata.FAILED_LOGIN_ATTEMPTS, failedLoginAttempts);
   }
 }
