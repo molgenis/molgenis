@@ -75,8 +75,9 @@
         <#-- Include the JS bundle for bootstrap 4 which includes popper.js -->
         <script type="text/javascript" src="<@resource_href "/js/bootstrap-4/bootstrap.bundle.min.js"/>"></script>
 
-        <#-- Include the molgenis-menu plugin css -->
-         <#--<link rel="stylesheet" href="<@resource_href "/js/menu/css/chunk-vendors.css"/>" type="text/css">-->
+        <#-- Include molgenis-menu css -->
+        <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
+
     </#if>
 
     <#-- Load css specified by plugins -->
