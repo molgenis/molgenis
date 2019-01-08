@@ -7,7 +7,7 @@ You can download, install and use MOLGENIS for free under license [LGPLv3]().
 **
 
 * [Java Platform (JDK) 8u171](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [Apache Tomcat v8.5.x](http://tomcat.apache.org/)
+* [Apache Tomcat v9.0.x](http://tomcat.apache.org/)
 * [PostgreSQL v9.6.x](https://www.postgresql.org/download/)
 * [Elasticsearch v5.5](https://www.elastic.co/downloads/elasticsearch)
 * Optional: [OpenCPU 2.0](https://www.opencpu.org/download.html) (enables R scripting feature)
