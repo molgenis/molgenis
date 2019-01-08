@@ -1,16 +1,5 @@
 package org.molgenis.script;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.meta.AbstractSystemEntityTest;
-import org.molgenis.util.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.Test;
-
 //NOTE: when the following exception occurs;
 //java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy,
 //this means you are missing this dependency:
@@ -19,6 +8,7 @@ import org.testng.annotations.Test;
 //  <artifactId>spring-security-test</artifactId>
 //  <scope>test</scope>
 //</dependency>
+//TODO remove this NOTE
 
 @ContextConfiguration(
     classes = {
@@ -31,15 +21,9 @@ public class ${ENTITY_CLASSNAME}Test extends AbstractSystemEntityTest {
   @Autowired ${ENTITY_CLASSNAME}Metadata metadata;
   @Autowired ${ENTITY_CLASSNAME}Factory factory;
 
-  private Map<String, Pair<Class, Object>> getOverriddenReturnTypes(){
-    //Add attributes with 'smart' getters and setters that convert back and forth to correct values for MOLGENIS datatypes
-    //Provide the attribute name as key, and a pair of return type (Class) and an Object to be used as test value
-    return new HashMap<>();
-    }
-
-  private List<String> getExcludedAttrs() {
-    return new ArrayList<>();
-  }
+  // TODO override or remove:
+  // getOverridenReturnTypes() if getters/setters use a return type that differs from the metadata
+  // getExcludedAttrs() if you want to exclude some attributes from the test
 
   @Test
   public void testSystemEntity() {

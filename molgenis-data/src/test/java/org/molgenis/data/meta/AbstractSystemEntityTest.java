@@ -9,7 +9,9 @@ import static org.testng.Assert.fail;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +33,26 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
 
   @SuppressWarnings("unused")
   protected abstract void testSystemEntity();
+
+  /**
+   * Override this method when the EntityType under test has getters and setters that convert back
+   * and forth to types that differ from the data type of the attribute.
+   *
+   * @return a map with the attribute name as key, and a pair of return type (Class) and an Object
+   *     to be used as test value.
+   */
+  protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
+    return new HashMap<>();
+  }
+
+  /**
+   * Override this method if you want to prevent attributes from being tested.
+   *
+   * @return list of attributes to ignore in the test
+   */
+  protected List<String> getExcludedAttrs() {
+    return new ArrayList<>();
+  }
 
   protected void internalTestAttributes(
       SystemEntityType systemEntityType,
