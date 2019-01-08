@@ -62,6 +62,7 @@ import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.server.adapter.ForwardedHeaderTransformer;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -336,5 +337,11 @@ public abstract class MolgenisWebAppConfig implements WebMvcConfigurer {
   @Bean
   public ApplicationContextProvider applicationContextProvider() {
     return new ApplicationContextProvider();
+  }
+
+  /** Introduced due to https://jira.spring.io/browse/SPR-16668 */
+  @Bean
+  public ForwardedHeaderTransformer forwardedHeaderTransformer() {
+    return new ForwardedHeaderTransformer();
   }
 }
