@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserRepositoryDecoratorFactory
-    extends AbstractSystemRepositoryDecoratorFactory<User, UserMetaData> {
+    extends AbstractSystemRepositoryDecoratorFactory<User, UserMetadata> {
   private final PasswordEncoder passwordEncoder;
 
   public UserRepositoryDecoratorFactory(
-      UserMetaData userMetaData, PasswordEncoder passwordEncoder) {
-    super(userMetaData);
+      UserMetadata userMetadata, PasswordEncoder passwordEncoder) {
+    super(userMetadata);
     this.passwordEncoder = requireNonNull(passwordEncoder);
   }
 

@@ -4,8 +4,8 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;

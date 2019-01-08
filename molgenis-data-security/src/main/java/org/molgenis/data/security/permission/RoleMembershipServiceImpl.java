@@ -3,7 +3,7 @@ package org.molgenis.data.security.permission;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.security.auth.RoleMembershipMetadata.ROLE_MEMBERSHIP;
 import static org.molgenis.data.security.auth.RoleMetadata.NAME;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -17,7 +17,7 @@ import org.molgenis.data.security.auth.RoleMembershipFactory;
 import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.stereotype.Component;
@@ -27,19 +27,19 @@ public class RoleMembershipServiceImpl implements RoleMembershipService {
   private final UserService userService;
   private final RoleMembershipFactory roleMembershipFactory;
   private final DataService dataService;
-  private final UserMetaData userMetaData;
+  private final UserMetadata userMetadata;
   private final RoleMetadata roleMetadata;
 
   RoleMembershipServiceImpl(
       UserService userService,
       RoleMembershipFactory roleMembershipFactory,
       DataService dataService,
-      UserMetaData userMetaData,
+      UserMetadata userMetadata,
       RoleMetadata roleMetadata) {
     this.userService = requireNonNull(userService);
     this.roleMembershipFactory = requireNonNull(roleMembershipFactory);
     this.dataService = requireNonNull(dataService);
-    this.userMetaData = requireNonNull(userMetaData);
+    this.userMetadata = requireNonNull(userMetadata);
     this.roleMetadata = requireNonNull(roleMetadata);
   }
 
@@ -48,7 +48,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService {
   public void addUserToRole(String username, String roleName) {
     User user = userService.getUser(username);
     if (user == null) {
-      throw new UnknownEntityException(userMetaData, userMetaData.getAttribute(USERNAME), username);
+      throw new UnknownEntityException(userMetadata, userMetadata.getAttribute(USERNAME), username);
     }
 
     Role role = dataService.query(RoleMetadata.ROLE, Role.class).eq(NAME, roleName).findOne();
@@ -93,7 +93,7 @@ public class RoleMembershipServiceImpl implements RoleMembershipService {
   @Override
   public Collection<RoleMembership> getMemberships(Collection<Role> roles) {
     Fetch roleFetch = new Fetch().field(RoleMetadata.NAME).field(RoleMetadata.LABEL);
-    Fetch userFetch = new Fetch().field(UserMetaData.USERNAME).field(UserMetaData.ID);
+    Fetch userFetch = new Fetch().field(UserMetadata.USERNAME).field(UserMetadata.ID);
     Fetch fetch =
         new Fetch()
             .field(RoleMembershipMetadata.ROLE, roleFetch)

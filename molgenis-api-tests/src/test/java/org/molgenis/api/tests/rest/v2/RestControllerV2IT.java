@@ -38,7 +38,7 @@ import net.minidev.json.JSONObject;
 import org.hamcrest.Matchers;
 import org.molgenis.api.tests.rest.v1.RestControllerIT;
 import org.molgenis.api.tests.utils.RestTestUtils;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -109,7 +109,7 @@ public class RestControllerV2IT {
         .put(ENTITY_TYPE_META_DATA, WRITE)
         .put(ATTRIBUTE_META_DATA, WRITE)
         .put(FILE_META, READ)
-        .put(UserMetaData.USER, COUNT);
+        .put(UserMetadata.USER, COUNT);
     testEntities.forEach(entity -> permissionsBuilder.put(entity, WRITE));
     setGrantedRepositoryPermissions(adminToken, testUsername, permissionsBuilder.build());
 

@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.auth.TwoFactorAuthenticationSetting.ENABLED;
@@ -68,7 +68,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.util.Href;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -807,7 +807,7 @@ public class RestController {
           User user =
               dataService.findOne(
                   USER,
-                  new QueryImpl<User>().eq(UserMetaData.USERNAME, authentication.getName()),
+                  new QueryImpl<User>().eq(UserMetadata.USERNAME, authentication.getName()),
                   User.class);
 
           if (user.isChangePassword()) {

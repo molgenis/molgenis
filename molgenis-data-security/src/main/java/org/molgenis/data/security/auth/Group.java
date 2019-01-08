@@ -96,7 +96,7 @@ public class Group extends StaticEntity {
     set(ROOT_PACKAGE, rootPackage);
   }
 
-  public String getRootPackage() {
-    return getString(ROOT_PACKAGE);
+  public Package getRootPackage() {
+    return getEntity(ROOT_PACKAGE, Package.class);
   }
 }

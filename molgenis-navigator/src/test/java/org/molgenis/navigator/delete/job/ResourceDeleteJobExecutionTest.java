@@ -1,4 +1,4 @@
-package org.molgenis.navigator.copy.job;
+package org.molgenis.navigator.delete.job;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,15 +21,15 @@ import org.testng.annotations.Test;
 @ContextConfiguration(
     classes = {
       EntityBaseTestConfig.class,
-      ResourceCopyJobExecutionMetadata.class,
-      ResourceCopyJobExecutionFactory.class,
+      ResourceDeleteJobExecutionMetadata.class,
+      ResourceDeleteJobExecutionFactory.class,
       JobPackage.class,
       JobTestConfig.class
     })
-public class ResourceCopyJobExecutionTest extends AbstractSystemEntityTest {
+public class ResourceDeleteJobExecutionTest extends AbstractSystemEntityTest {
 
-  @Autowired ResourceCopyJobExecutionMetadata metadata;
-  @Autowired ResourceCopyJobExecutionFactory factory;
+  @Autowired ResourceDeleteJobExecutionMetadata metadata;
+  @Autowired ResourceDeleteJobExecutionFactory factory;
 
   private Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
     // Add attributes with 'smart' getters and setters that convert back and forth to correct values
@@ -48,9 +48,8 @@ public class ResourceCopyJobExecutionTest extends AbstractSystemEntityTest {
     statusPair.setA(Status.class);
     statusPair.setB(Status.SUCCESS);
 
-    map.put(ResourceCopyJobExecutionMetadata.RESOURCES, resourcesPair);
+    map.put(ResourceDeleteJobExecutionMetadata.RESOURCES, resourcesPair);
     map.put(JobExecutionMetaData.STATUS, statusPair);
-
     return map;
   }
 
@@ -65,7 +64,7 @@ public class ResourceCopyJobExecutionTest extends AbstractSystemEntityTest {
   public void testSystemEntity() {
     internalTestAttributes(
         metadata,
-        ResourceCopyJobExecution.class,
+        ResourceDeleteJobExecution.class,
         factory,
         getOverriddenReturnTypes(),
         getExcludedAttrs());

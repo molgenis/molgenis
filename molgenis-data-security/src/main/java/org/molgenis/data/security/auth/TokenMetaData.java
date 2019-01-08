@@ -25,12 +25,12 @@ public class TokenMetaData extends SystemEntityType {
   public static final String DESCRIPTION = "description";
 
   private final SecurityPackage securityPackage;
-  private final UserMetaData userMetaData;
+  private final UserMetadata userMetadata;
 
-  TokenMetaData(SecurityPackage securityPackage, UserMetaData userMetaData) {
+  TokenMetaData(SecurityPackage securityPackage, UserMetadata userMetadata) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
-    this.userMetaData = requireNonNull(userMetaData);
+    this.userMetadata = requireNonNull(userMetadata);
   }
 
   @Override
@@ -41,7 +41,7 @@ public class TokenMetaData extends SystemEntityType {
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(USER)
         .setDataType(XREF)
-        .setRefEntity(userMetaData)
+        .setRefEntity(userMetadata)
         .setAggregatable(true)
         .setNillable(false);
     addAttribute(TOKEN_ATTR, ROLE_LABEL).setLabel(SIMPLE_NAME).setUnique(true).setNillable(false);

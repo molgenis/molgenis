@@ -7,11 +7,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SHORT_SECURE_RANDOM;
-import static org.molgenis.data.security.auth.UserMetaData.ACTIVATIONCODE;
-import static org.molgenis.data.security.auth.UserMetaData.ACTIVE;
-import static org.molgenis.data.security.auth.UserMetaData.EMAIL;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.ACTIVATIONCODE;
+import static org.molgenis.data.security.auth.UserMetadata.ACTIVE;
+import static org.molgenis.data.security.auth.UserMetadata.EMAIL;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 
 import java.net.URISyntaxException;
 import org.mockito.ArgumentCaptor;

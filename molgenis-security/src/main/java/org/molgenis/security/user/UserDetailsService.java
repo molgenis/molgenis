@@ -12,7 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.Role;
 import org.molgenis.data.security.auth.RoleMembership;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.core.SidUtils;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -38,8 +38,8 @@ public class UserDetailsService
   public UserDetails loadUserByUsername(String username) {
     User user =
         dataService
-            .query(UserMetaData.USER, User.class)
-            .eq(UserMetaData.USERNAME, username)
+            .query(UserMetadata.USER, User.class)
+            .eq(UserMetadata.USERNAME, username)
             .findOne();
     if (user == null) {
       throw new UsernameNotFoundException("unknown user '" + username + "'");
