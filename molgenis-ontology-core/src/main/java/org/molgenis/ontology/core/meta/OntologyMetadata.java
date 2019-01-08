@@ -14,7 +14,7 @@ import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyMetaData extends SystemEntityType {
+public class OntologyMetadata extends SystemEntityType {
   public static final String SIMPLE_NAME = "Ontology";
   public static final String ONTOLOGY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -24,9 +24,9 @@ public class OntologyMetaData extends SystemEntityType {
   public static final String ONTOLOGY_TERMS = "ontologyTerms";
 
   private final OntologyPackage ontologyPackage;
-  private OntologyTermMetaData ontologyTermMetaData;
+  private OntologyTermMetadata ontologyTermMetadata;
 
-  public OntologyMetaData(OntologyPackage ontologyPackage) {
+  public OntologyMetadata(OntologyPackage ontologyPackage) {
     super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
     this.ontologyPackage = requireNonNull(ontologyPackage);
   }
@@ -44,18 +44,18 @@ public class OntologyMetaData extends SystemEntityType {
     addAttribute(ONTOLOGY_NAME, ROLE_LABEL).setNillable(false).setLabel("Name");
     addAttribute(ONTOLOGY_TERMS)
         .setDataType(ONE_TO_MANY)
-        .setRefEntity(ontologyTermMetaData)
-        .setMappedBy(ontologyTermMetaData.getAttribute(OntologyTermMetaData.ONTOLOGY))
+        .setRefEntity(ontologyTermMetadata)
+        .setMappedBy(ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY))
         .setCascadeDelete(true)
         .setLabel("Terms");
   }
 
-  void setOntologyTermMetaData(OntologyTermMetaData ontologyTermMetaData) {
-    this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
+  void setOntologyTermMetadata(OntologyTermMetadata ontologyTermMetadata) {
+    this.ontologyTermMetadata = requireNonNull(ontologyTermMetadata);
   }
 
   @Override
   public Set<SystemEntityType> getDependencies() {
-    return singleton(ontologyTermMetaData);
+    return singleton(ontologyTermMetadata);
   }
 }

@@ -2,7 +2,7 @@ package org.molgenis.ontology.core.importer;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -27,7 +27,7 @@ import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.importer.repository.OntologyFileExtensions;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -78,16 +78,16 @@ public class OntologyImportService implements ImportService {
 
     boolean ontologyExists = false;
     for (Entity ontologyEntity : source.getRepository(ONTOLOGY)) {
-      String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
-      String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
+      String ontologyIRI = ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI);
+      String ontologyName = ontologyEntity.getString(OntologyMetadata.ONTOLOGY_NAME);
 
       Entity ontologyQueryEntity =
           dataService.findOne(
               ONTOLOGY,
               new QueryImpl<>()
-                  .eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI)
+                  .eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIRI)
                   .or()
-                  .eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
+                  .eq(OntologyMetadata.ONTOLOGY_NAME, ontologyName));
       ontologyExists = ontologyQueryEntity != null;
     }
 

@@ -11,7 +11,7 @@ import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermDynamicAnnotationMetaData extends SystemEntityType {
+public class OntologyTermDynamicAnnotationMetadata extends SystemEntityType {
   public static final String SIMPLE_NAME = "OntologyTermDynamicAnnotation";
   public static final String ONTOLOGY_TERM_DYNAMIC_ANNOTATION =
       PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -23,7 +23,7 @@ public class OntologyTermDynamicAnnotationMetaData extends SystemEntityType {
 
   private final OntologyPackage ontologyPackage;
 
-  public OntologyTermDynamicAnnotationMetaData(OntologyPackage ontologyPackage) {
+  public OntologyTermDynamicAnnotationMetadata(OntologyPackage ontologyPackage) {
     super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
     this.ontologyPackage = requireNonNull(ontologyPackage);
   }

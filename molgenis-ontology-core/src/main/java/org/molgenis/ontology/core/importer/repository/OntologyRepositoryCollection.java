@@ -2,11 +2,11 @@ package org.molgenis.ontology.core.importer.repository;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -33,15 +33,15 @@ import org.molgenis.ontology.core.meta.OntologyFactory;
 import org.molgenis.ontology.core.meta.OntologyTerm;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationFactory;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata;
 import org.molgenis.ontology.core.meta.OntologyTermFactory;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.core.meta.OntologyTermNodePath;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathFactory;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata;
 import org.molgenis.ontology.core.meta.OntologyTermSynonym;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata;
 import org.molgenis.ontology.core.utils.OWLClassContainer;
 import org.molgenis.ontology.core.utils.OntologyLoader;
 import org.molgenis.util.file.UnzipException;
@@ -160,7 +160,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates {@link OntologyTermNodePathMetaData} {@link Entity}s for an entire ontology tree and
+   * Creates {@link OntologyTermNodePathMetadata} {@link Entity}s for an entire ontology tree and
    * writes them to the {@link #nodePathsPerOntologyTerm} {@link Multimap}.
    */
   private void createNodePaths() {
@@ -194,7 +194,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates {@link OntologyTermMetaData} {@link Entity}s for all {@link OWLClass}ses in the {@link
+   * Creates {@link OntologyTermMetadata} {@link Entity}s for all {@link OWLClass}ses in the {@link
    * #loader} and adds them to the {@link #ontologyTermRepository}.
    */
   private void createOntologyTerms() {
@@ -202,7 +202,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates an {@link OntologyTermMetaData} {@link Entity} and adds it in the {@link
+   * Creates an {@link OntologyTermMetadata} {@link Entity} and adds it in the {@link
    * #ontologyTermRepository}
    *
    * @param ontologyTermClass the OWLClass to create an entity for
@@ -224,7 +224,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates {@link OntologyTermSynonymMetaData} {@link Entity}s for an ontology term
+   * Creates {@link OntologyTermSynonymMetadata} {@link Entity}s for an ontology term
    *
    * @param ontologyTerm {@link OWLClass} for the ontology term
    * @return {@link List} of created synonym {@link Entity}s
@@ -238,7 +238,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates an {@link OntologyTermSynonymMetaData} {@link Entity} and adds it to the {@link
+   * Creates an {@link OntologyTermSynonymMetadata} {@link Entity} and adds it to the {@link
    * #synonymRepository}.
    *
    * @param synonym String of the synonym to create an {@link Entity} for
@@ -253,7 +253,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates {@link OntologyTermDynamicAnnotationMetaData} {@link Entity}s for the databaseIds of an
+   * Creates {@link OntologyTermDynamicAnnotationMetadata} {@link Entity}s for the databaseIds of an
    * ontology term.
    *
    * @param term the term to create annotation entities for
@@ -268,7 +268,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates an {@link OntologyTermDynamicAnnotationMetaData} {@link Entity} for a key:value label.
+   * Creates an {@link OntologyTermDynamicAnnotationMetadata} {@link Entity} for a key:value label.
    *
    * @param label the key:value label
    * @return the {@link Entity}
@@ -304,7 +304,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection {
   }
 
   /**
-   * Creates a {@link OntologyTermNodePathMetaData} {@link Entity} and stores it in the {@link
+   * Creates a {@link OntologyTermNodePathMetadata} {@link Entity} and stores it in the {@link
    * #nodePathRepository}.
    *
    * @param container {@link OWLClassContainer} for the path to the ontology term
