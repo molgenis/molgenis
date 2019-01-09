@@ -15,7 +15,7 @@ import org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState
 import org.springframework.stereotype.Component;
 
 @Component
-public class AttributeMappingMetaData extends SystemEntityType {
+public class AttributeMappingMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "AttributeMapping";
   public static final String ATTRIBUTE_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -27,7 +27,7 @@ public class AttributeMappingMetaData extends SystemEntityType {
 
   private final MapperPackage mapperPackage;
 
-  public AttributeMappingMetaData(MapperPackage mapperPackage) {
+  public AttributeMappingMetadata(MapperPackage mapperPackage) {
     super(SIMPLE_NAME, PACKAGE_MAPPER);
     this.mapperPackage = requireNonNull(mapperPackage);
   }

@@ -11,7 +11,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
-import org.molgenis.semanticmapper.meta.EntityMappingMetaData;
+import org.molgenis.semanticmapper.meta.EntityMappingMetadata;
 import org.molgenis.semanticmapper.repository.AttributeMappingRepository;
 import org.molgenis.semanticmapper.repository.EntityMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository {
 
   @Autowired private IdGenerator idGenerator;
 
-  @Autowired private EntityMappingMetaData entityMappingMetaData;
+  @Autowired private EntityMappingMetadata entityMappingMetaData;
 
   private final AttributeMappingRepository attributeMappingRepository;
 
@@ -36,19 +36,19 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository {
   }
 
   private EntityMapping toEntityMapping(Entity entityMappingEntity) {
-    String identifier = entityMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
+    String identifier = entityMappingEntity.getString(EntityMappingMetadata.IDENTIFIER);
 
     EntityType targetEntityType =
         dataService.getEntityType(
-            entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE));
+            entityMappingEntity.getString(EntityMappingMetadata.TARGET_ENTITY_TYPE));
 
     EntityType sourceEntityType =
         dataService.getEntityType(
-            entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE));
+            entityMappingEntity.getString(EntityMappingMetadata.SOURCE_ENTITY_TYPE));
 
     List<Entity> attributeMappingEntities =
         Lists.newArrayList(
-            entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
+            entityMappingEntity.getEntities(EntityMappingMetadata.ATTRIBUTE_MAPPINGS));
     List<AttributeMapping> attributeMappings =
         attributeMappingRepository.getAttributeMappings(
             attributeMappingEntities, sourceEntityType, targetEntityType);
@@ -79,14 +79,14 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository {
   private Entity toEntityMappingEntity(
       EntityMapping entityMapping, List<Entity> attributeMappingEntities) {
     Entity entityMappingEntity = new DynamicEntity(entityMappingMetaData);
-    entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-    entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, entityMapping.getName());
+    entityMappingEntity.set(EntityMappingMetadata.IDENTIFIER, entityMapping.getIdentifier());
+    entityMappingEntity.set(EntityMappingMetadata.SOURCE_ENTITY_TYPE, entityMapping.getName());
     entityMappingEntity.set(
-        EntityMappingMetaData.TARGET_ENTITY_TYPE,
+        EntityMappingMetadata.TARGET_ENTITY_TYPE,
         entityMapping.getTargetEntityType() != null
             ? entityMapping.getTargetEntityType().getId()
             : null);
-    entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
+    entityMappingEntity.set(EntityMappingMetadata.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
     return entityMappingEntity;
   }
 }

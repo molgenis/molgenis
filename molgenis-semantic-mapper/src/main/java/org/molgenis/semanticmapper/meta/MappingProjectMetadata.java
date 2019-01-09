@@ -11,7 +11,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MappingProjectMetaData extends SystemEntityType {
+public class MappingProjectMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "MappingProject";
   public static final String MAPPING_PROJECT = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -21,10 +21,10 @@ public class MappingProjectMetaData extends SystemEntityType {
   public static final String MAPPING_TARGETS = "mappingtargets";
 
   private final MapperPackage mapperPackage;
-  private final MappingTargetMetaData mappingTargetMetaData;
+  private final MappingTargetMetadata mappingTargetMetaData;
 
-  public MappingProjectMetaData(
-      MapperPackage mapperPackage, MappingTargetMetaData mappingTargetMetaData) {
+  public MappingProjectMetadata(
+      MapperPackage mapperPackage, MappingTargetMetadata mappingTargetMetaData) {
     super(SIMPLE_NAME, PACKAGE_MAPPER);
     this.mapperPackage = requireNonNull(mapperPackage);
     this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
