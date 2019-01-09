@@ -52,7 +52,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final String AGGREGATE_THRESHOLD = "aggregate_threshold";
 
     private static final String DEFAULT_TITLE = "MOLGENIS";
-    private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
+    private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/Logo_Black_Small.png";
     private static final Integer DEFAULT_LOGO_TOP_MAX_HEIGHT = 150;
     private static final String DEFAULT_LANGUAGE_CODE = "en";
     private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
