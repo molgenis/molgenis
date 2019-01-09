@@ -10,7 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
-import org.molgenis.data.index.job.IndexJobExecutionMeta;
+import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
@@ -59,7 +59,7 @@ public class IndexBootstrapper {
       List<IndexJobExecution> failedIndexJobs =
           dataService
               .findAll(
-                  IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+                  IndexJobExecutionMetadata.INDEX_JOB_EXECUTION,
                   new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
                   IndexJobExecution.class)
               .collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class IndexBootstrapper {
             .collect(Collectors.toList());
     actions.forEach(this::registerIndexAction);
 
-    dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution);
+    dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, indexJobExecution);
     dataService.deleteAll(
         IndexActionMetaData.INDEX_ACTION, actions.stream().map(IndexAction::getId));
     dataService.deleteById(IndexActionGroupMetaData.INDEX_ACTION_GROUP, id);

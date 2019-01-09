@@ -21,11 +21,11 @@ public class IndexJobExecution extends JobExecution {
   }
 
   public String getIndexActionJobID() {
-    return getString(IndexJobExecutionMeta.INDEX_ACTION_JOB_ID);
+    return getString(IndexJobExecutionMetadata.INDEX_ACTION_JOB_ID);
   }
 
   public void setIndexActionJobID(String id) {
-    set(IndexJobExecutionMeta.INDEX_ACTION_JOB_ID, id);
+    set(IndexJobExecutionMetadata.INDEX_ACTION_JOB_ID, id);
   }
 
   private void setDefaultValues() {

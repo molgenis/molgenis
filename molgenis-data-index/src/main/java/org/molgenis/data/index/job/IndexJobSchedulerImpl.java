@@ -98,20 +98,20 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
           LOG.trace("Clean up Index job executions...");
           Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
           boolean indexJobExecutionExists =
-              dataService.hasRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
+              dataService.hasRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
           if (indexJobExecutionExists) {
             Stream<Entity> executions =
                 dataService
-                    .getRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION)
+                    .getRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION)
                     .query()
                     .lt(END_DATE, fiveMinutesAgo)
                     .and()
                     .eq(STATUS, SUCCESS.toString())
                     .findAll();
-            dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, executions);
+            dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, executions);
             LOG.debug("Cleaned up Index job executions.");
           } else {
-            LOG.warn("{} does not exist", IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
+            LOG.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
           }
         });
   }

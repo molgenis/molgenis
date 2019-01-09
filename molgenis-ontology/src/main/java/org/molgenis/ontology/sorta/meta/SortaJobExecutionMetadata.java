@@ -13,7 +13,7 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SortaJobExecutionMetaData extends SystemEntityType {
+public class SortaJobExecutionMetadata extends SystemEntityType {
   public static final String SIMPLE_NAME = "SortaJobExecution";
   public static final String SORTA_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -29,7 +29,7 @@ public class SortaJobExecutionMetaData extends SystemEntityType {
   private final JobPackage jobPackage;
   private final JobExecutionMetaData jobExecutionMetaData;
 
-  SortaJobExecutionMetaData(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData) {
+  SortaJobExecutionMetadata(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData) {
     super(SIMPLE_NAME, PACKAGE_JOB);
     this.jobPackage = requireNonNull(jobPackage);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);

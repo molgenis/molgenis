@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /** This entity is used to track the progress of the execution of a IndexActionJob. */
 @Component
-public class IndexJobExecutionMeta extends SystemEntityType {
+public class IndexJobExecutionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "IndexJobExecution";
   public static final String INDEX_JOB_EXECUTION = PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -25,7 +25,8 @@ public class IndexJobExecutionMeta extends SystemEntityType {
   private final JobPackage jobPackage;
   private final JobExecutionMetaData jobExecutionMetaData;
 
-  public IndexJobExecutionMeta(JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData) {
+  public IndexJobExecutionMetadata(
+      JobPackage jobPackage, JobExecutionMetaData jobExecutionMetaData) {
     super(SIMPLE_NAME, PACKAGE_JOB);
     this.jobPackage = requireNonNull(jobPackage);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);

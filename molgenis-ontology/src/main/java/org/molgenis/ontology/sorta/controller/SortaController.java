@@ -20,7 +20,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.INPUT
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALIDATED;
-import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
 import com.google.common.base.Objects;
@@ -73,7 +73,7 @@ import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobExecutionFactory;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
-import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
+import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.request.SortaServiceRequest;
 import org.molgenis.ontology.sorta.request.SortaServiceResponse;
@@ -123,7 +123,7 @@ public class SortaController extends PluginController {
   private final IdGenerator idGenerator;
   private final PermissionSystemService permissionSystemService;
   private final MatchingTaskContentMetaData matchingTaskContentMetaData;
-  private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
+  private final SortaJobExecutionMetadata sortaJobExecutionMetaData;
   private final OntologyTermMetaData ontologyTermMetaData;
   private final SortaJobExecutionFactory sortaJobExecutionFactory;
   private final EntityTypeFactory entityTypeFactory;
@@ -141,7 +141,7 @@ public class SortaController extends PluginController {
       IdGenerator idGenerator,
       PermissionSystemService permissionSystemService,
       MatchingTaskContentMetaData matchingTaskContentMetaData,
-      SortaJobExecutionMetaData sortaJobExecutionMetaData,
+      SortaJobExecutionMetadata sortaJobExecutionMetaData,
       OntologyTermMetaData ontologyTermMetaData,
       SortaJobExecutionFactory sortaJobExecutionFactory,
       EntityTypeFactory entityTypeFactory,

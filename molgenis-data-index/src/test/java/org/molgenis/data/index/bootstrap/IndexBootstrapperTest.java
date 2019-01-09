@@ -27,7 +27,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
-import org.molgenis.data.index.job.IndexJobExecutionMeta;
+import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
@@ -118,7 +118,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
     when(dataService.findAll(
-            IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+            IndexJobExecutionMetadata.INDEX_JOB_EXECUTION,
             new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
             IndexJobExecution.class))
         .thenReturn(Stream.of(indexJobExecution));
@@ -136,7 +136,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     verify(indexActionRegisterService).register(entityType, 1);
 
     // verify that the failed job and corresponding actions are cleaned up
-    verify(dataService).delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution);
+    verify(dataService).delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, indexJobExecution);
 
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
     verify(dataService).deleteAll(eq(IndexActionMetaData.INDEX_ACTION), captor.capture());
@@ -160,7 +160,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     when(idAttribute.getDataType()).thenReturn(AttributeType.INT);
     when(entityType.getIdAttribute()).thenReturn(idAttribute);
     when(dataService.findAll(
-            IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+            IndexJobExecutionMetadata.INDEX_JOB_EXECUTION,
             new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
             IndexJobExecution.class))
         .thenReturn(Stream.of(indexJobExecution));
@@ -183,7 +183,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     when(indexService.hasIndex(attributeMetadata)).thenReturn(true);
 
     when(dataService.findAll(
-            IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+            IndexJobExecutionMetadata.INDEX_JOB_EXECUTION,
             new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
             IndexJobExecution.class))
         .thenReturn(Stream.empty());
