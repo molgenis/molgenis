@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 /** This entity is used to group the index actions. */
 @Component
-public class IndexActionGroupMetaData extends SystemEntityType {
+public class IndexActionGroupMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "IndexActionGroup";
   public static final String INDEX_ACTION_GROUP = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -26,7 +26,7 @@ public class IndexActionGroupMetaData extends SystemEntityType {
 
   private final IndexPackage indexPackage;
 
-  public IndexActionGroupMetaData(IndexPackage indexPackage) {
+  public IndexActionGroupMetadata(IndexPackage indexPackage) {
     super(SIMPLE_NAME, PACKAGE_INDEX);
     this.indexPackage = requireNonNull(indexPackage);
   }

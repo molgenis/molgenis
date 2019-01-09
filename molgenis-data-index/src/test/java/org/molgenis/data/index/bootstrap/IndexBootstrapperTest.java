@@ -29,8 +29,8 @@ import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionGroupMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionGroupMetadata;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -123,8 +123,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
             IndexJobExecution.class))
         .thenReturn(Stream.of(indexJobExecution));
     when(dataService.findAll(
-            IndexActionMetaData.INDEX_ACTION,
-            new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"),
+            IndexActionMetadata.INDEX_ACTION,
+            new QueryImpl<IndexAction>().eq(IndexActionMetadata.INDEX_ACTION_GROUP_ATTR, "id"),
             IndexAction.class))
         .thenReturn(Stream.of(action));
 
@@ -139,9 +139,9 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
     verify(dataService).delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, indexJobExecution);
 
     ArgumentCaptor<Stream<Object>> captor = ArgumentCaptor.forClass(Stream.class);
-    verify(dataService).deleteAll(eq(IndexActionMetaData.INDEX_ACTION), captor.capture());
+    verify(dataService).deleteAll(eq(IndexActionMetadata.INDEX_ACTION), captor.capture());
     assertEquals(captor.getValue().collect(toList()), singletonList("actionId"));
-    verify(dataService).deleteById(IndexActionGroupMetaData.INDEX_ACTION_GROUP, "id");
+    verify(dataService).deleteById(IndexActionGroupMetadata.INDEX_ACTION_GROUP, "id");
   }
 
   @Test
@@ -165,8 +165,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
             IndexJobExecution.class))
         .thenReturn(Stream.of(indexJobExecution));
     when(dataService.findAll(
-            IndexActionMetaData.INDEX_ACTION,
-            new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"),
+            IndexActionMetadata.INDEX_ACTION,
+            new QueryImpl<IndexAction>().eq(IndexActionMetadata.INDEX_ACTION_GROUP_ATTR, "id"),
             IndexAction.class))
         .thenReturn(Stream.of(action));
 

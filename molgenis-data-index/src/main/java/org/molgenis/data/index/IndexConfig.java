@@ -13,8 +13,8 @@ import org.molgenis.data.index.job.IndexJobSchedulerImpl;
 import org.molgenis.data.index.job.IndexJobService;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.index.meta.IndexActionGroupMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionGroupMetadata;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.index.transaction.IndexTransactionListener;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -32,8 +32,8 @@ import org.springframework.context.annotation.Import;
 @Import({
   IndexActionFactory.class,
   IndexActionGroupFactory.class,
-  IndexActionMetaData.class,
-  IndexActionGroupMetaData.class,
+  IndexActionMetadata.class,
+  IndexActionGroupMetadata.class,
   IndexPackage.class,
   IndexJobExecutionFactory.class,
   IndexJobExecutionMetadata.class,

@@ -12,8 +12,8 @@ import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionGroupMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionGroupMetadata;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityType;
@@ -72,16 +72,16 @@ public class IndexBootstrapper {
     List<IndexAction> actions =
         dataService
             .findAll(
-                IndexActionMetaData.INDEX_ACTION,
-                new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, id),
+                IndexActionMetadata.INDEX_ACTION,
+                new QueryImpl<IndexAction>().eq(IndexActionMetadata.INDEX_ACTION_GROUP_ATTR, id),
                 IndexAction.class)
             .collect(Collectors.toList());
     actions.forEach(this::registerIndexAction);
 
     dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, indexJobExecution);
     dataService.deleteAll(
-        IndexActionMetaData.INDEX_ACTION, actions.stream().map(IndexAction::getId));
-    dataService.deleteById(IndexActionGroupMetaData.INDEX_ACTION_GROUP, id);
+        IndexActionMetadata.INDEX_ACTION, actions.stream().map(IndexAction::getId));
+    dataService.deleteById(IndexActionGroupMetadata.INDEX_ACTION_GROUP, id);
   }
 
   private void registerIndexAction(IndexAction action) {

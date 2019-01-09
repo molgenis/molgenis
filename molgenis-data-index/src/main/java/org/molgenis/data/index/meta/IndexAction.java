@@ -1,12 +1,12 @@
 package org.molgenis.data.index.meta;
 
-import static org.molgenis.data.index.meta.IndexActionMetaData.ACTION_ORDER;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ENTITY_ID;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ENTITY_TYPE_ID;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ID;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION_GROUP_ATTR;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_STATUS;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_ID;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -77,12 +77,12 @@ public class IndexAction extends StaticEntity {
     return this;
   }
 
-  public IndexActionMetaData.IndexStatus getIndexStatus() {
+  public IndexActionMetadata.IndexStatus getIndexStatus() {
     String indexStatusStr = getString(INDEX_STATUS);
     return indexStatusStr != null ? IndexStatus.valueOf(indexStatusStr) : null;
   }
 
-  public IndexAction setIndexStatus(IndexActionMetaData.IndexStatus indexStatus) {
+  public IndexAction setIndexStatus(IndexActionMetadata.IndexStatus indexStatus) {
     set(INDEX_STATUS, indexStatus.toString());
     return this;
   }
