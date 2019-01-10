@@ -4,9 +4,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.MSGID;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.NAMESPACE;
 
 import com.google.common.collect.Sets;
 import java.util.Collection;

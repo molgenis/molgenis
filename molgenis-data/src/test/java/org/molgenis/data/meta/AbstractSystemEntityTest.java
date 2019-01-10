@@ -59,14 +59,30 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
       Class entityClass,
       EntityFactory factory,
       Map<String, Pair<Class, Object>> overrideReturnTypes,
-      List<String> excludedAttributes) {
+      List<String> excludedAttributes,
+      boolean skipPackageCheck) {
 
     List<Method> methods = Arrays.asList(entityClass.getMethods());
 
-    testMetadataPackage(systemEntityType);
+    // Optionally skip the package check, this van be used to test metadata for which the package is
+    // set at bootstrapping the app
+    if (!skipPackageCheck) {
+      testMetadataPackage(systemEntityType);
+    }
+
     StreamSupport.stream(systemEntityType.getAtomicAttributes().spliterator(), false)
         .filter(attr -> !excludedAttributes.contains(attr.getName()))
         .forEach(attr -> testAttributes(attr, methods, factory, overrideReturnTypes));
+  }
+
+  protected void internalTestAttributes(
+      SystemEntityType systemEntityType,
+      Class entityClass,
+      EntityFactory factory,
+      Map<String, Pair<Class, Object>> overrideReturnTypes,
+      List<String> excludedAttributes) {
+    internalTestAttributes(
+        systemEntityType, entityClass, factory, overrideReturnTypes, excludedAttributes, false);
   }
 
   private void testAttributes(
