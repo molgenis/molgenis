@@ -738,13 +738,13 @@ public class QueryGenerator {
       attributePath.add(attribute);
 
       if (depth + 1 < queryRuleFieldTokens.length) {
-        entityTypeAtCurrentDepth = attribute.getRefEntity();
-        if (entityTypeAtCurrentDepth == null) {
+        if (!attribute.hasRefEntity()) {
           throw new MolgenisQueryException(
               format(
                   "Invalid query field [%s]: attribute [%s] does not refer to another entity",
                   queryRuleField, attribute.getName()));
         }
+        entityTypeAtCurrentDepth = attribute.getRefEntity();
       }
     }
     return attributePath;

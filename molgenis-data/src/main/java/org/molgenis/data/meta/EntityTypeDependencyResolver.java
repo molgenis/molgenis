@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.GenericDependencyResolver;
 import org.slf4j.Logger;
@@ -88,17 +89,8 @@ public class EntityTypeDependencyResolver {
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
           stream(entityType.getOwnAllAttributes())
-              .flatMap(
-                  attr -> {
-                    EntityType refEntity = attr.getRefEntity();
-                    if (refEntity != null
-                        && !attr.isMappedBy()
-                        && !refEntity.getId().equals(entityType.getId())) {
-                      return Stream.of(new EntityTypeNode(refEntity));
-                    } else {
-                      return Stream.empty();
-                    }
-                  })
+              .filter(attribute -> isProcessableAttribute(attribute, entityType))
+              .map(attr -> new EntityTypeNode(attr.getRefEntity()))
               .collect(toCollection(HashSet::new));
 
       EntityType extendsEntityMeta = entityType.getExtends();
@@ -128,20 +120,14 @@ public class EntityTypeDependencyResolver {
       EntityType entityType = entityTypeNode.getEntityType();
       Set<EntityTypeNode> refEntityMetaSet =
           stream(entityType.getOwnAllAttributes())
+              .filter(attribute -> isProcessableAttribute(attribute, entityType))
               .flatMap(
                   attr -> {
-                    EntityType refEntity = attr.getRefEntity();
-                    if (refEntity != null
-                        && !attr.isMappedBy()
-                        && !refEntity.getId().equals(entityType.getId())) {
-                      EntityTypeNode nodeRef =
-                          new EntityTypeNode(refEntity, entityTypeNode.getStack());
-                      Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
-                      dependenciesRef.add(nodeRef);
-                      return dependenciesRef.stream();
-                    } else {
-                      return Stream.empty();
-                    }
+                    EntityTypeNode nodeRef =
+                        new EntityTypeNode(attr.getRefEntity(), entityTypeNode.getStack());
+                    Set<EntityTypeNode> dependenciesRef = expandEntityTypeDependencies(nodeRef);
+                    dependenciesRef.add(nodeRef);
+                    return dependenciesRef.stream();
                   })
               .collect(toCollection(HashSet::new));
 
@@ -160,6 +146,12 @@ public class EntityTypeDependencyResolver {
     } else {
       return Sets.newHashSet();
     }
+  }
+
+  private static boolean isProcessableAttribute(Attribute attribute, EntityType entityType) {
+    return attribute.hasRefEntity()
+        && !attribute.isMappedBy()
+        && !attribute.getRefEntity().getId().equals(entityType.getId());
   }
 
   /** EntityType wrapper with equals/hashcode */

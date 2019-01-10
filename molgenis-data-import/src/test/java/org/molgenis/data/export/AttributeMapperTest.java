@@ -36,6 +36,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(tag2.getId()).thenReturn("tag2");
 
     when(attr.getEntity()).thenReturn(entityType);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getLookupAttributeIndex()).thenReturn(1);
     when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));
@@ -106,6 +107,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(tag2.getId()).thenReturn("tag2");
 
     when(attr.getEntity()).thenReturn(entityType);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getLookupAttributeIndex()).thenReturn(1);
     when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));
@@ -177,6 +179,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(tag2.getId()).thenReturn("tag2");
 
     when(attr.getEntity()).thenReturn(entityType);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getLookupAttributeIndex()).thenReturn(1);
     when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));
@@ -245,6 +248,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(tag2.getId()).thenReturn("tag2");
 
     when(attr.getEntity()).thenReturn(entityType);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getLookupAttributeIndex()).thenReturn(1);
     when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));
@@ -314,6 +318,7 @@ public class AttributeMapperTest extends AbstractMockitoTest {
     when(tag2.getId()).thenReturn("tag2");
 
     when(attr.getEntity()).thenReturn(entityType);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getLookupAttributeIndex()).thenReturn(1);
     when(attr.getTags()).thenReturn(newArrayList(tag1, tag2));

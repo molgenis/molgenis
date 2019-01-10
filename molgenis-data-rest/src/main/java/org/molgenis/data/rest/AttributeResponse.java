@@ -95,14 +95,13 @@ public class AttributeResponse {
     } else this.expression = null;
 
     if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase())) {
-      EntityType attrRefEntity = attr.getRefEntity();
       if (attributeExpandsSet != null
           && attributeExpandsSet.containsKey("refEntity".toLowerCase())) {
         Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
         this.refEntity =
-            attrRefEntity != null
+            attr.hasRefEntity()
                 ? new EntityTypeResponse(
-                    attrRefEntity,
+                    attr.getRefEntity(),
                     subAttributesSet,
                     Collections.singletonMap("attributes".toLowerCase(), null),
                     permissionService,
@@ -110,10 +109,10 @@ public class AttributeResponse {
                 : null;
       } else {
         this.refEntity =
-            attrRefEntity != null
+            attr.hasRefEntity()
                 ? new Href(
-                    Href.concatMetaEntityHref(RestController.BASE_URI, attrRefEntity.getId()),
-                    String.format("%s/%s", RestController.BASE_URI, attrRefEntity.getId()))
+                    Href.concatMetaEntityHref(RestController.BASE_URI, attr.getRefEntity().getId()),
+                    String.format("%s/%s", RestController.BASE_URI, attr.getRefEntity().getId()))
                 : null; // FIXME apply Href escaping fix
       }
     } else this.refEntity = null;

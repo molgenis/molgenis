@@ -64,9 +64,4 @@ public class EntityTypeReferenceMapperTest {
         entityTypeReferenceMapper.toEditorEntityTypeIdentifier(entityType);
     assertEquals(editorEntityTypeIdentifier, EditorEntityTypeIdentifier.create(id, label));
   }
-
-  @Test
-  public void testToEditorEntityTypeIdentifierNull() {
-    assertNull(entityTypeReferenceMapper.toEditorEntityTypeIdentifier(null));
-  }
 }

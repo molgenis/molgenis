@@ -326,15 +326,14 @@ public class EntityUtils {
     }
 
     // compare entity identifier
-    EntityType refEntity = attr.getRefEntity();
-    EntityType otherRefEntity = otherAttr.getRefEntity();
-    if (refEntity == null && otherRefEntity != null) {
+    if (attr.hasRefEntity() && !otherAttr.hasRefEntity()) {
       return false;
     }
-    if (refEntity != null && otherRefEntity == null) {
+    if (!attr.hasRefEntity() && otherAttr.hasRefEntity()) {
       return false;
     }
-    if (refEntity != null && !refEntity.getId().equals(otherRefEntity.getId())) {
+    if (attr.hasRefEntity()
+        && !attr.getRefEntity().getId().equals(otherAttr.getRefEntity().getId())) {
       return false;
     }
     if (!Objects.equals(attr.getCascadeDelete(), otherAttr.getCascadeDelete())) {

@@ -63,6 +63,7 @@ public class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
 
     when(expressionAttribute.getExpression()).thenReturn("{\"template\":\"my {{attr.refAttr}}\"}");
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+    when(attribute.hasRefEntity()).thenReturn(true);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getEntity("attr")).thenReturn(refEntity).getMock();
@@ -87,6 +88,7 @@ public class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(expressionAttribute.getExpression())
         .thenReturn("{\"template\":\"my {{attr.refAttr}} and {{attr.otherRefAttr}}\"}");
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
+    when(attribute.hasRefEntity()).thenReturn(true);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity = when(mock(Entity.class).getEntity("attr")).thenReturn(refEntity).getMock();
@@ -109,6 +111,7 @@ public class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
 
     when(expressionAttribute.getExpression()).thenReturn("{\"template\":\"my {{attr.refAttr}}\"}");
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(MREF).getMock();
+    when(attribute.hasRefEntity()).thenReturn(true);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     Entity entity =
@@ -236,6 +239,7 @@ public class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
     when(expressionAttribute.getExpression()).thenReturn("{\"template\":\"my {{attr}}\"}");
     Attribute attribute = when(mock(Attribute.class).getDataType()).thenReturn(XREF).getMock();
     EntityType refEntityType = mock(EntityType.class);
+    when(attribute.hasRefEntity()).thenReturn(true);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAttribute("attr")).thenReturn(attribute);
     templateExpressionEvaluator.evaluate(mock(Entity.class));

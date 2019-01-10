@@ -90,7 +90,9 @@ public class AttributeMapper {
     EditorAttributeIdentifier parent =
         attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getParent());
     EditorEntityTypeIdentifier refEntityType =
-        entityTypeReferenceMapper.toEditorEntityTypeIdentifier(attribute.getRefEntity());
+        attribute.hasRefEntity()
+            ? entityTypeReferenceMapper.toEditorEntityTypeIdentifier(attribute.getRefEntity())
+            : null;
     boolean cascadeDelete = attribute.getCascadeDelete() != null && attribute.getCascadeDelete();
     EditorAttributeIdentifier mappedByEntityType =
         attributeReferenceMapper.toEditorAttributeIdentifier(attribute.getMappedBy());
