@@ -9,15 +9,15 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
-import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
-import org.molgenis.semanticmapper.meta.EntityMappingMetaData;
+import org.molgenis.semanticmapper.meta.AttributeMappingMetadata;
+import org.molgenis.semanticmapper.meta.EntityMappingMetadata;
 
-/** O/R Mapping between {@link EntityMappingMetaData} Entities and {@link EntityMapping} s. */
+/** O/R Mapping between {@link EntityMappingMetadata} Entities and {@link EntityMapping} s. */
 public interface AttributeMappingRepository {
   /**
    * Creates a list of fully reconstructed {@link AttributeMapping}s.
    *
-   * @param attributeMappingEntities List of {@link Entity}s with {@link AttributeMappingMetaData}
+   * @param attributeMappingEntities List of {@link Entity}s with {@link AttributeMappingMetadata}
    *     metadata
    * @param sourceEntityType {@link EntityType} of the source entity of the attribute mapping, used
    *     to look up the {@link Attribute}

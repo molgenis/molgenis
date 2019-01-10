@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ScriptParameterFactory
-    extends AbstractSystemEntityFactory<ScriptParameter, ScriptParameterMetaData, String> {
+    extends AbstractSystemEntityFactory<ScriptParameter, ScriptParameterMetadata, String> {
   ScriptParameterFactory(
-      ScriptParameterMetaData scriptParameterMetaData, EntityPopulator entityPopulator) {
+      ScriptParameterMetadata scriptParameterMetaData, EntityPopulator entityPopulator) {
     super(ScriptParameter.class, scriptParameterMetaData, entityPopulator);
   }
 }

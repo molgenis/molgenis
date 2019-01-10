@@ -2,7 +2,7 @@ package org.molgenis.script.core;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.script.core.ScriptTypeMetaData.SCRIPT_TYPE;
+import static org.molgenis.script.core.ScriptTypeMetadata.SCRIPT_TYPE;
 
 import java.util.Collection;
 import java.util.List;
