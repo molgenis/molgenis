@@ -2,11 +2,11 @@ package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.TARGET_ATTRIBUTE;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -22,19 +22,20 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
-import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
+import org.molgenis.semanticmapper.meta.AttributeMappingMetadata;
 import org.molgenis.semanticmapper.repository.AttributeMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository {
-  private final AttributeMappingMetaData attributeMappingMetaData;
+
+  private final AttributeMappingMetadata attributeMappingMetaData;
 
   @Autowired private IdGenerator idGenerator;
 
   private final DataService dataService;
 
   public AttributeMappingRepositoryImpl(
-      DataService dataService, AttributeMappingMetaData attributeMappingMetaData) {
+      DataService dataService, AttributeMappingMetadata attributeMappingMetaData) {
     this.dataService = requireNonNull(dataService);
     this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
   }

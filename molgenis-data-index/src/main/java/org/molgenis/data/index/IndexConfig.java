@@ -1,20 +1,20 @@
 package org.molgenis.data.index;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
 
 import javax.annotation.PostConstruct;
 import org.molgenis.data.DataService;
 import org.molgenis.data.index.job.IndexJobExecution;
 import org.molgenis.data.index.job.IndexJobExecutionFactory;
-import org.molgenis.data.index.job.IndexJobExecutionMeta;
+import org.molgenis.data.index.job.IndexJobExecutionMetadata;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.index.job.IndexJobSchedulerImpl;
 import org.molgenis.data.index.job.IndexJobService;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.index.meta.IndexActionGroupMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionGroupMetadata;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.index.transaction.IndexTransactionListener;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -32,11 +32,11 @@ import org.springframework.context.annotation.Import;
 @Import({
   IndexActionFactory.class,
   IndexActionGroupFactory.class,
-  IndexActionMetaData.class,
-  IndexActionGroupMetaData.class,
+  IndexActionMetadata.class,
+  IndexActionGroupMetadata.class,
   IndexPackage.class,
   IndexJobExecutionFactory.class,
-  IndexJobExecutionMeta.class,
+  IndexJobExecutionMetadata.class,
   JobPackage.class,
   JobExecutionMetaData.class,
   IndexActionRegisterServiceImpl.class,

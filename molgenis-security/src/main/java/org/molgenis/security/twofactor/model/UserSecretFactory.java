@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserSecretFactory
-    extends AbstractSystemEntityFactory<UserSecret, UserSecretMetaData, String> {
-  UserSecretFactory(UserSecretMetaData userSecretMetaData, EntityPopulator entityPopulator) {
+    extends AbstractSystemEntityFactory<UserSecret, UserSecretMetadata, String> {
+  UserSecretFactory(UserSecretMetadata userSecretMetaData, EntityPopulator entityPopulator) {
     super(UserSecret.class, userSecretMetaData, entityPopulator);
   }
 }

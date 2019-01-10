@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.TagMetadata.TAG;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.IDENTIFIER;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.DEPTH;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_TARGETS;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.NAME;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
@@ -31,8 +31,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
-import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
+import org.molgenis.semanticmapper.meta.MappingProjectMetadata;
+import org.molgenis.semanticmapper.meta.MappingTargetMetadata;
 import org.molgenis.semanticmapper.repository.MappingTargetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,9 +57,9 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 
   @Autowired private IdGenerator idGenerator;
 
-  @Autowired private MappingProjectMetaData mappingProjectMeta;
+  @Autowired private MappingProjectMetadata mappingProjectMeta;
 
-  @Autowired private MappingTargetMetaData mappingTargetMeta;
+  @Autowired private MappingTargetMetadata mappingTargetMeta;
 
   private MappingTarget mappingTarget1;
   private MappingTarget mappingTarget2;
@@ -79,11 +79,11 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
     mappingTarget2 = mappingProject.addTarget(target2);
 
     Entity mappingTargetEntity = new DynamicEntity(mappingTargetMeta);
-    mappingTargetEntity.set(MappingTargetMetaData.TARGET, "target1");
-    mappingTargetEntity.set(MappingTargetMetaData.IDENTIFIER, "mappingTargetID1");
+    mappingTargetEntity.set(MappingTargetMetadata.TARGET, "target1");
+    mappingTargetEntity.set(MappingTargetMetadata.IDENTIFIER, "mappingTargetID1");
     Entity mappingTargetEntity2 = new DynamicEntity(mappingTargetMeta);
-    mappingTargetEntity2.set(MappingTargetMetaData.TARGET, "target2");
-    mappingTargetEntity2.set(MappingTargetMetaData.IDENTIFIER, "mappingTargetID2");
+    mappingTargetEntity2.set(MappingTargetMetadata.TARGET, "target2");
+    mappingTargetEntity2.set(MappingTargetMetadata.IDENTIFIER, "mappingTargetID2");
     mappingTargetEntities = asList(mappingTargetEntity, mappingTargetEntity2);
 
     mappingProjectEntity = new DynamicEntity(mappingProjectMeta);
@@ -163,7 +163,7 @@ public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
   public static class Config {
     @Autowired private DataService dataService;
 
-    @Autowired private MappingProjectMetaData mappingProjectMeta;
+    @Autowired private MappingProjectMetadata mappingProjectMeta;
 
     @Bean
     public MappingTargetRepository mappingTargetRepository() {

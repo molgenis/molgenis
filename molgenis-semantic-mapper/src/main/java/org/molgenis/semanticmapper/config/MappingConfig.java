@@ -12,8 +12,8 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.semanticmapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.semanticmapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
-import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
-import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
+import org.molgenis.semanticmapper.meta.AttributeMappingMetadata;
+import org.molgenis.semanticmapper.meta.MappingProjectMetadata;
 import org.molgenis.semanticmapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.semanticmapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.semanticmapper.repository.impl.MappingProjectRepositoryImpl;
@@ -39,9 +39,9 @@ public class MappingConfig {
   private final OntologyService ontologyService;
   private final IdGenerator idGenerator;
   private final PermissionSystemService permissionSystemService;
-  private final AttributeMappingMetaData attributeMappingMetaData;
+  private final AttributeMappingMetadata attributeMappingMetaData;
   private final AttributeFactory attrMetaFactory;
-  private final MappingProjectMetaData mappingProjectMeta;
+  private final MappingProjectMetadata mappingProjectMeta;
   private final EntityManager entityManager;
   private final JsMagmaScriptEvaluator jsMagmaScriptEvaluator;
 
@@ -51,9 +51,9 @@ public class MappingConfig {
       SemanticSearchService semanticSearchService,
       OntologyService ontologyService,
       IdGenerator idGenerator,
-      AttributeMappingMetaData attributeMappingMetaData,
+      AttributeMappingMetadata attributeMappingMetaData,
       AttributeFactory attrMetaFactory,
-      MappingProjectMetaData mappingProjectMeta,
+      MappingProjectMetadata mappingProjectMeta,
       EntityManager entityManager,
       JsMagmaScriptEvaluator jsMagmaScriptEvaluator) {
     this.permissionSystemService = requireNonNull(permissionSystemService);

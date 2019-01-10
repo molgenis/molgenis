@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * org.molgenis.data.Repository}'s index consistent again.
  */
 @Component
-public class IndexActionMetaData extends SystemEntityType {
+public class IndexActionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "IndexAction";
   public static final String INDEX_ACTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -49,10 +49,10 @@ public class IndexActionMetaData extends SystemEntityType {
   public static final String INDEX_STATUS = "indexStatus";
 
   private final IndexPackage indexPackage;
-  private IndexActionGroupMetaData indexActionGroupMetaData;
+  private IndexActionGroupMetadata indexActionGroupMetaData;
 
-  public IndexActionMetaData(
-      IndexPackage indexPackage, IndexActionGroupMetaData indexActionGroupMetaData) {
+  public IndexActionMetadata(
+      IndexPackage indexPackage, IndexActionGroupMetadata indexActionGroupMetaData) {
     super(SIMPLE_NAME, PACKAGE_INDEX);
     this.indexPackage = requireNonNull(indexPackage);
     this.indexActionGroupMetaData = requireNonNull(indexActionGroupMetaData);

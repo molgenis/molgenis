@@ -10,7 +10,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityMappingMetaData extends SystemEntityType {
+public class EntityMappingMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "EntityMapping";
   public static final String ENTITY_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -20,10 +20,10 @@ public class EntityMappingMetaData extends SystemEntityType {
   public static final String ATTRIBUTE_MAPPINGS = "attributeMappings";
 
   private final MapperPackage mapperPackage;
-  private final AttributeMappingMetaData attributeMappingMetaData;
+  private final AttributeMappingMetadata attributeMappingMetaData;
 
-  public EntityMappingMetaData(
-      MapperPackage mapperPackage, AttributeMappingMetaData attributeMappingMetaData) {
+  public EntityMappingMetadata(
+      MapperPackage mapperPackage, AttributeMappingMetadata attributeMappingMetaData) {
     super(SIMPLE_NAME, PACKAGE_MAPPER);
     this.mapperPackage = requireNonNull(mapperPackage);
     this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);

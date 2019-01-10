@@ -1,6 +1,6 @@
 package org.molgenis.script.core;
 
-import static org.molgenis.script.core.ScriptTypeMetaData.NAME;
+import static org.molgenis.script.core.ScriptTypeMetadata.NAME;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

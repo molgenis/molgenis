@@ -29,8 +29,8 @@ import org.molgenis.semanticmapper.config.MapperTestConfig;
 import org.molgenis.semanticmapper.config.MappingConfig;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
-import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
-import org.molgenis.semanticmapper.meta.EntityMappingMetaData;
+import org.molgenis.semanticmapper.meta.AttributeMappingMetadata;
+import org.molgenis.semanticmapper.meta.EntityMappingMetadata;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +47,9 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
 
   @Autowired private AttributeFactory attrMetaFactory;
 
-  @Autowired private AttributeMappingMetaData attrMappingMeta;
+  @Autowired private AttributeMappingMetadata attrMappingMeta;
 
-  @Autowired private EntityMappingMetaData entityMappingMeta;
+  @Autowired private EntityMappingMetadata entityMappingMeta;
 
   @Autowired private DataService dataService;
 
@@ -75,27 +75,27 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
             new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
 
     Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
-    attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-    attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
-    attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "sourceAttributes");
-    attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
+    attributeMappingEntity.set(EntityMappingMetadata.IDENTIFIER, AUTO_ID);
+    attributeMappingEntity.set(AttributeMappingMetadata.TARGET_ATTRIBUTE, "targetAttribute");
+    attributeMappingEntity.set(AttributeMappingMetadata.SOURCE_ATTRIBUTES, "sourceAttributes");
+    attributeMappingEntity.set(AttributeMappingMetadata.ALGORITHM, "algorithm");
 
     List<Entity> attributeMappingEntities = Lists.newArrayList();
     attributeMappingEntities.add(attributeMappingEntity);
 
     List<Entity> entityMappingEntities = Lists.newArrayList();
     Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
-    entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-    entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "targetAttribute");
-    entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
+    entityMappingEntity.set(EntityMappingMetadata.IDENTIFIER, AUTO_ID);
+    entityMappingEntity.set(EntityMappingMetadata.TARGET_ENTITY_TYPE, "targetAttribute");
+    entityMappingEntity.set(EntityMappingMetadata.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 
     entityMappingEntities.add(entityMappingEntity);
 
     when(dataService.getEntityType(
-            entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_TYPE)))
+            entityMappingEntity.getString(EntityMappingMetadata.TARGET_ENTITY_TYPE)))
         .thenReturn(targetEntityType);
     when(dataService.getEntityType(
-            entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_TYPE)))
+            entityMappingEntity.getString(EntityMappingMetadata.SOURCE_ENTITY_TYPE)))
         .thenReturn(sourceEntityType);
 
     assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
@@ -124,21 +124,21 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
             new EntityMapping(AUTO_ID, sourceEntityType, targetEntityType, attributeMappings));
 
     Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
-    attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-    attributeMappingEntity.set(AttributeMappingMetaData.TARGET_ATTRIBUTE, "targetAttribute");
-    attributeMappingEntity.set(AttributeMappingMetaData.SOURCE_ATTRIBUTES, "");
-    attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-    attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM_STATE, CURATED.toString());
+    attributeMappingEntity.set(EntityMappingMetadata.IDENTIFIER, AUTO_ID);
+    attributeMappingEntity.set(AttributeMappingMetadata.TARGET_ATTRIBUTE, "targetAttribute");
+    attributeMappingEntity.set(AttributeMappingMetadata.SOURCE_ATTRIBUTES, "");
+    attributeMappingEntity.set(AttributeMappingMetadata.ALGORITHM, "algorithm");
+    attributeMappingEntity.set(AttributeMappingMetadata.ALGORITHM_STATE, CURATED.toString());
 
     List<Entity> attributeMappingEntities = Lists.newArrayList();
     attributeMappingEntities.add(attributeMappingEntity);
 
     List<Entity> entityMappingEntities = Lists.newArrayList();
     Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
-    entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-    entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, "source");
-    entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "target");
-    entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
+    entityMappingEntity.set(EntityMappingMetadata.IDENTIFIER, AUTO_ID);
+    entityMappingEntity.set(EntityMappingMetadata.SOURCE_ENTITY_TYPE, "source");
+    entityMappingEntity.set(EntityMappingMetadata.TARGET_ENTITY_TYPE, "target");
+    entityMappingEntity.set(EntityMappingMetadata.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
     entityMappingEntities.add(entityMappingEntity);
 
     Assert.assertTrue(
@@ -149,7 +149,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest 
   @Configuration
   @Import(MapperTestConfig.class)
   public static class Config {
-    @Autowired private AttributeMappingMetaData attrMappingMeta;
+
+    @Autowired private AttributeMappingMetadata attrMappingMeta;
 
     @Bean
     DataService dataService() {

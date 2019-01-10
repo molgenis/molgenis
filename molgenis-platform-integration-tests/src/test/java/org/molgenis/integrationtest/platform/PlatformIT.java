@@ -52,7 +52,7 @@ import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeType;
@@ -828,9 +828,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           indexActionRegisterService.register(entityTypeDynamic, null);
 
           Query<IndexAction> q = new QueryImpl<>();
-          q.eq(IndexActionMetaData.ENTITY_TYPE_ID, "sys_test_TypeTestDynamic");
+          q.eq(IndexActionMetadata.ENTITY_TYPE_ID, "sys_test_TypeTestDynamic");
           Stream<org.molgenis.data.index.meta.IndexAction> all =
-              dataService.findAll(IndexActionMetaData.INDEX_ACTION, q, IndexAction.class);
+              dataService.findAll(IndexActionMetadata.INDEX_ACTION, q, IndexAction.class);
           all.forEach(e -> LOG.info(e.getEntityTypeId() + "." + e.getEntityId()));
           waitForIndexToBeStable(entityTypeDynamic, indexService, LOG);
         });

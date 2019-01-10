@@ -1,18 +1,12 @@
 package org.molgenis.data.security.auth;
 
-import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractEntityFactoryTest;
+import org.molgenis.data.security.config.SecurityTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {
-      EntityBaseTestConfig.class,
-      UserMetadata.class,
-      UserFactory.class,
-      SecurityPackage.class
-    })
+@ContextConfiguration(classes = {SecurityTestConfig.class})
 public class UserFactoryTest extends AbstractEntityFactoryTest {
 
   @Autowired UserFactory factory;

@@ -1,8 +1,8 @@
 package org.molgenis.semanticmapper.repository.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.DEPTH;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_PROJECT;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
+import org.molgenis.semanticmapper.meta.MappingProjectMetadata;
 import org.molgenis.semanticmapper.repository.MappingProjectRepository;
 import org.molgenis.semanticmapper.repository.MappingTargetRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +25,13 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository {
   private final DataService dataService;
   private final MappingTargetRepository mappingTargetRepo;
   private final IdGenerator idGenerator;
-  private final MappingProjectMetaData mappingProjectMeta;
+  private final MappingProjectMetadata mappingProjectMeta;
 
   public MappingProjectRepositoryImpl(
       DataService dataService,
       MappingTargetRepository mappingTargetRepo,
       IdGenerator idGenerator,
-      MappingProjectMetaData mappingProjectMeta) {
+      MappingProjectMetadata mappingProjectMeta) {
     this.dataService = requireNonNull(dataService);
     this.mappingTargetRepo = requireNonNull(mappingTargetRepo);
     this.idGenerator = requireNonNull(idGenerator);
@@ -86,16 +86,16 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository {
   /**
    * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
    *
-   * @param mappingProjectEntity Entity with {@link MappingProjectMetaData} metadata
+   * @param mappingProjectEntity Entity with {@link MappingProjectMetadata} metadata
    * @return fully reconstructed MappingProject
    */
   private MappingProject toMappingProject(Entity mappingProjectEntity) {
-    String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
-    String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
+    String identifier = mappingProjectEntity.getString(MappingProjectMetadata.IDENTIFIER);
+    String name = mappingProjectEntity.getString(MappingProjectMetadata.NAME);
     int depth = Optional.ofNullable(mappingProjectEntity.getInt(DEPTH)).orElse(3);
     List<Entity> mappingTargetEntities =
         Lists.newArrayList(
-            mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
+            mappingProjectEntity.getEntities(MappingProjectMetadata.MAPPING_TARGETS));
     List<MappingTarget> mappingTargets = mappingTargetRepo.toMappingTargets(mappingTargetEntities);
 
     return new MappingProject(identifier, name, depth, mappingTargets);
@@ -113,12 +113,12 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository {
     if (mappingProject.getIdentifier() == null) {
       mappingProject.setIdentifier(idGenerator.generateId());
     }
-    result.set(MappingProjectMetaData.IDENTIFIER, mappingProject.getIdentifier());
-    result.set(MappingProjectMetaData.NAME, mappingProject.getName());
+    result.set(MappingProjectMetadata.IDENTIFIER, mappingProject.getIdentifier());
+    result.set(MappingProjectMetadata.NAME, mappingProject.getName());
     result.set(DEPTH, mappingProject.getDepth());
     List<Entity> mappingTargetEntities =
         mappingTargetRepo.upsert(mappingProject.getMappingTargets());
-    result.set(MappingProjectMetaData.MAPPING_TARGETS, mappingTargetEntities);
+    result.set(MappingProjectMetadata.MAPPING_TARGETS, mappingTargetEntities);
     return result;
   }
 
