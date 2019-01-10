@@ -15,15 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-// NOTE: when the following exception occurs;
-// java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy,
-// this means you are missing this dependency:
-// <dependency>
-//  <groupId>org.springframework.security</groupId>
-//  <artifactId>spring-security-test</artifactId>
-//  <scope>test</scope>
-// </dependency>
-
 @ContextConfiguration(
     classes = {
       EntityBaseTestConfig.class,
@@ -37,11 +28,8 @@ public class AmazonBucketJobExecutionTest extends AbstractSystemEntityTest {
   @Autowired AmazonBucketJobExecutionMetadata metadata;
   @Autowired AmazonBucketJobExecutionFactory factory;
 
+  @Override
   protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
-    // Add attributes with 'smart' getters and setters that convert back and forth to correct values
-    // for MOLGENIS datatypes
-    // Provide the attribute name as key, and a pair of return type (Class) and a Object to be used
-    // as test value
     Pair<Class, Object> statusPair = new Pair<>();
     statusPair.setA(Status.class);
     statusPair.setB(Status.SUCCESS);
@@ -51,6 +39,7 @@ public class AmazonBucketJobExecutionTest extends AbstractSystemEntityTest {
     return map;
   }
 
+  @Override
   protected List<String> getExcludedAttrs() {
     List<String> attrs = new ArrayList<>();
     attrs.add(JobExecutionMetaData.FAILURE_EMAIL);
