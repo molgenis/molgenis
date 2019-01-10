@@ -72,7 +72,7 @@ import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobExecutionFactory;
-import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetadata;
+import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.request.SortaServiceRequest;
@@ -122,7 +122,8 @@ public class SortaController extends PluginController {
   private final MenuReaderService menuReaderService;
   private final IdGenerator idGenerator;
   private final PermissionSystemService permissionSystemService;
-  private final MatchingTaskContentMetadata matchingTaskContentMetaData;
+  private final MatchingTaskContentMetaData matchingTaskContentMetaData;
+  private final SortaJobExecutionMetadata sortaJobExecutionMetaData;
   private final OntologyTermMetadata ontologyTermMetadata;
   private final SortaJobExecutionFactory sortaJobExecutionFactory;
   private final EntityTypeFactory entityTypeFactory;
@@ -139,9 +140,9 @@ public class SortaController extends PluginController {
       MenuReaderService menuReaderService,
       IdGenerator idGenerator,
       PermissionSystemService permissionSystemService,
-      MatchingTaskContentMetadata matchingTaskContentMetaData,
-      OntologyTermMetadata ontologyTermMetadata,
+      MatchingTaskContentMetaData matchingTaskContentMetaData,
       SortaJobExecutionMetadata sortaJobExecutionMetaData,
+      OntologyTermMetadata ontologyTermMetadata,
       SortaJobExecutionFactory sortaJobExecutionFactory,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
@@ -157,7 +158,7 @@ public class SortaController extends PluginController {
     this.idGenerator = requireNonNull(idGenerator);
     this.permissionSystemService = requireNonNull(permissionSystemService);
     this.matchingTaskContentMetaData = requireNonNull(matchingTaskContentMetaData);
-    this.sortaJobExecutionMetadata = requireNonNull(sortaJobExecutionMetaData);
+    this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
     this.ontologyTermMetadata = requireNonNull(ontologyTermMetadata);
     this.sortaJobExecutionFactory = requireNonNull(sortaJobExecutionFactory);
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
@@ -173,7 +174,7 @@ public class SortaController extends PluginController {
 
   private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId) {
     Fetch fetch = new Fetch();
-    sortaJobExecutionMetadata.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
+    sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
     return RunAsSystemAspect.runAsSystem(
         () ->
             dataService.findOneById(
@@ -323,7 +324,7 @@ public class SortaController extends PluginController {
               .collect(Collectors.toList());
       QueryRule previousQueryRule = new QueryRule(queryRuleInputEntitiesInOneMatchingTask);
       QueryRule queryRuleFilterInput =
-          new QueryRule(MatchingTaskContentMetadata.INPUT_TERM, Operator.IN, filteredInputTermIds);
+          new QueryRule(MatchingTaskContentMetaData.INPUT_TERM, Operator.IN, filteredInputTermIds);
       queryRuleInputEntitiesInOneMatchingTask =
           Arrays.asList(previousQueryRule, new QueryRule(Operator.AND), queryRuleFilterInput);
     }
@@ -416,10 +417,10 @@ public class SortaController extends PluginController {
       SortaJobExecution sortaJobExecution, Entity resultEntity, EntityType downloadEntityType) {
     NumberFormat format = NumberFormat.getNumberInstance();
     format.setMaximumFractionDigits(2);
-    Entity inputEntity = resultEntity.getEntity(MatchingTaskContentMetadata.INPUT_TERM);
+    Entity inputEntity = resultEntity.getEntity(MatchingTaskContentMetaData.INPUT_TERM);
     Entity ontologyTermEntity =
         sortaService.getOntologyTermEntity(
-            resultEntity.getString(MatchingTaskContentMetadata.MATCHED_TERM),
+            resultEntity.getString(MatchingTaskContentMetaData.MATCHED_TERM),
             sortaJobExecution.getOntologyIri());
 
     Entity row = new DynamicEntity(downloadEntityType);
@@ -440,11 +441,11 @@ public class SortaController extends PluginController {
           ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
     }
     row.set(
-        MatchingTaskContentMetadata.VALIDATED,
-        resultEntity.getBoolean(MatchingTaskContentMetadata.VALIDATED));
-    Double score = resultEntity.getDouble(MatchingTaskContentMetadata.SCORE);
+        MatchingTaskContentMetaData.VALIDATED,
+        resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
+    Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
     if (score != null) {
-      row.set(MatchingTaskContentMetadata.SCORE, format.format(score));
+      row.set(MatchingTaskContentMetaData.SCORE, format.format(score));
     }
     return row;
   }
@@ -474,20 +475,20 @@ public class SortaController extends PluginController {
           Arrays.asList(
               OntologyTermMetadata.ONTOLOGY_TERM_NAME,
               OntologyTermMetadata.ONTOLOGY_TERM_IRI,
-              MatchingTaskContentMetadata.SCORE,
-              MatchingTaskContentMetadata.VALIDATED));
+              MatchingTaskContentMetaData.SCORE,
+              MatchingTaskContentMetaData.VALIDATED));
       targetMetadata.addAttribute(
           ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       targetMetadata.addAttribute(
           ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
       targetMetadata.addAttribute(
           Attribute.newInstance(
-                  matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetadata.SCORE),
+                  matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.SCORE),
                   EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS,
                   attrMetaFactory)
               .setDataType(AttributeType.STRING));
       targetMetadata.addAttribute(
-          matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetadata.VALIDATED));
+          matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.VALIDATED));
 
       csvWriter.writeAttributeNames(columnHeaders);
 
@@ -591,7 +592,7 @@ public class SortaController extends PluginController {
   private void createEmptyResultRepository(
       String jobName, String resultEntityName, EntityType sourceMetaData) {
     EntityType resultEntityType =
-        EntityType.newInstance(matchingTaskContentMetadata, DEEP_COPY_ATTRS, attrMetaFactory);
+        EntityType.newInstance(matchingTaskContentMetaData, DEEP_COPY_ATTRS, attrMetaFactory);
     resultEntityType.setId(resultEntityName);
     resultEntityType.setPackage(null);
     resultEntityType.setAbstract(false);
@@ -618,10 +619,10 @@ public class SortaController extends PluginController {
   private long countMatchedEntities(SortaJobExecution sortaJobExecution, boolean isMatched) {
     double threshold = sortaJobExecution.getThreshold();
     QueryRule validatedRule =
-        new QueryRule(MatchingTaskContentMetadata.VALIDATED, EQUALS, isMatched);
+        new QueryRule(MatchingTaskContentMetaData.VALIDATED, EQUALS, isMatched);
     QueryRule thresholdRule =
         new QueryRule(
-            MatchingTaskContentMetadata.SCORE, isMatched ? GREATER_EQUAL : LESS, threshold);
+            MatchingTaskContentMetaData.SCORE, isMatched ? GREATER_EQUAL : LESS, threshold);
     QueryRule combinedRule =
         new QueryRule(asList(validatedRule, new QueryRule(isMatched ? OR : AND), thresholdRule));
 
