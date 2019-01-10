@@ -9,7 +9,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.oidc.model.OidcPackage.PACKAGE_OIDC;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,14 +25,14 @@ public class OidcUserMappingMetadata extends SystemEntityType {
 
   private final OidcPackage oidcPackage;
   private final OidcClientMetadata oidcClientMetadata;
-  private final UserMetaData userMetaData;
+  private final UserMetadata userMetadata;
 
   public OidcUserMappingMetadata(
-      OidcPackage oidcPackage, OidcClientMetadata oidcClientMetadata, UserMetaData userMetaData) {
+      OidcPackage oidcPackage, OidcClientMetadata oidcClientMetadata, UserMetadata userMetadata) {
     super(SIMPLE_NAME, PACKAGE_OIDC);
     this.oidcPackage = requireNonNull(oidcPackage);
     this.oidcClientMetadata = requireNonNull(oidcClientMetadata);
-    this.userMetaData = requireNonNull(userMetaData);
+    this.userMetadata = requireNonNull(userMetadata);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class OidcUserMappingMetadata extends SystemEntityType {
         .setLabel("User")
         .setDescription("MOLGENIS user")
         .setDataType(XREF)
-        .setRefEntity(userMetaData)
+        .setRefEntity(userMetadata)
         .setNillable(false);
 
     // TODO add unique constraint on [OIDC_CLIENT, OIDC_USERNAME] (http://molgenis.org/ticket/3026)

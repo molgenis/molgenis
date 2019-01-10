@@ -2,14 +2,14 @@ package org.molgenis.data.security.user;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserServiceImplTest.Config;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public class UserServiceImplTest extends AbstractTestNGSpringContextTests {
     when(existingUser.getPassword()).thenReturn("encrypted-password");
 
     when(dataService.findOne(
-            USER, new QueryImpl<User>().eq(UserMetaData.USERNAME, username), User.class))
+            USER, new QueryImpl<User>().eq(UserMetadata.USERNAME, username), User.class))
         .thenReturn(existingUser);
 
     assertEquals(molgenisUserServiceImpl.getUser(username), existingUser);

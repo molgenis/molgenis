@@ -42,11 +42,11 @@ public class MembershipInvitationMetadata extends SystemEntityType {
   public static final String STATUS = "status";
 
   private final SecurityPackage securityPackage;
-  private final UserMetaData userMetadata;
+  private final UserMetadata userMetadata;
   private final RoleMetadata roleMetadata;
 
   public MembershipInvitationMetadata(
-      SecurityPackage securityPackage, UserMetaData userMetadata, RoleMetadata roleMetadata) {
+      SecurityPackage securityPackage, UserMetadata userMetadata, RoleMetadata roleMetadata) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
     this.userMetadata = requireNonNull(userMetadata);

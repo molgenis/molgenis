@@ -18,7 +18,7 @@ import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.dataexplorer.negotiator.config.NegotiatorPackage.PACKAGE_NEGOTIATOR;
 import static org.molgenis.genomebrowser.meta.GenomeBrowserPackage.PACKAGE_GENOME_BROWSER;
-import static org.molgenis.navigator.download.job.ResourceDownloadJobExecutionMetaData.RESOURCE_DOWNLOAD_JOB_EXECUTION;
+import static org.molgenis.navigator.download.job.ResourceDownloadJobExecutionMetadata.RESOURCE_DOWNLOAD_JOB_EXECUTION;
 import static org.molgenis.oneclickimporter.controller.OneClickImporterController.ONE_CLICK_IMPORTER;
 import static org.molgenis.oneclickimporter.job.OneClickImportJobExecutionMetadata.ONE_CLICK_IMPORT_JOB_EXECUTION;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;

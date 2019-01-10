@@ -7,8 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN;
 import static org.molgenis.data.security.auth.TokenMetaData.TOKEN_ATTR;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
-import static org.molgenis.data.security.auth.UserMetaData.USERNAME;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 import static org.testng.Assert.assertEquals;
 
 import org.mockito.ArgumentCaptor;
