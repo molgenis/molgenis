@@ -5,7 +5,7 @@ import static org.molgenis.data.security.auth.GroupService.AUTHORITY_EDITOR;
 import static org.molgenis.data.security.auth.GroupService.AUTHORITY_MANAGER;
 import static org.molgenis.data.security.auth.GroupService.AUTHORITY_VIEWER;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.metrics.MetricsController.ROLE_METRICS;
 import static org.molgenis.security.core.SidUtils.getRoleName;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;

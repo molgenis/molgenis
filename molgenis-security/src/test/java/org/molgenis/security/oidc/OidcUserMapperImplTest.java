@@ -13,7 +13,7 @@ import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.oidc.model.OidcUserMapping;
@@ -108,7 +108,7 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
         .thenReturn(oidcClient);
 
     User user = mock(User.class);
-    when(dataService.query(UserMetaData.USER, User.class).eq(UserMetaData.EMAIL, email).findOne())
+    when(dataService.query(UserMetadata.USER, User.class).eq(UserMetadata.EMAIL, email).findOne())
         .thenReturn(user);
 
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
@@ -159,7 +159,7 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
     when(dataService.findOneById(OidcClientMetadata.OIDC_CLIENT, registrationId, OidcClient.class))
         .thenReturn(oidcClient);
 
-    when(dataService.query(UserMetaData.USER, User.class).eq(UserMetaData.EMAIL, email).findOne())
+    when(dataService.query(UserMetadata.USER, User.class).eq(UserMetadata.EMAIL, email).findOne())
         .thenReturn(null);
 
     OidcUserMapping oidcUserMapping = mock(OidcUserMapping.class);
@@ -184,7 +184,7 @@ public class OidcUserMapperImplTest extends AbstractMockitoTest {
     verify(oidcUserMapping).setOidcUsername("username");
     verify(oidcUserMapping).setUser(user);
 
-    verify(dataService).add(UserMetaData.USER, user);
+    verify(dataService).add(UserMetadata.USER, user);
     verify(user).setUsername(email); // email, not username
     verify(user).setEmail(email);
     verify(user).setFirstName(givenName);

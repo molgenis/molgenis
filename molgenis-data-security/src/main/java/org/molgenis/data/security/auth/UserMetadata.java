@@ -18,7 +18,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserMetaData extends SystemEntityType {
+public class UserMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "User";
   public static final String USER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -55,7 +55,7 @@ public class UserMetaData extends SystemEntityType {
 
   private final SecurityPackage securityPackage;
 
-  public UserMetaData(SecurityPackage securityPackage) {
+  public UserMetadata(SecurityPackage securityPackage) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
   }

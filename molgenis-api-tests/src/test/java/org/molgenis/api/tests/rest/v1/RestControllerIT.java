@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import org.molgenis.api.tests.utils.RestTestUtils;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -80,7 +80,7 @@ public class RestControllerIT {
             .put("sys_FreemarkerTemplate", WRITE)
             .put("sys_scr_ScriptType", READ)
             .put("sys_FileMeta", WRITEMETA)
-            .put(UserMetaData.USER, COUNT)
+            .put(UserMetadata.USER, COUNT)
             .build());
 
     testUserToken = login(testUsername, REST_TEST_USER_PASSWORD);

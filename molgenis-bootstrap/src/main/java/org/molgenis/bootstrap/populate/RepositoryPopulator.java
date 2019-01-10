@@ -1,7 +1,7 @@
 package org.molgenis.bootstrap.populate;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.decorator.meta.DynamicDecoratorPopulator;

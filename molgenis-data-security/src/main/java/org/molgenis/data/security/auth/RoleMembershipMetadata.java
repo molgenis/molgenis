@@ -22,14 +22,14 @@ public class RoleMembershipMetadata extends SystemEntityType {
   public static final String ROLE = "role";
 
   private final SecurityPackage securityPackage;
-  private final UserMetaData userMetaData;
+  private final UserMetadata userMetadata;
   private final RoleMetadata roleMetadata;
 
   public RoleMembershipMetadata(
-      SecurityPackage securityPackage, UserMetaData userMetaData, RoleMetadata roleMetadata) {
+      SecurityPackage securityPackage, UserMetadata userMetadata, RoleMetadata roleMetadata) {
     super(SIMPLE_NAME, PACKAGE_SECURITY);
     this.securityPackage = requireNonNull(securityPackage);
-    this.userMetaData = requireNonNull(userMetaData);
+    this.userMetadata = requireNonNull(userMetadata);
     this.roleMetadata = requireNonNull(roleMetadata);
   }
 
@@ -44,7 +44,7 @@ public class RoleMembershipMetadata extends SystemEntityType {
     addAttribute(USER)
         .setLabel("User")
         .setDataType(XREF)
-        .setRefEntity(userMetaData)
+        .setRefEntity(userMetadata)
         .setNillable(false);
     addAttribute(ROLE)
         .setLabel("Role")

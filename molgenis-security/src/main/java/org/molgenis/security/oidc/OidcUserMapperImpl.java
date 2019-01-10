@@ -12,7 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.auth.UserFactory;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.oidc.model.OidcClientMetadata;
 import org.molgenis.security.oidc.model.OidcUserMapping;
@@ -70,8 +70,8 @@ public class OidcUserMapperImpl implements OidcUserMapper {
   private User createUserMapping(OidcUser oidcUser, OidcUserRequest userRequest) {
     User user =
         dataService
-            .query(UserMetaData.USER, User.class)
-            .eq(UserMetaData.EMAIL, oidcUser.getEmail())
+            .query(UserMetadata.USER, User.class)
+            .eq(UserMetadata.EMAIL, oidcUser.getEmail())
             .findOne();
     if (user == null) {
       user = createUser(oidcUser);
@@ -99,7 +99,7 @@ public class OidcUserMapperImpl implements OidcUserMapper {
     user.setFirstName(oidcUser.getGivenName());
     user.setLastName(oidcUser.getFamilyName());
 
-    dataService.add(UserMetaData.USER, user);
+    dataService.add(UserMetadata.USER, user);
 
     return user;
   }
