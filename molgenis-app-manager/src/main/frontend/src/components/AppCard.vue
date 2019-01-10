@@ -1,30 +1,48 @@
 <template>
-    <div class="card app-card-component mb-3">
-        <div class="card-header">
-            <button :disabled="app.isActive" class="btn btn-danger btn-sm mx-1 float-right" @click="deleteApp(app)"
-                    title="delete">
-                <i class="fa fa-trash"></i>
-            </button>
-
+    <div class="card app-card-component">
+      <div class="card-header">
+        <div class="row">
+          <div class="col">
             <h5>{{ app.label }}</h5>
-            <span>
-                <toggle-button
-                        :labels="{checked: ' Active', unchecked: ' Inactive'}"
-                        :width="72" :value="app.isActive"
-                        @change="toggleAppActiveState(app)" :sync="true"
-                        title="toggle active status"></toggle-button>
-            </span>
+          </div>
         </div>
+        <div class="row">
+          <div class="col">
+              <span>
+                <toggle-button
+                  :labels="{checked: ' Active', unchecked: ' Inactive'}"
+                  :width="72" :value="app.isActive"
+                  @change="toggleAppActiveState(app)" :sync="true"
+                  title="toggle active status"></toggle-button>
+            </span>
+            <button :disabled="app.isActive" class="btn btn-danger btn-sm mx-1 float-right"
+                    @click="deleteApp(app)"
+                    title="delete">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
 
         <div class="card-body app-card-body">
-            <p class="lead"> {{ app.description }} </p>
+              <dl>
+                <dt>Version</dt>
+                <dd class="text-muted">{{ app.version }}</dd>
+                <dt>Description</dt>
+                <dd class="text-muted">{{ app.description }}</dd>
+            </dl>
         </div>
     </div>
 </template>
 
 <style scoped>
+    .app-card-component {
+      height: 15rem;
+      margin-bottom: 1rem;
+    }
+
     .app-card-component .card-body {
-        height: 150px;
+      overflow-y: auto;
     }
 </style>
 

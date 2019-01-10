@@ -73,7 +73,7 @@ const filterNonVisiblePackages = (packages: Array<EditorPackageIdentifier>) => {
 const compareByLabel = (a, b) => a.label && b.label ? a.label.localeCompare(
   b.label) : 0
 
-const isReferenceType = (type: string) => {
+const isReferenceType = (type?: string) => {
   var isReferenceType
   switch (type) {
     case 'categorical':

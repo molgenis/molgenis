@@ -24,7 +24,6 @@ import java.util.function.Function;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.UnknownEntityTypeException;
@@ -46,6 +45,7 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.util.UnexpectedEnumException;
 import org.molgenis.web.PluginController;
+import org.molgenis.web.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +141,7 @@ public class DataExplorerController extends PluginController {
       model.addAttribute("warningMessage", message.toString());
     }
     model.addAttribute("selectedEntityName", selectedEntityName);
-    boolean navigatorAvailable = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR) != null;
+    boolean navigatorAvailable = menuReaderService.findMenuItemPath(NAVIGATOR) != null;
     model.addAttribute(
         "showNavigatorLink", dataExplorerSettings.isShowNavigatorLink() && navigatorAvailable);
 
@@ -280,7 +280,7 @@ public class DataExplorerController extends PluginController {
   public List<NavigatorLink> getNavigatorLinks(@RequestParam("entity") String entityTypeId) {
     List<NavigatorLink> result = new LinkedList<>();
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    String navigatorPath = menuReaderService.getMenu().findMenuItemPath(NAVIGATOR);
+    String navigatorPath = menuReaderService.findMenuItemPath(NAVIGATOR);
     if (entityType != null) {
       Package pack = entityType.getPackage();
       getNavigatorLinks(result, pack, navigatorPath);

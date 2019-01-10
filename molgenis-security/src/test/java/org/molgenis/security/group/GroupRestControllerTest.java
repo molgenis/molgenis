@@ -50,7 +50,7 @@ import org.molgenis.data.security.auth.RoleMembershipMetadata;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.RoleService;
 import org.molgenis.data.security.auth.User;
-import org.molgenis.data.security.auth.UserMetaData;
+import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.exception.NotAValidGroupRoleException;
 import org.molgenis.data.security.permission.RoleMembershipService;
 import org.molgenis.data.security.user.UserService;
@@ -97,7 +97,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   @Mock private RoleMembershipMetadata roleMembershipMetadata;
   @Mock private RoleMetadata roleMetadata;
   @Mock private GroupMetadata groupMetadata;
-  @Mock private UserMetaData userMetadata;
+  @Mock private UserMetadata userMetadata;
   @Mock private Attribute attribute;
 
   @Mock private User user;
@@ -430,7 +430,7 @@ public class GroupRestControllerTest extends AbstractMockitoTestNGSpringContextT
   public void testRemoveMembershipUnknownUser() throws Exception {
     when(groupService.getGroup("devs")).thenReturn(group);
     when(userService.getUser("henkie"))
-        .thenThrow(new UnknownEntityException(UserMetaData.USER, "henkie"));
+        .thenThrow(new UnknownEntityException(UserMetadata.USER, "henkie"));
     when(userPermissionEvaluator.hasPermission(new GroupIdentity("devs"), REMOVE_MEMBERSHIP))
         .thenReturn(true);
     mockMvc

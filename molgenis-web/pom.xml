@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>7.5.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-web</artifactId>
   <packaging>jar</packaging>
@@ -116,6 +116,10 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.danilopianini</groupId>
+      <artifactId>gson-extras</artifactId>
     </dependency>
   </dependencies>
 </project>

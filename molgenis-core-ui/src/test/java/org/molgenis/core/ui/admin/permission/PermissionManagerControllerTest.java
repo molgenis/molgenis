@@ -13,7 +13,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_D
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.data.security.auth.RoleMetadata.ROLE;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.security.core.PermissionSet.COUNT_MASK;
 import static org.molgenis.security.core.PermissionSet.READ_MASK;
 import static org.molgenis.security.core.PermissionSet.WRITEMETA_MASK;

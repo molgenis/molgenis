@@ -2,6 +2,7 @@ package org.molgenis.metadata.manager.mapper;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.i18n.LanguageService.getLanguageCodes;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
@@ -235,11 +236,19 @@ public class AttributeMapper {
     return attribute;
   }
 
+  /** Find index of editorAttribute in editorEntityType lookupAttributes or return null */
   private Integer getLookupAttributeIndex(
       EditorAttribute editorAttribute, EditorEntityType editorEntityType) {
-    EditorAttributeIdentifier editorAttributeIdentifier =
-        EditorAttributeIdentifier.create(editorAttribute.getId(), editorAttribute.getLabel());
-    int index = editorEntityType.getLookupAttributes().indexOf(editorAttributeIdentifier);
+
+    String editorAttributeId = editorAttribute.getId();
+
+    int index =
+        editorEntityType
+            .getLookupAttributes()
+            .stream()
+            .map(EditorAttributeIdentifier::getId)
+            .collect(toList())
+            .indexOf(editorAttributeId);
     return index != -1 ? index : null;
   }
 

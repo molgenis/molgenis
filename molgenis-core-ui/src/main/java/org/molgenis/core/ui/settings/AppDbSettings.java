@@ -1,7 +1,6 @@
 package org.molgenis.core.ui.settings;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.AttributeType.DECIMAL;
@@ -10,8 +9,8 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.TEXT;
+import static org.molgenis.web.menu.MenuUtils.readDefaultMenuValueFromClasspath;
 
-import org.molgenis.core.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.settings.DefaultSettingsEntity;
@@ -71,11 +70,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final String RECAPTCHA_VERIFY_URI = "recaptcha_verify_uri";
     private static final String RECAPTCHA_BOT_THRESHOLD = "recaptcha_bot_threshold";
 
-    private final MenuManagerServiceImpl menuManagerServiceImpl;
-
-    public Meta(MenuManagerServiceImpl menuManagerServiceImpl) {
+    public Meta() {
       super(ID);
-      this.menuManagerServiceImpl = requireNonNull(menuManagerServiceImpl);
     }
 
     @Override
@@ -111,7 +107,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
       addAttribute(MENU)
           .setDataType(TEXT)
           .setNillable(true)
-          .setDefaultValue(getDefaultMenuValue())
+          .setDefaultValue(readDefaultMenuValueFromClasspath())
           .setLabel("Menu")
           .setDescription("JSON object that describes menu content.")
           .setValidationExpression("$('" + MENU + "').isValidJson().value()");
@@ -239,10 +235,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
           .setLabel("Bot threshold")
           .setDescription(
               "A threshold to determine if a bot is at work here (0.5 is 50% likely to be a bot).");
-    }
-
-    private String getDefaultMenuValue() {
-      return menuManagerServiceImpl.getDefaultMenuValue();
     }
   }
 

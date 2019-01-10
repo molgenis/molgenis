@@ -34,8 +34,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 import org.molgenis.core.ui.jobs.JobsController;
-import org.molgenis.core.ui.menu.Menu;
-import org.molgenis.core.ui.menu.MenuReaderService;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.MetaDataService;
@@ -65,6 +63,7 @@ import org.molgenis.semanticsearch.semantic.Hits;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -189,9 +188,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   @Test
   public void itShouldUpdateExistingAttributeMappingWhenSaving() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-    Menu menu = mock(Menu.class);
-    when(menuReaderService.getMenu()).thenReturn(menu);
-    when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+    when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
     mockMvc
         .perform(
@@ -217,9 +214,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   @Test
   public void itShouldCreateNewAttributeMappingWhenSavingIfNonePresent() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-    Menu menu = mock(Menu.class);
-    when(menuReaderService.getMenu()).thenReturn(menu);
-    when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+    when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
     heightAttr = attrMetaFactory.create().setName("height").setDataType(INT);
     hop.addAttribute(heightAttr);
@@ -251,9 +246,7 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
   @Test
   public void itShouldRemoveEmptyAttributeMappingsWhenSaving() throws Exception {
     when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
-    Menu menu = mock(Menu.class);
-    when(menuReaderService.getMenu()).thenReturn(menu);
-    when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+    when(menuReaderService.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
     mockMvc
         .perform(

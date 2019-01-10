@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.security.auth.UserMetaData.USER;
+import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableSet;

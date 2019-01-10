@@ -18,7 +18,8 @@ export type State = {
   selectedAttributeId: ?string,
   editorEntityType: EditorEntityType,
   initialEditorEntityType: ?EditorEntityType,
-  loading: number
+  loading: number,
+  languageCodes: Array<string>
 }
 
 export type Alert = {
@@ -95,7 +96,7 @@ export type EditorAttributeIdentifier = {
 export type EditorAttribute = {
   'id': string,
   'name': string,
-  'type': ?string,
+  'type'?: string,
   'parent': ?EditorAttributeIdentifier,
   'refEntityType': ?EditorEntityTypeIdentifier,
   'cascadeDelete': ?boolean,
