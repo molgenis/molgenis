@@ -3,8 +3,8 @@ package org.molgenis.ontology.roc;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
@@ -20,8 +20,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.ontology.core.meta.OntologyFactory;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -54,23 +54,23 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     Ontology ontology = ontologyFactory.create();
     ontology.setOntologyIri(ontologyIri);
     when(dataService.findOne(
-            ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
+            ONTOLOGY, new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri)))
         .thenReturn(ontology);
 
     when(dataService.count(
-            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology)))
+            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontology)))
         .thenReturn((long) 100);
 
     QueryRule queryRule =
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
     queryRule.setOperator(Operator.DIS_MAX);
     QueryRule finalQuery =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology),
+                new QueryRule(OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontology),
                 new QueryRule(Operator.AND),
                 queryRule));
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery))).thenReturn((long) 30);
@@ -79,12 +79,12 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
     queryRule2.setOperator(Operator.DIS_MAX);
     QueryRule finalQuery2 =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology),
+                new QueryRule(OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontology),
                 new QueryRule(Operator.AND),
                 queryRule2));
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2))).thenReturn((long) 10);
@@ -101,26 +101,26 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
-    ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+    ontologyEntity.set(OntologyMetadata.ONTOLOGY_IRI, ontologyIri);
 
     when(dataService.findOne(
-            ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
+            ONTOLOGY, new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri)))
         .thenReturn(ontologyEntity);
 
     when(dataService.count(
-            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
+            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontologyEntity)))
         .thenReturn((long) 100);
 
     QueryRule queryRule =
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
     queryRule.setOperator(Operator.DIS_MAX);
     QueryRule finalQuery =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+                new QueryRule(OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontologyEntity),
                 new QueryRule(Operator.AND),
                 queryRule));
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery))).thenReturn((long) 30);
@@ -129,12 +129,12 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
     queryRule2.setOperator(Operator.DIS_MAX);
     QueryRule finalQuery2 =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+                new QueryRule(OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontologyEntity),
                 new QueryRule(Operator.AND),
                 queryRule2));
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2))).thenReturn((long) 10);
@@ -150,14 +150,14 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
-    ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+    ontologyEntity.set(OntologyMetadata.ONTOLOGY_IRI, ontologyIri);
 
     when(dataService.findOne(
-            ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
+            ONTOLOGY, new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri)))
         .thenReturn(ontologyEntity);
 
     when(dataService.count(
-            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
+            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontologyEntity)))
         .thenReturn((long) 100);
 
     Map<String, Double> redistributedNGramScore =
@@ -170,26 +170,26 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest {
     String ontologyIri = "http://www.molgenis.org";
 
     Entity ontologyEntity = ontologyFactory.create();
-    ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+    ontologyEntity.set(OntologyMetadata.ONTOLOGY_IRI, ontologyIri);
 
     when(dataService.findOne(
-            ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
+            ONTOLOGY, new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri)))
         .thenReturn(ontologyEntity);
 
     when(dataService.count(
-            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
+            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontologyEntity)))
         .thenReturn((long) 100);
 
     QueryRule queryRule =
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
     queryRule.setOperator(Operator.DIS_MAX);
     QueryRule finalQuery =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+                new QueryRule(OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontologyEntity),
                 new QueryRule(Operator.AND),
                 queryRule));
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery))).thenReturn((long) 30);

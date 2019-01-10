@@ -12,9 +12,9 @@ import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH_NGRAM;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.meta.AttributeType.STRING;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
 import static org.testng.Assert.assertEquals;
 
@@ -35,13 +35,13 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.ontology.core.meta.OntologyFactory;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
 import org.molgenis.ontology.core.meta.OntologyTerm;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationFactory;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata;
 import org.molgenis.ontology.core.meta.OntologyTermFactory;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.core.meta.OntologyTermSynonym;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.roc.InformationContentService;
@@ -83,24 +83,24 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
 
     // define dataService actions for test one
     when(dataService.findOne(
-            ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI)))
+            ONTOLOGY, new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ONTOLOGY_IRI)))
         .thenReturn(ontology);
 
     when(dataService.count(
-            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontology)))
+            ONTOLOGY_TERM, new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontology)))
         .thenReturn((long) 100);
 
     QueryRule queryRule =
         new QueryRule(
             singletonList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "hear")));
+                new QueryRule(OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "hear")));
     queryRule.setOperator(DIS_MAX);
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(queryRule))).thenReturn((long) 50);
 
     QueryRule queryRule2 =
         new QueryRule(
             singletonList(
-                new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "impair")));
+                new QueryRule(OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "impair")));
     queryRule2.setOperator(DIS_MAX);
     when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(queryRule2))).thenReturn((long) 50);
 
@@ -137,14 +137,14 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM,
                     FUZZY_MATCH,
                     "hear~0.8 impair~0.8")));
     disMaxRegularQueryRule.setOperator(DIS_MAX);
 
     List<QueryRule> finalQueryRules =
         asList(
-            new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+            new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
             new QueryRule(AND),
             disMaxRegularQueryRule);
 
@@ -156,13 +156,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH_NGRAM, "hear impair")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH_NGRAM, "hear impair")));
     disMaxNGramQueryRule.setOperator(DIS_MAX);
     when(dataService.findAll(
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         disMaxNGramQueryRule))
                 .pageSize(10)))
@@ -173,17 +173,17 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
     when(dataService.findOne(
             ONTOLOGY_TERM,
             new QueryImpl<>()
-                .eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '1')
+                .eq(OntologyTermMetadata.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '1')
                 .and()
-                .eq(OntologyTermMetaData.ONTOLOGY, ontology)))
+                .eq(OntologyTermMetadata.ONTOLOGY, ontology)))
         .thenReturn(ontologyTerm0);
 
     when(dataService.findOne(
             ONTOLOGY_TERM,
             new QueryImpl<>()
-                .eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '2')
+                .eq(OntologyTermMetadata.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + '2')
                 .and()
-                .eq(OntologyTermMetaData.ONTOLOGY, ontology)))
+                .eq(OntologyTermMetadata.ONTOLOGY, ontology)))
         .thenReturn(ontologyTerm1);
 
     // ########################### TEST TWO ###########################
@@ -208,16 +208,16 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         singletonList(
             ontologyTermSynonym2)); // self reference intended? Arrays.asList(ontologyTermEntity_3)
     ontologyTermEntity_3.set(
-        OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+        OntologyTermMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
         singletonList(ontologyTermDynamicAnnotation_3_1));
 
     // DataService action for matching ontology term annotation
     QueryRule annotationQueryRule =
         new QueryRule(
             asList(
-                new QueryRule(OntologyTermDynamicAnnotationMetaData.NAME, EQUALS, "OMIM"),
+                new QueryRule(OntologyTermDynamicAnnotationMetadata.NAME, EQUALS, "OMIM"),
                 new QueryRule(AND),
-                new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE, EQUALS, "123456")));
+                new QueryRule(OntologyTermDynamicAnnotationMetadata.VALUE, EQUALS, "123456")));
 
     when(dataService.findAll(
             ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
@@ -228,10 +228,10 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         new QueryRule(
-                            OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+                            OntologyTermMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
                             IN,
                             singletonList(ontologyTermDynamicAnnotation_3_1))))
                 .pageSize(Integer.MAX_VALUE)))
@@ -242,13 +242,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "input~0.8")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH, "input~0.8")));
     disMaxRegularQueryRule_2.setOperator(DIS_MAX);
     when(dataService.findAll(
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         disMaxRegularQueryRule_2))
                 .pageSize(49)))
@@ -259,13 +259,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH_NGRAM, "input")));
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM, FUZZY_MATCH_NGRAM, "input")));
     disMaxNGramQueryRule_2.setOperator(DIS_MAX);
     when(dataService.findAll(
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         disMaxNGramQueryRule_2))
                 .pageSize(10)))
@@ -298,7 +298,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM,
                     FUZZY_MATCH,
                     "proptosi~0.8 protrud~0.8 ey~0.8 exophthalmo~0.8")));
     disMaxRegularQueryRule_3.setOperator(DIS_MAX);
@@ -307,7 +307,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         disMaxRegularQueryRule_3))
                 .pageSize(50)))
@@ -318,7 +318,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
         new QueryRule(
             singletonList(
                 new QueryRule(
-                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM,
                     FUZZY_MATCH_NGRAM,
                     "proptosi protrud ey exophthalmo")));
     disMaxNGramQueryRule_3.setOperator(QueryRule.Operator.DIS_MAX);
@@ -327,7 +327,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     asList(
-                        new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontology),
+                        new QueryRule(OntologyTermMetadata.ONTOLOGY, EQUALS, ontology),
                         new QueryRule(AND),
                         disMaxNGramQueryRule_3))
                 .pageSize(10)))
@@ -406,7 +406,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
 
     Entity ontologyEntity = iterator.next();
 
-    assertEquals(ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI), ONTOLOGY_IRI);
+    assertEquals(ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI), ONTOLOGY_IRI);
 
     assertEquals(iterator.hasNext(), false);
   }
@@ -414,7 +414,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
   @Test
   public void getOntologyEntity() {
     Entity ontologyEntity = sortaServiceImpl.getOntologyEntity(ONTOLOGY_IRI);
-    assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI));
+    assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetadata.ONTOLOGY_IRI));
   }
 
   @Test
@@ -422,13 +422,13 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest {
     Entity firstOntologyTermEntity =
         sortaServiceImpl.getOntologyTermEntity(ONTOLOGY_IRI + 1, ONTOLOGY_IRI);
     assertEquals(
-        firstOntologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME),
+        firstOntologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME),
         "hearing impairment");
 
     Entity secondOntologyTermEntity =
         sortaServiceImpl.getOntologyTermEntity(ONTOLOGY_IRI + 2, ONTOLOGY_IRI);
     assertEquals(
-        secondOntologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME),
+        secondOntologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME),
         "mixed hearing impairment");
   }
 

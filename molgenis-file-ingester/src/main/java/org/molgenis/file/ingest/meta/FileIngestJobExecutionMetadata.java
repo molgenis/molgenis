@@ -16,7 +16,7 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileIngestJobExecutionMetaData extends SystemEntityType {
+public class FileIngestJobExecutionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "FileIngestJobExecution";
   public static final String FILE_INGEST_JOB_EXECUTION =
       PACKAGE_JOB + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -33,7 +33,7 @@ public class FileIngestJobExecutionMetaData extends SystemEntityType {
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
-  FileIngestJobExecutionMetaData(
+  FileIngestJobExecutionMetadata(
       FileMetaMetaData fileMetaMetaData,
       JobExecutionMetaData jobExecutionMetaData,
       JobPackage jobPackage) {

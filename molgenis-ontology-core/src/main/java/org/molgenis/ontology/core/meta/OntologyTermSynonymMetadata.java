@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermSynonymMetaData extends SystemEntityType {
+public class OntologyTermSynonymMetadata extends SystemEntityType {
   public static final String SIMPLE_NAME = "OntologyTermSynonym";
   public static final String ONTOLOGY_TERM_SYNONYM =
       PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -26,7 +26,7 @@ public class OntologyTermSynonymMetaData extends SystemEntityType {
 
   private OntologyPackage ontologyPackage;
 
-  public OntologyTermSynonymMetaData() {
+  public OntologyTermSynonymMetadata() {
     super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
   }
 

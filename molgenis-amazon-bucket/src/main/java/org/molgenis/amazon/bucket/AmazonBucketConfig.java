@@ -3,7 +3,7 @@ package org.molgenis.amazon.bucket;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecution;
-import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecutionMetaData;
+import org.molgenis.amazon.bucket.meta.AmazonBucketJobExecutionMetadata;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.jobs.model.ScheduledJobType;
@@ -18,15 +18,15 @@ import org.springframework.context.annotation.Lazy;
 public class AmazonBucketConfig {
   private final AmazonBucketIngester ingester;
   private final ScheduledJobTypeFactory scheduledJobTypeFactory;
-  private final AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData;
+  private final AmazonBucketJobExecutionMetadata amazonBucketJobExecutionMetadata;
 
   public AmazonBucketConfig(
       AmazonBucketIngester ingester,
       ScheduledJobTypeFactory scheduledJobTypeFactory,
-      AmazonBucketJobExecutionMetaData amazonBucketJobExecutionMetaData) {
+      AmazonBucketJobExecutionMetadata amazonBucketJobExecutionMetadata) {
     this.ingester = requireNonNull(ingester);
     this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
-    this.amazonBucketJobExecutionMetaData = requireNonNull(amazonBucketJobExecutionMetaData);
+    this.amazonBucketJobExecutionMetadata = requireNonNull(amazonBucketJobExecutionMetadata);
   }
 
   @Bean
@@ -75,7 +75,7 @@ public class AmazonBucketConfig {
             + "'description': 'The region where the amazon bucket is located'},'targetEntityId': {'type': 'string', "
             + "'description': 'Target EntityType ID'}},"
             + "'required': ['bucket','key','accessKey','secretKey','expression','region']}");
-    result.setJobExecutionType(amazonBucketJobExecutionMetaData);
+    result.setJobExecutionType(amazonBucketJobExecutionMetadata);
     return result;
   }
 }

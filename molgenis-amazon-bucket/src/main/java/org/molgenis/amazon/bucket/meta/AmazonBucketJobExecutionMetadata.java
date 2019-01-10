@@ -12,7 +12,7 @@ import org.molgenis.jobs.model.JobPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AmazonBucketJobExecutionMetaData extends SystemEntityType {
+public class AmazonBucketJobExecutionMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "AmazonBucketJobExecution";
 
   public static final String FILE = "file";
@@ -31,7 +31,7 @@ public class AmazonBucketJobExecutionMetaData extends SystemEntityType {
 
   public static final String AMAZON_BUCKET_JOB_TYPE = "AmazonBucketJob";
 
-  AmazonBucketJobExecutionMetaData(
+  AmazonBucketJobExecutionMetadata(
       FileMetaMetaData fileMetaMetaData,
       JobExecutionMetaData jobExecutionMetaData,
       JobPackage jobPackage) {

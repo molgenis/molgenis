@@ -8,19 +8,19 @@ import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
@@ -34,24 +34,24 @@ public class OntologyTermHitMetaData extends SystemEntityType {
   public static final String COMBINED_SCORE = "Combined_Score";
 
   private final OntologyPackage ontologyPackage;
-  private final OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
-  private final OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData;
-  private final OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
-  private final OntologyMetaData ontologyMetaData;
+  private final OntologyTermSynonymMetadata ontologyTermSynonymMetadata;
+  private final OntologyTermDynamicAnnotationMetadata ontologyTermDynamicAnnotationMetadata;
+  private final OntologyTermNodePathMetadata ontologyTermNodePathMetadata;
+  private final OntologyMetadata ontologyMetadata;
 
   public OntologyTermHitMetaData(
       OntologyPackage ontologyPackage,
-      OntologyTermSynonymMetaData ontologyTermSynonymMetaData,
-      OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData,
-      OntologyTermNodePathMetaData ontologyTermNodePathMetaData,
-      OntologyMetaData ontologyMetaData) {
+      OntologyTermSynonymMetadata ontologyTermSynonymMetadata,
+      OntologyTermDynamicAnnotationMetadata ontologyTermDynamicAnnotationMetadata,
+      OntologyTermNodePathMetadata ontologyTermNodePathMetadata,
+      OntologyMetadata ontologyMetadata) {
     super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
     this.ontologyPackage = requireNonNull(ontologyPackage);
-    this.ontologyTermSynonymMetaData = requireNonNull(ontologyTermSynonymMetaData);
-    this.ontologyTermDynamicAnnotationMetaData =
-        requireNonNull(ontologyTermDynamicAnnotationMetaData);
-    this.ontologyTermNodePathMetaData = requireNonNull(ontologyTermNodePathMetaData);
-    this.ontologyMetaData = requireNonNull(ontologyMetaData);
+    this.ontologyTermSynonymMetadata = requireNonNull(ontologyTermSynonymMetadata);
+    this.ontologyTermDynamicAnnotationMetadata =
+        requireNonNull(ontologyTermDynamicAnnotationMetadata);
+    this.ontologyTermNodePathMetadata = requireNonNull(ontologyTermNodePathMetadata);
+    this.ontologyMetadata = requireNonNull(ontologyMetadata);
   }
 
   @Override
@@ -69,15 +69,15 @@ public class OntologyTermHitMetaData extends SystemEntityType {
     addAttribute(ONTOLOGY_TERM_SYNONYM)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermSynonymMetaData);
+        .setRefEntity(ontologyTermSynonymMetadata);
     addAttribute(ONTOLOGY_TERM_DYNAMIC_ANNOTATION)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermDynamicAnnotationMetaData);
+        .setRefEntity(ontologyTermDynamicAnnotationMetadata);
     addAttribute(ONTOLOGY_TERM_NODE_PATH)
         .setDataType(MREF)
         .setNillable(true)
-        .setRefEntity(ontologyTermNodePathMetaData);
-    addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false).setRefEntity(ontologyMetaData);
+        .setRefEntity(ontologyTermNodePathMetadata);
+    addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false).setRefEntity(ontologyMetadata);
   }
 }
