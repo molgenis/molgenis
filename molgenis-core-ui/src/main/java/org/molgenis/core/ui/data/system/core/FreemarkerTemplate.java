@@ -1,8 +1,8 @@
 package org.molgenis.core.ui.data.system.core;
 
-import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.ID;
-import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.NAME;
-import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.VALUE;
+import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.ID;
+import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.NAME;
+import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.VALUE;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;
