@@ -48,5 +48,7 @@ public class ResourceCopyJobExecutionMetadata extends SystemEntityType {
         .setDataType(STRING)
         .setLabel("Target package")
         .setDescription("The ID of the package to copy the resources to.");
+
+    setRowLevelSecured(true);
   }
 }
