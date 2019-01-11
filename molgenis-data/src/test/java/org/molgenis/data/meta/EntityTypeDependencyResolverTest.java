@@ -71,10 +71,13 @@ public class EntityTypeDependencyResolverTest {
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(null);
 
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType0); // self-reference
+    when(attr1.hasRefEntity()).thenReturn(true);
     when(attr1.getRefEntity()).thenReturn(entityType2);
     when(attr1.isMappedBy()).thenReturn(true);
     when(attr1.getMappedBy()).thenReturn(attr2);
+    when(attr2.hasRefEntity()).thenReturn(true);
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
@@ -88,10 +91,13 @@ public class EntityTypeDependencyResolverTest {
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(null);
 
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType0); // self-reference
+    when(attr1.hasRefEntity()).thenReturn(true);
     when(attr1.getRefEntity()).thenReturn(entityType2);
     when(attr1.isMappedBy()).thenReturn(true);
     when(attr1.getMappedBy()).thenReturn(attr2);
+    when(attr2.hasRefEntity()).thenReturn(true);
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
@@ -106,11 +112,8 @@ public class EntityTypeDependencyResolverTest {
     when(entityType2.getExtends()).thenReturn(entityType1);
     when(entityType3.getExtends()).thenReturn(entityType2);
 
-    when(attr0.getRefEntity()).thenReturn(null);
-    when(attr1.getRefEntity()).thenReturn(null);
     when(attr1.isMappedBy()).thenReturn(false);
     when(attr1.getMappedBy()).thenReturn(null);
-    when(attr2.getRefEntity()).thenReturn(null);
 
     assertEquals(
         entityTypeDependencyResolver.resolve(
@@ -140,10 +143,13 @@ public class EntityTypeDependencyResolverTest {
     when(entityType2.getExtends()).thenReturn(entityType1);
     when(entityType3.getExtends()).thenReturn(entityType2);
 
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType0); // self-reference
+    when(attr1.hasRefEntity()).thenReturn(true);
     when(attr1.getRefEntity()).thenReturn(entityType2);
     when(attr1.isMappedBy()).thenReturn(true);
     when(attr1.getMappedBy()).thenReturn(attr2);
+    when(attr2.hasRefEntity()).thenReturn(true);
     when(attr2.getRefEntity()).thenReturn(entityType1);
 
     assertEquals(
@@ -170,8 +176,11 @@ public class EntityTypeDependencyResolverTest {
       expectedExceptionsMessageRegExp =
           "Could not resolve dependencies of items \\[entity1, entity2, entity0\\]. Are there circular dependencies\\?")
   public void resolveDependenciesEntityCircularRefEntity() {
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType1);
+    when(attr1.hasRefEntity()).thenReturn(true);
     when(attr1.getRefEntity()).thenReturn(entityType2);
+    when(attr2.hasRefEntity()).thenReturn(true);
     when(attr2.getRefEntity()).thenReturn(entityType0);
 
     entityTypeDependencyResolver.resolve(
@@ -187,7 +196,9 @@ public class EntityTypeDependencyResolverTest {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(entityType1);
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType3);
+    when(attr3.hasRefEntity()).thenReturn(true);
     when(attr3.getRefEntity()).thenReturn(entityType4);
 
     assertEquals(
@@ -212,7 +223,9 @@ public class EntityTypeDependencyResolverTest {
     when(entityType0.getExtends()).thenReturn(null);
     when(entityType1.getExtends()).thenReturn(entityType0);
     when(entityType2.getExtends()).thenReturn(entityType1);
+    when(attr0.hasRefEntity()).thenReturn(true);
     when(attr0.getRefEntity()).thenReturn(entityType3);
+    when(attr3.hasRefEntity()).thenReturn(true);
     when(attr3.getRefEntity()).thenReturn(entityType4);
     when(entityType4.getExtends()).thenReturn(entityType5);
     when(entityType5.getExtends()).thenReturn(entityType6);

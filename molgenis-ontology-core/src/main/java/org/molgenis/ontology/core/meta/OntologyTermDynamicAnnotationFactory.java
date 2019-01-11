@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class OntologyTermDynamicAnnotationFactory
     extends AbstractSystemEntityFactory<
-        OntologyTermDynamicAnnotation, OntologyTermDynamicAnnotationMetaData, String> {
+        OntologyTermDynamicAnnotation, OntologyTermDynamicAnnotationMetadata, String> {
   OntologyTermDynamicAnnotationFactory(
-      OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMeta,
+      OntologyTermDynamicAnnotationMetadata ontologyTermDynamicAnnotationMeta,
       EntityPopulator entityPopulator) {
     super(OntologyTermDynamicAnnotation.class, ontologyTermDynamicAnnotationMeta, entityPopulator);
   }

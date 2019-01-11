@@ -14,7 +14,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.sorta.controller.SortaController;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
@@ -94,7 +94,7 @@ public class SortaJobProcessor {
                               ontologyTermEntities, new DynamicEntity(matchingTaskContentMetaData));
                       resultEntity.set(
                           MatchingTaskContentMetaData.MATCHED_TERM,
-                          firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+                          firstMatchedOntologyTerm.get(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
                       resultEntity.set(
                           MatchingTaskContentMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));
                     } else {

@@ -1,8 +1,8 @@
 package org.molgenis.ontology.roc;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -24,8 +24,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.semanticsearch.string.Stemmer;
 
@@ -44,11 +44,11 @@ public class InformationContentService {
                   Entity ontologyEntity =
                       dataService.findOne(
                           ONTOLOGY,
-                          new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+                          new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri));
                   if (ontologyEntity != null) {
                     return dataService.count(
                         ONTOLOGY_TERM,
-                        new QueryImpl<>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+                        new QueryImpl<>().eq(OntologyTermMetadata.ONTOLOGY, ontologyEntity));
                   }
                   return (long) 0;
                 }
@@ -64,13 +64,13 @@ public class InformationContentService {
                   Entity ontologyEntity =
                       dataService.findOne(
                           ONTOLOGY,
-                          new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+                          new QueryImpl<>().eq(OntologyMetadata.ONTOLOGY_IRI, ontologyIri));
                   if (ontologyEntity != null) {
                     QueryRule queryRule =
                         new QueryRule(
                             Arrays.asList(
                                 new QueryRule(
-                                    OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+                                    OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM,
                                     Operator.FUZZY_MATCH,
                                     key.getWord())));
                     queryRule.setOperator(Operator.DIS_MAX);
@@ -78,7 +78,7 @@ public class InformationContentService {
                         new QueryRule(
                             Arrays.asList(
                                 new QueryRule(
-                                    OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+                                    OntologyTermMetadata.ONTOLOGY, Operator.EQUALS, ontologyEntity),
                                 new QueryRule(Operator.AND),
                                 queryRule));
                     long wordCount = dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery));

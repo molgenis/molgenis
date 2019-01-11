@@ -1,20 +1,12 @@
 package org.molgenis.data.security.auth;
 
-import org.molgenis.data.config.EntityBaseTestConfig;
 import org.molgenis.data.meta.AbstractSystemEntityTest;
-import org.molgenis.data.security.config.GroupTestConfig;
+import org.molgenis.data.security.config.SecurityTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(
-    classes = {
-      EntityBaseTestConfig.class,
-      GroupMetadata.class,
-      GroupFactory.class,
-      SecurityPackage.class,
-      GroupTestConfig.class
-    })
+@ContextConfiguration(classes = {SecurityTestConfig.class})
 public class GroupTest extends AbstractSystemEntityTest {
 
   @Autowired GroupMetadata metadata;

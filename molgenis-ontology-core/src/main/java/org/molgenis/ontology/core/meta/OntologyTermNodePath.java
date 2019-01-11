@@ -1,9 +1,9 @@
 package org.molgenis.ontology.core.meta;
 
 import static java.lang.Boolean.TRUE;
-import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ROOT;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata.NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata.ROOT;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

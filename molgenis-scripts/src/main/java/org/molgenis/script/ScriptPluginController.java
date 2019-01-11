@@ -2,8 +2,8 @@ package org.molgenis.script;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.script.ScriptPluginController.URI;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.core.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
+import static org.molgenis.script.core.ScriptParameterMetadata.SCRIPT_PARAMETER;
 
 import org.molgenis.data.DataService;
 import org.molgenis.script.core.Script;

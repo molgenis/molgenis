@@ -1,10 +1,10 @@
 package org.molgenis.file.ingest.meta;
 
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_TYPE;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.LOADER;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.TARGET_ENTITY_ID;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.URL;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata.FILE;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata.FILE_INGEST_JOB_TYPE;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata.LOADER;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata.TARGET_ENTITY_ID;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata.URL;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;

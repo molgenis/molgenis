@@ -1,9 +1,9 @@
 package org.molgenis.ontology.core.repository;
 
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_IRI;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_NAME;
 
 import java.util.ArrayList;
 import java.util.List;

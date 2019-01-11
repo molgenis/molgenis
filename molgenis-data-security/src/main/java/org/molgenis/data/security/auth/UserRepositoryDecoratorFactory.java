@@ -11,15 +11,19 @@ import org.springframework.stereotype.Component;
 public class UserRepositoryDecoratorFactory
     extends AbstractSystemRepositoryDecoratorFactory<User, UserMetadata> {
   private final PasswordEncoder passwordEncoder;
+  private final UserValidator userValidator;
 
   public UserRepositoryDecoratorFactory(
-      UserMetadata userMetadata, PasswordEncoder passwordEncoder) {
+      UserMetadata userMetadata, PasswordEncoder passwordEncoder, UserValidator userValidator) {
     super(userMetadata);
     this.passwordEncoder = requireNonNull(passwordEncoder);
+    this.userValidator = requireNonNull(userValidator);
   }
 
   @Override
   public Repository<User> createDecoratedRepository(Repository<User> repository) {
-    return new UserRepositoryDecorator(repository, passwordEncoder);
+    Repository<User> decoratedRepository = new UserRepositoryDecorator(repository, passwordEncoder);
+    decoratedRepository = new UserRepositoryValidationDecorator(decoratedRepository, userValidator);
+    return decoratedRepository;
   }
 }

@@ -1,11 +1,11 @@
 package org.molgenis.script.core;
 
-import static org.molgenis.script.core.ScriptMetaData.CONTENT;
-import static org.molgenis.script.core.ScriptMetaData.GENERATE_TOKEN;
-import static org.molgenis.script.core.ScriptMetaData.NAME;
-import static org.molgenis.script.core.ScriptMetaData.PARAMETERS;
-import static org.molgenis.script.core.ScriptMetaData.RESULT_FILE_EXTENSION;
-import static org.molgenis.script.core.ScriptMetaData.TYPE;
+import static org.molgenis.script.core.ScriptMetadata.CONTENT;
+import static org.molgenis.script.core.ScriptMetadata.GENERATE_TOKEN;
+import static org.molgenis.script.core.ScriptMetadata.NAME;
+import static org.molgenis.script.core.ScriptMetadata.PARAMETERS;
+import static org.molgenis.script.core.ScriptMetadata.RESULT_FILE_EXTENSION;
+import static org.molgenis.script.core.ScriptMetadata.TYPE;
 
 import com.google.common.collect.Lists;
 import java.util.Collections;

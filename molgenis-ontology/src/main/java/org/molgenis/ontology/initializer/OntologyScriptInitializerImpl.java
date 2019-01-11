@@ -1,8 +1,8 @@
 package org.molgenis.ontology.initializer;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.core.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
+import static org.molgenis.script.core.ScriptParameterMetadata.SCRIPT_PARAMETER;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,10 +14,10 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.core.Script;
 import org.molgenis.script.core.ScriptFactory;
-import org.molgenis.script.core.ScriptMetaData;
+import org.molgenis.script.core.ScriptMetadata;
 import org.molgenis.script.core.ScriptParameterFactory;
-import org.molgenis.script.core.ScriptParameterMetaData;
-import org.molgenis.script.core.ScriptTypeMetaData;
+import org.molgenis.script.core.ScriptParameterMetadata;
+import org.molgenis.script.core.ScriptTypeMetadata;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +35,13 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer 
   private final DataService dataService;
   private final ScriptFactory scriptFactory;
   private final ScriptParameterFactory scriptParameterFactory;
-  private final ScriptMetaData scriptMetaData;
+  private final ScriptMetadata scriptMetaData;
 
   public OntologyScriptInitializerImpl(
       DataService dataService,
       ScriptFactory scriptFactory,
       ScriptParameterFactory scriptParameterFactory,
-      ScriptMetaData scriptMetaData) {
+      ScriptMetadata scriptMetaData) {
     this.dataService = requireNonNull(dataService);
     this.scriptFactory = requireNonNull(scriptFactory);
     this.scriptParameterFactory = requireNonNull(scriptParameterFactory);
@@ -55,15 +55,15 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer 
     if (resource.exists()) {
       long count =
           dataService.count(
-              SCRIPT, new QueryImpl<>().eq(ScriptMetaData.NAME, ROC_CURVE_SCRIPT_NAME));
+              SCRIPT, new QueryImpl<>().eq(ScriptMetadata.NAME, ROC_CURVE_SCRIPT_NAME));
       if (count == 0) {
         Entity scriptType =
             dataService.findOne(
-                ScriptTypeMetaData.SCRIPT_TYPE, new QueryImpl<>().eq(ScriptTypeMetaData.NAME, "R"));
+                ScriptTypeMetadata.SCRIPT_TYPE, new QueryImpl<>().eq(ScriptTypeMetadata.NAME, "R"));
 
         if (scriptType == null)
           throw new UnknownEntityException(
-              scriptMetaData, scriptMetaData.getAttribute(ScriptMetaData.NAME), "R");
+              scriptMetaData, scriptMetaData.getAttribute(ScriptMetadata.NAME), "R");
 
         String scriptContent;
         try {
@@ -76,7 +76,7 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer 
 
         if (dataService.count(
                 SCRIPT_PARAMETER,
-                new QueryImpl<>().eq(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER))
+                new QueryImpl<>().eq(ScriptParameterMetadata.NAME, ROC_CURVE_SCRIPT_PARAMETER))
             == 0) {
           dataService.add(
               SCRIPT_PARAMETER,
@@ -86,15 +86,15 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer 
         Entity scriptParameterEntity =
             dataService.findOne(
                 SCRIPT_PARAMETER,
-                new QueryImpl<>().eq(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER));
+                new QueryImpl<>().eq(ScriptParameterMetadata.NAME, ROC_CURVE_SCRIPT_PARAMETER));
 
         Script script = scriptFactory.create();
         script.setName(ROC_CURVE_SCRIPT_NAME);
         script.setGenerateToken(true);
-        script.set(ScriptMetaData.TYPE, scriptType);
+        script.set(ScriptMetadata.TYPE, scriptType);
         script.setResultFileExtension("png");
         script.setContent(scriptContent);
-        script.set(ScriptMetaData.PARAMETERS, Arrays.asList(scriptParameterEntity));
+        script.set(ScriptMetadata.PARAMETERS, Arrays.asList(scriptParameterEntity));
         dataService.add(SCRIPT, script);
 
         LOG.info("Script entity \"roc\" has been added to the database!");

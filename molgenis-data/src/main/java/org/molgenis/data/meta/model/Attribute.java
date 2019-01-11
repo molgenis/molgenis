@@ -44,7 +44,6 @@ import static org.molgenis.data.meta.model.AttributeMetadata.VALIDATION_EXPRESSI
 import static org.molgenis.data.meta.model.AttributeMetadata.VISIBLE_EXPRESSION;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
-import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
@@ -56,6 +55,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Sort;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.support.StaticEntity;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.i18n.Labeled;
 
 /** Attribute defines the properties of an entity. Synonyms: feature, column, data item. */
@@ -110,7 +110,9 @@ public class Attribute extends StaticEntity implements Labeled {
     attrMetaCopy.setIdAttribute(attrMeta.isIdAttribute());
     attrMetaCopy.setLabelAttribute(attrMeta.isLabelAttribute());
     attrMetaCopy.setLookupAttributeIndex(attrMeta.getLookupAttributeIndex());
-    attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
+    if (attrMeta.hasRefEntity()) {
+      attrMetaCopy.setRefEntity(attrMeta.getRefEntity());
+    }
     attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
     attrMetaCopy.setOrderBy(attrMeta.getOrderBy());
     attrMetaCopy.setExpression(attrMeta.getExpression());
@@ -326,14 +328,22 @@ public class Attribute extends StaticEntity implements Labeled {
     return getEntities(CHILDREN, Attribute.class);
   }
 
+  /** @return whether this attribute references an entity type */
+  public boolean hasRefEntity() {
+    return EntityTypeUtils.isReferenceType(this);
+  }
+
   /**
    * When getDataType=xref/mref, get other end of xref
    *
    * @return referenced entity
+   * @throws UnsupportedOperationException if attribute type is not a reference type
    */
-  @Nullable
-  @CheckForNull
   public EntityType getRefEntity() {
+    if (!hasRefEntity()) {
+      throw new UnsupportedOperationException(
+          String.format("getRefEntity not supported for attribute type '%s'", getDataType()));
+    }
     return getEntity(REF_ENTITY_TYPE, EntityType.class);
   }
 
@@ -734,7 +744,7 @@ public class Attribute extends StaticEntity implements Labeled {
   public Attribute getInversedBy() {
     // FIXME besides checking mappedBy attr name also check
     // attr.getRefEntity().getFullyQualifiedName
-    if (isReferenceType(this)) {
+    if (hasRefEntity()) {
       return Streams.stream(getRefEntity().getAtomicAttributes())
           .filter(Attribute::isMappedBy)
           .filter(attr -> getName().equals(attr.getMappedBy().getName()))

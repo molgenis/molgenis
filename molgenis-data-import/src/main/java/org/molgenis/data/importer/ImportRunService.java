@@ -99,7 +99,11 @@ public class ImportRunService {
   // do not use platform specific line ending
   String createEnglishMailText(ImportRun importRun, ZoneId zone) {
     ZonedDateTime start = importRun.getStartDate().atZone(zone);
-    ZonedDateTime end = importRun.getEndDate().atZone(zone);
+    ZonedDateTime end =
+        importRun
+            .getEndDate()
+            .orElseThrow(() -> new IllegalStateException("ImportRun must have an end date"))
+            .atZone(zone);
     String startDateTimeString = ofLocalizedDateTime(FULL).withLocale(ENGLISH).format(start);
     String endTimeString = ofLocalizedTime(MEDIUM).withLocale(ENGLISH).format(end);
 

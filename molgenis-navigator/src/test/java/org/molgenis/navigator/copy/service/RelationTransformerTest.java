@@ -110,9 +110,11 @@ public class RelationTransformerTest {
     Attribute normalAttr = mock(Attribute.class);
     when(refAttr1.getIdentifier()).thenReturn("refAttr1");
     when(refAttr1.getDataType()).thenReturn(MREF);
+    when(refAttr1.hasRefEntity()).thenReturn(true);
     when(refAttr1.getRefEntity().getId()).thenReturn("ref1");
     when(refAttr2.getIdentifier()).thenReturn("refAttr2");
     when(refAttr2.getDataType()).thenReturn(XREF);
+    when(refAttr2.hasRefEntity()).thenReturn(true);
     when(refAttr2.getRefEntity().getId()).thenReturn("ref2");
     when(normalAttr.getIdentifier()).thenReturn("normalAttr");
     when(normalAttr.getDataType()).thenReturn(STRING);

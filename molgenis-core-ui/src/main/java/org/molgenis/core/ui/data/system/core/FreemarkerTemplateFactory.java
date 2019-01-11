@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FreemarkerTemplateFactory
-    extends AbstractSystemEntityFactory<FreemarkerTemplate, FreemarkerTemplateMetaData, String> {
+    extends AbstractSystemEntityFactory<FreemarkerTemplate, FreemarkerTemplateMetadata, String> {
   FreemarkerTemplateFactory(
-      FreemarkerTemplateMetaData freemarkerTemplate, EntityPopulator entityPopulator) {
+      FreemarkerTemplateMetadata freemarkerTemplate, EntityPopulator entityPopulator) {
     super(FreemarkerTemplate.class, freemarkerTemplate, entityPopulator);
   }
 }

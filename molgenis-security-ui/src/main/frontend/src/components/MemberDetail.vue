@@ -8,14 +8,18 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">
-              <router-link :to="{ name: 'groupOverView' }" class="text-capitalize">{{ 'security-ui-breadcrumb-groups' |
+              <router-link :to="{ name: 'groupOverView' }" class="text-capitalize">{{
+                'security-ui-breadcrumb-groups' |
                 i18n }}
               </router-link>
             </li>
             <li class="breadcrumb-item">
-              <router-link :to="{ name: 'groupDetail', params: { name: groupName } }" class="text-capitalize">{{groupName}}</router-link>
+              <router-link :to="{ name: 'groupDetail', params: { name: groupName } }"
+                           class="text-capitalize">{{groupName}}
+              </router-link>
             </li>
-            <li class="breadcrumb-item active text-capitalize" aria-current="page">{{memberName}}</li>
+            <li class="breadcrumb-item active text-capitalize" aria-current="page">{{memberName}}
+            </li>
           </ol>
         </nav>
       </div>
@@ -30,7 +34,7 @@
     <div class="row">
       <div class="col-md-6">
         <h5 class="font-weight-light">{{'security-ui-membership-attribute-user' | i18n}}</h5>
-        <h5 v-if="member" class="pl-3">{{memberName}}</h5>
+        <p v-if="member" class="pl-3 text-capitalize font-weight-bold">{{memberName}}</p>
       </div>
     </div>
 
@@ -38,13 +42,15 @@
 
     <div class="row">
       <div class="col-md-3">
-        <h5 class="font-weight-light">{{'security-ui-membership-attribute-role' | i18n}}</h5>
-        <h5 v-if="member && !isEditRoleMode" class="pl-3">{{member.roleLabel}}</h5>
+        <h5 class="text-capitalize font-weight-bold">{{'security-ui-membership-attribute-role' |
+          i18n}}</h5>
+        <p v-if="member && !isEditRoleMode" class="text-capitalize font-weight-bold pl-3">
+          {{member.roleLabel}}</p>
         <form v-else-if="isEditRoleMode">
 
-          <div v-for="role in sortedRoles" class="form-check" >
+          <div v-for="role in sortedRoles" class="form-check">
             <input class="form-check-input" type="radio" name="roleRadio"
-                   :id="role.roleName" :value="role.roleName" v-model="selectedRole" >
+                   :id="role.roleName" :value="role.roleName" v-model="selectedRole">
             <label class="form-check-label" :for="role.roleName">
               {{role.roleLabel}}
             </label>
@@ -158,7 +164,8 @@
         if (!this.groupRoles || !this.groupRoles[this.groupName]) {
           return []
         }
-        return [...this.groupRoles[this.groupName]].sort((a, b) => a.roleLabel.localeCompare(b.roleLabel))
+        return [...this.groupRoles[this.groupName]].sort(
+          (a, b) => a.roleLabel.localeCompare(b.roleLabel))
       },
       canRemoveMember () {
         const permissions = this.groupPermissions[this.groupName] || []
@@ -176,19 +183,21 @@
       },
       onRemoveMember () {
         this.isRemoving = !this.isRemoving
-        this.$store.dispatch('removeMember', {groupName: this.groupName, memberName: this.memberName})
+        this.$store.dispatch('removeMember',
+          {groupName: this.groupName, memberName: this.memberName})
           .then(() => {
-            this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
+            this.$router.push({name: 'groupDetail', params: {name: this.groupName}})
           }, () => {
             this.isRemoving = !this.isRemoving
           })
       },
       onUpdateMember () {
         this.isUpdating = !this.isUpdating
-        const updateMemberCommand = { roleName: this.selectedRole }
-        this.$store.dispatch('updateMember', {groupName: this.groupName, memberName: this.memberName, updateMemberCommand})
+        const updateMemberCommand = {roleName: this.selectedRole}
+        this.$store.dispatch('updateMember',
+          {groupName: this.groupName, memberName: this.memberName, updateMemberCommand})
           .then(() => {
-            this.$router.push({ name: 'groupDetail', params: { name: this.groupName } })
+            this.$router.push({name: 'groupDetail', params: {name: this.groupName}})
           }, () => {
             this.isUpdating = !this.isUpdating
           })

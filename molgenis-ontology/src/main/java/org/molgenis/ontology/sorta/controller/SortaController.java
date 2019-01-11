@@ -20,7 +20,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.INPUT
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALIDATED;
-import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 
 import com.google.common.base.Objects;
@@ -68,12 +68,12 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.JobExecutor;
 import org.molgenis.jobs.model.JobExecutionMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobExecutionFactory;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
-import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
+import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.request.SortaServiceRequest;
 import org.molgenis.ontology.sorta.request.SortaServiceResponse;
@@ -123,8 +123,8 @@ public class SortaController extends PluginController {
   private final IdGenerator idGenerator;
   private final PermissionSystemService permissionSystemService;
   private final MatchingTaskContentMetaData matchingTaskContentMetaData;
-  private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
-  private final OntologyTermMetaData ontologyTermMetaData;
+  private final SortaJobExecutionMetadata sortaJobExecutionMetaData;
+  private final OntologyTermMetadata ontologyTermMetadata;
   private final SortaJobExecutionFactory sortaJobExecutionFactory;
   private final EntityTypeFactory entityTypeFactory;
   private final AttributeFactory attrMetaFactory;
@@ -141,8 +141,8 @@ public class SortaController extends PluginController {
       IdGenerator idGenerator,
       PermissionSystemService permissionSystemService,
       MatchingTaskContentMetaData matchingTaskContentMetaData,
-      SortaJobExecutionMetaData sortaJobExecutionMetaData,
-      OntologyTermMetaData ontologyTermMetaData,
+      SortaJobExecutionMetadata sortaJobExecutionMetaData,
+      OntologyTermMetadata ontologyTermMetadata,
       SortaJobExecutionFactory sortaJobExecutionFactory,
       EntityTypeFactory entityTypeFactory,
       AttributeFactory attrMetaFactory,
@@ -159,7 +159,7 @@ public class SortaController extends PluginController {
     this.permissionSystemService = requireNonNull(permissionSystemService);
     this.matchingTaskContentMetaData = requireNonNull(matchingTaskContentMetaData);
     this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
-    this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
+    this.ontologyTermMetadata = requireNonNull(ontologyTermMetadata);
     this.sortaJobExecutionFactory = requireNonNull(sortaJobExecutionFactory);
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attrMetaFactory = requireNonNull(attrMetaFactory);
@@ -355,7 +355,7 @@ public class SortaController extends PluginController {
 
     EntityPager pager = new EntityPager(start, num, count, null);
     return new EntityCollectionResponse(
-        pager, entityMaps, "/match/retrieve", ontologyTermMetaData, permissionService, dataService);
+        pager, entityMaps, "/match/retrieve", ontologyTermMetadata, permissionService, dataService);
   }
 
   @PostMapping("/match")
@@ -434,11 +434,11 @@ public class SortaController extends PluginController {
             });
     if (ontologyTermEntity != null) {
       row.set(
-          OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-          ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+          OntologyTermMetadata.ONTOLOGY_TERM_NAME,
+          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       row.set(
-          OntologyTermMetaData.ONTOLOGY_TERM_IRI,
-          ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+          OntologyTermMetadata.ONTOLOGY_TERM_IRI,
+          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
     }
     row.set(
         MatchingTaskContentMetaData.VALIDATED,
@@ -473,14 +473,14 @@ public class SortaController extends PluginController {
       }
       columnHeaders.addAll(
           Arrays.asList(
-              OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-              OntologyTermMetaData.ONTOLOGY_TERM_IRI,
+              OntologyTermMetadata.ONTOLOGY_TERM_NAME,
+              OntologyTermMetadata.ONTOLOGY_TERM_IRI,
               MatchingTaskContentMetaData.SCORE,
               MatchingTaskContentMetaData.VALIDATED));
       targetMetadata.addAttribute(
-          ontologyTermMetaData.getAttribute(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+          ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
       targetMetadata.addAttribute(
-          ontologyTermMetaData.getAttribute(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+          ontologyTermMetadata.getAttribute(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
       targetMetadata.addAttribute(
           Attribute.newInstance(
                   matchingTaskContentMetaData.getAttribute(MatchingTaskContentMetaData.SCORE),

@@ -4,8 +4,8 @@ import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
-import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_ID;
-import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECRET;
+import static org.molgenis.security.twofactor.model.UserSecretMetadata.USER_ID;
+import static org.molgenis.security.twofactor.model.UserSecretMetadata.USER_SECRET;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -19,7 +19,7 @@ import org.molgenis.security.twofactor.exceptions.InvalidVerificationCodeExcepti
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
+import org.molgenis.security.twofactor.model.UserSecretMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -191,7 +191,7 @@ public class TwoFactorAuthenticationServiceImpl implements TwoFactorAuthenticati
             () ->
                 dataService
                     .query(USER_SECRET, UserSecret.class)
-                    .eq(UserSecretMetaData.USER_ID, user.getId())
+                    .eq(UserSecretMetadata.USER_ID, user.getId())
                     .findOne());
 
     if (secret != null) {

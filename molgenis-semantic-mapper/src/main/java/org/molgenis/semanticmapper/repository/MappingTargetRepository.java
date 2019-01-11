@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
+import org.molgenis.semanticmapper.meta.MappingTargetMetadata;
 
 public interface MappingTargetRepository {
   /**
@@ -20,7 +20,7 @@ public interface MappingTargetRepository {
   /**
    * Creates a list of fully reconstructed {@link MappingTarget}s.
    *
-   * @param mappingTargetEntities List of {@link Entity}s with {@link MappingTargetMetaData}
+   * @param mappingTargetEntities List of {@link Entity}s with {@link MappingTargetMetadata}
    *     metadata
    * @return a {@link List} of {@link MappingTarget}s.
    */

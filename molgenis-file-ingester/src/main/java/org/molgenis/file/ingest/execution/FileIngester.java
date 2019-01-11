@@ -16,7 +16,7 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.MetadataAction;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata;
 import org.molgenis.jobs.Progress;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +49,7 @@ public class FileIngester {
   /**
    * Imports a csv file defined in the fileIngest entity
    *
-   * @see FileIngestJobExecutionMetaData
+   * @see FileIngestJobExecutionMetadata
    */
   public FileMeta ingest(
       String entityTypeId, String url, String loader, String jobExecutionID, Progress progress) {

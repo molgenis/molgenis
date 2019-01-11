@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AmazonBucketJobExecutionFactory
     extends AbstractSystemEntityFactory<
-        AmazonBucketJobExecution, AmazonBucketJobExecutionMetaData, String> {
+        AmazonBucketJobExecution, AmazonBucketJobExecutionMetadata, String> {
   AmazonBucketJobExecutionFactory(
-      AmazonBucketJobExecutionMetaData fileIngestJobExecutionMetaData,
+      AmazonBucketJobExecutionMetadata fileIngestJobExecutionMetaData,
       EntityPopulator entityPopulator) {
     super(AmazonBucketJobExecution.class, fileIngestJobExecutionMetaData, entityPopulator);
   }

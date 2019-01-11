@@ -12,14 +12,15 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.MappingProjectMetaData;
-import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
+import org.molgenis.semanticmapper.meta.MappingProjectMetadata;
+import org.molgenis.semanticmapper.meta.MappingTargetMetadata;
 import org.molgenis.semanticmapper.repository.EntityMappingRepository;
 import org.molgenis.semanticmapper.repository.MappingTargetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MappingTargetRepositoryImpl implements MappingTargetRepository {
-  @Autowired private MappingTargetMetaData mappingTargetMetaData;
+
+  @Autowired private MappingTargetMetadata mappingTargetMetaData;
 
   @Autowired private IdGenerator idGenerator;
 
@@ -58,9 +59,9 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository {
   private Entity toMappingTargetEntity(
       MappingTarget mappingTarget, List<Entity> entityMappingEntities) {
     Entity mappingTargetEntity = new DynamicEntity(mappingTargetMetaData);
-    mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
-    mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getId());
-    mappingTargetEntity.set(MappingTargetMetaData.ENTITY_MAPPINGS, entityMappingEntities);
+    mappingTargetEntity.set(MappingProjectMetadata.IDENTIFIER, mappingTarget.getIdentifier());
+    mappingTargetEntity.set(MappingTargetMetadata.TARGET, mappingTarget.getTarget().getId());
+    mappingTargetEntity.set(MappingTargetMetadata.ENTITY_MAPPINGS, entityMappingEntities);
     return mappingTargetEntity;
   }
 
@@ -72,24 +73,24 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository {
   /**
    * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
    *
-   * @param mappingTargetEntity Entity with {@link MappingProjectMetaData} metadata
+   * @param mappingTargetEntity Entity with {@link MappingProjectMetadata} metadata
    * @return fully reconstructed MappingProject
    */
   private MappingTarget toMappingTarget(Entity mappingTargetEntity) {
     List<EntityMapping> entityMappings = Collections.emptyList();
-    String identifier = mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER);
+    String identifier = mappingTargetEntity.getString(MappingTargetMetadata.IDENTIFIER);
 
-    if (!dataService.hasRepository(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))) {
+    if (!dataService.hasRepository(mappingTargetEntity.getString(MappingTargetMetadata.TARGET))) {
       return null;
     }
 
     EntityType target =
-        dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET));
+        dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetadata.TARGET));
 
-    if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS) != null) {
+    if (mappingTargetEntity.getEntities(MappingTargetMetadata.ENTITY_MAPPINGS) != null) {
       List<Entity> entityMappingEntities =
           Lists.newArrayList(
-              mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
+              mappingTargetEntity.getEntities(MappingTargetMetadata.ENTITY_MAPPINGS));
       entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
     }
 

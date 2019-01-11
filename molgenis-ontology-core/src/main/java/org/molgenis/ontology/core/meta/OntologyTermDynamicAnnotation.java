@@ -1,9 +1,9 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.LABEL;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.VALUE;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.LABEL;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetadata.VALUE;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

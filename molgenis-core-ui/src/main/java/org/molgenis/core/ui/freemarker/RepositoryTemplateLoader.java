@@ -1,6 +1,6 @@
 package org.molgenis.core.ui.freemarker;
 
-import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
+import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
 
 import freemarker.cache.TemplateLoader;
 import java.io.IOException;

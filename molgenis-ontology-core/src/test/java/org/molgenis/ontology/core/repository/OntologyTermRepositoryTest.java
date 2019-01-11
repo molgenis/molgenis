@@ -9,12 +9,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
@@ -29,10 +29,10 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetadata;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,11 +48,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Autowired OntologyTermRepository ontologyTermRepository;
 
-  @Autowired private OntologyMetaData ontologyMetaData;
+  @Autowired private OntologyMetadata ontologyMetadata;
 
-  @Autowired private OntologyTermMetaData ontologyTermMetaData;
+  @Autowired private OntologyTermMetadata ontologyTermMetadata;
 
-  @Autowired private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
+  @Autowired private OntologyTermNodePathMetadata ontologyTermNodePathMetadata;
 
   private org.molgenis.ontology.core.meta.OntologyTerm ontologyTermEntity;
 
@@ -63,7 +63,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @BeforeTest
   public void beforeTest() {
     Entity ontologyEntity = mock(Entity.class);
-    when(ontologyEntity.getString(OntologyMetaData.ID)).thenReturn("34");
+    when(ontologyEntity.getString(OntologyMetadata.ID)).thenReturn("34");
 
     ontologyTermEntity = mock(org.molgenis.ontology.core.meta.OntologyTerm.class);
     when(ontologyTermEntity.getString(ID)).thenReturn("12");
@@ -75,18 +75,18 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
   @Test
   public void testFindExcatOntologyTerms() {
     Entity synonymEntity1 = mock(Entity.class);
-    when(synonymEntity1.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-1");
-    when(synonymEntity1.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR))
+    when(synonymEntity1.get(OntologyTermSynonymMetadata.ID)).thenReturn("synonym-1");
+    when(synonymEntity1.get(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR))
         .thenReturn("Weight Reduction Diet");
 
     Entity synonymEntity2 = mock(Entity.class);
-    when(synonymEntity2.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-2");
-    when(synonymEntity2.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR))
+    when(synonymEntity2.get(OntologyTermSynonymMetadata.ID)).thenReturn("synonym-2");
+    when(synonymEntity2.get(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR))
         .thenReturn("Weight loss Diet");
 
     Entity synonymEntity3 = mock(Entity.class);
-    when(synonymEntity3.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-3");
-    when(synonymEntity3.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR))
+    when(synonymEntity3.get(OntologyTermSynonymMetadata.ID)).thenReturn("synonym-3");
+    when(synonymEntity3.get(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR))
         .thenReturn("Diet, Reducing");
 
     Entity ontologyTermEntity1 = mock(Entity.class);
@@ -98,8 +98,8 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
         .thenReturn(asList(synonymEntity1, synonymEntity2, synonymEntity3));
 
     Entity synonymEntity4 = mock(Entity.class);
-    when(synonymEntity4.get(OntologyTermSynonymMetaData.ID)).thenReturn("synonym-4");
-    when(synonymEntity4.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR))
+    when(synonymEntity4.get(OntologyTermSynonymMetadata.ID)).thenReturn("synonym-4");
+    when(synonymEntity4.get(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR))
         .thenReturn("Weight");
 
     Entity ontologyTermEntity2 = mock(Entity.class);
@@ -147,38 +147,38 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetChildOntologyTermsByNodePath() {
-    Entity ontologyEntity = new DynamicEntity(ontologyMetaData);
-    ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org");
-    ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, "molgenis");
+    Entity ontologyEntity = new DynamicEntity(ontologyMetadata);
+    ontologyEntity.set(OntologyMetadata.ONTOLOGY_IRI, "http://www.molgenis.org");
+    ontologyEntity.set(OntologyMetadata.ONTOLOGY_NAME, "molgenis");
 
-    Entity nodePathEntity_1 = new DynamicEntity(ontologyTermNodePathMetaData);
-    nodePathEntity_1.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1]");
-    Entity nodePathEntity_2 = new DynamicEntity(ontologyTermNodePathMetaData);
-    nodePathEntity_2.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].0[2]");
-    Entity nodePathEntity_3 = new DynamicEntity(ontologyTermNodePathMetaData);
-    nodePathEntity_3.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].1[2]");
+    Entity nodePathEntity_1 = new DynamicEntity(ontologyTermNodePathMetadata);
+    nodePathEntity_1.set(OntologyTermNodePathMetadata.NODE_PATH, "0[0].1[1]");
+    Entity nodePathEntity_2 = new DynamicEntity(ontologyTermNodePathMetadata);
+    nodePathEntity_2.set(OntologyTermNodePathMetadata.NODE_PATH, "0[0].1[1].0[2]");
+    Entity nodePathEntity_3 = new DynamicEntity(ontologyTermNodePathMetadata);
+    nodePathEntity_3.set(OntologyTermNodePathMetadata.NODE_PATH, "0[0].1[1].1[2]");
 
-    Entity ontologyTerm_2 = new DynamicEntity(ontologyTermMetaData);
+    Entity ontologyTerm_2 = new DynamicEntity(ontologyTermMetadata);
     ontologyTerm_2.set(ONTOLOGY, ontologyEntity);
     ontologyTerm_2.set(ONTOLOGY_TERM_IRI, "iri 2");
     ontologyTerm_2.set(ONTOLOGY_TERM_NAME, "name 2");
     ontologyTerm_2.set(
-        OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, asList(nodePathEntity_1, nodePathEntity_2));
+        OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH, asList(nodePathEntity_1, nodePathEntity_2));
     ontologyTerm_2.set(ONTOLOGY_TERM_SYNONYM, emptyList());
 
-    Entity ontologyTerm_3 = new DynamicEntity(ontologyTermMetaData);
+    Entity ontologyTerm_3 = new DynamicEntity(ontologyTermMetadata);
     ontologyTerm_3.set(ONTOLOGY, ontologyEntity);
     ontologyTerm_3.set(ONTOLOGY_TERM_IRI, "iri 3");
     ontologyTerm_3.set(ONTOLOGY_TERM_NAME, "name 3");
     ontologyTerm_3.set(
-        OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, singletonList(nodePathEntity_3));
+        OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH, singletonList(nodePathEntity_3));
     ontologyTerm_3.set(ONTOLOGY_TERM_SYNONYM, emptyList());
 
     when(dataService.findAll(
             ONTOLOGY_TERM,
             new QueryImpl<>(
                     new QueryRule(
-                        OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+                        OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH,
                         QueryRule.Operator.FUZZY_MATCH,
                         "\"0[0].1[1]\""))
                 .and()

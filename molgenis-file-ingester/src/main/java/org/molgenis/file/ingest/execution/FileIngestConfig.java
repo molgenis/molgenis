@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetadata;
 import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.jobs.model.ScheduledJobType;
@@ -24,19 +24,19 @@ import org.springframework.context.annotation.Lazy;
 public class FileIngestConfig {
   private final FileIngester fileIngester;
   private final ScheduledJobTypeFactory scheduledJobTypeFactory;
-  private final FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData;
+  private final FileIngestJobExecutionMetadata fileIngestJobExecutionMetadata;
   private final MenuReaderService menuReaderService;
   private final Gson gson;
 
   public FileIngestConfig(
       FileIngester fileIngester,
       ScheduledJobTypeFactory scheduledJobTypeFactory,
-      FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData,
+      FileIngestJobExecutionMetadata fileIngestJobExecutionMetadata,
       MenuReaderService menuReaderService,
       Gson gson) {
     this.fileIngester = requireNonNull(fileIngester);
     this.scheduledJobTypeFactory = requireNonNull(scheduledJobTypeFactory);
-    this.fileIngestJobExecutionMetaData = requireNonNull(fileIngestJobExecutionMetaData);
+    this.fileIngestJobExecutionMetadata = requireNonNull(fileIngestJobExecutionMetadata);
     this.menuReaderService = requireNonNull(menuReaderService);
     this.gson = requireNonNull(gson);
   }
@@ -94,7 +94,7 @@ public class FileIngestConfig {
                     of("type", "string", "description", "ID of the entity to import to")),
                 "required",
                 ImmutableList.of("url", "loader", "targetEntityId"))));
-    result.setJobExecutionType(fileIngestJobExecutionMetaData);
+    result.setJobExecutionType(fileIngestJobExecutionMetadata);
     return result;
   }
 }

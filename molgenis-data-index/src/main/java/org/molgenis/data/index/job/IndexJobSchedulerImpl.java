@@ -3,10 +3,10 @@ package org.molgenis.data.index.job;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ENTITY_TYPE_ID;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION_GROUP_ATTR;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.jobs.model.JobExecutionMetaData.STATUS;
@@ -98,20 +98,20 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
           LOG.trace("Clean up Index job executions...");
           Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
           boolean indexJobExecutionExists =
-              dataService.hasRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
+              dataService.hasRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
           if (indexJobExecutionExists) {
             Stream<Entity> executions =
                 dataService
-                    .getRepository(IndexJobExecutionMeta.INDEX_JOB_EXECUTION)
+                    .getRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION)
                     .query()
                     .lt(END_DATE, fiveMinutesAgo)
                     .and()
                     .eq(STATUS, SUCCESS.toString())
                     .findAll();
-            dataService.delete(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, executions);
+            dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, executions);
             LOG.debug("Cleaned up Index job executions.");
           } else {
-            LOG.warn("{} does not exist", IndexJobExecutionMeta.INDEX_JOB_EXECUTION);
+            LOG.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
           }
         });
   }

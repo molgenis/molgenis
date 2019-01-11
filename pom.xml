@@ -123,7 +123,6 @@
     <minify-maven-plugin.version>1.7.4</minify-maven-plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
     <jsdoc3-maven-plugin.version>1.1.0</jsdoc3-maven-plugin.version>
-    <jetty-maven-plugin.version>9.4.8.v20171121</jetty-maven-plugin.version>
     <release-maven-plugin.version>2.5.3</release-maven-plugin.version>
     <reproducible-build-maven-plugin.version>0.7</reproducible-build-maven-plugin.version>
 
@@ -1085,5 +1084,6 @@
     <module>molgenis-i18n</module>
     <module>molgenis-beacon</module>
     <module>molgenis-metrics</module>
+    <module>molgenis-menu</module>
   </modules>
 </project>
