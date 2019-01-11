@@ -100,9 +100,9 @@ public class IndexAction extends StaticEntity {
 
     IndexAction that = (IndexAction) o;
 
-    if (getEntityId() != null
-        ? !getEntityId().equals(that.getEntityId())
-        : that.getEntityId() != null) return false;
+    String entityId = getEntityId();
+    if (entityId != null ? !entityId.equals(that.getEntityId()) : that.getEntityId() != null)
+      return false;
     return getEntityTypeId() != null
         ? getEntityTypeId().equals(that.getEntityTypeId())
         : that.getEntityTypeId() == null;
@@ -115,7 +115,8 @@ public class IndexAction extends StaticEntity {
    */
   @Override
   public int hashCode() {
-    int result = getEntityId() != null ? getEntityId().hashCode() : 0;
+    String entityId = getEntityId();
+    int result = entityId != null ? entityId.hashCode() : 0;
     result = 31 * result + (getEntityTypeId() != null ? getEntityTypeId().hashCode() : 0);
     return result;
   }
