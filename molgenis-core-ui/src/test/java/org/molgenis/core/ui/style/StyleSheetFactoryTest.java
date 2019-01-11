@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.style;
 
 import org.molgenis.data.config.EntityBaseTestConfig;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AbstractEntityFactoryTest;
 import org.molgenis.settings.SettingsPackage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
       StyleSheetMetadata.class,
       StyleSheetFactory.class,
       SettingsPackage.class,
-      FileMetaMetaData.class
+      FileMetaMetadata.class
     })
 public class StyleSheetFactoryTest extends AbstractEntityFactoryTest {
 

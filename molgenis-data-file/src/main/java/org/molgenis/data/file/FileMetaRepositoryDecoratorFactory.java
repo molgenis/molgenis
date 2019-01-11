@@ -5,16 +5,16 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.AbstractSystemRepositoryDecoratorFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FileMetaRepositoryDecoratorFactory
-    extends AbstractSystemRepositoryDecoratorFactory<FileMeta, FileMetaMetaData> {
+    extends AbstractSystemRepositoryDecoratorFactory<FileMeta, FileMetaMetadata> {
   private final FileStore fileStore;
 
   public FileMetaRepositoryDecoratorFactory(
-      FileMetaMetaData fileMetaMetadata, FileStore fileStore) {
+      FileMetaMetadata fileMetaMetadata, FileStore fileStore) {
     super(fileMetaMetadata);
     this.fileStore = requireNonNull(fileStore);
   }

@@ -3,7 +3,7 @@ package org.molgenis.app;
 import static org.molgenis.beacon.config.BeaconPackage.PACKAGE_BEACON;
 import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
 import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DECORATOR_CONFIGURATION;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;

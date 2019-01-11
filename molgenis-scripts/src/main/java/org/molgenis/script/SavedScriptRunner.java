@@ -2,7 +2,7 @@ package org.molgenis.script;
 
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.text.MessageFormat.format;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 
 import java.io.File;

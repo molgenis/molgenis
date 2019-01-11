@@ -10,7 +10,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;

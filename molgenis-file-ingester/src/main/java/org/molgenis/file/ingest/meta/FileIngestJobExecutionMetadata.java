@@ -9,7 +9,7 @@ import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.model.JobPackage;
@@ -29,16 +29,16 @@ public class FileIngestJobExecutionMetadata extends SystemEntityType {
   public static final String TARGET_ENTITY_ID = "targetEntityId";
   public static final String FILE_INGEST_JOB_TYPE = "FileIngesterJob";
 
-  private final FileMetaMetaData fileMetaMetaData;
+  private final FileMetaMetadata fileMetaMetadata;
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
   FileIngestJobExecutionMetadata(
-      FileMetaMetaData fileMetaMetaData,
+      FileMetaMetadata fileMetaMetadata,
       JobExecutionMetaData jobExecutionMetaData,
       JobPackage jobPackage) {
     super(SIMPLE_NAME, PACKAGE_JOB);
-    this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
+    this.fileMetaMetadata = requireNonNull(fileMetaMetadata);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
     this.jobPackage = requireNonNull(jobPackage);
   }
@@ -52,7 +52,7 @@ public class FileIngestJobExecutionMetadata extends SystemEntityType {
         .setLabel("File")
         .setDescription("The imported file.")
         .setDataType(XREF)
-        .setRefEntity(fileMetaMetaData)
+        .setRefEntity(fileMetaMetadata)
         .setNillable(true);
     addAttribute(URL)
         .setLabel("Url")

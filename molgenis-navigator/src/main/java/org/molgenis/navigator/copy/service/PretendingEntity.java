@@ -7,7 +7,7 @@ import java.util.Map;
 import org.molgenis.data.AbstractEntityDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
@@ -42,7 +42,7 @@ class PretendingEntity extends AbstractEntityDecorator {
   }
 
   /**
-   * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
+   * Because the File datatype has a reference to {@link FileMetaMetadata} it can happen that a
    * typed FileMeta Entity is requested.
    */
   @Override
@@ -64,7 +64,7 @@ class PretendingEntity extends AbstractEntityDecorator {
   }
 
   /**
-   * Because the File datatype has a reference to {@link FileMetaMetaData} it can happen that a
+   * Because the File datatype has a reference to {@link FileMetaMetadata} it can happen that a
    * typed FileMeta Entity is requested.
    */
   @Override

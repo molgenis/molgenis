@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.file;
 
 import static org.molgenis.core.ui.file.FileDownloadController.URI;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 
 import java.io.File;
 import java.io.FileInputStream;
