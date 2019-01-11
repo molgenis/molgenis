@@ -46,15 +46,17 @@
           :to="{ name: 'memberDetail', params: { groupName: name, memberName: member.username } }"
           class="list-group-item list-group-item-action">
           <div>
-            <h5 class="text-capitalize">{{member.username}}
+            <span class="text-capitalize font-weight-bold">{{member.username}}
               <small class="font-weight-light text-uppercase"> ({{member.roleLabel}})</small>
-            </h5>
+            </span>
           </div>
         </router-link>
       </div>
     </div>
     <b-modal id="deleteModal" ok-variant="danger" cancel-variant="secondary"
-             :title="$t('security-ui-delete-confirmation-title')" :ok-title="$t('security-ui-delete-confirmation-ok-text')" :cancel-title="$t('security-ui-delete-confirmation-cancel-text')" @ok="deleteGroup">
+             :title="$t('security-ui-delete-confirmation-title')"
+             :ok-title="$t('security-ui-delete-confirmation-ok-text')"
+             :cancel-title="$t('security-ui-delete-confirmation-cancel-text')" @ok="deleteGroup">
       {{ 'security-ui-delete-confirmation-text' | i18n }}
     </b-modal>
   </div>
@@ -62,7 +64,7 @@
 
 <script>
   import Toast from './Toast'
-  import {mapGetters, mapMutations} from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
 
   export default {
     name: 'GroupDetail',
