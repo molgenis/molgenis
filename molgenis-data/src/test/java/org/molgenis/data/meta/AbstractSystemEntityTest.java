@@ -64,7 +64,7 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
 
     List<Method> methods = Arrays.asList(entityClass.getMethods());
 
-    // Optionally skip the package check, this van be used to test metadata for which the package is
+    // Optionally skip the package check, this can be used to test metadata for which the package is
     // set at bootstrapping the app
     if (!skipPackageCheck) {
       testMetadataPackage(systemEntityType);

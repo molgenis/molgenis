@@ -6,15 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-// NOTE: when the following exception occurs;
-// java.lang.ArrayStoreException: sun.reflect.annotation.TypeNotPresentExceptionProxy,
-// this means you are missing this dependency:
-// <dependency>
-//  <groupId>org.springframework.security</groupId>
-//  <artifactId>spring-security-test</artifactId>
-//  <scope>test</scope>
-// </dependency>
-
 @ContextConfiguration(
     classes = {
       EntityBaseTestConfig.class,

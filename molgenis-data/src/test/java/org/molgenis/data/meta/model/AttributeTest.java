@@ -25,7 +25,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,16 +59,12 @@ public class AttributeTest extends AbstractSystemEntityTest {
 
   @Override
   protected Map<String, Pair<Class, Object>> getOverriddenReturnTypes() {
-    Pair<Class, Object> statusPair = new Pair<>();
-    statusPair.setA(Sort.class);
-    statusPair.setB(Sort.parse("attr"));
-
-    Pair<Class, Object> enumOptions = new Pair<>();
-    enumOptions.setA(List.class);
-    enumOptions.setB(Collections.singletonList("test"));
+    Pair<Class, Object> orderPair = new Pair<>();
+    orderPair.setA(Sort.class);
+    orderPair.setB(Sort.parse("attr"));
 
     Map<String, Pair<Class, Object>> map = new HashMap<>();
-    map.put(AttributeMetadata.ORDER_BY, statusPair);
+    map.put(AttributeMetadata.ORDER_BY, orderPair);
     return map;
   }
 
@@ -121,7 +116,6 @@ public class AttributeTest extends AbstractSystemEntityTest {
     attribute.setDataType(XREF);
     assertTrue(attribute.hasRefEntity());
   }
-
 
   @Test
   public void setParentNullToNull() {
