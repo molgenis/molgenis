@@ -5,11 +5,11 @@ import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.stereotype.Component;
 
 @Component
-class NegotiatorConfigEntityFactory
+class NegotiatorEntityConfigFactory
     extends AbstractSystemEntityFactory<
-        NegotiatorEntityConfig, NegotiatorEntityConfigMeta, String> {
-  NegotiatorConfigEntityFactory(
-      NegotiatorEntityConfigMeta myEntityMeta, EntityPopulator entityPopulator) {
+        NegotiatorEntityConfig, NegotiatorEntityConfigMetadata, String> {
+  NegotiatorEntityConfigFactory(
+      NegotiatorEntityConfigMetadata myEntityMeta, EntityPopulator entityPopulator) {
     super(NegotiatorEntityConfig.class, myEntityMeta, entityPopulator);
   }
 }

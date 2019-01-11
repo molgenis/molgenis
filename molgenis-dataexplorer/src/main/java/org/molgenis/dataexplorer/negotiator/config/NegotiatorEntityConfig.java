@@ -18,6 +18,6 @@ public class NegotiatorEntityConfig extends StaticEntity {
   }
 
   public NegotiatorConfig getNegotiatorConfig() {
-    return getEntity(NegotiatorEntityConfigMeta.NEGOTIATOR_CONFIG, NegotiatorConfig.class);
+    return getEntity(NegotiatorEntityConfigMetadata.NEGOTIATOR_CONFIG, NegotiatorConfig.class);
   }
 }

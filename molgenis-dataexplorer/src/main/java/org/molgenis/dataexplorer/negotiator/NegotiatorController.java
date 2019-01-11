@@ -4,7 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.dataexplorer.negotiator.NegotiatorController.URI;
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.ENABLED_EXPRESSION;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.ENABLED_EXPRESSION;
 import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -26,7 +26,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
-import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -165,10 +165,10 @@ public class NegotiatorController extends PluginController {
 
   private Collection getEntityCollection(NegotiatorEntityConfig entityConfig, Entity entity) {
     Attribute collectionAttr =
-        entityConfig.getEntity(NegotiatorEntityConfigMeta.COLLECTION_ID, Attribute.class);
+        entityConfig.getEntity(NegotiatorEntityConfigMetadata.COLLECTION_ID, Attribute.class);
 
     Attribute biobankAttr =
-        entityConfig.getEntity(NegotiatorEntityConfigMeta.BIOBANK_ID, Attribute.class);
+        entityConfig.getEntity(NegotiatorEntityConfigMetadata.BIOBANK_ID, Attribute.class);
 
     String biobankString = getStringValue(biobankAttr, entity);
     String collectionString = getStringValue(collectionAttr, entity);
@@ -248,10 +248,10 @@ public class NegotiatorController extends PluginController {
 
   private Optional<NegotiatorEntityConfig> getNegotiatorEntityConfig(String entityId) {
     Query<NegotiatorEntityConfig> query =
-        new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMeta.ENTITY, entityId);
+        new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMetadata.ENTITY, entityId);
     NegotiatorEntityConfig negotiatorEntityConfig =
         dataService.findOne(
-            NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query, NegotiatorEntityConfig.class);
+            NegotiatorEntityConfigMetadata.NEGOTIATORENTITYCONFIG, query, NegotiatorEntityConfig.class);
     return Optional.ofNullable(negotiatorEntityConfig);
   }
 
