@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.settings;
 
-import static org.molgenis.core.ui.settings.StaticContentMeta.CONTENT;
-import static org.molgenis.core.ui.settings.StaticContentMeta.KEY;
+import static org.molgenis.core.ui.settings.StaticContentMetadata.CONTENT;
+import static org.molgenis.core.ui.settings.StaticContentMetadata.KEY;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;

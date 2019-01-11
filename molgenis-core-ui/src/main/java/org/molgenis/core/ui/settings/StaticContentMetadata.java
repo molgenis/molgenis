@@ -9,14 +9,14 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StaticContentMeta extends SystemEntityType {
+public class StaticContentMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "StaticContent";
   public static final String STATIC_CONTENT = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
   public static final String KEY = "key_";
   public static final String CONTENT = "content";
 
-  StaticContentMeta() {
+  StaticContentMetadata() {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
   }
 

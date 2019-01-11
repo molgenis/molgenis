@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StaticContentFactory
-    extends AbstractSystemEntityFactory<StaticContent, StaticContentMeta, String> {
+    extends AbstractSystemEntityFactory<StaticContent, StaticContentMetadata, String> {
   public StaticContentFactory(
-      StaticContentMeta staticContentMeta, EntityPopulator entityPopulator) {
-    super(StaticContent.class, staticContentMeta, entityPopulator);
+      StaticContentMetadata staticContentMetadata, EntityPopulator entityPopulator) {
+    super(StaticContent.class, staticContentMetadata, entityPopulator);
   }
 }
