@@ -68,7 +68,7 @@ public class SystemEntityTypeInitializer {
   private void checkPackage(SystemEntityType systemEntityType) {
     Package aPackage = systemEntityType.getPackage();
     if (aPackage == null) {
-      throw new IllegalStateException("System entity package entity type can't be root package");
+      throw new IllegalStateException("System entity type package can't be root package");
     }
     if (!aPackage.getRootPackage().getId().equals(rootSystemPackage.getId())) {
       throw new RuntimeException(
