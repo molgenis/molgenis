@@ -1,5 +1,6 @@
 package org.molgenis.core.ui.data.system.core;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
@@ -7,10 +8,11 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.data.meta.SystemEntityType;
+import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FreemarkerTemplateMetaData extends SystemEntityType {
+public class FreemarkerTemplateMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "FreemarkerTemplate";
   public static final String FREEMARKER_TEMPLATE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -19,14 +21,17 @@ public class FreemarkerTemplateMetaData extends SystemEntityType {
   public static final String ID = "id";
   public static final String NAME = "Name";
   public static final String VALUE = "Value";
+  private final RootSystemPackage systemPackage;
 
-  FreemarkerTemplateMetaData() {
+  FreemarkerTemplateMetadata(RootSystemPackage systemPackage) {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
+    this.systemPackage = requireNonNull(systemPackage);
   }
 
   @Override
   public void init() {
     setLabel("Freemarker template");
+    setPackage(systemPackage);
 
     addAttribute(ID, ROLE_ID).setLabel("Id").setAuto(true).setVisible(false);
     addAttribute(NAME, ROLE_LABEL)
