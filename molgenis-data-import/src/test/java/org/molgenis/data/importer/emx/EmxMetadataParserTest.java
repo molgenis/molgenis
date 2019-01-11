@@ -115,7 +115,8 @@ public class EmxMetadataParserTest extends AbstractMockitoTest {
 
     assertEquals(entitiesValidationReport, expectedEntitiesValidationReport);
     // 6: name, entity, dataType, idAttribute, labelAttribute, visible
-    verify(attributeValidator, times(6)).validate(any(Attribute.class), eq(ADD_SKIP_ENTITY_VALIDATION));
+    verify(attributeValidator, times(6))
+        .validate(any(Attribute.class), eq(ADD_SKIP_ENTITY_VALIDATION));
   }
 
   private void initMetaFactories() {
