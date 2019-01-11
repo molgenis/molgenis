@@ -107,6 +107,7 @@ public class Tag extends StaticEntity {
    * }
    * </code></pre>
    */
+  @SuppressWarnings("squid:S2259") // potential multi-threading NPEs
   @Override
   public boolean equals(Object o) {
     if (o == this) {

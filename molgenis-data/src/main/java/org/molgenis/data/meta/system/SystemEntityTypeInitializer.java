@@ -10,6 +10,7 @@ import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.MetaPackage;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.data.util.GenericDependencyResolver;
 import org.springframework.context.ApplicationContext;
@@ -65,7 +66,11 @@ public class SystemEntityTypeInitializer {
   }
 
   private void checkPackage(SystemEntityType systemEntityType) {
-    if (!systemEntityType.getPackage().getRootPackage().getId().equals(rootSystemPackage.getId())) {
+    Package aPackage = systemEntityType.getPackage();
+    if (aPackage == null) {
+      throw new IllegalStateException("System entity package entity type can't be root package");
+    }
+    if (!aPackage.getRootPackage().getId().equals(rootSystemPackage.getId())) {
       throw new RuntimeException(
           format(
               "System entity [%s] must be in package [%s]",
