@@ -52,13 +52,14 @@ $light-gray: #fafafa;
 
 $primary: $main-blue;
 $secondary: $sub-blue;
-$success: $main-blue;
+$success: $sub-green;
 $danger: $red;
 $light: $light;
 $dark: $dark;
 
 // Font, line-height, and color for body text, headings, and more.
 $font-family-sans-serif: "IBM_Plex_sans";
+$font-family-monospace: "IBM_Plex_mono";
 $font-size-base: 1rem; // 0.875rem !default; // Assumes the browser default, typically `16px`
 
 $headings-font-family: "bebas_neueregular";
@@ -75,6 +76,14 @@ $border-radius: 0px;
 $btn-border-radius-sm: 0px;
 $btn-border-radius-lg: 0px;
 
+// Navbar
+$navbar-light-color: $main-blue;
+
+.navbar {
+  font-weight: 600;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05), 0 2px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
 // Page
 .mg-page-banner {
   background-color: $main-blue;
@@ -90,7 +99,7 @@ $btn-border-radius-lg: 0px;
 }
 
 .table, .list-group-item {
-  font-family: IBM_Plex_mono;
+  font-family: "IBM_Plex_mono";
 }
 
 // Option A: Include all of Bootstrap
