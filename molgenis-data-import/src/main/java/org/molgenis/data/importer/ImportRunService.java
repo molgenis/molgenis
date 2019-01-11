@@ -8,7 +8,7 @@ import static java.time.format.FormatStyle.FULL;
 import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
+import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 
 import java.time.ZoneId;

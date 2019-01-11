@@ -6,7 +6,7 @@ import static org.molgenis.data.decorator.meta.DecoratorConfigurationMetadata.DE
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
-import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
+import static org.molgenis.data.importer.ImportRunMetadata.IMPORT_RUN;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.plugin.model.PluginIdentity.PLUGIN;
