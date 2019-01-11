@@ -143,6 +143,7 @@ public class EntityTypeCopierTest extends AbstractMockitoTest {
     Attribute refAttrCopy = mock(Attribute.class);
     when(entityTypeACopy.getAtomicAttributes()).thenReturn(singletonList(refAttrCopy));
     when(refAttrCopy.getDataType()).thenReturn(AttributeType.XREF);
+    when(refAttrCopy.hasRefEntity()).thenReturn(true);
     when(refAttrCopy.getRefEntity()).thenReturn(entityTypeB);
 
     copier.copy(asList(entityTypeA, entityTypeB), state);

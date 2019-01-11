@@ -35,10 +35,6 @@ class EntityTypeReferenceMapper {
   }
 
   EditorEntityTypeIdentifier toEditorEntityTypeIdentifier(EntityType entityType) {
-    if (entityType == null) {
-      return null;
-    }
-
     String id = entityType.getId();
     String label = entityType.getLabel();
     return EditorEntityTypeIdentifier.create(id, label);

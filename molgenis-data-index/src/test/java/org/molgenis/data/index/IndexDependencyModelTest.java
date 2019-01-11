@@ -117,6 +117,7 @@ public class IndexDependencyModelTest {
 
     for (EntityType refEntity : refEntities) {
       Attribute attribute = Mockito.mock(Attribute.class);
+      when(attribute.hasRefEntity()).thenReturn(true);
       when(attribute.getRefEntity()).thenReturn(refEntity);
       attributes.add(attribute);
     }

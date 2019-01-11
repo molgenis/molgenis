@@ -11,6 +11,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Optional;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.security.user.UserService;
@@ -44,7 +45,7 @@ public class ImportRunServiceTest extends AbstractMockitoTest {
     Instant startDate = Instant.parse("2016-02-13T12:34:56.217Z");
     when(importRun.getStartDate()).thenReturn(startDate);
     Instant endDate = Instant.parse("2016-02-13T12:35:12.231Z");
-    when(importRun.getEndDate()).thenReturn(endDate);
+    when(importRun.getEndDate()).thenReturn(Optional.of(endDate));
 
     String mailText =
         importRunService.createEnglishMailText(importRun, ZoneId.of("Europe/Amsterdam"));

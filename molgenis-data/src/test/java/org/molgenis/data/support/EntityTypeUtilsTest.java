@@ -218,6 +218,7 @@ public class EntityTypeUtilsTest {
         when(mock(Attribute.class).getName()).thenReturn("MyRefRefEntityTypeAttr").getMock();
     Attribute refRefEntityTypeRefAttr =
         when(mock(Attribute.class).getName()).thenReturn("MyRefRefEntityTypeRefAttr").getMock();
+    when(refRefEntityTypeRefAttr.hasRefEntity()).thenReturn(true);
     when(refRefEntityTypeRefAttr.getRefEntity()).thenReturn(refRefEntityType);
     when(refRefEntityType.getAtomicAttributes())
         .thenReturn(asList(refRefEntityTypeAttr, refRefEntityTypeRefAttr));
@@ -227,6 +228,7 @@ public class EntityTypeUtilsTest {
         when(mock(Attribute.class).getName()).thenReturn("MyRefEntityTypeAttr").getMock();
     Attribute refEntityTypeRefAttr =
         when(mock(Attribute.class).getName()).thenReturn("MyRefEntityTypeRefAttr").getMock();
+    when(refEntityTypeRefAttr.hasRefEntity()).thenReturn(true);
     when(refEntityTypeRefAttr.getRefEntity()).thenReturn(refRefEntityType);
     when(refEntityType.getAtomicAttributes())
         .thenReturn(asList(refEntityTypeAttr, refEntityTypeRefAttr));
@@ -235,6 +237,7 @@ public class EntityTypeUtilsTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn("MyEntityTypeAttr").getMock();
     Attribute refAttr =
         when(mock(Attribute.class).getName()).thenReturn("MyEntityTypeRefAttr").getMock();
+    when(refAttr.hasRefEntity()).thenReturn(true);
     when(refAttr.getRefEntity()).thenReturn(refEntityType);
     when(entityType.getAtomicAttributes()).thenReturn(asList(attr, refAttr));
 

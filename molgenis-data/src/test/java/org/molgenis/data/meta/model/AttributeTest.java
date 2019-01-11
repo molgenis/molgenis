@@ -60,6 +60,18 @@ public class AttributeTest {
   }
 
   @Test
+  public void testIsReferenceTypeString() {
+    attribute.setDataType(STRING);
+    assertFalse(attribute.hasRefEntity());
+  }
+
+  @Test
+  public void testIsReferenceTypeXref() {
+    attribute.setDataType(XREF);
+    assertTrue(attribute.hasRefEntity());
+  }
+
+  @Test
   public void setParentNullToAttribute() {
     Attribute parentAttr = mock(Attribute.class);
     attribute.setParent(parentAttr);
