@@ -157,8 +157,9 @@ public class IndexActionRegisterServiceImpl
       IndexActionGroup indexActionGroup, Impact key, int actionOrder) {
     IndexAction indexAction = indexActionFactory.create();
     indexAction.setIndexStatus(PENDING);
-    if (key.getId() != null) {
-      indexAction.setEntityId(key.getId().toString());
+    Object entityId = key.getId();
+    if (entityId != null) {
+      indexAction.setEntityId(entityId.toString());
     }
     indexAction.setEntityTypeId(key.getEntityTypeId());
     indexAction.setIndexActionGroup(indexActionGroup);
