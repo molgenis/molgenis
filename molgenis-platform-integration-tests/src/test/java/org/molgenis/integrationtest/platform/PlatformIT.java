@@ -432,7 +432,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
           dataService.deleteById(PACKAGE, "package_onetomany");
           assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
           assertTrue(dataService.hasEntityType(entityType.getId()));
-          assertTrue(dataService.hasEntityType(refEntityType.getId()));
+          assertFalse(dataService.hasEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
