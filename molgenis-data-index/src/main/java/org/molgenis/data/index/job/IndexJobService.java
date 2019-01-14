@@ -108,9 +108,9 @@ public class IndexJobService {
     requireNonNull(indexAction);
     String entityTypeId = indexAction.getEntityTypeId();
     updateIndexActionStatus(indexAction, IndexActionMetadata.IndexStatus.STARTED);
-    EntityType entityType = dataService.getEntityType(entityTypeId);
     try {
-      if (entityType != null) {
+      if (dataService.hasEntityType(entityTypeId)) {
+        EntityType entityType = dataService.getEntityType(entityTypeId);
         if (indexAction.getEntityId() != null) {
           progress.progress(
               progressCount,
@@ -122,7 +122,7 @@ public class IndexJobService {
           indexService.rebuildIndex(repository);
         }
       } else {
-        entityType = getEntityType(indexAction);
+        EntityType entityType = getEntityType(indexAction);
         if (indexService.hasIndex(entityType)) {
           progress.progress(
               progressCount, format("Dropping entityType with id: {0}", entityType.getId()));

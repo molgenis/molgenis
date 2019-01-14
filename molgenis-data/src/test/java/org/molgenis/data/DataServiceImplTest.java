@@ -9,9 +9,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -54,6 +57,35 @@ public class DataServiceImplTest {
   }
 
   @Test
+  public void testHasEntityTypeTrue() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.hasEntityType(entityTypeId)).thenReturn(true);
+    assertTrue(dataService.hasEntityType(entityTypeId));
+  }
+
+  @Test
+  public void testHasEntityTypeFalse() {
+    String entityTypeId = "MyEntityTypeId";
+    assertFalse(dataService.hasEntityType(entityTypeId));
+  }
+
+  @Test
+  public void testGetEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = mock(EntityType.class);
+    when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
+
+    assertEquals(dataService.getEntityType(entityTypeId), entityType);
+  }
+
+  @Test(expectedExceptions = UnknownEntityTypeException.class)
+  public void testGetEntityTypeUnknownEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.empty());
+    dataService.getEntityType(entityTypeId);
+  }
+
+  @Test
   public void addStream() {
     Stream<Entity> entities = Stream.empty();
     dataService.add("Entity1", entities);
@@ -88,9 +120,40 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void getRepositoryByEntityName() {
-    assertEquals(dataService.getRepository("Entity1"), repo1);
-    assertEquals(dataService.getRepository("Entity2"), repo2);
+  public void hasRepositoryTrue() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.hasRepository(entityTypeId)).thenReturn(true);
+    assertTrue(dataService.hasRepository(entityTypeId));
+  }
+
+  @Test
+  public void hasRepositoryFalse() {
+    String entityTypeId = "MyEntityTypeId";
+    assertFalse(dataService.hasRepository(entityTypeId));
+  }
+
+  @Test
+  public void getRepository() {
+    String entityTypeId = "MyEntityTypeId";
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+    assertEquals(dataService.getRepository(entityTypeId), repository);
+  }
+
+  @Test(expectedExceptions = UnknownEntityTypeException.class)
+  public void getRepositoryUnknownEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getRepository(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+    dataService.getRepository(entityTypeId);
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void getRepositoryUnknownRepository() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+    dataService.getRepository(entityTypeId);
   }
 
   @Test

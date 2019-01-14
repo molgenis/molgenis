@@ -24,6 +24,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
@@ -430,8 +431,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
           dataService.deleteById(PACKAGE, "package_onetomany");
           assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
-          assertNull(dataService.getEntityType(entityType.getId()));
-          assertNull(dataService.getEntityType(refEntityType.getId()));
+          assertFalse(dataService.hasEntityType(entityType.getId()));
+          assertFalse(dataService.hasEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });

@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -221,7 +220,10 @@ public class DataExplorerController extends PluginController {
         permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA);
     boolean repositoryIsWritable = dataService.getCapabilities(entityTypeId).contains(WRITABLE);
 
-    Package containingPackage = dataService.getEntityType(entityTypeId).getPackage();
+    Package containingPackage =
+        dataService.hasEntityType(entityTypeId)
+            ? dataService.getEntityType(entityTypeId).getPackage()
+            : null;
     boolean canAddEntityType =
         containingPackage != null
             && permissionService.hasPermission(
@@ -235,10 +237,6 @@ public class DataExplorerController extends PluginController {
   @ResponseBody
   public ModulesConfigResponse getModules(@RequestParam("entity") String entityTypeId) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
-
     List<Module> modules = dataExplorerService.getModules(entityType);
 
     ModulesConfigResponse modulesConfigResponse = new ModulesConfigResponse();
@@ -279,7 +277,8 @@ public class DataExplorerController extends PluginController {
   @ResponseBody
   public List<NavigatorLink> getNavigatorLinks(@RequestParam("entity") String entityTypeId) {
     List<NavigatorLink> result = new LinkedList<>();
-    EntityType entityType = dataService.getEntityType(entityTypeId);
+    EntityType entityType =
+        dataService.hasEntityType(entityTypeId) ? dataService.getEntityType(entityTypeId) : null;
     String navigatorPath = menuReaderService.findMenuItemPath(NAVIGATOR);
     if (entityType != null) {
       Package pack = entityType.getPackage();
@@ -387,8 +386,10 @@ public class DataExplorerController extends PluginController {
       @PathVariable(value = "entityId") String entityId,
       Model model)
       throws Exception {
-    EntityType entityType = dataService.getEntityType(entityTypeId);
-    if (entityType == null) {
+    EntityType entityType;
+    if (dataService.hasEntityType(entityTypeId)) {
+      entityType = dataService.getEntityType(entityTypeId);
+    } else {
       throw new MolgenisDataAccessException(
           "EntityType with id [" + entityTypeId + "] does not exist. Did you use the correct URL?");
     }
