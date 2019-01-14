@@ -84,20 +84,6 @@ $navbar-light-color: $main-blue;
   box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05), 0 2px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-// Page
-.mg-page-banner {
-  background-color: $main-blue;
-  h1 {
-    margin-top: 22px;
-    margin-bottom: 22px;
-    color: $white;
-  }
-}
-
-.mg-plugin-container {
-  padding-top: 2rem;
-}
-
 .table, .list-group-item {
   font-family: "IBM_Plex_mono";
 }
