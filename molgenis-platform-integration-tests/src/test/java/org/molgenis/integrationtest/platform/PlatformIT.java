@@ -24,9 +24,9 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.fail;
 
 import java.util.HashMap;
