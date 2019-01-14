@@ -18,7 +18,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.data.security.permission.PermissionSystemService;
 import org.molgenis.jobs.JobExecutor;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetadata;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
@@ -54,7 +54,7 @@ public class SortaControllerTest extends AbstractMockitoTest {
 
   @Mock private MatchingTaskContentMetaData matchingTaskContentMetaData;
   @Mock private SortaJobExecutionMetadata sortaJobExecutionMetaData;
-  @Mock private OntologyTermMetaData ontologyTermMetaData;
+  @Mock private OntologyTermMetadata ontologyTermMetadata;
   @Mock private SortaJobExecutionFactory sortaJobExecutionFactory;
   @Mock private EntityTypeFactory entityTypeFactory;
   @Mock private AttributeFactory attrMetaFactory;
@@ -76,7 +76,7 @@ public class SortaControllerTest extends AbstractMockitoTest {
             permissionSystemService,
             matchingTaskContentMetaData,
             sortaJobExecutionMetaData,
-            ontologyTermMetaData,
+            ontologyTermMetadata,
             sortaJobExecutionFactory,
             entityTypeFactory,
             attrMetaFactory,
