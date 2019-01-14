@@ -353,9 +353,6 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Override
   public void addAttribute(Attribute attr) {
     EntityType entityType = dataService.getEntityType(attr.getEntity().getId());
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(attr.getEntity().getId());
-    }
     entityType.addAttribute(attr);
 
     // Update repository state
@@ -526,9 +523,6 @@ public class MetaDataServiceImpl implements MetaDataService {
     String newEntityTypeId = newEntityType.getId();
     if (dataService.hasRepository(newEntityTypeId)) {
       EntityType oldEntityType = dataService.getEntityType(newEntityTypeId);
-      if (oldEntityType == null) {
-        throw new UnknownEntityTypeException(newEntityTypeId);
-      }
       List<Attribute> oldAtomicAttributes =
           stream(oldEntityType.getAtomicAttributes()).collect(toList());
 

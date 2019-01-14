@@ -1106,8 +1106,9 @@ public class EmxMetadataParser implements MetadataParser {
         if (intermediateResults.knowsEntity(refEntityName)) {
           refEntityType = intermediateResults.getEntityType(refEntityName);
         } else {
-          refEntityType = dataService.getEntityType(refEntityName);
-          if (refEntityType == null) {
+          if (dataService.hasEntityType(refEntityName)) {
+            refEntityType = dataService.getEntityType(refEntityName);
+          } else {
             throw new IllegalArgumentException(
                 "attributes.refEntity error on line "
                     + rowIndex

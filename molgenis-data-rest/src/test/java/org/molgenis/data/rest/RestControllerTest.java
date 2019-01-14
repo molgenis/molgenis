@@ -43,6 +43,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.meta.AttributeType;
@@ -557,7 +558,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
 
   @Test
   public void retrieveAttributeUnknownEntity() throws Exception {
-    String HREF_UNKNOWN_ENTITY_META = BASE_URI + "/unknown/meta";
+    String entityTypeId = "unknown";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+    String HREF_UNKNOWN_ENTITY_META = BASE_URI + "/" + entityTypeId + "/meta";
     mockMvc.perform(get(HREF_UNKNOWN_ENTITY_META + "/attribute")).andExpect(status().isNotFound());
   }
 
@@ -805,9 +809,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
 
   @Test
   public void updateAttribute_unknownEntity() throws Exception {
+    String entityTypeId = "unknownentity";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
     mockMvc
         .perform(
-            post(BASE_URI + "/unknownentity/" + ENTITY_UNTYPED_ID + "/name")
+            post(BASE_URI + "/" + entityTypeId + "/" + ENTITY_UNTYPED_ID + "/name")
                 .param("_method", "PUT")
                 .content("Klaas")
                 .contentType(APPLICATION_JSON))
@@ -864,7 +871,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests {
 
   @Test
   public void handleUnknownEntityException() throws Exception {
-    mockMvc.perform(get(BASE_URI + "/bogus/1")).andExpect(status().isNotFound());
+    String entityTypeId = "bogus";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+    mockMvc.perform(get(BASE_URI + "/" + entityTypeId + "/1")).andExpect(status().isNotFound());
   }
 
   @Test

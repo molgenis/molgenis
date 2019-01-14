@@ -9,9 +9,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
@@ -51,6 +54,35 @@ public class DataServiceImplTest {
     when(metaDataService.getEntityTypes())
         .thenAnswer(invocation -> Stream.of(entityType1, entityType2, entityType3));
     dataService.setMetaDataService(metaDataService);
+  }
+
+  @Test
+  public void testHasEntityTypeTrue() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.hasEntityType(entityTypeId)).thenReturn(true);
+    assertTrue(dataService.hasEntityType(entityTypeId));
+  }
+
+  @Test
+  public void testHasEntityTypeFalse() {
+    String entityTypeId = "MyEntityTypeId";
+    assertFalse(dataService.hasEntityType(entityTypeId));
+  }
+
+  @Test
+  public void testGetEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    EntityType entityType = mock(EntityType.class);
+    when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.of(entityType));
+
+    assertEquals(dataService.getEntityType(entityTypeId), entityType);
+  }
+
+  @Test(expectedExceptions = UnknownEntityTypeException.class)
+  public void testGetEntityTypeUnknownEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getEntityType(entityTypeId)).thenReturn(Optional.empty());
+    dataService.getEntityType(entityTypeId);
   }
 
   @Test

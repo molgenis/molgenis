@@ -329,11 +329,12 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest {
         "true",
         "When checking for a new entity type, the result should be the String \"true\"");
     assertEquals(response.getContentType(), MediaType.APPLICATION_JSON_UTF8_VALUE);
-    verify(dataService).getEntityType("blah");
+    verify(dataService).hasEntityType("blah");
   }
 
   @Test
   public void testIsNewEntityReturnsFalseIfEntityExists() throws Exception {
+    when(dataService.hasEntityType("it_emx_test_TypeTest")).thenReturn(true);
     when(dataService.getEntityType("it_emx_test_TypeTest")).thenReturn(mock(EntityType.class));
     MockHttpServletResponse response =
         mockMvc

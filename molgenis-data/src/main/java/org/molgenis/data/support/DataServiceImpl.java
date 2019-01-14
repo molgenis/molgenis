@@ -13,6 +13,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
@@ -29,11 +30,16 @@ public class DataServiceImpl implements DataService {
     this.metaDataService = requireNonNull(metaDataService);
   }
 
-  @Nullable
-  @CheckForNull
+  @Override
+  public boolean hasEntityType(String entityTypeId) {
+    return metaDataService.hasEntityType(entityTypeId);
+  }
+
   @Override
   public EntityType getEntityType(String entityTypeId) {
-    return metaDataService.getEntityType(entityTypeId).orElse(null);
+    return metaDataService
+        .getEntityType(entityTypeId)
+        .orElseThrow(() -> new UnknownEntityTypeException(entityTypeId));
   }
 
   @Override

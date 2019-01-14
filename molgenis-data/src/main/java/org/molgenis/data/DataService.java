@@ -58,12 +58,20 @@ public interface DataService extends Iterable<Repository<Entity>> {
   <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
 
   /**
-   * Returns the type for the given entity
+   * Returns whether an entity type exists for the given entity type identifier.
    *
-   * @return entity type
+   * @param entityTypeId entity type identifier
+   * @return true if an entity type exists for the given entity type identifier
    */
-  @Nullable
-  @CheckForNull
+  boolean hasEntityType(String entityTypeId);
+
+  /**
+   * Returns the entity type for the given entity type identifier.
+   *
+   * @param entityTypeId entity type identifier
+   * @return entity type
+   * @throws UnknownEntityTypeException if no entity type with the given identifier exists
+   */
   EntityType getEntityType(String entityTypeId);
 
   /**

@@ -302,9 +302,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       final List<Entity> entities =
@@ -433,9 +430,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       List<Entity> entities =
@@ -473,9 +467,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       Attribute attr = meta.getAttribute(attributeName);
@@ -642,10 +633,6 @@ public class RestControllerV2 {
 
   private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName) {
     EntityType entity = dataService.getEntityType(entityTypeId);
-    if (entity == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
-
     Attribute attribute = entity.getAttribute(attributeName);
     if (attribute == null) {
       throw new UnknownAttributeException(entity, attributeName);
@@ -661,9 +648,6 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       boolean includeCategories) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     Query<Entity> q =
         request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();
