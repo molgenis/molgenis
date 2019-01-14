@@ -55,7 +55,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings 
     private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/Logo_Black_Small.png";
     private static final Integer DEFAULT_LOGO_TOP_MAX_HEIGHT = 150;
     private static final String DEFAULT_LANGUAGE_CODE = "en";
-    private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
+    private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis-blue.min.css";
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
     private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
     private static final boolean
