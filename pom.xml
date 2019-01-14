@@ -104,6 +104,7 @@
     <simple-excel.version>1.2</simple-excel.version>
     <poi-ooxml-schemas.version>4.0.0</poi-ooxml-schemas.version>
     <gson-extras.version>0.2.1</gson-extras.version>
+    <vcf-io.version>1.0.3</vcf-io.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -895,35 +896,9 @@
         <version>${json.version}</version>
       </dependency>
       <dependency>
-        <groupId>nl.systemsgenetics</groupId>
-        <artifactId>Genotype-IO</artifactId>
-        <version>${Genotype-IO.version}</version>
-        <exclusions>
-          <exclusion>
-            <artifactId>mockito-all</artifactId>
-            <groupId>org.mockito</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>log4j</artifactId>
-            <groupId>log4j</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>commons-logging</artifactId>
-            <groupId>commons-logging</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>trove4j</artifactId>
-            <groupId>net.sf.trove4j</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>commons-cli</artifactId>
-            <groupId>org.apache.commons</groupId>
-          </exclusion>
-          <exclusion>
-            <artifactId>edu-umd-cs-findbugs-annotations</artifactId>
-            <groupId>com.kenai.nbpwr</groupId>
-          </exclusion>
-        </exclusions>
+        <groupId>org.molgenis</groupId>
+        <artifactId>vcf-io</artifactId>
+        <version>${vcf-io.version}</version>
       </dependency>
       <dependency>
         <groupId>com.icegreen</groupId>
@@ -941,7 +916,7 @@
         <artifactId>freemarker-java8</artifactId>
         <version>${freemarker-java8.version}</version>
       </dependency>
-      <dependency>
+      <dependency>syste
         <groupId>cz.jirutka.rsql</groupId>
         <artifactId>rsql-parser</artifactId>
         <version>${rsql-parser.version}</version>
