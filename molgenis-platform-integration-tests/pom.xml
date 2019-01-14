@@ -134,7 +134,7 @@
             <elasticsearch.transport.addresses>${elasticsearch.transport.addresses}
             </elasticsearch.transport.addresses>
             <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
-            <db_uri>jdbc:postgresql://localhost/${it_db_name}</db_uri>
+            <db_uri>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</db_uri>
             <db_user>${it_db_user}</db_user>
             <db_password>${it_db_password}</db_password>
           </systemPropertyVariables>
