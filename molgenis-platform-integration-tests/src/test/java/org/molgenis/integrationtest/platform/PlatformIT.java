@@ -26,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.HashMap;
@@ -430,8 +431,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
           dataService.deleteById(PACKAGE, "package_onetomany");
           assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
-          assertNull(dataService.getEntityType(entityType.getId()));
-          assertNull(dataService.getEntityType(refEntityType.getId()));
+          assertTrue(dataService.hasEntityType(entityType.getId()));
+          assertTrue(dataService.hasEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
