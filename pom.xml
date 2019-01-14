@@ -107,10 +107,10 @@
     <commons-io.version>2.6</commons-io.version>
     <commons-fileupload.version>1.3.3</commons-fileupload.version>
     <poi.version>3.17</poi.version>
+    <jaxb-api.version>2.2.11</jaxb-api.version>
 
     <!-- test-dependency versions not managed by parent pom -->
     <jsonpath.version>2.4.0</jsonpath.version>
-    <mockito.version>2.7.22</mockito.version>
     <hamcrest-all.version>1.3</hamcrest-all.version>
     <awaitility.version>3.0.0</awaitility.version>
     <greenmail-webapp.version>1.5.5</greenmail-webapp.version>
@@ -1040,6 +1040,11 @@
         <artifactId>poi-ooxml</artifactId>
         <version>${poi.version}</version>
       </dependency>
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>${jaxb-api.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -1060,6 +1065,14 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
   </dependencies>
 
