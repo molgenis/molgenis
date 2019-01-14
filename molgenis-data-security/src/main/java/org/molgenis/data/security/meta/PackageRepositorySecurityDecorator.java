@@ -6,6 +6,7 @@ import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositor
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.READ;
 import static org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator.Action.UPDATE;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSuOrSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSystem;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,9 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
+import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.data.security.owned.AbstractRowLevelSecurityRepositoryDecorator;
+import org.molgenis.data.util.PackageUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.Acl;
 import org.springframework.security.acls.model.AlreadyExistsException;
@@ -41,16 +44,23 @@ public class PackageRepositorySecurityDecorator
   }
 
   @Override
-  public boolean isActionPermitted(Package pack, Action action) {
+  public boolean isActionPermitted(Package updatedPack, Action action) {
     boolean permitted;
+    Package currentPack = delegate().findOneById(updatedPack.getId());
+    if (action == CREATE || action == UPDATE || action == DELETE) {
+      if ((PackageUtils.isSystemPackage(updatedPack) || PackageUtils.isSystemPackage(currentPack))
+          && !currentUserIsSystem()) {
+        throw new SystemMetadataModificationException();
+      }
+    }
     if (action == CREATE || action == DELETE) {
-      permitted = isActionPermittedOnParent(pack, action);
+      permitted = isActionPermittedOnParent(updatedPack, action);
     } else if (action == UPDATE) {
       permitted =
-          isActionPermittedOnParent(pack, action)
-              && internalIsActionPermitted(pack.getId(), action);
+          isActionPermittedOnParent(updatedPack, action)
+              && internalIsActionPermitted(updatedPack.getId(), action);
     } else {
-      permitted = internalIsActionPermitted(pack.getId(), action);
+      permitted = internalIsActionPermitted(updatedPack.getId(), action);
     }
     return permitted;
   }
