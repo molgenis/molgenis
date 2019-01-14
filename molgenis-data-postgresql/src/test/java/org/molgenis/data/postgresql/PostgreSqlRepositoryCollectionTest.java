@@ -257,6 +257,7 @@ public class PostgreSqlRepositoryCollectionTest {
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(XREF);
+    when(updatedAttr.hasRefEntity()).thenReturn(true);
     when(updatedAttr.getRefEntity()).thenReturn(refEntityType);
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
     ArgumentCaptor<String> captor = forClass(String.class);
@@ -460,11 +461,13 @@ public class PostgreSqlRepositoryCollectionTest {
     when(attr.getIdentifier()).thenReturn("attrId");
     when(entityType.getAttribute(attrName)).thenReturn(attr);
     when(attr.getDataType()).thenReturn(XREF);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType0);
 
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(XREF);
+    when(updatedAttr.hasRefEntity()).thenReturn(true);
     when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
@@ -500,11 +503,13 @@ public class PostgreSqlRepositoryCollectionTest {
     when(attr.getIdentifier()).thenReturn("attrId");
     when(entityType.getAttribute(attrName)).thenReturn(attr);
     when(attr.getDataType()).thenReturn(XREF);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType0);
 
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getIdentifier()).thenReturn("attrId");
     when(updatedAttr.getDataType()).thenReturn(XREF);
+    when(updatedAttr.hasRefEntity()).thenReturn(true);
     when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
@@ -544,10 +549,12 @@ public class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(entityType.getAttribute(attrName)).thenReturn(attr);
     when(attr.getDataType()).thenReturn(MREF);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType0);
 
     Attribute updatedAttr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(updatedAttr.getDataType()).thenReturn(MREF);
+    when(updatedAttr.hasRefEntity()).thenReturn(true);
     when(updatedAttr.getRefEntity()).thenReturn(refEntityType1);
 
     postgreSqlRepoCollection.updateAttribute(entityType, attr, updatedAttr);
@@ -723,6 +730,7 @@ public class PostgreSqlRepositoryCollectionTest {
     when(refAttr.getInversedBy()).thenReturn(attr);
 
     when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getMappedBy()).thenReturn(refAttr);
     when(attr.isMappedBy()).thenReturn(true);
@@ -764,6 +772,7 @@ public class PostgreSqlRepositoryCollectionTest {
     Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
     when(attr.getIdentifier()).thenReturn("attrId");
     when(attr.getDataType()).thenReturn(MREF);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
 
     when(entityType.getAttribute(attrName)).thenReturn(attr);
@@ -785,11 +794,13 @@ public class PostgreSqlRepositoryCollectionTest {
     when(refAttr.getIdentifier()).thenReturn("refAttrId");
 
     when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getMappedBy()).thenReturn(refAttr);
     when(attr.isMappedBy()).thenReturn(true);
 
     when(refAttr.getDataType()).thenReturn(XREF);
+    when(refAttr.hasRefEntity()).thenReturn(true);
     when(refAttr.getRefEntity()).thenReturn(entityType);
     when(refAttr.getInversedBy()).thenReturn(attr);
     when(refAttr.isInversedBy()).thenReturn(true);

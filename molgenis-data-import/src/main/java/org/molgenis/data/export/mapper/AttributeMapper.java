@@ -85,7 +85,7 @@ public class AttributeMapper {
           row.add(attr.getEntity() != null ? attr.getEntity().getId() : null);
           break;
         case EMX_ATTRIBUTES_REF_ENTITY:
-          row.add(attr.getRefEntity() != null ? attr.getRefEntity().getId() : null);
+          row.add(attr.hasRefEntity() ? attr.getRefEntity().getId() : null);
           break;
         case EMX_ATTRIBUTES_LOOKUP_ATTRIBUTE:
           row.add(getLookupValue(attr));

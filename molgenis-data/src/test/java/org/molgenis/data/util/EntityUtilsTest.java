@@ -138,6 +138,7 @@ public class EntityUtilsTest {
     Attribute refIdAttr = mock(Attribute.class);
     when(refIdAttr.getDataType()).thenReturn(INT);
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getDataType()).thenReturn(ONE_TO_MANY);
     EntityManager entityManager = mock(EntityManager.class);
@@ -160,6 +161,7 @@ public class EntityUtilsTest {
     Attribute refIdAttr = mock(Attribute.class);
     when(refIdAttr.getDataType()).thenReturn(STRING);
     when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+    when(attr.hasRefEntity()).thenReturn(true);
     when(attr.getRefEntity()).thenReturn(refEntityType);
     when(attr.getDataType()).thenReturn(XREF);
     Entity entity = mock(Entity.class);
@@ -198,6 +200,7 @@ public class EntityUtilsTest {
       Attribute attr = getMockAttr("refEntity");
       Attribute otherAttr = getMockAttr("refEntityNull");
       EntityType refEntity = mock(EntityType.class);
+      when(attr.hasRefEntity()).thenReturn(true);
       when(attr.getRefEntity()).thenReturn(refEntity);
 
       testCases.add(new Object[] {attr, otherAttr, false});
@@ -210,7 +213,9 @@ public class EntityUtilsTest {
       EntityType otherRefEntity = mock(EntityType.class);
       when(refEntity.getId()).thenReturn("ref1");
       when(otherRefEntity.getId()).thenReturn("ref1");
+      when(attr.hasRefEntity()).thenReturn(true);
       when(attr.getRefEntity()).thenReturn(refEntity);
+      when(otherAttr.hasRefEntity()).thenReturn(true);
       when(otherAttr.getRefEntity()).thenReturn(otherRefEntity);
 
       testCases.add(new Object[] {attr, otherAttr, true});
@@ -223,7 +228,9 @@ public class EntityUtilsTest {
       EntityType otherRefEntity = mock(EntityType.class);
       when(refEntity.getId()).thenReturn("ref1");
       when(otherRefEntity.getId()).thenReturn("ref2");
+      when(attr.hasRefEntity()).thenReturn(true);
       when(attr.getRefEntity()).thenReturn(refEntity);
+      when(otherAttr.hasRefEntity()).thenReturn(true);
       when(otherAttr.getRefEntity()).thenReturn(otherRefEntity);
 
       testCases.add(new Object[] {attr, otherAttr, false});

@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

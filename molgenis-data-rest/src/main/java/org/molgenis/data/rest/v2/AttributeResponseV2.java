@@ -69,8 +69,8 @@ class AttributeResponseV2 {
     this.maxLength = attr.getDataType().getMaxLength();
     this.expression = attr.getExpression();
 
-    EntityType refEntity = attr.getRefEntity();
-    if (refEntity != null) {
+    if (attr.hasRefEntity()) {
+      EntityType refEntity = attr.getRefEntity();
       this.refEntity =
           new EntityTypeResponseV2(
               refEntity, fetch, permissionService, dataService, includeCategories);

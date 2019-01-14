@@ -195,7 +195,7 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
             attribute.getExpression(), tagPartName, tagAttribute);
       }
 
-      variableEntityType = tagAttribute.getRefEntity();
+      variableEntityType = tagAttribute.hasRefEntity() ? tagAttribute.getRefEntity() : null;
       if (variableEntityType != null && !it.hasNext()) {
         throw new TemplateExpressionMissingTagException(attribute.getExpression(), tagPartName);
       }

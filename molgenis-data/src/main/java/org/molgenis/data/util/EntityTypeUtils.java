@@ -313,8 +313,8 @@ public class EntityTypeUtils {
   private static Fetch createFetchForReindexing(EntityType entityType, int indexingDepth) {
     Fetch fetch = new Fetch();
     for (Attribute attr : entityType.getAtomicAttributes()) {
-      EntityType refEntityType = attr.getRefEntity();
-      if (refEntityType != null && indexingDepth > 0) {
+      if (attr.hasRefEntity() && indexingDepth > 0) {
+        EntityType refEntityType = attr.getRefEntity();
         fetch.field(attr.getName(), createFetchForReindexing(refEntityType, indexingDepth - 1));
       } else {
         fetch.field(attr.getName());
@@ -325,7 +325,7 @@ public class EntityTypeUtils {
 
   public static boolean hasSelfReferences(EntityType entityType) {
     for (Attribute attr : entityType.getAtomicAttributes()) {
-      if (attr.getRefEntity() != null && EntityUtils.equals(attr.getRefEntity(), entityType)) {
+      if (attr.hasRefEntity() && EntityUtils.equals(attr.getRefEntity(), entityType)) {
         return true;
       }
     }

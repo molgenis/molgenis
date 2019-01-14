@@ -25,9 +25,9 @@ abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator 
 
   List<Category> convertToCategory(Attribute attribute) {
     List<Category> categories = new ArrayList<>();
-    EntityType refEntity = attribute.getRefEntity();
 
-    if (refEntity != null) {
+    if (attribute.hasRefEntity()) {
+      EntityType refEntity = attribute.getRefEntity();
       dataService
           .findAll(refEntity.getId())
           .forEach(

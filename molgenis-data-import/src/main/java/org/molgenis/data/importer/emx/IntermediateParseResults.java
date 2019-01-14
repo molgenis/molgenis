@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.importer.emx.EmxMetadataParser.EmxAttribute;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;

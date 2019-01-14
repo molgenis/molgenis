@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OntologyTermFactory
-    extends AbstractSystemEntityFactory<OntologyTerm, OntologyTermMetaData, String> {
-  OntologyTermFactory(OntologyTermMetaData ontologyTermMeta, EntityPopulator entityPopulator) {
+    extends AbstractSystemEntityFactory<OntologyTerm, OntologyTermMetadata, String> {
+  OntologyTermFactory(OntologyTermMetadata ontologyTermMeta, EntityPopulator entityPopulator) {
     super(OntologyTerm.class, ontologyTermMeta, entityPopulator);
   }
 }

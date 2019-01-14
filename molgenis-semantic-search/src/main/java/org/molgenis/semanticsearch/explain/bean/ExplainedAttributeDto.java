@@ -42,7 +42,7 @@ public abstract class ExplainedAttributeDto {
     map.put(AttributeMetadata.TYPE, attribute.getDataType().toString());
     map.put(AttributeMetadata.IS_NULLABLE, attribute.isNillable());
     map.put(AttributeMetadata.IS_UNIQUE, attribute.isUnique());
-    if (attribute.getRefEntity() != null) {
+    if (attribute.hasRefEntity()) {
       map.put(AttributeMetadata.REF_ENTITY_TYPE, attribute.getRefEntity().getId());
     }
     return map;

@@ -3,7 +3,7 @@ package org.molgenis.script;
 import static java.net.URLConnection.guessContentTypeFromName;
 import static java.text.MessageFormat.format;
 import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.script.core.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.core.ScriptMetadata.SCRIPT;
 
 import java.io.File;
 import java.util.Map;
@@ -16,7 +16,7 @@ import org.molgenis.data.file.model.FileMetaFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.core.GenerateScriptException;
 import org.molgenis.script.core.Script;
-import org.molgenis.script.core.ScriptMetaData;
+import org.molgenis.script.core.ScriptMetadata;
 import org.molgenis.script.core.ScriptParameter;
 import org.molgenis.script.core.ScriptRunner;
 import org.molgenis.script.core.ScriptRunnerFactory;
@@ -71,7 +71,7 @@ public class SavedScriptRunner {
   public ScriptResult runScript(String scriptName, Map<String, Object> parameters) {
     Script script =
         dataService.findOne(
-            SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName), Script.class);
+            SCRIPT, new QueryImpl<Script>().eq(ScriptMetadata.NAME, scriptName), Script.class);
 
     if (script == null) {
       throw new UnknownScriptException("Unknown script [" + scriptName + "]");

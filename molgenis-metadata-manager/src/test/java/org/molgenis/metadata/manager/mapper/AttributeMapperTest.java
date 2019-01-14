@@ -339,6 +339,7 @@ public class AttributeMapperTest {
     Attribute parentAttr = mock(Attribute.class);
     when(attribute.getParent()).thenReturn(parentAttr);
     EntityType refEntityType = mock(EntityType.class);
+    when(attribute.hasRefEntity()).thenReturn(true);
     when(attribute.getRefEntity()).thenReturn(refEntityType);
     when(attribute.getCascadeDelete()).thenReturn(cascadeDelete);
     Attribute mappedByAttribute = mock(Attribute.class);

@@ -7,7 +7,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.CODE;
 import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.RECOVERY_CODE;
 import static org.molgenis.security.twofactor.model.RecoveryCodeMetadata.USER_ID;
-import static org.molgenis.security.twofactor.model.UserSecretMetaData.USER_SECRET;
+import static org.molgenis.security.twofactor.model.UserSecretMetadata.USER_SECRET;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -19,7 +19,7 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.twofactor.model.RecoveryCode;
 import org.molgenis.security.twofactor.model.RecoveryCodeFactory;
 import org.molgenis.security.twofactor.model.UserSecret;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
+import org.molgenis.security.twofactor.model.UserSecretMetadata;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -76,7 +76,7 @@ public class RecoveryServiceImpl implements RecoveryService {
               () ->
                   dataService
                       .query(USER_SECRET, UserSecret.class)
-                      .eq(UserSecretMetaData.USER_ID, userId)
+                      .eq(UserSecretMetadata.USER_ID, userId)
                       .findOne());
       secret.setFailedLoginAttempts(0);
       runAsSystem(() -> dataService.update(USER_SECRET, secret));

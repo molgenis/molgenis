@@ -44,8 +44,8 @@
     </dependency>
     <!-- third party dependencies -->
     <dependency>
-      <groupId>nl.systemsgenetics</groupId>
-      <artifactId>Genotype-IO</artifactId>
+      <groupId>org.molgenis</groupId>
+      <artifactId>vcf-io</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

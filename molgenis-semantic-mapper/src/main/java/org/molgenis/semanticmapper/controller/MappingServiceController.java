@@ -687,8 +687,8 @@ public class MappingServiceController extends PluginController {
       attributeMapping = entityMapping.addAttributeMapping(targetAttribute);
     }
 
-    EntityType refEntityType = attributeMapping.getTargetAttribute().getRefEntity();
-    if (refEntityType != null) {
+    if (attributeMapping.getTargetAttribute().hasRefEntity()) {
+      EntityType refEntityType = attributeMapping.getTargetAttribute().getRefEntity();
       Iterable<Entity> refEntities = () -> dataService.findAll(refEntityType.getId()).iterator();
       model.addAttribute("categories", refEntities);
     }

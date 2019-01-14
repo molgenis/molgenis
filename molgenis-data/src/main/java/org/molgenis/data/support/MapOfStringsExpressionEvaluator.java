@@ -31,10 +31,10 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator {
     if (expression == null) {
       throw new NullPointerException("Attribute has no expression.");
     }
-    EntityType refEntity = attribute.getRefEntity();
-    if (refEntity == null) {
+    if (!attribute.hasRefEntity()) {
       throw new NullPointerException("refEntity not specified.");
     }
+    EntityType refEntity = attribute.getRefEntity();
     Gson gson = new Gson();
     try {
       @SuppressWarnings("unchecked")
@@ -223,6 +223,11 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator {
     @Override
     public Iterable<Attribute> getChildren() {
       return attr.getChildren();
+    }
+
+    @Override
+    public boolean hasRefEntity() {
+      return attr.hasRefEntity();
     }
 
     @Override

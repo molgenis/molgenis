@@ -1,7 +1,7 @@
 package org.molgenis.data.index.meta;
 
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.COUNT;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ID;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.COUNT;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityType;

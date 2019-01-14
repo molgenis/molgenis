@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toSet;
 
 import com.google.common.util.concurrent.AtomicLongMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -79,9 +78,8 @@ public class IndexStatus {
     }
     Set<String> referencedEntityIds =
         stream(emd.getAtomicAttributes())
-            .map(Attribute::getRefEntity)
-            .filter(Objects::nonNull)
-            .map(EntityType::getId)
+            .filter(Attribute::hasRefEntity)
+            .map(attribute -> attribute.getRefEntity().getId())
             .collect(toSet());
     referencedEntityIds.add(emd.getId());
     return referencedEntityIds.stream().noneMatch(actionCountsPerEntity::containsKey);
