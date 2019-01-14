@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -22,6 +23,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.SCORE
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData.VALIDATED;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetadata.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
+import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
@@ -37,7 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,7 +82,6 @@ import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.molgenis.security.core.runas.RunAsSystemAspect;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
@@ -175,7 +175,7 @@ public class SortaController extends PluginController {
   private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId) {
     Fetch fetch = new Fetch();
     sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-    return RunAsSystemAspect.runAsSystem(
+    return runAsSystem(
         () ->
             dataService.findOneById(
                 SORTA_JOB_EXECUTION, sortaJobExecutionId, fetch, SortaJobExecution.class));
@@ -204,7 +204,7 @@ public class SortaController extends PluginController {
         User currentUser = userAccountService.getCurrentUser();
         if (currentUser.isSuperuser()
             || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
-          RunAsSystemAspect.runAsSystem(
+          runAsSystem(
               () -> {
                 Double thresholdValue = Double.parseDouble(threshold);
                 sortaJobExecution.setThreshold(thresholdValue);
@@ -260,7 +260,7 @@ public class SortaController extends PluginController {
       User currentUser = userAccountService.getCurrentUser();
       if (currentUser.isSuperuser()
           || Objects.equal(sortaJobExecution.getUser().get(), currentUser.getUsername())) {
-        RunAsSystemAspect.runAsSystem(
+        runAsSystem(
             () -> dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier()));
         tryDeleteRepository(sortaJobExecution.getResultEntityName());
         tryDeleteRepository(sortaJobExecution.getSourceEntityName());
@@ -273,7 +273,7 @@ public class SortaController extends PluginController {
     if (dataService.hasRepository(entityTypeId)
         && permissionService.hasPermission(
             new EntityTypeIdentity(entityTypeId), EntityTypePermission.DELETE_METADATA)) {
-      RunAsSystemAspect.runAsSystem(() -> deleteRepository(entityTypeId));
+      runAsSystem(() -> deleteRepository(entityTypeId));
     } else {
       LOG.info("Unable to delete repository {}", entityTypeId);
     }
@@ -321,7 +321,7 @@ public class SortaController extends PluginController {
               .map(
                   inputEntity ->
                       inputEntity.getString(SortaServiceImpl.DEFAULT_MATCHING_IDENTIFIER))
-              .collect(Collectors.toList());
+              .collect(toList());
       QueryRule previousQueryRule = new QueryRule(queryRuleInputEntitiesInOneMatchingTask);
       QueryRule queryRuleFilterInput =
           new QueryRule(MatchingTaskContentMetaData.INPUT_TERM, Operator.IN, filteredInputTermIds);
@@ -542,24 +542,13 @@ public class SortaController extends PluginController {
   }
 
   private List<SortaJobExecution> getJobsForCurrentUser() {
-    final List<SortaJobExecution> jobs = new ArrayList<>();
     User currentUser = userAccountService.getCurrentUser();
     Query<SortaJobExecution> query =
         dataService
             .query(SORTA_JOB_EXECUTION, SortaJobExecution.class)
             .eq(JobExecutionMetaData.USER, currentUser.getUsername());
     query.sort().on(JobExecutionMetaData.START_DATE, DESC);
-    RunAsSystemAspect.runAsSystem(
-        () ->
-            query
-                .findAll()
-                .forEach(
-                    job -> {
-                      // TODO: fetch the user as well
-                      job.set(JobExecutionMetaData.USER, currentUser.getUsername());
-                      jobs.add(job);
-                    }));
-    return jobs;
+    return runAsSystem(() -> query.findAll().collect(toList()));
   }
 
   private SortaJobExecution createJobExecution(
@@ -576,7 +565,7 @@ public class SortaController extends PluginController {
     sortaJobExecution.setThreshold(DEFAULT_THRESHOLD);
     sortaJobExecution.setOntologyIri(ontologyIri);
 
-    RunAsSystemAspect.runAsSystem(
+    runAsSystem(
         () -> {
           createInputRepository(inputData);
           createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityType());
