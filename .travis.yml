@@ -1,23 +1,25 @@
 language: java
-jdk: oraclejdk8
-# Trusty dist needed for postgresql version 9.6
-dist: trusty
+jdk: openjdk8
+# Xenial dist needed for postgresql version 11
+dist: xenial
 # Caches downloaded libraries between builds
 cache:
   yarn: true
   directories:
     - '$HOME/.m2/repository'
 env:
+  # Variables shared between builds
+  global:
+    - PGPORT=5433
   # This configures the parallel jobs to run
-  - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
-  - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password"
-services:
-  - postgresql
+  matrix:
+    - COV_FLAG="api"                       SCRIPT="./mvnw verify -pl molgenis-api-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433"
+    - COV_FLAG="integration"               SCRIPT="travis_wait ./mvnw verify -pl molgenis-platform-integration-tests --batch-mode --quiet -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=postgres -Dit_db_password=molgenis -Dit_db_port=5433"
 addons:
   sauce_connect: true
-  postgresql: '9.6'
 sudo: required
 before_install:
+  - .ci/install-postgres-11.sh
   # Use wrapper script to install fixed maven version
   - mvn -N io.takari:maven:wrapper -Dmaven=3.5.4
 install:
