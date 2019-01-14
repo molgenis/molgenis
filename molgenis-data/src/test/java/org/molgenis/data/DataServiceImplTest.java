@@ -120,9 +120,40 @@ public class DataServiceImplTest {
   }
 
   @Test
-  public void getRepositoryByEntityName() {
-    assertEquals(dataService.getRepository("Entity1"), repo1);
-    assertEquals(dataService.getRepository("Entity2"), repo2);
+  public void hasRepositoryTrue() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.hasRepository(entityTypeId)).thenReturn(true);
+    assertTrue(dataService.hasRepository(entityTypeId));
+  }
+
+  @Test
+  public void hasRepositoryFalse() {
+    String entityTypeId = "MyEntityTypeId";
+    assertFalse(dataService.hasRepository(entityTypeId));
+  }
+
+  @Test
+  public void getRepository() {
+    String entityTypeId = "MyEntityTypeId";
+    @SuppressWarnings("unchecked")
+    Repository<Entity> repository = mock(Repository.class);
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.of(repository));
+    assertEquals(dataService.getRepository(entityTypeId), repository);
+  }
+
+  @Test(expectedExceptions = UnknownEntityTypeException.class)
+  public void getRepositoryUnknownEntityType() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getRepository(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+    dataService.getRepository(entityTypeId);
+  }
+
+  @Test(expectedExceptions = UnknownRepositoryException.class)
+  public void getRepositoryUnknownRepository() {
+    String entityTypeId = "MyEntityTypeId";
+    when(metaDataService.getRepository(entityTypeId)).thenReturn(Optional.empty());
+    dataService.getRepository(entityTypeId);
   }
 
   @Test

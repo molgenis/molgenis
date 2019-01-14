@@ -33,29 +33,34 @@ public interface DataService extends Iterable<Repository<Entity>> {
    */
   Set<RepositoryCapability> getCapabilities(String repositoryName);
 
-  /** check if a repository for this entity already exists */
+  /**
+   * Returns whether a repository exists for the given entity type identifier.
+   *
+   * @param entityTypeId entity type identifier
+   * @return true if a repository exists for the given entity type identifier
+   */
   boolean hasRepository(String entityTypeId);
 
   /**
-   * Get a CrudRepository by entity name
+   * Returns the repository for the given entity type identifier.
    *
-   * @throws UnknownEntityTypeException when the repository can not be found
-   * @throws MolgenisDataException if the repository doesn't implement CrudRepository
+   * @param entityTypeId entity type identifier
+   * @return repository, never null
+   * @throws UnknownEntityTypeException if no entity type with the given identifier exists
+   * @throws UnknownRepositoryException if no repository exists for the entity type
    */
-  @Nullable
-  @CheckForNull
   Repository<Entity> getRepository(String entityTypeId);
 
   /**
-   * Returns a {@link Repository} for the given entity of the given type.
+   * Returns the typed repository for the given entity type identifier.
    *
-   * @param entityClass entity class
-   * @param <E> entity type
-   * @return typed entity {@link Repository}
+   * @param entityTypeId entity type identifier
+   * @param entityTypeClass entity type class
+   * @return typed repository, never null
+   * @throws UnknownEntityTypeException if no entity type with the given identifier exists
+   * @throws UnknownRepositoryException if no repository exists for the entity type
    */
-  @Nullable
-  @CheckForNull
-  <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass);
+  <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityTypeClass);
 
   /**
    * Returns whether an entity type exists for the given entity type identifier.
@@ -69,7 +74,7 @@ public interface DataService extends Iterable<Repository<Entity>> {
    * Returns the entity type for the given entity type identifier.
    *
    * @param entityTypeId entity type identifier
-   * @return entity type
+   * @return entity type, never null
    * @throws UnknownEntityTypeException if no entity type with the given identifier exists
    */
   EntityType getEntityType(String entityTypeId);

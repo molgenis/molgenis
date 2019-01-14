@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.util.PackageUtils.PackageTreeTraverser;
@@ -66,11 +65,6 @@ public class PackageRepositoryDecorator extends AbstractRepositoryDecorator<Pack
   }
 
   private Repository<EntityType> getEntityRepository() {
-    Repository<EntityType> repository =
-        dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
-    if (repository == null) {
-      throw new UnknownRepositoryException(ENTITY_TYPE_META_DATA);
-    }
-    return repository;
+    return dataService.getRepository(ENTITY_TYPE_META_DATA, EntityType.class);
   }
 }

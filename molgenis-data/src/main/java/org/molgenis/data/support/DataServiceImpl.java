@@ -14,6 +14,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownEntityTypeException;
+import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.meta.MetaDataService;
@@ -45,11 +46,6 @@ public class DataServiceImpl implements DataService {
   @Override
   public synchronized Stream<String> getEntityTypeIds() {
     return metaDataService.getEntityTypes().map(EntityType::getId);
-  }
-
-  @Override
-  public boolean hasRepository(String entityTypeId) {
-    return metaDataService.hasRepository(entityTypeId);
   }
 
   @Override
@@ -143,18 +139,23 @@ public class DataServiceImpl implements DataService {
     getRepository(entityTypeId).deleteAll();
   }
 
-  @Nullable
-  @CheckForNull
   @Override
-  public Repository<Entity> getRepository(String entityTypeId) {
-    return metaDataService.getRepository(entityTypeId).orElse(null);
+  public boolean hasRepository(String entityTypeId) {
+    return metaDataService.hasRepository(entityTypeId);
   }
 
-  @Nullable
-  @CheckForNull
+  @Override
+  public Repository<Entity> getRepository(String entityTypeId) {
+    return metaDataService
+        .getRepository(entityTypeId)
+        .orElseThrow(() -> new UnknownRepositoryException(entityTypeId));
+  }
+
   @Override
   public <E extends Entity> Repository<E> getRepository(String entityTypeId, Class<E> entityClass) {
-    return metaDataService.getRepository(entityTypeId, entityClass).orElse(null);
+    return metaDataService
+        .getRepository(entityTypeId, entityClass)
+        .orElseThrow(() -> new UnknownRepositoryException(entityTypeId));
   }
 
   @Override
