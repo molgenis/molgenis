@@ -916,7 +916,7 @@
         <artifactId>freemarker-java8</artifactId>
         <version>${freemarker-java8.version}</version>
       </dependency>
-      <dependency>syste
+      <dependency>
         <groupId>cz.jirutka.rsql</groupId>
         <artifactId>rsql-parser</artifactId>
         <version>${rsql-parser.version}</version>
