@@ -62,13 +62,13 @@ public class EntityImportReport implements Serializable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
 
-    for (String entity : nrImportedEntitiesMap.keySet()) {
-      sb.append("Imported ")
-          .append(nrImportedEntitiesMap.get(entity))
-          .append(" ")
-          .append(entity)
-          .append(" entities.<br />");
-    }
+    nrImportedEntitiesMap.forEach(
+        (entity, nrImportedEntities) ->
+            sb.append("Imported ")
+                .append(nrImportedEntities)
+                .append(" ")
+                .append(entity)
+                .append(" entities.<br />"));
 
     return sb.toString();
   }

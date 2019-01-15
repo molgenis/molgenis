@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import net.sf.samtools.util.BlockCompressedInputStream;
@@ -288,9 +289,9 @@ public class VcfWriterUtils {
       Map<String, String> infoHeaderLinesMap,
       Map<String, Attribute> annotatorAttributes)
       throws IOException {
-    for (String infoHeaderFieldKey : infoHeaderLinesMap.keySet()) {
-      if (!annotatorAttributes.containsKey(infoHeaderFieldKey)) {
-        outputVCFWriter.write(infoHeaderLinesMap.get(infoHeaderFieldKey));
+    for (Entry<String, String> entry : infoHeaderLinesMap.entrySet()) {
+      if (!annotatorAttributes.containsKey(entry.getKey())) {
+        outputVCFWriter.write(entry.getValue());
         outputVCFWriter.newLine();
       }
     }

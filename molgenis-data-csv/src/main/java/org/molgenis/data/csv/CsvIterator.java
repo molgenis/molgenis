@@ -138,9 +138,7 @@ public class CsvIterator implements CloseableIterator<Entity> {
 
           next = new DynamicEntity(entityType);
 
-          for (String name : colNamesMap.keySet()) {
-            next.set(name, valueList.get(colNamesMap.get(name)));
-          }
+          colNamesMap.forEach((key, value) -> next.set(key, valueList.get(value)));
         } else if (values != null
             && (values.length > 1 || (values.length == 1 && values[0].length() > 0))
             && (values.length < colNamesMap.size() || values.length > colNamesMap.size())) {
