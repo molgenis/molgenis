@@ -251,7 +251,9 @@ public class NegotiatorController extends PluginController {
         new QueryImpl<NegotiatorEntityConfig>().eq(NegotiatorEntityConfigMetadata.ENTITY, entityId);
     NegotiatorEntityConfig negotiatorEntityConfig =
         dataService.findOne(
-            NegotiatorEntityConfigMetadata.NEGOTIATORENTITYCONFIG, query, NegotiatorEntityConfig.class);
+            NegotiatorEntityConfigMetadata.NEGOTIATORENTITYCONFIG,
+            query,
+            NegotiatorEntityConfig.class);
     return Optional.ofNullable(negotiatorEntityConfig);
   }
 
