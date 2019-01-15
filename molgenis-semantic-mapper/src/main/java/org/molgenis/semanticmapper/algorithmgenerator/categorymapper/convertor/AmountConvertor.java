@@ -17,9 +17,11 @@ public abstract class AmountConvertor {
     AmountWrapper amountWrapper = getInternalAmount(description);
     if (amountWrapper != null && CategoryMapperUtil.containNegativeAdjectives(description)) {
       Amount<?> amount = amountWrapper.getAmount();
-      Amount<?> newAmount =
-          Amount.rangeOf((double) 0, amount.getEstimatedValue(), amount.getUnit());
-      amountWrapper = AmountWrapper.create(newAmount, amountWrapper.isDetermined());
+      if (amount != null) {
+        Amount<?> newAmount =
+            Amount.rangeOf((double) 0, amount.getEstimatedValue(), amount.getUnit());
+        amountWrapper = AmountWrapper.create(newAmount, amountWrapper.isDetermined());
+      }
     }
     return amountWrapper;
   }

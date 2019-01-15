@@ -1,5 +1,7 @@
 package org.molgenis.genomebrowser;
 
+import static java.util.Collections.emptyList;
+
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public abstract class GenomeBrowserTrack {
         labelAttr,
         entity,
         trackType,
-        molgenisReferenceTracks,
+        molgenisReferenceTracks != null ? molgenisReferenceTracks : emptyList(),
         molgenisReferenceMode,
         genomeBrowserAttrs,
         actions,
@@ -76,8 +78,6 @@ public abstract class GenomeBrowserTrack {
 
   public abstract GenomeBrowserSettings.TrackType getTrackType();
 
-  @Nullable
-  @CheckForNull
   public abstract Iterable<GenomeBrowserTrack> getMolgenisReferenceTracks();
 
   public abstract GenomeBrowserSettings.MolgenisReferenceMode getMolgenisReferenceMode();
@@ -125,8 +125,9 @@ public abstract class GenomeBrowserTrack {
                 "genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()).toString()));
     if (getLabelAttr() != null)
       config.append(",").append(getConfigStringValue("label_attr", getLabelAttr()));
-    if (getAttrs() != null)
-      config.append(",").append(getConfigObjectValue("attrs", getAttrsJSON(getAttrs()).toString()));
+    String attrs = getAttrs();
+    if (attrs != null)
+      config.append(",").append(getConfigObjectValue("attrs", getAttrsJSON(attrs).toString()));
     if (getActions() != null)
       config.append(",").append(getConfigObjectValue("actions", JSONObject.quote(getActions())));
     if (getTrackType() != null)
