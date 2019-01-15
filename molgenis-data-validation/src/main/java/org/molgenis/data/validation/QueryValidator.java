@@ -143,7 +143,7 @@ public class QueryValidator {
       case SCRIPT:
       case STRING:
       case TEXT:
-        value = convertString(attr, queryRuleValue);
+        value = convertString(queryRuleValue);
         break;
       case ENUM:
         value = convertEnum(attr, queryRuleValue);
@@ -423,7 +423,7 @@ public class QueryValidator {
     return entityManager.getReference(attr.getRefEntity(), idValue);
   }
 
-  private static String convertString(@SuppressWarnings("unused") Attribute attr, Object value) {
+  private static String convertString(Object value) {
     if (value instanceof String) {
       return (String) value;
     }
