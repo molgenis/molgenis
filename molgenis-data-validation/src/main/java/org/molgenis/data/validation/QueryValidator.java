@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.QueryUtils;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.file.model.FileMeta;
@@ -71,45 +72,15 @@ public class QueryValidator {
       case LESS:
       case LESS_EQUAL:
       case LIKE:
-        {
-          Attribute attr = getQueryRuleAttribute(queryRule, entityType);
-          Object value = toQueryRuleValue(queryRule.getValue(), attr);
-          queryRule.setValue(value);
-          break;
-        }
+        validateSimpleQueryRule(queryRule, entityType);
+        break;
       case SEARCH:
-        {
-          Object queryRuleValue = queryRule.getValue();
-          if (queryRuleValue != null && !(queryRuleValue instanceof String)) {
-            // fix value type
-            queryRule.setValue(queryRuleValue.toString());
-          }
-          break;
-        }
+        validateSearchQueryRule(queryRule);
+        break;
       case IN:
       case RANGE:
-        {
-          Attribute attr = getQueryRuleAttribute(queryRule, entityType);
-          Object queryRuleValue = queryRule.getValue();
-          if (queryRuleValue != null) {
-            if (!(queryRuleValue instanceof Iterable<?>)) {
-              throw new MolgenisValidationException(
-                  new ConstraintViolation(
-                      format(
-                          "Query rule with operator [%s] value is of type [%s] instead of [Iterable]",
-                          operator, queryRuleValue.getClass().getSimpleName())));
-            }
-
-            // fix value types
-            Iterable<?> queryRuleValues = (Iterable<?>) queryRuleValue;
-            List<Object> values =
-                stream(queryRuleValues)
-                    .map(value -> toQueryRuleValue(value, attr))
-                    .collect(toList());
-            queryRule.setValue(values);
-          }
-          break;
-        }
+        validateIterableQueryRule(queryRule, entityType, operator);
+        break;
       case DIS_MAX:
       case NESTED:
       case SHOULD:
@@ -119,6 +90,41 @@ public class QueryValidator {
         break;
       default:
         throw new UnexpectedEnumException(operator);
+    }
+  }
+
+  private void validateSimpleQueryRule(QueryRule queryRule, EntityType entityType) {
+    Attribute attr = getQueryRuleAttribute(queryRule, entityType);
+    Object value = toQueryRuleValue(queryRule.getValue(), attr);
+    queryRule.setValue(value);
+  }
+
+  private void validateIterableQueryRule(
+      QueryRule queryRule, EntityType entityType, Operator operator) {
+    Attribute attr = getQueryRuleAttribute(queryRule, entityType);
+    Object queryRuleValue = queryRule.getValue();
+    if (queryRuleValue != null) {
+      if (!(queryRuleValue instanceof Iterable<?>)) {
+        throw new MolgenisValidationException(
+            new ConstraintViolation(
+                format(
+                    "Query rule with operator [%s] value is of type [%s] instead of [Iterable]",
+                    operator, queryRuleValue.getClass().getSimpleName())));
+      }
+
+      // fix value types
+      Iterable<?> queryRuleValues = (Iterable<?>) queryRuleValue;
+      List<Object> values =
+          stream(queryRuleValues).map(value -> toQueryRuleValue(value, attr)).collect(toList());
+      queryRule.setValue(values);
+    }
+  }
+
+  private void validateSearchQueryRule(QueryRule queryRule) {
+    Object queryRuleValue = queryRule.getValue();
+    if (queryRuleValue != null && !(queryRuleValue instanceof String)) {
+      // fix value type
+      queryRule.setValue(queryRuleValue.toString());
     }
   }
 
