@@ -47,11 +47,10 @@ public class PackageRepositorySecurityDecorator
   public boolean isActionPermitted(Package updatedPack, Action action) {
     boolean permitted;
     Package currentPack = delegate().findOneById(updatedPack.getId());
-    if (action == CREATE || action == UPDATE || action == DELETE) {
-      if ((PackageUtils.isSystemPackage(updatedPack) || PackageUtils.isSystemPackage(currentPack))
-          && !currentUserIsSystem()) {
-        throw new SystemMetadataModificationException();
-      }
+    if ((action == CREATE || action == UPDATE || action == DELETE)
+        && ((PackageUtils.isSystemPackage(updatedPack) || PackageUtils.isSystemPackage(currentPack))
+            && !currentUserIsSystem())) {
+      throw new SystemMetadataModificationException();
     }
     if (action == CREATE || action == DELETE) {
       permitted = isActionPermittedOnParent(updatedPack, action);
