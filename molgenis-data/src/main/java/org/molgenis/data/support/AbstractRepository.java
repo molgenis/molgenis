@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractRepository implements Repository<Entity> {
   private static final int FIND_ALL_BATCH_SIZE = 1000;
 
-  private final Logger LOG = LoggerFactory.getLogger(getClass());
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
   private String name;
 
@@ -114,7 +114,7 @@ public abstract class AbstractRepository implements Repository<Entity> {
   private Entity lookup(Map<Object, Entity> index, Object id) {
     Entity result = index.get(id);
     if (result == null) {
-      LOG.debug("Lookup: Couldn't find {} for id {}.", getName(), id);
+      log.debug("Lookup: Couldn't find {} for id {}.", getName(), id);
     }
     return result;
   }
