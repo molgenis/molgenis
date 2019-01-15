@@ -76,8 +76,6 @@ public abstract class GenomeBrowserTrack {
 
   public abstract GenomeBrowserSettings.TrackType getTrackType();
 
-  @Nullable
-  @CheckForNull
   public abstract Iterable<GenomeBrowserTrack> getMolgenisReferenceTracks();
 
   public abstract GenomeBrowserSettings.MolgenisReferenceMode getMolgenisReferenceMode();
@@ -125,8 +123,9 @@ public abstract class GenomeBrowserTrack {
                 "genome_attrs", getGenomeBrowserAttrsJSON(getGenomeBrowserAttrs()).toString()));
     if (getLabelAttr() != null)
       config.append(",").append(getConfigStringValue("label_attr", getLabelAttr()));
-    if (getAttrs() != null)
-      config.append(",").append(getConfigObjectValue("attrs", getAttrsJSON(getAttrs()).toString()));
+    String attrs = getAttrs();
+    if (attrs != null)
+      config.append(",").append(getConfigObjectValue("attrs", getAttrsJSON(attrs).toString()));
     if (getActions() != null)
       config.append(",").append(getConfigObjectValue("actions", JSONObject.quote(getActions())));
     if (getTrackType() != null)
