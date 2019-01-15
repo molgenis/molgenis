@@ -8,9 +8,9 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.BIOBANK_ID;
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.COLLECTION_ID;
-import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta.ENABLED_EXPRESSION;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.BIOBANK_ID;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.COLLECTION_ID;
+import static org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata.ENABLED_EXPRESSION;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -36,7 +36,7 @@ import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorConfig;
 import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfig;
-import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMeta;
+import org.molgenis.dataexplorer.negotiator.config.NegotiatorEntityConfigMetadata;
 import org.molgenis.i18n.properties.AllPropertiesMessageSource;
 import org.molgenis.js.magma.JsMagmaScriptEvaluator;
 import org.molgenis.security.core.UserPermissionEvaluator;
@@ -74,9 +74,11 @@ public class NegotiatorControllerTest {
     /* Negotiator config mock */
     Query<NegotiatorEntityConfig> query =
         new QueryImpl<NegotiatorEntityConfig>()
-            .eq(NegotiatorEntityConfigMeta.ENTITY, "molgenis_id_1");
+            .eq(NegotiatorEntityConfigMetadata.ENTITY, "molgenis_id_1");
     when(dataService.findOne(
-            NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query, NegotiatorEntityConfig.class))
+            NegotiatorEntityConfigMetadata.NEGOTIATORENTITYCONFIG,
+            query,
+            NegotiatorEntityConfig.class))
         .thenReturn(negotiatorEntityConfig);
 
     when(collectionAttr.getName()).thenReturn("collectionAttr");
@@ -150,10 +152,12 @@ public class NegotiatorControllerTest {
 
     Query<NegotiatorEntityConfig> query =
         new QueryImpl<NegotiatorEntityConfig>()
-            .eq(NegotiatorEntityConfigMeta.ENTITY, "molgenis_id_1");
+            .eq(NegotiatorEntityConfigMetadata.ENTITY, "molgenis_id_1");
 
     when(dataService.findOne(
-            NegotiatorEntityConfigMeta.NEGOTIATORENTITYCONFIG, query, NegotiatorEntityConfig.class))
+            NegotiatorEntityConfigMetadata.NEGOTIATORENTITYCONFIG,
+            query,
+            NegotiatorEntityConfig.class))
         .thenReturn(null);
 
     negotiatorController.validateNegotiatorExport(request);

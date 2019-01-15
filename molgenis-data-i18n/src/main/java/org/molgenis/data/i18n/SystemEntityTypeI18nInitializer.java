@@ -4,7 +4,7 @@ import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 
 import java.util.stream.Stream;
-import org.molgenis.data.i18n.model.L10nStringMetaData;
+import org.molgenis.data.i18n.model.L10nStringMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -31,7 +31,7 @@ public class SystemEntityTypeI18nInitializer {
 
     EntityTypeMetadata entityTypeMeta = ctx.getBean(EntityTypeMetadata.class);
     AttributeMetadata attrMetaMeta = ctx.getBean(AttributeMetadata.class);
-    L10nStringMetaData l10nStringMeta = ctx.getBean(L10nStringMetaData.class);
+    L10nStringMetadata l10nStringMeta = ctx.getBean(L10nStringMetadata.class);
 
     languageCodes.forEach(
         languageCode -> {

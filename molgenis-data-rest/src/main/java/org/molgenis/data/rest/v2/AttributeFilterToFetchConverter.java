@@ -5,7 +5,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -175,7 +175,7 @@ public class AttributeFilterToFetchConverter {
       }
 
       if (attr.getDataType() == FILE) {
-        fetch.field(FileMetaMetaData.URL);
+        fetch.field(FileMetaMetadata.URL);
       }
     } else {
       fetch = null;

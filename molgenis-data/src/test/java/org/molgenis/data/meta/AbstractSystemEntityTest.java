@@ -59,14 +59,30 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
       Class entityClass,
       EntityFactory factory,
       Map<String, Pair<Class, Object>> overrideReturnTypes,
-      List<String> excludedAttributes) {
+      List<String> excludedAttributes,
+      boolean skipPackageCheck) {
 
     List<Method> methods = Arrays.asList(entityClass.getMethods());
 
-    testMetadataPackage(systemEntityType);
+    // Optionally skip the package check, this can be used to test metadata for which the package is
+    // set at bootstrapping the app
+    if (!skipPackageCheck) {
+      testMetadataPackage(systemEntityType);
+    }
+
     StreamSupport.stream(systemEntityType.getAtomicAttributes().spliterator(), false)
         .filter(attr -> !excludedAttributes.contains(attr.getName()))
         .forEach(attr -> testAttributes(attr, methods, factory, overrideReturnTypes));
+  }
+
+  protected void internalTestAttributes(
+      SystemEntityType systemEntityType,
+      Class entityClass,
+      EntityFactory factory,
+      Map<String, Pair<Class, Object>> overrideReturnTypes,
+      List<String> excludedAttributes) {
+    internalTestAttributes(
+        systemEntityType, entityClass, factory, overrideReturnTypes, excludedAttributes, false);
   }
 
   private void testAttributes(
@@ -131,7 +147,7 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
     Package pack = metadata.getPackage();
     if (pack != null && SystemPackage.class.isAssignableFrom(pack.getClass())) {
       SystemPackage systemPackage = (SystemPackage) pack;
-      systemPackage.init();
+      initPackage(systemPackage);
       if (!PackageUtils.isSystemPackage(systemPackage)) {
         fail(
             String.format(
@@ -139,7 +155,19 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
       }
     } else {
       fail(
-          String.format("SystemEntityTypes should extend %s", SystemPackage.class.getSimpleName()));
+          String.format(
+              "The package in which an entityType resides should extend %s",
+              SystemPackage.class.getSimpleName()));
+    }
+  }
+
+  private void initPackage(SystemPackage systemPackage) {
+    systemPackage.init();
+    Package parent = systemPackage.getParent();
+    while (parent != null) {
+      SystemPackage parentPackage = (SystemPackage) parent;
+      parentPackage.init();
+      parent = parent.getParent();
     }
   }
 
@@ -176,6 +204,8 @@ public abstract class AbstractSystemEntityTest extends AbstractMolgenisSpringTes
       Optional actualOptional = (Optional) actual;
       Object actualObject = actualOptional.isPresent() ? actualOptional.get() : null;
       return actualObject != null && actualObject.equals(expected);
+    } else if (getter.getReturnType().isArray()) {
+      return Arrays.equals((Object[]) actual, (Object[]) expected);
     } else {
       return actual.equals(expected);
     }

@@ -7,9 +7,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.MSGID;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.NAMESPACE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.collections.Lists.newArrayList;
 

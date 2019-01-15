@@ -5,7 +5,7 @@ import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.jobs.model.JobPackage.PACKAGE_JOB;
 
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.jobs.model.JobExecutionMetaData;
 import org.molgenis.jobs.model.JobPackage;
@@ -25,18 +25,18 @@ public class AmazonBucketJobExecutionMetadata extends SystemEntityType {
   public static final String REGION = "region";
   public static final String EXTENSION = "extension";
 
-  private final FileMetaMetaData fileMetaMetaData;
+  private final FileMetaMetadata fileMetaMetadata;
   private final JobExecutionMetaData jobExecutionMetaData;
   private final JobPackage jobPackage;
 
   public static final String AMAZON_BUCKET_JOB_TYPE = "AmazonBucketJob";
 
   AmazonBucketJobExecutionMetadata(
-      FileMetaMetaData fileMetaMetaData,
+      FileMetaMetadata fileMetaMetadata,
       JobExecutionMetaData jobExecutionMetaData,
       JobPackage jobPackage) {
     super(SIMPLE_NAME, PACKAGE_JOB);
-    this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
+    this.fileMetaMetadata = requireNonNull(fileMetaMetadata);
     this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
     this.jobPackage = requireNonNull(jobPackage);
   }
@@ -77,7 +77,7 @@ public class AmazonBucketJobExecutionMetadata extends SystemEntityType {
         .setLabel("File")
         .setDescription("The imported file.")
         .setDataType(XREF)
-        .setRefEntity(fileMetaMetaData)
+        .setRefEntity(fileMetaMetadata)
         .setNillable(true);
     addAttribute(EXTENSION)
         .setLabel("Extension")
