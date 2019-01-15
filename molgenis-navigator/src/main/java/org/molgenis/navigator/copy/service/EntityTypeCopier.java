@@ -20,6 +20,7 @@ import org.molgenis.data.meta.EntityTypeDependencyResolver;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.springframework.stereotype.Component;
@@ -76,15 +77,12 @@ public class EntityTypeCopier {
 
   private void persist(List<EntityType> copiedEntityTypes, CopyState state) {
     List<EntityType> persistedEntityTypes =
-        entityTypeDependencyResolver
-            .resolve(copiedEntityTypes)
-            .stream()
+        entityTypeDependencyResolver.resolve(copiedEntityTypes).stream()
             .map(copy -> cutDefaultValues(copy, state))
             .map(this::persistEntityType)
             .collect(toList());
 
-    persistedEntityTypes
-        .stream()
+    persistedEntityTypes.stream()
         .map(copy -> copyEntities(copy, state))
         .map(copy -> pasteDefaultValues(copy, state))
         .forEach(e -> state.progress().increment(1));
@@ -101,10 +99,10 @@ public class EntityTypeCopier {
    */
   private EntityType assignUniqueLabel(EntityType entityType, CopyState state) {
     Set<String> existingLabels;
-    if (state.targetPackage() != null) {
-      //noinspection ConstantConditions
+    Package targetPackage = state.targetPackage();
+    if (targetPackage != null) {
       existingLabels =
-          stream(state.targetPackage().getEntityTypes()).map(EntityType::getLabel).collect(toSet());
+          stream(targetPackage.getEntityTypes()).map(EntityType::getLabel).collect(toSet());
     } else {
       existingLabels =
           dataService

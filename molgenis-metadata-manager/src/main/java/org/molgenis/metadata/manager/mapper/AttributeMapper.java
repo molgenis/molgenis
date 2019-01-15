@@ -245,7 +245,9 @@ public class AttributeMapper {
     String editorAttributeId = editorAttribute.getId();
 
     int index =
-        editorEntityType.getLookupAttributes().stream()
+        editorEntityType
+            .getLookupAttributes()
+            .stream()
             .map(EditorAttributeIdentifier::getId)
             .collect(toList())
             .indexOf(editorAttributeId);

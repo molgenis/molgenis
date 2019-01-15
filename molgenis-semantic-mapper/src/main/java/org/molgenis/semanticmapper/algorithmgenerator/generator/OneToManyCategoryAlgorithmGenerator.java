@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.jscience.physics.amount.Amount;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -87,8 +88,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     StringBuilder stringBuilder = new StringBuilder();
     if (!sourceAttributes.isEmpty()) {
       stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
-      sourceAttributes
-          .stream()
+      sourceAttributes.stream()
           .forEach(
               attribute ->
                   stringBuilder
@@ -109,8 +109,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     boolean isTargetSuitable =
         oneToOneCategoryAlgorithmGenerator.isFrequencyCategory(convertToCategory(targetAttribute));
     boolean areSourcesSuitable =
-        sourceAttributes
-            .stream()
+        sourceAttributes.stream()
             .map(this::convertToCategory)
             .allMatch(oneToOneCategoryAlgorithmGenerator::isFrequencyCategory);
     return isTargetSuitable && areSourcesSuitable;
@@ -149,8 +148,7 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
     StringBuilder stringBuilder = new StringBuilder();
 
     List<Category> sortedCategories =
-        convertToCategory(attribute)
-            .stream()
+        convertToCategory(attribute).stream()
             .filter(category -> category.getAmountWrapper() != null)
             .collect(Collectors.toList());
 
@@ -243,14 +241,26 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
   }
 
   int parseAmountMinimumValue(Category category) {
-    return (int)
-        Double.parseDouble(
-            DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
+    AmountWrapper amountWrapper = category.getAmountWrapper();
+    if (amountWrapper == null) {
+      throw new IllegalArgumentException("Category amount wrapper is null");
+    }
+    Amount<?> amount = amountWrapper.getAmount();
+    if (amount == null) {
+      throw new IllegalArgumentException("Category amount wrapper amount is null");
+    }
+    return (int) Double.parseDouble(DECIMAL_FORMAT.format(amount.getMinimumValue()));
   }
 
   int parseAmountMaximumValue(Category category) {
-    return (int)
-        Double.parseDouble(
-            DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
+    AmountWrapper amountWrapper = category.getAmountWrapper();
+    if (amountWrapper == null) {
+      throw new IllegalArgumentException("Category amount wrapper is null");
+    }
+    Amount<?> amount = amountWrapper.getAmount();
+    if (amount == null) {
+      throw new IllegalArgumentException("Category amount wrapper amount is null");
+    }
+    return (int) Double.parseDouble(DECIMAL_FORMAT.format(amount.getMaximumValue()));
   }
 }
