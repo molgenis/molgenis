@@ -77,12 +77,15 @@ public class EntityTypeCopier {
 
   private void persist(List<EntityType> copiedEntityTypes, CopyState state) {
     List<EntityType> persistedEntityTypes =
-        entityTypeDependencyResolver.resolve(copiedEntityTypes).stream()
+        entityTypeDependencyResolver
+            .resolve(copiedEntityTypes)
+            .stream()
             .map(copy -> cutDefaultValues(copy, state))
             .map(this::persistEntityType)
             .collect(toList());
 
-    persistedEntityTypes.stream()
+    persistedEntityTypes
+        .stream()
         .map(copy -> copyEntities(copy, state))
         .map(copy -> pasteDefaultValues(copy, state))
         .forEach(e -> state.progress().increment(1));
