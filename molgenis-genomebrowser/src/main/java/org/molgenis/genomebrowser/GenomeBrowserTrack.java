@@ -1,5 +1,7 @@
 package org.molgenis.genomebrowser;
 
+import static java.util.Collections.emptyList;
+
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Strings;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public abstract class GenomeBrowserTrack {
         labelAttr,
         entity,
         trackType,
-        molgenisReferenceTracks,
+        molgenisReferenceTracks != null ? molgenisReferenceTracks : emptyList(),
         molgenisReferenceMode,
         genomeBrowserAttrs,
         actions,
