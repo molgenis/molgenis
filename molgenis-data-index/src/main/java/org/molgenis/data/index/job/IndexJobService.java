@@ -4,10 +4,10 @@ import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.ACTION_ORDER;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION_GROUP_ATTR;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import io.micrometer.core.annotation.Timed;
@@ -22,7 +22,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
@@ -107,10 +107,10 @@ public class IndexJobService {
   private boolean performAction(Progress progress, int progressCount, IndexAction indexAction) {
     requireNonNull(indexAction);
     String entityTypeId = indexAction.getEntityTypeId();
-    updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.STARTED);
-    EntityType entityType = dataService.getEntityType(entityTypeId);
+    updateIndexActionStatus(indexAction, IndexActionMetadata.IndexStatus.STARTED);
     try {
-      if (entityType != null) {
+      if (dataService.hasEntityType(entityTypeId)) {
+        EntityType entityType = dataService.getEntityType(entityTypeId);
         if (indexAction.getEntityId() != null) {
           progress.progress(
               progressCount,
@@ -122,7 +122,7 @@ public class IndexJobService {
           indexService.rebuildIndex(repository);
         }
       } else {
-        entityType = getEntityType(indexAction);
+        EntityType entityType = getEntityType(indexAction);
         if (indexService.hasIndex(entityType)) {
           progress.progress(
               progressCount, format("Dropping entityType with id: {0}", entityType.getId()));
@@ -135,11 +135,11 @@ public class IndexJobService {
               format("Skip index entity {0}.{1}", entityType.getId(), indexAction.getEntityId()));
         }
       }
-      updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
+      updateIndexActionStatus(indexAction, IndexActionMetadata.IndexStatus.FINISHED);
       return true;
     } catch (Exception ex) {
       LOG.error("Index job failed", ex);
-      updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FAILED);
+      updateIndexActionStatus(indexAction, IndexActionMetadata.IndexStatus.FAILED);
       return false;
     }
   }
@@ -151,7 +151,7 @@ public class IndexJobService {
    * @param status the new {@link IndexStatus}
    */
   private void updateIndexActionStatus(
-      IndexAction indexAction, IndexActionMetaData.IndexStatus status) {
+      IndexAction indexAction, IndexActionMetadata.IndexStatus status) {
     indexAction.setIndexStatus(status);
     dataService.update(INDEX_ACTION, indexAction);
   }

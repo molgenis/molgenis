@@ -64,7 +64,6 @@ import org.molgenis.data.importer.MyEntitiesValidationReport;
 import org.molgenis.data.importer.ParsedMetaData;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.EntityTypeDependencyResolver;
-import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -75,7 +74,6 @@ import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.util.EntityTypeUtils;
-import org.molgenis.data.util.EntityUtils;
 import org.molgenis.data.validation.meta.AttributeValidator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;
 import org.molgenis.data.validation.meta.EntityTypeValidator;
@@ -221,7 +219,7 @@ public class EmxMetadataParser implements MetadataParser {
   private final TagValidator tagValidator;
   private final EntityTypeDependencyResolver entityTypeDependencyResolver;
 
-  public EmxMetadataParser(
+  EmxMetadataParser(
       DataService dataService,
       PackageFactory packageFactory,
       AttributeFactory attrMetaFactory,
@@ -1106,8 +1104,9 @@ public class EmxMetadataParser implements MetadataParser {
         if (intermediateResults.knowsEntity(refEntityName)) {
           refEntityType = intermediateResults.getEntityType(refEntityName);
         } else {
-          refEntityType = dataService.getEntityType(refEntityName);
-          if (refEntityType == null) {
+          if (dataService.hasEntityType(refEntityName)) {
+            refEntityType = dataService.getEntityType(refEntityName);
+          } else {
             throw new IllegalArgumentException(
                 "attributes.refEntity error on line "
                     + rowIndex
@@ -1179,20 +1178,6 @@ public class EmxMetadataParser implements MetadataParser {
           builder.put(emxName, dataService.getRepository(repoName).getEntityType());
         });
     return builder.build();
-  }
-
-  /** Throws Exception if an import is trying to update metadata of a system entity */
-  public static void scanMetaDataForSystemEntityType(
-      Map<String, EntityType> allEntityTypeMap, Iterable<EntityType> existingMetaData) {
-    existingMetaData.forEach(
-        emd -> {
-          if (!allEntityTypeMap.containsKey(emd.getId())) allEntityTypeMap.put(emd.getId(), emd);
-          else if ((!EntityUtils.equals(emd, allEntityTypeMap.get(emd.getId())))
-              && emd instanceof SystemEntityType) {
-            throw new MolgenisDataException(
-                "SystemEntityType in the database conflicts with the metadata for this import");
-          }
-        });
   }
 
   /**
@@ -1318,44 +1303,5 @@ public class EmxMetadataParser implements MetadataParser {
       }
     }
     return report;
-  }
-
-  static class EmxAttribute {
-    private final Attribute attr;
-    private boolean idAttr;
-    private boolean labelAttr;
-    private boolean lookupAttr;
-
-    public EmxAttribute(Attribute attr) {
-      this.attr = requireNonNull(attr);
-    }
-
-    public Attribute getAttr() {
-      return attr;
-    }
-
-    public boolean isIdAttr() {
-      return idAttr;
-    }
-
-    public void setIdAttr(boolean idAttr) {
-      this.idAttr = idAttr;
-    }
-
-    public boolean isLabelAttr() {
-      return labelAttr;
-    }
-
-    public void setLabelAttr(boolean labelAttr) {
-      this.labelAttr = labelAttr;
-    }
-
-    public boolean isLookupAttr() {
-      return lookupAttr;
-    }
-
-    public void setLookupAttr(boolean lookupAttr) {
-      this.lookupAttr = lookupAttr;
-    }
   }
 }

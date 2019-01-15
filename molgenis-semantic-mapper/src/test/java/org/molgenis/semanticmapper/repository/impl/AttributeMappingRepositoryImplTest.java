@@ -9,11 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.semanticmapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.ALGORITHM_STATE;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.IDENTIFIER;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.SOURCE_ATTRIBUTES;
-import static org.molgenis.semanticmapper.meta.AttributeMappingMetaData.TARGET_ATTRIBUTE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.ALGORITHM;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.ALGORITHM_STATE;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.SOURCE_ATTRIBUTES;
+import static org.molgenis.semanticmapper.meta.AttributeMappingMetadata.TARGET_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
 import org.molgenis.semanticmapper.config.MappingConfig;
 import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
-import org.molgenis.semanticmapper.meta.AttributeMappingMetaData;
+import org.molgenis.semanticmapper.meta.AttributeMappingMetadata;
 import org.molgenis.semanticsearch.service.OntologyTagService;
 import org.molgenis.semanticsearch.service.SemanticSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 
   @Autowired private AttributeFactory attrMetaFactory;
 
-  @Autowired private AttributeMappingMetaData attrMappingMeta;
+  @Autowired private AttributeMappingMetadata attrMappingMeta;
 
   @Autowired private AttributeMappingRepositoryImpl attributeMappingRepository;
 
@@ -234,7 +234,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
   @Configuration
   @Import(MapperTestConfig.class)
   public static class Config {
-    @Autowired private AttributeMappingMetaData attrMappingMeta;
+
+    @Autowired private AttributeMappingMetadata attrMappingMeta;
 
     @Bean
     DataService dataService() {

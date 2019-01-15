@@ -11,8 +11,7 @@ import static org.molgenis.beacon.config.BeaconMetadata.VERSION;
 import static org.molgenis.beacon.config.BeaconMetadata.WELCOME_URL;
 
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
+import java.util.Optional;
 import org.molgenis.beacon.controller.model.BeaconDatasetResponse;
 import org.molgenis.beacon.controller.model.BeaconOrganizationResponse;
 import org.molgenis.beacon.controller.model.BeaconResponse;
@@ -45,28 +44,20 @@ public class Beacon extends StaticEntity {
     return getString(API_VERSION);
   }
 
-  @Nullable
-  @CheckForNull
-  public BeaconOrganization getOrganization() {
-    return getEntity(BEACON_ORGANIZATION, BeaconOrganization.class);
+  public Optional<BeaconOrganization> getOrganization() {
+    return Optional.ofNullable(getEntity(BEACON_ORGANIZATION, BeaconOrganization.class));
   }
 
-  @Nullable
-  @CheckForNull
-  public String getDescription() {
-    return getString(DESCRIPTION);
+  public Optional<String> getDescription() {
+    return Optional.ofNullable(getString(DESCRIPTION));
   }
 
-  @Nullable
-  @CheckForNull
-  public String getVersion() {
-    return getString(VERSION);
+  public Optional<String> getVersion() {
+    return Optional.ofNullable(getString(VERSION));
   }
 
-  @Nullable
-  @CheckForNull
-  public String getWelcomeUrl() {
-    return getString(WELCOME_URL);
+  public Optional<String> getWelcomeUrl() {
+    return Optional.ofNullable(getString(WELCOME_URL));
   }
 
   public Iterable<BeaconDataset> getDataSets() {
@@ -74,21 +65,17 @@ public class Beacon extends StaticEntity {
   }
 
   public BeaconResponse toBeaconResponse() {
-    BeaconOrganizationResponse beaconOrganizationResponse;
-    if (getOrganization() == null) {
-      beaconOrganizationResponse = null;
-    } else {
-      beaconOrganizationResponse = getOrganization().toBeaconOrganizationResponse();
-    }
+    BeaconOrganizationResponse beaconOrganizationResponse =
+        getOrganization().map(BeaconOrganization::toBeaconOrganizationResponse).orElse(null);
 
     return BeaconResponse.create(
         getId(),
         getName(),
         getApiVersion(),
         beaconOrganizationResponse,
-        getDescription(),
-        getVersion(),
-        getWelcomeUrl(),
+        getDescription().orElse(null),
+        getVersion().orElse(null),
+        getWelcomeUrl().orElse(null),
         entityTypeToBeaconDataset());
   }
 

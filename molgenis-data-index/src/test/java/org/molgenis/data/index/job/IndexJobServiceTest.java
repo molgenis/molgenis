@@ -15,10 +15,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.FAILED;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.FINISHED;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -41,7 +41,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
@@ -91,8 +91,10 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
     testEntityType = harness.createDynamicRefEntityType();
     when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(Optional.of(testEntityType));
     toIndexEntity = harness.createTestRefEntities(testEntityType, 1).get(0);
+    when(dataService.hasEntityType("TypeTestRefDynamic")).thenReturn(true);
     when(dataService.getEntityType("TypeTestRefDynamic")).thenReturn(testEntityType);
     when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(toIndexEntity);
+    when(dataService.hasEntityType("entityType")).thenReturn(true);
     when(dataService.getEntityType("entityType")).thenReturn(testEntityType);
   }
 
@@ -141,7 +143,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId("entityId")
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
     mockGetAllIndexActions(of(indexAction));
     indexActionGroup.setCount(1);
 
@@ -173,7 +175,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId("entityId")
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
     mockGetAllIndexActions(of(indexAction));
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
     indexActionGroup.setCount(1);
@@ -207,7 +209,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId(null)
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
     mockGetAllIndexActions(of(indexAction));
     indexActionGroup.setCount(1);
 
@@ -241,7 +243,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId(null)
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
     mockGetAllIndexActions(of(indexAction));
     indexActionGroup.setCount(1);
 
@@ -280,7 +282,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId(entityTypeId)
             .setEntityId(null)
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
     mockGetAllIndexActions(of(indexAction));
     indexActionGroup.setCount(1);
 
@@ -317,7 +319,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId("entityId1")
             .setActionOrder(0)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
 
     IndexAction indexAction2 =
         indexActionFactory
@@ -326,7 +328,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId("entityId2")
             .setActionOrder(1)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
 
     IndexAction indexAction3 =
         indexActionFactory
@@ -335,7 +337,7 @@ public class IndexJobServiceTest extends AbstractMolgenisSpringTest {
             .setEntityTypeId("entityType")
             .setEntityId("entityId3")
             .setActionOrder(2)
-            .setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+            .setIndexStatus(IndexActionMetadata.IndexStatus.PENDING);
 
     mockGetAllIndexActions(of(indexAction1, indexAction2, indexAction3));
     indexActionGroup.setCount(3);

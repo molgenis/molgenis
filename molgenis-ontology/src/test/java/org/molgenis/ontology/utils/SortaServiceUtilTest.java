@@ -2,17 +2,17 @@ package org.molgenis.ontology.utils;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_TERMS;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.COMBINED_SCORE;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.SCORE;
+import static org.molgenis.ontology.core.meta.OntologyMetadata.ONTOLOGY_TERMS;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.COMBINED_SCORE;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.SCORE;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,12 +21,12 @@ import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.ontology.core.config.OntologyTestConfig;
 import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.ontology.core.meta.OntologyFactory;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyMetadata;
 import org.molgenis.ontology.core.meta.OntologyTerm;
 import org.molgenis.ontology.core.meta.OntologyTermFactory;
 import org.molgenis.ontology.core.meta.OntologyTermSynonym;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.utils.SortaServiceUtilTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
         ONTOLOGY_TERM_SYNONYM,
         singletonList(
             ImmutableMap.of(
-                OntologyTermSynonymMetaData.ID,
+                OntologyTermSynonymMetadata.ID,
                 "1",
                 ONTOLOGY_TERM_SYNONYM_ATTR,
                 "synonym",
@@ -90,11 +90,11 @@ public class SortaServiceUtilTest extends AbstractMolgenisSpringTest {
     expected.put(
         ONTOLOGY,
         ImmutableMap.of(
-            OntologyMetaData.ID,
+            OntologyMetadata.ID,
             "1",
-            OntologyMetaData.ONTOLOGY_IRI,
+            OntologyMetadata.ONTOLOGY_IRI,
             ONTOLOGY_IRI,
-            OntologyMetaData.ONTOLOGY_NAME,
+            OntologyMetadata.ONTOLOGY_NAME,
             "testOntology"));
 
     assertEquals(SortaServiceUtil.getEntityAsMap(singletonList(term)), singletonList(expected));

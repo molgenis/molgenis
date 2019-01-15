@@ -14,11 +14,11 @@ import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.DEPTH;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.IDENTIFIER;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.DEPTH;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_TARGETS;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.NAME;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.MAPPING_BATCH_SIZE;
 import static org.molgenis.semanticmapper.service.impl.MappingServiceImpl.SOURCE;
 import static org.testng.Assert.assertEquals;
@@ -63,7 +63,7 @@ import org.molgenis.semanticmapper.mapping.model.AttributeMapping;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingProject;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
+import org.molgenis.semanticmapper.meta.MappingTargetMetadata;
 import org.molgenis.semanticmapper.repository.MappingProjectRepository;
 import org.molgenis.semanticmapper.service.AlgorithmService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,12 +230,12 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest {
         getManualMappingProject(mappingProjectIdentifier, projectName, 3, expectedMappingTarget);
 
     Entity mappingTargetEntity = mock(Entity.class);
-    when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER))
+    when(mappingTargetEntity.getString(MappingTargetMetadata.IDENTIFIER))
         .thenReturn(mappingTargetIdentifier);
-    when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET))
+    when(mappingTargetEntity.getString(MappingTargetMetadata.TARGET))
         .thenReturn(hopMetaData.getId());
-    when(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS)).thenReturn(null);
-    when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)))
+    when(mappingTargetEntity.getEntities(MappingTargetMetadata.ENTITY_MAPPINGS)).thenReturn(null);
+    when(dataService.getEntityType(mappingTargetEntity.getString(MappingTargetMetadata.TARGET)))
         .thenReturn(hopMetaData);
 
     Entity mappingProjectEntity = mock(Entity.class);

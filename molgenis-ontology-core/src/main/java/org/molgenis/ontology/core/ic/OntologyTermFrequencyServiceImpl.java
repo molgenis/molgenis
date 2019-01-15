@@ -4,7 +4,7 @@ import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.FREQUENCY;
 import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.OCCURRENCE;
 import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.TERM;
 import static org.molgenis.ontology.core.ic.TermFrequencyMetaData.TERM_FREQUENCY;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetadata;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.scheduling.annotation.Async;
 
@@ -78,7 +78,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService {
         .forEach(
             entity -> {
               String ontologyTermSynonym =
-                  entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
+                  entity.getString(OntologyTermSynonymMetadata.ONTOLOGY_TERM_SYNONYM_ATTR);
               PubMedTFEntity pubMedTFEntity =
                   pubMedTermFrequencyService.getTermFrequency(ontologyTermSynonym);
 

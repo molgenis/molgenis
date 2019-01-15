@@ -3,9 +3,9 @@ package org.molgenis.semanticmapper.repository.impl;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.when;
-import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.ENTITY_MAPPINGS;
-import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.IDENTIFIER;
-import static org.molgenis.semanticmapper.meta.MappingTargetMetaData.TARGET;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.ENTITY_MAPPINGS;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.IDENTIFIER;
+import static org.molgenis.semanticmapper.meta.MappingTargetMetadata.TARGET;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collection;
@@ -28,8 +28,8 @@ import org.molgenis.data.util.EntityUtils;
 import org.molgenis.semanticmapper.config.MapperTestConfig;
 import org.molgenis.semanticmapper.mapping.model.EntityMapping;
 import org.molgenis.semanticmapper.mapping.model.MappingTarget;
-import org.molgenis.semanticmapper.meta.EntityMappingMetaData;
-import org.molgenis.semanticmapper.meta.MappingTargetMetaData;
+import org.molgenis.semanticmapper.meta.EntityMappingMetadata;
+import org.molgenis.semanticmapper.meta.MappingTargetMetadata;
 import org.molgenis.semanticmapper.repository.EntityMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,9 +53,9 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest 
 
   @Autowired private MappingTargetRepositoryImpl mappingTargetRepository;
 
-  @Autowired private EntityMappingMetaData entityMappingMeta;
+  @Autowired private EntityMappingMetadata entityMappingMeta;
 
-  @Autowired private MappingTargetMetaData mappingTargetMeta;
+  @Autowired private MappingTargetMetadata mappingTargetMeta;
 
   @Autowired private IdGenerator idGenerator;
 
@@ -86,10 +86,10 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest 
 
     // Entities
     Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
-    entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, "entityMappingID");
-    entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_TYPE, "source");
-    entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_TYPE, "target");
-    entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, emptyList());
+    entityMappingEntity.set(EntityMappingMetadata.IDENTIFIER, "entityMappingID");
+    entityMappingEntity.set(EntityMappingMetadata.SOURCE_ENTITY_TYPE, "source");
+    entityMappingEntity.set(EntityMappingMetadata.TARGET_ENTITY_TYPE, "target");
+    entityMappingEntity.set(EntityMappingMetadata.ATTRIBUTE_MAPPINGS, emptyList());
     Entity mappingTargetEntity = new DynamicEntity(mappingTargetMeta);
     mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
     mappingTargetEntity.set(TARGET, "target");

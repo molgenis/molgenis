@@ -97,6 +97,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("location").getMock();
     when(amd.getDataType()).thenReturn(XREF);
+    when(amd.hasRefEntity()).thenReturn(true);
     when(amd.getRefEntity()).thenReturn(refEmd);
     when(amd.getExpression()).thenReturn("hallo");
     try {
@@ -111,6 +112,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(XREF);
+    when(amd.hasRefEntity()).thenReturn(true);
     when(amd.getRefEntity()).thenReturn(refEmd);
     when(amd.getExpression()).thenReturn("{'Chromosome':{'hallo1':'bla'}}");
     try {
@@ -127,6 +129,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
+    when(amd.hasRefEntity()).thenReturn(true);
     when(amd.getRefEntity()).thenReturn(refEmd);
     when(amd.getExpression()).thenReturn("{'hallo':String}");
     try {
@@ -141,6 +144,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(STRING);
+    when(amd.hasRefEntity()).thenReturn(true);
     when(amd.getRefEntity()).thenReturn(refEmd);
     when(amd.getExpression()).thenReturn("{'Chromosome':hallo}");
     try {
@@ -157,6 +161,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractMolgenisSpringT
   public void testEvaluate() {
     Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
     when(amd.getDataType()).thenReturn(XREF);
+    when(amd.hasRefEntity()).thenReturn(true);
     when(amd.getRefEntity()).thenReturn(refEmd);
     when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
     when(amd.getEntityType()).thenReturn(mock(EntityType.class));

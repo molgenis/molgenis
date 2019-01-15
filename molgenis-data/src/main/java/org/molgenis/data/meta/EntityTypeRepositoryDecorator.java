@@ -130,6 +130,9 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
 
   private void updateEntityTypeInBackend(EntityType updatedEntityType) {
     EntityType existingEntityType = delegate().findOneById(updatedEntityType.getId());
+    if (existingEntityType == null) {
+      throw new UnknownEntityTypeException(updatedEntityType.getId());
+    }
     if (!existingEntityType.isAbstract()) {
       RepositoryCollection backend = dataService.getMeta().getBackend(existingEntityType);
       backend.updateRepository(existingEntityType, updatedEntityType);
@@ -145,6 +148,9 @@ public class EntityTypeRepositoryDecorator extends AbstractRepositoryDecorator<E
    */
   private void addAndRemoveAttributesInBackend(EntityType entityType) {
     EntityType existingEntityType = delegate().findOneById(entityType.getId());
+    if (existingEntityType == null) {
+      throw new UnknownEntityTypeException(entityType.getId());
+    }
     Map<String, Attribute> attrsMap = toAttributesMap(entityType);
     Map<String, Attribute> existingAttrsMap = toAttributesMap(existingEntityType);
 

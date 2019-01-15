@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EntitiesValidationReportImpl implements EntitiesValidationReport {
   /** map of all sheets, and whether they are importable (recognized) or not */
@@ -80,5 +81,35 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport {
   @Override
   public List<String> getPackages() {
     return packages;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    EntitiesValidationReportImpl that = (EntitiesValidationReportImpl) o;
+    return sheetsImportable.equals(that.sheetsImportable)
+        && fieldsImportable.equals(that.fieldsImportable)
+        && fieldsUnknown.equals(that.fieldsUnknown)
+        && fieldsRequired.equals(that.fieldsRequired)
+        && fieldsAvailable.equals(that.fieldsAvailable)
+        && importOrder.equals(that.importOrder)
+        && packages.equals(that.packages);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        sheetsImportable,
+        fieldsImportable,
+        fieldsUnknown,
+        fieldsRequired,
+        fieldsAvailable,
+        importOrder,
+        packages);
   }
 }

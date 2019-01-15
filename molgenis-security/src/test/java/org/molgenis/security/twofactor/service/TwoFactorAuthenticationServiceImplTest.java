@@ -16,7 +16,7 @@ import org.molgenis.data.security.user.UserServiceImpl;
 import org.molgenis.security.twofactor.exceptions.TooManyLoginAttemptsException;
 import org.molgenis.security.twofactor.model.UserSecret;
 import org.molgenis.security.twofactor.model.UserSecretFactory;
-import org.molgenis.security.twofactor.model.UserSecretMetaData;
+import org.molgenis.security.twofactor.model.UserSecretMetadata;
 import org.molgenis.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -49,8 +49,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
     when(molgenisUser.getId()).thenReturn("1324");
     when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
     when(dataService
-            .query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-            .eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+            .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
+            .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
             .findOne())
         .thenReturn(userSecret);
   }
@@ -97,8 +97,8 @@ public class TwoFactorAuthenticationServiceImplTest extends AbstractTestNGSpring
   public void testDisableForUser() {
     when(userService.getUser(molgenisUser.getUsername())).thenReturn(molgenisUser);
     when(dataService
-            .query(UserSecretMetaData.USER_SECRET, UserSecret.class)
-            .eq(UserSecretMetaData.USER_ID, molgenisUser.getId())
+            .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
+            .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
             .findOne())
         .thenReturn(userSecret);
     twoFactorAuthenticationService.disableForUser();

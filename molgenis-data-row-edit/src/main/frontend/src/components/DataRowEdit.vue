@@ -15,7 +15,7 @@
 
     <div v-if="showForm">
 
-      <h5>{{dataTableLabel}}</h5>
+      <h1>{{dataTableLabel}}</h1>
 
       <form-component
         id="data-row-edit-form"
@@ -50,10 +50,12 @@
             class="btn btn-primary"
             type="button"
             disabled="disabled">
-            {{ 'data-row-edit-save-busy-state-label' | i18n }} <i class="fa fa-spinner fa-spin "></i>
+            {{ 'data-row-edit-save-busy-state-label' | i18n }} <i
+            class="fa fa-spinner fa-spin "></i>
           </button>
 
-          <span v-if="!isSaving && formState.$invalid && formState.$touched" class="alert text-danger">
+          <span v-if="!isSaving && formState.$invalid && formState.$touched"
+                class="alert text-danger">
               {{ 'data-row-edit-invalid-fields-msg' | i18n }}
           </span>
         </div>
@@ -123,7 +125,8 @@
       },
       handleError (message) {
         this.alert = {
-          message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message') : message,
+          message: typeof message !== 'string' ? this.$t('data-row-edit-default-error-message')
+            : message,
           type: 'danger'
         }
         this.showForm = true

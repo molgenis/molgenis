@@ -78,7 +78,7 @@ class RelationTransformer {
 
   private static void transformRefEntity(
       Attribute attribute, Map<String, EntityType> newEntityTypes) {
-    if (attribute.getRefEntity() != null) {
+    if (attribute.hasRefEntity()) {
       String refId = attribute.getRefEntity().getId();
       if (newEntityTypes.containsKey(refId)) {
         attribute.setRefEntity(newEntityTypes.get(refId));

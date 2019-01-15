@@ -1,7 +1,7 @@
 package org.molgenis.core.ui.freemarker;
 
 import static org.mockito.Mockito.when;
-import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
+import static org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata.FREEMARKER_TEMPLATE;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -13,7 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplate;
 import org.molgenis.core.ui.data.system.core.FreemarkerTemplateFactory;
-import org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetaData;
+import org.molgenis.core.ui.data.system.core.FreemarkerTemplateMetadata;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = RepositoryTemplateLoaderTest.Config.class)
 public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest {
   @Configuration
-  @Import({FreemarkerTemplateMetaData.class, FreemarkerTemplateFactory.class})
+  @Import({FreemarkerTemplateMetadata.class, FreemarkerTemplateFactory.class})
   static class Config {
     @Autowired private DataService dataService;
 

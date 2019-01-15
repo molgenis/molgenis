@@ -10,8 +10,8 @@ import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COP
 import static org.molgenis.data.meta.model.PackageMetadata.PACKAGE;
 import static org.molgenis.data.util.EntityTypeUtils.hasSelfReferences;
 import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
-import static org.molgenis.semanticmapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.MAPPING_PROJECT;
+import static org.molgenis.semanticmapper.meta.MappingProjectMetadata.NAME;
 
 import java.util.List;
 import java.util.Map;

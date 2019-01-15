@@ -4,8 +4,8 @@ import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.security.auth.TokenMetaData.TOKEN;
-import static org.molgenis.data.security.auth.TokenMetaData.TOKEN_ATTR;
+import static org.molgenis.data.security.auth.TokenMetadata.TOKEN;
+import static org.molgenis.data.security.auth.TokenMetadata.TOKEN_ATTR;
 import static org.molgenis.data.security.auth.UserMetadata.USER;
 import static org.molgenis.data.security.auth.UserMetadata.USERNAME;
 

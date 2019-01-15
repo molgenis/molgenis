@@ -13,7 +13,6 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.IS_ABSTRACT;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.molgenis.data.Fetch;
@@ -97,9 +96,8 @@ class IndexDependencyModel {
   private boolean hasAttributeThatReferences(EntityType candidate, String entityTypeId) {
     Iterable<Attribute> attributes = candidate.getOwnAtomicAttributes();
     return stream(attributes)
-        .map(Attribute::getRefEntity)
-        .filter(Objects::nonNull)
-        .map(EntityType::getId)
+        .filter(Attribute::hasRefEntity)
+        .map(attribute -> attribute.getRefEntity().getId())
         .anyMatch(entityTypeId::equals);
   }
 

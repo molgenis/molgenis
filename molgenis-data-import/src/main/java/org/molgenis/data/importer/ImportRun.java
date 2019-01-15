@@ -13,6 +13,7 @@ import static org.molgenis.data.importer.ImportRunMetaData.USERNAME;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -64,10 +65,8 @@ public class ImportRun extends StaticEntity {
     set(STARTDATE, startDate);
   }
 
-  @Nullable
-  @CheckForNull
-  public Instant getEndDate() {
-    return getInstant(ENDDATE);
+  public Optional<Instant> getEndDate() {
+    return Optional.ofNullable(getInstant(ENDDATE));
   }
 
   public void setEndDate(Instant endDate) {

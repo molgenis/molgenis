@@ -377,8 +377,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
     }
 
     // ref entity changes
-    if (attr.getRefEntity() != null
-        && updatedAttr.getRefEntity() != null
+    if (attr.hasRefEntity()
+        && updatedAttr.hasRefEntity()
         && !attr.getRefEntity().getId().equals(updatedAttr.getRefEntity().getId())) {
       updateRefEntity(entityType, attr, updatedAttr);
     }

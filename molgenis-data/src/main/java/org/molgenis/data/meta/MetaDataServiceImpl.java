@@ -38,6 +38,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionRegistry;
 import org.molgenis.data.RepositoryCreationException;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.UnknownRepositoryCollectionException;
 import org.molgenis.data.UnknownRepositoryException;
@@ -194,6 +195,9 @@ public class MetaDataServiceImpl implements MetaDataService {
   @Override
   public void deleteAttributeById(Object id) {
     Attribute attribute = dataService.findOneById(ATTRIBUTE_META_DATA, id, Attribute.class);
+    if (attribute == null) {
+      throw new UnknownEntityException(ATTRIBUTE_META_DATA, id);
+    }
     EntityType entityType = attribute.getEntity();
 
     // Update repository state

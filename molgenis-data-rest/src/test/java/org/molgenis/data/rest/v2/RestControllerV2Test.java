@@ -703,11 +703,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   @Test
   public void retrieveResourceCollectionUnknownEntityType() throws Exception {
+    String entityTypeId = "unknown";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+
     String expectedContent =
         readFile(
             getClass().getResourceAsStream("resourceCollectionResponseUnknownEntityType.json"));
     mockMvc
-        .perform(get(BASE_URI + '/' + "unknown"))
+        .perform(get(BASE_URI + '/' + entityTypeId))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(APPLICATION_JSON_UTF8))
         .andExpect(content().json(expectedContent));
@@ -944,6 +948,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   @Test
   public void testCreateEntitiesUnknownEntityTypeException() throws Exception {
+    String entityTypeId = "entity2";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+
     mockMvc
         .perform(
             post(BASE_URI + "/" + "entity2")
@@ -1049,6 +1057,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   @Test
   public void testUpdateEntitiesUnknownEntity() throws Exception {
+    String entityTypeId = "entity2";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+
     mockMvc
         .perform(
             put(BASE_URI + "/" + "entity2")
@@ -1104,6 +1116,10 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   @Test
   public void testUpdateEntitiesSpecificAttributeUnknownEntity() throws Exception {
+    String entityTypeId = "entity2";
+    when(dataService.getEntityType(entityTypeId))
+        .thenThrow(new UnknownEntityTypeException(entityTypeId));
+
     mockMvc
         .perform(
             put(BASE_URI + "/" + "entity2" + "/" + "email")

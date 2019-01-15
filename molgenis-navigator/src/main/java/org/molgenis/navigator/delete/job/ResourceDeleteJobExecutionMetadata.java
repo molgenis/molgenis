@@ -42,5 +42,7 @@ public class ResourceDeleteJobExecutionMetadata extends SystemEntityType {
         .setDataType(TEXT)
         .setLabel("Resources")
         .setDescription("JSON containing the resources to delete.");
+
+    setRowLevelSecured(true);
   }
 }

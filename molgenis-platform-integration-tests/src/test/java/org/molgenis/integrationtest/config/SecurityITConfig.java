@@ -8,7 +8,7 @@ import java.util.Collection;
 import org.molgenis.data.security.auth.RoleMetadata;
 import org.molgenis.data.security.auth.SecurityPackage;
 import org.molgenis.data.security.auth.TokenFactory;
-import org.molgenis.data.security.auth.TokenMetaData;
+import org.molgenis.data.security.auth.TokenMetadata;
 import org.molgenis.data.security.auth.UserFactory;
 import org.molgenis.data.security.auth.UserMetadata;
 import org.molgenis.data.security.user.UserServiceImpl;
@@ -40,7 +40,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
   DataServiceTokenService.class,
   TokenGenerator.class,
   TokenFactory.class,
-  TokenMetaData.class,
+  TokenMetadata.class,
   SecurityPackage.class,
   UserMetadata.class,
   UserAccountServiceImpl.class,

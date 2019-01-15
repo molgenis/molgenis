@@ -10,9 +10,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.Impact.createSingleEntityImpact;
 import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetaData.IndexStatus.PENDING;
+import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY_TYPE;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -157,8 +157,9 @@ public class IndexActionRegisterServiceImpl
       IndexActionGroup indexActionGroup, Impact key, int actionOrder) {
     IndexAction indexAction = indexActionFactory.create();
     indexAction.setIndexStatus(PENDING);
-    if (key.getId() != null) {
-      indexAction.setEntityId(key.getId().toString());
+    Object entityId = key.getId();
+    if (entityId != null) {
+      indexAction.setEntityId(entityId.toString());
     }
     indexAction.setEntityTypeId(key.getEntityTypeId());
     indexAction.setIndexActionGroup(indexActionGroup);
