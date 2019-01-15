@@ -77,7 +77,7 @@
 
     <!-- override dependency versions managed by parent pom -->
     <elasticsearch.version>5.5.1</elasticsearch.version>
-    <postgresql.version>9.4.1211</postgresql.version>
+    <tomcat.version>9.0.14</tomcat.version>
     <testng.version>6.8</testng.version>
     <guava.version>25.0-jre</guava.version>
 
@@ -135,6 +135,7 @@
     <it_db_name>molgenis_test</it_db_name>
     <it_db_user>molgenis</it_db_user>
     <it_db_password>molgenis</it_db_password>
+    <it_db_port>5432</it_db_port>
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
@@ -384,7 +385,7 @@
           </dependencies>
           <configuration>
             <driver>org.postgresql.Driver</driver>
-            <url>jdbc:postgresql://localhost/</url>
+            <url>jdbc:postgresql://localhost:${it_db_port}/</url>
             <username>${it_db_user}</username>
             <password>${it_db_password}</password>
             <forceMojoExecution>true</forceMojoExecution>
