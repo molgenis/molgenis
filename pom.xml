@@ -142,7 +142,7 @@
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
-    <fmt-maven-plugin.version>2.5.1</fmt-maven-plugin.version>
+    <fmt-maven-plugin.version>2.7</fmt-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     <checkstyle.version>8.12</checkstyle.version>
     <sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
