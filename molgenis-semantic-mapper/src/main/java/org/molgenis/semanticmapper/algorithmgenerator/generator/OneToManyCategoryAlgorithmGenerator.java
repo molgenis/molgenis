@@ -127,7 +127,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
           stringBuilder.append("$('").append(attribute.getName()).append("').map({");
         }
 
-        double estimatedValue = amountWrapper.getAmount().getEstimatedValue();
+        Amount<?> amount = amountWrapper.getAmount();
+        if (amount == null) {
+          throw new IllegalArgumentException("Amount wrapper amount can't be null");
+        }
+        double estimatedValue = amount.getEstimatedValue();
 
         stringBuilder
             .append("\"")
