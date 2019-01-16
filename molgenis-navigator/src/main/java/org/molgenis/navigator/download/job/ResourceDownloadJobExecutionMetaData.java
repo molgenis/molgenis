@@ -40,5 +40,7 @@ public class ResourceDownloadJobExecutionMetaData extends SystemEntityType {
         .setDataType(TEXT)
         .setDescription("List of resources to be downloaded.")
         .setNillable(true);
+
+    setRowLevelSecured(true);
   }
 }
