@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -51,14 +50,10 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection {
   }
 
   public ExcelRepositoryCollection(String name, InputStream in, CellProcessor... cellProcessors)
-      throws IOException, MolgenisInvalidFormatException {
+      throws IOException {
     super(ExcelFileExtensions.getExcel(), cellProcessors);
     this.fileName = name;
-    try {
-      workbook = WorkbookFactory.create(in);
-    } catch (InvalidFormatException e) {
-      throw new MolgenisInvalidFormatException(e.getMessage());
-    }
+    workbook = WorkbookFactory.create(in);
   }
 
   @Override
