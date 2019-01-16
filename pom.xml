@@ -103,7 +103,6 @@
     <handlebars.version>4.1.0</handlebars.version>
     <node.version>v8.12.0</node.version>
     <yarn.version>v1.7.0</yarn.version>
-    <simple-excel.version>1.2</simple-excel.version>
     <poi-ooxml-schemas.version>4.0.1</poi-ooxml-schemas.version>
     <gson-extras.version>0.2.1</gson-extras.version>
     <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
@@ -968,11 +967,6 @@
         <groupId>io.sentry</groupId>
         <artifactId>sentry-logback</artifactId>
         <version>${sentry-logback.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.mokka88</groupId>
-        <artifactId>simple-excel</artifactId>
-        <version>${simple-excel.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.poi</groupId>

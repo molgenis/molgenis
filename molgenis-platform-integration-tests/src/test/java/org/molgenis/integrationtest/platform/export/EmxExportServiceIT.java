@@ -1,9 +1,7 @@
 package org.molgenis.integrationtest.platform.export;
 
-import static bad.robot.excel.matchers.WorkbookMatcher.sameWorkbook;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
 
 import java.io.FileInputStream;
@@ -11,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -102,12 +100,14 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
     emxDownloadService.export(
         newArrayList(entityType1, refEntityType1), newArrayList(actualIt), actual, progress);
     try (XSSFWorkbook actualWorkbook = new XSSFWorkbook(Files.newInputStream(actual))) {
-      try (Workbook expected =
+      try (XSSFWorkbook expected =
           new XSSFWorkbook(
               new FileInputStream(
                   ResourceUtils.getFile(
                       EmxExportServiceIT.class, "/xls/expectedDownloadResult.xlsx")))) {
-        assertThat(actualWorkbook, sameWorkbook(expected));
+        String actualWorkbookString = new XSSFExcelExtractor(actualWorkbook).getText();
+        String expectedWorkbookString = new XSSFExcelExtractor(expected).getText();
+        assertEquals(actualWorkbookString, expectedWorkbookString);
       }
     }
 
