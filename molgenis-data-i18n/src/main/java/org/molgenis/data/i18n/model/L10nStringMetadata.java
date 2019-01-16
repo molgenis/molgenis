@@ -9,7 +9,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class L10nStringMetaData extends SystemEntityType {
+public class L10nStringMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "L10nString";
   public static final String L10N_STRING = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -18,7 +18,7 @@ public class L10nStringMetaData extends SystemEntityType {
   public static final String NAMESPACE = "namespace";
   public static final String DESCRIPTION = "description";
 
-  L10nStringMetaData() {
+  L10nStringMetadata() {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
   }
 

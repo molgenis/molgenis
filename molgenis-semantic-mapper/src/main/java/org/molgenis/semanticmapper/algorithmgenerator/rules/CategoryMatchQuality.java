@@ -30,6 +30,11 @@ public abstract class CategoryMatchQuality<T> implements Comparable<CategoryMatc
 
   @Override
   public int compareTo(CategoryMatchQuality<T> categoryMatchQuality) {
-    return getQuality().compareTo(categoryMatchQuality.getQuality());
+    Quality<T> quality = getQuality();
+    Quality<T> otherQuality = categoryMatchQuality.getQuality();
+    if (quality == null || otherQuality == null) {
+      return 0;
+    }
+    return quality.compareTo(otherQuality);
   }
 }

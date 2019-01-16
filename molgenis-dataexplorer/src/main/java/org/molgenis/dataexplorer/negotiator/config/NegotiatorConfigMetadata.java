@@ -8,7 +8,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-class NegotiatorConfigMeta extends SystemEntityType {
+class NegotiatorConfigMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "NegotiatorConfig";
 
   public static final String NEGOTIATOR_URL = "negotiator_url";
@@ -21,7 +21,7 @@ class NegotiatorConfigMeta extends SystemEntityType {
 
   private final NegotiatorPackage negotiatorPackage;
 
-  public NegotiatorConfigMeta(NegotiatorPackage negotiatorPackage) {
+  public NegotiatorConfigMetadata(NegotiatorPackage negotiatorPackage) {
     super(SIMPLE_NAME, NegotiatorPackage.PACKAGE_NEGOTIATOR);
     this.negotiatorPackage = requireNonNull(negotiatorPackage);
   }

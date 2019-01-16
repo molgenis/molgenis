@@ -294,6 +294,7 @@ public class RestControllerV2 {
    * @param response HttpServletResponse
    * @return EntityCollectionCreateResponseBodyV2
    */
+  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
   @Transactional
   @PostMapping(value = "/{entityTypeId}", produces = APPLICATION_JSON_VALUE)
   public EntityCollectionBatchCreateResponseBodyV2 createEntities(
@@ -302,9 +303,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       final List<Entity> entities =
@@ -426,6 +424,7 @@ public class RestControllerV2 {
    * @param request EntityCollectionCreateRequestV2
    * @param response HttpServletResponse
    */
+  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
   @PutMapping("/{entityTypeId}")
   public synchronized void updateEntities(
       @PathVariable("entityTypeId") String entityTypeId,
@@ -433,9 +432,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       List<Entity> entities =
@@ -464,6 +460,7 @@ public class RestControllerV2 {
    * @param request EntityCollectionBatchRequestV2
    * @param response HttpServletResponse
    */
+  @SuppressWarnings("squid:S2259") // getEntities is guaranteed to be not empty
   @PutMapping("/{entityTypeId}/{attributeName}")
   @ResponseStatus(OK)
   public synchronized void updateAttribute(
@@ -473,9 +470,6 @@ public class RestControllerV2 {
       HttpServletResponse response)
       throws Exception {
     final EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     try {
       Attribute attr = meta.getAttribute(attributeName);
@@ -642,10 +636,6 @@ public class RestControllerV2 {
 
   private AttributeResponseV2 createAttributeResponse(String entityTypeId, String attributeName) {
     EntityType entity = dataService.getEntityType(entityTypeId);
-    if (entity == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
-
     Attribute attribute = entity.getAttribute(attributeName);
     if (attribute == null) {
       throw new UnknownAttributeException(entity, attributeName);
@@ -661,9 +651,6 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       boolean includeCategories) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     Query<Entity> q =
         request.getQ() != null ? request.getQ().createQuery(entityType) : new QueryImpl<>();

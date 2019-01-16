@@ -162,12 +162,7 @@ public class RestController {
   /** Checks if an entity exists. */
   @GetMapping(value = "/{entityTypeId}/exist", produces = APPLICATION_JSON_VALUE)
   public boolean entityExists(@PathVariable("entityTypeId") String entityTypeId) {
-    try {
-      dataService.getRepository(entityTypeId);
-      return true;
-    } catch (UnknownEntityTypeException e) {
-      return false;
-    }
+    return dataService.hasRepository(entityTypeId);
   }
 
   /**
@@ -186,9 +181,6 @@ public class RestController {
     Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
     return new EntityTypeResponse(
         meta, attributeSet, attributeExpandSet, permissionService, dataService);
   }
@@ -212,9 +204,6 @@ public class RestController {
         toExpandMap(request != null ? request.getExpand() : null);
 
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
     return new EntityTypeResponse(
         meta, attributesSet, attributeExpandSet, permissionService, dataService);
   }
@@ -273,9 +262,6 @@ public class RestController {
     Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
     Object id = getTypedValue(untypedId, meta.getIdAttribute());
     Entity entity = dataService.findOneById(entityTypeId, id);
     if (entity == null) {
@@ -612,9 +598,6 @@ public class RestController {
       @PathVariable("id") String untypedId,
       @RequestBody(required = false) Object paramValue) {
     EntityType entityType = dataService.getEntityType(entityTypeId);
-    if (entityType == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
 
     Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
@@ -968,11 +951,8 @@ public class RestController {
       String attributeName,
       Set<String> attributeSet,
       Map<String, Set<String>> attributeExpandSet) {
-    Attribute attribute = null;
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta != null) {
-      attribute = meta.getAttribute(attributeName);
-    }
+    Attribute attribute = meta.getAttribute(attributeName);
     if (attribute != null) {
       return new AttributeResponse(
           entityTypeId,
@@ -995,9 +975,6 @@ public class RestController {
       Set<String> attributesSet,
       Map<String, Set<String>> attributeExpandSet) {
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
     Object id = getTypedValue(untypedId, meta.getIdAttribute());
 
     // Check if the entity has an attribute with name refAttributeName
@@ -1072,9 +1049,6 @@ public class RestController {
       Set<String> attributesSet,
       Map<String, Set<String>> attributeExpandsSet) {
     EntityType meta = dataService.getEntityType(entityTypeId);
-    if (meta == null) {
-      throw new UnknownEntityTypeException(entityTypeId);
-    }
     Repository<Entity> repository = dataService.getRepository(entityTypeId);
 
     // convert sort

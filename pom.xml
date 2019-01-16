@@ -90,7 +90,6 @@
     <org.everit.json.schema.version>1.5.1</org.everit.json.schema.version>
     <picard.version>1.102.0</picard.version>
     <json.version>20141113</json.version>
-    <Genotype-IO.version>1.0.3</Genotype-IO.version>
     <rsql-parser.version>2.0.0</rsql-parser.version>
     <UserAgentUtils.version>1.17</UserAgentUtils.version>
     <freemarker-java8.version>1.1.2</freemarker-java8.version>
@@ -139,6 +138,7 @@
     <it_db_name>molgenis_test</it_db_name>
     <it_db_user>molgenis</it_db_user>
     <it_db_password>molgenis</it_db_password>
+    <it_db_port>5432</it_db_port>
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
@@ -388,7 +388,7 @@
           </dependencies>
           <configuration>
             <driver>org.postgresql.Driver</driver>
-            <url>jdbc:postgresql://localhost/</url>
+            <url>jdbc:postgresql://localhost:${it_db_port}/</url>
             <username>${it_db_user}</username>
             <password>${it_db_password}</password>
             <forceMojoExecution>true</forceMojoExecution>

@@ -230,6 +230,7 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
   @Test
   public void testViewEntityDetailsById() throws Exception {
+    when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
     when(configuration.getTemplate("view-standalone-report-specific-" + entityTypeId + ".ftl"))
         .thenReturn(mock(Template.class));
 
@@ -275,6 +276,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
   @Test
   public void testPackageLink() {
+    when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
+
     when(menuReaderService.findMenuItemPath(NAVIGATOR))
         .thenReturn("menu/main/navigation/navigator");
     List<NavigatorLink> expected = new LinkedList<>();
@@ -331,6 +334,8 @@ public class DataExplorerControllerTest extends AbstractMockitoTestNGSpringConte
 
   @Test
   public void testShowCopyAllowed() {
+    when(dataService.hasEntityType(entityTypeId)).thenReturn(true);
+
     when(dataService.getCapabilities(entityTypeId).contains(WRITABLE)).thenReturn(true);
     when(permissionService.hasPermission(new EntityTypeIdentity(entityTypeId), READ_DATA))
         .thenReturn(true);

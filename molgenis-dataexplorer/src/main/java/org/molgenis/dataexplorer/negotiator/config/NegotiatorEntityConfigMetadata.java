@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NegotiatorEntityConfigMeta extends SystemEntityType {
+public class NegotiatorEntityConfigMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "NegotiatorEntityConfig";
 
   public static final String NEGOTIATORENTITYCONFIG =
@@ -27,18 +27,18 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType {
   private final EntityTypeMetadata entityTypeMetadata;
   private final AttributeMetadata attributeMetadata;
   private final NegotiatorPackage negotiatorPackage;
-  private final NegotiatorConfigMeta negotiatorConfigMeta;
+  private final NegotiatorConfigMetadata negotiatorConfigMetadata;
 
-  public NegotiatorEntityConfigMeta(
+  public NegotiatorEntityConfigMetadata(
       AttributeMetadata attributeMetadata,
       EntityTypeMetadata entityTypeMetadata,
       NegotiatorPackage negotiatorPackage,
-      NegotiatorConfigMeta negotiatorConfigMeta) {
+      NegotiatorConfigMetadata negotiatorConfigMetadata) {
     super(SIMPLE_NAME, NegotiatorPackage.PACKAGE_NEGOTIATOR);
     this.entityTypeMetadata = requireNonNull(entityTypeMetadata);
     this.attributeMetadata = requireNonNull(attributeMetadata);
     this.negotiatorPackage = requireNonNull(negotiatorPackage);
-    this.negotiatorConfigMeta = requireNonNull(negotiatorConfigMeta);
+    this.negotiatorConfigMetadata = requireNonNull(negotiatorConfigMetadata);
   }
 
   @Override
@@ -57,7 +57,7 @@ public class NegotiatorEntityConfigMeta extends SystemEntityType {
         .setLabel("Entity to use in negotiator");
     addAttribute(NEGOTIATOR_CONFIG)
         .setDataType(AttributeType.XREF)
-        .setRefEntity(negotiatorConfigMeta)
+        .setRefEntity(negotiatorConfigMetadata)
         .setNillable(false)
         .setLabel("General negotiator settings");
     addAttribute(COLLECTION_ID)

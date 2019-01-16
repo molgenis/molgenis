@@ -35,10 +35,11 @@ public class IndexManagerServiceImpl implements IndexManagerService {
         .getEntityTypeIds()
         .forEach(
             entityTypeId -> {
-              Repository<Entity> repository = dataService.getRepository(entityTypeId);
-              if (repository != null
-                  && repository.getCapabilities().contains(RepositoryCapability.INDEXABLE)) {
-                indexedEntityTypeList.add(repository.getEntityType());
+              if (dataService.hasRepository(entityTypeId)) {
+                Repository<Entity> repository = dataService.getRepository(entityTypeId);
+                if (repository.getCapabilities().contains(RepositoryCapability.INDEXABLE)) {
+                  indexedEntityTypeList.add(repository.getEntityType());
+                }
               }
             });
 

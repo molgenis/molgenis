@@ -15,7 +15,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ImportRunMetaData extends SystemEntityType {
+public class ImportRunMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "ImportRun";
   public static final String IMPORT_RUN = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -29,7 +29,7 @@ public class ImportRunMetaData extends SystemEntityType {
   public static final String IMPORTEDENTITIES = "importedEntities";
   public static final String NOTIFY = "notify";
 
-  ImportRunMetaData() {
+  ImportRunMetadata() {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
   }
 

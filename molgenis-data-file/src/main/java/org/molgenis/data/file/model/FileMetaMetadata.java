@@ -13,7 +13,7 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileMetaMetaData extends SystemEntityType {
+public class FileMetaMetadata extends SystemEntityType {
   private static final String SIMPLE_NAME = "FileMeta";
   public static final String FILE_META = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
@@ -23,7 +23,7 @@ public class FileMetaMetaData extends SystemEntityType {
   public static final String SIZE = "size";
   public static final String URL = "url";
 
-  FileMetaMetaData() {
+  FileMetaMetadata() {
     super(SIMPLE_NAME, PACKAGE_SYSTEM);
   }
 

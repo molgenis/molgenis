@@ -17,7 +17,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -107,7 +107,7 @@ public class StyleServiceImpl implements StyleService {
     fileMeta.setFilename(fileName);
     fileMeta.setSize(fileStore.getFileUnchecked(fileId).length());
     fileMeta.setUrl(buildFileUrl(fileId));
-    dataService.add(FileMetaMetaData.FILE_META, fileMeta);
+    dataService.add(FileMetaMetadata.FILE_META, fileMeta);
     return fileMeta;
   }
 

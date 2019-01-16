@@ -10,7 +10,7 @@ import org.molgenis.data.export.EmxExportService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.i18n.MessageSourceHolder;
 import org.molgenis.jobs.Progress;
 import org.molgenis.navigator.download.exception.DownloadFailedException;
@@ -48,7 +48,7 @@ public class ResourceDownloadService {
       ResourceCollection resourceCollection = resourceCollector.get(resourceIdentifiers);
       File emxFile = fileStore.getFileUnchecked(filename);
       fileMeta = createFileMeta(emxFile);
-      dataService.add(FileMetaMetaData.FILE_META, fileMeta);
+      dataService.add(FileMetaMetadata.FILE_META, fileMeta);
       emxExportService.export(
           resourceCollection.getEntityTypes(),
           resourceCollection.getPackages(),

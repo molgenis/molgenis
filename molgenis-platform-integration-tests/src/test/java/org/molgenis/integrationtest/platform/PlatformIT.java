@@ -14,7 +14,7 @@ import static org.molgenis.data.EntityTestHarness.ATTR_INT;
 import static org.molgenis.data.EntityTestHarness.ATTR_REF_STRING;
 import static org.molgenis.data.EntityTestHarness.ATTR_STRING;
 import static org.molgenis.data.EntityTestHarness.ATTR_XREF;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -24,6 +24,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
@@ -47,7 +48,7 @@ import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.i18n.model.L10nString;
 import org.molgenis.data.i18n.model.L10nStringFactory;
-import org.molgenis.data.i18n.model.L10nStringMetaData;
+import org.molgenis.data.i18n.model.L10nStringMetadata;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.index.job.IndexJobScheduler;
@@ -301,7 +302,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
     car.set("en", "car");
     car.set("nl", "auto");
     car.setNamespace("platform-it");
-    dataService.add(L10nStringMetaData.L10N_STRING, car);
+    dataService.add(L10nStringMetadata.L10N_STRING, car);
 
     // Test default value
     assertEquals(LanguageService.getBundle().getString("car"), "car");
@@ -430,8 +431,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests {
 
           dataService.deleteById(PACKAGE, "package_onetomany");
           assertEquals(metadataService.getPackage("package_onetomany"), Optional.empty());
-          assertNull(dataService.getEntityType(entityType.getId()));
-          assertNull(dataService.getEntityType(refEntityType.getId()));
+          assertFalse(dataService.hasEntityType(entityType.getId()));
+          assertFalse(dataService.hasEntityType(refEntityType.getId()));
           entities.forEach(this::assertNotPresent);
           refEntities.forEach(this::assertNotPresent);
         });
