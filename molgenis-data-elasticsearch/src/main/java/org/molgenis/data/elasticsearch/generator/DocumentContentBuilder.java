@@ -97,11 +97,11 @@ class DocumentContentBuilder {
         break;
       case DATE:
         LocalDate date = entity.getLocalDate(attrName);
-        writeString(generator, date.toString());
+        writeDate(generator, date);
         break;
       case DATE_TIME:
         Instant dateTime = entity.getInstant(attrName);
-        writeString(generator, dateTime.toString());
+        writeDateTime(generator, dateTime);
         break;
       case CATEGORICAL:
       case XREF:
@@ -148,6 +148,23 @@ class DocumentContentBuilder {
   private void writeString(XContentGenerator generator, String strValue) throws IOException {
     if (strValue != null) {
       generator.writeString(strValue);
+    } else {
+      generator.writeNull();
+    }
+  }
+
+  private void writeDate(XContentGenerator generator, LocalDate dateValue) throws IOException {
+    if (dateValue != null) {
+      generator.writeString(dateValue.toString());
+    } else {
+      generator.writeNull();
+    }
+  }
+
+  private void writeDateTime(XContentGenerator generator, Instant dateTimeValue)
+      throws IOException {
+    if (dateTimeValue != null) {
+      generator.writeString(dateTimeValue.toString());
     } else {
       generator.writeNull();
     }
