@@ -330,9 +330,9 @@ public class EmxMetadataParser implements MetadataParser {
         .forEach(
             attributes ->
                 attributes.forEach(
-                    attr -> {
-                      attributeValidator.validate(attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
-                    }));
+                    attr ->
+                        attributeValidator.validate(
+                            attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION)));
 
     // validate package/entity/attribute tags
     metaDataMap
@@ -350,10 +350,7 @@ public class EmxMetadataParser implements MetadataParser {
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->
-                attributes.forEach(
-                    attr -> {
-                      attr.getTags().forEach(tagValidator::validate);
-                    }));
+                attributes.forEach(attr -> attr.getTags().forEach(tagValidator::validate)));
 
     report = generateEntityValidationReport(source, report, metaDataMap);
 
