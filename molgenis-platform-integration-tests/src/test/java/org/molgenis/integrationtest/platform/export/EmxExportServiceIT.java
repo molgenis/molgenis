@@ -59,7 +59,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
   @WithMockUser(
       username = USERNAME,
       roles = {ROLE_SU})
-  @Test
+  @Test(enabled = false)
   public void test() throws IOException {
     Package pack = packageFactory.create("pack");
     pack.setLabel("pack");
