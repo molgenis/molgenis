@@ -77,7 +77,8 @@ It contains the following parameters
 | version | string |yes |The version of your app. Used to manage app version, updating etc etc.. |
 | apiDependency | string |yes | The version of the MOLGENIS REST api you used in your app. Can be used to give warnings about possible incompatibility with a specific version of MOLGENIS |
 | name | string |yes | The name of the app. May not contain '/'
-| includeMenuAndFooter | boolean |yes | If you want to use the MOLGENIS menu, you can this value to __true__ |
+| includeMenuAndFooter | boolean |yes | 
+  If you want MOLGENIS to serve your app with the standard header (with menu and polyfill), and footer, set this value to __true__ |
 | runtimeOptions | object |no | A map containing initial parameters you might want to give to your app on init |
 
 ### Example
