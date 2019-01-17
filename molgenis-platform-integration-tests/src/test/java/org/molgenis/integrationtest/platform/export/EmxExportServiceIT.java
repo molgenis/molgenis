@@ -107,8 +107,10 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
                       EmxExportServiceIT.class, "/xls/expectedDownloadResult.xlsx")))) {
         // XSSFExcelExtractor results in tab differences between actual and expected even though
         // both excel files are correct
-        String actualWorkbookString = new XSSFExcelExtractor(actualWorkbook).getText().replaceAll("\t", "");
-        String expectedWorkbookString = new XSSFExcelExtractor(expected).getText().replaceAll("\t", "");
+        String actualWorkbookString =
+            new XSSFExcelExtractor(actualWorkbook).getText().replaceAll("\t", "");
+        String expectedWorkbookString =
+            new XSSFExcelExtractor(expected).getText().replaceAll("\t", "");
         assertEquals(actualWorkbookString, expectedWorkbookString);
       }
     }
