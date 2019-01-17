@@ -5,10 +5,8 @@ pipeline {
         }
     }
     environment {
-        npm_config_registry = 'http://nexus.molgenis-nexus:8081/repository/npm-central/'
-        HELM_REPO = 'https://registry.molgenis.org/repository/helm/'
-        LOCAL_REGISTRY = 'registry.molgenis.org'
         LOCAL_REPOSITORY = "${LOCAL_REGISTRY}/molgenis/molgenis-app"
+        CHART_VERSION = '0.9.1'
     }
     stages {
         stage('Retrieve build secrets') {
@@ -16,6 +14,8 @@ pipeline {
                 container('vault') {
                     script {
                         sh "mkdir /home/jenkins/.m2"
+                        sh "mkdir /home/jenkins/.rancher"
+                        sh(script: 'vault read -field=value secret/ops/jenkins/rancher/cli2.json > /home/jenkins/.rancher/cli2.json')
                         sh(script: 'vault read -field=value secret/ops/jenkins/maven/settings.xml > /home/jenkins/.m2/settings.xml')
                         env.SONAR_TOKEN = sh(script: 'vault read -field=value secret/ops/token/sonar', returnStdout: true)
                         env.GITHUB_TOKEN = sh(script: 'vault read -field=value secret/ops/token/github', returnStdout: true)
@@ -26,6 +26,9 @@ pipeline {
                 }
                 dir('/home/jenkins/.m2') {
                     stash includes: 'settings.xml', name: 'maven-settings'
+                }
+                dir('/home/jenkins/.rancher') {
+                    stash includes: 'cli2.json', name: 'rancher-config'
                 }
             }
         }
@@ -44,9 +47,9 @@ pipeline {
                     steps {
                         container('maven') {
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false"
-                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
-                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                            sh "mvn -q -B sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.github.pullRequest=${env.CHANGE_ID} -Dsonar.ws.timeout=120"
+                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
+                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K -C ${GIT_COMMIT}"
+                            sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                             }
@@ -71,9 +74,9 @@ pipeline {
                 stage('Build [ master ]') {
                     steps {
                         container('maven') {
-                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
-                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K"
-                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch=${BRANCH_NAME} -Dsonar.ws.timeout=120"
+                            sh "mvn -q -B clean verify -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
+                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
+                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG} -Ddockerfile.repository=${LOCAL_REPOSITORY}"
                                 sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=dev -Ddockerfile.repository=${LOCAL_REPOSITORY}"
@@ -88,12 +91,10 @@ pipeline {
                 }
                 stage("Deploy to dev [ master ]") {
                     steps {
-                        milestone(ordinal: 100, label: 'deploy to dev.molgenis.org')
-                        container('helm') {
-                            sh "helm init --client-only"
-                            sh "helm repo add molgenis ${HELM_REPO}"
-                            sh "helm repo update"
-                            sh "helm upgrade master molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                        milestone(ordinal: 100, label: 'deploy to master.dev.molgenis.org')
+                        container('rancher') {
+                            sh "rancher context switch development"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} master ${CHART_VERSION}"
                         }
                     }
                 }
@@ -116,7 +117,9 @@ pipeline {
                             unstash 'maven-settings'
                         }
                         container('maven') {
-                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs"
+                            sh "mvn -q -B clean install -Dmaven.test.redirectTestOutputToFile=true -DskipITs -T4"
+                            sh "curl -s https://codecov.io/bash | bash -s - -c -F unit -K  -C ${GIT_COMMIT}"
+                            sh "mvn -q -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.branch.name=${BRANCH_NAME} -Dsonar.ws.timeout=120"
                             dir('molgenis-app'){
                                 sh "mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-latest"
                                 sh "mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=latest"
@@ -143,12 +146,13 @@ pipeline {
                 }
                 stage('Deploy to test [ x.x ]') {
                     steps {
-                        milestone(ordinal: 100, label: 'deploy to test.molgenis.org')
-                        container('helm') {
-                            sh "helm init --client-only"
-                            sh "helm repo add molgenis ${HELM_REPO}"
-                            sh "helm repo update"
-                            sh "helm upgrade latest molgenis/molgenis --reuse-values --set molgenis.image.tag=${TAG} --set molgenis.image.repository=${LOCAL_REGISTRY}"
+                        milestone(ordinal: 100, label: 'deploy to latest.test.molgenis.org')
+                        dir('/home/jenkins/.rancher') {
+                            unstash 'rancher-config'
+                        }
+                        container('rancher') {
+                            sh "rancher context switch test"
+                            sh "rancher apps upgrade --set molgenis.image.tag=${TAG} latest ${CHART_VERSION}"
                         }
                     }
                 }
@@ -166,7 +170,10 @@ pipeline {
                             }
                         }
                         container('maven') {
-                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true\""
+                            sh "mvn -q -B release:perform -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
+                            // Can not use DSL here because of bug in Jenkins
+                            // The build wants to create a tmp directory in the target/checkout/molgenis-app
+                            // This is not permitted
                             sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:build dockerfile:tag dockerfile:push -Ddockerfile.tag=${TAG}"
                             sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=${BRANCH_NAME}-stable"
                             sh "cd target/checkout/molgenis-app && mvn -q -B dockerfile:tag dockerfile:push -Ddockerfile.tag=stable"
