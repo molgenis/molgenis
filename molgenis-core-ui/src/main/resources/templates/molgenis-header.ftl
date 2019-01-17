@@ -35,15 +35,6 @@
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
         <script src="<@resource_href "/js/script-evaluator.js"/>"></script>
 
-        <#-- Load custome javascript -->
-        <#if app_settings.customJavascript?has_content>
-            <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
-                <#if js_file_name?ends_with(".js")>
-                    <script src="<@resource_href "${js_file_name?html}"/>"></script>
-                </#if>
-            </#list>
-        </#if>
-
         <script>
             top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
                 <#if context_url??>
@@ -77,6 +68,15 @@
         <#-- Include molgenis-menu css -->
         <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
 
+    </#if>
+
+    <#-- Load custome javascript -->
+    <#if app_settings.customJavascript?has_content>
+        <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
+            <#if js_file_name?ends_with(".js")>
+                <script src="<@resource_href "${js_file_name?html}"/>"></script>
+            </#if>
+        </#list>
     </#if>
 
     <#-- Load css specified by plugins -->
