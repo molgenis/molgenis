@@ -57,7 +57,7 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
   @WithMockUser(
       username = USERNAME,
       roles = {ROLE_SU})
-  @Test(enabled = false)
+  @Test
   public void test() throws IOException {
     Package pack = packageFactory.create("pack");
     pack.setLabel("pack");
@@ -105,8 +105,8 @@ public class EmxExportServiceIT extends AbstractTransactionalTestNGSpringContext
               new FileInputStream(
                   ResourceUtils.getFile(
                       EmxExportServiceIT.class, "/xls/expectedDownloadResult.xlsx")))) {
-        String actualWorkbookString = new XSSFExcelExtractor(actualWorkbook).getText();
-        String expectedWorkbookString = new XSSFExcelExtractor(expected).getText();
+        String actualWorkbookString = new XSSFExcelExtractor(actualWorkbook).getText().replaceAll("\t", "");
+        String expectedWorkbookString = new XSSFExcelExtractor(expected).getText().replaceAll("\t", "");
         assertEquals(actualWorkbookString, expectedWorkbookString);
       }
     }
