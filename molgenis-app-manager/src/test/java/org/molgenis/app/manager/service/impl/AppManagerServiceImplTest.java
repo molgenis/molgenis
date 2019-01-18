@@ -3,7 +3,7 @@ package org.molgenis.app.manager.service.impl;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.io.File.separator;
 import static org.apache.commons.codec.CharEncoding.UTF_8;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -42,6 +42,7 @@ import org.molgenis.app.manager.meta.AppMetadata;
 import org.molgenis.app.manager.model.AppConfig;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginFactory;
@@ -57,10 +58,7 @@ import org.testng.annotations.Test;
 
 public class AppManagerServiceImplTest {
   @Mock private AppFactory appFactory;
-
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private FileStore fileStore;
   @Mock private PluginFactory pluginFactory;
   private AppManagerServiceImpl appManagerServiceImpl;
@@ -151,7 +149,10 @@ public class AppManagerServiceImplTest {
     when(app.getResourceFolder()).thenReturn(resourceFolder);
     when(app.getAppVersion()).thenReturn(appVersion);
 
-    when(dataService.query("sys_App", App.class).eq("name", name).findOne()).thenReturn(app);
+    @SuppressWarnings("unchecked")
+    Query<App> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query("sys_App", App.class)).thenReturn(query);
+    when(query.eq("name", name).findOne()).thenReturn(app);
 
     AppResponse expectedAppResponse = AppResponse.create(app);
     assertEquals(appManagerServiceImpl.getAppByName(name), expectedAppResponse);
@@ -160,7 +161,10 @@ public class AppManagerServiceImplTest {
   @Test(expectedExceptions = AppForURIDoesNotExistException.class)
   public void testGetAppByNameUnknownAppName() {
     String name = "unknownName";
-    when(dataService.query("sys_App", App.class).eq("name", name).findOne()).thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<App> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query("sys_App", App.class)).thenReturn(query);
+    when(query.eq("name", name).findOne()).thenReturn(null);
     appManagerServiceImpl.getAppByName(name);
   }
 
