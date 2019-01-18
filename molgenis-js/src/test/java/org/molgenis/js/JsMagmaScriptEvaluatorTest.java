@@ -172,7 +172,7 @@ public class JsMagmaScriptEvaluatorTest {
     person.set("lastUpdate", lastUpdate);
 
     Object result = jsMagmaScriptEvaluator.eval("$('lastUpdate').value()", person, 1);
-    assertEquals(result, lastUpdate.toEpochMilli());
+    assertEquals(result, Double.valueOf(lastUpdate.toEpochMilli()));
   }
 
   @Test
@@ -190,7 +190,7 @@ public class JsMagmaScriptEvaluatorTest {
     person.set("long", Long.MAX_VALUE);
 
     Object result = jsMagmaScriptEvaluator.eval("$('long').value()", person, 1);
-    assertEquals(result, Long.MAX_VALUE);
+    assertEquals(result, Double.valueOf(Long.MAX_VALUE));
   }
 
   @Test
@@ -394,10 +394,10 @@ public class JsMagmaScriptEvaluatorTest {
     String script =
         "var counter = 0;\nvar SUM=newValue(0);\nif(!$('SBP_1').isNull().value()){\n\tSUM.plus($('SBP_1').value());\n\tcounter++;\n}\nif(!$('SBP_2').isNull().value()){\n\tSUM.plus($('SBP_2').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\nSUM.value();\n}\nelse{\n\tnull;\n}";
     Object result1 = jsMagmaScriptEvaluator.eval(script, entity0, 3);
-    assertEquals(result1, 122.0);
+    assertEquals(result1, 122);
 
     Object result2 = jsMagmaScriptEvaluator.eval(script, entity1, 3);
-    assertEquals(result2, 120.0);
+    assertEquals(result2, 120);
 
     Object result3 = jsMagmaScriptEvaluator.eval(script, entity2, 3);
     assertNull(result3);
@@ -547,7 +547,7 @@ public class JsMagmaScriptEvaluatorTest {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 180);
     Object result = jsMagmaScriptEvaluator.eval("$('height').plus(100).value()", entity0, 3);
-    assertEquals(result, 280d);
+    assertEquals(result, 280);
   }
 
   @Test
@@ -572,7 +572,7 @@ public class JsMagmaScriptEvaluatorTest {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 2);
     Object result = jsMagmaScriptEvaluator.eval("$('height').times(100).value()", entity0, 3);
-    assertEquals(result, 200d);
+    assertEquals(result, 200);
   }
 
   @Test
@@ -580,7 +580,7 @@ public class JsMagmaScriptEvaluatorTest {
     Entity entity0 = new DynamicEntity(personHeightEntityType);
     entity0.set("height", 200);
     Object result = jsMagmaScriptEvaluator.eval("$('height').div(100).value()", entity0, 3);
-    assertEquals(result, 2d);
+    assertEquals(result, 2);
   }
 
   @Test
@@ -643,7 +643,7 @@ public class JsMagmaScriptEvaluatorTest {
     Collection<Object> result =
         jsMagmaScriptEvaluator.eval(
             Arrays.asList("$('weight').value()", "$('height').pow(2).value()"), person);
-    assertEquals(result, Arrays.asList(80d, 400d));
+    assertEquals(result, Arrays.asList(80, 400));
   }
 
   @Test(enabled = false)
