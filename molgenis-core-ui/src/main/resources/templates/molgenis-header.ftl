@@ -24,8 +24,6 @@
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
 
-        <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
-
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
         <script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
@@ -78,6 +76,9 @@
         <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
 
     </#if>
+
+    <#-- Load css specified via settigns -->
+    <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
 
     <#-- Load css specified by plugins -->
     <#list css as css_file_name>
