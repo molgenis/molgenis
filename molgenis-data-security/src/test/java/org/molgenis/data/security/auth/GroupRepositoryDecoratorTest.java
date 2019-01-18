@@ -3,9 +3,10 @@ package org.molgenis.data.security.auth;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -23,6 +24,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.security.GroupIdentity;
 import org.molgenis.test.AbstractMockitoTest;
@@ -31,10 +33,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
-
-  @Mock(answer = RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private MutableAclService aclService;
   @Mock private Repository<Group> delegateRepository;
 
@@ -70,16 +69,18 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
 
     when(dataService.findOneById(GroupMetadata.GROUP, "test", Group.class)).thenReturn(group);
 
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role1")
-            .findAll())
-        .thenReturn(members.stream());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role2")
-            .findAll())
-        .thenReturn(Stream.empty());
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role1Query = mock(Query.class);
+    when(role1Query.findAll()).thenReturn(members.stream());
+    doReturn(role1Query).when(query).eq(RoleMembershipMetadata.ROLE, "role1");
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role2Query = mock(Query.class);
+    when(role2Query.findAll()).thenReturn(Stream.empty());
+    doReturn(role2Query).when(query).eq(RoleMembershipMetadata.ROLE, "role2");
 
     groupRepositoryDecorator.delete(group);
 
@@ -111,16 +112,21 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
 
     when(dataService.findOneById(GroupMetadata.GROUP, "test", Group.class)).thenReturn(group);
     when(group.getRoles()).thenReturn(roles);
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role1")
-            .findAll())
-        .thenReturn(members.stream());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role2")
-            .findAll())
-        .thenReturn(Stream.empty());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role1Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role1Query).when(query).eq(RoleMembershipMetadata.ROLE, "role1");
+    when(role1Query.findAll()).thenReturn(members.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role2Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role2Query).when(query).eq(RoleMembershipMetadata.ROLE, "role2");
+    when(role2Query.findAll()).thenReturn(Stream.empty());
 
     groupRepositoryDecorator.deleteById("test");
 
@@ -173,21 +179,25 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
     when(group2.getRoles()).thenReturn(roles2);
 
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role1")
-            .findAll())
-        .thenReturn(members.stream());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role2")
-            .findAll())
-        .thenReturn(Stream.empty());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role3")
-            .findAll())
-        .thenReturn(members2.stream());
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role1Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role1Query).when(query).eq(RoleMembershipMetadata.ROLE, "role1");
+    when(role1Query.findAll()).thenReturn(members.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role2Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role2Query).when(query).eq(RoleMembershipMetadata.ROLE, "role2");
+    when(role2Query.findAll()).thenReturn(Stream.empty());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role3Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role3Query).when(query).eq(RoleMembershipMetadata.ROLE, "role3");
+    when(role3Query.findAll()).thenReturn(members2.stream());
 
     groupRepositoryDecorator.deleteAll();
 
@@ -239,21 +249,26 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     when(group.getRoles()).thenReturn(roles);
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
     when(group2.getRoles()).thenReturn(roles2);
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role1")
-            .findAll())
-        .thenReturn(members.stream());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role2")
-            .findAll())
-        .thenReturn(Stream.empty());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role3")
-            .findAll())
-        .thenReturn(members2.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role1Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role1Query).when(query).eq(RoleMembershipMetadata.ROLE, "role1");
+    when(role1Query.findAll()).thenReturn(members.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role2Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role2Query).when(query).eq(RoleMembershipMetadata.ROLE, "role2");
+    when(role2Query.findAll()).thenReturn(Stream.empty());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role3Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role3Query).when(query).eq(RoleMembershipMetadata.ROLE, "role3");
+    when(role3Query.findAll()).thenReturn(members2.stream());
 
     groupRepositoryDecorator.delete(Stream.of(group, group2));
 
@@ -303,21 +318,26 @@ public class GroupRepositoryDecoratorTest extends AbstractMockitoTest {
     when(group.getRoles()).thenReturn(roles);
     doReturn(group2).when(dataService).findOneById(GroupMetadata.GROUP, "test2", Group.class);
     when(group2.getRoles()).thenReturn(roles2);
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role1")
-            .findAll())
-        .thenReturn(members.stream());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role2")
-            .findAll())
-        .thenReturn(Stream.empty());
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
-            .eq(RoleMembershipMetadata.ROLE, "role3")
-            .findAll())
-        .thenReturn(members2.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_DEEP_STUBS);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role1Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role1Query).when(query).eq(RoleMembershipMetadata.ROLE, "role1");
+    when(role1Query.findAll()).thenReturn(members.stream());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role2Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role2Query).when(query).eq(RoleMembershipMetadata.ROLE, "role2");
+    when(role2Query.findAll()).thenReturn(Stream.empty());
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> role3Query = mock(Query.class, RETURNS_DEEP_STUBS);
+    doReturn(role3Query).when(query).eq(RoleMembershipMetadata.ROLE, "role3");
+    when(role3Query.findAll()).thenReturn(members2.stream());
 
     groupRepositoryDecorator.deleteAll(Stream.of("test", "test2"));
 

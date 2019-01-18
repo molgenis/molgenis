@@ -1,6 +1,7 @@
 package org.molgenis.security.twofactor.service;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.populate.IdGeneratorImpl;
 import org.molgenis.data.security.auth.User;
@@ -51,10 +53,12 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests {
     when(userService.getUser(USERNAME)).thenReturn(molgenisUser);
     when(molgenisUser.getUsername()).thenReturn(USERNAME);
     when(molgenisUser.getId()).thenReturn("1234");
-    when(dataService
-            .query(RecoveryCodeMetadata.RECOVERY_CODE, RecoveryCode.class)
-            .eq(USER_ID, molgenisUser.getId())
-            .findAll())
+
+    @SuppressWarnings("unchecked")
+    Query<RecoveryCode> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RecoveryCodeMetadata.RECOVERY_CODE, RecoveryCode.class))
+        .thenReturn(query);
+    when(query.eq(USER_ID, molgenisUser.getId()).findAll())
         .thenReturn(IntStream.range(0, 1).mapToObj(i -> recoveryCode));
   }
 
@@ -72,17 +76,22 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests {
     String recoveryCodeId = "lkfsdufash";
     UserSecret userSecret = mock(UserSecret.class);
 
-    when(dataService
-            .query(RECOVERY_CODE, RecoveryCode.class)
+    @SuppressWarnings("unchecked")
+    Query<RecoveryCode> recoveryCodeQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(recoveryCodeQuery).when(dataService).query(RECOVERY_CODE, RecoveryCode.class);
+    when(recoveryCodeQuery
             .eq(USER_ID, molgenisUser.getId())
             .and()
             .eq(CODE, recoveryCodeId)
             .findOne())
         .thenReturn(recoveryCode);
-    when(dataService
-            .query(UserSecretMetadata.USER_SECRET, UserSecret.class)
-            .eq(UserSecretMetadata.USER_ID, molgenisUser.getId())
-            .findOne())
+
+    @SuppressWarnings("unchecked")
+    Query<UserSecret> userSecretQuery = mock(Query.class, RETURNS_SELF);
+    doReturn(userSecretQuery)
+        .when(dataService)
+        .query(UserSecretMetadata.USER_SECRET, UserSecret.class);
+    when(userSecretQuery.eq(UserSecretMetadata.USER_ID, molgenisUser.getId()).findOne())
         .thenReturn(userSecret);
     recoveryService.useRecoveryCode(recoveryCodeId);
     verify(userSecret).setFailedLoginAttempts(0);
@@ -112,7 +121,7 @@ public class RecoveryServiceImplTest extends AbstractTestNGSpringContextTests {
 
     @Bean
     public DataService dataService() {
-      return mock(DataService.class, RETURNS_DEEP_STUBS);
+      return mock(DataService.class);
     }
 
     @Bean

@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -191,7 +191,7 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     User user = mock(User.class);
 
     @SuppressWarnings("unchecked")
-    Query<User> q = mock(Query.class, RETURNS_DEEP_STUBS);
+    Query<User> q = mock(Query.class, RETURNS_SELF);
     when(dataService.query(USER, User.class)).thenReturn(q);
     when(q.eq(EMAIL, "user@molgenis.org").findOne()).thenReturn(user);
 

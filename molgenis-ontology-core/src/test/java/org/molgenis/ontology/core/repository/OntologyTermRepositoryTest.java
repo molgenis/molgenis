@@ -6,7 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyTermMetadata.ID;
@@ -224,10 +224,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
   @Test
   public void testGetOntologyTerm() {
-    when(dataService
-            .query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class)
-            .eq(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")
-            .findOne())
+    @SuppressWarnings("unchecked")
+    Query<org.molgenis.ontology.core.meta.OntologyTerm> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(ONTOLOGY_TERM, org.molgenis.ontology.core.meta.OntologyTerm.class))
+        .thenReturn(query);
+    when(query.eq(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri").findOne())
         .thenReturn(ontologyTermEntity);
 
     String[] iris = {"http://www.test.nl/iri"};
@@ -246,7 +247,7 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest {
 
     @Bean
     public DataService dataService() {
-      return mock(DataService.class, RETURNS_DEEP_STUBS);
+      return mock(DataService.class);
     }
 
     @Bean

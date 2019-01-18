@@ -1,6 +1,7 @@
 package org.molgenis.data.security.permission;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -16,12 +17,12 @@ import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.stream.Stream;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.security.auth.Role;
@@ -38,14 +39,9 @@ import org.testng.annotations.Test;
 
 public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
   @Mock private UserService userService;
-
   @Mock private RoleMembershipFactory roleMembershipFactory;
-
-  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-  private DataService dataService;
-
+  @Mock private DataService dataService;
   @Mock private UserMetadata userMetadata;
-
   @Mock private RoleMetadata roleMetadata;
   @Mock private RoleMembership roleMembership;
   @Mock private RoleMembership oldRoleMembership;
@@ -71,8 +67,10 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
 
     Role role = mock(Role.class);
     String rolename = "GCC_MANAGER";
-    when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne())
-        .thenReturn(role);
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, rolename).findOne()).thenReturn(role);
 
     RoleMembership roleMembership = mock(RoleMembership.class);
     when(roleMembershipFactory.create()).thenReturn(roleMembership);
@@ -101,8 +99,10 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
     when(userService.getUser(username)).thenReturn(user);
 
     String rolename = "GCC_DELETER";
-    when(dataService.query(RoleMetadata.ROLE, Role.class).eq(RoleMetadata.NAME, rolename).findOne())
-        .thenReturn(null);
+    @SuppressWarnings("unchecked")
+    Query<Role> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMetadata.ROLE, Role.class)).thenReturn(query);
+    when(query.eq(RoleMetadata.NAME, rolename).findOne()).thenReturn(null);
 
     roleMembershipService.addUserToRole(username, rolename);
   }
@@ -161,8 +161,12 @@ public class RoleMembershipServiceImplTest extends AbstractMockitoTest {
             .field(RoleMembershipMetadata.FROM)
             .field(RoleMembershipMetadata.TO)
             .field(RoleMembershipMetadata.ID);
-    when(dataService
-            .query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class)
+
+    @SuppressWarnings("unchecked")
+    Query<RoleMembership> query = mock(Query.class, RETURNS_SELF);
+    when(dataService.query(RoleMembershipMetadata.ROLE_MEMBERSHIP, RoleMembership.class))
+        .thenReturn(query);
+    when(query
             .in(RoleMembershipMetadata.ROLE, ImmutableList.of(editor, viewer))
             .fetch(fetch)
             .findAll())
