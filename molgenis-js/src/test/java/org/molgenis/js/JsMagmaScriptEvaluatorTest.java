@@ -165,6 +165,7 @@ public class JsMagmaScriptEvaluatorTest {
     jsMagmaScriptEvaluator = new JsMagmaScriptEvaluator(new NashornScriptEngine());
   }
 
+  @SuppressWarnings("UnnecessaryBoxing")
   @Test
   public void testValueForDateTime() {
     Entity person = new DynamicEntity(personLastUpdatedEntityType);
@@ -184,6 +185,7 @@ public class JsMagmaScriptEvaluatorTest {
     assertEquals(result, true);
   }
 
+  @SuppressWarnings("UnnecessaryBoxing")
   @Test
   public void testValueForLong() {
     Entity person = new DynamicEntity(personLongEntityType);
