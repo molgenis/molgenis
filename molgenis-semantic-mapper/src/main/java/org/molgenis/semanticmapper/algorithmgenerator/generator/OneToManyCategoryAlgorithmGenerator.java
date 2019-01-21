@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.jscience.physics.amount.Amount;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -126,7 +127,11 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
           stringBuilder.append("$('").append(attribute.getName()).append("').map({");
         }
 
-        double estimatedValue = amountWrapper.getAmount().getEstimatedValue();
+        Amount<?> amount = amountWrapper.getAmount();
+        if (amount == null) {
+          throw new IllegalArgumentException("Amount wrapper amount can't be null");
+        }
+        double estimatedValue = amount.getEstimatedValue();
 
         stringBuilder
             .append("\"")
@@ -243,14 +248,26 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
   }
 
   int parseAmountMinimumValue(Category category) {
-    return (int)
-        Double.parseDouble(
-            DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
+    AmountWrapper amountWrapper = category.getAmountWrapper();
+    if (amountWrapper == null) {
+      throw new IllegalArgumentException("Category amount wrapper is null");
+    }
+    Amount<?> amount = amountWrapper.getAmount();
+    if (amount == null) {
+      throw new IllegalArgumentException("Category amount wrapper amount is null");
+    }
+    return (int) Double.parseDouble(DECIMAL_FORMAT.format(amount.getMinimumValue()));
   }
 
   int parseAmountMaximumValue(Category category) {
-    return (int)
-        Double.parseDouble(
-            DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
+    AmountWrapper amountWrapper = category.getAmountWrapper();
+    if (amountWrapper == null) {
+      throw new IllegalArgumentException("Category amount wrapper is null");
+    }
+    Amount<?> amount = amountWrapper.getAmount();
+    if (amount == null) {
+      throw new IllegalArgumentException("Category amount wrapper amount is null");
+    }
+    return (int) Double.parseDouble(DECIMAL_FORMAT.format(amount.getMaximumValue()));
   }
 }

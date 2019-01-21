@@ -1,9 +1,9 @@
 package org.molgenis.data.i18n.model;
 
-import static org.molgenis.data.i18n.model.L10nStringMetaData.DESCRIPTION;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.ID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.MSGID;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.NAMESPACE;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.DESCRIPTION;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.ID;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.MSGID;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.NAMESPACE;
 
 import java.util.Locale;
 import javax.annotation.CheckForNull;

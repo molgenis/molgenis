@@ -77,7 +77,7 @@ Attributes:
 | children	  | patients | mref     |          | patients  |             |  children of a patient  |
 | birthdate   | patients | date     |          |           |             |  day of birth           |
 | birthplace  | patients | xref     |          | cities    |             |  place of birth         |
-| disease     | patients |          |          |           |             |  disese description     |
+| disease     | patients |          |          |           |             |  disease description    |
 | userName    | users    |          | FALSE    |           | TRUE        |  unique login name      |
 | active      | users    | bool     |          |           |             |  whether user is active |
 
@@ -199,7 +199,7 @@ Magma JavaScript validation expression that must return a bool. Must return true
 true/false to indicate whether the attribute can be seen by users. Can also contain a Magma JavaScript expression to dynamically decide if the attribute should be shown or not. See the [Expressions](ref-expressions.md) section for a syntax description.
 
 #### defaultValue
-value that will be filled in in the forms when a new entity instance is created. Not yet supported for mref and xref values. For categorical_mref, should be a comma separated list of ids. For xref should be the of the refEntity. For bool should be true or false. For datetime should be a string in the format YYYY-MM-DDTHH:mm:ssZZ. For date should be a string in the format YYYY-MM-DD.
+value that will be filled in in the forms when a new entity instance is created. For mref and categorical_mref, this should be a comma separated list of ids. For categorical and xref this should be the id of the refEntity. For bool should be true or false. For datetime should be a string in the format YYYY-MM-DDTHH:mm:ssZZ. For date should be a string in the format YYYY-MM-DD.
 
 #### partOfAttribute
 is used to group attributes into a compound attribute. Put here the name of the compound attribute.

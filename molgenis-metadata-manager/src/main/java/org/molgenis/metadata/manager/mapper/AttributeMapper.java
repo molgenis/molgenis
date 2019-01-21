@@ -256,13 +256,13 @@ public class AttributeMapper {
 
   private boolean isIdAttribute(
       EditorAttribute editorAttribute, EditorEntityType editorEntityType) {
-    return editorEntityType.getIdAttribute() != null
-        && editorEntityType.getIdAttribute().getId().equals(editorAttribute.getId());
+    EditorAttributeIdentifier idAttribute = editorEntityType.getIdAttribute();
+    return idAttribute != null && idAttribute.getId().equals(editorAttribute.getId());
   }
 
   private boolean isLabelAttribute(
       EditorAttribute editorAttribute, EditorEntityType editorEntityType) {
-    return editorEntityType.getLabelAttribute() != null
-        && editorEntityType.getLabelAttribute().getId().equals(editorAttribute.getId());
+    EditorAttributeIdentifier labelAttribute = editorEntityType.getLabelAttribute();
+    return labelAttribute != null && labelAttribute.getId().equals(editorAttribute.getId());
   }
 }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FileMetaFactory
-    extends AbstractSystemEntityFactory<FileMeta, FileMetaMetaData, String> {
-  FileMetaFactory(FileMetaMetaData fileMetaMetaData, EntityPopulator entityPopulator) {
-    super(FileMeta.class, fileMetaMetaData, entityPopulator);
+    extends AbstractSystemEntityFactory<FileMeta, FileMetaMetadata, String> {
+  FileMetaFactory(FileMetaMetadata fileMetaMetadata, EntityPopulator entityPopulator) {
+    super(FileMeta.class, fileMetaMetadata, entityPopulator);
   }
 }

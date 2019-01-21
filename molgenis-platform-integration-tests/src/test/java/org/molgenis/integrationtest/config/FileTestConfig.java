@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.UUID;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({FileMetaFactory.class, FileMetaMetaData.class})
+@Import({FileMetaFactory.class, FileMetaMetadata.class})
 public class FileTestConfig {
 
   @Bean

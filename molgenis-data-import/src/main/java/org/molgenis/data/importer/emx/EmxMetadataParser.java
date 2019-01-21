@@ -10,10 +10,10 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.DataConverter.toList;
-import static org.molgenis.data.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.data.file.model.FileMetaMetadata.FILE_META;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
-import static org.molgenis.data.i18n.model.L10nStringMetaData.L10N_STRING;
+import static org.molgenis.data.i18n.model.L10nStringMetadata.L10N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetadata.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.AVAILABLE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.IMPORTABLE;
@@ -330,9 +330,9 @@ public class EmxMetadataParser implements MetadataParser {
         .forEach(
             attributes ->
                 attributes.forEach(
-                    attr -> {
-                      attributeValidator.validate(attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION);
-                    }));
+                    attr ->
+                        attributeValidator.validate(
+                            attr, ValidationMode.ADD_SKIP_ENTITY_VALIDATION)));
 
     // validate package/entity/attribute tags
     metaDataMap
@@ -350,10 +350,7 @@ public class EmxMetadataParser implements MetadataParser {
         .map(EntityType::getAllAttributes)
         .forEach(
             attributes ->
-                attributes.forEach(
-                    attr -> {
-                      attr.getTags().forEach(tagValidator::validate);
-                    }));
+                attributes.forEach(attr -> attr.getTags().forEach(tagValidator::validate)));
 
     report = generateEntityValidationReport(source, report, metaDataMap);
 

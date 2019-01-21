@@ -34,7 +34,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -201,7 +201,7 @@ public class RestServiceTest {
     when(oldEntityType.getIdAttribute()).thenReturn(idAttr);
     when(idAttr.getDataType()).thenReturn(INT);
     when(oldEntity.getEntity(fileAttrName)).thenReturn(storedFileMeta);
-    when(storedFileMeta.get(FileMetaMetaData.FILENAME)).thenReturn(fileName);
+    when(storedFileMeta.get(FileMetaMetadata.FILENAME)).thenReturn(fileName);
     when(dataService.findOneById(fileAttr.getEntity().getId(), entityId)).thenReturn(oldEntity);
 
     Object result = restService.toEntityValue(fileAttr, fileName, entityId);

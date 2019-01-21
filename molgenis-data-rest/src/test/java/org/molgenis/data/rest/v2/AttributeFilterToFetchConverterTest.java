@@ -11,7 +11,7 @@ import static org.testng.Assert.assertNull;
 import org.molgenis.data.AbstractMolgenisSpringTest;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityType;
@@ -72,7 +72,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 
   @Autowired private EntityTypeFactory entityTypeFactory;
   @Autowired private AttributeFactory attributeFactory;
-  @Autowired private FileMetaMetaData fileMetaMeta;
+  @Autowired private FileMetaMetadata fileMetaMeta;
 
   @BeforeMethod
   public void setUpBeforeMethod() {
@@ -158,9 +158,9 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
             .field(
                 COMPOUND_PART_FILE_ATTR_NAME,
                 new Fetch()
-                    .field(FileMetaMetaData.ID)
-                    .field(FileMetaMetaData.FILENAME)
-                    .field(FileMetaMetaData.URL))
+                    .field(FileMetaMetadata.ID)
+                    .field(FileMetaMetadata.FILENAME)
+                    .field(FileMetaMetadata.URL))
             .field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
             .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
@@ -207,9 +207,9 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
             .field(
                 COMPOUND_PART_FILE_ATTR_NAME,
                 new Fetch()
-                    .field(FileMetaMetaData.ID)
-                    .field(FileMetaMetaData.FILENAME)
-                    .field(FileMetaMetaData.URL))
+                    .field(FileMetaMetadata.ID)
+                    .field(FileMetaMetadata.FILENAME)
+                    .field(FileMetaMetadata.URL))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
             .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
   }
@@ -265,9 +265,9 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
             .field(
                 COMPOUND_PART_FILE_ATTR_NAME,
                 new Fetch()
-                    .field(FileMetaMetaData.ID)
-                    .field(FileMetaMetaData.FILENAME)
-                    .field(FileMetaMetaData.URL))
+                    .field(FileMetaMetadata.ID)
+                    .field(FileMetaMetadata.FILENAME)
+                    .field(FileMetaMetadata.URL))
             .field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
             .field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
             .field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
@@ -364,6 +364,6 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
   }
 
   @Configuration
-  @Import({FileMetaMetaData.class, SecurityPackage.class, RootSystemPackage.class})
+  @Import({FileMetaMetadata.class, SecurityPackage.class, RootSystemPackage.class})
   public static class Config {}
 }

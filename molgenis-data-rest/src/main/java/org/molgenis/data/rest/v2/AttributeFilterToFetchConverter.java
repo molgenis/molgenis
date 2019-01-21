@@ -5,7 +5,7 @@ import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -69,62 +69,75 @@ public class AttributeFilterToFetchConverter {
     AttributeType attrType = attr.getDataType();
     switch (attrType) {
       case COMPOUND:
-        {
-          AttributeFilter subAttrFilter =
-              attrFilter != null ? attrFilter.getAttributeFilter(entityType, attr) : null;
-          if (subAttrFilter != null && !subAttrFilter.isIncludeAllAttrs()) {
-            // include compound attribute parts defined by filter
-            if (subAttrFilter.isIncludeIdAttr()) {
-              createFetchContentRec(
-                  subAttrFilter, entityType, entityType.getIdAttribute(), fetch, languageCode);
-            }
-            if (subAttrFilter.isIncludeLabelAttr()) {
-              createFetchContentRec(
-                  subAttrFilter,
-                  entityType,
-                  entityType.getLabelAttribute(languageCode),
-                  fetch,
-                  languageCode);
-            }
-            subAttrFilter.forEach(
-                entry -> {
-                  String attrPartName = entry.getKey();
-                  Attribute attrPart = attr.getChild(attrPartName);
-                  createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
-                });
-          } else {
-            // include all compound attribute parts
-            attr.getChildren()
-                .forEach(
-                    attrPart ->
-                        createFetchContentRec(
-                            subAttrFilter, entityType, attrPart, fetch, languageCode));
-          }
-          break;
-        }
+        createCompoundFetchContentRec(attrFilter, entityType, attr, fetch, languageCode);
+        break;
       case CATEGORICAL:
       case CATEGORICAL_MREF:
       case FILE:
       case MREF:
       case XREF:
       case ONE_TO_MANY:
-        {
-          AttributeFilter subAttrFilter =
-              attrFilter != null ? attrFilter.getAttributeFilter(entityType, attr) : null;
-          Fetch subFetch;
-          if (subAttrFilter != null) {
-            subFetch = convert(subAttrFilter, attr.getRefEntity(), languageCode);
-
-          } else {
-            subFetch = createDefaultAttributeFetch(attr, languageCode);
-          }
-          fetch.field(attr.getName(), subFetch);
-          break;
-        }
+        createReferenceFetchContentRec(attrFilter, entityType, attr, fetch, languageCode);
+        break;
         // $CASES-OMITTED$
       default:
         fetch.field(attr.getName());
         break;
+    }
+  }
+
+  private static void createReferenceFetchContentRec(
+      AttributeFilter attrFilter,
+      EntityType entityType,
+      Attribute attr,
+      Fetch fetch,
+      String languageCode) {
+    AttributeFilter subAttrFilter =
+        attrFilter != null ? attrFilter.getAttributeFilter(entityType, attr) : null;
+    Fetch subFetch;
+    if (subAttrFilter != null) {
+      subFetch = convert(subAttrFilter, attr.getRefEntity(), languageCode);
+
+    } else {
+      subFetch = createDefaultAttributeFetch(attr, languageCode);
+    }
+    fetch.field(attr.getName(), subFetch);
+  }
+
+  private static void createCompoundFetchContentRec(
+      AttributeFilter attrFilter,
+      EntityType entityType,
+      Attribute attr,
+      Fetch fetch,
+      String languageCode) {
+    AttributeFilter subAttrFilter =
+        attrFilter != null ? attrFilter.getAttributeFilter(entityType, attr) : null;
+    if (subAttrFilter != null && !subAttrFilter.isIncludeAllAttrs()) {
+      // include compound attribute parts defined by filter
+      if (subAttrFilter.isIncludeIdAttr()) {
+        createFetchContentRec(
+            subAttrFilter, entityType, entityType.getIdAttribute(), fetch, languageCode);
+      }
+      if (subAttrFilter.isIncludeLabelAttr()) {
+        createFetchContentRec(
+            subAttrFilter,
+            entityType,
+            entityType.getLabelAttribute(languageCode),
+            fetch,
+            languageCode);
+      }
+      subAttrFilter.forEach(
+          entry -> {
+            String attrPartName = entry.getKey();
+            Attribute attrPart = attr.getChild(attrPartName);
+            createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode);
+          });
+    } else {
+      // include all compound attribute parts
+      attr.getChildren()
+          .forEach(
+              attrPart ->
+                  createFetchContentRec(subAttrFilter, entityType, attrPart, fetch, languageCode));
     }
   }
 
@@ -175,7 +188,7 @@ public class AttributeFilterToFetchConverter {
       }
 
       if (attr.getDataType() == FILE) {
-        fetch.field(FileMetaMetaData.URL);
+        fetch.field(FileMetaMetadata.URL);
       }
     } else {
       fetch = null;

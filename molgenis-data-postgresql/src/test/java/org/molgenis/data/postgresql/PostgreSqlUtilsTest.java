@@ -34,7 +34,7 @@ import java.util.Iterator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.file.model.FileMeta;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
@@ -128,12 +128,12 @@ public class PostgreSqlUtilsTest {
     when(refIntIdEntityType.getIdAttribute()).thenReturn(attrRefIntId);
     when(refIntIdEntityType.toString()).thenReturn("refIntId");
 
-    String attrRefFileIdName = FileMetaMetaData.ID;
+    String attrRefFileIdName = FileMetaMetadata.ID;
     Attribute attrRefFileId = mock(Attribute.class);
     when(attrRefFileId.getName()).thenReturn(attrRefFileIdName);
     when(attrRefFileId.getDataType()).thenReturn(STRING);
 
-    FileMetaMetaData fileMetaMeta = mock(FileMetaMetaData.class);
+    FileMetaMetadata fileMetaMeta = mock(FileMetaMetadata.class);
     when(fileMetaMeta.getIdAttribute()).thenReturn(attrRefFileId);
     when(fileMetaMeta.toString()).thenReturn("fileMeta");
 

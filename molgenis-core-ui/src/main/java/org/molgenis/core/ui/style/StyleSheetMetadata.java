@@ -7,7 +7,7 @@ import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.settings.SettingsPackage;
 import org.springframework.stereotype.Component;
@@ -24,12 +24,12 @@ public class StyleSheetMetadata extends SystemEntityType {
   public static final String BOOTSTRAP_4_THEME = "bootstrap4Theme";
   private final SettingsPackage settingsPackage;
 
-  private final FileMetaMetaData fileMetaMetaData;
+  private final FileMetaMetadata fileMetaMetadata;
 
-  public StyleSheetMetadata(SettingsPackage settingsPackage, FileMetaMetaData fileMetaMetaData) {
+  public StyleSheetMetadata(SettingsPackage settingsPackage, FileMetaMetadata fileMetaMetadata) {
     super(SIMPLE_NAME, SettingsPackage.PACKAGE_SETTINGS);
     this.settingsPackage = requireNonNull(settingsPackage);
-    this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
+    this.fileMetaMetadata = requireNonNull(fileMetaMetadata);
   }
 
   @Override
@@ -44,11 +44,11 @@ public class StyleSheetMetadata extends SystemEntityType {
     addAttribute(BOOTSTRAP_3_THEME)
         .setNillable(false)
         .setDataType(FILE)
-        .setRefEntity(fileMetaMetaData);
+        .setRefEntity(fileMetaMetadata);
 
     addAttribute(BOOTSTRAP_4_THEME)
         .setNillable(true)
         .setDataType(FILE)
-        .setRefEntity(fileMetaMetaData);
+        .setRefEntity(fileMetaMetadata);
   }
 }

@@ -28,7 +28,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.file.model.FileMetaMetaData;
+import org.molgenis.data.file.model.FileMetaMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.settings.AppSettings;
@@ -164,7 +164,7 @@ public class StyleServiceTest extends AbstractMockitoTest {
     verify(fileStore, times(1)).store(bs3Data, generatedId);
     verify(fileStore, times(1)).store(bs4Data, generatedId);
     // two times, once for each style file
-    verify(dataService, times(2)).add(FileMetaMetaData.FILE_META, fileMeta);
+    verify(dataService, times(2)).add(FileMetaMetadata.FILE_META, fileMeta);
   }
 
   @SuppressWarnings("deprecation")
@@ -201,7 +201,7 @@ public class StyleServiceTest extends AbstractMockitoTest {
     verify(styleSheet).setName(styleId);
     verify(dataService, times(1)).add(STYLE_SHEET, styleSheet);
     verify(fileStore, times(1)).store(bs3Data, generatedId);
-    verify(dataService, times(1)).add(FileMetaMetaData.FILE_META, fileMeta);
+    verify(dataService, times(1)).add(FileMetaMetadata.FILE_META, fileMeta);
   }
 
   @SuppressWarnings("deprecation")

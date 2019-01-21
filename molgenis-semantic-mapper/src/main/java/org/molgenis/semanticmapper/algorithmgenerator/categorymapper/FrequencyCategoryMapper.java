@@ -44,30 +44,36 @@ public class FrequencyCategoryMapper extends CategoryMapper {
   }
 
   Double convert(AmountWrapper sourceAmountWrapper, AmountWrapper targetAmountWrapper) {
-    if (sourceAmountWrapper != null && targetAmountWrapper != null) {
-      Amount<?> sourceAmount = sourceAmountWrapper.getAmount().to(STANDARD_UNIT);
-      Amount<?> targetAmount = targetAmountWrapper.getAmount().to(STANDARD_UNIT);
+    if (sourceAmountWrapper == null || targetAmountWrapper == null) {
+      return null;
+    }
 
-      if (unitsCompatible(sourceAmount, targetAmount)) {
-        if (!sourceAmountWrapper.isDetermined()
-            && !targetAmountWrapper.isDetermined()
-            && sourceAmountWrapper
-                .getAmount()
-                .getUnit()
-                .equals(targetAmountWrapper.getAmount().getUnit())) {
-          return (double) 0;
-        }
+    Amount<?> sourceAmountWrapperAmount = sourceAmountWrapper.getAmount();
+    Amount<?> targetAmountWrapperAmount = targetAmountWrapper.getAmount();
 
-        if (!sourceAmountWrapper.isDetermined()) {
-          sourceAmount = determineAmount(sourceAmount, targetAmount);
-        }
+    if (sourceAmountWrapperAmount == null || targetAmountWrapperAmount == null) {
+      return null;
+    }
 
-        if (!targetAmountWrapper.isDetermined()) {
-          targetAmount = determineAmount(targetAmount, sourceAmount);
-        }
+    Amount<?> sourceAmount = sourceAmountWrapperAmount.to(STANDARD_UNIT);
+    Amount<?> targetAmount = targetAmountWrapperAmount.to(STANDARD_UNIT);
 
-        return convertFactor(sourceAmount, targetAmount);
+    if (unitsCompatible(sourceAmount, targetAmount)) {
+      if (!sourceAmountWrapper.isDetermined()
+          && !targetAmountWrapper.isDetermined()
+          && sourceAmountWrapperAmount.getUnit().equals(targetAmountWrapperAmount.getUnit())) {
+        return (double) 0;
       }
+
+      if (!sourceAmountWrapper.isDetermined()) {
+        sourceAmount = determineAmount(sourceAmount, targetAmount);
+      }
+
+      if (!targetAmountWrapper.isDetermined()) {
+        targetAmount = determineAmount(targetAmount, sourceAmount);
+      }
+
+      return convertFactor(sourceAmount, targetAmount);
     }
 
     return null;

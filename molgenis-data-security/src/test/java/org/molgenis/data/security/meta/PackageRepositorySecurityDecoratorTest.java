@@ -27,6 +27,7 @@ import org.molgenis.data.security.PackageIdentity;
 import org.molgenis.data.security.PackagePermission;
 import org.molgenis.data.security.exception.NullParentPackageNotSuException;
 import org.molgenis.data.security.exception.PackagePermissionDeniedException;
+import org.molgenis.data.security.exception.SystemMetadataModificationException;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
@@ -64,6 +65,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     when(parent.getId()).thenReturn("2");
     when(pack.getParent()).thenReturn(parent);
     when(oldPack.getParent()).thenReturn(parent);
+    when(oldPack.getId()).thenReturn("1");
 
     MutableAcl acl = mock(MutableAcl.class);
     MutableAcl parentAcl = mock(MutableAcl.class);
@@ -99,6 +101,8 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
 
     when(pack.getId()).thenReturn("1");
     when(parent.getId()).thenReturn("2");
+    when(pack.getId()).thenReturn("1");
+    when(oldPack.getId()).thenReturn("2");
     when(pack.getParent()).thenReturn(parent);
     when(oldPack.getParent()).thenReturn(oldParent);
 
@@ -115,10 +119,12 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
   @Test(expectedExceptions = NullParentPackageNotSuException.class)
   public void testUpdateToNullPackage() {
     Package pack = mock(Package.class);
+    when(pack.getId()).thenReturn("pack");
     when(pack.getParent()).thenReturn(null);
     MutableAcl acl1 = mock(MutableAcl.class);
     Package oldPack = mock(Package.class);
     Package oldParent = mock(Package.class);
+    when(oldPack.getId()).thenReturn("pack");
     when(oldPack.getParent()).thenReturn(oldParent);
     when(delegateRepository.findOneById(pack.getId())).thenReturn(oldPack);
 
@@ -145,6 +151,8 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     Package oldPack2 = mock(Package.class);
     when(oldPack1.getParent()).thenReturn(parent);
     when(oldPack2.getParent()).thenReturn(parent);
+    when(oldPack1.getId()).thenReturn("1");
+    when(oldPack2.getId()).thenReturn("2");
 
     when(acl1.getParentAcl()).thenReturn(parentAcl);
     when(acl2.getParentAcl()).thenReturn(parentAcl);
@@ -193,6 +201,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     Package package3 = mock(Package.class);
     Package package4 = mock(Package.class);
     when(package1.getId()).thenReturn("1");
+    when(package2.getId()).thenReturn("2");
     when(package3.getId()).thenReturn("3");
     when(package4.getId()).thenReturn("4");
 
@@ -217,6 +226,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
   public void testDeleteById() {
     Package package1 = mock(Package.class);
     Package package2 = mock(Package.class);
+    when(package1.getId()).thenReturn("1");
     when(package2.getId()).thenReturn("2");
     when(package1.getParent()).thenReturn(package2);
 
@@ -237,7 +247,8 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     Package permittedPackage =
         when(mock(Package.class).getId()).thenReturn("permittedPackageId").getMock();
     when(permittedPackage.getParent()).thenReturn(permittedParentPackage);
-    Package notPermittedPackage = mock(Package.class);
+    Package notPermittedPackage =
+        when(mock(Package.class).getId()).thenReturn("notPermittedPackageId").getMock();
     doAnswer(
             invocation -> {
               Consumer<List<Package>> consumer = invocation.getArgument(0);
@@ -263,6 +274,8 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     Package package2 = mock(Package.class);
     Package package3 = mock(Package.class);
     Package package4 = mock(Package.class);
+    when(package1.getId()).thenReturn("1");
+    when(package2.getId()).thenReturn("2");
     when(package3.getId()).thenReturn("3");
     when(package4.getId()).thenReturn("4");
 
@@ -313,6 +326,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     Package pack = mock(Package.class);
     Package parent = mock(Package.class);
 
+    when(pack.getId()).thenReturn("pack");
     when(parent.getId()).thenReturn("2");
     when(pack.getParent()).thenReturn(parent);
 
@@ -326,6 +340,7 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
   @Test(expectedExceptions = NullParentPackageNotSuException.class)
   public void testAddNullParent() {
     Package pack = mock(Package.class);
+    when(pack.getId()).thenReturn("pack");
     when(pack.getParent()).thenReturn(null);
     repo.add(pack);
   }
@@ -397,6 +412,48 @@ public class PackageRepositorySecurityDecoratorTest extends AbstractMolgenisSpri
     when(userPermissionEvaluator.hasPermission(new PackageIdentity("1"), PackagePermission.VIEW))
         .thenReturn(false);
     repo.findOneById("1");
+  }
+
+  @Test(expectedExceptions = SystemMetadataModificationException.class)
+  public void testMoveSysPack() {
+    Package sys = mock(Package.class);
+    when(sys.getId()).thenReturn("sys");
+    Package oldSys = mock(Package.class);
+    when(delegateRepository.findOneById("sys")).thenReturn(oldSys);
+    repo.update(sys);
+  }
+
+  @Test(expectedExceptions = SystemMetadataModificationException.class)
+  public void testMoveFromSysPack() {
+    Package sys = mock(Package.class);
+    when(sys.getId()).thenReturn("sys");
+
+    Package root = mock(Package.class);
+    when(root.getId()).thenReturn("root");
+
+    Package test = mock(Package.class);
+    when(test.getId()).thenReturn("test");
+    when(test.getRootPackage()).thenReturn(root);
+
+    Package oldTest = mock(Package.class);
+    when(oldTest.getId()).thenReturn("test");
+    when(oldTest.getRootPackage()).thenReturn(sys);
+
+    when(delegateRepository.findOneById("test")).thenReturn(oldTest);
+    repo.update(test);
+  }
+
+  @Test(expectedExceptions = SystemMetadataModificationException.class)
+  public void testMoveToSysPack() {
+    Package sys = mock(Package.class);
+    when(sys.getId()).thenReturn("sys");
+    Package test = mock(Package.class);
+    when(test.getId()).thenReturn("test");
+    when(test.getRootPackage()).thenReturn(sys);
+
+    Package oldTest = mock(Package.class);
+    when(delegateRepository.findOneById("test")).thenReturn(oldTest);
+    repo.update(test);
   }
 
   static class Config {}
