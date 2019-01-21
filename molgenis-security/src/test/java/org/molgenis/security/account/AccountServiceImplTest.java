@@ -5,6 +5,7 @@ import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.populate.IdGenerator.Strategy.SECURE_RANDOM;
@@ -71,6 +72,8 @@ public class AccountServiceImplTest extends AbstractMockitoTestNGSpringContextTe
     when(user.getEmail()).thenReturn("jan.jansen@activation.nl");
     when(user.getPassword()).thenReturn("password");
     when(user.isActive()).thenReturn(true);
+
+    reset(mailSender);
   }
 
   @Test
