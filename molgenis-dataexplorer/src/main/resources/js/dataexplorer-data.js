@@ -86,9 +86,10 @@
     function onRowInspect(e) {
         var entityId = e.id;
         var entityTypeId = e.name;
-
-        $('#entityReport').load("dataexplorer/details", {entityTypeId: entityTypeId, entityId: entityId}, function () {
-            $('#entityReportModal').modal("show");
+        $('#entityReport').load("dataexplorer/details", {entityTypeId: entityTypeId, entityId: entityId}, function( response, status, xhr ) {
+            if ( status !== "error" ) {
+                $('#entityReportModal').modal("show");
+            }
         });
     }
 

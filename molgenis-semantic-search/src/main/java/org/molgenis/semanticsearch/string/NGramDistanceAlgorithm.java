@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -277,9 +278,9 @@ public class NGramDistanceAlgorithm {
     int totalToken = getTotalNumTokens(inputStringTokens) + getTotalNumTokens(ontologyTermTokens);
     int numMatchedToken = 0;
 
-    for (String token : inputStringTokens.keySet()) {
-      if (ontologyTermTokens.containsKey(token)) {
-        numMatchedToken += Math.min(inputStringTokens.get(token), ontologyTermTokens.get(token));
+    for (Entry<String, Integer> token : inputStringTokens.entrySet()) {
+      if (ontologyTermTokens.containsKey(token.getKey())) {
+        numMatchedToken += Math.min(token.getValue(), ontologyTermTokens.get(token.getKey()));
       }
     }
 

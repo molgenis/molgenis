@@ -16,16 +16,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="<@resource_href "/img/favicon.ico"/>" type="image/x-icon">
 
+    <#-- Include browser polyfills before any script tags are inserted -->
+    <@polyfill/>
     <#if !version?? || version == 1>
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-3/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
         <#if app_settings.logoTopHref?has_content><link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css"></#if>
-
-        <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
-
-        <#-- Include browser polyfills before any script tags are inserted -->
-        <@polyfill/>
 
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
@@ -79,6 +76,9 @@
         <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
 
     </#if>
+
+    <#-- Load css specified via settigns -->
+    <#if app_settings.cssHref?has_content><link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css"></#if>
 
     <#-- Load css specified by plugins -->
     <#list css as css_file_name>

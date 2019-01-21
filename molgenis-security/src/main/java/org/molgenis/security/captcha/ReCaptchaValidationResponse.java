@@ -9,7 +9,7 @@ public class ReCaptchaValidationResponse {
   private double score;
   private String action;
   private String
-      challenge_ts; // timestamp of the challenge load (ISO format yyyy-MM-dd'T'HH:mm:ssZZ)
+      challengeTs; // timestamp of the challenge load (ISO format yyyy-MM-dd'T'HH:mm:ssZZ)
   private String string;
   private String hostname;
   private List<String> errorCodes;
@@ -18,14 +18,14 @@ public class ReCaptchaValidationResponse {
       boolean success,
       double score,
       String action,
-      String challenge_ts,
+      String challengeTs,
       String string,
       String hostname,
       List<String> errorCodes) {
     this.success = success;
     this.score = score;
     this.action = action;
-    this.challenge_ts = challenge_ts;
+    this.challengeTs = challengeTs;
     this.string = string;
     this.hostname = hostname;
     this.errorCodes = errorCodes;
@@ -55,12 +55,12 @@ public class ReCaptchaValidationResponse {
     this.action = action;
   }
 
-  public String getChallenge_ts() {
-    return challenge_ts;
+  public String getChallengeTs() {
+    return challengeTs;
   }
 
-  public void setChallenge_ts(String challenge_ts) {
-    this.challenge_ts = challenge_ts;
+  public void setChallengeTs(String challengeTs) {
+    this.challengeTs = challengeTs;
   }
 
   public String getString() {
@@ -99,7 +99,7 @@ public class ReCaptchaValidationResponse {
     return success == that.success
         && Double.compare(that.score, score) == 0
         && Objects.equals(action, that.action)
-        && Objects.equals(challenge_ts, that.challenge_ts)
+        && Objects.equals(challengeTs, that.challengeTs)
         && Objects.equals(string, that.string)
         && Objects.equals(hostname, that.hostname)
         && Objects.equals(errorCodes, that.errorCodes);
@@ -107,6 +107,6 @@ public class ReCaptchaValidationResponse {
 
   @Override
   public int hashCode() {
-    return Objects.hash(success, score, action, challenge_ts, string, hostname, errorCodes);
+    return Objects.hash(success, score, action, challengeTs, string, hostname, errorCodes);
   }
 }

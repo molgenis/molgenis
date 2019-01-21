@@ -1,6 +1,6 @@
 # Finding data
 
-![Searchall_screen](../../images/searchall/searchAll.png?raw=true, "searchall/screen")
+![Searchall_screen](../../images/searchall/SearchAll.png?raw=true, "searchall/screen")
 
 Via the "Search all data" plugin it is possible to search for all hits in all data rows, and names and labels of metadata.
 

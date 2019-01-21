@@ -669,10 +669,10 @@
     isomorphic-fetch "^2.2.1"
     lodash "^4.17.4"
 
-"@molgenis/molgenis-ui-context@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-context/-/molgenis-ui-context-0.1.3.tgz#bdee167599d041fdca4693c3f90ebd6ce970f102"
-  integrity sha512-CInxLR+8WODVPpd+O96HevD0MNuIncZV+Sbo3Cl7cQgc2pshf2vazFHpuC0+W38YrnQCGxHhzzOVapYFDR36XQ==
+"@molgenis/molgenis-ui-context@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@molgenis/molgenis-ui-context/-/molgenis-ui-context-0.2.0.tgz#27b6c1931173a3922837d5bf0532af9dba9068bf"
+  integrity sha512-23XfWJ9PSFaG0adXjxjb+iI9IAVrjzcJnPcRsgQidAwYilwm+uLVkWh2ZIhGP+FLdHbnXFSfSCatEJo9jed0yw==
   dependencies:
     "@molgenis/molgenis-api-client" "^3.1.0"
 
@@ -2530,9 +2530,9 @@ copy-webpack-plugin@^4.6.0:
     serialize-javascript "^1.4.0"
 
 core-js@^2.4.0:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.1.tgz#87416ae817de957a3f249b3b5ca475d4aaed6042"
-  integrity sha512-L72mmmEayPJBejKIWe2pYtGis5r0tQ5NaJekdhyXgeMQTpJoBsH0NL4ElY2LfSoV15xeQWKQ+XTTOZdyero5Xg==
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.2.tgz#267988d7268323b349e20b4588211655f0e83944"
+  integrity sha512-NdBPF/RVwPW6jr0NCILuyN9RiqLo2b1mddWHkUL+VnvcB7dzlnBJ1bXYntjpTGOgkZiiLWj2JxmOr7eGE3qK6g==
 
 core-js@^2.5.0, core-js@^2.5.7:
   version "2.6.0"
