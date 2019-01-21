@@ -4,34 +4,16 @@ Molgenis allows for many customizations. One of them is uploading your own boots
 
 # Bootstrap themes
 
-Molgenis uses currently two versions of bootstrap: bootstrap 3.3.7 and bootstrap 4.x. To customize 
+Currently Molgenis uses two versions of bootstrap: bootstrap 3.3.7 and bootstrap 4.x. To customize 
 your complete molgenis, you need a customized theme for both versions of bootstrap. 
 
 ## Bootstrap 3
 Creating bootstrap 3 themes can be done using the following tool:
 [bootstrap-life-customizer](https://www.bootstrap-live-customizer.com/). 
 
-### Fonts
-To use different fonts, you need to import them in the theme.less config. You can edit it by
-clicking the "Edit theme.less"-button. Here you can import fonts via URL in this way:
-```css
-@import url("//fonts.googleapis.com/css?family=IBM+Plex+Sans");
-```
-After doing this you can use the font throughout your bootstrap theme. Selecting the font as base
-font can be done in the "Typography" tab of your theme builder.
-
 ## Bootstrap 4
 Creating bootstrap 4 themes can be done using this tool:
 [bootstrap.build](https://bootstrap.build/app).
-
-### Fonts
-To use different fonts, they should be imported in the custom.scss. Here you can import fonts like 
-this:
-```css
-@import url("//fonts.googleapis.com/css?family=IBM+Plex+Sans");
-```
-After doing this you can use the font throughout your bootstrap theme. You can apply your font in 
-the "Typography" section of the theme builder.
 
 ## Tips and tricks
 
@@ -43,12 +25,23 @@ plugin. However please note colors selected by the color picker might be a sligh
 from the original. The color picker is especially handy when selecting colors from images, rather
 than HTML elements.
 
+### Fonts
+To use different fonts, you need to import them in the less or scss config. For bootstrap 3, you can 
+edit the ```theme.less``` by clicking the "Edit theme.less"-button. For bootstrap 4 fonts should be 
+imported in the ```custom.scss```. 
+Here you can import fonts via URL in this way:
+```css
+@import url("//fonts.googleapis.com/css?family=IBM+Plex+Sans");
+```
+After doing this you can use the font throughout your bootstrap theme. Selecting the font as base
+font can be done in the "Typography" tab of your theme builder.
+
 ### Exporting
 Download at least the unminimized css file. This is the readable version of your css and it can be 
 loaded in molgenis using the theme manager. If you created a theme for a specific project, put it in
-the molgenis-projects repository on github. It could also be nice to export the .less files for
-bootstrap 3 and the .scss files for bootstrap 4. Using these files you can load your theme again in
-the theme builder to continue later. 
+the molgenis-projects repository on github. Downloading the ```.less``` files for bootstrap 3 and the
+```.scss``` files for bootstrap 4 and uploading them later again enables for continuing on your
+styling in the theme builder in future.
 
 ### Making bootstrap 3 and 4 themes look the same
 There is not a real trick for this. Throughout the application the classes between bootstrap 3 and 4
