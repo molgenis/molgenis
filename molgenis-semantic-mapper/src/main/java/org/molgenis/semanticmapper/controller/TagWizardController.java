@@ -2,6 +2,7 @@ package org.molgenis.semanticmapper.controller;
 
 import static com.google.common.collect.ImmutableSortedSet.of;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_TYPE_META_DATA;
@@ -20,6 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -36,7 +38,6 @@ import org.molgenis.web.ErrorMessageResponse;
 import org.molgenis.web.PluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -59,16 +60,21 @@ public class TagWizardController extends PluginController {
 
   private static final String VIEW_TAG_WIZARD = "view-tag-wizard";
 
-  @Autowired private DataService dataService;
+  private DataService dataService;
+  private OntologyService ontologyService;
+  private OntologyTagService ontologyTagService;
+  private SemanticSearchService semanticSearchService;
 
-  @Autowired private OntologyService ontologyService;
-
-  @Autowired private OntologyTagService ontologyTagService;
-
-  @Autowired private SemanticSearchService semanticSearchService;
-
-  public TagWizardController() {
+  public TagWizardController(
+      DataService dataService,
+      OntologyService ontologyService,
+      OntologyTagService ontologyTagService,
+      SemanticSearchService semanticSearchService) {
     super(URI);
+    this.dataService = requireNonNull(dataService);
+    this.ontologyService = requireNonNull(ontologyService);
+    this.ontologyTagService = requireNonNull(ontologyTagService);
+    this.semanticSearchService = requireNonNull(semanticSearchService);
   }
 
   /**
@@ -84,6 +90,7 @@ public class TagWizardController extends PluginController {
     List<String> entityTypeIds =
         dataService
             .findAll(ENTITY_TYPE_META_DATA, EntityType.class)
+            .filter(entityType -> !EntityTypeUtils.isSystemEntity(entityType))
             .map(EntityType::getId)
             .collect(toList());
 

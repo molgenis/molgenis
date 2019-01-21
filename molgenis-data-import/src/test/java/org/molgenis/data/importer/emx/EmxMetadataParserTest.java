@@ -9,7 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeType.CATEGORICAL_MREF;
+import static org.molgenis.data.meta.AttributeType.FILE;
+import static org.molgenis.data.meta.AttributeType.MREF;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.validation.meta.AttributeValidator.ValidationMode.ADD_SKIP_ENTITY_VALIDATION;
 import static org.testng.Assert.assertEquals;
 
@@ -117,6 +121,62 @@ public class EmxMetadataParserTest extends AbstractMockitoTest {
     // 6: name, entity, dataType, idAttribute, labelAttribute, visible
     verify(attributeValidator, times(6))
         .validate(any(Attribute.class), eq(ADD_SKIP_ENTITY_VALIDATION));
+  }
+
+  @Test
+  public void testCheckRequiredAttributeAttributes() {
+    emxMetadataParser.checkRequiredAttributeAttributes(0, "name", "entity");
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp = "attributes.name is missing on line \\[0\\]")
+  public void testCheckRequiredAttributeAttributesNoName() {
+    emxMetadataParser.checkRequiredAttributeAttributes(0, "", "entity");
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "attributes.entity is missing for attribute named: name on line \\[0\\]")
+  public void testCheckRequiredAttributeAttributesNoEntity() {
+    emxMetadataParser.checkRequiredAttributeAttributes(0, "name", "");
+  }
+
+  @Test
+  public void testCheckReferenceDatatypeRules() {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getDataType()).thenReturn(XREF);
+    emxMetadataParser.checkReferenceDatatypeRules(0, "entityName", "emxName", attr, "refEntity");
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "attributes.isAggregatable error on line \\[0\\] \\(entityName.emxName\\): isAggregatable nillable attribute cannot be of type MREF")
+  public void testCheckReferenceDatatypeRulesNillableAggregatableRef() {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getDataType()).thenReturn(MREF);
+    when(attr.isAggregatable()).thenReturn(true);
+    when(attr.isNillable()).thenReturn(true);
+    emxMetadataParser.checkReferenceDatatypeRules(0, "entityName", "emxName", attr, "refEntity");
+  }
+
+  @Test(
+      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptionsMessageRegExp =
+          "Missing refEntity on line \\[0\\] \\(entityName.emxName\\)")
+  public void testCheckReferenceDatatypeRulesNoRefEntity() {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getDataType()).thenReturn(CATEGORICAL_MREF);
+    emxMetadataParser.checkReferenceDatatypeRules(0, "entityName", "emxName", attr, "");
+  }
+
+  @Test
+  public void testCheckReferenceDatatypeRulesNoRefEntityFile() {
+    Attribute attr = mock(Attribute.class);
+    when(attr.getDataType()).thenReturn(FILE);
+    emxMetadataParser.checkReferenceDatatypeRules(0, "entityName", "emxName", attr, "");
   }
 
   private void initMetaFactories() {

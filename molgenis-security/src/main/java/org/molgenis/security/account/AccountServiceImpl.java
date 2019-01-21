@@ -108,9 +108,6 @@ public class AccountServiceImpl implements AccountService {
       mailSender.send(mailMessage);
     } catch (MailException mce) {
       LOG.error("Could not send signup mail", mce);
-
-      dataService.delete(USER, user);
-
       throw new MolgenisUserException(
           "An error occurred. Please contact the administrator. You are not signed up!");
     }

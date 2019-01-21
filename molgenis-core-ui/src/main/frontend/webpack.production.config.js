@@ -24,7 +24,7 @@ var configuration = {
         path : '../../../target/classes/js/dist',
         filename: 'molgenis-[name].js',
         publicPath: '/js/dist/'
-    },    
+    },
     plugins: [
         new webpack.PrefetchPlugin('react/lib/ReactWithAddons'),
         new webpack.PrefetchPlugin('react/lib/DOMChildrenOperations.js'),
@@ -36,6 +36,7 @@ var configuration = {
         new webpack.PrefetchPlugin('promise'),
         new webpack.PrefetchPlugin('./src/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
+        new CopyWebpackPlugin([{ from: '@molgenis/molgenis-ui-context/menu', to: '../../resources/js/menu.umd.js' }]),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.DefinePlugin({
         	'process.env': {
