@@ -42,12 +42,23 @@
                 top.molgenis.setPluginId('${plugin_id?js_string}');
                 </#if>
         </script>
+    </#if>
 
-        <#-- Load javascript specified by plugins -->
-        <#list js as js_file_name>
-            <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
-        </#list>
-    <#else>
+    <#-- Load custome javascript -->
+    <#if app_settings.customJavascript?has_content>
+      <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
+        <#if js_file_name?ends_with(".js")>
+          <script src="<@resource_href "${js_file_name?html}"/>"></script>
+        </#if>
+      </#list>
+    </#if>
+
+    <#-- Load javascript specified by plugins -->
+    <#list js as js_file_name>
+        <script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
+    </#list>
+
+    <#if version != 1>>
         <#-- Include bootstrap 4 theme CSS for Vue plugins -->
         <link rel="stylesheet" href="<@theme_href "/css/bootstrap-4/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
@@ -66,15 +77,6 @@
         <#-- Include molgenis-menu css -->
         <link rel="stylesheet" href="<@resource_href "/js/menu/menu.css"/>" type="text/css">
 
-    </#if>
-
-    <#-- Load custome javascript -->
-    <#if app_settings.customJavascript?has_content>
-        <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
-            <#if js_file_name?ends_with(".js")>
-                <script src="<@resource_href "${js_file_name?html}"/>"></script>
-            </#if>
-        </#list>
     </#if>
 
     <#-- Load css specified via settigns -->
